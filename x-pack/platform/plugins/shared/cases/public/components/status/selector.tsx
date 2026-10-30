@@ -6,44 +6,62 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiTextColor } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { Status } from '@kbn/cases-components';
-import type { CaseStatuses } from '../../../common/types/domain';
-import { statuses } from './config';
+import type { CaseStatusDefinition } from '../../../common/types/domain';
 import { STATUS } from '../case_view/translations';
+import { getStatusBadgeProps } from './use_case_statuses';
+import * as i18n from './translations';
 
 interface Props {
-  selectedStatus: CaseStatuses;
-  onStatusChange: (status: CaseStatuses) => void;
+  /** The statuses to list, in admin order. */
+  statuses: CaseStatusDefinition[];
+  selectedStatusKey: string;
+  onStatusChange: (status: CaseStatusDefinition) => void;
   isLoading: boolean;
   isDisabled: boolean;
 }
 
 export const StatusSelector: React.FC<Props> = ({
-  selectedStatus,
+  statuses,
+  selectedStatusKey,
   onStatusChange,
   isLoading,
   isDisabled,
 }) => {
-  const caseStatuses = Object.keys(statuses) as CaseStatuses[];
-  const options: Array<EuiSuperSelectOption<CaseStatuses>> = caseStatuses.map((status) => {
-    return {
-      value: status,
-      inputDisplay: (
-        <EuiFlexGroup
-          gutterSize="xs"
-          alignItems={'center'}
-          responsive={false}
-          data-test-subj={`case-status-selection-${status}`}
-        >
+  const options: Array<EuiSuperSelectOption<string>> = statuses.map((status) => ({
+    value: status.key,
+    // A disabled status is listed only because the case is in it; cases cannot move to it.
+    disabled: status.disabled,
+    inputDisplay: (
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems={'center'}
+        responsive={false}
+        data-test-subj={`case-status-selection-${status.key}`}
+      >
+        <EuiFlexItem grow={false}>
+          <Status {...getStatusBadgeProps(status)} />
+        </EuiFlexItem>
+        {status.disabled && (
           <EuiFlexItem grow={false}>
-            <Status status={status} />
+            <EuiTextColor color="subdued">{i18n.DISABLED}</EuiTextColor>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    };
-  });
+        )}
+      </EuiFlexGroup>
+    ),
+  }));
+
+  const onChange = useCallback(
+    (key: string) => {
+      const status = statuses.find((item) => item.key === key);
+      if (status != null) {
+        onStatusChange(status);
+      }
+    },
+    [onStatusChange, statuses]
+  );
 
   return (
     <EuiSuperSelect
@@ -51,8 +69,8 @@ export const StatusSelector: React.FC<Props> = ({
       fullWidth={true}
       isLoading={isLoading}
       options={options}
-      valueOfSelected={selectedStatus}
-      onChange={onStatusChange}
+      valueOfSelected={selectedStatusKey}
+      onChange={onChange}
       data-test-subj="case-status-selection"
       aria-label={STATUS}
     />

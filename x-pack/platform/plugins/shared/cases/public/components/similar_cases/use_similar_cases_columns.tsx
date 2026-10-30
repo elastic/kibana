@@ -13,8 +13,8 @@ import type {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { EuiBadgeGroup, EuiBadge, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
-import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { CaseStatusBadge } from '../status/case_status_badge';
 
 import type { ActionConnector } from '../../../common/types/domain';
 
@@ -251,9 +251,9 @@ export const useSimilarCasesColumns = ({
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
-        render: (status: CaseUI['status']) => {
+        render: (status: CaseUI['status'], theCase: SimilarCaseUI) => {
           if (status != null) {
-            return <Status status={status} />;
+            return <CaseStatusBadge theCase={theCase} />;
           }
           return getEmptyCellValue();
         },

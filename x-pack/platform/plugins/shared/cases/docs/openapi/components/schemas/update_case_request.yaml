@@ -83,6 +83,8 @@ properties:
           $ref: 'case_severity.yaml'
         status:
           $ref: 'case_status.yaml'
+        status_key:
+          $ref: 'case_status_key.yaml'
         tags:
           $ref: 'case_tags.yaml'
         title:

@@ -41,6 +41,7 @@ import {
   pickExtendedFieldsDifferingFromDefaults,
 } from '../../../common/utils/template_fields';
 import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
+import { getStatusesForWrite, resolveStatusForCreate } from './status_write';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
@@ -153,6 +154,7 @@ export const bulkCreate = async (
     }
 
     const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+    const statuses = await getStatusesForWrite(clientArgs.services);
 
     const bulkCreateRequest: BulkCreateCasesArgs['cases'] = [];
 
@@ -192,6 +194,7 @@ export const bulkCreate = async (
         templatesEnabled: clientArgs.config.templates.enabled,
         relaxRequiredFields: options.relaxRequiredFields === true,
         spaceExtractObservables: extractObservablesMap.get(theCase.owner),
+        statusKey: resolveStatusForCreate({ statuses, statusKey: theCase.status_key })?.status_key,
       });
       bulkCreateRequest.push(request);
     }
@@ -501,6 +504,7 @@ const createBulkCreateCaseRequest = async ({
   templatesEnabled,
   relaxRequiredFields,
   spaceExtractObservables,
+  statusKey,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -518,6 +522,8 @@ const createBulkCreateCaseRequest = async ({
   relaxRequiredFields: boolean;
   /** Space-level extractObservables default from the configuration saved object. */
   spaceExtractObservables?: boolean;
+  /** The resolved key of the case's status; undefined while custom statuses are off. */
+  statusKey?: string;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
@@ -659,6 +665,7 @@ const createBulkCreateCaseRequest = async ({
       ...transformNewCase({
         user,
         newCase: normalizedCase,
+        statusKey,
       }),
     },
   };

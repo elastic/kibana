@@ -33,6 +33,8 @@ properties:
     $ref: 'settings.yaml'
   severity:
     $ref: 'case_severity.yaml'
+  status_key:
+    $ref: 'case_status_key.yaml'
   tags:
     $ref: 'case_tags.yaml'
   category:

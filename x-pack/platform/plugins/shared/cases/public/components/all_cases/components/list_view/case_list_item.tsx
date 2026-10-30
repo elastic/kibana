@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { Status } from '@kbn/cases-components/src/status/status';
+import { CaseStatusBadge } from '../../../status/case_status_badge';
 
 import type { CaseUI } from '../../../../../common/ui/types';
 import type { CasesColumnSelection } from '../../types';
@@ -245,7 +245,7 @@ export const CaseListItem: React.FC<{
                         </EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <Status status={theCase.status} />
+                        <CaseStatusBadge theCase={theCase} />
                       </EuiFlexItem>
                       {theCase.totalAlerts > 0 && (
                         <EuiFlexItem grow={false}>

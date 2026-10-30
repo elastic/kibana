@@ -578,6 +578,20 @@ export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTIO
   }
 );
 
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_KEY_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.statusKey',
+  {
+    defaultMessage:
+      'The key of the space status the case is now in. The status field holds its category.',
+  }
+);
+
+export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_KEY_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.caseStatusUpdated.eventSchema.previousStatusKey', {
+    defaultMessage:
+      'The key of the space status the case was in. Empty for cases that were never moved to a status by key.',
+  });
+
 export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.ids',
   {

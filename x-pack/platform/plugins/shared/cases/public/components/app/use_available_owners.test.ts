@@ -105,16 +105,34 @@ describe('useAvailableCasesOwners with the top-level Cases app', () => {
   beforeEach(() => {
     isTopLevelAppEnabledMock.mockReturnValue(true);
     useGetAvailableOwnersMock.mockReturnValue({
-      data: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+      data: {
+        owners: [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
+        createOwners: [SECURITY_SOLUTION_OWNER],
+        settingsOwners: [OBSERVABILITY_OWNER],
+      },
     } as unknown as ReturnType<typeof useGetAvailableOwners>);
   });
 
-  it('returns the owners the server reports when casesV4 grants the capabilities', () => {
+  it('returns the owners the user can read when only read is requested', () => {
     mockKibana({ casesV4: allCasesCapabilities() });
-    const { result } = renderHook(useAvailableCasesOwners);
+    const { result } = renderHook(() => useAvailableCasesOwners(['read']));
 
     expect(result.current).toEqual([SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]);
     expect(useGetAvailableOwnersMock).toHaveBeenCalledWith({ enabled: true });
+  });
+
+  it('returns the owners the user can create cases in when writes are requested', () => {
+    mockKibana({ casesV4: allCasesCapabilities() });
+    const { result } = renderHook(useAvailableCasesOwners);
+
+    expect(result.current).toEqual([SECURITY_SOLUTION_OWNER]);
+  });
+
+  it('returns the owners whose settings the user can manage', () => {
+    mockKibana({ casesV4: allCasesCapabilities() });
+    const { result } = renderHook(() => useAvailableCasesOwners(['settings']));
+
+    expect(result.current).toEqual([OBSERVABILITY_OWNER]);
   });
 
   it('ignores the legacy per-solution capabilities', () => {

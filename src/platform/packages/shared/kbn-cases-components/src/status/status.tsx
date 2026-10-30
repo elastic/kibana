@@ -9,24 +9,29 @@
 
 import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 
 import { getStatusConfiguration } from './config';
 import type { CaseStatuses } from './types';
 
 interface Props {
   status: CaseStatuses;
+  /** Overrides the label of the status category, e.g. with an admin-defined status name. */
+  label?: string;
+  /** Overrides the color of the status category. */
+  color?: EuiBadgeProps['color'];
   dataTestSubj?: string;
 }
 
 const statuses = getStatusConfiguration();
 
-const CaseStatusComponent: React.FC<Props> = ({ status, dataTestSubj }) => {
+const CaseStatusComponent: React.FC<Props> = ({ status, label, color, dataTestSubj }) => {
   return (
     <EuiBadge
       data-test-subj={dataTestSubj ? dataTestSubj : `case-status-badge-${status}`}
-      color={statuses[status]?.color}
+      color={color ?? statuses[status]?.color}
     >
-      {statuses[status]?.label}
+      {label ?? statuses[status]?.label}
     </EuiBadge>
   );
 };

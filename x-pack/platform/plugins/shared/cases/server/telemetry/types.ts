@@ -298,6 +298,20 @@ export interface FieldLibraryTelemetry {
   main: FieldLibrarySolutionTelemetry;
 }
 
+export interface CustomStatusesCategoryTelemetry {
+  total: number;
+  max: number;
+}
+
+export interface CustomStatusesTelemetry {
+  totalSpaces: number;
+  byCategory: {
+    notStarted: CustomStatusesCategoryTelemetry;
+    active: CustomStatusesCategoryTelemetry;
+    done: CustomStatusesCategoryTelemetry;
+  };
+}
+
 export type CasesTelemetryConnectorKeys =
   | 'itsm'
   | 'sir'
@@ -413,6 +427,7 @@ export interface CasesTelemetry {
   };
   templates: TemplatesTelemetry;
   fieldLibrary: FieldLibraryTelemetry;
+  customStatuses: CustomStatusesTelemetry;
   workflows: {
     all: WorkflowsSolutionTelemetry;
     sec: WorkflowsSolutionTelemetry;
@@ -433,5 +448,6 @@ export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
 export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
+export type CustomStatusesCategoryTelemetrySchema = MakeSchemaFrom<CustomStatusesCategoryTelemetry>;
 export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;
 export type UserActionsSourceTelemetrySchema = MakeSchemaFrom<UserActionsSourceTelemetry>;

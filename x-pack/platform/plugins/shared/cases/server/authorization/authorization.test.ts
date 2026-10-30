@@ -1557,13 +1557,13 @@ describe('authorization', () => {
 
     beforeEach(() => {
       securityStart = securityMock.createStart();
-      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+      (securityStart.authz.mode.useRbacForRequest as jest.Mock).mockReturnValue(true);
       (
         securityStart.authz.actions.cases.get as jest.MockedFunction<
           typeof securityStart.authz.actions.cases.get
         >
       ).mockImplementation((owner, opName) => `${owner}:${opName}`);
-      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+      (securityStart.authz.checkPrivilegesDynamicallyWithRequest as jest.Mock).mockReturnValue(
         jest.fn(async () => ({
           hasAllRequested: false,
           username: 'user',
@@ -1591,6 +1591,21 @@ describe('authorization', () => {
       await expect(auth.getAvailableOwners(Operations.getCase)).resolves.toEqual([
         'securitySolution',
       ]);
+    });
+
+    it('rejects owners whose solution is not in the deployment', async () => {
+      featuresStart.getKibanaFeatures.mockReturnValue([
+        { id: 'casesV4', cases: ['cases', 'observability', 'securitySolution'] },
+        { id: 'securitySolutionCasesV3', cases: ['securitySolution'] },
+      ] as unknown as KibanaFeature[]);
+      const auth = await createAuth();
+
+      await expect(
+        auth.ensureAuthorized({
+          entities: [{ id: '1', owner: 'observability' }],
+          operation: Operations.createCase,
+        })
+      ).rejects.toThrow();
     });
 
     it('returns no owners when the space disables casesV4', async () => {

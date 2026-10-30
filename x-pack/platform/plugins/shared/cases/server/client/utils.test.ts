@@ -15,6 +15,7 @@ import {
   buildAttachmentRequestFromFileJSON,
   buildFilter,
   buildObservablesFieldsFilter,
+  buildStatusKeyFilter,
   buildRangeFilter,
   constructQueryOptions,
   constructSearch,
@@ -27,6 +28,8 @@ import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
 import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../common/types/domain';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
+import type { CaseStatusDefinition } from '../../common/types/domain/space_settings/v1';
+import { DEFAULT_CASE_STATUSES } from '../../common/utils/statuses';
 
 describe('utils', () => {
   describe('buildFilter', () => {
@@ -337,6 +340,52 @@ describe('utils', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('buildStatusKeyFilter', () => {
+    const statuses: CaseStatusDefinition[] = [
+      ...DEFAULT_CASE_STATUSES,
+      {
+        key: 'triage',
+        label: 'Triage',
+        color: 'accent',
+        category: 'not_started',
+        order: 3,
+        isDefault: false,
+        disabled: false,
+      },
+    ];
+
+    it('returns undefined without keys', () => {
+      expect(buildStatusKeyFilter(undefined, statuses)).toBeUndefined();
+      expect(buildStatusKeyFilter([], statuses)).toBeUndefined();
+    });
+
+    it('matches a custom status by key only', () => {
+      const filter = buildStatusKeyFilter('triage', statuses);
+
+      expect(filter && toKqlExpression(filter)).toBe('cases.attributes.status_key: triage');
+    });
+
+    it('also matches the cases without a key of a default status category', () => {
+      const filter = buildStatusKeyFilter(['triage', 'closed'], statuses);
+
+      expect(filter && toKqlExpression(filter)).toBe(
+        '(cases.attributes.status_key: triage OR (cases.attributes.status_key: closed OR (cases.attributes.status: 20 AND NOT cases.attributes.status_key: *)))'
+      );
+    });
+
+    it('is applied by constructQueryOptions and survives the search attribute rewrite', () => {
+      const { filter } = constructQueryOptions({
+        status_key: 'open',
+        statuses,
+        searchType: 'search',
+      });
+
+      expect(filter && toKqlExpression(filter)).toBe(
+        '(cases.status_key: open OR (cases.status: 0 AND NOT cases.status_key: *))'
+      );
     });
   });
 

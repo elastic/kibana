@@ -7,19 +7,21 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Status } from '@kbn/cases-components/src/status/status';
 import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { statuses } from '../status';
+import { CaseStatusBadge } from '../status/case_status_badge';
+import { getCaseStatusKey } from '../status/use_case_statuses';
 import * as i18n from './translations';
 
 const isStatusValid = (status: string): status is CaseStatuses => Object.hasOwn(statuses, status);
 
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
-  const status = userAction.payload.status ?? '';
+  const { payload } = userAction;
+  const status = payload.status ?? '';
   const closeReason = userAction.payload.closeReason;
   const syncedAlertCount = userAction.payload.syncedAlertCount;
 
@@ -35,7 +37,7 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
       >
         <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Status status={status} />
+          <CaseStatusBadge theCase={{ status, statusKey: getCaseStatusKey(payload) }} />
         </EuiFlexItem>
         {shouldRenderSyncDetails && (
           <>

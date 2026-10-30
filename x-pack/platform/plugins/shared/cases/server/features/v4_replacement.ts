@@ -10,7 +10,8 @@ import type {
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,
 } from '@kbn/features-plugin/common';
-import { FEATURE_ID_V4 } from '../../common/constants';
+import { CASES_CONNECTORS_CAPABILITY, FEATURE_ID_V4 } from '../../common/constants';
+import { CASES_CONNECTORS_SUB_PRIVILEGE_ID } from './constants';
 
 /** Every Cases feature that `casesV4` replaces, for all three solutions. */
 export const LEGACY_CASES_FEATURE_IDS = [
@@ -64,17 +65,50 @@ const toV4 = (privilegeId: string, minimalId: string): ReplacedBy => ({
  * those references move to `casesV4`, because a `replacedBy` may not target a deprecated feature.
  * Any other feature is returned unchanged.
  */
-export const withCasesV4Replacement = (feature: KibanaFeatureConfig): KibanaFeatureConfig => {
+export const withCasesV4Replacement = (
+  feature: KibanaFeatureConfig,
+  { disabledSubFeaturePrivileges = [] }: { disabledSubFeaturePrivileges?: readonly string[] } = {}
+): KibanaFeatureConfig => {
   if (!isLegacyCasesFeature(feature.id) || feature.privileges == null) {
     return feature;
   }
 
+  // casesV4 grants connectors through a sub-feature privilege, which its minimal privileges do not
+  // include, while a legacy privilege granted them directly. A disabled privilege cannot be
+  // referenced, and a tier that disables it never granted connectors anyway.
+  const connectorsAvailable = !disabledSubFeaturePrivileges.includes(
+    CASES_CONNECTORS_SUB_PRIVILEGE_ID
+  );
+  const withConnectors = (privilege: typeof all, replacedBy: ReplacedBy): ReplacedBy => {
+    if (
+      !connectorsAvailable ||
+      !privilege.ui?.includes(CASES_CONNECTORS_CAPABILITY) ||
+      !('default' in replacedBy)
+    ) {
+      return replacedBy;
+    }
+    return {
+      default: replacedBy.default,
+      minimal: replacedBy.minimal.map((reference) =>
+        reference.feature === FEATURE_ID_V4
+          ? {
+              ...reference,
+              privileges: [...reference.privileges, CASES_CONNECTORS_SUB_PRIVILEGE_ID],
+            }
+          : reference
+      ),
+    };
+  };
+
   const { all, read } = feature.privileges;
   const replace = (privilege: typeof all, privilegeId: 'all' | 'read'): typeof all => ({
     ...privilege,
-    replacedBy: privilege.replacedBy
-      ? retargetReplacedBy(privilege.replacedBy)
-      : toV4(privilegeId, `minimal_${privilegeId}`),
+    replacedBy: withConnectors(
+      privilege,
+      privilege.replacedBy
+        ? retargetReplacedBy(privilege.replacedBy)
+        : toV4(privilegeId, `minimal_${privilegeId}`)
+    ),
   });
 
   return {

@@ -1,0 +1,13 @@
+in: query
+name: status_key
+description: >
+  Filters the returned cases by the key of their space status. A default status also matches the
+  cases of its category that were never set to a status by key.
+schema:
+  oneOf:
+    - $ref: '../schemas/case_status_key.yaml'
+    - type: array
+      items:
+        $ref: '../schemas/case_status_key.yaml'
+      maxItems: 50
+example: awaiting_customer

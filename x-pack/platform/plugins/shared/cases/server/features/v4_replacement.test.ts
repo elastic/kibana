@@ -76,11 +76,11 @@ describe('withCasesV4Replacement', () => {
 
     expect(feature.privileges?.all.replacedBy).toEqual({
       default: [{ feature: 'casesV4', privileges: ['all'] }],
-      minimal: [{ feature: 'casesV4', privileges: ['minimal_all'] }],
+      minimal: [{ feature: 'casesV4', privileges: ['minimal_all', 'cases_connectors'] }],
     });
     expect(feature.privileges?.read.replacedBy).toEqual({
       default: [{ feature: 'casesV4', privileges: ['read'] }],
-      minimal: [{ feature: 'casesV4', privileges: ['minimal_read'] }],
+      minimal: [{ feature: 'casesV4', privileges: ['minimal_read', 'cases_connectors'] }],
     });
     for (const { privilegeGroups } of feature.subFeatures ?? []) {
       for (const { privileges } of privilegeGroups) {
@@ -101,9 +101,36 @@ describe('withCasesV4Replacement', () => {
       minimal: [
         {
           feature: 'casesV4',
-          privileges: ['minimal_all', 'cases_assign', 'cases_manage_templates'],
+          privileges: ['minimal_all', 'cases_assign', 'cases_manage_templates', 'cases_connectors'],
         },
       ],
+    });
+  });
+
+  it('does not reference connectors when the tier disables them', () => {
+    const feature = withCasesV4Replacement(getV3(), {
+      disabledSubFeaturePrivileges: ['cases_connectors'],
+    });
+
+    expect(feature.privileges?.all.replacedBy).toEqual({
+      default: [{ feature: 'casesV4', privileges: ['all'] }],
+      minimal: [{ feature: 'casesV4', privileges: ['minimal_all'] }],
+    });
+  });
+
+  it('does not add connectors to a legacy privilege that did not grant them', () => {
+    const v3 = getV3();
+    const feature = withCasesV4Replacement({
+      ...v3,
+      privileges: {
+        all: { ...v3.privileges!.all, ui: ['read_cases'] },
+        read: v3.privileges!.read,
+      },
+    } as KibanaFeatureConfig);
+
+    expect(feature.privileges?.all.replacedBy).toEqual({
+      default: [{ feature: 'casesV4', privileges: ['all'] }],
+      minimal: [{ feature: 'casesV4', privileges: ['minimal_all'] }],
     });
   });
 });

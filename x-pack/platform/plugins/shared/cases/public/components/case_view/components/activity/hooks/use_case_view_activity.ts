@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { CaseStatuses } from '@kbn/cases-components';
 import type { CaseUI } from '../../../../../../common';
+import type { CaseStatusDefinition } from '../../../../../../common/types/domain';
+import { CATEGORY_TO_STATUS } from '../../../../../../common/utils/statuses';
 import { useCasesLocalStorage } from '../../../../../common/use_cases_local_storage';
 import { useOnUpdateField } from '../../../use_on_update_field';
 import type {
@@ -17,6 +18,7 @@ import type {
 import { useStatusAction } from '../../../../actions/status/use_status_action';
 import { useRefreshCaseViewPage } from '../../../use_on_refresh_case_view_page';
 import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
+import { getCaseStatusKey, useCaseStatuses } from '../../../../status/use_case_statuses';
 
 /**
  * Local-storage-backed activity filters/pagination, plus status and
@@ -45,20 +47,23 @@ export const useCaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
     onAction: () => {},
     onActionSuccess: refreshCaseViewPage,
     selectedStatus: caseData.status,
+    selectedStatusKey: getCaseStatusKey(caseData),
   });
+  const { isCustomStatusesEnabled } = useCaseStatuses();
 
   const changeStatus = useCallback(
-    (status: CaseStatuses, closeReason?: string) => {
-      if (status !== CaseStatuses.closed) {
+    (status: CaseStatusDefinition, closeReason?: string) => {
+      // The single field patch only sends `status`; moving to a status also needs its key.
+      if (status.category === 'done' || isCustomStatusesEnabled) {
+        statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
+      } else {
         onUpdateField({
           key: 'status',
-          value: status,
+          value: CATEGORY_TO_STATUS[status.category],
         });
-      } else {
-        statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
       }
     },
-    [caseData, onUpdateField, statusAction]
+    [caseData, isCustomStatusesEnabled, onUpdateField, statusAction]
   );
 
   const handleUserActivityParamsChanged = useCallback(

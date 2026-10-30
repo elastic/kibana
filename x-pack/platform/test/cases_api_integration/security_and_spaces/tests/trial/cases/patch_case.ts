@@ -21,6 +21,7 @@ import {
   removeServerGeneratedPropertiesFromCase,
   updateCase,
   findCaseUserActions,
+  omitStatusKey,
 } from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -94,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const statusUserAction = userActionsResponse.userActions[0];
-        expect(statusUserAction.payload).to.eql({
+        expect(omitStatusKey(statusUserAction.payload)).to.eql({
           status: CaseStatuses.closed,
           closeReason: 'false_positive',
         });
@@ -492,7 +493,7 @@ export default ({ getService }: FtrProviderContext): void => {
             options: { types: [UserActionTypes.status], sortOrder: 'asc' },
           });
 
-          expect(userActionsResponse.userActions[0].payload).to.eql({
+          expect(omitStatusKey(userActionsResponse.userActions[0].payload)).to.eql({
             status: CaseStatuses.closed,
             closeReason: 'duplicate',
             syncedAlertCount: 1,

@@ -43,7 +43,7 @@ const SOLUTION_HELP = i18n.translate('xpack.cases.configure.solutionProfile.help
  */
 export const SolutionProfileScope: FC<{ children: ReactNode }> = ({ children }) => {
   const { owner } = useCasesContext();
-  const availableOwners = useAvailableCasesOwners(['read']);
+  const availableOwners = useAvailableCasesOwners(['settings']);
   const { isLoading } = useGetAvailableOwners({ enabled: owner.length === 0 });
   const history = useHistory();
   const { search } = useLocation();

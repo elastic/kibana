@@ -19,6 +19,7 @@ import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
 import { getWorkflowsTelemetryData } from './queries/workflows';
+import { getCustomStatusesTelemetryData } from './queries/custom_statuses';
 
 jest.mock('./queries/alerts');
 jest.mock('./queries/cases');
@@ -31,6 +32,7 @@ jest.mock('./queries/user_actions');
 jest.mock('./queries/templates');
 jest.mock('./queries/field_definitions');
 jest.mock('./queries/workflows');
+jest.mock('./queries/custom_statuses');
 
 const getAlertsMock = getAlertsTelemetryData as jest.Mock;
 const getCasesMock = getCasesTelemetryData as jest.Mock;
@@ -43,6 +45,7 @@ const getUserActionsMock = getUserActionsTelemetryData as jest.Mock;
 const getTemplatesMock = getTemplatesTelemetryData as jest.Mock;
 const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
 const getWorkflowsMock = getWorkflowsTelemetryData as jest.Mock;
+const getCustomStatusesMock = getCustomStatusesTelemetryData as jest.Mock;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -115,6 +118,15 @@ const expectedWorkflows = {
   main: workflowsScope,
 };
 
+const expectedCustomStatuses = {
+  totalSpaces: 2,
+  byCategory: {
+    notStarted: { total: 3, max: 2 },
+    active: { total: 2, max: 1 },
+    done: { total: 4, max: 3 },
+  },
+};
+
 describe('collectTelemetryData', () => {
   const logger = loggingSystemMock.createLogger();
   const savedObjectsClient = new TelemetrySavedObjectsClient(savedObjectsRepositoryMock.create());
@@ -140,6 +152,7 @@ describe('collectTelemetryData', () => {
       main: populatedFieldLibraryScope,
     });
     getWorkflowsMock.mockResolvedValue(expectedWorkflows);
+    getCustomStatusesMock.mockResolvedValue(expectedCustomStatuses);
   });
 
   it('reports templates, field library, and workflows alongside every pre-existing area', async () => {
@@ -150,6 +163,7 @@ describe('collectTelemetryData', () => {
     expect(getWorkflowsMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
     expect(result).toStrictEqual({
       ...preExistingPayload(),
+      customStatuses: expectedCustomStatuses,
       templates: expectedTemplates,
       fieldLibrary: expectedFieldLibrary,
       workflows: expectedWorkflows,
@@ -169,6 +183,7 @@ describe('collectTelemetryData', () => {
       expect(result).not.toHaveProperty('templates');
       expect(result).toStrictEqual({
         ...preExistingPayload(),
+        customStatuses: expectedCustomStatuses,
         fieldLibrary: expectedFieldLibrary,
         workflows: expectedWorkflows,
       });
@@ -193,6 +208,7 @@ describe('collectTelemetryData', () => {
       // field definitions.
       expect(result).toStrictEqual({
         ...preExistingPayload(),
+        customStatuses: expectedCustomStatuses,
         templates: expectedTemplates,
         workflows: expectedWorkflows,
       });
@@ -211,6 +227,7 @@ describe('collectTelemetryData', () => {
       // run a workflow from a case.
       expect(result).toStrictEqual({
         ...preExistingPayload(),
+        customStatuses: expectedCustomStatuses,
         templates: expectedTemplates,
         fieldLibrary: expectedFieldLibrary,
       });
@@ -220,6 +237,26 @@ describe('collectTelemetryData', () => {
       await collect();
 
       expect(logger.debug).toHaveBeenCalledWith('Failed collecting Cases workflows telemetry data');
+    });
+  });
+
+  describe('when the custom statuses read fails', () => {
+    beforeEach(() => {
+      getCustomStatusesMock.mockRejectedValue(new Error('custom statuses boom'));
+    });
+
+    it('omits only the custom statuses key, leaving every other area intact', async () => {
+      const result = await collect();
+
+      expect(result).toStrictEqual({
+        ...preExistingPayload(),
+        templates: expectedTemplates,
+        fieldLibrary: expectedFieldLibrary,
+        workflows: expectedWorkflows,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Failed collecting Cases custom statuses telemetry data'
+      );
     });
   });
 

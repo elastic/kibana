@@ -485,3 +485,7 @@ export const ACTION_LICENSE_DISABLED_BY_CONFIG = i18n.translate(
       'External connectors are disabled in the Kibana configuration. Update xpack.actions.enabledActionTypes to enable them.',
   }
 );
+
+export const STATUS_DISABLED = i18n.translate('xpack.cases.caseTable.statusDisabled', {
+  defaultMessage: 'Disabled',
+});

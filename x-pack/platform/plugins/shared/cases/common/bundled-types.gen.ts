@@ -370,7 +370,7 @@ export const CaseDescription = lazySchema(() => z.string().max(30000));
 export type CaseDescription = z.infer<typeof CaseDescription>;
 
 /**
-  * The application that owns the cases: Stack Management, Observability, or Elastic Security.
+  * The solution the case comes from: Stack Management (`cases`), Observability, or Elastic Security. Roles that grant Cases for all solutions can see every case in the space; roles that grant Cases for one solution see only that solution's cases.
 
   */
 export const Owner = lazySchema(() => z.enum(['cases', 'observability', 'securitySolution']));
@@ -408,6 +408,19 @@ export const CaseSeverity = lazySchema(() => z.enum(['critical', 'high', 'low', 
 export type CaseSeverity = z.infer<typeof CaseSeverity>;
 export type CaseSeverityEnum = typeof CaseSeverity.enum;
 export const CaseSeverityEnum = CaseSeverity.enum;
+
+/**
+  * The key of a case status defined in the space. Setting it also sets `status` to the category of that status. Rejected when custom statuses are turned off.
+
+  */
+export const CaseStatusKey = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z0-9_-]+$/)
+);
+export type CaseStatusKey = z.infer<typeof CaseStatusKey>;
 
 /**
   * The words and phrases that help categorize cases. It can be an empty array.
@@ -451,9 +464,16 @@ export const CreateCaseRequest = lazySchema(() =>
       ConnectorPropertiesSwimlane,
     ]),
     description: CaseDescription,
-    owner: Owner,
+    /**
+      * The solution the case comes from. If you omit it, the case takes the owner of its template, the only solution in the deployment, or `cases`, in that order. It is required when `xpack.cases.topLevelApp.enabled` is `false`.
+
+      */
+    owner: Owner.describe(
+      'The solution the case comes from. If you omit it, the case takes the owner of its template, the only solution in the deployment, or `cases`, in that order. It is required when `xpack.cases.topLevelApp.enabled` is `false`.\n'
+    ),
     settings: Settings,
     severity: CaseSeverity.optional(),
+    status_key: CaseStatusKey.optional(),
     tags: CaseTags,
     category: CaseCategory.optional(),
     title: CaseTitle,
@@ -857,6 +877,17 @@ export const CaseResponseProperties = lazySchema(() =>
     settings: Settings,
     severity: CaseSeverity,
     status: CaseStatus,
+    /**
+      * The key of the space status the case is in. `status` holds its category. Null for cases that were never set to a status by key; they are in their category's default status.
+
+      */
+    status_key: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        "The key of the space status the case is in. `status` holds its category. Null for cases that were never set to a status by key; they are in their category's default status.\n"
+      ),
     tags: z.array(z.string()),
     title: z.string(),
     totalAlerts: z.number().int(),
@@ -1013,6 +1044,7 @@ export const UpdateCaseRequest = lazySchema(() =>
           settings: Settings.optional(),
           severity: CaseSeverity.optional(),
           status: CaseStatus.optional(),
+          status_key: CaseStatusKey.optional(),
           tags: CaseTags.optional(),
           title: CaseTitle.optional(),
           closeReason: CaseCloseSyncReason.optional(),

@@ -49,6 +49,7 @@ import {
   withCasesV4Replacement,
 } from './features';
 import { setTopLevelAppEnabled } from './common/top_level_app';
+import { setCustomStatusesEnabled } from './common/custom_statuses';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
@@ -167,6 +168,7 @@ export class CasePlugin
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
     setTopLevelAppEnabled(this.caseConfig.topLevelApp.enabled);
+    setCustomStatusesEnabled(this.caseConfig.customStatuses.enabled);
 
     if (this.caseConfig.topLevelApp.enabled) {
       const { v4, legacy } = getTopLevelAppCasesKibanaFeatures(this.caseConfig.topLevelApp);
@@ -368,7 +370,9 @@ export class CasePlugin
         registerOwnerPrefix(owner, prefix);
       },
       withCasesV4Replacement: (feature) =>
-        this.caseConfig.topLevelApp.enabled ? withCasesV4Replacement(feature) : feature,
+        this.caseConfig.topLevelApp.enabled
+          ? withCasesV4Replacement(feature, this.caseConfig.topLevelApp)
+          : feature,
     };
   }
 

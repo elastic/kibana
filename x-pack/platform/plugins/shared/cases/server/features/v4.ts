@@ -220,7 +220,7 @@ export const getV4 = ({
           name: i18n.translate('xpack.cases.features.connectorsSubFeatureDetails', {
             defaultMessage: 'View the connectors cases can push to',
           }),
-          // Tiers that lack connectors disable this privilege through `xpack.features.overrides`.
+          // Tiers that lack connectors disable it with `xpack.cases.topLevelApp.disabledSubFeaturePrivileges`.
           includeIn: 'read',
           savedObject: { all: [], read: [] },
           ui: [CASES_CONNECTORS_CAPABILITY],

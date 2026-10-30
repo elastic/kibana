@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
-import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
+import type { CaseSeverity, CaseStatusDefinition } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
 import { useAllCasesNavigation } from '../../../../../common/navigation';
@@ -31,13 +31,14 @@ import {
   EDIT_CASE_NAME_ARIA,
 } from '../../../translations';
 import { getBadges } from '../utils/header_badges';
+import { useCaseStatuses } from '../../../../status/use_case_statuses';
 import { getMenu } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
-  onStatusChanged: (status: CaseStatuses) => void;
+  onStatusChanged: (status: CaseStatusDefinition) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
@@ -123,31 +124,32 @@ export const useCaseViewHeader = ({
       'data-test-subj': 'case-view-created-at',
     };
 
-    // One app shows every solution's cases, so the case says which solution it comes from.
-    const solutionItems = isTopLevelAppEnabled()
-      ? [
-          {
+    const incrementalIdItem =
+      typeof caseData.incrementalId === 'number'
+        ? {
             type: 'text' as const,
-            label: SOLUTION(getOwnerLabel(caseData.owner)),
-            'data-test-subj': 'case-view-solution',
-          },
-        ]
-      : [];
+            label: `#${caseData.incrementalId}`,
+            'data-test-subj': 'case-view-incremental-id',
+          }
+        : undefined;
 
-    if (typeof caseData.incrementalId === 'number') {
-      return [
-        {
-          type: 'text' as const,
-          label: `#${caseData.incrementalId}`,
-          'data-test-subj': 'case-view-incremental-id',
-        },
-        ...solutionItems,
-        reportedByItem,
-        createdAtItem,
-      ];
+    if (!isTopLevelAppEnabled()) {
+      return incrementalIdItem
+        ? [incrementalIdItem, reportedByItem, createdAtItem]
+        : [reportedByItem, createdAtItem];
     }
 
-    return [...solutionItems, reportedByItem, createdAtItem];
+    // One app shows every solution's cases, so the case says which solution it comes from. The
+    // header holds three items at most, so the creation date joins the reporter.
+    const solutionItem = {
+      type: 'text' as const,
+      label: SOLUTION(getOwnerLabel(caseData.owner)),
+      'data-test-subj': 'case-view-solution',
+    };
+    const reportedOnItem = { ...reportedByItem, value: CREATED_ON(formattedDate) };
+    return incrementalIdItem
+      ? [incrementalIdItem, solutionItem, reportedOnItem]
+      : [solutionItem, reportedOnItem];
   }, [
     caseData.incrementalId,
     caseData.owner,
@@ -161,17 +163,28 @@ export const useCaseViewHeader = ({
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);
 
   // Badges
-  const badges = useMemo(
-    () =>
-      getBadges({
-        caseData,
-        isStatusMenuDisabled,
-        isSeverityMenuDisabled,
-        onStatusChanged,
-        onSeverityChanged,
-      }),
-    [caseData, isStatusMenuDisabled, isSeverityMenuDisabled, onStatusChanged, onSeverityChanged]
-  );
+  const { getStatus, getPickableStatuses } = useCaseStatuses();
+  const badges = useMemo(() => {
+    const currentStatus = getStatus(caseData);
+
+    return getBadges({
+      caseData,
+      currentStatus,
+      statusOptions: getPickableStatuses(currentStatus),
+      isStatusMenuDisabled,
+      isSeverityMenuDisabled,
+      onStatusChanged,
+      onSeverityChanged,
+    });
+  }, [
+    caseData,
+    getStatus,
+    getPickableStatuses,
+    isStatusMenuDisabled,
+    isSeverityMenuDisabled,
+    onStatusChanged,
+    onSeverityChanged,
+  ]);
 
   // Menu
   const currentExternalIncident = useMemo(

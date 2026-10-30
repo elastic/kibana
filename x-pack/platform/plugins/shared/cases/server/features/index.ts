@@ -30,5 +30,7 @@ export const getTopLevelAppCasesKibanaFeatures = ({
   legacy: KibanaFeatureConfig[];
 } => ({
   v4: getV4({ disabledSubFeaturePrivileges }),
-  legacy: [getV1(), getV2(), getV3()].map(withCasesV4Replacement),
+  legacy: [getV1(), getV2(), getV3()].map((feature) =>
+    withCasesV4Replacement(feature, { disabledSubFeaturePrivileges })
+  ),
 });

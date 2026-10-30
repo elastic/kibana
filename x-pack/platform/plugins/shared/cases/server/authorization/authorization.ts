@@ -86,18 +86,19 @@ export class Authorization {
       }
       const kibanaFeatures = features.getKibanaFeatures();
 
-      caseOwners = new Set(
-        kibanaFeatures
-          // get all the features' cases owners that aren't disabled
-          .filter(({ id }) => !disabledFeatures.has(id))
-          .flatMap((feature) => feature.cases ?? [])
-      );
       // `casesV4` lists every owner whether or not its solution runs in this deployment, so the
       // owners that exist are the ones the solutions' own Cases features list.
       registeredCaseOwners = new Set(
         kibanaFeatures
           .filter(({ id }) => id !== FEATURE_ID_V4)
           .flatMap((feature) => feature.cases ?? [])
+      );
+      caseOwners = new Set(
+        kibanaFeatures
+          // get all the features' cases owners that aren't disabled
+          .filter(({ id }) => !disabledFeatures.has(id))
+          .flatMap((feature) => feature.cases ?? [])
+          .filter((owner) => registeredCaseOwners.has(owner))
       );
     } catch (error) {
       throw createCaseError({
@@ -228,6 +229,13 @@ export class Authorization {
   /** Returns the owners whose solution registered a Cases feature in this deployment. */
   public getRegisteredOwners(): string[] {
     return Array.from(this.registeredCaseOwners);
+  }
+
+  /** Returns the owners whose solution exists in this deployment and is enabled in this space. */
+  public getSpaceOwners(): string[] {
+    return Array.from(this.registeredCaseOwners).filter((owner) =>
+      this.featureCaseOwners.has(owner)
+    );
   }
 
   /**

@@ -115,15 +115,19 @@ const pinStoredTemplate = (
 
 export const transformNewCase = ({
   user,
-  newCase: { template, ...newCase },
+  newCase: { template, status_key: _requestedStatusKey, ...newCase },
+  statusKey,
 }: {
   user: User;
   newCase: CasePostRequest;
+  /** The resolved key of the case's status; omitted while custom statuses are off. */
+  statusKey?: string;
 }): CaseTransformedAttributes => ({
   ...newCase,
   // Re-added only when present so an absent template stays absent (an explicit
   // `template: undefined` key changes SO create payloads and snapshots).
   ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
+  ...(statusKey !== undefined ? { status_key: statusKey } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,

@@ -101,7 +101,13 @@ export const withAttachmentProviders = <T extends RegisteredUnifiedAttachmentTyp
     getAttachmentList: type.getAttachmentList
       ? (props?: never) => {
           const list = type.getAttachmentList?.(props);
-          return list?.children ? { ...list, children: wrap(list.children, false) } : list;
+          if (!list?.children) {
+            return list;
+          }
+          return {
+            ...list,
+            children: wrap(list.children as ComponentType<never>, false) as typeof list.children,
+          };
         }
       : undefined,
   } as T;

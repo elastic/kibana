@@ -168,7 +168,9 @@ describe('similar', () => {
     it('does not limit similar cases to the source case owner', async () => {
       await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
 
-      const { filter } = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+      const [{ filter }] = mockClientArgs.services.caseService.findCases.mock.calls[0] as [
+        { filter?: unknown }
+      ];
       expect(JSON.stringify(filter)).not.toContain('cases.attributes.owner');
       expect(JSON.stringify(filter)).toContain('127.0.0.1');
     });
@@ -177,7 +179,9 @@ describe('similar', () => {
   it('limits similar cases to the source case owner when the top-level app is off', async () => {
     await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
 
-    const { filter } = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+    const [{ filter }] = mockClientArgs.services.caseService.findCases.mock.calls[0] as [
+      { filter?: unknown }
+    ];
     expect(JSON.stringify(filter)).toContain('cases.attributes.owner');
   });
 

@@ -120,6 +120,10 @@ export const SEVERITY_BADGE_ARIA_LABEL = (severity: string) =>
     values: { severity },
   });
 
+export const STATUS_DISABLED_HINT = i18n.translate('xpack.cases.caseView.statusDisabledHint', {
+  defaultMessage: 'This status is disabled.',
+});
+
 export const STATUS_BADGE_ARIA_LABEL = (status: string) =>
   i18n.translate('xpack.cases.caseView.statusBadgeAriaLabel', {
     defaultMessage: 'Status: {status}',

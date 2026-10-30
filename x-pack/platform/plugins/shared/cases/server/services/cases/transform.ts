@@ -7,6 +7,9 @@
 
 /* eslint-disable @kbn/compat/typescript-naming-convention */
 
+import { omit } from 'lodash';
+import { getStatusKeyField } from '../../common/custom_statuses';
+
 import type {
   SavedObject,
   SavedObjectReference,
@@ -209,9 +212,10 @@ export function transformESModelToCase(
     totalComment: total_comments ?? 0,
     totalAlerts: total_alerts ?? 0,
     totalEvents: total_events ?? 0,
-    ...caseAttributes,
+    ...omit(caseAttributes, 'status_key'),
     severity,
     status,
+    ...getStatusKeyField(caseAttributes.status_key),
     connector,
     external_service: externalService,
     category,
@@ -300,9 +304,10 @@ export function transformSavedObjectToExternalModel(
   return {
     ...caseSavedObject,
     attributes: {
-      ...caseSavedObjectAttributes,
+      ...omit(caseSavedObjectAttributes, 'status_key'),
       severity,
       status,
+      ...getStatusKeyField(caseSavedObjectAttributes.status_key),
       connector,
       external_service: externalService,
       category,

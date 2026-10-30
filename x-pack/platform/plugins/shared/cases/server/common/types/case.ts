@@ -41,6 +41,7 @@ export interface CasePersistedAttributes {
   settings: { syncAlerts: boolean; extractObservables?: boolean };
   severity: CasePersistedSeverity;
   status: CasePersistedStatus;
+  status_key?: string | null;
   tags: string[];
   title: string;
   total_alerts: number;

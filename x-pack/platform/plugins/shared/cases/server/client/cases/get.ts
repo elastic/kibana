@@ -74,6 +74,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
+import { getStatusKeyField } from '../../common/custom_statuses';
 
 export const CasesByAttachmentIDsRequestSchema = z.object({
   /**
@@ -225,6 +226,7 @@ export const getCasesByAlertID = async (
       title: caseInfo.attributes.title,
       description: caseInfo.attributes.description,
       status: caseInfo.attributes.status,
+      ...getStatusKeyField(caseInfo.attributes.status_key),
       createdAt: caseInfo.attributes.created_at,
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
@@ -652,14 +654,28 @@ export async function getCategories(
 }
 
 /**
- * Retrieves the owners (solutions) that exist in this deployment and whose cases the user can read.
+ * The owners (solutions) that exist in this deployment that the user can read, create cases in, and
+ * manage settings for.
  */
-export async function getAvailableOwners(clientArgs: CasesClientArgs): Promise<string[]> {
+export interface AvailableOwners {
+  owners: string[];
+  createOwners: string[];
+  settingsOwners: string[];
+}
+
+export async function getAvailableOwners(clientArgs: CasesClientArgs): Promise<AvailableOwners> {
   const { logger, authorization } = clientArgs;
 
   try {
-    const owners = await authorization.getAvailableOwners(Operations.getCase);
-    return OWNERS.filter((owner) => owners.includes(owner));
+    const [owners, createOwners, settingsOwners] = await Promise.all(
+      [Operations.getCase, Operations.createCase, Operations.updateConfiguration].map(
+        async (operation) => {
+          const authorized = await authorization.getAvailableOwners(operation);
+          return OWNERS.filter((owner) => authorized.includes(owner));
+        }
+      )
+    );
+    return { owners, createOwners, settingsOwners };
   } catch (error) {
     throw createCaseError({ message: `Failed to get available owners: ${error}`, error, logger });
   }

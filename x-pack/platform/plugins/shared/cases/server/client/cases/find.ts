@@ -39,7 +39,7 @@ export const find = async (
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, spaceSettingsService },
     authorization,
     logger,
     savedObjectsSerializer,
@@ -107,11 +107,17 @@ export const find = async (
       assignees: paramArgs.assignees,
       category: paramArgs.category,
       customFields: paramArgs.customFields,
+      status_key: paramArgs.status_key,
     };
 
+    const statuses =
+      paramArgs.status_key != null ? await spaceSettingsService.getStatuses() : undefined;
+
+    // The status counts are per category, so neither status filter applies to them.
     const statusStatsOptions = constructQueryOptions({
       ...options,
       status: undefined,
+      status_key: undefined,
       customFieldsConfiguration,
       authorizationFilter,
     });
@@ -119,6 +125,7 @@ export const find = async (
     const caseQueryOptions = constructQueryOptions({
       ...options,
       customFieldsConfiguration,
+      statuses,
       authorizationFilter,
     });
 

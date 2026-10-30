@@ -19,8 +19,8 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { CaseStatusBadge } from '../../status/case_status_badge';
 import { CaseStatuses } from '../../../../common/types/domain';
 
 import { tableColumnPresetDateRelative } from '../../../utils/table_column_presets';
@@ -289,9 +289,9 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
         sortable: true,
-        render: (status: CaseUI['status']) => {
+        render: (status: CaseUI['status'], theCase: CaseUI) => {
           if (status != null) {
-            return <Status status={status} />;
+            return <CaseStatusBadge theCase={theCase} />;
           }
 
           return getEmptyCellValue();

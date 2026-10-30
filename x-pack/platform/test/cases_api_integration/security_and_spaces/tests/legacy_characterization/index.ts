@@ -14,5 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./rbac_matrix'));
     loadTestFile(require.resolve('./status_lifecycle'));
     loadTestFile(require.resolve('./attachment_acceptance'));
+    loadTestFile(require.resolve('./custom_statuses_disabled'));
   });
 };

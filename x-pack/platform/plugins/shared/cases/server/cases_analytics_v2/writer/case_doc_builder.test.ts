@@ -115,6 +115,13 @@ describe('buildCaseDoc', () => {
     ).toBe('critical');
   });
 
+  it('mirrors status_key and defaults it to null for cases without one', () => {
+    expect(buildCaseDoc(fullCaseSO()).case.status_key).toBeNull();
+    expect(buildCaseDoc(fullCaseSO({ status_key: 'awaiting_customer' })).case.status_key).toBe(
+      'awaiting_customer'
+    );
+  });
+
   it('converts numeric status to a human-readable string', () => {
     expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.OPEN })).case.status).toBe('open');
     expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.IN_PROGRESS })).case.status).toBe(

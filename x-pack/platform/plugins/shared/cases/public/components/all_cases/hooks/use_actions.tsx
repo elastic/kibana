@@ -14,13 +14,14 @@ import type {
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseStatuses } from '@kbn/cases-components';
+import type { CaseStatusDefinition } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../containers/types';
 import { useDeleteAction } from '../../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../../confirm_delete_case';
 import { useStatusAction } from '../../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
 import * as i18n from '../translations';
-import { statuses } from '../../status';
+import { getCaseStatusKey, useCaseStatuses } from '../../status/use_case_statuses';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useSeverityAction } from '../../actions/severity/use_severity_action';
 import { severities } from '../../severity/config';
@@ -67,7 +68,12 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     onAction: closePopover,
     onActionSuccess: refreshCases,
     selectedStatus: theCase.status,
+    selectedStatusKey: getCaseStatusKey(theCase),
   });
+  const { getStatus } = useCaseStatuses();
+  const currentStatus = getStatus(theCase);
+  // The done status picked from the menu; the close reason modal applies it.
+  const [closingStatus, setClosingStatus] = useState<CaseStatusDefinition | null>(null);
 
   const severityAction = useSeverityAction({
     isDisabled: false,
@@ -95,9 +101,13 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
 
   const onCloseCase = useCallback(
     (closeReason?: string) => {
-      statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed, closeReason);
+      statusAction.handleUpdateCaseStatus(
+        [theCase],
+        closingStatus ?? CaseStatuses.closed,
+        closeReason
+      );
     },
-    [statusAction, theCase]
+    [closingStatus, statusAction, theCase]
   );
   const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
     totalAlerts: theCase.totalAlerts,
@@ -109,22 +119,21 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     onCloseCase,
   });
 
-  const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(() => {
-    return statusAction
-      .getActions([theCase])
-      .map((statusActionMenuItem: EuiContextMenuPanelItemDescriptor) => {
-        if (
-          statusActionMenuItem.key === 'cases-bulk-action-status-closed' &&
-          theCase.status !== CaseStatuses.closed
-        ) {
-          return {
-            ...statusActionMenuItem,
-            onClick: openCloseCaseModal,
-          } as EuiContextMenuPanelItemDescriptor;
+  const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(
+    () =>
+      statusAction.getActions([theCase], (status) => {
+        if (theCase.status !== CaseStatuses.closed) {
+          setClosingStatus(status);
+          openCloseCaseModal();
+          return;
         }
-        return statusActionMenuItem;
-      });
-  }, [openCloseCaseModal, statusAction, theCase]);
+        // A closed case keeps its close reason; only a move to another done status applies.
+        if (status.key !== currentStatus.key) {
+          statusAction.handleUpdateCaseStatus([theCase], status);
+        }
+      }),
+    [currentStatus.key, openCloseCaseModal, statusAction, theCase]
+  );
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
@@ -142,7 +151,7 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
           <FormattedMessage
             defaultMessage="Status: {status}"
             id="xpack.cases.allCasesView.statusWithValue"
-            values={{ status: <b>{statuses[theCase.status]?.label ?? '-'}</b> }}
+            values={{ status: <b>{currentStatus.label}</b> }}
           />
         ),
         panel: 1,
@@ -216,6 +225,7 @@ export const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: 
     return panelsToBuild;
   }, [
     assigneesAction,
+    currentStatus.label,
     canDelete,
     canAssign,
     canUpdate,

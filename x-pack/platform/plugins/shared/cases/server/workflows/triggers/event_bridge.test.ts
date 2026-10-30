@@ -22,6 +22,8 @@ import {
 } from '../../../common/workflows/triggers';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
+import type { Case } from '../../../common/types/domain';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 const flushMicrotasks = async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -111,6 +113,79 @@ describe('registerCasesWorkflowEventBridge', () => {
       owner: 'securitySolution',
       previousStatus: 'in-progress',
       status: 'closed',
+      previousStatusKey: null,
+      statusKey: null,
+    });
+  });
+
+  describe('custom statuses', () => {
+    const emitStatusChange = ({
+      updatedFields,
+      previous,
+      updated,
+    }: {
+      updatedFields: string[];
+      previous: { status: string; status_key: string | null };
+      updated: { status: string; status_key: string | null };
+    }) =>
+      eventBus.emitCaseUpdated(
+        request,
+        { caseId: 'case-1', owner: 'securitySolution', updatedFields },
+        {
+          previousCase: { attributes: previous } as unknown as CaseSavedObjectTransformed,
+          updatedCase: updated as unknown as Case,
+        }
+      );
+
+    it('forwards a move between two statuses of the same category with the keys', async () => {
+      emitStatusChange({
+        updatedFields: ['status_key'],
+        previous: { status: 'open', status_key: null },
+        updated: { status: 'open', status_key: 'triage' },
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseStatusUpdatedTriggerId, {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        previousStatus: 'open',
+        status: 'open',
+        previousStatusKey: null,
+        statusKey: 'triage',
+      });
+    });
+
+    it('forwards a category change with both keys', async () => {
+      emitStatusChange({
+        updatedFields: ['status', 'status_key'],
+        previous: { status: 'open', status_key: 'triage' },
+        updated: { status: 'closed', status_key: 'duplicate' },
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseStatusUpdatedTriggerId, {
+        caseId: 'case-1',
+        owner: 'securitySolution',
+        previousStatus: 'open',
+        status: 'closed',
+        previousStatusKey: 'triage',
+        statusKey: 'duplicate',
+      });
+    });
+
+    it('does not forward a status trigger when neither the status nor the key changed', async () => {
+      emitStatusChange({
+        updatedFields: ['status_key'],
+        previous: { status: 'open', status_key: 'triage' },
+        updated: { status: 'open', status_key: 'triage' },
+      });
+
+      await flushMicrotasks();
+
+      expect(mockClient.emitEvent).toHaveBeenCalledTimes(1);
+      expect(mockClient.emitEvent).toHaveBeenCalledWith(CaseUpdatedTriggerId, expect.anything());
     });
   });
 

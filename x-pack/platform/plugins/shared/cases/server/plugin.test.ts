@@ -25,6 +25,7 @@ import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASES_SPACE_SETTINGS_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../common/constants';
@@ -216,6 +217,20 @@ describe('Cases Plugin', () => {
         (call) => call[0]?.name === CASE_ATTACHMENT_SAVED_OBJECT
       );
       expect(attachmentSOCall).toBeDefined();
+    });
+
+    it('should always register the cases-space-settings SO even when custom statuses are disabled', async () => {
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({ customStatuses: { enabled: false } })
+      );
+      const pluginWithCustomStatusesDisabled = new CasePlugin(context);
+
+      pluginWithCustomStatusesDisabled.setup(coreSetup, pluginsSetup);
+
+      const registeredTypeNames = coreSetup.savedObjects.registerType.mock.calls.map(
+        (call) => call[0]?.name
+      );
+      expect(registeredTypeNames).toContain(CASES_SPACE_SETTINGS_SAVED_OBJECT);
     });
 
     // Registration must be unconditional so a serverless release has the

@@ -7,7 +7,8 @@
 
 import { isEmpty } from 'lodash';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
-import type { QueryParams, FilterOptions, CasesConfigurationUI } from '../../../../common/ui';
+import type { QueryParams, CasesConfigurationUI } from '../../../../common/ui';
+import type { CasesFilterOptions } from '../../../containers/types';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
@@ -18,14 +19,15 @@ export const allCasesUrlStateDeserializer = (
   customFieldsConfiguration: CasesConfigurationUI['customFields'] = []
 ): AllCasesURLState => {
   const queryParams: Partial<QueryParams> & Record<string, unknown> = {};
-  const filterOptions: Partial<FilterOptions> & Record<string, unknown> = {};
+  const filterOptions: Partial<CasesFilterOptions> & Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(urlParamsMap)) {
     if (Object.hasOwn(DEFAULT_CASES_TABLE_STATE.queryParams, key)) {
       queryParams[key] = value;
     }
 
-    if (Object.hasOwn(DEFAULT_CASES_TABLE_STATE.filterOptions, key)) {
+    // `statusKey` has no default: it only applies when custom statuses are on.
+    if (Object.hasOwn(DEFAULT_CASES_TABLE_STATE.filterOptions, key) || key === 'statusKey') {
       filterOptions[key] = value;
     }
   }
@@ -37,7 +39,7 @@ export const allCasesUrlStateDeserializer = (
     ...restQueryParams,
   };
 
-  const filterOptionsParsed: Partial<FilterOptions> = {
+  const filterOptionsParsed: Partial<CasesFilterOptions> = {
     ...restFilterOptions,
   };
 

@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { lazyObject } from '@kbn/lazy-object';
+import { getEffectiveStatuses } from '../../common/utils/statuses';
 import type {
   AlertService,
   CaseConfigureService,
@@ -20,6 +21,7 @@ import type {
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
+import type { SpaceSettingsService } from './space_settings';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
 import type { UserActionFinder } from './user_actions/operations/find';
@@ -49,6 +51,7 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
+export type SpaceSettingsServiceMock = jest.Mocked<SpaceSettingsService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -269,4 +272,15 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
   });
 
   return service as unknown as FieldDefinitionsServiceMock;
+};
+
+export const createSpaceSettingsServiceMock = (): SpaceSettingsServiceMock => {
+  const service: PublicMethodsOf<SpaceSettingsService> = lazyObject({
+    get: jest.fn().mockResolvedValue(null),
+    getStatuses: jest.fn().mockResolvedValue(getEffectiveStatuses(null)),
+    put: jest.fn(),
+  });
+
+  // the cast here is required because jest.Mocked tries to include private members and would throw an error
+  return service as unknown as SpaceSettingsServiceMock;
 };

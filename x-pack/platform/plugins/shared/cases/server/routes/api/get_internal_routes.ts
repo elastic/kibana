@@ -36,6 +36,7 @@ import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
 import { createRunWorkflowRoute } from './internal/run_workflow';
+import { getSpaceSettingsRoute, putSpaceSettingsRoute } from './internal/space_settings';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -69,6 +70,8 @@ export const getInternalRoutes = (
     similarCaseRoute,
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
+    getSpaceSettingsRoute,
+    putSpaceSettingsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
     ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),

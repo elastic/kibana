@@ -52,6 +52,7 @@ import {
   createConfiguration,
   createComment,
   elasticUserProfileId,
+  omitStatusKey,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -1840,7 +1841,7 @@ const removeServerGeneratedData = (
 ): Omit<Case, 'created_at' | 'updated_at' | 'version'> => {
   const { created_at, updated_at, version, ...restCase } = theCase;
 
-  return restCase;
+  return omitStatusKey(restCase);
 };
 
 const verifyAlertsAttachedToCase = ({

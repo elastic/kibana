@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
@@ -31,6 +32,7 @@ import {
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
+import { getStatusesForWrite, resolveStatusForCreate } from './status_write';
 import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
 import {
   buildExtendedFieldsDefaults,
@@ -122,6 +124,11 @@ export const create = async (
         entities: [{ owner: query.owner, id: savedObjectID }],
       });
     }
+
+    const statusKey = resolveStatusForCreate({
+      statuses: await getStatusesForWrite(clientArgs.services),
+      statusKey: query.status_key,
+    })?.status_key;
 
     // Expand the template's case defaults and extended_fields defaults into the request
     // (caller-wins), and pin the resolved template version. Runs AFTER the createCase
@@ -360,6 +367,7 @@ export const create = async (
     const attributes = transformNewCase({
       user,
       newCase: normalizedCase,
+      statusKey,
     });
 
     // Server-derived assignee identity: resolve profile uids to username /
@@ -386,7 +394,7 @@ export const create = async (
         caseId: newCase.id,
         user,
         payload: {
-          ...query,
+          ...omit(query, 'status_key'),
           severity: query.severity ?? CaseSeverity.LOW,
           assignees: query.assignees ?? [],
           category: query.category ?? null,

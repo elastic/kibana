@@ -28,18 +28,25 @@ import {
 import { getNoneConnector } from '../../../common/utils/connectors';
 import { getCaseSettings } from '../../../common/utils/case_settings';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 
 const findTemplateById = (
   configurations: Configurations,
   templateId: string
 ): { template: TemplateConfiguration; owner: string } | undefined => {
-  for (const configuration of configurations) {
+  const matches = configurations.flatMap((configuration) => {
     const template = configuration.templates?.find(({ key }) => key === templateId);
-    if (template) {
-      return { template, owner: configuration.owner };
-    }
+    return template ? [{ template, owner: configuration.owner }] : [];
+  });
+  // Template keys are unique per solution, not across solutions.
+  if (matches.length > 1) {
+    throw new Error(
+      `Case template "${templateId}" exists in more than one solution. Set owner to choose one: ${matches
+        .map(({ owner }) => owner)
+        .join(', ')}`
+    );
   }
-  return undefined;
+  return matches[0];
 };
 
 export const createCaseFromTemplateStepDefinition = (
@@ -53,8 +60,11 @@ export const createCaseFromTemplateStepDefinition = (
       CreateCaseFromTemplateStepConfig,
       CreateCaseFromTemplateStepOutput['case']
     >(getCasesClient, async (casesClient, input) => {
-      // `owner` is optional: when omitted, the case takes the template's owner.
+      // With the top-level app on, `owner` is optional and the case takes the template's owner.
       const { case_template_id, owner: requestedOwner, overwrites } = input;
+      if (requestedOwner === undefined && !isTopLevelAppEnabled()) {
+        throw new Error('Owner is required.');
+      }
       const normalizedOverwrites = overwrites
         ? normalizeCaseStepUpdatesForBulkPatch(overwrites)
         : {};

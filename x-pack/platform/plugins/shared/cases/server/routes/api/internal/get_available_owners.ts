@@ -22,7 +22,7 @@ export const getAvailableOwnersRoute = createCasesRoute({
       const casesContext = await context.cases;
       const casesClient = await casesContext.getCasesClient();
 
-      return response.ok({ body: { owners: await casesClient.cases.getAvailableOwners() } });
+      return response.ok({ body: await casesClient.cases.getAvailableOwners() });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve the available case owners: ${error}`,

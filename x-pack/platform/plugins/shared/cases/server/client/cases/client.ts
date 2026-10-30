@@ -39,6 +39,7 @@ import { deleteCases } from './delete';
 import { search } from './search';
 import { find } from './find';
 import type {
+  AvailableOwners,
   CasesByAlertIDParams,
   CasesByAttachmentIDsRequest,
   GetCaseIDsByAttachmentIDsResponse,
@@ -146,9 +147,10 @@ export interface CasesSubClient {
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
   /**
-   * Retrieves the owners that exist in this deployment and whose cases the user can read.
+   * Retrieves the owners that exist in this deployment that the user can read, create cases in,
+   * and manage settings for.
    */
-  getAvailableOwners(): Promise<string[]>;
+  getAvailableOwners(): Promise<AvailableOwners>;
   /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */

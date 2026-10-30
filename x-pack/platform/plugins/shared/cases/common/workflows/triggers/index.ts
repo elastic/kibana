@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { Owner as OwnerSchema } from '../../bundled-types.gen';
 import {
@@ -33,6 +33,8 @@ import {
   COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
+  CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_KEY_DESCRIPTION,
+  CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_KEY_DESCRIPTION,
   EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION,
   OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION,
   OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION,
@@ -124,14 +126,24 @@ triggers:
 
 export const CaseStatusUpdatedTriggerId = 'cases.caseStatusUpdated' as const;
 
-const caseStatusUpdatedEventSchema = baseCaseEventSchema.extend({
-  status: z
-    .string()
-    .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION }),
-  previousStatus: z
-    .string()
-    .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION }),
-});
+const caseStatusUpdatedEventSchema = lazySchema(() =>
+  baseCaseEventSchema.extend({
+    status: z
+      .string()
+      .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION }),
+    previousStatus: z
+      .string()
+      .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION }),
+    statusKey: z
+      .string()
+      .nullable()
+      .optional()
+      .meta({ description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_KEY_DESCRIPTION }),
+    previousStatusKey: z.string().nullable().optional().meta({
+      description: CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_KEY_DESCRIPTION,
+    }),
+  })
+);
 
 export const caseStatusUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseStatusUpdatedTriggerId,

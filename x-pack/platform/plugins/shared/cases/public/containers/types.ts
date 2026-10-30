@@ -6,9 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { FilterOptions } from '../../common/ui';
 
 export * from '../../common/ui';
 
+/** Cases list filters. `statusKey` holds the statuses to filter by when custom statuses are on. */
+export type CasesFilterOptions = FilterOptions & { statusKey?: string[] };
 export type FeatureIdsResponse = estypes.SearchResponse<
   unknown,
   {

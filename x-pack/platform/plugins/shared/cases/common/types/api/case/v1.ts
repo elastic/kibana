@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CASE_EXTENDED_FIELDS,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -51,6 +51,8 @@ import {
   SimilarCaseSchema,
 } from '../../domain/case/v1';
 import { CaseConnectorSchema } from '../../domain/connector/v1';
+import { CaseStatusKeySchema } from '../../domain/space_settings/v1';
+import { MAX_CASE_STATUSES } from '../../../constants/statuses';
 import { CaseUserProfileSchema, UserSchema } from '../../domain/user/v1';
 import { CasesStatusResponseSchema } from '../stats/v1';
 import {
@@ -198,73 +200,80 @@ export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.exten
 /**
  * Create case
  */
-export const CasePostRequestSchema = z.object({
-  /**
-   * Description of the case
-   */
-  description: limitedStringSchema({
-    fieldName: 'description',
-    min: 1,
-    max: MAX_DESCRIPTION_LENGTH,
-  }),
-  /**
-   * Identifiers for the case.
-   */
-  tags: limitedArraySchema({
-    codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
-    fieldName: 'tags',
-    min: 0,
-    max: MAX_TAGS_PER_CASE,
-  }),
-  /**
-   * Title of the case
-   */
-  title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
-  /**
-   * The external configuration for the case
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Sync settings for alerts
-   */
-  settings: CaseSettingsSchema,
-  /**
-   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
-   * creating this case must also be granted access to that plugin's feature.
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  /**
-   * The users assigned to the case
-   */
-  assignees: limitedArraySchema({
-    codec: CaseUserProfileSchema,
-    fieldName: 'assignees',
-    min: 0,
-    max: MAX_ASSIGNEES_PER_CASE,
-  }).optional(),
-  /**
-   * The severity of the case. The severity is
-   * default it to "low" if not provided.
-   */
-  severity: CaseSeveritySchema.optional(),
-  /**
-   * The category of the case.
-   */
-  category: z
-    .union([
-      limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
-      z.null(),
-    ])
-    .optional(),
-  /**
-   * The list of custom field values of the case.
-   */
-  customFields: CaseRequestCustomFieldsSchema.optional(),
-  template: CaseRequestTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z
-    .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
-    .optional(),
-});
+export const CasePostRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Description of the case
+     */
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_DESCRIPTION_LENGTH,
+    }),
+    /**
+     * Identifiers for the case.
+     */
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+      fieldName: 'tags',
+      min: 0,
+      max: MAX_TAGS_PER_CASE,
+    }),
+    /**
+     * Title of the case
+     */
+    title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
+    /**
+     * The external configuration for the case
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Sync settings for alerts
+     */
+    settings: CaseSettingsSchema,
+    /**
+     * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+     * creating this case must also be granted access to that plugin's feature.
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    /**
+     * The users assigned to the case
+     */
+    assignees: limitedArraySchema({
+      codec: CaseUserProfileSchema,
+      fieldName: 'assignees',
+      min: 0,
+      max: MAX_ASSIGNEES_PER_CASE,
+    }).optional(),
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
+    severity: CaseSeveritySchema.optional(),
+    /**
+     * The category of the case.
+     */
+    category: z
+      .union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        z.null(),
+      ])
+      .optional(),
+    /**
+     * The list of custom field values of the case.
+     */
+    customFields: CaseRequestCustomFieldsSchema.optional(),
+    template: CaseRequestTemplateSchema.nullable().optional(),
+    [CASE_EXTENDED_FIELDS]: z
+      .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
+      .optional(),
+    /**
+     * The key of a status in the space's not started category. Defaults to that category's default
+     * status.
+     */
+    status_key: CaseStatusKeySchema.optional(),
+  })
+);
 
 /**
  * Bulk create cases
@@ -321,6 +330,22 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
    * The status of the case (open, closed, in-progress)
    */
   status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
+  /**
+   * The keys of the space's statuses to filter by
+   */
+  status_key: lazySchema(() =>
+    z
+      .union([
+        limitedArraySchema({
+          codec: CaseStatusKeySchema,
+          fieldName: 'status_key',
+          min: 0,
+          max: MAX_CASE_STATUSES,
+        }),
+        CaseStatusKeySchema,
+      ])
+      .optional()
+  ),
   /**
    * The severity of the case
    */
@@ -564,10 +589,16 @@ export const CasesBulkGetResponseSchema = z.object({
 /**
  * The saved object ID and version
  */
-export const CasePatchRequestSchema = CaseRequestFieldsSchema.extend({
-  id: z.string().max(512),
-  version: z.string().max(512),
-});
+export const CasePatchRequestSchema = lazySchema(() =>
+  CaseRequestFieldsSchema.extend({
+    id: z.string().max(512),
+    version: z.string().max(512),
+    /**
+     * The key of a status in the space. It sets `status` to the status's category.
+     */
+    status_key: CaseStatusKeySchema.optional(),
+  })
+);
 
 export const CasesPatchRequestSchema = z.object({
   cases: limitedArraySchema({

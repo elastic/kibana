@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '../../common/lib/kibana';
+import { isCustomStatusesEnabled } from '../../common/custom_statuses';
+import { CaseStatusesSettings } from './statuses';
 import { CasesPageBody } from '../app/cases_page_body';
 import { Connectors } from './connectors';
 import * as configureCasesI18n from './translations';
@@ -104,6 +106,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     AddOrEditObservableTypeFlyout,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
+  // Statuses belong to the space, so they sit above the settings of the selected solution.
+  const showStatusesSection = isCustomStatusesEnabled() && permissions.settings;
+
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
   const showExtractObservablesSection = showObservableTypesSection && isExtractObservablesEnabled;
@@ -136,6 +141,14 @@ export const ConfigureCases: React.FC = React.memo(() => {
                       }}
                     />
                   </EuiCallOut>
+                </div>
+                <EuiSpacer size="xl" />
+              </>
+            )}
+            {showStatusesSection && (
+              <>
+                <div css={contentWrapperCss}>
+                  <CaseStatusesSettings />
                 </div>
                 <EuiSpacer size="xl" />
               </>

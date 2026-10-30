@@ -37,6 +37,9 @@ import * as customFieldsI18n from '../custom_fields/translations';
 import * as templatesI18n from '../templates/translations';
 import * as observableTypesI18n from '../observable_types/translations';
 import { CASE_SETTINGS_TITLE } from './translations';
+import { DEFAULT_CASE_STATUSES } from '../../../common/utils/statuses';
+import * as customStatuses from '../../common/custom_statuses';
+import * as api from '../../containers/api';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -128,6 +131,46 @@ describe('ConfigureCases', () => {
     expect(screen.getByTestId('cases-external-incident-management-section')).toBeInTheDocument();
     expect(screen.getByTestId('cases-case-closures-section')).toBeInTheDocument();
     expect(screen.getByTestId('cases-observable-types-section')).toBeInTheDocument();
+  });
+
+  describe('statuses section', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('is hidden when custom statuses are off', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('cases-settings-panel')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-statuses-section')).not.toBeInTheDocument();
+    });
+
+    it('renders above the solution settings when custom statuses are on', async () => {
+      jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+      jest.spyOn(api, 'getCaseStatuses').mockResolvedValue([...DEFAULT_CASE_STATUSES]);
+      renderWithTestingProviders(<ConfigureCases />);
+
+      await screen.findByTestId('case-statuses-section');
+      expect(
+        within(screen.getByTestId('cases-settings-panel')).queryByTestId('case-statuses-section')
+      ).not.toBeInTheDocument();
+      // Matches come back in document order.
+      expect(
+        screen
+          .getAllByTestId(/^(case-statuses-section|cases-settings-panel)$/)
+          .map((element) => element.getAttribute('data-test-subj'))
+      ).toEqual(['case-statuses-section', 'cases-settings-panel']);
+    });
+
+    it('is hidden without the settings privilege', async () => {
+      jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { permissions: noCasesSettingsPermission() },
+      });
+
+      expect(await screen.findByTestId('cases-settings-panel')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-statuses-section')).not.toBeInTheDocument();
+    });
   });
 
   describe('when templates v2 is disabled', () => {

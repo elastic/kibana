@@ -94,6 +94,9 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // Human-readable strings, converted in the doc-builder from
         // the SO's numeric enums. See the file-level comment.
         status: { type: 'keyword' },
+        // The key of the space's status; `status` holds its category. Labels are not
+        // indexed: they live in the space settings and can be renamed.
+        status_key: { type: 'keyword' },
         severity: { type: 'keyword' },
         // Object (not `nested`) — matches the SO. `nested` is only
         // needed when sub-fields must be queried independently per

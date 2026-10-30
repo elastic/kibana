@@ -41,6 +41,11 @@ import {
   getTimingMetricsForUpdate,
   getUserProfiles,
 } from './utils';
+import {
+  clearStatusKeyWhileDisabled,
+  getStatusesForWrite,
+  resolveStatusForUpdate,
+} from './status_write';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
@@ -254,6 +259,21 @@ export const push = async (
     };
 
     const shouldMarkAsClosed = shouldCloseByPush(myCaseConfigure);
+    const currentStatus = {
+      status: myCase.attributes.status,
+      statusKey: myCase.attributes.status_key,
+    };
+    const closedStatusKey = shouldMarkAsClosed
+      ? resolveStatusForUpdate({
+          statuses: await getStatusesForWrite(clientArgs.services),
+          status: CaseStatuses.closed,
+          current: currentStatus,
+        })?.status_key
+      : undefined;
+    const closedStatusKeyUpdate =
+      closedStatusKey != null
+        ? { status_key: closedStatusKey }
+        : clearStatusKeyWhileDisabled({ status: CaseStatuses.closed, current: currentStatus });
 
     const [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
@@ -263,6 +283,7 @@ export const push = async (
           ...(shouldMarkAsClosed
             ? {
                 status: CaseStatuses.closed,
+                ...closedStatusKeyUpdate,
                 closed_at: pushedDate,
                 closed_by: { email, full_name, username, profile_uid },
               }
@@ -309,7 +330,7 @@ export const push = async (
       await userActionService.creator.createUserAction({
         userAction: {
           type: UserActionTypes.status,
-          payload: { status: CaseStatuses.closed },
+          payload: { status: CaseStatuses.closed, status_key: closedStatusKey },
           user,
           caseId,
           owner: myCase.attributes.owner,

@@ -8,6 +8,9 @@
 import React from 'react';
 
 import type { CaseStatuses } from '../../../../common/types/domain';
+import type { CasesFilterOptions } from '../../../containers/types';
+import { getStatusKeyFilter } from '../../../containers/utils';
+import { isCustomStatusesEnabled } from '../../../common/custom_statuses';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../components/multi_select_filter';
 import { SolutionFilter } from '../components/solution_filter';
@@ -82,13 +85,15 @@ export const getSystemFilterConfig = ({
       isActive: true,
       isAvailable: true,
       getEmptyOptions: () => {
-        return {
-          status: [],
-        };
+        const emptyOptions: Partial<CasesFilterOptions> = isCustomStatusesEnabled()
+          ? { status: [], statusKey: [] }
+          : { status: [] };
+        return emptyOptions;
       },
       render: ({ filterOptions }: FilterConfigRenderParams) => (
         <StatusFilter
           selectedOptionKeys={filterOptions?.status}
+          selectedStatusKeys={getStatusKeyFilter(filterOptions)}
           onChange={onSystemFilterChange}
           hiddenStatuses={hiddenStatuses}
           countClosedCases={countClosedCases}
