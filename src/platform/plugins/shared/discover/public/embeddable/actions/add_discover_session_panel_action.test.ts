@@ -29,6 +29,7 @@ const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) 
   serializeState: () => state,
   latestState$: of(state),
   applySerializedState: () => undefined,
+  compareSerializedState: () => true,
 });
 
 const createDiscoverSessionTabState = () => ({

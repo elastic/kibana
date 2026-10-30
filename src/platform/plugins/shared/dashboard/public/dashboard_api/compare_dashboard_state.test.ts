@@ -9,6 +9,7 @@
 
 import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getControlsSchema } from '@kbn/controls-schemas';
+import { EMPTY } from 'rxjs';
 import { logger } from '../services/logger';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { diffDashboardStates } from './compare_dashboard_state';
@@ -19,6 +20,18 @@ const section = (collapsed: boolean) => ({
   collapsed,
   grid: { y: 0 },
   panels: [],
+});
+
+const childApi = (
+  type: string,
+  compareSerializedState: (baseline: never, current: never) => boolean
+) => ({
+  type,
+  compareSerializedState,
+  serializeState: () => ({}),
+  applySerializedState: () => undefined,
+  anyStateChange$: EMPTY,
+  latestState$: EMPTY,
 });
 
 const state = (overrides: Partial<DashboardState> = {}): DashboardState =>
@@ -161,13 +174,13 @@ describe('diffDashboardStates', () => {
     expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
     expect(
       diffDashboardStates(baseline, current, {
-        'panel-1': {
-          type: 'lens',
-          compareSerializedState: (
+        'panel-1': childApi(
+          'lens',
+          (
             left: { attributes?: { title?: string } } | undefined,
             right: { attributes?: { title?: string } } | undefined
-          ) => left?.attributes?.title === right?.attributes?.title,
-        },
+          ) => left?.attributes?.title === right?.attributes?.title
+        ),
       })
     ).toEqual({});
   });
@@ -187,7 +200,7 @@ describe('diffDashboardStates', () => {
         config: { title: 'Count' },
         ...overrides,
       } as DashboardPanel);
-    const ignoreConfig = { compareSerializedState: () => true };
+    const ignoreConfig = () => true;
     const pinnedPanel = (title = 'Host', id?: string) =>
       getControlsSchema().parse({
         ...(id !== undefined && { id }),
@@ -326,7 +339,7 @@ describe('diffDashboardStates', () => {
 
         expect(
           diffDashboardStates(baseline, current, {
-            '__comparison:panel:0': { type: 'lens', compareSerializedState },
+            '__comparison:panel:0': childApi('lens', compareSerializedState),
           })
         ).toStrictEqual({ panels: current.panels });
         expect(compareSerializedState).not.toHaveBeenCalled();
@@ -356,16 +369,10 @@ describe('diffDashboardStates', () => {
 
         expect(
           diffDashboardStates(baseline, current, {
-            'panel-1': {
-              type: 'lens',
-              compareSerializedState: () => {
-                throw error;
-              },
-            },
-            'control-1': {
-              type: 'options_list_control',
-              compareSerializedState: comparePinnedPanel,
-            },
+            'panel-1': childApi('lens', () => {
+              throw error;
+            }),
+            'control-1': childApi('options_list_control', comparePinnedPanel),
           })
         ).toStrictEqual({ panels: current.panels, pinned_panels: current.pinned_panels });
         expect(comparePinnedPanel).toHaveBeenCalledWith(
@@ -389,12 +396,9 @@ describe('diffDashboardStates', () => {
 
         expect(
           diffDashboardStates(baseline, current, {
-            'control-1': {
-              type: 'options_list_control',
-              compareSerializedState: () => {
-                throw error;
-              },
-            },
+            'control-1': childApi('options_list_control', () => {
+              throw error;
+            }),
           })
         ).toStrictEqual({ pinned_panels: current.pinned_panels });
         expect(logger.warn).toHaveBeenCalledWith(
@@ -409,7 +413,7 @@ describe('diffDashboardStates', () => {
 
       expect(
         diffDashboardStates(state({ panels: [lensPanel({ id: 'panel-1' })] }), current, {
-          'panel-1': { type: 'lens', ...ignoreConfig },
+          'panel-1': childApi('lens', ignoreConfig),
         })
       ).toEqual({ panels: current.panels });
     });
@@ -421,7 +425,7 @@ describe('diffDashboardStates', () => {
 
       expect(
         diffDashboardStates(state({ panels: [libraryPanel('library-a')] }), current, {
-          'panel-1': { type: 'lens', ...ignoreConfig },
+          'panel-1': childApi('lens', ignoreConfig),
         })
       ).toEqual({ panels: current.panels });
     });

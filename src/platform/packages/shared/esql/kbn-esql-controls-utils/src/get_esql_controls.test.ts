@@ -43,6 +43,7 @@ const createControlApi = (
   type,
   serializeState: () => state,
   applySerializedState: () => undefined,
+  compareSerializedState: () => true,
   anyStateChange$: EMPTY,
   latestState$: () => state,
 });

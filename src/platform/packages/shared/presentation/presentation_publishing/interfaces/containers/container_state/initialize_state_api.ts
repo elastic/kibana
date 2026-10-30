@@ -10,7 +10,7 @@
 import { combineLatestWith, debounceTime, map, of, shareReplay, startWith } from 'rxjs';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
 import type { HasParentApi } from '../../has_parent_api';
-import type { ComparesSerializedState, HasSerializableState } from '../../has_serializable_state';
+import type { HasSerializableState } from '../../has_serializable_state';
 import type { HasUniqueId } from '../../has_uuid';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { getTitle } from '../../titles/publishes_title';
@@ -26,14 +26,12 @@ export const initializeStateApi = <StateType extends object = object>({
   defaultState,
   serializeState,
   anyStateChange$,
-}: Omit<HasSerializableState<StateType>, 'latestState$'> &
+}: Omit<HasSerializableState<StateType>, 'latestState$' | 'compareSerializedState'> &
   HasUniqueId &
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-  }): PublishesUnsavedChanges &
-  HasSerializableState<StateType> &
-  ComparesSerializedState<StateType> => {
+  }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
   const compareSerializedState = (
     baseline: Partial<StateType> | undefined,
     current: Partial<StateType> | undefined

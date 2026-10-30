@@ -559,11 +559,10 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
-            const changedChildIds = new Set(
-              childrenChanges.flatMap(({ uuid, hasUnsavedChanges }) =>
-                hasUnsavedChanges ? [uuid] : []
-              )
-            );
+            const changedChildIds = new Set<string>();
+            for (const { uuid, hasUnsavedChanges } of childrenChanges) {
+              if (hasUnsavedChanges) changedChildIds.add(uuid);
+            }
             const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
               lastSavedLayout,
               currentLayout,
