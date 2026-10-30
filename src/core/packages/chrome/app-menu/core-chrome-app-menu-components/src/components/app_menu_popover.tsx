@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type ReactElement } from 'react';
-import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import React, { useMemo, useRef, type ReactElement } from 'react';
+import {
+  EuiContextMenu,
+  EuiPopover,
+  EuiToolTip,
+  type EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
 import type { AppMenuPopoverItem, AppMenuPrimaryActionItem } from '../types';
 
@@ -37,11 +42,15 @@ export const AppMenuPopover = ({
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
+  const lastPanels = useRef<EuiContextMenuPanelDescriptor[]>();
   const panels = useMemo(() => {
+    // keep the last panels while closed: EuiPopover still renders them during its exit transition.
     if (!isOpen) {
-      return []; // panels are only needed while open
+      return lastPanels.current ?? [];
     }
-    return getPopoverPanels({
+
+    // building panels on every open re-evaluate `disableButton`, tooltip values, etc. */
+    const nextPanels = getPopoverPanels({
       items,
       primaryActionItem,
       rootPanelWidth: popoverWidth,
@@ -49,18 +58,19 @@ export const AppMenuPopover = ({
       onClose,
       onCloseOverflowButton,
     });
+    lastPanels.current = nextPanels;
+    return nextPanels;
   }, [
+    isOpen,
     items,
     primaryActionItem,
     popoverWidth,
     popoverTestId,
     onClose,
     onCloseOverflowButton,
-    /** Building panels on every open re-evaluates function-valued `disableButton` and tooltip values. */
-    isOpen,
   ]);
 
-  if (isOpen && panels.length === 0) {
+  if (panels.length === 0) {
     return null;
   }
 

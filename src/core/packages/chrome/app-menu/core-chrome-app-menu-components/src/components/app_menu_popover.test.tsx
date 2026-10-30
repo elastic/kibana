@@ -98,13 +98,16 @@ describe('AppMenuPopover', () => {
     expect(disableButton).toHaveBeenCalledTimes(callsAfterOpen);
   });
 
-  it('should keep the anchor and not throw when an open popover closes', async () => {
+  it('should keep rendering the items during the exit transition when the popover closes', async () => {
     const { rerender } = render(<AppMenuPopover {...defaultProps} isOpen={true} />);
     await waitFor(() => expect(screen.getByText('Item 1')).toBeInTheDocument());
 
     rerender(<AppMenuPopover {...defaultProps} isOpen={false} />);
 
+    // EuiPopover keeps its content mounted while closing, and tests rely on it (e.g. Discover's
+    // top nav accessibility test looks up the clicked menu item right after the popover closes)
     expect(screen.getByTestId('anchor-button')).toBeInTheDocument();
+    expect(screen.getByText('Item 1')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText('Item 1')).not.toBeInTheDocument());
   });
 
