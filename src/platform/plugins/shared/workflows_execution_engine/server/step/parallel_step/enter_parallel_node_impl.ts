@@ -27,9 +27,11 @@ import { isTemplateExpression, parseDuration } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 import type { RuntimeGraphView } from '../../workflow_context_manager/workflow_runtime_graph';
 import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { getIdleTimeoutResumeDeadlineMs } from '../../workflow_execution_loop/handle_execution_delay';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 import { isCancellableNode } from '../node_implementation';
 import type { NodesFactory } from '../nodes_factory';
@@ -78,7 +80,8 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private nodesFactory: NodesFactory,
-    private workflowGraph: RuntimeGraphView
+    private workflowGraph: RuntimeGraphView,
+    private workflowExecutionState: Pick<WorkflowExecutionState, 'getStepExecutionsByStepId'>
   ) {}
 
   public async run(): Promise<void> {
@@ -753,6 +756,20 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
   private computeResumeAt(state: ParallelStepState): Date {
     const now = Date.now();
     let earliest: number | undefined;
+    const consider = (ts: number | undefined) => {
+      if (ts === undefined || Number.isNaN(ts)) {
+        return;
+      }
+      if (earliest === undefined || ts < earliest) {
+        earliest = ts;
+      }
+    };
+
+    const overallTimeoutMs = this.resolveTimeoutMs(this.node.configuration.timeout);
+    if (overallTimeoutMs !== undefined) {
+      consider(state.startedAt + overallTimeoutMs);
+    }
+    const branchTimeoutMs = this.resolveTimeoutMs(this.node.configuration['branch-timeout']);
 
     const inFlightBranches = state.branches.filter(
       (branch) => !TERMINAL_BRANCH_STATUSES.has(branch.status)
@@ -765,17 +782,38 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       });
       const resumeAt = branchRuntime.stepExecution?.state?.resumeAt;
       if (typeof resumeAt === 'string') {
-        const ts = new Date(resumeAt).getTime();
-        if (!Number.isNaN(ts) && (earliest === undefined || ts < earliest)) {
-          earliest = ts;
-        }
+        consider(new Date(resumeAt).getTime());
       }
+      if (branchTimeoutMs !== undefined && branch.startedAt !== undefined) {
+        consider(branch.startedAt + branchTimeoutMs);
+      }
+      // Step timeout around a wait inside the branch, plus the workflow timeout.
+      consider(this.getEnclosingIdleDeadlineMs(branchRuntime, branchStackFrames));
     }
 
     if (earliest !== undefined && earliest > now) {
       return new Date(earliest);
     }
     return new Date(now + RETICK_FLOOR_MS);
+  }
+
+  /** Earliest idle deadline enclosing a branch: workflow timeout, step-timeout zones, and HITL. */
+  private getEnclosingIdleDeadlineMs(
+    branchRuntime: StepExecutionRuntime,
+    branchStackFrames: StackFrame[]
+  ): number | undefined {
+    const persistedStack = branchRuntime.stepExecution?.scopeStack;
+    const stackFrames =
+      persistedStack != null && persistedStack.length > 0 ? persistedStack : branchStackFrames;
+    return getIdleTimeoutResumeDeadlineMs(
+      {
+        workflowExecutionGraph: this.workflowGraph,
+        workflowExecutionState: this.workflowExecutionState,
+      },
+      branchRuntime.workflowExecution,
+      stackFrames,
+      branchRuntime
+    );
   }
 
   /**
