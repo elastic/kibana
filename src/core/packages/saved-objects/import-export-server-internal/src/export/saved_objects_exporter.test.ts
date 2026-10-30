@@ -1375,6 +1375,44 @@ describe('getSortedObjectsForExport()', () => {
       expect(response).toEqual([...objectResults, expect.objectContaining({ exportedCount: 3 })]);
     });
 
+    test.each([false, true])(
+      'redacts the `acl` attribute (includeNamespaces: %s)',
+      async (includeNamespaces) => {
+        const acl = {
+          version: [1],
+          owner: { type: ['user'], id: ['u_owner'] },
+          general_access: ['none'],
+          entries: [],
+        };
+        const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            createSavedObject({ type: 'multi', id: '1', namespaces: ['foo'], acl }),
+            createSavedObject({ type: 'other', id: '2' }),
+          ],
+        });
+        const exportStream = await exporter.exportByObjects({
+          request,
+          objects: [
+            { type: 'multi', id: '1' },
+            { type: 'other', id: '2' },
+          ],
+          includeNamespaces,
+        });
+        const response = await readStreamToCompletion(exportStream);
+        expect(response).toEqual([
+          createSavedObject({
+            type: 'multi',
+            id: '1',
+            ...(includeNamespaces && { namespaces: ['foo'] }),
+          }),
+          createSavedObject({ type: 'other', id: '2' }),
+          expect.objectContaining({ exportedCount: 2 }),
+        ]);
+        expect(response[0]).not.toHaveProperty('acl');
+      }
+    );
+
     test('includes nested dependencies when passed in', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [

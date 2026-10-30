@@ -16,6 +16,7 @@ import {
   throwIfTypeNotVisibleByAPI,
   throwIfAnyTypeNotVisibleByAPI,
   logWarnOnExternalRequest,
+  stripAcl,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -419,5 +420,51 @@ describe('logWarnOnExternalRequest', () => {
       logger,
     });
     expect(logger.warn).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('stripAcl', () => {
+  const acl = {
+    version: [1],
+    owner: { type: ['user'], id: ['u_owner'] },
+    general_access: ['none'],
+    entries: [],
+  };
+  const object = { type: 'foo', id: 'bar', attributes: { title: 'Foo' }, references: [] };
+
+  it('removes the ACL from a saved object', () => {
+    expect(stripAcl({ ...object, acl })).toEqual(object);
+  });
+
+  it('removes ACLs from bulk and find results, including errors', () => {
+    const error = { type: 'foo', id: 'missing', error: { statusCode: 404 } };
+    expect(
+      stripAcl({
+        saved_objects: [{ ...object, acl, score: 1 }, error],
+        total: 2,
+        page: 1,
+        per_page: 20,
+      })
+    ).toEqual({ saved_objects: [{ ...object, score: 1 }, error], total: 2, page: 1, per_page: 20 });
+  });
+
+  it('removes ACLs from resolve and bulk resolve results', () => {
+    const resolved = { saved_object: { ...object, acl }, outcome: 'exactMatch' };
+    expect(stripAcl(resolved)).toEqual({ saved_object: object, outcome: 'exactMatch' });
+    expect(stripAcl({ resolved_objects: [resolved] })).toEqual({
+      resolved_objects: [{ saved_object: object, outcome: 'exactMatch' }],
+    });
+  });
+
+  it('returns other values unchanged', () => {
+    expect(stripAcl(undefined)).toBeUndefined();
+    expect(stripAcl('text')).toBe('text');
+    expect(stripAcl({ ...object })).toEqual(object);
+  });
+
+  it('does not mutate the input', () => {
+    const input = { saved_objects: [{ ...object, acl }] };
+    stripAcl(input);
+    expect(input.saved_objects[0].acl).toBe(acl);
   });
 });

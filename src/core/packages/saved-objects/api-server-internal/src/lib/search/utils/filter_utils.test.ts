@@ -279,6 +279,24 @@ describe('Filter Utils', () => {
         validateConvertFilterToKueryNode([], 'hiddentype.title: "title"', mockMappings);
       }).toThrowErrorMatchingInlineSnapshot(`"This type hiddentype is not allowed: Bad Request"`);
     });
+
+    test('Lets make sure that we are throwing an exception if we filter by the access control list', () => {
+      const mappingsWithAcl = {
+        properties: {
+          ...mockMappings.properties,
+          acl: { properties: { owner: { properties: { id: { type: 'keyword' } } } } },
+        },
+      } as const;
+      expect(() => {
+        validateConvertFilterToKueryNode(
+          ['foo'],
+          'foo.attributes.title: "best" or foo.acl.owner.id: "u_owner"',
+          mappingsWithAcl
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"This key 'foo.acl.owner.id' cannot be used in a filter: Bad Request"`
+      );
+    });
   });
 
   describe('#validateFilterKueryNode', () => {
@@ -699,6 +717,30 @@ describe('Filter Utils', () => {
 
       expect(hasError).toEqual(
         "This key 'bean.attributes.red' does NOT exist in bean saved object index patterns"
+      );
+    });
+
+    test.each(['bean.acl', 'bean.acl.owner.id', 'bean.acl.entries.id'])(
+      'Return error if key %s refers to the access control list',
+      (key) => {
+        const mappingsWithAcl = {
+          properties: { ...mockMappings.properties, acl: { type: 'object' } },
+        } as const;
+        expect(hasFilterKeyError(key, ['bean'], mappingsWithAcl)).toEqual(
+          `This key '${key}' cannot be used in a filter`
+        );
+      }
+    );
+
+    test('Does not return an error for an attribute named acl', () => {
+      const mappingsWithAclAttribute = {
+        properties: {
+          ...mockMappings.properties,
+          bean: { properties: { acl: { type: 'keyword' } } },
+        },
+      } as const;
+      expect(hasFilterKeyError('bean.attributes.acl', ['bean'], mappingsWithAclAttribute)).toBe(
+        null
       );
     });
   });

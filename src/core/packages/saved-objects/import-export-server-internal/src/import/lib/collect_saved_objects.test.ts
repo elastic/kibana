@@ -352,6 +352,32 @@ describe('collectSavedObjects()', () => {
       expect(result).toEqual(expect.objectContaining({ collectedObjects }));
     });
 
+    test('drops access control lists from imported objects', async () => {
+      const acl = {
+        version: 1,
+        owner: { type: 'user', id: 'u_owner' },
+        general_access: 'none',
+        entries: [],
+      };
+      const readStream = createReadStream({ ...obj1, acl }, obj2);
+      const supportedTypes = [obj1.type, obj2.type];
+      const filter = jest.fn().mockReturnValue(true);
+      const result = await collectSavedObjects({
+        readStream,
+        supportedTypes,
+        objectLimit,
+        typeRegistry,
+        filter,
+      });
+
+      expect(filter).toHaveBeenCalledWith(expect.not.objectContaining({ acl }));
+      expect(result.collectedObjects).toEqual([
+        { ...obj1, typeMigrationVersion: '', managed: false },
+        { ...obj2, typeMigrationVersion: '', managed: false },
+      ]);
+      expect(result.collectedObjects[0]).not.toHaveProperty('acl');
+    });
+
     describe('with optional filter', () => {
       test('filters out objects when result === false', async () => {
         const readStream = createReadStream(obj1, obj2);
