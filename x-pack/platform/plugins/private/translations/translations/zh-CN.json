@@ -46516,7 +46516,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.userPreview": "用户预览",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindings": "漏洞详情",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindingsPreview": "漏洞预览",
-    "xpack.securitySolution.flyout.panelAriaLabel.watchlists": "监控列表",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnCountLabel": "计数",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnLabel": "告警",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnTooltip": "字段值对完全相同的告警的总数。",

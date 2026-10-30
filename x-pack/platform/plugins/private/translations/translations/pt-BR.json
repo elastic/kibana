@@ -46485,7 +46485,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.userPreview": "Prévia do usuário",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindings": "Detalhes da vulnerabilidade",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindingsPreview": "Visualização da vulnerabilidade",
-    "xpack.securitySolution.flyout.panelAriaLabel.watchlists": "Listas de observação",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnCountLabel": "contagem",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnLabel": "Alerta",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnTooltip": "Número total de alertas com pares de valores de campo idênticos.",
