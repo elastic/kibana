@@ -13,24 +13,26 @@ import {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
-  MAX_RESPONSE_PREVIEW_LENGTH,
-  getBoundedResponsePreview,
   isEmptyModelResponseError,
 } from './language_models/empty_model_response_error';
 import { InferenceClientLlm } from './language_models/inference_client_llm';
 import { parseBedrockStream } from './utils/bedrock';
 import { parseGeminiResponse } from './utils/gemini';
+import {
+  MAX_SANITIZED_ERROR_MESSAGE_LENGTH,
+  sanitizeErrorMessage,
+} from './utils/sanitize_error_message';
 import { getDefaultArguments } from './language_models/constants';
 
 export {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
-  MAX_RESPONSE_PREVIEW_LENGTH,
-  getBoundedResponsePreview,
   isEmptyModelResponseError,
+  MAX_SANITIZED_ERROR_MESSAGE_LENGTH,
   parseBedrockStream,
   parseGeminiResponse,
+  sanitizeErrorMessage,
   getDefaultArguments,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,

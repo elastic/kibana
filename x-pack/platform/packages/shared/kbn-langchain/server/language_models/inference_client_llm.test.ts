@@ -120,6 +120,32 @@ describe('InferenceClientLlm', () => {
     );
   });
 
+  it('keeps a quoted payload of the error message out of the error log and logs it at debug', async () => {
+    const error = new Error(
+      'Failed to parse line "data: {"choices":[{"delta":{"content":"MODEL-OUTPUT-MARKER"}}]}"'
+    );
+    Object.assign(error, { code: 'internalError' });
+    mockInferenceClient.chatComplete.mockRejectedValueOnce(error);
+
+    const llm = new InferenceClientLlm({
+      connectorId: 'test-connector',
+      inferenceClient: mockInferenceClient,
+      logger: mockLogger,
+    });
+
+    await expect(llm._call('test prompt')).rejects.toBe(error);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'InferenceClientLlm: chatComplete failed for connector test-connector: internalError - Failed to parse line'
+    );
+    expect(JSON.stringify(mockLogger.error.mock.calls)).not.toContain('MODEL-OUTPUT-MARKER');
+
+    const debugMessages = mockLogger.debug.mock.calls.map(([message]) =>
+      typeof message === 'function' ? message() : message
+    );
+    expect(debugMessages.some((message) => message.includes('MODEL-OUTPUT-MARKER'))).toBe(true);
+  });
+
   describe('empty completions', () => {
     it('rejects with an empty-response error when the model returns no content', async () => {
       (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({

@@ -9,6 +9,7 @@ import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
 import {
   attackDiscoveryRefineTemplateRequest,
+  getParseErrorSummary,
   type AttackDiscoveryTemplateCompletion,
 } from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
@@ -150,7 +151,9 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
-      const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
+        error
+      )}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
 
       const maxRetriesReached = getMaxRetriesReached({

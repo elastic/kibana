@@ -25,6 +25,10 @@ import { getParseErrorSummary } from '../helpers/get_parse_error_summary';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
 
+// the length is a diagnostic for truncated responses; it is empty when the call failed before returning one
+const getRawResponseLength = (rawResponse: string): string =>
+  rawResponse === '' ? '' : `; raw response length: ${rawResponse.length} characters`;
+
 export const getGenerateNode = <T extends GraphInsightTypes>({
   llm,
   logger,
@@ -204,7 +208,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
           })
         : `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
             error
-          )}`;
+          )}${getRawResponseLength(rawResponse)}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
       // Raw model output can contain alert-derived text, so it is only ever logged at debug and is
       // never added to `errors`, which reach persisted and telemetry sinks:

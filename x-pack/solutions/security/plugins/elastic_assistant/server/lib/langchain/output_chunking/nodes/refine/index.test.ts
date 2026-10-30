@@ -187,7 +187,7 @@ ${ATTACK_DISCOVERY_REFINE}
       ...initialGraphState,
       combinedRefinements: '{"key": "value"}',
       errors: [
-        'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): [\n  {\n    "expected": "array",\n    "code": "invalid_type",\n    "path": [\n      "insights"\n    ],\n    "message": "Invalid input: expected array, received undefined"\n  }\n]',
+        'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): the response does not match the expected schema (invalid_type at insights (expected array))',
       ],
       generationAttempts: 2,
       refinements: ['{"key": "value"}'],
@@ -302,7 +302,7 @@ ${ATTACK_DISCOVERY_REFINE}
       ...withPreviousGenerations,
       combinedRefinements: 'refine0refine1',
       errors: [
-        'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'r\', "refine0refine1" is not valid JSON',
+        'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token',
       ],
       generationAttempts: 3,
       refinements: ['refine0', 'refine1'],
@@ -384,10 +384,43 @@ ${ATTACK_DISCOVERY_REFINE}
       insights: state.unrefinedResults, // <-- the unrefined results are returned
       combinedRefinements: 'refine1this will not pass JSON parsing',
       errors: [
-        'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'r\', "refine1thi"... is not valid JSON',
+        'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token',
       ],
       generationAttempts: 10,
       refinements: ['refine1', response],
     });
   });
+
+  it.each([
+    ['ServerSentEventError', 'internalError'],
+    ['Error', undefined],
+  ])(
+    'persists no model output when the chain throws a Failed to parse line error (%s)',
+    async (name, code) => {
+      const error = new Error(
+        'Failed to parse line "data: {"choices":[{"delta":{"content":"MODEL-OUTPUT-MARKER"}}]}": Unexpected token'
+      );
+      error.name = name;
+      if (code) {
+        Object.assign(error, { code });
+      }
+
+      const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+        .invoke as jest.Mock;
+      mockInvoke.mockRejectedValue(error);
+
+      const node = getRefineNode({
+        llm: mockLlm,
+        logger: mockLogger,
+        responseIsHallucinated: mockResponseIsHallucinated,
+        generationSchema,
+      });
+
+      const state = await node(initialGraphState);
+
+      expect(state.errors).toHaveLength(1);
+      expect(state.errors[0]).toContain('Failed to parse line');
+      expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
+    }
+  );
 });

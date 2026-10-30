@@ -18,6 +18,7 @@ export {
 export {
   extractJson,
   getFormatInstructionsFromZodV4Schema,
+  getParseErrorSummary,
   getStructuredGenerationPrompt,
 } from './output_chunking/nodes/helpers';
 export { NodeType } from './constants';

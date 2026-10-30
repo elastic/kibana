@@ -9,9 +9,7 @@ import {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
-  getBoundedResponsePreview,
   isEmptyModelResponseError,
-  MAX_RESPONSE_PREVIEW_LENGTH,
 } from './empty_model_response_error';
 
 const getError = (
@@ -23,7 +21,6 @@ const getError = (
     contentLength: 0,
     model: 'test-model',
     promptTokens: 128390,
-    responseBody: '',
     traceId: 'test-trace-id',
     ...overrides,
   });
@@ -55,22 +52,6 @@ describe('EmptyModelResponseError', () => {
     expect(error.message).toContain('traceId: unknown');
   });
 
-  it('keeps the response body out of the message and exposes a bounded preview separately', () => {
-    const responseBody = `ALERT-DERIVED-TEXT host=srv-01 ${'x'.repeat(
-      MAX_RESPONSE_PREVIEW_LENGTH
-    )}`;
-
-    const error = getError({ contentLength: responseBody.length, responseBody });
-
-    expect(error.message).not.toContain('ALERT-DERIVED-TEXT');
-    expect(error.message).not.toContain('srv-01');
-    expect(error.message).not.toContain('response: "');
-    expect(error.message).toContain(`response length: ${responseBody.length} characters`);
-    expect(error.stack ?? '').not.toContain('ALERT-DERIVED-TEXT');
-    expect(error.responsePreview).toEqual(getBoundedResponsePreview(responseBody));
-    expect(error.responsePreview.startsWith('ALERT-DERIVED-TEXT host=srv-01')).toBe(true);
-  });
-
   it('exposes the structured fields for callers that classify the failure', () => {
     const error = getError({ completionTokens: 0, contentLength: 0 });
 
@@ -99,34 +80,5 @@ describe('isEmptyModelResponseError', () => {
     expect(isEmptyModelResponseError(new Error('boom'))).toBe(false);
     expect(isEmptyModelResponseError(undefined)).toBe(false);
     expect(isEmptyModelResponseError(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX)).toBe(false);
-  });
-});
-
-describe('getBoundedResponsePreview', () => {
-  it('returns a short response unchanged', () => {
-    expect(getBoundedResponsePreview('<html>502 Bad Gateway</html>')).toEqual(
-      '<html>502 Bad Gateway</html>'
-    );
-  });
-
-  it('does not truncate a response of exactly the maximum length', () => {
-    const response = 'x'.repeat(MAX_RESPONSE_PREVIEW_LENGTH);
-
-    expect(getBoundedResponsePreview(response)).toEqual(response);
-  });
-
-  it('bounds a long response and reports the total length', () => {
-    const response = 'x'.repeat(MAX_RESPONSE_PREVIEW_LENGTH + 100);
-
-    const preview = getBoundedResponsePreview(response);
-
-    expect(preview.startsWith('x'.repeat(MAX_RESPONSE_PREVIEW_LENGTH))).toBe(true);
-    expect(preview).toContain(`truncated, ${response.length} characters total`);
-  });
-
-  it('honors an explicit bound', () => {
-    const preview = getBoundedResponsePreview('abcdef', 3);
-
-    expect(preview).toEqual('abc... (truncated, 6 characters total)');
   });
 });

@@ -344,7 +344,7 @@ ${ATTACK_DISCOVERY_REFINE}
     });
 
     expect(state.errors[0]).toContain(
-      'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: the response is not valid JSON'
+      'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token; raw response length: 7 characters'
     );
     expect(state.errors[0]).not.toContain('refine1');
   });
@@ -414,7 +414,6 @@ ${ATTACK_DISCOVERY_REFINE}
         completionTokens: 0,
         connectorId: 'test-connector-id',
         contentLength: 0,
-        responseBody: '',
       })
     );
 
@@ -460,6 +459,39 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state.insights).toEqual(initialGraphState.unrefinedResults);
   });
 
+  it.each([
+    ['ServerSentEventError', 'internalError'],
+    ['Error', undefined],
+  ])(
+    'persists no model output when the chain throws a Failed to parse line error (%s)',
+    async (name, code) => {
+      const error = new Error(
+        'Failed to parse line "data: {"choices":[{"delta":{"content":"MODEL-OUTPUT-MARKER"}}]}": Unexpected token'
+      );
+      error.name = name;
+      if (code) {
+        Object.assign(error, { code });
+      }
+
+      const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+        .invoke as jest.Mock;
+      mockInvoke.mockRejectedValue(error);
+
+      const node = getRefineNode({
+        llm: mockLlm,
+        logger: mockLogger,
+        responseIsHallucinated: mockResponseIsHallucinated,
+        generationSchema,
+      });
+
+      const state = await node(initialGraphState);
+
+      expect(state.errors).toHaveLength(1);
+      expect(state.errors[0]).toContain('Failed to parse line');
+      expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
+    }
+  );
+
   it('classifies a thrown empty completion as an empty model response', async () => {
     const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
       .invoke as jest.Mock;
@@ -471,7 +503,6 @@ ${ATTACK_DISCOVERY_REFINE}
         contentLength: 0,
         model: 'test-model',
         promptTokens: 128390,
-        responseBody: '',
         traceId: 'test-trace-id',
       })
     );
@@ -571,7 +602,7 @@ ${ATTACK_DISCOVERY_REFINE}
     });
 
     expect(state.errors[0]).toContain(
-      'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: the response is not valid JSON'
+      'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token; raw response length: 31 characters'
     );
     expect(state.errors[0]).not.toContain(response);
   });
@@ -599,7 +630,9 @@ ${ATTACK_DISCOVERY_REFINE}
     const state = await refineNode(initialGraphState);
 
     expect(state.errors).toHaveLength(1);
-    expect(state.errors[0]).toContain('SyntaxError: the response is not valid JSON');
+    expect(state.errors[0]).toContain(
+      `SyntaxError: Unexpected token; raw response length: ${rawResponse.length} characters`
+    );
     expect(JSON.stringify(state.errors)).not.toContain('ALERT-DERIVED-TEXT');
     expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
     expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');

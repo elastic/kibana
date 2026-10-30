@@ -32,7 +32,6 @@ describe('EMPTY_MODEL_RESPONSE_ERROR_MARKER', () => {
       completionTokens: 0,
       connectorId: 'test-connector-id',
       contentLength: 0,
-      responseBody: '',
     });
 
     expect(error.message).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
@@ -43,7 +42,6 @@ describe('EMPTY_MODEL_RESPONSE_ERROR_MARKER', () => {
       completionTokens: 0,
       connectorId: 'test-connector-id',
       contentLength: 0,
-      responseBody: '',
     });
 
     const persisted = getEmptyModelResponseError({
@@ -98,7 +96,6 @@ describe('getEmptyModelResponseError', () => {
       contentLength: 0,
       model: 'test-model',
       promptTokens: 128390,
-      responseBody: '',
       traceId: 'test-trace-id',
     });
 
@@ -151,7 +148,6 @@ describe('isEmptyModelResponseError', () => {
         new EmptyModelResponseError({
           connectorId: 'test-connector-id',
           contentLength: 0,
-          responseBody: '',
         })
       )
     ).toBe(true);

@@ -193,7 +193,6 @@ describe('throwIfErrorCountsExceeded', () => {
         contentLength: 0,
         model: 'test-model',
         promptTokens: 128390,
-        responseBody: '',
       }),
       generationAttempts: 9,
       llmType: 'inference',

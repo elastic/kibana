@@ -257,7 +257,7 @@ describe('ActionsClientLlm', () => {
       );
     });
 
-    it('keeps the response out of the error message and exposes it as responsePreview', async () => {
+    it('keeps the response out of the error message', async () => {
       const responseText = '   \n  \t ';
       actionsClient.execute.mockImplementation(
         jest.fn().mockResolvedValue({
@@ -277,7 +277,6 @@ describe('ActionsClientLlm', () => {
       expect(error).toBeInstanceOf(EmptyModelResponseError);
       expect(error.message).not.toContain('response: "');
       expect(error.message).toContain(`response length: ${responseText.length} characters`);
-      expect(error.responsePreview).toEqual(responseText);
     });
 
     it('rejects with an empty-response error the response has no content', async () => {

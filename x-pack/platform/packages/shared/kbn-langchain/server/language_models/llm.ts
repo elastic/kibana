@@ -304,7 +304,6 @@ export class ActionsClientLlm extends LLM {
       contentLength: content.length,
       model,
       promptTokens,
-      responseBody: content,
       traceId: this.#traceId,
     });
 

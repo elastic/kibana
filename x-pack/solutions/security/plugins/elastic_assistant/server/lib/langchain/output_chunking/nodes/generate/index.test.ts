@@ -176,7 +176,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       ...initialGraphState,
       combinedGenerations: '{"key": "value"}',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "expected": "array",\n    "code": "invalid_type",\n    "path": [\n      "insights"\n    ],\n    "message": "Invalid input: expected array, received undefined"\n  }\n]',
+        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): the response does not match the expected schema (invalid_type at insights (expected array))',
       ],
       generationAttempts: 1,
       generations: ['{"key": "value"}'],
@@ -295,7 +295,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       ...withPreviousGenerations,
       combinedGenerations: 'gen0gen1',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON',
+        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token',
       ],
       generationAttempts: 2,
       generations: ['gen0', 'gen1'],
@@ -389,4 +389,38 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
     });
   });
+
+  it.each([
+    ['ServerSentEventError', 'internalError'],
+    ['Error', undefined],
+  ])(
+    'persists no model output when the chain throws a Failed to parse line error (%s)',
+    async (name, code) => {
+      const error = new Error(
+        'Failed to parse line "data: {"choices":[{"delta":{"content":"MODEL-OUTPUT-MARKER"}}]}": Unexpected token'
+      );
+      error.name = name;
+      if (code) {
+        Object.assign(error, { code });
+      }
+
+      const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+        .invoke as jest.Mock;
+      mockInvoke.mockRejectedValue(error);
+
+      const node = getGenerateNode({
+        llm: mockLlm,
+        logger: mockLogger,
+        getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+        responseIsHallucinated: mockResponseIsHallucinated,
+        generationSchema,
+      });
+
+      const state = await node(initialGraphState);
+
+      expect(state.errors).toHaveLength(1);
+      expect(state.errors[0]).toContain('Failed to parse line');
+      expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
+    }
+  );
 });
