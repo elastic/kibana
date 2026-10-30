@@ -136187,6 +136187,7 @@ paths:
           name: size
           required: false
           schema:
+            maximum: 100
             minimum: 1
             type: number
         - description: Page number.
