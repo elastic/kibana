@@ -132,8 +132,10 @@ steps:
   # A create that fails with no Proposal under the id (not a lost race, and not a later failure
   # of a Proposal that exists, which is left to read as it always has) is journaled and ends this
   # run failed. Packaging and the Worker cannot see an async child's failure, the hunt-once stamp
-  # is already written so no sweep retries the report, and a failed execution is what the
-  # Workflows list and the Watches failure callout surface. See `resolve_create_outcome`.
+  # is already written so no sweep retries the report, so the journal note says what happened and
+  # a failed execution shows up in the Workflows executions list. The Watches failure callout is
+  # not relied on: it clears once any newer gate run in the space completes, and lost-race gates
+  # do that within seconds. See `resolve_create_outcome`.
   #
   # The loser is not left silent: `journal_lost_race` below says where its finding went. What it
   # cannot do is close the Investigation. `expectedProposalCount` was fixed when this gate was
@@ -224,7 +226,7 @@ steps:
       # a nested workflow failure can carry an unbounded message. Same 2000 cut coverage_review
       # uses on journaled errors. Title is capped so a long mint label cannot spend the rest.
       create_failure_note: |-
-        The Proposal for "{{ inputs.title | default: 'the proposed action' | truncate: 200 }}" could not be created: {{ steps.create_and_gate_proposal.error.message | truncate: 2000 }}. No Proposal was found under its id when this run looked, so it is not in the Proposal queue as far as this run could tell, and it will not be retried automatically because this run already marked the report hunted. {% if inputs.reportId != nil and inputs.reportId != empty %}A manual run targeting report `{{ inputs.reportId }}` retries it.{% else %}A manual run targeting this Investigation's report retries it.{% endif %} This Investigation stays open until an analyst closes it.
+        The Proposal for "{{ inputs.title | default: 'the proposed action' | truncate: 200 }}" could not be created: {{ steps.create_and_gate_proposal.error.message | truncate: 2000 }}. No Proposal was found under its id when this run checked, so it is likely not in the Proposal queue. It will not be retried automatically, because this run already marked the report hunted. {% if inputs.reportId != nil and inputs.reportId != empty %}A manual run targeting report `{{ inputs.reportId }}` retries it.{% else %}A manual run targeting this Investigation's report retries it.{% endif %} This Investigation stays open until an analyst closes it.
 
   - name: journal_create_failure
     type: workflow.execute
@@ -424,9 +426,9 @@ steps:
       close_reason: resolved
 
   # Last, so the requeries and the idempotent close above still run as best-effort cleanup, and
-  # `emit_result` is simply never reached on this path. Ending the run failed is the one signal the
-  # Workflows executions list and the Watches failure callout surface. A lost race does not take
-  # this path: its finding is covered by the other Proposal and it keeps its own note.
+  # `emit_result` is simply never reached on this path. Ending the run failed is what the
+  # Workflows executions list shows. A lost race does not take this path: its finding is covered by
+  # the other Proposal and it keeps its own note.
   - name: fail_on_create_failure
     type: workflow.fail
     if: "${{ variables.create_failed == true }}"

@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import { ExecutionStatus, WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
+import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
 import {
   ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
   getManagedWorkflowDefinition,
@@ -111,5 +111,3 @@ export const createGateFixture = ({ existingProposal }: { existingProposal: Exis
     },
   };
 };
-
-export { ExecutionStatus };
