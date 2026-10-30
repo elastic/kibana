@@ -28518,7 +28518,6 @@
     "xpack.lens.config.experimentalLabelDataview.content": "Die Inline-Bearbeitung bietet derzeit nur begrenzte Konfigurationsoptionen.",
     "xpack.lens.config.experimentalLabelDataview.title": "Technische Vorschau",
     "xpack.lens.config.layersTableCaption": "Ebenen sind verfügbar für die Konvertierung in den Abfragemodus.",
-    "xpack.lens.config.queryModeDescription": "Der Abfragemodus ermöglicht eine erweiterte Datenanalyse mit ES|QL.",
     "xpack.lens.config.queryModeWarningDescription": "Sobald Sie das Diagramm nach dem Wechsel in den Abfragemodus gespeichert haben, können Sie nicht zurückkehren.",
     "xpack.lens.config.queryPreviewDescription": "Abfragevorschau",
     "xpack.lens.config.readMoreLinkText": "Weitere Informationen",
