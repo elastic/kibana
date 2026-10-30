@@ -9,6 +9,7 @@ import {
   isAllowedMonitorHostShape,
   isNarrowerOrEqualHostList,
   normalizeAllowedMonitorHost,
+  normalizeAllowedMonitorHosts,
 } from './allowed_monitor_hosts';
 
 describe('allowed monitor hosts', () => {
@@ -43,6 +44,18 @@ describe('allowed monitor hosts', () => {
 
   it('normalizes like Heartbeat compares hosts', () => {
     expect(normalizeAllowedMonitorHost(' API.Example.com. ')).toBe('api.example.com');
+  });
+
+  it('normalizes a list and drops duplicates, keeping the first-seen order', () => {
+    expect(
+      normalizeAllowedMonitorHosts([
+        'B.example.com',
+        'a.example.com.',
+        'b.example.com',
+        'A.example.com',
+      ])
+    ).toEqual(['b.example.com', 'a.example.com']);
+    expect(normalizeAllowedMonitorHosts(undefined)).toEqual([]);
   });
 
   describe('isNarrowerOrEqualHostList', () => {

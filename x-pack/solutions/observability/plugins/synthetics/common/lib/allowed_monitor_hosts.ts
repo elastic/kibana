@@ -10,7 +10,7 @@
 // strict as Heartbeat's: a host name or IP, without scheme, port, path, wildcard or surrounding
 // whitespace. Non-ASCII names must be entered in their punycode form.
 export const MAX_ALLOWED_MONITOR_HOSTS = 100;
-const MAX_HOST_LENGTH = 253;
+export const MAX_ALLOWED_MONITOR_HOST_LENGTH = 253;
 
 const HOST_NAME_REGEX = /^[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_])?\.?$/;
 // Shape only. The server confirms IPv6 literals with `net.isIP`.
@@ -19,12 +19,17 @@ const IPV6_SHAPE_REGEX = /^(?=.*:)[0-9A-Fa-f:.]{2,45}$/;
 /** Whether `host` could be a monitor target host: a host name or an IP literal. */
 export const isAllowedMonitorHostShape = (host: string): boolean =>
   host.length > 0 &&
-  host.length <= MAX_HOST_LENGTH &&
+  host.length <= MAX_ALLOWED_MONITOR_HOST_LENGTH &&
   (HOST_NAME_REGEX.test(host) || IPV6_SHAPE_REGEX.test(host));
 
 /** The form Heartbeat compares hosts in: lowercase, without a trailing dot. */
 export const normalizeAllowedMonitorHost = (host: string): string =>
   host.trim().toLowerCase().replace(/\.$/, '');
+
+/** The list as it is stored: normalized, without duplicates, in the order first seen. */
+export const normalizeAllowedMonitorHosts = (hosts: readonly string[] | undefined): string[] => [
+  ...new Set((hosts ?? []).map(normalizeAllowedMonitorHost)),
+];
 
 /** Whether every host of `next` is already allowed by `existing`. An empty list allows any host. */
 export const isNarrowerOrEqualHostList = (

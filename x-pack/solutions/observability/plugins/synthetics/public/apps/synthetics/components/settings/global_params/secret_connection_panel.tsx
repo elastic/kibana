@@ -44,8 +44,11 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
+  AffectedMonitor,
+  AffectedMonitorReason,
   HashiCorpVaultConfig,
   HashiCorpVaultSecrets,
+  SecretConnectionSaveResult,
   SecretConnectionStatus,
   SecretConnectionTestResult,
   SecretProviderType,
@@ -138,6 +141,36 @@ const toConnectionPayload = (
       : { secretId: form.secretId || undefined },
   };
 };
+
+const AFFECTED_REASON_LABELS: Record<AffectedMonitorReason, string> = {
+  monitor_type: i18n.translate('xpack.synthetics.secretConnection.affectedReason.monitorType', {
+    defaultMessage: 'browser monitor',
+  }),
+  redirects: i18n.translate('xpack.synthetics.secretConnection.affectedReason.redirects', {
+    defaultMessage: 'follows redirects',
+  }),
+  host: i18n.translate('xpack.synthetics.secretConnection.affectedReason.host', {
+    defaultMessage: 'other host',
+  }),
+};
+
+const affectedMonitorsText = (
+  connection: string,
+  monitors: AffectedMonitor[],
+  total: number
+): string =>
+  i18n.translate('xpack.synthetics.secretConnection.affectedMonitorsText', {
+    defaultMessage:
+      '{total, plural, one {# monitor} other {# monitors}} using "{connection}" will report down: {monitors}{more, plural, =0 {} other { and # more}}. Browser monitors, monitors that follow redirects and monitors that target a host that is not on the list cannot use a connection with allowed monitor hosts.',
+    values: {
+      total,
+      connection,
+      monitors: monitors
+        .map(({ name, reason }) => `${name} (${AFFECTED_REASON_LABELS[reason]})`)
+        .join(', '),
+      more: Math.max(total - monitors.length, 0),
+    },
+  });
 
 export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
@@ -254,8 +287,21 @@ export const SecretConnectionPanel = () => {
         type: editing.type,
         ...toConnectionPayload({ ...editing, allowedMonitorHosts }),
       };
-      await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
+      const result = await http.put<SecretConnectionSaveResult>(
+        SYNTHETICS_API_URLS.SECRET_CONNECTION,
+        { body: JSON.stringify(body) }
+      );
       notifications?.toasts.addSuccess(SAVED_TOAST);
+      if (result?.affectedMonitors?.length) {
+        notifications?.toasts.addWarning({
+          title: AFFECTED_MONITORS_TITLE,
+          text: affectedMonitorsText(
+            body.name,
+            result.affectedMonitors,
+            result.affectedMonitorCount ?? result.affectedMonitors.length
+          ),
+        });
+      }
       closeFlyout();
       await load();
     } catch (e) {
@@ -759,6 +805,12 @@ const TEST_NOTE = i18n.translate('xpack.synthetics.secretConnection.testNote', {
   defaultMessage:
     'Test connection checks that Kibana can reach and authenticate with Vault. At runtime, Heartbeat resolves secrets from the private location’s network, so make sure it can reach this address too.',
 });
+const AFFECTED_MONITORS_TITLE = i18n.translate(
+  'xpack.synthetics.secretConnection.affectedMonitorsTitle',
+  {
+    defaultMessage: 'Some monitors can no longer use this connection',
+  }
+);
 const SAVED_TOAST = i18n.translate('xpack.synthetics.secretConnection.savedToast', {
   defaultMessage: 'Vault connection saved',
 });

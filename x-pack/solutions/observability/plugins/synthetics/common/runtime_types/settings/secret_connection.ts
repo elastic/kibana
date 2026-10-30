@@ -73,6 +73,21 @@ export interface SecretConnectionStatus {
   hasSecret?: boolean;
 }
 
+export type AffectedMonitorReason = 'monitor_type' | 'redirects' | 'host';
+
+/** A monitor Heartbeat will refuse to run with a connection once it has allowed monitor hosts. */
+export interface AffectedMonitor {
+  name: string;
+  reason: AffectedMonitorReason;
+}
+
+/** Response of saving a connection: its status, plus the monitors a new restriction affects. */
+export interface SecretConnectionSaveResult extends SecretConnectionStatus {
+  affectedMonitors?: AffectedMonitor[];
+  // Can exceed `affectedMonitors.length`, which is capped.
+  affectedMonitorCount?: number;
+}
+
 /** Outcome of `POST /_test`: whether Kibana could reach Vault and authenticate. */
 export interface SecretConnectionTestResult {
   ok: boolean;

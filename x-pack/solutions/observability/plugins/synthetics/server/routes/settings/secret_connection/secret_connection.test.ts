@@ -286,3 +286,121 @@ describe('secret connection routes', () => {
     });
   });
 });
+
+describe('saving allowed monitor hosts', () => {
+  const save = (routeContext: unknown) => saveSecretConnectionRoute().handler(routeContext as any);
+  const body = (allowedMonitorHosts?: string[]) => ({
+    name: 'prod',
+    config: { ...storedConfig, allowedMonitorHosts },
+    secrets: { token: 't' },
+  });
+  const savedHosts = (create: jest.Mock) => create.mock.calls[0][1].config.allowedMonitorHosts;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('stores the hosts lowercase, without trailing dots or duplicates', async () => {
+    const { routeContext, create } = setup({
+      body: body(['API.Example.com.', 'api.example.com', 'b.example.com']),
+    });
+
+    await save(routeContext);
+
+    expect(savedHosts(create)).toEqual(['api.example.com', 'b.example.com']);
+  });
+
+  it('leaves the setting out when there are no hosts', async () => {
+    const { routeContext, create } = setup({ body: body([]) });
+
+    await save(routeContext);
+
+    expect(create.mock.calls[0][1].config).not.toHaveProperty('allowedMonitorHosts');
+  });
+
+  describe('monitors the restriction affects', () => {
+    const monitors = [
+      { name: 'ok', type: 'http', urls: 'https://api.example.com/v1', max_redirects: '0' },
+      { name: 'other-host', type: 'http', urls: 'https://other.example/v1', max_redirects: '0' },
+      { name: 'redirects', type: 'http', urls: 'https://api.example.com', max_redirects: '3' },
+      { name: 'proxy', type: 'http', urls: 'https://api.example.com', proxy_url: 'http://p.x:80' },
+      { name: 'login', type: 'browser' },
+      { name: 'tcp-via-param', type: 'tcp', hosts: '${tcpHost}:443' },
+      { name: 'no-connection', type: 'http', urls: 'https://other.example', max_redirects: '0' },
+    ].map((monitor) => ({
+      ...monitor,
+      // The first six use the connection, the last one does not.
+      password:
+        monitor.name === 'no-connection'
+          ? 'plain'
+          : monitor.name === 'tcp-via-param'
+          ? '${secret}'
+          : 'vault://prod@app#password',
+    }));
+    const globalParams = { secret: 'vault://prod@app#key', tcpHost: 'x.example.com' };
+
+    it('lists the monitors that use the connection and would be refused', async () => {
+      const { routeContext } = setup({
+        body: body(['api.example.com']),
+        monitors,
+        globalParams,
+      });
+
+      const result = (await save(routeContext)) as any;
+
+      expect(result.affectedMonitors).toEqual([
+        { name: 'other-host', reason: 'host' },
+        { name: 'redirects', reason: 'redirects' },
+        { name: 'proxy', reason: 'host' },
+        { name: 'login', reason: 'monitor_type' },
+        { name: 'tcp-via-param', reason: 'host' },
+      ]);
+      expect(result.affectedMonitorCount).toBe(5);
+    });
+
+    it('does not look at monitors when the list is unchanged', async () => {
+      const { routeContext } = setup({
+        body: body(['api.example.com']),
+        stored: {
+          config: { ...storedConfig, allowedMonitorHosts: ['API.example.com'] },
+          secrets: { token: 'stored' },
+        },
+        monitors,
+        globalParams,
+      });
+
+      const result = (await save(routeContext)) as any;
+
+      expect(routeContext.monitorConfigRepository.findDecryptedMonitors).not.toHaveBeenCalled();
+      expect(result).not.toHaveProperty('affectedMonitors');
+    });
+
+    it('does not look at monitors when the restriction is removed', async () => {
+      const { routeContext } = setup({
+        body: body([]),
+        stored: {
+          config: { ...storedConfig, allowedMonitorHosts: ['api.example.com'] },
+          secrets: { token: 'stored' },
+        },
+        monitors,
+      });
+
+      await save(routeContext);
+
+      expect(routeContext.monitorConfigRepository.findDecryptedMonitors).not.toHaveBeenCalled();
+    });
+
+    it('still saves when the monitors cannot be checked', async () => {
+      const { routeContext, create } = setup({ body: body(['api.example.com']), monitors });
+      routeContext.monitorConfigRepository.findDecryptedMonitors.mockRejectedValue(
+        new Error('boom')
+      );
+
+      const result = (await save(routeContext)) as any;
+
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(result).not.toHaveProperty('affectedMonitors');
+      expect(routeContext.server.logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+  });
+});

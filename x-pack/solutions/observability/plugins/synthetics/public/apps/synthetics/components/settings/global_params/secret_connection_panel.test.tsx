@@ -15,7 +15,7 @@ const mockGet = jest.fn();
 const mockPut = jest.fn();
 const mockServices = {
   http: { get: mockGet, put: mockPut },
-  notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+  notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn(), addWarning: jest.fn() } },
   application: { capabilities: { uptime: { canManageSecretConnections: true } } },
 };
 
@@ -102,5 +102,34 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
     await screen.findByTestId('syntheticsSecretConnectionFlyout');
 
     expect(screen.queryByText(INVALID_HOST_ERROR)).not.toBeInTheDocument();
+  });
+
+  it('warns which monitors can no longer use the connection after saving a restriction', async () => {
+    mockPut.mockResolvedValue({
+      ...savedConnection,
+      affectedMonitors: [
+        { name: 'checkout', reason: 'host' },
+        { name: 'login', reason: 'monitor_type' },
+      ],
+      affectedMonitorCount: 3,
+    });
+    await openEditFlyout();
+
+    await userEvent.type(hostsInput(), 'api.example.com{enter}');
+    await userEvent.click(screen.getByTestId('syntheticsVaultSaveConnection'));
+
+    await waitFor(() => expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalled());
+    const { text } = mockServices.notifications.toasts.addWarning.mock.calls[0][0];
+    expect(text).toContain('3 monitors');
+    expect(text).toContain('checkout (other host), login (browser monitor) and 1 more');
+  });
+
+  it('does not warn when no monitor is affected', async () => {
+    await openEditFlyout();
+
+    await userEvent.click(screen.getByTestId('syntheticsVaultSaveConnection'));
+
+    await waitFor(() => expect(mockPut).toHaveBeenCalledTimes(1));
+    expect(mockServices.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 });

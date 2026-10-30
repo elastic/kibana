@@ -12,6 +12,7 @@ import { validateVaultAddress } from './address_guard';
 import { SECRET_CONNECTION_NAME_REGEX } from '../../../../common/lib/vault_reference';
 import {
   isAllowedMonitorHostShape,
+  MAX_ALLOWED_MONITOR_HOST_LENGTH,
   MAX_ALLOWED_MONITOR_HOSTS,
 } from '../../../../common/lib/allowed_monitor_hosts';
 
@@ -32,7 +33,7 @@ export const HashiCorpVaultConfigSchema = schema.object({
   allowedMonitorHosts: schema.maybe(
     schema.arrayOf(
       schema.string({
-        maxLength: 253,
+        maxLength: MAX_ALLOWED_MONITOR_HOST_LENGTH,
         validate: (host) =>
           isAllowedMonitorHostShape(host) && (!host.includes(':') || isIP(host) !== 0)
             ? undefined
