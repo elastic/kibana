@@ -146,6 +146,30 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       attributes: {
         type: 'keyword',
       },
+      elastic_cloud: {
+        type: 'object',
+        properties: {
+          project: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          deployment: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          region: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
   scope: {
