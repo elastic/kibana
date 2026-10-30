@@ -212,6 +212,14 @@ describe('Rule Tuning outcome reports', () => {
       );
     });
 
+    it('ends the run with a failed workflow output', () => {
+      const { type, status } = stepNamed(steps, 'emit_failed_result') as YamlStep & {
+        status?: string;
+      };
+
+      expect({ type, status }).toEqual({ type: 'workflow.output', status: 'failed' });
+    });
+
     it.each([
       [
         'reviews requested for noisy rules',
