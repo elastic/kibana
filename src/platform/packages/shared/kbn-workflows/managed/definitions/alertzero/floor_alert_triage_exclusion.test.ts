@@ -8,6 +8,7 @@
  */
 
 import { parse } from 'yaml';
+import { fromKueryExpression } from '@kbn/es-query';
 import FLOOR_ALERT_TRIAGE_EXCLUSION_YAML from './floor_alert_triage_exclusion.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -36,6 +37,25 @@ describe('floor_alert_triage_exclusion', () => {
     expect(workflow.triggers[0].on?.condition).toContain('event.tagsAdded: "az:true_positive"');
     expect(workflow.triggers[0].on?.condition).toContain('event.tagsAdded: "az:inconclusive"');
     expect(workflow.triggers[0].on?.condition).toContain('event.tagsRemoved: "az:false_positive"');
+  });
+
+  // Every verdict write of the batch also drops its claim tag, and an analyst never does, so this
+  // keeps the worker's own tagging from starting runs. The `not` must apply to the whole condition.
+  it('leaves out every tag change that removes the sweep claim tag az:triage_pending', () => {
+    const ast = fromKueryExpression(workflow.triggers[0].on!.condition!);
+
+    expect(ast.function).toBe('and');
+    const [anyExclusion, notClaimed] = ast.arguments as Array<{
+      function: string;
+      arguments: Array<{ function: string; arguments: Array<{ value: unknown }> }>;
+    }>;
+    expect(anyExclusion.function).toBe('or');
+    expect(anyExclusion.arguments).toHaveLength(3);
+    expect(notClaimed.function).toBe('not');
+    expect(notClaimed.arguments[0].arguments.map(({ value }) => value)).toEqual([
+      'event.tagsRemoved',
+      'az:triage_pending',
+    ]);
   });
 
   // A burst of trigger events creates its runs at once, and with `queue` every one of them saw the

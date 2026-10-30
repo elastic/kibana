@@ -20,16 +20,19 @@ tags:
 # queues itself, and none is ever started.
 #
 # The filter keeps most tag changes out, such as the sweep's `az:false_positive` and its key tags.
-# It still lets through the batch's `az:true_positive` and `az:inconclusive` verdict tags (the event
-# does not say who tagged), the re-tags of a dismissed or expired proposal, and the re-tags this
-# workflow makes. Those start a run that does nothing: the first step ignores every alert that is
-# not in a pending proposal.
+# The event does not say who tagged, so the batch's own `az:true_positive` and `az:inconclusive`
+# verdict writes are kept out by what they also remove: every one of them drops the sweep's claim
+# tag `az:triage_pending`, which an analyst never does, because an alert in a proposal no longer
+# carries it. The filter still lets through the re-tags of a dismissed or expired proposal and the
+# re-tags this workflow makes. Those start a run that does nothing: the first step ignores every
+# alert whose tags already agree with its proposal.
 triggers:
   - type: security.alertTagsChanged
     on:
       condition: >-
-        event.tagsAdded: "az:true_positive" or event.tagsAdded: "az:inconclusive"
-        or event.tagsRemoved: "az:false_positive"
+        (event.tagsAdded: "az:true_positive" or event.tagsAdded: "az:inconclusive"
+        or event.tagsRemoved: "az:false_positive")
+        and not event.tagsRemoved: "az:triage_pending"
 
 consts:
   author_name: "Alert Triage worker"
