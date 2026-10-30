@@ -53,7 +53,7 @@ describe('InferenceFeatureRegistry', () => {
     });
 
     it('stores recommended endpoints declared with model parameters', () => {
-      const parameters = { reasoning: { effort: 'low' as const }, temperature: 0 };
+      const parameters = { reasoning: { effort: 'low' as const } };
       registry.register(
         createValidFeature({
           featureId: 'my_feature',
@@ -65,17 +65,6 @@ describe('InferenceFeatureRegistry', () => {
         { id: 'with_params', parameters },
         { id: 'plain' },
       ]);
-    });
-
-    it('returns error for recommended endpoints with invalid model parameters', () => {
-      const result = registry.register(
-        createValidFeature({
-          recommendedEndpoints: [{ id: 'ep', parameters: { temperature: 5 } }],
-        })
-      );
-
-      expect(result).toEqual({ ok: false, error: expect.stringContaining('temperature') });
-      expect(registry.getAll()).toHaveLength(0);
     });
 
     it('returns error and does not store invalid features', () => {
@@ -195,19 +184,6 @@ describe('InferenceFeatureRegistry', () => {
         { id: 'ep-1', parameters },
         { id: 'ep-2' },
       ]);
-    });
-
-    it('throws and does not update when an entry has invalid model parameters', () => {
-      registry.register(
-        createValidFeature({ featureId: 'my_feature', recommendedEndpoints: ['original'] })
-      );
-
-      expect(() =>
-        registry.updateRecommendedEndpoints('my_feature', [
-          { id: 'ep-1', parameters: { temperature: -1 } },
-        ])
-      ).toThrow('temperature');
-      expect(registry.get('my_feature')?.recommendedEndpoints).toEqual([{ id: 'original' }]);
     });
 
     it('replaces endpoints on successive calls (does not append)', () => {
