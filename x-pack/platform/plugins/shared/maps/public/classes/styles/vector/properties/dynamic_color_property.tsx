@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { ExpressionSpecification, Map as MbMap } from '@kbn/mapbox-gl';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +52,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     this._chartsPaletteServiceGetColor = chartsPaletteServiceGetColor;
   }
 
-  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
+  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number | ExpressionSpecification) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
@@ -68,25 +68,29 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);
   }
 
-  syncCircleStrokeWithMb(pointLayerId: string, mbMap: MbMap, alpha: unknown) {
+  syncCircleStrokeWithMb(
+    pointLayerId: string,
+    mbMap: MbMap,
+    alpha: number | ExpressionSpecification
+  ) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
   }
 
-  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
+  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number | ExpressionSpecification) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
 
-  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
+  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number | ExpressionSpecification) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'line-color', color);
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
-  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
+  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number | ExpressionSpecification) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'text-color', color);
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
@@ -131,9 +135,9 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return [DATA_MAPPING_FUNCTION.INTERPOLATE, DATA_MAPPING_FUNCTION.PERCENTILES];
   }
 
-  _getMbColor() {
+  _getMbColor(): string | ExpressionSpecification | undefined {
     if (!this.getMbFieldName()) {
-      return null;
+      return undefined;
     }
 
     return this.isCategorical()
@@ -141,13 +145,13 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       : this._getOrdinalColorMbExpression();
   }
 
-  _getOrdinalColorMbExpression() {
+  _getOrdinalColorMbExpression(): ExpressionSpecification | undefined {
     const invert = this._options.invert === undefined ? false : this._options.invert;
     const targetName = this.getMbFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
-        return null;
+        return undefined;
       }
 
       const colorStops: Array<number | string> = this._options.customColorRamp.reduce(
@@ -173,7 +177,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     if (this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
-        return null;
+        return undefined;
       }
 
       const colorStops = getPercentilesMbColorRampStops(
@@ -182,7 +186,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         invert
       );
       if (!colorStops) {
-        return null;
+        return undefined;
       }
 
       return [
@@ -201,7 +205,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!rangeFieldMeta) {
-      return null;
+      return undefined;
     }
 
     const colorStops = getOrdinalMbColorRampStops(
@@ -211,7 +215,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       invert
     );
     if (!colorStops) {
-      return null;
+      return undefined;
     }
 
     const lessThanFirstStopValue = rangeFieldMeta.min - 1;
@@ -324,22 +328,22 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       : stops;
   }
 
-  _getCategoricalColorMbExpression() {
+  _getCategoricalColorMbExpression(): string | ExpressionSpecification | undefined {
     const otherCategoryColor = this._getOtherCategoryColor();
     if (
       this._options.useCustomColorPalette &&
       (!this._options.customColorPalette || !this._options.customColorPalette.length)
     ) {
-      return otherCategoryColor;
+      return otherCategoryColor ?? undefined;
     }
 
     const stops = this._getColorPaletteStops();
     if (stops.length < 1) {
       // occurs when no data
-      return otherCategoryColor;
+      return otherCategoryColor ?? undefined;
     }
 
-    const mbStops = [];
+    const mbStops: Array<string | null> = [];
     for (let i = 0; i < stops.length; i++) {
       const stop = stops[i];
       if (!stop.isOtherCategory) {
@@ -349,7 +353,11 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     mbStops.push(otherCategoryColor); // color for unmatched values
-    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
+    return [
+      'match',
+      ['to-string', ['get', this.getMbFieldName()]],
+      ...mbStops,
+    ] as ExpressionSpecification;
   }
 
   _getOrdinalBreaks(symbolId?: string, svg?: string): Break[] {
