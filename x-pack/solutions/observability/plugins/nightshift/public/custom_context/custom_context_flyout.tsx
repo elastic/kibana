@@ -37,7 +37,7 @@ import {
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
   type CustomContextSnippet,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { useFormatTimestamp } from '../common/format_timestamp';
+import { useFormatTimestamp } from '../hooks/use_format_timestamp';
 import { useFetchCustomContext } from './use_fetch_custom_context';
 import { useSaveCustomContext } from './use_save_custom_context';
 

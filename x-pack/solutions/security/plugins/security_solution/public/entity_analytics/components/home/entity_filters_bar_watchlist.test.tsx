@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntityFiltersBarWatchlist } from './entity_filters_bar_watchlist';
 
-const mockOpenFlyout = jest.fn();
 const mockUseWatchlistsPrivileges = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+jest.mock('../watchlists/flyout/watchlist_flyout', () => ({
+  WatchlistFlyout: ({ mode, spaceId }: { mode: string; spaceId?: string }) => (
+    <div data-test-subj="mockWatchlistFlyout">{`${mode}:${spaceId}`}</div>
+  ),
 }));
 
 jest.mock('../../api/hooks/use_watchlists_privileges', () => ({
@@ -70,14 +71,17 @@ describe('EntityFiltersBarWatchlist', () => {
     expect(screen.getByRole('separator')).toBeInTheDocument();
   });
 
-  it('opens the create flyout and closes the popover when clicked', () => {
+  it('opens the create flyout and closes the popover when clicked', async () => {
     renderComponent();
     openPopover();
+    expect(screen.queryByTestId('mockWatchlistFlyout')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('entityFiltersBarCreateWatchlist'));
 
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: { id: expect.any(String), params: { mode: 'create', spaceId: 'default' } },
-    });
+    expect(screen.getByTestId('mockWatchlistFlyout')).toHaveTextContent('create:default');
+    await waitFor(() =>
+      expect(screen.queryByTestId('entityFiltersBarCreateWatchlist')).not.toBeInTheDocument()
+    );
+    expect(screen.getByTestId('mockWatchlistFlyout')).toBeInTheDocument();
   });
 });

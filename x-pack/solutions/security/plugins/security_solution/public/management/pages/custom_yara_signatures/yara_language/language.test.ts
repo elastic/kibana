@@ -6,7 +6,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
-import { registerYaraLanguage, YARA_LANG_ID, YARA_THEME_ID } from '.';
+import { registerYaraLanguage, YARA_LANG_ID } from '.';
 import { buildYaraTheme } from './theme';
 import {
   BUILT_IN_KEYWORDS,
@@ -51,7 +51,7 @@ describe('YARA language', () => {
   });
 
   it('should register the theme', () => {
-    expect(monaco.editor.getLanguageThemeResolver(YARA_THEME_ID)).toBe(buildYaraTheme);
+    expect(monaco.editor.getLanguageThemeResolver(YARA_LANG_ID)).toBe(buildYaraTheme);
   });
 
   it('should tokenize identifiers and whitespace', () => {
