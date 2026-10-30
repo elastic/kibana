@@ -259,7 +259,7 @@ export const ExecutionResultCard = ({
             <EuiText size="s" color="subdued" css={{ fontWeight: 500, fontSize: '12px' }}>
               {effectiveIdentity.inheritedFrom ? i18nTexts.runAsInherited : i18nTexts.runAs}
             </EuiText>
-            <EuiText size="s" css={{ fontSize: '12px', minWidth: 0 }}>
+            <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px', minWidth: 0 }}>
               <ServiceAccountName id={effectiveIdentity.id} />
             </EuiText>
           </div>
