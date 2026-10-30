@@ -52,6 +52,7 @@ interface YamlStep {
   with?: {
     result_report_intent_targets?: string;
     result_behaviors?: string;
+    result_coverage_gaps?: string;
     report_intent_targets?: string;
     'workflow-id'?: string;
     'run-as-mode'?: string;
@@ -327,6 +328,69 @@ describe('Hunt Watch worker chain', () => {
       ).toEqual(expected);
     });
 
+    describe('coverage_gaps', () => {
+      const gap = (id: string) => ({
+        reason: 'unknown_technique_id',
+        detail: id,
+        technique_id: id,
+      });
+      const gapsOutput = (result: Record<string, unknown> | undefined) =>
+        evaluateExpression(resultVariables().result_coverage_gaps as string, {
+          steps: {
+            read_hunt_result: result ? { output: { data: { result } } } : undefined,
+          },
+        });
+
+      it('concatenates the coordinator, Tier 1 and Tier 2 gaps, coordinator first', () => {
+        expect(
+          gapsOutput({
+            incomplete: [gap('C')],
+            tier1: { incomplete: [gap('T1')] },
+            tier2: { incomplete: [gap('T2')] },
+          })
+        ).toEqual([gap('C'), gap('T1'), gap('T2')]);
+      });
+
+      it.each([
+        [
+          'no coordinator gaps',
+          { tier1: { incomplete: [gap('T1')] }, tier2: { incomplete: [gap('T2')] } },
+          ['T1', 'T2'],
+        ],
+        [
+          'no Tier 1 gaps',
+          { incomplete: [gap('C')], tier1: {}, tier2: { incomplete: [gap('T2')] } },
+          ['C', 'T2'],
+        ],
+        [
+          'no Tier 2 (it never ran)',
+          { incomplete: [gap('C')], tier1: { incomplete: [gap('T1')] } },
+          ['C', 'T1'],
+        ],
+      ])('renders %s without error', (_name, result, expected) => {
+        expect(
+          (gapsOutput(result) as Array<{ technique_id: string }>).map((entry) => entry.technique_id)
+        ).toEqual(expected);
+      });
+
+      it.each([
+        ['every list nil', {}],
+        ['no read at all', undefined],
+      ])('is an empty array with %s', (_name, result) => {
+        expect(gapsOutput(result)).toEqual([]);
+      });
+
+      it('bounds the list at 100 and keeps the coordinator gaps ahead of technique gaps', () => {
+        const many = Array.from({ length: 150 }, (_, index) => gap(`T${index}`));
+        const bounded = gapsOutput({
+          incomplete: [{ reason: 'input_truncated', detail: 'prefix only' }],
+          tier2: { incomplete: many },
+        }) as Array<{ reason: string }>;
+        expect(bounded).toHaveLength(100);
+        expect(bounded[0].reason).toBe('input_truncated');
+      });
+    });
+
     it('reads behaviors as an empty array when Tier 2 never ran', () => {
       expect(
         evaluateExpression(resultVariables().result_behaviors as string, {
@@ -592,7 +656,7 @@ describe('Hunt Watch worker chain', () => {
   describe('hunt — result status from the polled envelope', () => {
     const variables = stepIn(huntSteps, 'resolve_result_status')?.with as Record<string, string>;
     const liquid = createWorkflowLiquidEngine();
-    const render = (template: string, readOutput: unknown): string =>
+    const render = (template: string, readOutput: unknown, writeEvidenceError?: string): string =>
       liquid
         .parseAndRenderSync(template, {
           inputs: { investigationConversationId: 'conv-1' },
@@ -602,11 +666,16 @@ describe('Hunt Watch worker chain', () => {
               output: { run_id: 'run-1', state: 'running', result_attachment_id: 'att-1' },
             },
             ...(readOutput === undefined ? {} : { read_hunt_result: { output: readOutput } }),
+            ...(writeEvidenceError === undefined
+              ? {}
+              : { write_evidence: { error: { message: writeEvidenceError } } }),
           },
         })
         .trim();
-    const status = (readOutput: unknown) => render(variables.result_status, readOutput);
-    const reason = (readOutput: unknown) => render(variables.result_reason, readOutput);
+    const status = (readOutput: unknown, writeEvidenceError?: string) =>
+      render(variables.result_status, readOutput, writeEvidenceError);
+    const reason = (readOutput: unknown, writeEvidenceError?: string) =>
+      render(variables.result_reason, readOutput, writeEvidenceError);
 
     const LIMIT_REASON =
       'Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution exec-1.';
@@ -626,6 +695,49 @@ describe('Hunt Watch worker chain', () => {
       };
       expect(status(completed)).toBe('partial');
       expect(reason(completed)).toContain('incomplete but retryable (Tier 2 timed out)');
+    });
+
+    const incompleteFinal = (hasConfirmedHit: boolean) => ({
+      data: {
+        state: 'completed',
+        result: {
+          completeness: 'incomplete_final',
+          has_confirmed_hit: hasConfirmedHit,
+          message: 'T9999 is not in the catalog',
+        },
+      },
+    });
+
+    it('is retired_incomplete for a settled incomplete_final run with no hit', () => {
+      expect(status(incompleteFinal(false))).toBe('retired_incomplete');
+      expect(reason(incompleteFinal(false))).toContain(
+        'retired without having been fully searched; its executed searches are recorded'
+      );
+    });
+
+    it('stays partial for an incomplete_final run with a confirmed hit, which packages through the SSE path', () => {
+      expect(status(incompleteFinal(true))).toBe('partial');
+    });
+
+    it('stays partial, quoting the error, when the evidence write failed and the gate was not stamped', () => {
+      expect(status(incompleteFinal(false), 'write failed: 503')).toBe('partial');
+      expect(reason(incompleteFinal(false), 'write failed: 503')).toContain(
+        'could not be recorded on the report (write failed: 503)'
+      );
+      expect(reason(incompleteFinal(false), 'write failed: 503')).toContain(
+        'stays eligible for a later sweep'
+      );
+    });
+
+    it('stays partial for incomplete_retryable whatever the evidence write did', () => {
+      const retryable = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'x' },
+        },
+      };
+      expect(status(retryable)).toBe('partial');
+      expect(status(retryable, 'boom')).toBe('partial');
     });
 
     it('is failed with the fixed limit reason when the poll ends on a run still running', () => {

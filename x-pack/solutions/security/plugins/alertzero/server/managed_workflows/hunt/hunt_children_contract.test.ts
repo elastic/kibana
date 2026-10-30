@@ -26,6 +26,7 @@ import {
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
+import { MAX_HUNT_TECHNIQUE_IDS } from '../../../common/hunt_technique_limit';
 
 interface NestedStep {
   name: string;
@@ -269,6 +270,22 @@ describe('system-security-hunt-execute', () => {
       string
     >;
     expect(inputs.message).toEqual(expect.stringContaining('coordinator.narrative'));
+  });
+
+  it('declares the coverage gaps a retired run hands to packaging', () => {
+    const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
+    expect(Object.keys(emitted)).toContain('coverage_gaps');
+    expect(outputNames(workflow)).toContain('coverage_gaps');
+    expect(
+      (workflow.outputs as { properties?: Record<string, { type?: string }> }).properties
+        ?.coverage_gaps?.type
+    ).toBe('array');
+  });
+
+  it('bounds the gap list at the technique cap the packaging step accepts', () => {
+    const { result_coverage_gaps: expression } = stepNamed(workflow, 'resolve_result_status')
+      .with as Record<string, string>;
+    expect(expression).toContain(`slice: 0, ${MAX_HUNT_TECHNIQUE_IDS}`);
   });
 
   it('exposes the headline, hit, and sse_count the Worker conclusion quotes', () => {

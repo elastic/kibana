@@ -78,6 +78,13 @@ outputs:
         additionalProperties: true
     tier2_invoked:
       type: boolean
+    # Why a `retired_incomplete` run could not search part of the report: the coordinator's, Tier 1's
+    # and Tier 2's gaps, at most 100. Empty, never absent, when the run reported none.
+    coverage_gaps:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
@@ -329,19 +336,26 @@ steps:
   - name: resolve_result_status
     type: data.set
     with:
-      # `success` is reserved for `completeness == complete`: the run covered
-      # what it was asked to. Both incomplete kinds report `partial`, because
-      # packaging reads this field to decide whether the absence of a finding is
-      # a verdict about the environment, and neither kind supports that claim --
-      # `incomplete_retryable` left a transient gap and did not mark the report hunted,
-      # `incomplete_final` left a gap that reproduces, so the report retires
-      # having never been fully searched. Gating on `completed_successfully`
-      # instead would call that second case a success, which is the same
-      # conflation this file avoids when stamping `last_hunt_status`.
+      # Three statuses besides `failed`, because packaging reads this field to decide what the
+      # absence of a finding means:
+      # - `success` is reserved for `completeness == complete`: the run covered what it was asked to.
+      # - `retired_incomplete`: `incomplete_final` with no confirmed hit, and the evidence write
+      #   succeeded. The write stamps the hunt-once gate, so no later sweep selects this report; the
+      #   absence of a hit is a settled result, but not a clean verdict, because part of the report
+      #   deterministically cannot be searched. Packaging closes the Investigation and says so.
+      #   Neither `success` (it would claim an environment never fully searched is clean) nor
+      #   `partial` (it would leave the Investigation open for a retry that never comes).
+      # - `partial`: every other completed run that is not complete. `incomplete_retryable` did not
+      #   mark the report hunted, so a later sweep hunts it again into the same Investigation. A
+      #   confirmed hit stays `partial` even when final: it packages through the SSE path. An
+      #   `incomplete_final` run whose evidence write failed stays `partial` too: the gate was not
+      #   stamped, the report will be hunted again, and its Investigation must stay open.
       # `failed`: start failed/skipped, failed envelope, or poll gave up.
       result_status: |-
         {%- if steps.read_hunt_result.output.data.result.completeness == "complete" -%}
         success
+        {%- elsif steps.read_hunt_result.output.data.state == 'completed' and steps.read_hunt_result.output.data.result.completeness == "incomplete_final" and steps.read_hunt_result.output.data.result.has_confirmed_hit != true and steps.write_evidence.error == nil -%}
+        retired_incomplete
         {%- elsif steps.read_hunt_result.output.data.state == 'completed' -%}
         partial
         {%- else -%}
@@ -369,8 +383,10 @@ steps:
         The confirmed hit {% if steps.write_evidence.error == nil %}was recorded on the report{% else %}could not be recorded on the report ({{ steps.write_evidence.error.message }}){% endif %}, but part of the hunt did not run ({{ steps.read_hunt_result.output.data.result.message }}), so this run is not a statement about everything the report describes.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" -%}
         The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
+        {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" and steps.write_evidence.error != nil -%}
+        The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), but its result could not be recorded on the report ({{ steps.write_evidence.error.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" -%}
-        The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), so the report is retired without having been fully searched and its evidence is recorded as incomplete rather than clean.
+        The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), so the report is retired without having been fully searched; its executed searches are recorded and its evidence is marked incomplete rather than clean.
         {%- else -%}
         The hunt reported a completeness this workflow does not recognise ({{ steps.read_hunt_result.output.data.result.completeness }}: {{ steps.read_hunt_result.output.data.result.message }}), so its result is not recorded as a clean verdict.
         {%- endif -%}
@@ -395,6 +411,13 @@ steps:
       result_behaviors: "${{ steps.read_hunt_result.output.data.result.tier2.behaviors | compact | where: 'execution.executed', true | slice: 0, 20 }}"
       # A Tier 2 that threw still called the model: the coordinator returns `tier1_only` with
       # `tier2_skipped_reason: tier2_failed`.
+      # What the run could not search, for packaging to name in the coverage KI and the Investigation
+      # summary. The coordinator's own gaps come first so a whole-search gap is never sliced off behind
+      # technique gaps. `compact` the base so a nil list is `[]` (liquidjs `concat` takes an array), and
+      # again after the concats so a nil tier list cannot leave a null. The bound mirrors
+      # MAX_HUNT_TECHNIQUE_IDS (alertzero `common/hunt_technique_limit.ts`) and the packaging step's
+      # `coverageGaps` max; packaging dedupes, since the narrative dedupes by reason and detail.
+      result_coverage_gaps: "${{ steps.read_hunt_result.output.data.result.incomplete | compact | concat: steps.read_hunt_result.output.data.result.tier1.incomplete | concat: steps.read_hunt_result.output.data.result.tier2.incomplete | compact | slice: 0, 100 }}"
       result_tier2_invoked: "${{ steps.read_hunt_result.output.data.result.status == 'tier1_and_tier2' or steps.read_hunt_result.output.data.result.tier2_skipped_reason == 'tier2_failed' }}"
 
   # Permanent delete after outputs are set; continue on failure.
@@ -421,3 +444,4 @@ steps:
       report_intent_targets: "${{ variables.result_report_intent_targets }}"
       behaviors: "${{ variables.result_behaviors }}"
       tier2_invoked: "${{ variables.result_tier2_invoked }}"
+      coverage_gaps: "${{ variables.result_coverage_gaps }}"
