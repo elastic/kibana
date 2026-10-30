@@ -18,6 +18,7 @@ import type {
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
 import type { AttackDiscoveryExecutorOptions } from '@kbn/attack-discovery-schedules-common';
+import type { ElasticAssistantStart } from '@kbn/discoveries';
 import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -45,9 +46,8 @@ export interface ElasticAssistantPluginSetup {
   ) => void;
 }
 
-/** Minimal start contract — extend as capabilities are wired up. */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ElasticAssistantPluginStart {}
+/** The slice of the elastic_assistant start contract that `@kbn/discoveries` consumes. */
+export type ElasticAssistantPluginStart = ElasticAssistantStart;
 
 export interface DiscoveriesPluginSetupDeps {
   actions: ActionsPluginSetup;

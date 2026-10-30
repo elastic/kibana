@@ -145,6 +145,14 @@ export interface ElasticAssistantPluginStart {
    * @param callback
    */
   registerCallback: (callbackId: CallbackIds, callback: Function) => void;
+  /**
+   * Installs the space-level resources (anonymization fields with their defaults, ...) that are
+   * otherwise created lazily with the first AI Assistant data client. For callers that read them
+   * directly, such as Attack Discovery generation. No AI Assistant license check: callers enforce
+   * their own authorization, and it only installs the defaults a licensed space gets on first use.
+   * @returns `false` when the install failed.
+   */
+  ensureSpaceResources: (spaceId: string) => Promise<boolean>;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {

@@ -144,7 +144,9 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * run step's ground-truth gate, so false-positive triage happens only in the
  * review's FP/TP analysis. Version 5 skips alerts the review tagged
  * `az:ad_correlated`. Version 6 gives the child a 12h workflow timeout and
- * limits retrieval to the prorated alert cap. Each bump is a deliberate
+ * limits retrieval to the prorated alert cap. Version 7 gates the ES|QL alert
+ * retrieval on the space's alerts index existing, so a fresh space with no alerts
+ * yet is a quiet zero-batch run instead of a failed one. Each bump is a deliberate
  * rollout signal; the YAML change alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {

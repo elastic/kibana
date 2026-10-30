@@ -883,6 +883,117 @@ describe('executeGenerationWorkflow', () => {
     );
   });
 
+  describe('AI Assistant space resources', () => {
+    const run = async ({
+      ensureSpaceResources,
+      pluginsStart,
+    }: {
+      ensureSpaceResources?: jest.Mock;
+      pluginsStart?: Record<string, unknown>;
+    }) => {
+      const coreStartMock = {
+        elasticsearch: {
+          client: {
+            asScoped: () => ({
+              asCurrentUser: {
+                indices: { refresh: jest.fn().mockResolvedValue(undefined) },
+                security: { authenticate: jest.fn().mockResolvedValue({ username: 'test-user' }) },
+              },
+            }),
+          },
+        },
+        http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        security: {
+          authc: {
+            apiKeys: {
+              grantAsInternalUser: jest
+                .fn()
+                .mockResolvedValue({ api_key: 'test-api-key', id: 'test-api-key-id' }),
+              invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+            },
+          },
+        },
+      } as unknown as CoreStart;
+      const logger = {
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+      } as unknown as Logger;
+
+      await executeGenerationWorkflow({
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        apiConfig: { action_type_id: '.gen-ai', connector_id: 'test-connector-id', model: 'gpt-4' },
+        authz: createAuthorizedAuthzMock(),
+        executionUuid: 'test-execution-uuid',
+        getEventLogIndex: async () => '.kibana-event-log-test',
+        getEventLogger: async () => ({ logEvent: jest.fn() } as unknown as IEventLogger),
+        getStartServices: async () => ({
+          coreStart: coreStartMock,
+          pluginsStart: pluginsStart ?? { elasticAssistant: { ensureSpaceResources } },
+        }),
+        logger,
+        request: {} as unknown as KibanaRequest,
+        type: 'attack_discovery',
+        workflowConfig: {
+          alert_retrieval_workflow_ids: [],
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflows_enabled: false,
+          default_retrieval_enabled: true,
+          skill_enabled: true,
+          validation_workflow_id: 'default',
+        },
+        workflowsManagementApi: {
+          createWorkflow: jest.fn(),
+          getWorkflow: jest.fn(),
+          getWorkflowExecution: jest.fn(),
+          getWorkflows: jest.fn(),
+          runWorkflow: jest.fn(),
+        } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['workflowsManagementApi'],
+      });
+
+      return logger;
+    };
+
+    it('installs the space resources before fetching the anonymization fields', async () => {
+      const order: string[] = [];
+      const ensureSpaceResources = jest.fn(async () => {
+        order.push('ensure');
+        return true;
+      });
+      mockFetchAnonymizationFields.mockImplementation(async () => {
+        order.push('fetch');
+        return mockAnonymizationFields;
+      });
+
+      const logger = await run({ ensureSpaceResources });
+
+      expect(ensureSpaceResources).toHaveBeenCalledWith('default');
+      expect(order).toEqual(['ensure', 'fetch']);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('pipeline API key'));
+    });
+
+    it('warns and still fetches the anonymization fields when the install fails', async () => {
+      const ensureSpaceResources = jest.fn().mockResolvedValue(false);
+
+      const logger = await run({ ensureSpaceResources });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
+      expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+    });
+
+    it('fetches the anonymization fields when elastic_assistant is not available', async () => {
+      await run({ pluginsStart: {} });
+
+      expect(mockFetchAnonymizationFields).toHaveBeenCalled();
+    });
+  });
+
   describe('when shouldStopExecution() reports the rule was cancelled (timed out)', () => {
     const buildCancelledRunArgs = () => {
       const mockEventLogger: jest.Mocked<IEventLogger> = {

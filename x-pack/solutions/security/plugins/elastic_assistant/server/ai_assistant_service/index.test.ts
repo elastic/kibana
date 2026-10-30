@@ -902,6 +902,40 @@ describe('AI Assistant Service', () => {
     });
   });
 
+  describe('ensureSpaceResources', () => {
+    test('installs the space-level resources of a space that never created a data client', async () => {
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+      // No data stream is installed for the space yet.
+      clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
+      clusterClient.indices.createDataStream.mockClear();
+
+      await expect(assistantService.ensureSpaceResources('fresh-space')).resolves.toBe(true);
+
+      expect(clusterClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: '.kibana-elastic-ai-assistant-anonymization-fields-fresh-space',
+      });
+    });
+
+    test('returns false when the space-level install fails and the retry fails too', async () => {
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+      clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+      clusterClient.indices.createDataStream.mockRejectedValue(new Error('install failed'));
+
+      await expect(assistantService.ensureSpaceResources('broken-space')).resolves.toBe(false);
+    });
+  });
+
   describe('createDefaultAnonymizationFields', () => {
     test('should create default anonymization fields', async () => {
       (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
