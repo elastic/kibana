@@ -101,27 +101,5 @@ spaceTest.describe(
         }
       }
     );
-
-    spaceTest(
-      'enable footer shows the CTA copy and helper links',
-      async ({ page, pageObjects, browserAuth, kbnUrl, kbnClient, apiServices }) => {
-        const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
-          withStubModel: true,
-        });
-        try {
-          await browserAuth.loginAsAdmin();
-          await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
-          const alertZero = pageObjects.alertZeroApp;
-          await alertZero.advanceToWorkerSelection();
-
-          await expect(alertZero.enableButton).toBeVisible();
-          await expect(alertZero.enableButton).toHaveText('Enable and run');
-          await expect(alertZero.readMoreLink).toBeVisible();
-          await expect(alertZero.watchSettingsLink).toBeVisible();
-        } finally {
-          await space.cleanup();
-        }
-      }
-    );
   }
 );

@@ -9,15 +9,20 @@ import type { ApiClientFixture, EsClient } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/kbn-client';
 import { buildServiceAccountUrl } from '@kbn/alertzero-common';
 import {
+  assignEmptyModelAssignment,
   createApi,
   createApiFromKbnClient,
   createWorkerServiceAccount,
   listWorkers,
   ok,
   patchWorker,
+  readSupplyBaseline,
+  restoreSupplyBaseline,
   seedStubModel,
   setAlertZeroEnabledInSpace,
   type AlertZeroApi,
+  type StubModel,
+  type SupplyBaseline,
 } from './helpers';
 
 /** Space-id namespace so every throwaway space this suite creates is identifiable. */
@@ -29,6 +34,8 @@ const randomSuffix = (): string =>
 /** Minimal spaces surface the specs rely on (satisfied by scout's apiServices.spaces). */
 export interface SpacesService {
   create: (args: { id: string; name: string }) => Promise<unknown>;
+  /** AlertZero only runs in Security-solution spaces (`isSpaceSupported`). */
+  setSolutionView: (args: { id: string; solution: 'security' }) => Promise<unknown>;
   delete: (id: string) => Promise<unknown>;
 }
 
@@ -40,11 +47,35 @@ export interface OnboardingSpace {
 }
 
 /**
+ * Best-effort ordered teardown: every step runs even when an earlier one throws, and the
+ * failures surface together afterwards.
+ */
+const runSteps = async (
+  steps: ReadonlyArray<{ name: string; run: () => Promise<unknown> }>
+): Promise<void> => {
+  const failures: string[] = [];
+  for (const { name, run } of steps) {
+    try {
+      await run();
+    } catch (error) {
+      failures.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  if (failures.length > 0) {
+    throw new Error(`Onboarding space cleanup failed:\n${failures.join('\n')}`);
+  }
+};
+
+/**
  * Shared lifecycle of `createOnboardingSpace` / `createUiOnboardingSpace`:
- * creates the space, turns the per-space gate on, optionally seeds the stub
- * model. Cleanup disables every enabled worker first (best-effort; the space
- * deletion is the hard isolation anyway), then removes the stub connector and
- * the space.
+ * creates the space (Security solution view), turns the per-space gate on, and
+ * either seeds the stub model or pins an explicitly empty model assignment (a
+ * space with no assignment inherits every cluster-wide endpoint, so "no model"
+ * would otherwise depend on the cluster). Cleanup disables every enabled worker
+ * first (best-effort; the space deletion is the hard isolation anyway), puts the
+ * deployment-wide Hunt supply workflows back, then removes the stub connector
+ * and the space. A setup failure after the space exists runs the same teardown
+ * before rethrowing, so a failed setup cannot leak the space or the connector.
  */
 const buildOnboardingSpace = async (
   api: AlertZeroApi,
@@ -54,32 +85,53 @@ const buildOnboardingSpace = async (
   const spaceId = `${NAMESPACE}-${randomSuffix()}`;
   await spaces.create({ id: spaceId, name: `Onboarding ${spaceId}` });
 
-  // Worker routes 404 until the per-space gate is on; seeding and every later
-  // spec depend on it.
-  await setAlertZeroEnabledInSpace(api, spaceId, true);
-  const stub = withStubModel ? await seedStubModel(api, spaceId) : undefined;
+  let stub: StubModel | undefined;
+  let supplyBaseline: SupplyBaseline | undefined;
+
+  const cleanup = () =>
+    runSteps([
+      { name: 'disable workers', run: () => resetOnboardingState(api, spaceId) },
+      {
+        name: 'delete worker service accounts',
+        run: () => deleteWorkerServiceAccounts(api, spaceId),
+      },
+      {
+        name: 'restore Hunt supply workflows',
+        run: async () => {
+          if (supplyBaseline) await restoreSupplyBaseline(api, spaceId, supplyBaseline);
+        },
+      },
+      {
+        name: 'stub model cleanup',
+        run: async () => {
+          if (stub) await stub.cleanup();
+        },
+      },
+      { name: `delete space ${spaceId}`, run: () => spaces.delete(spaceId) },
+    ]);
+
+  try {
+    // The app is unsupported (404s, hidden) outside a Security-solution space.
+    await spaces.setSolutionView({ id: spaceId, solution: 'security' });
+    // Worker routes 404 until the per-space gate is on; seeding and every later
+    // spec depend on it.
+    await setAlertZeroEnabledInSpace(api, spaceId, true);
+    supplyBaseline = await readSupplyBaseline(api, spaceId);
+    if (withStubModel) {
+      stub = await seedStubModel(api, spaceId);
+    } else {
+      await assignEmptyModelAssignment(api, spaceId);
+    }
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
+  }
 
   return {
     spaceId,
     api,
     stub: stub ? { connectorId: stub.connectorId, cleanup: stub.cleanup } : undefined,
-    cleanup: async () => {
-      const failures: string[] = [];
-      const step = async (name: string, run: () => Promise<unknown>) => {
-        try {
-          await run();
-        } catch (error) {
-          failures.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      };
-      await step('disable workers', () => resetOnboardingState(api, spaceId));
-      await step('delete worker service accounts', () => deleteWorkerServiceAccounts(api, spaceId));
-      if (stub) await step('stub model cleanup', stub.cleanup);
-      await step(`delete space ${spaceId}`, () => spaces.delete(spaceId));
-      if (failures.length > 0) {
-        throw new Error(`Onboarding space cleanup failed:\n${failures.join('\n')}`);
-      }
-    },
+    cleanup,
   };
 };
 
@@ -113,14 +165,21 @@ export const enableFirstWorker = async (space: OnboardingSpace): Promise<() => P
   const workers = await listWorkers(space.api, space.spaceId);
   const target = workers[0];
   const account = await createWorkerServiceAccount(space.api, target.id);
-  ok(
-    await patchWorker(space.api, space.spaceId, target.id, {
-      enabled: true,
-      settingsRevision: target.settingsRevision ?? null,
-      settings: { serviceAccountId: account.id },
-    }),
-    `enable ${target.id}`
-  );
+  try {
+    ok(
+      await patchWorker(space.api, space.spaceId, target.id, {
+        enabled: true,
+        settingsRevision: target.settingsRevision ?? null,
+        settings: { serviceAccountId: account.id },
+      }),
+      `enable ${target.id}`
+    );
+  } catch (error) {
+    // The account is cluster-scoped, and the caller never receives its cleanup when
+    // the enable fails; the space has no worker referencing it yet either.
+    await account.cleanup().catch(() => undefined);
+    throw error;
+  }
   return account.cleanup;
 };
 
@@ -208,6 +267,14 @@ interface ClosedProposalDoc {
   ranks: { impact: number; confidence: number };
 }
 
+/**
+ * `@kbn/storage-adapter`'s `types.date` maps `strict_date_optional_time`. A bare
+ * `{ type: 'date' }` would default to `strict_date_optional_time||epoch_millis`, so a
+ * seeded index would differ from the one the server creates and the adapter's own
+ * mapping reconciliation could conflict on it.
+ */
+const DATE_FIELD = { type: 'date', format: 'strict_date_optional_time' } as const;
+
 /** Impact/confidence → numeric sort rank, mirroring `sort_ranks.ts` (`3 - rankIndex`). */
 const RANKS = {
   impact: { critical: 0, high: 1, medium: 2, low: 3 },
@@ -249,10 +316,9 @@ export const seedClosedProposal = async (
     ranks: { impact: RANKS.impact.medium, confidence: RANKS.confidence.medium },
   };
 
-  // Create backing index + alias on first use. The mappings mirror
-  // `proposals_storage.ts` loosely (all types the closed-list query reads);
-  // ES dynamic mapping would also accept the doc, but explicit mappings keep
-  // a later adapter write from hitting a mapping conflict.
+  // Create backing index + alias on first use. The mappings mirror every field of
+  // `proposals_storage.ts` (including date formats) so a later adapter write never hits
+  // a mapping conflict.
   const aliasExists = await esClient.indices.existsAlias({ name: PROPOSALS_INDEX });
   if (!aliasExists) {
     await esClient.indices.create({
@@ -264,6 +330,8 @@ export const seedClosedProposal = async (
           conversationId: { type: 'keyword' },
           title: { type: 'text' },
           comment: { type: 'text' },
+          actionWorkflowId: { type: 'keyword' },
+          actionInput: { type: 'flattened' },
           status: { type: 'keyword' },
           decision: { type: 'keyword' },
           supersededBy: { type: 'keyword' },
@@ -274,7 +342,7 @@ export const seedClosedProposal = async (
           confidence: { type: 'keyword' },
           category: { type: 'keyword' },
           origin: { type: 'keyword' },
-          expiresAt: { type: 'date' },
+          expiresAt: DATE_FIELD,
           ranks: {
             properties: { impact: { type: 'byte' }, confidence: { type: 'byte' } },
           },
@@ -286,13 +354,22 @@ export const seedClosedProposal = async (
               profileUid: { type: 'keyword' },
             },
           },
-          decidedAt: { type: 'date' },
+          decidedAt: DATE_FIELD,
           dismissReason: { type: 'keyword' },
           rationale: { type: 'text' },
           executionError: { type: 'text' },
           previousExecutionError: { type: 'text' },
           workflowExecutionId: { type: 'keyword' },
-          createdAt: { type: 'date' },
+          createdAt: DATE_FIELD,
+          gateReleasedAt: DATE_FIELD,
+          createdBy: {
+            properties: {
+              username: { type: 'keyword' },
+              fullName: { type: 'keyword' },
+              email: { type: 'keyword' },
+              profileUid: { type: 'keyword' },
+            },
+          },
         },
       },
     });

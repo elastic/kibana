@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 125,
-        "column": 32
+        "line": 118,
+        "column": 82
       }
     },
     {
@@ -271,20 +271,6 @@
       }
     },
     {
-      "id": "aef97376a048da1-d93466c1a62e454",
-      "title": "AlertZero onboarding - worker defaults and no-save enable footer shows the CTA copy and helper links",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 88,
-        "column": 27
-      }
-    },
-    {
       "id": "12e1f9dc0a1a5b4-20dcfefc21169df",
       "title": "AlertZero queue page width keeps the trend charts within the window and resizes them when it narrows",
       "expectedStatus": "passed",
@@ -299,20 +285,6 @@
       }
     },
     {
-      "id": "576b27bb4712c51-3462f2ec71eb166",
-      "title": "AlertZero onboarding - reset fixture self-check pure helpers: spaceUrl namespacing, isWorkerEnableBlocked, ok",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
-        "line": 31,
-        "column": 19
-      }
-    },
-    {
       "id": "576b27bb4712c51-18e0079de941191",
       "title": "AlertZero onboarding - reset fixture self-check stub clears no_model; enable persists; reset disables every worker",
       "expectedStatus": "passed",
@@ -322,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
-        "line": 45,
-        "column": 35
+        "line": 30,
+        "column": 19
       }
     }
   ]

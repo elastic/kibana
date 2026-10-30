@@ -130,6 +130,8 @@ spaceTest.describe(
         const spaceId = `scout-onb-off-${Date.now().toString(36)}`;
         await apiServices.spaces.create({ id: spaceId, name: `Onboarding off ${spaceId}` });
         try {
+          // Security view, so the not-found below can only come from the setting being off.
+          await apiServices.spaces.setSolutionView({ id: spaceId, solution: 'security' });
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: spaceId }));
 

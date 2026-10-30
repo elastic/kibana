@@ -14,12 +14,17 @@ import {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_WORKERS_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
   SECURITY_SERVICE_ACCOUNT_URL,
   buildServiceAccountUrl,
   buildWorkerUrl,
   getWorkerRoleName,
   WORKER_SERVICE_ACCOUNT_NAMES,
 } from '@kbn/alertzero-common';
+import {
+  SUPPLY_WORKFLOW_IDS,
+  type SupplyWorkflowKey,
+} from '../../api/fixtures/supply_workflow_ids';
 
 /** Poll interval for bounded waits inside specs (server-side settle can take seconds). */
 export const POLL_INTERVAL_MS = 2_000;
@@ -302,6 +307,96 @@ interface InferenceSettingsResponse {
 const SEARCH_INFERENCE_SETTINGS_PATH = '/internal/search_inference_endpoints/settings';
 const SEARCH_INFERENCE_API_VERSION = '1';
 
+const inferenceSettingsHeaders: Headers = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': SEARCH_INFERENCE_API_VERSION,
+};
+
+/**
+ * Pins an explicit empty AlertZero parent model assignment in the space. A space with no
+ * assignment document falls back to every cluster-wide chat-completion endpoint, so a
+ * connector created anywhere else would silently unblock the "no model" cases. An
+ * assignment document with zero endpoints is what makes `no_model` deterministic. The
+ * document is space-scoped, so deleting the throwaway space removes it.
+ */
+export const assignEmptyModelAssignment = async (
+  api: AlertZeroApi,
+  spaceId: string
+): Promise<void> => {
+  const put = await api.raw(
+    'PUT',
+    spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+    inferenceSettingsHeaders,
+    { features: [{ feature_id: ALERTZERO_INFERENCE_PARENT_FEATURE_ID, endpoints: [] }] }
+  );
+  if (put.statusCode !== 200) {
+    helperError(`pin an empty model assignment in ${spaceId}`, put);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Deployment-wide Hunt supply workflows
+// ---------------------------------------------------------------------------
+
+const DEPLOYMENT_SUPPLY_KEYS: readonly SupplyWorkflowKey[] = ['ingest', 'enrich'];
+
+export type SupplyBaseline = Partial<Record<SupplyWorkflowKey, boolean>>;
+
+interface SupplyStatusRows {
+  workflows?: Array<{ key: string; enabled: boolean; installed: boolean }>;
+}
+
+/**
+ * Enabling Hunt turns the deployment-wide ingest/enrich workflows on, and disabling the
+ * last Hunt tears them down — a per-space reset reaches beyond the space. Records their
+ * `enabled` state (read through `spaceId`, whose gate must already be on) so cleanup can
+ * put them back. Returns `undefined` when the status cannot be read: nothing to restore.
+ */
+export const readSupplyBaseline = async (
+  api: AlertZeroApi,
+  spaceId: string
+): Promise<SupplyBaseline | undefined> => {
+  const status = await api.internal<SupplyStatusRows>(
+    'GET',
+    spaceUrl(HUNT_THREAT_INTEL_SUPPLY_URL, spaceId)
+  );
+  if (status.statusCode !== 200) return undefined;
+  const baseline: SupplyBaseline = {};
+  for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+    const row = status.body.workflows?.find((workflow) => workflow.key === key);
+    if (row?.installed) baseline[key] = row.enabled;
+  }
+  return baseline;
+};
+
+/** Re-applies a recorded baseline through the Workflows API wherever the current state differs. */
+export const restoreSupplyBaseline = async (
+  api: AlertZeroApi,
+  spaceId: string,
+  baseline: SupplyBaseline
+): Promise<void> => {
+  const current = ok<SupplyStatusRows>(
+    await api.internal('GET', spaceUrl(HUNT_THREAT_INTEL_SUPPLY_URL, spaceId)),
+    `read supply status in ${spaceId}`
+  );
+  for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+    const wanted = baseline[key];
+    const row = current.workflows?.find((workflow) => workflow.key === key);
+    if (wanted !== undefined && row?.installed && row.enabled !== wanted) {
+      ok(
+        await api.raw(
+          'PUT',
+          `/api/workflows/managed/workflow/${encodeURIComponent(SUPPLY_WORKFLOW_IDS[key])}`,
+          { 'kbn-xsrf': 'some-xsrf-token', 'elastic-api-version': '2023-10-31' },
+          { enabled: wanted }
+        ),
+        `restore supply workflow ${key}`
+      );
+    }
+  }
+};
+
 /** Unique per call; names a connector, so `randomUUID` rather than `Math.random`. */
 const uniqueSuffix = () => `${Date.now()}-${randomUUID().slice(0, 8)}`;
 
@@ -339,43 +434,9 @@ export const seedStubModel = async (api: AlertZeroApi, spaceId: string): Promise
   }
   const connectorId = (createdConnector.body as { id: string }).id;
 
-  const settingsHeaders: Headers = {
-    'kbn-xsrf': 'some-xsrf-token',
-    'x-elastic-internal-origin': 'kibana',
-    'elastic-api-version': SEARCH_INFERENCE_API_VERSION,
-  };
-  const settingsGet = await api.raw<InferenceSettingsResponse>(
-    'GET',
-    spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
-    settingsHeaders
-  );
-  if (settingsGet.statusCode !== 200) {
-    helperError(`read inference settings in ${spaceId}`, settingsGet);
-  }
-  const existingFeatures = settingsGet.body.data?.features ?? [];
-  const parent = existingFeatures.find(
-    (f) => f.feature_id === ALERTZERO_INFERENCE_PARENT_FEATURE_ID
-  );
-  const assigned = !parent || parent.endpoints.length === 0;
-  if (assigned) {
-    const put = await api.raw(
-      'PUT',
-      spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
-      settingsHeaders,
-      {
-        features: [
-          ...existingFeatures.filter((f) => f.feature_id !== ALERTZERO_INFERENCE_PARENT_FEATURE_ID),
-          {
-            feature_id: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-            endpoints: [{ id: connectorId }],
-          },
-        ],
-      }
-    );
-    if (put.statusCode !== 200) {
-      helperError(`assign stub model in ${spaceId}`, put);
-    }
-  }
+  const settingsHeaders = inferenceSettingsHeaders;
+  let existingFeatures: InferenceSettingsResponse['data']['features'] = [];
+  let assigned = false;
 
   const cleanup = async () => {
     if (assigned) {
@@ -401,6 +462,49 @@ export const seedStubModel = async (api: AlertZeroApi, spaceId: string): Promise
       helperError(`delete stub connector ${connectorId}`, deleteConnector);
     }
   };
+
+  // A failure after the connector exists must not leave it behind: the caller never
+  // receives `cleanup` when this throws.
+  try {
+    const settingsGet = await api.raw<InferenceSettingsResponse>(
+      'GET',
+      spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+      settingsHeaders
+    );
+    if (settingsGet.statusCode !== 200) {
+      helperError(`read inference settings in ${spaceId}`, settingsGet);
+    }
+    existingFeatures = settingsGet.body.data?.features ?? [];
+    const parent = existingFeatures.find(
+      (f) => f.feature_id === ALERTZERO_INFERENCE_PARENT_FEATURE_ID
+    );
+    const shouldAssign = !parent || parent.endpoints.length === 0;
+    if (shouldAssign) {
+      const put = await api.raw(
+        'PUT',
+        spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+        settingsHeaders,
+        {
+          features: [
+            ...existingFeatures.filter(
+              (f) => f.feature_id !== ALERTZERO_INFERENCE_PARENT_FEATURE_ID
+            ),
+            {
+              feature_id: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+              endpoints: [{ id: connectorId }],
+            },
+          ],
+        }
+      );
+      if (put.statusCode !== 200) {
+        helperError(`assign stub model in ${spaceId}`, put);
+      }
+      assigned = true;
+    }
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
+  }
 
   return { connectorId, cleanup };
 };

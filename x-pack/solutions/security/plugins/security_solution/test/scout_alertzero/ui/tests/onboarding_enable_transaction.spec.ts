@@ -128,16 +128,11 @@ spaceTest.describe(
 
           // Retry with the network restored: full success releases the lock and lands
           // on the queue. Dismiss the failure toasts first — they overlay the Enable
-          // button and the warning toast is sticky. Handles resolve once, so a toast
-          // animating out between clicks cannot be clicked twice.
+          // button and the warning toast is sticky.
           await page.unroute(`**/internal/alertzero/workers/${victim.id}*`);
-          const dismissButtons = page.getByRole('button', { name: 'Dismiss toast' });
-          for (const button of await dismissButtons.all()) {
-            await button.click({ timeout: 5_000 }).catch(() => undefined);
-          }
-          await expect(page.locator('.euiGlobalToastListItem')).toHaveCount(0, {
-            timeout: 10_000,
-          });
+          const toastList = page.components.toast();
+          await toastList.closeAll();
+          await expect(toastList.toasts).toHaveCount(0, { timeout: 10_000 });
           await alertZero.enableButton.click();
           await alertZero.waitForQueue();
 

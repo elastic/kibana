@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERTZERO_WORKERS_URL } from '@kbn/alertzero-common';
 import { expect } from '@kbn/scout-security/api';
 import {
   apiTest,
@@ -16,30 +15,20 @@ import {
   ok,
   patchWorker,
   resetOnboardingState,
-  spaceUrl,
   tags,
 } from '../fixtures';
 
 /**
- * Live self-check for the reset fixture and the pure helpers. Everything later
- * specs assume about `resetOnboardingState` and `seedStubModel` is proven here
- * first: dirty state is created for real, the reset clears it, and the
- * assertions are the ones the negative control (documented in the plan) breaks.
+ * Live self-check for the reset fixture. Dirty state is created for real and the
+ * reset must clear it; the `z_` prefix runs it last, so it checks the fixture the
+ * earlier specs already used rather than gating them. The pure helpers
+ * (`spaceUrl`, `isWorkerEnableBlocked`, `ok`) are covered by Jest in
+ * `server/threat_intel/scout_alertzero_fixtures.test.ts`.
  */
 apiTest.describe(
   'AlertZero onboarding - reset fixture self-check',
   { tag: [...tags.stateful.classic] },
   () => {
-    apiTest('pure helpers: spaceUrl namespacing, isWorkerEnableBlocked, ok', async () => {
-      expect(spaceUrl(ALERTZERO_WORKERS_URL, 'default')).toBe(ALERTZERO_WORKERS_URL);
-      expect(spaceUrl(ALERTZERO_WORKERS_URL, 'space-1')).toBe(`/s/space-1${ALERTZERO_WORKERS_URL}`);
-      expect(isWorkerEnableBlocked({ blockingReasons: ['no_model'] })).toBe(true);
-      expect(isWorkerEnableBlocked({ blockingReasons: ['other'] })).toBe(false);
-      expect(isWorkerEnableBlocked({})).toBe(false);
-      expect(ok({ statusCode: 200, body: { workers: [] } }, 't')).toStrictEqual({ workers: [] });
-      expect(() => ok({ statusCode: 404, body: {} }, 't')).toThrow(/404/);
-    });
-
     apiTest(
       'stub clears no_model; enable persists; reset disables every worker',
       async ({ apiClient, samlAuth, apiServices }) => {

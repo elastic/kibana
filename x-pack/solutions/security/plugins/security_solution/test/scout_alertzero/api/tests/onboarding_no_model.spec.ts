@@ -10,13 +10,16 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
 } from '@kbn/alertzero-common';
 import { expect } from '@kbn/scout-security/api';
-import { apiTest, enableAlertZeroInSpace, tags, TI_HEADERS } from '../fixtures';
+import { apiTest, tags, TI_HEADERS } from '../fixtures';
+// Plain TS (no browser fixtures): shares the UI suite's space lifecycle so both halves
+// agree on what "no model" means — Security view, gate on, explicitly empty assignment.
+import { createOnboardingSpace } from '../../ui/fixtures/onboarding';
 
 /**
  * No-model blocking, API half (#19932 scenario 4 + #19955). This case never
  * touches the browser or asserts rendering — it only proves the GET-workers
- * endpoint reports `blockingReasons: ['no_model']` in a space with no inference
- * endpoint assigned — so it lives here behind scoped session authentication
+ * endpoint reports `blockingReasons: ['no_model']` in a space whose AlertZero model
+ * assignment is explicitly empty — so it lives here behind scoped session authentication
  * instead of paying for the UI job's browser lifecycle. The rendering half
  * (callout, locked controls, escape hatch) stays in the UI suite.
  */
@@ -28,14 +31,10 @@ apiTest.describe(
       'every worker reports the no_model blocking reason',
       async ({ apiClient, apiServices, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-        const headers = { ...TI_HEADERS, ...cookieHeader };
-        const spaceId = `scout-onb-api-nomodel-${Date.now().toString(36)}`;
-        await apiServices.spaces.create({ id: spaceId, name: spaceId });
+        const space = await createOnboardingSpace(apiClient, apiServices.spaces, cookieHeader);
         try {
-          await enableAlertZeroInSpace({ apiClient, headers, spaceId });
-
-          const res = await apiClient.get(`/s/${spaceId}${ALERTZERO_WORKERS_URL}`, {
-            headers,
+          const res = await apiClient.get(`/s/${space.spaceId}${ALERTZERO_WORKERS_URL}`, {
+            headers: { ...TI_HEADERS, ...cookieHeader },
             responseType: 'json',
           });
           expect(res.statusCode).toBe(200);
@@ -51,7 +50,7 @@ apiTest.describe(
             expect(worker.blockingReasons).toContain('no_model');
           }
         } finally {
-          await apiServices.spaces.delete(spaceId);
+          await space.cleanup();
         }
       }
     );
