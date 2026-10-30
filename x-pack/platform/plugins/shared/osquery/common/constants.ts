@@ -27,6 +27,15 @@ export type PlatformId = (typeof PLATFORM_IDS)[number];
 
 export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
+/**
+ * Not part of the public API contract. Workflow steps send this on
+ * `POST /api/osquery/live_queries`; the route then rejects the request when the agents it
+ * actually selects exceed the value, which is the set the fleet-wrapper preflight can
+ * undercount. It can only narrow a request, and is ignored while `workflowsExtensionsEnabled`
+ * is off. It must not start with `x-elastic-internal-`: `callKibanaApi` strips those headers.
+ */
+export const OSQUERY_MAX_AGENTS_HEADER = 'x-osquery-max-agents';
+
 export const API_VERSIONS = {
   public: {
     v1: '2023-10-31',
@@ -74,3 +83,9 @@ export const MAX_TAG_LENGTH = 256;
  * sketch memory at max precision could trip the circuit breaker.
  */
 export const AGENT_CARDINALITY_PRECISION = 40000;
+
+/**
+ * Largest targeted-agent count whose responders are counted with an exact `terms` aggregation
+ * instead of `cardinality`. Stays under Elasticsearch's default `search.max_buckets` (65,536).
+ */
+export const EXACT_RESPONDING_AGENTS_LIMIT = 50000;

@@ -44,6 +44,7 @@ describe('buildResultsQuery', () => {
         allow_no_indices: true,
         index: ['logs-osquery_manager.result*'],
         ignore_unavailable: true,
+        preference: 'action-123',
         aggs: {
           count_by_agent_id: {
             terms: {
@@ -78,6 +79,7 @@ describe('buildResultsQuery', () => {
               order: 'desc',
             },
           },
+          '_doc',
         ],
       });
     });
@@ -258,6 +260,7 @@ describe('buildResultsQuery', () => {
         allow_no_indices: true,
         index: ['logs-osquery_manager.result-prod', 'logs-osquery_manager.result-staging'],
         ignore_unavailable: true,
+        preference: 'action-full',
         aggs: {
           count_by_agent_id: {
             terms: {
@@ -315,6 +318,7 @@ describe('buildResultsQuery', () => {
               order: 'asc',
             },
           },
+          '_doc',
         ],
       });
     });
@@ -495,6 +499,28 @@ describe('buildResultsQuery', () => {
         { term: { action_id: 'action id' } },
         { term: { 'agent.id': 'agent id' } },
       ]);
+    });
+  });
+
+  describe('shard preference', () => {
+    const baseOptions: ResultsRequestOptions = {
+      actionId: 'action-123',
+      pagination: { activePage: 0, querySize: 100, cursorStart: 0 },
+      sort: [{ field: '@timestamp', direction: Direction.desc }],
+    };
+
+    it('pins an action read to one set of shard copies so offset pages stay disjoint', () => {
+      expect(buildResultsQuery(baseOptions).preference).toBe('action-123');
+    });
+
+    it('leaves a scheduled-execution read unpinned', () => {
+      const result = buildResultsQuery({
+        ...baseOptions,
+        scheduleId: 'schedule-1',
+        executionCount: 7,
+      });
+
+      expect(result.preference).toBeUndefined();
     });
   });
 

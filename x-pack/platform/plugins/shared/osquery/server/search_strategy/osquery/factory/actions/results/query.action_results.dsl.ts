@@ -13,6 +13,8 @@ import moment from 'moment';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   ACTION_RESPONSES_INDEX,
+  AGENT_CARDINALITY_PRECISION,
+  EXACT_RESPONDING_AGENTS_LIMIT,
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
@@ -23,6 +25,7 @@ import { prefixIndexPatternsWithCcs } from '../../../../../utils/ccs_utils';
 export const buildActionResultsQuery = ({
   actionId,
   agentIds,
+  agentsCount,
   kuery,
   startDate,
   sort,
@@ -142,6 +145,25 @@ export const buildActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
+              // Fleet delivers responses at least once, so `doc_count` can exceed the number of
+              // agents that answered. Completion is decided on distinct agents. A `terms` agg sized
+              // to the targeted agents is exact, which `cardinality` is not (it estimated wrong in
+              // about 1 of 2 runs at 10k agents and left answered queries `running`). Fleets past
+              // the bucket limit fall back to `cardinality`.
+              ...(agentsCount && agentsCount > 0 && agentsCount <= EXACT_RESPONDING_AGENTS_LIMIT
+                ? {
+                    responding_agent_ids: {
+                      terms: { field: 'agent_id', size: agentsCount },
+                    },
+                  }
+                : {
+                    responding_agents: {
+                      cardinality: {
+                        field: 'agent_id',
+                        precision_threshold: AGENT_CARDINALITY_PRECISION,
+                      },
+                    },
+                  }),
               responses: {
                 terms: {
                   script: {
