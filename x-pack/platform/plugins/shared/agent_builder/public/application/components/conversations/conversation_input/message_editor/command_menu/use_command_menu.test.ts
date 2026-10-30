@@ -107,15 +107,15 @@ describe('useCommandMenuCommand', () => {
   });
 
   describe('no stickiness — a later trigger always wins immediately', () => {
-    it('lets a "/" elsewhere in the text win outright, with no memory of an earlier "@" mention', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+    it('lets a "/" elsewhere in the text win outright, with no memory of an earlier "#" mention', () => {
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
       expect(result.current.match.activeCommand?.command.id).toBe('sml');
 
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match and more /skill');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match and more /skill');
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
@@ -126,7 +126,7 @@ describe('useCommandMenuCommand', () => {
 
   describe('hasVisibleContent: always visible within the first word', () => {
     it('is visible while still on the first word, before any content is confirmed', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -136,7 +136,7 @@ describe('useCommandMenuCommand', () => {
     });
 
     it('stays visible on backspace after being reported empty, so a typo can still be fixed', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -145,7 +145,7 @@ describe('useCommandMenuCommand', () => {
         result.current.reportContent(false, 'connector/no_match');
       });
 
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_matc');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_matc');
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
@@ -157,7 +157,7 @@ describe('useCommandMenuCommand', () => {
 
   describe('hasVisibleContent: past the first word, defaults to hidden until confirmed', () => {
     it('is hidden by default once a space is crossed, before any confirmation arrives', () => {
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match ');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no_match ');
       const { result } = renderHook(() => useCommandMenu());
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -222,7 +222,7 @@ describe('useCommandMenuCommand', () => {
 
     it('stays hidden across a whole sentence typed after a mention that never gets confirmed', () => {
       const { result } = renderHook(() => useCommandMenu());
-      mockGetTextBeforeCursor.mockReturnValue('@connector/no-match');
+      mockGetTextBeforeCursor.mockReturnValue('#connector/no-match');
       act(() => {
         result.current.checkInputForCommand(mockElement);
       });
@@ -230,8 +230,8 @@ describe('useCommandMenuCommand', () => {
         result.current.reportContent(false, 'connector/no-match');
       });
 
-      const sentence = '@connector/no-match this is not a match';
-      for (let end = '@connector/no-match'.length + 1; end <= sentence.length; end++) {
+      const sentence = '#connector/no-match this is not a match';
+      for (let end = '#connector/no-match'.length + 1; end <= sentence.length; end++) {
         mockGetTextBeforeCursor.mockReturnValue(sentence.slice(0, end));
         act(() => {
           result.current.checkInputForCommand(mockElement);

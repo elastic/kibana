@@ -147,17 +147,23 @@ const addItemsToInitialPanel = ({
 }: {
   panels: BulkActionsPanelConfig[];
   items: BulkActionsConfig[];
-}) => {
-  if (panels.length > 0) {
-    if (panels[0].items) {
-      panels[0].items = [...panels[0].items, ...items].filter(
-        (item, index, self) => index === self.findIndex((newItem) => newItem.key === item.key)
-      );
-    }
-    return panels;
-  } else {
+}): BulkActionsPanelConfig[] => {
+  if (panels.length === 0) {
     return [{ id: 0, items }];
   }
+  const [firstPanel, ...restPanels] = panels;
+  if (!firstPanel.items) {
+    return panels;
+  }
+  return [
+    {
+      ...firstPanel,
+      items: [...firstPanel.items, ...items].filter(
+        (item, index, self) => index === self.findIndex((newItem) => newItem.key === item.key)
+      ),
+    },
+    ...restPanels,
+  ];
 };
 
 export const useBulkAddToCaseActions = ({

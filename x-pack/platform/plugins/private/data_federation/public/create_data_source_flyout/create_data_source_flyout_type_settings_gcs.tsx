@@ -16,16 +16,13 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 
 export function CreateDataSourceFlyoutTypeSettingsGcs({
   control,
-  unregister,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: projectIdField } = useController({
     name: 'settings.project_id',
@@ -39,14 +36,6 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
     name: 'settings.token_uri',
     control,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.project_id');
-      unregister('settings.endpoint');
-      unregister('settings.token_uri');
-    };
-  }, [unregister]);
 
   return (
     <>
@@ -104,11 +93,9 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
 
 export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
   control,
-  unregister,
   areCredentialsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areCredentialsRequired: boolean;
 }) {
   const { field: credentialsField, fieldState: credentialsState } = useController({
@@ -125,12 +112,6 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
         }
       : undefined,
   });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.credentials');
-    };
-  }, [unregister]);
 
   return (
     <EuiFormRow
@@ -158,11 +139,9 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
 
 export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
   control,
-  unregister,
   areFieldsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
   const [isOptionalOpen, setIsOptionalOpen] = useState(false);
@@ -202,14 +181,6 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
       setIsOptionalOpen(true);
     }
   }, [hasOptionalError]);
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.jwt_audience');
-      unregister('settings.sts_audience');
-      unregister('settings.service_account_impersonation_url');
-    };
-  }, [unregister]);
 
   return (
     <>

@@ -271,7 +271,7 @@ test.describe(
         ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.ruleLibrary)
-        ).not.toBeVisible();
+        ).toBeVisible();
         await expect(
           nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, PANEL_LINKS.actionPolicies)
         ).toBeVisible();
@@ -315,6 +315,21 @@ test.describe(
         PANEL_LINKS.rulesV2
       );
       await expectPageTitle(pageObjects.chrome.pageTitle, 'Rules');
+    });
+
+    test('clicking Rule Library loads Rule library when alerting v2 is enabled', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await enableV2AndOpenNav({ browserAuth, pageObjects, kbnClient, scoutSpace });
+
+      await pageObjects.observabilityNavigation.clickPanelNavItemByDeepLinkId(
+        ALERTS_PANEL_ID,
+        PANEL_LINKS.ruleLibrary
+      );
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Rule library');
     });
 
     test('clicking Action Policies loads Action Policies when alerting v2 is enabled', async ({
@@ -454,7 +469,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['read'] }),
-        [PANEL_LINKS.rulesV2]
+        [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary]
       );
     });
 
@@ -467,7 +482,7 @@ test.describe(
       await expectPanelForRole(
         { browserAuth, pageObjects, kbnClient, scoutSpace },
         observabilityAlertingNavRole({ alerting_v2_rules: ['all'] }),
-        [PANEL_LINKS.rulesV2]
+        [PANEL_LINKS.rulesV2, PANEL_LINKS.ruleLibrary]
       );
     });
 

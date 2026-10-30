@@ -12,7 +12,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { defineGetServiceAccountRoute } from './get';
-import { getServiceAccountParamsSchema } from './schemas';
+import { serviceAccountIdParamsSchema } from './schemas';
 import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../../common/service_accounts';
 import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
@@ -140,18 +140,18 @@ describe('Get service account route', () => {
 
   describe('params schema', () => {
     it('accepts a bounded id', () => {
-      expect(getServiceAccountParamsSchema.parse({ id: 'service-account-id' })).toEqual({
+      expect(serviceAccountIdParamsSchema.parse({ id: 'service-account-id' })).toEqual({
         id: 'service-account-id',
       });
     });
 
     it('rejects an empty id', () => {
-      expect(getServiceAccountParamsSchema.safeParse({ id: '' }).success).toBe(false);
+      expect(serviceAccountIdParamsSchema.safeParse({ id: '' }).success).toBe(false);
     });
 
     it('rejects an unbounded id', () => {
       expect(
-        getServiceAccountParamsSchema.safeParse({
+        serviceAccountIdParamsSchema.safeParse({
           id: 'x'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1),
         }).success
       ).toBe(false);

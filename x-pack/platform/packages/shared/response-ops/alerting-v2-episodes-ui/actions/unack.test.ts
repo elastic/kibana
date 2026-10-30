@@ -37,6 +37,7 @@ const makeClassicEpisode = (id: string, status = 'acknowledged'): AlertEpisode =
       ruleId: 'r1',
       workflowStatus: status,
       workflowTags: [],
+      caseIds: [],
     } as ClassicAlertActionContext,
   });
 

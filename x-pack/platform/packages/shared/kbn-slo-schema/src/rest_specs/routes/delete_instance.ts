@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z, lazySchema } from '@kbn/zod';
+
 import { sloIdSchema } from '../../schema/slo';
 
-const deleteSLOInstancesParamsSchema = t.type({
-  body: t.type({
-    list: t.array(
-      t.intersection([
-        t.type({ sloId: sloIdSchema, instanceId: t.string }),
-        t.partial({ excludeRollup: t.boolean }),
-      ])
-    ),
-  }),
-});
+const deleteSLOInstancesParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z
+        .array(
+          z.object({
+            sloId: sloIdSchema,
+            instanceId: z.string().describe('The SLO instance identifier'),
+            excludeRollup: z.boolean().optional(),
+          })
+        )
+        .describe('An array of slo id and instance id'),
+    }),
+  })
+);
 
-type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
-type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
+type DeleteSLOInstancesInput = z.input<typeof deleteSLOInstancesParamsSchema.shape.body>;
+type DeleteSLOInstancesParams = z.output<typeof deleteSLOInstancesParamsSchema.shape.body>;
 
 export { deleteSLOInstancesParamsSchema };
 export type { DeleteSLOInstancesInput, DeleteSLOInstancesParams };

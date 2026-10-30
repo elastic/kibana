@@ -44,10 +44,16 @@ const renderActions = (
 };
 
 describe('SourceActionsColumn', () => {
-  it('disables onboard while a schedule is pending', () => {
-    renderActions({ isOnboardPending: true });
+  it('shows a disabled stop while a run is expected but not reported yet', () => {
+    renderActions({
+      isOnboardPending: true,
+      onboardingStatus: SignificantEventsWorkflowStatus.Completed,
+    });
 
-    expect(screen.getByTestId('significantEventsAppSourcesTableOnboardButton')).toBeDisabled();
+    expect(screen.getByTestId('significantEventsAppSourcesTableStopButton')).toBeDisabled();
+    expect(
+      screen.queryByTestId('significantEventsAppSourcesTableOnboardButton')
+    ).not.toBeInTheDocument();
   });
 
   it('disables stop from the click and brings it back when cancel fails', async () => {

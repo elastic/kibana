@@ -316,6 +316,57 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('serviceAccounts.delete', () => {
+    const params = { force: false };
+
+    it('properly delegates to the management service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        api.serviceAccounts.delete(request, 'service-account-id', params)
+      ).resolves.toEqual({ deleted: true, warnings: [] });
+
+      expect(serviceAccounts!.management.delete).toHaveBeenCalledWith(
+        request,
+        'service-account-id',
+        params
+      );
+    });
+
+    it('resolves with the blocking workloads when workloads are still bound to the account', async () => {
+      const workload = {
+        pluginId: 'alerting',
+        workloadType: 'rule',
+        workloadId: 'rule-1',
+        displayName: 'rule-1',
+      };
+      serviceAccounts!.management.delete.mockResolvedValue({
+        deleted: false,
+        workloads: [workload],
+      });
+
+      await expect(
+        api.serviceAccounts.delete(
+          httpServerMock.createKibanaRequest(),
+          'service-account-id',
+          params
+        )
+      ).resolves.toEqual({ deleted: false, workloads: [workload] });
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.delete(
+          httpServerMock.createKibanaRequest(),
+          'service-account-id',
+          params
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
   describe('workload bindings', () => {
     // Mutations name a workload; reads and executions name the space it lives in as well.
     const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };

@@ -13,29 +13,12 @@ import type {
 } from '../../hooks/use_automations';
 import {
   SLACK_TRIGGER_EVENTS,
+  toPresetSchedule,
   toAutomationFormValues,
   isSlackTrigger,
   type AutomationFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
-import { hasDailyLimit } from './validation';
-
-const toCronTime = (time: string): { minute: number; hour: number } => {
-  const [hour, minute] = time.split(':').map(Number);
-  return { minute, hour };
-};
-
-export const toEveryCron = (trigger: Extract<TriggerFormValues, { kind: 'every' }>): string => {
-  const { minute, hour } = toCronTime(trigger.time);
-  if (trigger.unit === 'hour') {
-    const hours = trigger.betweenHours
-      ? `${toCronTime(trigger.startTime).hour}-${toCronTime(trigger.endTime).hour}`
-      : '*';
-    return `0 ${hours} * * *`;
-  }
-  const days = trigger.unit === 'week' ? [...trigger.daysOfWeek].sort().join(',') : '*';
-  return `${minute} ${hour} * * ${days}`;
-};
 
 const toTriggerRow = (
   trigger: TriggerFormValues
@@ -46,7 +29,6 @@ const toTriggerRow = (
       kind: 'alert',
       ...(ruleNamePattern ? { ruleNamePattern } : {}),
       ...(trigger.ruleNames.length ? { ruleNames: trigger.ruleNames } : {}),
-      ...(trigger.alertStatus !== 'any' ? { alertStatus: trigger.alertStatus } : {}),
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
     };
   }
@@ -57,23 +39,13 @@ const toTriggerRow = (
       event: SLACK_TRIGGER_EVENTS[trigger.kind],
       ...(trigger.channels.length ? { channels: trigger.channels } : {}),
       ...(trigger.users.length ? { users: trigger.users } : {}),
+      ...(trigger.bots.length ? { bots: trigger.bots } : {}),
       ...(messageFilter ? { messageFilter } : {}),
     };
   }
-  if (trigger.kind === 'cron') {
-    return {
-      kind: 'schedule',
-      schedulePreset: 'custom',
-      cronExpression: trigger.cronExpression.trim(),
-      timezone: trigger.timezone,
-    };
-  }
-  const presets = { hour: 'hourly', day: 'daily', week: 'weekly' } as const;
   return {
     kind: 'schedule',
-    schedulePreset: presets[trigger.unit],
-    cronExpression: toEveryCron(trigger),
-    timezone: trigger.timezone,
+    ...toPresetSchedule(trigger),
   };
 };
 
@@ -98,9 +70,7 @@ export const toAutomationRequestBody = (
       : values.slackAction.target === 'thread'
       ? [{ action: 'post_to_slack', targetMode: 'thread' }]
       : [{ action: 'post_to_slack', targetMode: values.slackAction.target, destination }],
-    runtime: hasDailyLimit(values.trigger)
-      ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
-      : {},
+    runtime: { dailyDispatchLimit: Number(values.dailyDispatchLimit) },
   };
 };
 
@@ -175,11 +145,7 @@ export const toAutomationUpdateBody = (
     completions: toUpdatedCompletions(values, automation),
     runtime: {
       ...automation.runtime,
-      ...(hasDailyLimit(values.trigger)
-        ? { dailyDispatchLimit: Number(values.dailyDispatchLimit) }
-        : hasDailyLimit(originalValues.trigger)
-        ? { dailyDispatchLimit: null }
-        : {}),
+      dailyDispatchLimit: Number(values.dailyDispatchLimit),
     },
   };
 };

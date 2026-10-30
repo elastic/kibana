@@ -35,6 +35,12 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 export const agentBuilderDefaultAiIndexId = 'elastic';
 
 /**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
@@ -102,6 +108,11 @@ export interface AgentDefinition {
    * Optional symbol used to represent the agent in the UI
    */
   avatar_symbol?: string;
+  /**
+   * Service account the agent runs as for every conversation. A reference only: the binding
+   * itself is held by Core's service account workload bindings, never a credential.
+   */
+  service_account_id?: string;
   /**
    * Configuration associated with this agent
    */

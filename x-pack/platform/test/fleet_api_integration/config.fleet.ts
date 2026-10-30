@@ -22,8 +22,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseConfig.kbnTestServer,
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
-        // The OAuth2 authentication of the Kafka output is behind a feature flag
+        // The authentication methods of the Kafka output are behind a feature flag each
         `--feature_flags.overrides.fleet.enableKafkaOAuth2Auth=true`,
+        `--feature_flags.overrides.fleet.enableKafkaKerberosAuth=true`,
       ],
     },
   };

@@ -19,6 +19,7 @@ const ebtElement = {
   aiIndexListPageToolbar: 'contextEngine.aiIndexListPage.toolbar',
   aiIndexListPageDeleteModal: 'contextEngine.aiIndexListPage.deleteModal',
   aiIndexCreatePage: 'contextEngine.aiIndexCreatePage',
+  aiIndexCreateModal: 'contextEngine.aiIndexCreateModal',
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
@@ -56,6 +57,7 @@ const ebtAction = {
   },
   aiIndexDetail: {
     TAB_OVERVIEW: 'tab_overview',
+    TAB_SOURCES: 'tab_sources',
     TAB_KNOWLEDGE_INDICATORS: 'tab_knowledge_indicators',
   },
   description: {
@@ -73,11 +75,8 @@ const ebtAction = {
     SELECT_DATA_STREAM: 'select_data_stream',
   },
   sources: {
-    EDIT: 'edit_sources',
     SAVE: 'save_sources',
     CANCEL: 'cancel_sources',
-    TAB_ESQL: 'tab_esql',
-    TAB_CONNECTORS: 'tab_connectors',
     ADD_ESQL: 'add_esql',
     CREATE_CONNECTOR: 'create_connector',
     TOGGLE_CONNECTOR: 'toggle_connector',
@@ -88,7 +87,8 @@ const ebtAction = {
     CREATE: 'create_automation',
     ADD_MENU: 'open_add_automation_menu',
     ROW_ACTIONS_MENU: 'open_automation_actions_menu',
-    PREVIEW_WORKFLOW: 'preview_automation',
+    RUN_WORKFLOW: 'run_actions_workflows',
+    PREVIEW_WORKFLOW: 'preview_actions_workflows',
     OPEN_WORKFLOW: 'open_workflow',
     REMOVE: 'remove_automation',
   },
@@ -106,6 +106,8 @@ const ebtAction = {
     DEST_LINK: 'open_destination',
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
+    FILTER_STATUS: 'filter_status',
+    SEARCH: 'search_ki',
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
     OPEN_ROW: 'open_row',
@@ -113,6 +115,13 @@ const ebtAction = {
   viewKi: {
     TAB_DETAILS: 'tab_details',
     TAB_DOCUMENT: 'tab_document',
+    DELETE: 'delete',
+    RESTORE: 'restore',
+  },
+  editKi: {
+    EDIT: 'edit',
+    SAVE: 'save_content',
+    CANCEL: 'cancel_content',
   },
 } as const;
 

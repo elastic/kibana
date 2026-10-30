@@ -9,3 +9,6 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 
 export const ESCALATIONS_API_PRIVILEGE_READ = ApiPrivileges.read('escalations');
 export const ESCALATIONS_API_PRIVILEGE_MANAGE = ApiPrivileges.manage('escalations');
+
+/** Escalations read per status when a list is filtered by entity or summarised as Impact pills. */
+export const MAX_ESCALATIONS_SCAN = 1_000;
