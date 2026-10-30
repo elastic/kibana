@@ -48,6 +48,36 @@ time, JS errors and failed HTTP requests, its Core Web Vitals, and page loads an
 time, from `GET /internal/digital_experience/applications/{serviceName}/overview`. Without `source`,
 the page shows the Classic RUM application.
 
+### Sessions (`/{serviceName}/sessions?source=otel`)
+
+A tab of EDOT Browser applications only, as sessions are built from EDOT Browser data (see
+[Sessions](#sessions)).
+
+- **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
+  manage sessions privilege and tells everyone else whom to ask. Once set up, a callout flags sessions
+  that need an update (with an **Update sessions** button for those users), a failing transform, or
+  one that is behind.
+- **KPIs:** sessions, sessions with errors, median duration, pages per session and bounce rate, over
+  the listed sessions, so they follow the search and filters.
+- **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **Has errors**,
+  duration ranges, and browser, OS, country and entry page facets with their counts.
+- **Table:** start time, user with browser and OS, journey (entry → number of pages in between →
+  exit), duration, pages, clicks and errors; sortable and paged on the server. A column selector,
+  kept in local storage, adds location, entry and exit page, device, session ID, last activity,
+  events, bounced, and LCP / INP / CLS colored by rating. The search, filters, sort and page are
+  kept in the URL, and links to a session carry them so its **Sessions** breadcrumb leads back to
+  the same list.
+- **Empty states:** with no sessions, how they get there; with none matching, a button to clear the
+  filters. A callout counts sessions the transform could not summarize.
+
+### Session (`/{serviceName}/sessions/{sessionId}`)
+
+- **Summary:** duration, page views, clicks and errors; when, who, browser and OS, location, entry and
+  exit pages; and the session's Core Web Vitals.
+- **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
+  the page (its counts in a tooltip) and a marker per error.
+- **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
+
 ## Sessions
 
 An Elasticsearch continuous transform summarizes EDOT Browser sessions from
@@ -157,8 +187,10 @@ session detail timeline). Without it they answer 403 naming those privileges; ot
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`
-- `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets, sorting,
-  pagination, and KPIs
+- `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
+  OS, country, entry page), the `hasErrors` and `minDurationMs` / `maxDurationMs` filters, sorting,
+  pagination, and KPIs. Facets count their values without their own selection; the other filters
+  narrow every count.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}`: summary,
   event timeline, per-page journey, and web vitals
 
@@ -170,6 +202,6 @@ logged and answer 500 without Elasticsearch details:
   features are in `server/lib/` (`helpers/`, and `otel/` for the OTel queries).
 - `server/sessions/`: the sessions transform spec, setup, status and health task, with its routes in
   `server/routes/sessions/`.
-- `public/pages/`: one folder per page (`applications_list/`, `application_details/`) with its own
-  components, hooks and utils; what several pages share is in `public/components/`, `public/hooks/`
-  and `public/utils/`. `public/application/` is the app shell.
+- `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
+  `session_detail/`) with its own components, hooks and utils; what several pages share is in
+  `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
