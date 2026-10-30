@@ -12,6 +12,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE,
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -279,6 +280,14 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     it('has each batch retrieve its own alerts rather than take pre-built alert strings', () => {
       expect(fanOut().steps?.[0].with?.alert_retrieval_mode).toBe('esql');
       expect(fanOut().steps?.[0].with).not.toHaveProperty('alerts');
+    });
+
+    // The YAML cannot import the constant, so this is what keeps the two equal and
+    // stops a deleted key from leaving the Worker deduplicating against manual runs.
+    it('passes the Worker generation source to the run step', () => {
+      expect(fanOut().steps?.[0].with?.generation_source).toBe(
+        ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE
+      );
     });
 
     // The offsets and the per-branch slice are a matched pair — an off-by-one

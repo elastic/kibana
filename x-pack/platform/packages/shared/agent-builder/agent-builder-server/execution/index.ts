@@ -15,6 +15,7 @@ export type {
   ConversationAgentExecution,
   StandaloneAgentExecution,
   AgentExecution,
+  ExecutionRunAs,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
   ConversationOperation,
