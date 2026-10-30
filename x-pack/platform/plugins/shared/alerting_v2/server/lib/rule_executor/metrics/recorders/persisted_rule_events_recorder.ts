@@ -8,6 +8,7 @@
 import { injectable } from 'inversify';
 import type { MetricCollectorWriter, MetricRecorder, MetricRecorderContext } from '../types';
 import { RULE_EXECUTION_COUNTERS } from '../counters';
+import type { BulkIndexObservationError } from '../../types';
 import {
   alertEventType,
   type AlertEventDocument,
@@ -38,6 +39,8 @@ import {
  * consumption is honest: the recorder's `observes` contract pins the
  * producer.
  */
+const HTTP_CONFLICT = 409;
+
 @injectable()
 export class PersistedRuleEventsRecorder implements MetricRecorder {
   public readonly name = 'persisted_rule_events';
@@ -45,41 +48,49 @@ export class PersistedRuleEventsRecorder implements MetricRecorder {
 
   public record(collector: MetricCollectorWriter, { meta, state }: MetricRecorderContext): void {
     const bulkIndexResult = meta?.observations?.bulkIndexResult;
-    if (!bulkIndexResult || bulkIndexResult.docs.length === 0) {
+    if (!bulkIndexResult) {
       return;
     }
 
     const persistedDocs = bulkIndexResult.docs as readonly AlertEventDocument[];
+    const persistedEpisodeIds = new Set(
+      persistedDocs.flatMap((doc) => (doc.alert ? [doc.alert.id] : []))
+    );
 
-    collector.increment(RULE_EXECUTION_COUNTERS.ruleEventsGenerated, persistedDocs.length);
+    const counts = {
+      [RULE_EXECUTION_COUNTERS.ruleEventsDeduplicated]:
+        bulkIndexResult.errors.filter(isDeduplicationConflict).length,
+      [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: persistedDocs.length,
+      [RULE_EXECUTION_COUNTERS.signalsGenerated]: persistedDocs.filter(
+        (doc) => doc.type === alertEventType.signal
+      ).length,
+      // Count episodes, not docs: a single-series rule writes many docs that
+      // share one new episode id, and that is one new episode. A new episode
+      // counts once if any of its docs landed, and not at all if they all
+      // failed to index.
+      [RULE_EXECUTION_COUNTERS.newEpisodesGenerated]: [...new Set(state.newEpisodeIds)].filter(
+        (episodeId) => persistedEpisodeIds.has(episodeId)
+      ).length,
+    };
 
-    let signalsCount = 0;
-    const persistedEpisodeIds = new Set<string>();
-    for (const doc of persistedDocs) {
-      if (doc.type === alertEventType.signal) {
-        signalsCount += 1;
-      }
-      if (doc.alert) {
-        persistedEpisodeIds.add(doc.alert.id);
-      }
-    }
-
-    if (signalsCount > 0) {
-      collector.increment(RULE_EXECUTION_COUNTERS.signalsGenerated, signalsCount);
-    }
-
-    // Count episodes, not docs: a single-series rule writes many docs that share
-    // one new episode id, and that is one new episode. A new episode counts once
-    // if any of its docs landed, and not at all if they all failed to index.
-    let newEpisodesCount = 0;
-    for (const episodeId of new Set(state.newEpisodeIds)) {
-      if (persistedEpisodeIds.has(episodeId)) {
-        newEpisodesCount += 1;
-      }
-    }
-
-    if (newEpisodesCount > 0) {
-      collector.increment(RULE_EXECUTION_COUNTERS.newEpisodesGenerated, newEpisodesCount);
-    }
+    Object.entries(counts)
+      .filter(([, count]) => count > 0)
+      .forEach(([counter, count]) => collector.increment(counter, count));
   }
 }
+
+/**
+ * Whether a bulk rejection is the expected outcome of rule-event
+ * deduplication rather than a failure.
+ *
+ * `StoreAlertEventsStep` writes every deduplicable event with a
+ * deterministic `_id` on a `create` op; when that `_id` already exists
+ * Elasticsearch answers 409 (`version_conflict_engine_exception`). Those
+ * rejections are duplicates the `FilterDuplicateEventsStep` pre-check could
+ * not see (typically written earlier in the same run) and are counted into
+ * `ruleEventsDeduplicated`, never into a failure metric. Matching on the
+ * status code rather than the exception name keeps this file free of a
+ * dependency on storage-service error strings.
+ */
+const isDeduplicationConflict = (error: BulkIndexObservationError): boolean =>
+  error.details?.statusCode === HTTP_CONFLICT;

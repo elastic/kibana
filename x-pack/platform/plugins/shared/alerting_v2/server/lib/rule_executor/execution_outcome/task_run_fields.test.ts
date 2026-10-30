@@ -39,6 +39,7 @@ const createResult = (
 const zeroedMetricFields = {
   'metrics.signalsGenerated': 0,
   'metrics.ruleEventsGenerated': 0,
+  'metrics.ruleEventsDeduplicated': 0,
   'metrics.newEpisodesGenerated': 0,
   'metrics.rowsReturnedByQuery': 0,
   'metrics.groupsDroppedByLimit': 0,

@@ -99,6 +99,7 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
     expect(results[0].state.queryPayload).toBeDefined();
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Executing ES|QL query',
       expect.objectContaining({
@@ -125,7 +126,10 @@ describe('ExecuteRuleQueryStep', () => {
 
     const expectedQuery = `${rule.query.base.trimEnd()}\n| LIMIT ${NON_STREAMING_MAX_ROWS}`;
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: expectedQuery, drop_null_columns: true }),
+      expect.objectContaining({
+        query: expectedQuery,
+        drop_null_columns: true,
+      }),
       expect.objectContaining({ signal: abortController.signal })
     );
   });
@@ -180,7 +184,9 @@ describe('ExecuteRuleQueryStep', () => {
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: `FROM logs-*\n| LIMIT ${NON_STREAMING_MAX_ROWS}` }),
+      expect.objectContaining({
+        query: `FROM logs-*\n| LIMIT ${NON_STREAMING_MAX_ROWS}`,
+      }),
       expect.any(Object)
     );
   });
@@ -216,9 +222,100 @@ describe('ExecuteRuleQueryStep', () => {
     // ES|QL takes the min across multiple LIMIT commands, so the author's
     // smaller LIMIT still wins - appending the configured max is always safe.
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM logs-* | LIMIT 10\n| LIMIT 500' }),
+      expect.objectContaining({
+        query: 'FROM logs-* | LIMIT 10\n| LIMIT 500',
+      }),
       expect.objectContaining({ signal: state.input.executionContext.signal })
     );
+  });
+
+  it('sends a partially declared METADATA query unchanged and marks it not eligible', async () => {
+    step = createStep(500);
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: { base: 'FROM logs-* METADATA _id | KEEP _id, host.name' },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'FROM logs-* METADATA _id | KEEP _id, host.name\n| LIMIT 500',
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('marks a query that declares the identity METADATA as eligible without rewriting it', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const query = 'FROM logs-* METADATA _id, _index, _version | WHERE host.name IS NOT NULL';
+    const rule = createRuleResponse({
+      query: { base: query },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: true, mvExpandFields: [] });
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: `${query}\n| LIMIT ${NON_STREAMING_MAX_ROWS}` }),
+      expect.any(Object)
+    );
+  });
+
+  it('does not inject METADATA into a query that omits it', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const query = 'FROM logs-* | WHERE host.name IS NOT NULL';
+    const rule = createRuleResponse({
+      query: { base: query },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: `${query}\n| LIMIT ${NON_STREAMING_MAX_ROWS}` }),
+      expect.any(Object)
+    );
+  });
+
+  it('threads the MV_EXPAND columns onto state for rule-event deduplication', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: {
+        base: 'FROM logs-* METADATA _id, _index, _version | MV_EXPAND host.ip | WHERE host.ip IS NOT NULL',
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({
+      eligible: true,
+      mvExpandFields: ['host.ip'],
+    });
+  });
+
+  it('marks aggregating queries as not eligible for deduplication', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: {
+        base: 'FROM logs-* METADATA _id, _index, _version | STATS count = COUNT(*) BY host.name',
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results[0].state.deduplication).toEqual({ eligible: false, mvExpandFields: [] });
   });
 
   it('throws abort error when signal is aborted', async () => {
@@ -454,7 +551,9 @@ describe('ExecuteRuleQueryStep', () => {
       await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
       expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-        expect.objectContaining({ query: `FROM logs-*\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}` }),
+        expect.objectContaining({
+          query: `FROM logs-*\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+        }),
         expect.any(Object)
       );
     });
