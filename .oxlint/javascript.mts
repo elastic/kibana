@@ -155,8 +155,6 @@ export const javascriptOverrides: OxlintOverride[] = [
       'one-var': ['error', 'never'],
       'prefer-const': 'error',
       'valid-typeof': 'error',
-      'no-unsanitized/method': 'error',
-      'no-unsanitized/property': 'error',
       'prefer-object-spread': 'error',
     },
   },
