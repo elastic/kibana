@@ -68,7 +68,6 @@ export interface WorkflowsApiService {
     workflowId: string,
     filter: WaitForSuccessfulExecutionFilter
   ) => Promise<string>;
-  /** Reads an execution with the rendered input and the output of every step. */
   getExecution: (
     executionId: string,
     options?: WorkflowsApiSpaceOptions
