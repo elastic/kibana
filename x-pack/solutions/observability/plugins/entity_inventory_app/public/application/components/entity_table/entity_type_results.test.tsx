@@ -55,7 +55,6 @@ describe('EntityTypeResults', () => {
       'data-entity-type',
       'host'
     );
-    expect(screen.getByTestId('entityInventoryTableSummary')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTableLoading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryDiagnosticsCallout')).not.toBeInTheDocument();

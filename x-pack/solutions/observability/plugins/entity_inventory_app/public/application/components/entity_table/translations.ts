@@ -101,39 +101,6 @@ export const RESET_TO_DEFAULT_LABEL = i18n.translate(
   { defaultMessage: 'Reset to default' }
 );
 
-interface PageRange {
-  start: number;
-  end: number;
-}
-
-export const getCompleteSummary = ({ start, end, total }: PageRange & { total: number }) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.summary.complete', {
-    defaultMessage:
-      'Showing {start}-{end} of {total} {total, plural, one {entity} other {entities}}',
-    values: { start, end, total },
-  });
-
-export const getTruncatedSummary = ({
-  start,
-  end,
-  returned,
-  total,
-}: PageRange & { returned: number; total: number }) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.summary.truncated', {
-    defaultMessage: 'Showing {start}-{end} of {returned} most recent ({total} total)',
-    values: { start, end, returned, total },
-  });
-
-export const getTotalUnknownSummary = ({
-  start,
-  end,
-  returned,
-}: PageRange & { returned: number }) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.summary.totalUnknown', {
-    defaultMessage: 'Showing {start}-{end} of {returned} most recent (total unknown)',
-    values: { start, end, returned },
-  });
-
 export const getTruncationTitle = ({ returned, total }: { returned: number; total: number }) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.truncation.title', {
     defaultMessage: 'Showing the {returned} most recently seen of {total} entities',

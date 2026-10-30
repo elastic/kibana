@@ -18,13 +18,7 @@ import type { InventoryListResponse, InventoryRow } from '../../../inventory_api
 import { createAppServicesMock } from '../../../mocks';
 import { DEFAULT_PAGE_SIZE, EntityTable } from './entity_table';
 import { NAME_COLUMN_ID, getDefaultVisibleColumns } from './entity_type_config';
-import {
-  NO_VALUE_LABEL,
-  RESET_TO_DEFAULT_LABEL,
-  getCompleteSummary,
-  getTotalUnknownSummary,
-  getTruncatedSummary,
-} from './translations';
+import { NO_VALUE_LABEL, RESET_TO_DEFAULT_LABEL } from './translations';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
@@ -130,37 +124,15 @@ describe('EntityTable', () => {
     expect(getCell(1, NAME_COLUMN_ID)).toHaveTextContent('web-002');
   });
 
-  it('summarises the page of a complete list against the total', () => {
-    const list = getFixture('normal');
-    renderTable(list);
+  it.each(['normal', 'truncated', 'countFailed'] as const)(
+    'does not add a summary line to the toolbar for a %s list',
+    (scenario) => {
+      renderTable(getFixture(scenario));
 
-    expect(screen.getByTestId('entityInventoryTableSummary')).toHaveTextContent(
-      getCompleteSummary({ start: 1, end: DEFAULT_PAGE_SIZE, total: list.rows.length })
-    );
-  });
-
-  it('summarises the page of a truncated list against the returned rows', () => {
-    const list = getFixture('truncated');
-    renderTable(list);
-
-    expect(screen.getByTestId('entityInventoryTableSummary')).toHaveTextContent(
-      getTruncatedSummary({
-        start: 1,
-        end: DEFAULT_PAGE_SIZE,
-        returned: list.rows.length,
-        total: list.total ?? 0,
-      })
-    );
-  });
-
-  it('summarises the page of a list whose total is unknown', () => {
-    const list = getFixture('countFailed');
-    renderTable(list);
-
-    expect(screen.getByTestId('entityInventoryTableSummary')).toHaveTextContent(
-      getTotalUnknownSummary({ start: 1, end: DEFAULT_PAGE_SIZE, returned: list.rows.length })
-    );
-  });
+      expect(screen.queryByTestId('entityInventoryTableSummary')).not.toBeInTheDocument();
+      expect(screen.queryByText(/^Showing \d/)).not.toBeInTheDocument();
+    }
+  );
 
   it('styles the grid like the design: horizontal row borders, a shaded header and no stripes', () => {
     renderTable(getFixture('normal'));

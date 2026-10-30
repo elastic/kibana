@@ -50,10 +50,7 @@ import {
   NO_VALUE_LABEL,
   RESET_TO_DEFAULT_LABEL,
   getColumnLabel,
-  getCompleteSummary,
   getTableAriaLabel,
-  getTotalUnknownSummary,
-  getTruncatedSummary,
 } from './translations';
 
 export const DEFAULT_PAGE_SIZE = 10;
@@ -84,22 +81,6 @@ const EmptyCellValue = () => (
     </EuiScreenReaderOnly>
   </EuiText>
 );
-
-const getSummary = (
-  { rows, total, truncated }: InventoryListResponse,
-  pageIndex: number,
-  pageSize: number
-): string => {
-  const start = pageIndex * pageSize + 1;
-  const end = Math.min(start + pageSize - 1, rows.length);
-  if (total === null) {
-    return getTotalUnknownSummary({ start, end, returned: rows.length });
-  }
-  if (truncated) {
-    return getTruncatedSummary({ start, end, returned: rows.length, total });
-  }
-  return getCompleteSummary({ start, end, total });
-};
 
 /**
  * One entity type's results as a data grid. Sorting and pagination run over the rows held in
@@ -206,11 +187,6 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       showDisplaySelector: false,
       showFullScreenSelector: false,
       additionalControls: {
-        left: (
-          <EuiText size="xs" data-test-subj="entityInventoryTableSummary">
-            {getSummary(list, pageIndex, pageSize)}
-          </EuiText>
-        ),
         right: (
           <EuiButtonEmpty
             size="xs"
@@ -229,7 +205,7 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
         ),
       },
     }),
-    [list, pageIndex, pageSize, onReset, type]
+    [onReset, type]
   );
 
   return (
