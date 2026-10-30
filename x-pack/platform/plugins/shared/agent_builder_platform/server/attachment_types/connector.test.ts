@@ -16,6 +16,7 @@ import { getConnectorSpec } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
+import { renderSurface, surfaceContext } from './test_helpers';
 
 jest.mock('@kbn/connector-specs', () => ({
   ...jest.requireActual('@kbn/connector-specs'),
@@ -522,5 +523,61 @@ describe('connector attachment type', () => {
     it('is true', () => {
       expect(connectorType.isReadonly).toBe(true);
     });
+  });
+});
+
+describe('connector toSurfaceComposition', () => {
+  const connectorType = createConnectorAttachmentType();
+  const spec = {
+    metadata: {
+      id: '.github',
+      displayName: 'GitHub',
+      description: 'Generic GitHub connector',
+      minimumLicense: 'enterprise' as const,
+      supportedFeatureIds: [],
+    },
+    actions: {
+      searchIssues: { isTool: true, input: z.object({}), handler: jest.fn() },
+      createIssue: { isTool: true, input: z.object({}), handler: jest.fn() },
+    },
+    test: { handler: jest.fn(), enabled: false },
+  };
+
+  it('shows the spec description, and the type and actions as fields', async () => {
+    getConnectorSpecMock.mockReturnValue(spec as unknown as ReturnType<typeof getConnectorSpec>);
+
+    const composition = await connectorType.toSurfaceComposition?.(
+      createAttachment({ ...validData, selected_actions: ['searchIssues'] }),
+      surfaceContext
+    );
+
+    expect(composition).toEqual({
+      type: 'view',
+      title: 'My Github Connector',
+      body: [
+        { type: 'markdown', text: 'Generic GitHub connector' },
+        {
+          type: 'fields',
+          items: [
+            { label: 'Type', value: 'GitHub' },
+            { label: 'Actions', value: 'searchIssues' },
+          ],
+        },
+      ],
+    });
+    expect((await renderSurface(composition)).valid).toBe(true);
+  });
+
+  it('shows the type id without a spec', async () => {
+    getConnectorSpecMock.mockReturnValue(undefined);
+
+    const composition = await connectorType.toSurfaceComposition?.(
+      createAttachment(validData),
+      surfaceContext
+    );
+
+    expect(composition?.body).toEqual([
+      { type: 'fields', items: [{ label: 'Type', value: '.github' }] },
+    ]);
   });
 });

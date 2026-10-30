@@ -443,22 +443,36 @@ skill that owns the relevant task. See [Inline rendering guidance in skills](#in
 
 #### `toSurfaceComposition` — rendering outside Kibana
 
-Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition built from the primitives of `@kbn/isomer-components` (`SurfaceNode`), rendered by the `isomer` plugin's runtime to every surface. Without it, the attachment is left out there.
+
+It gets the attachment at the rendered version and `{ request, spaceId }`, and may be async.
 
 ```ts
 const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
   id: 'my_type',
   validate: ...,
   format: ...,
-  toSurfaceComposition: (data) => ({
+  toSurfaceComposition: ({ data, origin }) => ({
     type: 'view',
     title: data.name,
-    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+    subtitle: data.kind,
+    body: [
+      { type: 'markdown', text: data.summary },
+      { type: 'fields', items: [{ label: 'Status', value: data.status }] },
+      ...(origin
+        ? [{ type: 'link', label: 'Open in Kibana', app: 'my_app', path: `/items/${origin}` }]
+        : []),
+    ],
   }),
 };
 ```
 
-GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws leaves the attachment out. See the `text` type for an example.
+- **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
+- **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
+- **Links back to Kibana.** Use `link` with an app id and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. `actions` take absolute URLs only: a relative `/app/…` URL would lose the base path and the space.
+- **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 1,000 for a `fields` value. A composition that fails validation, or a mapping that throws, leaves the whole attachment out, so clamp what can be long.
+
+See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.
 
 #### Real example: the built-in image attachment
 
