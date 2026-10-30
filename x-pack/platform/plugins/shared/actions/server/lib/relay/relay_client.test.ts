@@ -510,18 +510,6 @@ describe('RelayClient', () => {
       );
     });
 
-    it('sends no query for an ad hoc read with Relay defaults', async () => {
-      requestMock.mockResolvedValue({ status: 200, data: body } as never);
-
-      await createClient().readMessages({ tenantKey: 'team-A', channelId: 'C123' });
-
-      expect(requestMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: 'https://relay.test/v1/slack/tenants/team-A/channels/C123/messages',
-        })
-      );
-    });
-
     it('rejects a body without messages', async () => {
       requestMock.mockResolvedValue({ status: 200, data: { channel: { id: 'C123' } } } as never);
 

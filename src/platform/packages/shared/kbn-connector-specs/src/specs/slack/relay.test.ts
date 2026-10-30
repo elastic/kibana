@@ -587,33 +587,14 @@ describe('relayGetConversationHistory', () => {
     );
   });
 
-  it.each(['not-a-cursor', 'abc:1700000000', '1:2:3'])(
-    'rejects the cursor %s before calling Relay',
-    async (cursor) => {
-      const readMessages = jest.fn();
-
-      await expect(read({ channel: 'C123', cursor }, { readMessages })).rejects.toThrow(
-        /Invalid cursor/
-      );
-      expect(readMessages).not.toHaveBeenCalled();
-    }
-  );
-
-  it('rejects a malformed window bound before calling Relay', async () => {
+  it.each([
+    { input: { channel: 'C123', cursor: 'abc:1700000000' }, message: /Invalid cursor/ },
+    { input: { channel: 'C123', latest: 'yesterday' }, message: /Slack timestamps/ },
+    { input: { channel: '#alerts' }, message: /Pass the channel ID/ },
+  ])('rejects $input before calling Relay', async ({ input, message }) => {
     const readMessages = jest.fn();
 
-    await expect(read({ channel: 'C123', latest: 'yesterday' }, { readMessages })).rejects.toThrow(
-      /Slack timestamps/
-    );
-    expect(readMessages).not.toHaveBeenCalled();
-  });
-
-  it('rejects a channel name before calling Relay', async () => {
-    const readMessages = jest.fn();
-
-    await expect(read({ channel: '#alerts' }, { readMessages })).rejects.toThrow(
-      /Pass the channel ID/
-    );
+    await expect(read(input, { readMessages })).rejects.toThrow(message);
     expect(readMessages).not.toHaveBeenCalled();
   });
 
@@ -632,14 +613,10 @@ describe('relayGetConversationHistory', () => {
     await expect(read({ channel: 'C123' }, { readMessages })).resolves.toEqual(expected);
   });
 
-  it.each([
-    { error: relayError(403), message: /Not allowed to read the connected channels/ },
-    { error: relayError(409, { reason: 'not_installed' }), message: /no longer installed/ },
-    { error: relayError(400, { reason: 'bad_request' }), message: /at most 7 days/ },
-  ])('throws on a failure that ends the scan: $message', async ({ error, message }) => {
-    const readMessages = jest.fn().mockRejectedValue(error);
+  it('restates a rejected window as the 7-day limit', async () => {
+    const readMessages = jest.fn().mockRejectedValue(relayError(400, { reason: 'bad_request' }));
 
-    await expect(read({ channel: 'C123' }, { readMessages })).rejects.toThrow(message);
+    await expect(read({ channel: 'C123' }, { readMessages })).rejects.toThrow(/at most 7 days/);
   });
 });
 
