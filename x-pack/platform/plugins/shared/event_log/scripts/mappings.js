@@ -45,6 +45,14 @@ exports.EcsCustomPropertyMappings = {
           data: {
             type: 'flattened',
           },
+          // set on task-yield events: when the yielded task becomes claimable again
+          yield: {
+            properties: {
+              deadline: {
+                type: 'date',
+              },
+            },
+          },
         },
       },
       // alerting specific fields
