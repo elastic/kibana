@@ -29,8 +29,10 @@ const AI_INDEX_ID = `memory-smoke-${RUN_ID}`;
 const DESTINATION_INDEX = `ai-index-idx-${AI_INDEX_ID}`;
 const AGENT_ID = `memory-smoke-${RUN_ID}`;
 const PROJECT_LABEL = `project-${randomBytes(4).toString('hex')}`;
-const SECRET_TOKEN = `cobalt-${randomBytes(6).toString('hex')}`;
-const CONVERSATION_IDS = [randomUUID(), randomUUID()] as const;
+const PROJECT_OWNER = `owner-${randomBytes(6).toString('hex')}`;
+const DEPLOYMENT_REGION = `region-${randomBytes(6).toString('hex')}`;
+const RELEASE_CODE = `release-${randomBytes(6).toString('hex')}`;
+const CONVERSATION_IDS = [randomUUID(), randomUUID(), randomUUID(), randomUUID()] as const;
 const API_HEADERS = { 'elastic-api-version': '2023-10-31' };
 const LIVE_MEMORY_TEST_TIMEOUT = 16 * 60 * 1000;
 
@@ -75,7 +77,7 @@ const createFailureEvidence = ({
   error: unknown;
 }): LlmSmokeFailureEvidence => ({
   target: inferenceId,
-  scenario: 'cross-conversation Memory write and recall',
+  scenario: 'cross-conversation multi-fact Memory write and recall',
   statusCode: response?.statusCode,
   responseBody: response ? JSON.stringify(response.body) : undefined,
   errorMessage: error instanceof Error ? error.message : String(error),
@@ -237,7 +239,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'stores a fact and recalls it naturally in a new conversation',
+      'combines facts stored across three separate conversations',
       async ({ asAdmin, esClient }) => {
         expect(selectedInferenceId).toBeDefined();
         const inferenceId = selectedInferenceId as string;
@@ -261,20 +263,40 @@ apiTest.describe(
         };
 
         try {
-          const remember = await converse(
+          const rememberOwner = await converse(
             CONVERSATION_IDS[0],
-            `Remember this for later: ${PROJECT_LABEL}'s deployment code is ${SECRET_TOKEN}.`
+            `Remember this for later: ${PROJECT_LABEL}'s owner is ${PROJECT_OWNER}.`
           );
-          expect(remember.conversation_id).toBe(CONVERSATION_IDS[0]);
-          expect(eisInferenceIds).toContain(remember.model_usage.connector_id);
+          expect(rememberOwner.conversation_id).toBe(CONVERSATION_IDS[0]);
+          expect(eisInferenceIds).toContain(rememberOwner.model_usage.connector_id);
 
-          const recallPrompt = `What is ${PROJECT_LABEL}'s deployment code?`;
-          expect(recallPrompt).not.toContain(SECRET_TOKEN);
-          const recall = await converse(CONVERSATION_IDS[1], recallPrompt);
-          expect(recall.conversation_id).toBe(CONVERSATION_IDS[1]);
-          expect(recall.conversation_id).not.toBe(remember.conversation_id);
+          const rememberRegion = await converse(
+            CONVERSATION_IDS[1],
+            `Remember this for later: ${PROJECT_LABEL}'s deployment region is ${DEPLOYMENT_REGION}.`
+          );
+          expect(rememberRegion.conversation_id).toBe(CONVERSATION_IDS[1]);
+          expect(eisInferenceIds).toContain(rememberRegion.model_usage.connector_id);
+
+          const rememberRelease = await converse(
+            CONVERSATION_IDS[2],
+            `Remember this for later: ${PROJECT_LABEL}'s release code is ${RELEASE_CODE}.`
+          );
+          expect(rememberRelease.conversation_id).toBe(CONVERSATION_IDS[2]);
+          expect(eisInferenceIds).toContain(rememberRelease.model_usage.connector_id);
+
+          const recallPrompt = `What are ${PROJECT_LABEL}'s owner, deployment region, and release code?`;
+          expect(recallPrompt).not.toContain(PROJECT_OWNER);
+          expect(recallPrompt).not.toContain(DEPLOYMENT_REGION);
+          expect(recallPrompt).not.toContain(RELEASE_CODE);
+          const recall = await converse(CONVERSATION_IDS[3], recallPrompt);
+          expect(recall.conversation_id).toBe(CONVERSATION_IDS[3]);
+          expect(recall.conversation_id).not.toBe(rememberOwner.conversation_id);
+          expect(recall.conversation_id).not.toBe(rememberRegion.conversation_id);
+          expect(recall.conversation_id).not.toBe(rememberRelease.conversation_id);
           expect(eisInferenceIds).toContain(recall.model_usage.connector_id);
-          expect(recall.response.message?.toLowerCase()).toContain(SECRET_TOKEN.toLowerCase());
+          expect(recall.response.message?.toLowerCase()).toContain(PROJECT_OWNER.toLowerCase());
+          expect(recall.response.message?.toLowerCase()).toContain(DEPLOYMENT_REGION.toLowerCase());
+          expect(recall.response.message?.toLowerCase()).toContain(RELEASE_CODE.toLowerCase());
         } catch (error) {
           const evidence = createFailureEvidence({
             inferenceId,
