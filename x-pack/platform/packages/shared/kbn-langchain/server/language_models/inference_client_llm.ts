@@ -10,6 +10,10 @@ import type { BaseLanguageModelCallOptions } from '@langchain/core/language_mode
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
+import {
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+} from './content_filtered_model_response_error';
 import { EmptyModelResponseError } from './empty_model_response_error';
 
 const LLM_TYPE = 'InferenceClientLlm';
@@ -114,6 +118,14 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         throw error;
       });
 
+    this.#throwIfContentFiltered({
+      completionTokens: response.tokens?.completion,
+      content: response.content,
+      finishReason: response.finish_reason,
+      model: response.model ?? this.#model,
+      promptTokens: response.tokens?.prompt,
+    });
+
     this.#throwIfResponseIsEmpty({
       completionTokens: response.tokens?.completion,
       content: response.content,
@@ -123,6 +135,42 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
     });
 
     return response.content;
+  }
+
+  /**
+   * Throws (and logs at `error`) when the provider stopped the completion with
+   * `finish_reason: content_filter`, whether or not partial content was returned. The same prompt
+   * is filtered again on every retry, so the error is typed and non-retryable for callers.
+   */
+  #throwIfContentFiltered({
+    completionTokens,
+    content,
+    finishReason,
+    model,
+    promptTokens,
+  }: {
+    completionTokens?: number;
+    content: string;
+    finishReason?: unknown;
+    model?: string;
+    promptTokens?: number;
+  }): void {
+    if (!isContentFilterFinishReason(finishReason)) {
+      return;
+    }
+
+    const error = new ContentFilteredModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      responseBody: content,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
   }
 
   /**

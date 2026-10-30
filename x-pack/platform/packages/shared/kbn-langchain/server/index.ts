@@ -17,12 +17,26 @@ import {
   getBoundedResponsePreview,
   isEmptyModelResponseError,
 } from './language_models/empty_model_response_error';
+import {
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  CONTENT_FILTER_FINISH_REASON,
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+  isContentFilteredModelResponseError,
+} from './language_models/content_filtered_model_response_error';
 import { InferenceClientLlm } from './language_models/inference_client_llm';
 import { parseBedrockStream } from './utils/bedrock';
 import { parseGeminiResponse } from './utils/gemini';
 import { getDefaultArguments } from './language_models/constants';
 
 export {
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  CONTENT_FILTER_FINISH_REASON,
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+  isContentFilteredModelResponseError,
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,

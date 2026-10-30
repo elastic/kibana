@@ -9,7 +9,12 @@ import { InferenceClientLlm } from './inference_client_llm';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
-import { EMPTY_MODEL_RESPONSE_ERROR_CODE, EmptyModelResponseError } from '..';
+import {
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+  ContentFilteredModelResponseError,
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EmptyModelResponseError,
+} from '..';
 
 describe('InferenceClientLlm', () => {
   const connectorId = 'test-connector';
@@ -231,6 +236,58 @@ describe('InferenceClientLlm', () => {
       // the transport-failure log line must not be emitted for a successful-but-empty completion
       const errorLogCalls = mockLogger.error.mock.calls.map((call) => String(call[0]));
       expect(errorLogCalls.some((message) => message.includes('chatComplete failed'))).toBe(false);
+    });
+  });
+
+  describe('content_filter finish reason', () => {
+    it.each([
+      ['empty', ''],
+      ['truncated, non-empty', '{"insights":[{"title":"cut off'],
+    ])('rejects with a content-filter error for a %s response', async (_label, content) => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content,
+        finish_reason: 'content_filter',
+        model: 'claude-5.5-opus',
+        tokens: { completion: 2, prompt: 77, total: 79 },
+        toolCalls: [],
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      const error = await llm._call('test prompt').catch((e) => e);
+
+      expect(error).toBeInstanceOf(ContentFilteredModelResponseError);
+      expect(error).not.toBeInstanceOf(EmptyModelResponseError);
+      expect(error).toEqual(
+        expect.objectContaining({
+          code: CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+          completionTokens: 2,
+          connectorId,
+          contentLength: content.length,
+          model: 'claude-5.5-opus',
+          promptTokens: 77,
+        })
+      );
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reject a normally finished response', async () => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content: 'fine',
+        finish_reason: 'stop',
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      await expect(llm._call('test prompt')).resolves.toBe('fine');
     });
   });
 });

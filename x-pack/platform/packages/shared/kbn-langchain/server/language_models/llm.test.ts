@@ -12,6 +12,8 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
 import {
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+  ContentFilteredModelResponseError,
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
@@ -144,6 +146,118 @@ describe('ActionsClientLlm', () => {
       });
 
       await expect(actionsClientLlm._call(prompt)).rejects.toThrow(EmptyModelResponseError);
+    });
+
+    describe('content_filter finish reason', () => {
+      it.each([
+        ['empty', ''],
+        ['truncated, non-empty', '{"insights":[{"title":"cut off'],
+      ])(
+        'rejects with a content-filter error for a %s unified completion when llmType is inference',
+        async (_label, content) => {
+          actionsClient.execute.mockResolvedValue({
+            actionId: connectorId,
+            data: {
+              choices: [{ finish_reason: 'content_filter', message: { content, tool_calls: [] } }],
+              model: 'claude-5.5-opus',
+              usage: { completion_tokens: 7, prompt_tokens: 900 },
+            },
+            status: 'ok',
+          });
+          const actionsClientLlm = new ActionsClientLlm({
+            actionsClient,
+            connectorId,
+            llmType: 'inference',
+            logger: mockLogger,
+            traceId: 'trace-unified',
+          });
+
+          const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+          expect(error).toBeInstanceOf(ContentFilteredModelResponseError);
+          expect(error).toEqual(
+            expect.objectContaining({
+              code: CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+              completionTokens: 7,
+              connectorId,
+              contentLength: content.length,
+              model: 'claude-5.5-opus',
+              promptTokens: 900,
+              traceId: 'trace-unified',
+            })
+          );
+          expect(mockLogger.error).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it('does not reject a unified completion that finished normally', async () => {
+        actionsClient.execute.mockResolvedValue({
+          actionId: connectorId,
+          data: { choices: [{ finish_reason: 'stop', message: { content: 'ok' } }] },
+          status: 'ok',
+        });
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          llmType: 'inference',
+          logger: mockLogger,
+        });
+
+        await expect(actionsClientLlm._call(prompt)).resolves.toBe('ok');
+      });
+
+      it.each([
+        ['empty', ''],
+        ['truncated, non-empty', '{"insights":[{"title":"cut off'],
+      ])(
+        'rejects with a content-filter error for a %s invokeAI (.gen-ai) response',
+        async (_l, message) => {
+          actionsClient.execute.mockResolvedValue({
+            actionId: connectorId,
+            data: {
+              finish_reason: 'content_filter',
+              message,
+              usage: { completion_tokens: 3, prompt_tokens: 50, total_tokens: 53 },
+            },
+            status: 'ok',
+          });
+          const actionsClientLlm = new ActionsClientLlm({
+            actionsClient,
+            connectorId,
+            llmType: 'openai',
+            logger: mockLogger,
+            model: 'gpt-x',
+          });
+
+          const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+          expect(error).toBeInstanceOf(ContentFilteredModelResponseError);
+          expect(error).toEqual(
+            expect.objectContaining({
+              completionTokens: 3,
+              contentLength: message.length,
+              model: 'gpt-x',
+              promptTokens: 50,
+            })
+          );
+        }
+      );
+
+      it('keeps returning an invokeAI response that has no finish_reason (bedrock/gemini today)', async () => {
+        actionsClient.execute.mockResolvedValue({
+          actionId: connectorId,
+          data: { message: 'fine' },
+          status: 'ok',
+        });
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          llmType: 'bedrock',
+          logger: mockLogger,
+        });
+
+        await expect(actionsClientLlm._call(prompt)).resolves.toBe('fine');
+      });
     });
 
     it('returns the expected content when _call is invoked', async () => {
@@ -395,6 +509,63 @@ describe('ActionsClientLlm', () => {
         );
         // logged at `error` (persisted), not debug-only: serverless has no log-level switch
         expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      });
+
+      it.each([
+        ['empty', ''],
+        ['truncated, non-empty', '{"insights":[{"title":"cut off'],
+      ])(
+        'rejects with a content-filter error, not a retryable parse/empty error, for a %s response',
+        async (_label, content) => {
+          (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+            content,
+            finish_reason: 'content_filter',
+            model: 'claude-5.5-opus',
+            tokens: { completion: 4, prompt: 321, total: 325 },
+            toolCalls: [],
+          });
+          const actionsClientLlm = new ActionsClientLlm({
+            actionsClient,
+            connectorId,
+            inferenceClient: mockInferenceClient,
+            isInferenceEndpoint: true,
+            logger: mockLogger,
+            traceId: 'trace-inf',
+          });
+
+          const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+          expect(error).toBeInstanceOf(ContentFilteredModelResponseError);
+          expect(error).not.toBeInstanceOf(EmptyModelResponseError);
+          expect(error).toEqual(
+            expect.objectContaining({
+              code: CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+              completionTokens: 4,
+              connectorId,
+              contentLength: content.length,
+              model: 'claude-5.5-opus',
+              promptTokens: 321,
+              traceId: 'trace-inf',
+            })
+          );
+          expect(mockLogger.error).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it('does not reject a normally finished response', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: 'Hello, world',
+          finish_reason: 'stop',
+        });
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await expect(actionsClientLlm._call(prompt)).resolves.toBe('Hello, world');
       });
 
       it('treats a whitespace-only response as an empty response', async () => {
