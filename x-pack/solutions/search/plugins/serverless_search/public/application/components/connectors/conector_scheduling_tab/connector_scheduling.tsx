@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import type { Connector } from '@kbn/search-connectors';
 import { ConnectorStatus } from '@kbn/search-connectors';
-import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
+import { ConnectorSchedulingComponent } from '@kbn/search-connectors-ui';
 import { useConnectorScheduling } from '../../../hooks/api/use_update_connector_scheduling';
 
 interface ConnectorSchedulingPanels {

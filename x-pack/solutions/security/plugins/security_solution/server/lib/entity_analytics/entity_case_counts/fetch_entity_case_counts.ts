@@ -13,8 +13,11 @@ import type {
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
 import { nodeBuilder } from '@kbn/es-query';
-import { CaseStatuses } from '@kbn/cases-components';
-import { SECURITY_ENTITY_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import {
+  CaseStatuses,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+} from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 
 /** The hidden saved object type of unified case attachments (not exported by the plugin). */

@@ -19,6 +19,7 @@
     "@kbn/config-schema",
     "@kbn/core-http-browser",
     "@kbn/search-connectors",
+    "@kbn/search-connectors-ui",
     "@kbn/task-manager-plugin",
     "@kbn/fleet-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
