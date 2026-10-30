@@ -12,7 +12,6 @@ import {
   getComparableAttachmentState,
   getComparableDashboardState,
 } from './compare_dashboard_data';
-import { DEFAULT_TIME_RANGE } from './dashboard_state_helpers';
 
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
@@ -38,7 +37,7 @@ describe('getComparableAttachmentState', () => {
     expect(panel.config).toMatchObject(metricApiConfig);
   });
 
-  it('leaves out the time range and refresh interval that applying fills in', () => {
+  it('has no time range or refresh interval when the attachment sets none', () => {
     const data = { title: 'Logs', panels: [] } as unknown as DashboardAttachmentData;
 
     const state = getComparableAttachmentState(data);
@@ -59,31 +58,17 @@ describe('getComparableAttachmentState', () => {
 });
 
 describe('getComparableDashboardState', () => {
-  it('leaves out the default time range and a paused refresh interval', () => {
+  it('keeps the time range and refresh interval', () => {
     const state = {
       title: 'Logs',
       panels: [],
-      time_range: { ...DEFAULT_TIME_RANGE, mode: 'relative' },
+      time_range: { from: 'now-24h', to: 'now' },
       refresh_interval: { pause: true, value: 60000 },
     } as unknown as DashboardState;
 
-    const comparableState = getComparableDashboardState(state);
-
-    expect(comparableState).not.toHaveProperty('time_range');
-    expect(comparableState).not.toHaveProperty('refresh_interval');
-  });
-
-  it('keeps a time range and refresh interval the user set', () => {
-    const state = {
-      title: 'Logs',
-      panels: [],
-      time_range: { from: 'now-7d', to: 'now' },
-      refresh_interval: { pause: false, value: 60000 },
-    } as unknown as DashboardState;
-
     expect(getComparableDashboardState(state)).toMatchObject({
-      time_range: { from: 'now-7d', to: 'now' },
-      refresh_interval: { pause: false, value: 60000 },
+      time_range: { from: 'now-24h', to: 'now' },
+      refresh_interval: { pause: true, value: 60000 },
     });
   });
 

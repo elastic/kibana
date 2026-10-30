@@ -502,7 +502,6 @@ describe('registerDashboardAppIntegration', () => {
               ...panel,
               config: { ...panel.config, settings: defaultPanelSettings },
             })),
-            refresh_interval: { pause: true, value: 60000 },
           },
         });
         emitDashboardStateChange();

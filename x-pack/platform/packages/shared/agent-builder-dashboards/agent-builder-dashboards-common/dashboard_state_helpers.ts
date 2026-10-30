@@ -16,7 +16,6 @@ export const EMPTY_DASHBOARD_STATE = Object.freeze({
   title: '',
   description: '',
   panels: [],
-  time_range: DEFAULT_TIME_RANGE,
   query: { expression: '', language: 'kql' as const },
   filters: [],
   options: {

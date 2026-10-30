@@ -72,23 +72,6 @@ export const isAttachmentShownInDashboard = (
 ): boolean => isEmpty(api.diffStates(getComparableAttachmentState(data), comparableState));
 
 /**
- * An attachment without a refresh interval pauses the dashboard's own one. Keeping its value,
- * which the timefilter already accepted, avoids a default below the minimum refresh interval
- * that the timefilter would clamp and report as an unsaved change.
- */
-const toAppliedDashboardState = (
-  api: DashboardApi,
-  data: DashboardAttachmentData
-): DashboardState => {
-  const dashboardState = attachmentDataToDashboardState(data);
-  const { refresh_interval: currentRefreshInterval } = api.getSerializedState().attributes;
-  if (dashboardState.refresh_interval || !currentRefreshInterval) {
-    return dashboardState;
-  }
-  return { ...dashboardState, refresh_interval: { ...currentRefreshInterval, pause: true } };
-};
-
-/**
  * Applies the attachment to the dashboard and waits for its panels to settle, so the state
  * changes the apply causes are not taken for manual changes. Skips applying when the dashboard
  * already shows it.
@@ -108,7 +91,7 @@ export const applyAttachmentToDashboard = ({
       return;
     }
 
-    await api.setState(toAppliedDashboardState(api, attachment.data), { changedBy: ['agent'] });
+    await api.setState(attachmentDataToDashboardState(attachment.data), { changedBy: ['agent'] });
     await waitForPanelsToLoad(api);
     await firstValueFrom(timer(MANUAL_CHANGES_DEBOUNCE_MS));
   });
