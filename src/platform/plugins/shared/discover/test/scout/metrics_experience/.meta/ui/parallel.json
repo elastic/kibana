@@ -1,5 +1,5 @@
 {
-  "sha1": "9cd0628961f8b3fbc731a61a62f298fadd571662",
+  "sha1": "045b9efb12e5ab17c4ce2dbaa19f9e250c6d1dfc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -912,6 +912,24 @@
       }
     },
     {
+      "id": "ec44ac173cf4694-ea41d7610c8defe",
+      "title": "Metrics in Discover - Save Session Recency orders a reopened recency session by the opener's own history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session_recency.spec.ts",
+        "line": 46,
+        "column": 46
+      }
+    },
+    {
       "id": "722fb5fc48cd135-af3779e74d07e98",
       "title": "Metrics in Discover - Save Session should save and restore a metrics session",
       "expectedStatus": "passed",
@@ -925,8 +943,62 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 59,
+        "column": 24
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-f76afb10c9ecd91",
+      "title": "Metrics in Discover - Save Session should flag a sort change as unsaved and revert to the saved sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 181,
+        "column": 22
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-4d3fb4cbe6e55bc",
+      "title": "Metrics in Discover - Save Session should reopen a session saved with the recency sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 216,
+        "column": 9
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-5c723f1b2b091b9",
+      "title": "Metrics in Discover - Save Session should open a session saved before sort was persisted with the default sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 244,
+        "column": 24
       }
     },
     {
@@ -943,8 +1015,26 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
-        "line": 43,
-        "column": 66
+        "line": 59,
+        "column": 24
+      }
+    },
+    {
+      "id": "9901fdc737200ac-40cc0c2f674cc38",
+      "title": "Metrics in Discover - Share Session should share the recency sort but order by the recipient's own history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
+        "line": 151,
+        "column": 20
       }
     },
     {

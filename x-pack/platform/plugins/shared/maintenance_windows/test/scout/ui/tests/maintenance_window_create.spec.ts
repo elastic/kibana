@@ -158,7 +158,9 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleAfterXOccurenceInput').fill('5');
 
     await page.testSubj.click(SUBMIT_BUTTON);
-    // Alerts defaults ON so the MW is created immediately without the confirmation modal.
+
+    // Alerts is on with no filter, so the "apply to all alerts" confirmation modal appears.
+    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Created maintenance window '${name}'`
@@ -241,6 +243,9 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await episodeInput.press('Enter');
 
     await page.testSubj.click(SUBMIT_BUTTON);
+
+    // Alerts (v1) is still on with no filter, so the "apply to all alerts" modal appears.
+    await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Created maintenance window '${name}'`

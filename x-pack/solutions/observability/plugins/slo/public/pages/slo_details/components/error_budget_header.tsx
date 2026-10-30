@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
@@ -62,7 +61,7 @@ export function ErrorBudgetHeader({
       {!hideHeaderDurationLabel && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
-            {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+            {slo.timeWindow.type === 'rolling'
               ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
                   defaultMessage: 'Last {duration}',
                   values: { duration: toDurationLabel(slo.timeWindow.duration) },

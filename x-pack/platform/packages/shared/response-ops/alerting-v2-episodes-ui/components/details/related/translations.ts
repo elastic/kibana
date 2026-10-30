@@ -106,3 +106,39 @@ export const EPISODE_ID_COPIED = i18n.translate(
     defaultMessage: 'Alert ID copied',
   }
 );
+
+export const RELATED_SAME_GROUP_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.sameGroupSourceDescription',
+  {
+    defaultMessage: 'Other alerts from this source that share the same group as this alert.',
+  }
+);
+
+export const RELATED_OTHER_GROUPS_SOURCE_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.otherGroupsSourceTitle',
+  {
+    defaultMessage: 'Other groups from this source',
+  }
+);
+
+export const RELATED_OTHER_GROUPS_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.otherGroupsSourceDescription',
+  {
+    defaultMessage:
+      'Other alerts from this source that belong to a different group than the current alert.',
+  }
+);
+
+export const RELATED_SOURCE_ONLY_LIST_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.sourceOnlyListTitle',
+  {
+    defaultMessage: 'Other alerts from this source',
+  }
+);
+
+export const RELATED_SOURCE_ONLY_LIST_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.related.sourceOnlyListDescription',
+  {
+    defaultMessage: 'Other alerts from this source, excluding the current one.',
+  }
+);

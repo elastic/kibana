@@ -9,7 +9,11 @@ import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '../../../entities_grid/common';
 import { getRiskScoreIndex } from '../../../entities_grid/queries/esql';
-import { buildRiskLevelHistoryBranch, buildRiskScoreHistoryBranch } from '../risk_history';
+import {
+  RISK_MOVER_MIN_SCORE_CHANGE,
+  buildRiskLevelHistoryBranch,
+  buildRiskScoreHistoryBranch,
+} from '../risk_history';
 import { buildJoinTail } from '../risk_previous_period';
 import {
   buildRiskTilesSeriesQuery,
@@ -42,6 +46,9 @@ import { describeSeriesFollowsCount, readCounts, RANGES } from './series_follow_
  * | host:r6   | 1500         | 10 Low, at 5: 80 High; no entity doc, so dropped                    |
  * | user:r7   | 1500         | 75 High, at 600: 40 Low, at 90: 78 High                             |
  * | host:r8   | 1500         | 20 Low, at 1300: 55 Moderate, at 40: 95 Critical                    |
+ * | host:g1   | 1500         | own 30 Low throughout; group 40 Low, at 100: 70 High (the group counts) |
+ * | host:g1a  | 1500         | alias of host:g1: own 20 Low, at 140: 80 Critical (must not count, even where the group does not rise) |
+ * | host:g4   | 1500         | like host:g1, but each group doc is older than the own doc of its hour (the group still counts) |
  */
 
 const NAMESPACE = 'default';
@@ -65,6 +72,8 @@ interface EntitySeed {
   changes: Change[];
   resolvedTo?: string;
   noEntityDoc?: boolean;
+  /** The group's own (resolution) value, on a main entity: its history, hour by hour. */
+  group?: { initial: Value; changes: Change[]; hoursOlder?: number };
 }
 
 const R1_CHANGES: Change[] = [
@@ -119,6 +128,27 @@ const ENTITIES: readonly EntitySeed[] = [
       [40, [95, 'Critical']],
     ],
   },
+  {
+    id: 'host:g1',
+    from: HISTORY_HOURS,
+    initial: [30, 'Low'],
+    changes: [],
+    group: { initial: [40, 'Low'], changes: [[100, [70, 'High']]] },
+  },
+  {
+    id: 'host:g1a',
+    from: HISTORY_HOURS,
+    initial: [20, 'Low'],
+    changes: [[140, [80, 'Critical']]],
+    resolvedTo: 'host:g1',
+  },
+  {
+    id: 'host:g4',
+    from: HISTORY_HOURS,
+    initial: [30, 'Low'],
+    changes: [],
+    group: { initial: [40, 'Low'], changes: [[100, [70, 'High']]], hoursOlder: 0.3 },
+  },
 ];
 
 const valueAt = ({ initial, changes }: EntitySeed, hoursAgo: number): Value =>
@@ -137,6 +167,8 @@ const loadFixture = async (client: Client) => {
         'entity.risk.calculated_score_norm': FLOAT,
         'entity.risk.calculated_level': KEYWORD,
         'entity.relationships.resolution.resolved_to': KEYWORD,
+        'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+        'entity.relationships.resolution.risk.calculated_level': KEYWORD,
       },
     },
   });
@@ -148,9 +180,11 @@ const loadFixture = async (client: Client) => {
         'host.risk.id_value': KEYWORD,
         'host.risk.calculated_score_norm': FLOAT,
         'host.risk.calculated_level': KEYWORD,
+        'host.risk.score_type': KEYWORD,
         'user.risk.id_value': KEYWORD,
         'user.risk.calculated_score_norm': FLOAT,
         'user.risk.calculated_level': KEYWORD,
+        'user.risk.score_type': KEYWORD,
       },
     },
   });
@@ -167,6 +201,18 @@ const loadFixture = async (client: Client) => {
             'entity.name': seed.id.split(':')[1],
             'entity.risk.calculated_score_norm': score,
             'entity.risk.calculated_level': level,
+            ...(seed.group
+              ? {
+                  'entity.relationships.resolution.risk.calculated_score_norm': valueAt(
+                    { ...seed, ...seed.group },
+                    0
+                  )[0],
+                  'entity.relationships.resolution.risk.calculated_level': valueAt(
+                    { ...seed, ...seed.group },
+                    0
+                  )[1],
+                }
+              : {}),
             ...(seed.resolvedTo
               ? { 'entity.relationships.resolution.resolved_to': seed.resolvedTo }
               : {}),
@@ -174,15 +220,23 @@ const loadFixture = async (client: Client) => {
         ];
     const history = Array.from({ length: seed.from + 1 }, (_, h) => {
       const [docScore, docLevel] = valueAt(seed, h);
-      return [
+      const doc = (value: Value, scoreType?: 'base' | 'resolution', hoursOlder = 0) => [
         { index: { _index: getRiskScoreIndex(NAMESPACE) } },
         {
-          '@timestamp': new Date(now - (h + 0.5) * HOUR_MS).toISOString(),
+          '@timestamp': new Date(now - (h + 0.5 + hoursOlder) * HOUR_MS).toISOString(),
           [`${type}.risk.id_value`]: seed.id,
-          [`${type}.risk.calculated_score_norm`]: docScore,
-          [`${type}.risk.calculated_level`]: docLevel,
+          [`${type}.risk.calculated_score_norm`]: value[0],
+          [`${type}.risk.calculated_level`]: value[1],
+          ...(scoreType ? { [`${type}.risk.score_type`]: scoreType } : {}),
         },
       ];
+      // A main entity has its own (base) docs and its group's (resolution) docs, under one id.
+      return seed.group
+        ? [
+            ...doc([docScore, docLevel], 'base'),
+            ...doc(valueAt({ ...seed, ...seed.group }, h), 'resolution', seed.group.hoursOlder),
+          ]
+        : doc([docScore, docLevel]);
     }).flat();
     return [...entityDoc, ...history];
   });
@@ -204,7 +258,7 @@ const oracleMovers = (range: TimeRange, back: number) => {
     ...buildRiskScoreHistoryBranch(index, hoursBack(back), 'current_score'),
     ')',
     `| STATS boundary_score = MAX(boundary_score), current_score = MAX(current_score) BY \`entity.id\``,
-    `| WHERE current_score - boundary_score >= 10`,
+    `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
     ...buildJoinTail(ENTITY_INDEX, []),
   ].join('\n');
 };
@@ -236,12 +290,12 @@ describeSeriesFollowsCount({
     {
       name: 'Risk movers',
       column: riskMoversSeriesColumn,
-      byHand: { '24h': 2, '30d': 3 },
+      byHand: { '24h': 2, '30d': 5 },
     },
     {
       name: 'Newly high/critical',
       column: newlyHighCriticalSeriesColumn,
-      byHand: { '24h': 2, '30d': 4 },
+      byHand: { '24h': 2, '30d': 6 },
     },
   ],
   // The one query for both tiles.

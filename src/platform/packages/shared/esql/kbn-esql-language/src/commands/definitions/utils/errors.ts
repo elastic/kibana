@@ -52,14 +52,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   switch (messageId) {
     case 'unknownColumn':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownColumn', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownColumn', {
           defaultMessage: 'Unknown column "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unmappedColumnWarning':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unmappedColumnWarning', {
+        message: i18n.translate('esqlLanguage.esql.validation.unmappedColumnWarning', {
           defaultMessage: `"{name}" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
           values: { name: out.name },
         }),
@@ -68,42 +68,42 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownIndex':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownIndex', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unknownDataSource':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownDataSource', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownDataSource', {
           defaultMessage: 'Unknown data source "{name}"',
           values: { name: out.name },
         }),
       };
     case 'unknownCastingType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownCastingType', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownCastingType', {
           defaultMessage: 'Unknown inline cast type "::{castType}"',
           values: { castType: out.castType },
         }),
       };
     case 'invalidInlineCast':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.invalidInlineCast', {
+        message: i18n.translate('esqlLanguage.esql.validation.invalidInlineCast', {
           defaultMessage: 'Cannot cast value of type "{valueType}" to type "{castType}"',
           values: { castType: out.castType, valueType: out.valueType },
         }),
       };
     case 'unknownFunction':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.missingFunction', {
+        message: i18n.translate('esqlLanguage.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function {name}',
           values: { name: out.name.toUpperCase() },
         }),
       };
     case 'unknownSetting':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownSetting', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownSetting', {
           defaultMessage: 'Unknown setting {name}',
           values: { name: out.name },
         }),
@@ -113,7 +113,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         .map((sig) => `- (${sig})`)
         .join('\n  ');
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.noMatchingCallSignatures', {
+        message: i18n.translate('esqlLanguage.esql.validation.noMatchingCallSignatures', {
           defaultMessage: `Invalid input types for {functionName}.
 
 Received ({argTypes}).
@@ -129,7 +129,7 @@ Expected one of:
       };
     case 'wrongNumberArgsVariadic':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.wrongNumberArgsVariadic', {
+        message: i18n.translate('esqlLanguage.esql.validation.wrongNumberArgsVariadic', {
           defaultMessage: '{fn} expected {validArgCounts} arguments, but got {actual}.',
           values: {
             fn: out.fn.toUpperCase(),
@@ -143,7 +143,7 @@ Expected one of:
       };
     case 'wrongNumberArgsExact':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.wrongNumberArgsExact', {
+        message: i18n.translate('esqlLanguage.esql.validation.wrongNumberArgsExact', {
           defaultMessage:
             '{fn} expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
           values: {
@@ -155,7 +155,7 @@ Expected one of:
       };
     case 'wrongNumberArgsAtLeast':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.wrongNumberArgsAtLeast', {
+        message: i18n.translate('esqlLanguage.esql.validation.wrongNumberArgsAtLeast', {
           defaultMessage:
             '{fn} expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
           values: {
@@ -167,23 +167,20 @@ Expected one of:
       };
     case 'unsupportedColumnTypeForCommand':
       return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.unsupportedColumnTypeForCommand',
-          {
-            defaultMessage:
-              '{command} only supports values of type {type}. Found "{column}" of type {givenType}',
-            values: {
-              command: out.command.toUpperCase(),
-              type: out.type,
-              column: out.column,
-              givenType: out.givenType,
-            },
-          }
-        ),
+        message: i18n.translate('esqlLanguage.esql.validation.unsupportedColumnTypeForCommand', {
+          defaultMessage:
+            '{command} only supports values of type {type}. Found "{column}" of type {givenType}',
+          values: {
+            command: out.command.toUpperCase(),
+            type: out.type,
+            column: out.column,
+            givenType: out.givenType,
+          },
+        }),
       };
     case 'unknownDissectKeyword':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownDissectKeyword', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownDissectKeyword', {
           defaultMessage: 'Expected [APPEND_SEPARATOR] in [DISSECT] but found [{keyword}]',
           values: {
             keyword: out.keyword,
@@ -192,20 +189,17 @@ Expected one of:
       };
     case 'functionNotAllowedHere':
       return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.functionNotAvailableInLocation',
-          {
-            defaultMessage: 'Function {name} not allowed in {locationName}',
-            values: {
-              locationName: out.locationName.toUpperCase(),
-              name: out.name.toUpperCase(),
-            },
-          }
-        ),
+        message: i18n.translate('esqlLanguage.esql.validation.functionNotAvailableInLocation', {
+          defaultMessage: 'Function {name} not allowed in {locationName}',
+          values: {
+            locationName: out.locationName.toUpperCase(),
+            name: out.name.toUpperCase(),
+          },
+        }),
       };
     case 'unknownInterval':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownInterval', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownInterval', {
           defaultMessage: `Unexpected time interval qualifier: ''{value}''`,
           values: {
             value: out.value,
@@ -214,7 +208,7 @@ Expected one of:
       };
     case 'unknownPolicy':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownPolicy', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownPolicy', {
           defaultMessage: 'Unknown policy "{name}"',
           values: {
             name: out.name,
@@ -223,7 +217,7 @@ Expected one of:
       };
     case 'nestedAggFunction':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.nestedAggFunction', {
+        message: i18n.translate('esqlLanguage.esql.validation.nestedAggFunction', {
           defaultMessage: 'Aggregation functions cannot be nested. Found {name} in {parentName}.',
           values: {
             parentName: out.parentName.toUpperCase(),
@@ -233,7 +227,7 @@ Expected one of:
       };
     case 'expectedAggregationArgument':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
+        message: i18n.translate('esqlLanguage.esql.validation.expectedAggregationArgument', {
           defaultMessage: 'This argument of {parentName} must be an aggregation function.',
           values: {
             parentName: out.parentName.toUpperCase(),
@@ -242,7 +236,7 @@ Expected one of:
       };
     case 'unknownAggregateFunction':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknowAggregateFunction', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknowAggregateFunction', {
           defaultMessage:
             'Expected an aggregate function or group but got "{value}" of type {type}',
           values: {
@@ -253,7 +247,7 @@ Expected one of:
       };
     case 'unsupportedFieldType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unsupportedFieldType', {
+        message: i18n.translate('esqlLanguage.esql.validation.unsupportedFieldType', {
           defaultMessage:
             'Field "{field}" cannot be retrieved, it is unsupported or not indexed; returning null',
           values: {
@@ -263,7 +257,7 @@ Expected one of:
       };
     case 'columnTypeConflict':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.columnTypeConflict', {
+        message: i18n.translate('esqlLanguage.esql.validation.columnTypeConflict', {
           defaultMessage: 'Column [{columnName}] has conflicting types across indices{typesSuffix}',
           values: {
             columnName: out.columnName,
@@ -275,7 +269,7 @@ Expected one of:
     case 'inSubqueryColumnCountMismatch':
       return {
         message: i18n.translate(
-          'kbn-esql-language.esql.validation.inSubqueryColumnCountMismatchErrorMessage',
+          'esqlLanguage.esql.validation.inSubqueryColumnCountMismatchErrorMessage',
           {
             defaultMessage:
               'The subquery must return {expected, plural, one {# column} other {# columns}}, but returned {actual}',
@@ -285,7 +279,7 @@ Expected one of:
       };
     case 'inSubqueryTypeMismatch':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.inSubqueryTypeMismatch', {
+        message: i18n.translate('esqlLanguage.esql.validation.inSubqueryTypeMismatch', {
           defaultMessage:
             'Left field [{leftField}] of type [{leftType}] is incompatible with right field [{rightField}] of type [{rightType}]',
           values: {
@@ -298,7 +292,7 @@ Expected one of:
       };
     case 'unsupportedMode':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unsupportedSettingValue', {
+        message: i18n.translate('esqlLanguage.esql.validation.unsupportedSettingValue', {
           defaultMessage:
             'Unrecognized value "{value}" for {command}, mode needs to be one of [{expected}]',
           values: {
@@ -311,14 +305,14 @@ Expected one of:
       };
     case 'metadataBracketsDeprecation':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.metadataBracketsDeprecation', {
+        message: i18n.translate('esqlLanguage.esql.validation.metadataBracketsDeprecation', {
           defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
         }),
         type: 'warning',
       };
     case 'unknownMetadataField':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.wrongMetadataArgumentType', {
+        message: i18n.translate('esqlLanguage.esql.validation.wrongMetadataArgumentType', {
           defaultMessage:
             'Metadata field "{value}" is not available. Available metadata fields are: [{availableFields}]',
           values: {
@@ -330,7 +324,7 @@ Expected one of:
       };
     case 'promqlInvalidParam':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidParam', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlInvalidParam', {
           defaultMessage: '[PROMQL] {reason}',
           values: { reason: out.reason },
         }),
@@ -338,7 +332,7 @@ Expected one of:
       };
     case 'promqlMutuallyExclusiveParams':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMutuallyExclusiveParams', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlMutuallyExclusiveParams', {
           defaultMessage: '[PROMQL] Parameters "{param1}" and "{param2}" are mutually exclusive',
           values: { param1: out.param1, param2: out.param2 },
         }),
@@ -346,14 +340,14 @@ Expected one of:
       };
     case 'promqlMissingQuery':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlMissingQuery', {
           defaultMessage: '[PROMQL] Missing query',
         }),
         type: 'error',
       };
     case 'promqlUnknownFunction':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlUnknownFunction', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlUnknownFunction', {
           defaultMessage: '[PROMQL] Unknown function "{fn}"',
           values: { fn: out.fn },
         }),
@@ -361,7 +355,7 @@ Expected one of:
       };
     case 'promqlWrongNumberArgs':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlWrongNumberArgs', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlWrongNumberArgs', {
           defaultMessage:
             '[PROMQL] Wrong number of arguments for "{fn}". Expected {expected}, got {actual}',
           values: { fn: out.fn, expected: out.expected, actual: out.actual },
@@ -370,14 +364,14 @@ Expected one of:
       };
     case 'promqlGroupingNotAllowed':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlGroupingNotAllowed', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlGroupingNotAllowed', {
           defaultMessage: '[PROMQL] Grouping is only allowed on aggregation',
         }),
         type: 'error',
       };
     case 'promqlNoMatchingSignature':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlNoMatchingSignature', {
+        message: i18n.translate('esqlLanguage.esql.validation.promqlNoMatchingSignature', {
           defaultMessage: '[PROMQL] Argument types require ({required}) for function "{fn}"',
           values: { fn: out.fn, required: out.required },
         }),
@@ -385,21 +379,18 @@ Expected one of:
       };
     case 'wrongDissectOptionArgumentType':
       return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.wrongDissectOptionArgumentType',
-          {
-            defaultMessage:
-              'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
-            values: {
-              value: out.value,
-            },
-          }
-        ),
+        message: i18n.translate('esqlLanguage.esql.validation.wrongDissectOptionArgumentType', {
+          defaultMessage:
+            'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
+          values: {
+            value: out.value,
+          },
+        }),
         type: 'error',
       };
     case 'invalidJoinIndex':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.invalidJoinIndex', {
+        message: i18n.translate('esqlLanguage.esql.validation.invalidJoinIndex', {
           defaultMessage:
             '"{identifier}" is not a valid JOIN index. Please use a "lookup" mode index.',
           values: { identifier: out.identifier },
@@ -407,7 +398,7 @@ Expected one of:
       };
     case 'joinOnSingleExpression':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.joinOnSingleExpression', {
+        message: i18n.translate('esqlLanguage.esql.validation.joinOnSingleExpression', {
           defaultMessage:
             'JOIN ON clause must be a comma separated list of fields or a single expression',
         }),
@@ -415,13 +406,13 @@ Expected one of:
       };
     case 'tooManyForks':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.tooManyForks', {
+        message: i18n.translate('esqlLanguage.esql.validation.tooManyForks', {
           defaultMessage: '[FORK] a query cannot have more than one FORK command.',
         }),
       };
     case 'licenseRequired':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.licenseRequired', {
+        message: i18n.translate('esqlLanguage.esql.validation.licenseRequired', {
           defaultMessage: '{name} requires a {requiredLicense} license.',
           values: {
             name: out.name.toUpperCase(),
@@ -431,7 +422,7 @@ Expected one of:
       };
     case 'licenseRequiredForSignature':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.licenseRequiredForSignature', {
+        message: i18n.translate('esqlLanguage.esql.validation.licenseRequiredForSignature', {
           defaultMessage:
             '{name} with {signatureDescription} requires a {requiredLicense} license.',
           values: {
@@ -443,7 +434,7 @@ Expected one of:
       };
     case 'changePointWrongFieldType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.changePointWrongFieldType', {
+        message: i18n.translate('esqlLanguage.esql.validation.changePointWrongFieldType', {
           defaultMessage:
             'CHANGE_POINT only supports numeric values, found "{columnName}" of type {givenType}',
           values: {
@@ -455,7 +446,7 @@ Expected one of:
       };
     case 'dropTimestampWarning':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.dropTimestampWarning', {
+        message: i18n.translate('esqlLanguage.esql.validation.dropTimestampWarning', {
           defaultMessage: 'Dropping "@timestamp" prevents the time range from being applied.',
         }),
         type: 'warning',
@@ -463,7 +454,7 @@ Expected one of:
 
     case 'inferenceIdRequired':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.inferenceIdRequired', {
+        message: i18n.translate('esqlLanguage.esql.validation.inferenceIdRequired', {
           defaultMessage: '"inference_id" parameter is required for {command}.',
           values: { command: out.command.toUpperCase() },
         }),
@@ -472,7 +463,7 @@ Expected one of:
 
     case 'unsupportedQueryType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unsupportedQueryType', {
+        message: i18n.translate('esqlLanguage.esql.validation.unsupportedQueryType', {
           defaultMessage: '{command} query must be of type text. Found {expressionType}',
           values: { command: out.command.toUpperCase(), expressionType: out.expressionType },
         }),
@@ -480,14 +471,14 @@ Expected one of:
       };
     case 'forkTooManyBranches':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkTooManyBranches', {
+        message: i18n.translate('esqlLanguage.esql.validation.forkTooManyBranches', {
           defaultMessage: '[FORK] Supports a maximum of 8 branches.',
         }),
         type: 'error',
       };
     case 'invalidSettingValue':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
+        message: i18n.translate('esqlLanguage.esql.validation.invalidSettingValue', {
           defaultMessage: 'Invalid value "{value}" for setting "{setting}".',
           values: {
             value: out.value,
@@ -498,7 +489,7 @@ Expected one of:
       };
     case 'unknownMapParameterName':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
+        message: i18n.translate('esqlLanguage.esql.validation.unknownMapParameterName', {
           defaultMessage: 'Unknown parameter "{paramName}".',
           values: { paramName: out.paramName },
         }),
@@ -506,7 +497,7 @@ Expected one of:
       };
     case 'invalidMapParameterValueType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
+        message: i18n.translate('esqlLanguage.esql.validation.invalidMapParameterValueType', {
           defaultMessage:
             'Invalid type for parameter "{paramName}". Expected type: {expectedType}. Received: {actualType}.',
           values: {
@@ -519,7 +510,7 @@ Expected one of:
       };
     case 'mmrQueryVectorWrongType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.mmrQueryVectorWrongType', {
+        message: i18n.translate('esqlLanguage.esql.validation.mmrQueryVectorWrongType', {
           defaultMessage: '[MMR] Query vector must be of type dense_vector. Found {type}',
           values: { type: out.type },
         }),
@@ -527,7 +518,7 @@ Expected one of:
       };
     case 'mmrOnFieldWrongType':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.mmrOnFieldWrongType', {
+        message: i18n.translate('esqlLanguage.esql.validation.mmrOnFieldWrongType', {
           defaultMessage: '[MMR] ON field must be of type dense_vector. Found {type}',
           values: { type: out.type },
         }),
@@ -535,7 +526,7 @@ Expected one of:
       };
     case 'invalidMapParameterValue':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValue', {
+        message: i18n.translate('esqlLanguage.esql.validation.invalidMapParameterValue', {
           defaultMessage:
             'Invalid value "{value}" for parameter "{paramName}". Expected one of: {allowedValues}.',
           values: {
@@ -548,7 +539,7 @@ Expected one of:
       };
     case 'highlightInvalidOnPattern':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.highlightInvalidOnPattern', {
+        message: i18n.translate('esqlLanguage.esql.validation.highlightInvalidOnPattern', {
           defaultMessage:
             '[HIGHLIGHT] Invalid pattern [{pattern}] in ON, expected field names or [*]',
           values: { pattern: out.pattern },
@@ -557,14 +548,14 @@ Expected one of:
       };
     case 'highlightWildcardWithFields':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.highlightWildcardWithFields', {
+        message: i18n.translate('esqlLanguage.esql.validation.highlightWildcardWithFields', {
           defaultMessage: '[HIGHLIGHT] [*] cannot be combined with other fields in ON',
         }),
         type: 'error',
       };
     case 'highlightQueryFieldNotInOn':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.highlightQueryFieldNotInOn', {
+        message: i18n.translate('esqlLanguage.esql.validation.highlightQueryFieldNotInOn', {
           defaultMessage: '[HIGHLIGHT] Query field [{field}] is not in the ON fields [{fields}]',
           values: { field: out.field, fields: out.fields },
         }),
@@ -572,42 +563,33 @@ Expected one of:
       };
     case 'highlightInvalidPrefixModifier':
       return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.highlightInvalidPrefixModifier',
-          {
-            defaultMessage: '[HIGHLIGHT] Invalid modifier [{keyword}], expected [prefix]',
-            values: { keyword: out.keyword },
-          }
-        ),
+        message: i18n.translate('esqlLanguage.esql.validation.highlightInvalidPrefixModifier', {
+          defaultMessage: '[HIGHLIGHT] Invalid modifier [{keyword}], expected [prefix]',
+          values: { keyword: out.keyword },
+        }),
         type: 'error',
       };
     case 'highlightInvalidQueryExpression':
       return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.highlightInvalidQueryExpression',
-          {
-            defaultMessage:
-              '[HIGHLIGHT] Query must be a full-text function ({functions}), a string literal, or a boolean combination of them. Found [{expression}]',
-            values: { functions: FULL_TEXT_FUNCTION_NAMES, expression: out.expression },
-          }
-        ),
+        message: i18n.translate('esqlLanguage.esql.validation.highlightInvalidQueryExpression', {
+          defaultMessage:
+            '[HIGHLIGHT] Query must be a full-text function ({functions}), a string literal, or a boolean combination of them. Found [{expression}]',
+          values: { functions: FULL_TEXT_FUNCTION_NAMES, expression: out.expression },
+        }),
         type: 'error',
       };
     case 'denseVectorInvalidSuffixModifier':
       return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.denseVectorInvalidSuffixModifier',
-          {
-            defaultMessage: '[DENSE_VECTOR] Invalid modifier [{keyword}], expected [suffix]',
-            values: { keyword: out.keyword },
-          }
-        ),
+        message: i18n.translate('esqlLanguage.esql.validation.denseVectorInvalidSuffixModifier', {
+          defaultMessage: '[DENSE_VECTOR] Invalid modifier [{keyword}], expected [suffix]',
+          values: { keyword: out.keyword },
+        }),
         type: 'error',
       };
     case 'denseVectorMultipleFieldsWithTarget':
       return {
         message: i18n.translate(
-          'kbn-esql-language.esql.validation.denseVectorMultipleFieldsWithTarget',
+          'esqlLanguage.esql.validation.denseVectorMultipleFieldsWithTarget',
           {
             defaultMessage:
               '[DENSE_VECTOR] Output name [{target}] accepts a single field. Use [suffix = "..." ON ...] to name the columns of several fields.',
@@ -618,7 +600,7 @@ Expected one of:
       };
     case 'tsdbIncompatibleFunction':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {
+        message: i18n.translate('esqlLanguage.esql.validation.tsdbIncompatibleFunction', {
           defaultMessage: 'Function {fnName} is not supported in time series (TS) pipelines',
           values: { fnName: out.fnName.toUpperCase() },
         }),
@@ -693,12 +675,9 @@ const withWarningSeverity = (message: ESQLMessage, shouldWarn: boolean): ESQLMes
 export const errors = {
   unexpected: (
     location: ESQLLocation,
-    message: string = i18n.translate(
-      'kbn-esql-language.esql.validation.errors.unexpected.message',
-      {
-        defaultMessage: 'Unexpected error, this should never happen.',
-      }
-    )
+    message: string = i18n.translate('esqlLanguage.esql.validation.errors.unexpected.message', {
+      defaultMessage: 'Unexpected error, this should never happen.',
+    })
   ): ESQLMessage => {
     return createError('unexpected', location, message);
   },

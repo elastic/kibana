@@ -62,14 +62,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: SignificantEventsSupertestRepositoryClient;
 
-  // A guarded, rule-touching route used only as a probe: the pause guard rejects
-  // it with 409 before it reaches any stream/rule work, so an unknown stream is
-  // enough. After resume it runs (reporting the stream as failed), proving the
-  // guard, not the missing stream, is what produced the 409.
-  const reconcileProbe = (expectStatusCode: number) =>
+  // A guarded, rule-mutating route used only as a probe: the pause guard rejects
+  // it with 409 before it reaches any query/rule work. After resume, the unknown
+  // query id makes the route return without changing a rule.
+  const demoteProbe = (expectStatusCode: number) =>
     apiClient
-      .fetch('POST /internal/streams/queries/_reconcile', {
-        params: { body: { sourceIds: ['logs.maintenance-probe-missing'] } },
+      .fetch('POST /internal/streams/queries/_demote', {
+        params: { body: { queryIds: ['maintenance-probe-missing'] } },
       })
       .expect(expectStatusCode);
 
@@ -107,13 +106,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('rejects rule-touching routes with 409 while paused and allows them once resumed', async () => {
-      await reconcileProbe(200);
+      await demoteProbe(200);
 
       await pauseMaintenance(apiClient);
-      await reconcileProbe(409);
+      await demoteProbe(409);
 
       await resumeMaintenance(apiClient);
-      await reconcileProbe(200);
+      await demoteProbe(200);
     });
 
     it('is idempotent: pausing twice keeps the paused state', async () => {
@@ -207,6 +206,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
+        /* Pause now: the KI sync sweep deletes exactly this orphan, and its guard is the only thing that stops it. */
+        await pauseMaintenance(apiClient);
+
         const seededRules = await alertingApi.searchRulesV2(roleAuthc, {
           search: 'Maintenance reset',
         });
@@ -268,7 +270,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: REGISTERED_DATA_STREAMS.join(','),
         });
 
-        await pauseMaintenance(apiClient);
         const reset = await resetMaintenance(apiClient);
         expect(reset.state).to.eql('enabled');
         if (!reset.deleted) {

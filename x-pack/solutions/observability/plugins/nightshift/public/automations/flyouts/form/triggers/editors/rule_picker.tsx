@@ -28,7 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { MAX_RULE_NAMES } from '@kbn/nightshift-investigations-plugin/common';
-import { useRuleCatalog } from '../../../../../hooks/use_rule_catalog';
+import { useRuleCatalog } from '../../../../../data/rules/use_rule_catalog';
 import type { TriggerFormValues } from '../../automation_form_values';
 import { rulePickerLabels } from '../translations';
 import { matchedTags, resolveRuleNames } from './rule_selection';

@@ -88,7 +88,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   const startSearchingPrompt = (
     <EuiEmptyPrompt
       data-test-subj="discoverUninitialized"
-      iconType="discoverApp"
+      iconType="productDiscover"
       title={
         <h2>
           <FormattedMessage id="discover.uninitializedTitle" defaultMessage="Start searching" />

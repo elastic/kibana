@@ -63,12 +63,18 @@ export const loadInvestigationDataset = async (
   };
 };
 
+/** Reads and validates an examples file: a `nightshift/` dataset name and distinct case ids. */
+export const readInvestigationFile = (path: string): z.infer<typeof investigationFileSchema> => {
+  const file = investigationFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
+  assertDistinctCaseIds(file.examples);
+  return file;
+};
+
 /** Loads a file dataset for ungraded investigations, preserving optional labels and metadata. */
 export const readInvestigationDataset = (
   path = process.env.NIGHTSHIFT_EXAMPLES_FILE ?? join(__dirname, 'synthetic.json')
 ): EvaluationDataset<InvestigationExample> => {
-  const file = investigationFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
-  assertDistinctCaseIds(file.examples);
+  const file = readInvestigationFile(path);
   return {
     name: file.dataset,
     description: file.description ?? 'Ungraded investigations with complete agent traces.',

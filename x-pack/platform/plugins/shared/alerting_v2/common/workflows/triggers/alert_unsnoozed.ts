@@ -23,15 +23,15 @@ export const alertUnsnoozedTriggerCommonDefinition: CommonTriggerDefinition<
   id: ALERT_UNSNOOZED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: alertUnsnoozedPayloadSchema,
-  title: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertUnsnoozed.title', {
+  title: i18n.translate('xpack.alertingV2.workflowTriggers.alertUnsnoozed.title', {
     defaultMessage: 'Alerting - Alert unsnoozed',
   }),
-  description: i18n.translate('xpack.alertingVTwo.workflowTriggers.alertUnsnoozed.description', {
+  description: i18n.translate('xpack.alertingV2.workflowTriggers.alertUnsnoozed.description', {
     defaultMessage: 'Emitted when snooze is removed from an alert.',
   }),
   documentation: {
     details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.alertUnsnoozed.documentation.details',
+      'xpack.alertingV2.workflowTriggers.alertUnsnoozed.documentation.details',
       {
         defaultMessage:
           'Emitted after an alert unsnooze action is persisted. The payload includes event.alertId, event.ruleId, and event.spaceId for trigger conditions.',

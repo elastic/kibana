@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
@@ -219,6 +219,75 @@ describe('SavedObjectAttachmentsTable', () => {
       { wrapperProps: { permissions: buildCasesPermissions({ delete: false }) } }
     );
     expect(screen.queryByTestId('cases-so-attachments-table-delete-c1')).not.toBeInTheDocument();
+  });
+
+  describe('bulk remove', () => {
+    const data = caseWith([
+      soAttachment('c1', DASHBOARD_ATTACHMENT_TYPE, 'dash-1', 'Sales overview'),
+      soAttachment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'Inventory'),
+    ]);
+
+    it('does not render row selection without onRemove', () => {
+      renderWithTestingProviders(
+        <SavedObjectAttachmentsTable
+          caseData={data}
+          attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
+          soType="dashboard"
+        />
+      );
+
+      expect(screen.queryByTestId('checkboxSelectRow-c1')).not.toBeInTheDocument();
+    });
+
+    it('removes the selected attachments by saved object id and clears the selection', async () => {
+      const onRemove = jest.fn();
+      renderWithTestingProviders(
+        <SavedObjectAttachmentsTable
+          caseData={data}
+          attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
+          soType="dashboard"
+          onRemove={onRemove}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('checkboxSelectRow-c1'));
+      await userEvent.click(screen.getByTestId('checkboxSelectRow-c2'));
+      expect(screen.getByTestId('cases-attachments-selected-count')).toHaveTextContent(
+        '2 selected'
+      );
+
+      await userEvent.click(screen.getByTestId('cases-attachments-remove-selected'));
+      expect(onRemove).toHaveBeenCalledWith(
+        { savedObjectIds: ['c1', 'c2'] },
+        { onSuccess: expect.any(Function) }
+      );
+
+      const [[, { onSuccess }]] = onRemove.mock.calls;
+      act(() => onSuccess());
+      expect(screen.queryByTestId('cases-attachments-selected-count')).not.toBeInTheDocument();
+    });
+
+    it('drops selected rows hidden by the search term', async () => {
+      const onRemove = jest.fn();
+      const props = {
+        caseData: data,
+        attachmentTypeId: DASHBOARD_ATTACHMENT_TYPE,
+        soType: 'dashboard',
+        onRemove,
+      };
+      const { rerender } = renderWithTestingProviders(<SavedObjectAttachmentsTable {...props} />);
+
+      await userEvent.click(screen.getByTestId('checkboxSelectRow-c1'));
+      await userEvent.click(screen.getByTestId('checkboxSelectRow-c2'));
+
+      rerender(<SavedObjectAttachmentsTable {...props} searchTerm="sales" />);
+      await userEvent.click(screen.getByTestId('cases-attachments-remove-selected'));
+
+      expect(onRemove).toHaveBeenCalledWith(
+        { savedObjectIds: ['c1'] },
+        { onSuccess: expect.any(Function) }
+      );
+    });
   });
 
   it('confirms deletion and calls useDeleteComment with the row id', async () => {

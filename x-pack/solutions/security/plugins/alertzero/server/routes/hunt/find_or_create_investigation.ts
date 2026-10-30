@@ -10,6 +10,7 @@ import {
   API_VERSIONS,
   FindOrCreateInvestigationRequestBody,
   INTERNAL_API_ACCESS,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
@@ -18,6 +19,10 @@ import {
 } from '../../../common/constants';
 import { loadReportHuntContext } from '../../services/watches/hunt/common/load_report_context';
 import { runFindOrCreateInvestigation } from '../../services/watches/hunt/common/find_or_create_investigation';
+import {
+  ALERTZERO_TELEMETRY_EVENTS,
+  buildWorkerInvestigationReopenedPayload,
+} from '../../telemetry';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
@@ -34,6 +39,7 @@ export const registerFindOrCreateInvestigationRoute = ({
   logger,
   getSpaceId,
   getAgentBuilderConversations,
+  reportTelemetryEvent,
 }: RouteDependencies): void => {
   router.versioned
     .post({
@@ -72,6 +78,17 @@ export const registerFindOrCreateInvestigationRoute = ({
               loadReport: () =>
                 loadReportHuntContext({ esClient: reportsEsClient, spaceId, reportId }),
               logger,
+              // Only the Hunt Worker's find-or-create step calls this route, so the reopen is
+              // reported as that Worker's. The route does not verify its caller.
+              onReopened: (investigationId) =>
+                reportTelemetryEvent(
+                  ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationReopened,
+                  buildWorkerInvestigationReopenedPayload({
+                    investigationId,
+                    spaceId,
+                    workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+                  })
+                ),
             }
           );
 
