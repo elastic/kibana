@@ -341,4 +341,56 @@ steps:
     expect(collectionResult?.severity).toBe('warning');
     expect(collectionResult?.message).toBe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
   });
+
+  it('validates loop-variable paths that use colon-style filter arguments', () => {
+    const yaml = `name: Colon filter args
+enabled: false
+triggers:
+  - type: manual
+consts:
+  items:
+    - name: Alice
+steps:
+  - name: summarize
+    type: console
+    with:
+      message: |
+        {%- for row in consts.items %}
+        {{ row.name | default: "n/a" }}
+        {{ row.missing | default: "n/a" }}
+        {%- endfor %}`;
+    const definition: WorkflowYaml = {
+      version: '1',
+      name: 'Colon filter args',
+      enabled: false,
+      triggers: [{ type: 'manual' }],
+      consts: { items: [{ name: 'Alice' }] },
+      steps: [{ name: 'summarize', type: 'console', with: { message: 'x' } }],
+    };
+    const graph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const docLineCounter = new LineCounter();
+    const doc = parseDocument(yaml, { lineCounter: docLineCounter });
+
+    const variableItems = collectAllVariables(yaml, doc, docLineCounter, graph);
+    expect(variableItems.map((item) => item.key)).toEqual([
+      'row.name | default: "n/a"',
+      'row.missing | default: "n/a"',
+    ]);
+
+    const results = validateVariables(
+      createStepContextResolver(emptyRegistry, definition, graph, doc),
+      variableItems,
+      definition,
+      doc,
+      yaml
+    );
+
+    const errors = results.filter((r) => r.severity === 'error');
+    expect(errors).toEqual([
+      expect.objectContaining({
+        key: 'row.missing | default: "n/a"',
+        ruleId: 'invalidVariableReference',
+      }),
+    ]);
+  });
 });
