@@ -934,7 +934,6 @@ export class DataGridService extends FtrService {
   }
 
   public async closeComparisonSettingsMenu() {
-    // End on the menu being gone so the next open starts from a known state
     await this.retry.try(async () => {
       if (await this.testSubjects.exists('unifiedDataTableComparisonSettingsMenu')) {
         await this.testSubjects.click('unifiedDataTableComparisonSettings');

@@ -213,7 +213,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async closeSavedQueryManagementComponent() {
-    // End on the panel being gone so the next open remounts the menu on its root panel
+    // Wait until gone so the next open starts on the root panel
     await this.retry.try(async () => {
       if (await this.testSubjects.exists('queryBarMenuPanel')) {
         await this.testSubjects.click('showQueryBarMenu');

@@ -112,14 +112,7 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.pressEnter(dataTestSubj);
   }
 
-  /**
-   * Reveals the SuperDatePicker's start/end date popover buttons.
-   *
-   * The picker hides those buttons whenever it is collapsed (a single "Show
-   * dates" button, shown for pretty relative ranges) or disabled by its consumer.
-   * Retry until the popover buttons are actually shown so callers can rely on
-   * them being present.
-   */
+  /** Expand the SuperDatePicker until its start/end date popover buttons are shown. */
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.existOrFail('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
@@ -128,12 +121,10 @@ export class TimePickerPageObject extends FtrService {
       'start and end date popover buttons to be shown',
       20000,
       async () => {
-        // Already expanded: the popover buttons are present.
         if (await this.testSubjects.exists('superDatePickerstartDatePopoverButton')) {
           return true;
         }
-        // Otherwise the picker is collapsed to a single "Show dates" button, which may be
-        // rendered disabled while the consumer resolves its time field.
+        // Collapsed: "Show dates" may be disabled while the time field resolves
         if (!(await this.testSubjects.exists('superDatePickerShowDatesButton'))) {
           return false;
         }
