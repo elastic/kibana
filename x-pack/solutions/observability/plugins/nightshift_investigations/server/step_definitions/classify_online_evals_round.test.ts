@@ -36,10 +36,12 @@ const setup = ({
   rounds = [{ id: 'round-1', started_at: DURING_RUN, steps: [] }],
   paused = false,
   evalsAvailable = true,
+  agentBuilderAvailable = true,
 }: {
   rounds?: Array<{ id: string; started_at: string; steps: unknown[] }>;
   paused?: boolean;
   evalsAvailable?: boolean;
+  agentBuilderAvailable?: boolean;
 } = {}) => {
   const get = jest.fn().mockResolvedValue({ id: 'inv-1', rounds });
   const getScopedClient = jest.fn().mockResolvedValue({ get });
@@ -47,7 +49,9 @@ const setup = ({
   const reportOnlineEvalsStepFailed = jest.fn();
   const definition = classifyOnlineEvalsRoundStepDefinition({
     getAgentBuilder: () =>
-      ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart),
+      agentBuilderAvailable
+        ? ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart)
+        : undefined,
     isEvalsAvailable: () => evalsAvailable,
     isPaused,
     telemetry: { reportOnlineEvalsStepFailed } as unknown as NightshiftTelemetryClient,
@@ -156,6 +160,17 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
       workflow_execution_id: 'investigation-exec-1',
       space_id: 'ops',
     });
+  });
+
+  it('reports Agent Builder being unavailable and skips the round', async () => {
+    const { run, reportOnlineEvalsStepFailed } = setup({ agentBuilderAvailable: false });
+
+    await expect(run()).resolves.toEqual({
+      output: { should_score: false, skip_reason: 'classification_failed' },
+    });
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'classify_round', code: 'agent_builder_unavailable' })
+    );
   });
 
   it('reports invalid input and skips the round, without reading the investigation', async () => {

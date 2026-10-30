@@ -17,6 +17,7 @@ import type {
 export class OnlineEvalsStepError extends Error {
   constructor(public readonly code: OnlineEvalsStepFailureCode, message: string) {
     super(message);
+    this.name = 'OnlineEvalsStepError';
   }
 }
 

@@ -7,13 +7,14 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateFn } from '@kbn/evals-plugin/server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
 import { buildOnlineEvalScoreEvent, type EvaluateResult } from '../online_evals/build_score_event';
-import { reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
+import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
 /** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
@@ -87,46 +88,59 @@ const skip = (skipReason: SkipReason) => ({
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
-interface RoundEvaluation {
-  results: EvaluateResult[];
-  failedEvaluators: ScoreInput['evaluators'];
-  agentId?: string;
-  roundTraceId?: string;
-  investigationEndedAt?: string;
-}
+/** Reads the round to score. Throws a coded error, reported as a step failure, when it can't. */
+const readRound = async ({
+  input,
+  getAgentBuilder,
+  request,
+}: {
+  input: ScoreInput;
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  request: KibanaRequest;
+}): Promise<{ agentId: string; round: ConversationRound }> => {
+  const agentBuilder = getAgentBuilder();
+  if (!agentBuilder) {
+    throw new OnlineEvalsStepError(
+      'agent_builder_unavailable',
+      'Agent Builder is not available, so the investigation cannot be read'
+    );
+  }
+  const conversation = await agentBuilder.conversations
+    .getScopedClient({ request })
+    .then((conversations) => conversations.get(input.investigation_id))
+    .catch((error) => {
+      throw new OnlineEvalsStepError('investigation_unavailable', getErrorMessage(error));
+    });
+  const round = conversation.rounds.find(({ id }) => id === input.round_id);
+  if (!round) {
+    throw new OnlineEvalsStepError(
+      'round_not_found',
+      `Round "${input.round_id}" not found in the investigation`
+    );
+  }
+  return { agentId: conversation.agent_id, round };
+};
 
 /**
- * Reads the round and runs the judges on it. A failure here is reported in the score event as
+ * Runs the judges on the round. An `evaluate()` that throws is reported in the score event as
  * every evaluator failing, rather than as a failed step.
  */
-const evaluateRound = async ({
+const runJudges = async ({
   input,
+  round,
   evaluate,
-  getAgentBuilder,
   request,
   spaceId,
   logger,
 }: {
   input: ScoreInput;
+  round: ConversationRound;
   evaluate: EvaluateFn;
-  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
   spaceId: string;
   logger: { warn(message: string): void };
-}): Promise<RoundEvaluation> => {
+}): Promise<{ results: EvaluateResult[]; failedEvaluators: ScoreInput['evaluators'] }> => {
   try {
-    const agentBuilder = getAgentBuilder();
-    if (!agentBuilder) {
-      throw new Error('Agent Builder is not available, so the investigation cannot be read');
-    }
-    const conversations = await agentBuilder.conversations.getScopedClient({ request });
-    const conversation = await conversations.get(input.investigation_id);
-    const round = conversation.rounds.find(({ id }) => id === input.round_id);
-    if (!round) {
-      throw new Error(`Round "${input.round_id}" not found in the investigation`);
-    }
-    const roundEndedAt = Date.parse(round.started_at) + round.time_to_last_token;
-
     const results = await evaluate({
       request,
       spaceId,
@@ -136,15 +150,7 @@ const evaluateRound = async ({
         connector_id: input.judge_connector_id,
       })),
     });
-    return {
-      results,
-      failedEvaluators: [],
-      agentId: conversation.agent_id,
-      roundTraceId: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
-      investigationEndedAt: Number.isFinite(roundEndedAt)
-        ? new Date(roundEndedAt).toISOString()
-        : undefined,
-    };
+    return { results, failedEvaluators: [] };
   } catch (error) {
     logger.warn(
       `Online evals could not score round "${input.round_id}" of investigation "${
@@ -153,6 +159,11 @@ const evaluateRound = async ({
     );
     return { results: [], failedEvaluators: input.evaluators };
   }
+};
+
+const getRoundEndedAt = (round: ConversationRound): string | undefined => {
+  const endedAt = Date.parse(round.started_at) + round.time_to_last_token;
+  return Number.isFinite(endedAt) ? new Date(endedAt).toISOString() : undefined;
 };
 
 export const scoreOnlineEvalsRoundStepDefinition = ({
@@ -176,7 +187,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
     label: 'Score an Investigation Round for Online Evals',
     category: StepCategory.Ai,
     description:
-      'Runs judges on one investigation round and sends the scores as a telemetry event. Never fails: judge and evidence failures are reported in the score event, and any other failure as telemetry.',
+      'Runs judges on one investigation round and sends the scores as a telemetry event. Never fails: judge failures are reported in the score event, and a round that cannot be read, or any other failure, as a step failure event.',
     inputSchema,
     outputSchema: z.object({
       scored: z.boolean().describe('Whether a score event was sent.'),
@@ -202,15 +213,19 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
         const scoringStartedAt = Date.now();
         const { workflow, execution } = context.contextManager.getContext();
 
-        const { results, failedEvaluators, agentId, roundTraceId, investigationEndedAt } =
-          await evaluateRound({
-            input,
-            evaluate,
-            getAgentBuilder,
-            request: context.contextManager.getFakeRequest(),
-            spaceId: workflow.spaceId,
-            logger: context.logger,
-          });
+        const request = context.contextManager.getFakeRequest();
+
+        const { agentId, round } = await readRound({ input, getAgentBuilder, request });
+        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        const investigationEndedAt = getRoundEndedAt(round);
+        const { results, failedEvaluators } = await runJudges({
+          input,
+          round,
+          evaluate,
+          request,
+          spaceId: workflow.spaceId,
+          logger: context.logger,
+        });
 
         const event = buildOnlineEvalScoreEvent({
           metadata: {
@@ -222,7 +237,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
               ? { investigation_execution_id: input.investigation_execution_id }
               : {}),
             space_id: workflow.spaceId,
-            ...(agentId ? { agent_id: agentId } : {}),
+            agent_id: agentId,
             evaluator_set: input.evaluator_set,
             round_kind: input.round_kind,
             graded_report: input.graded_report,
