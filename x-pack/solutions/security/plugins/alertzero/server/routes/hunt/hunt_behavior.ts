@@ -6,11 +6,17 @@
  */
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
-import { API_VERSIONS, HuntBehaviorRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
+  API_VERSIONS,
+  HuntBehaviorRequestBody,
+  INTERNAL_API_ACCESS,
+} from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
+import { selectHuntCallModel } from '../../services/watches/hunt/common/select_hunt_call_model';
 import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -55,18 +61,29 @@ export const registerHuntBehaviorRoute = ({
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
           // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
-          // why that distinction matters. Both Tier 2 jobs run on the Frontier tier, so a
-          // missing Frontier model fails the request.
+          // why that distinction matters. Extraction prefers a saved cyber-domain model.
+          // ES|QL generation keeps Frontier when that model requires a prompt template,
+          // so a missing Frontier model still fails the request in that case.
           const { models, failures } = await resolveHuntModels({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
+            telemetryPluginId: ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,
             tiers: TIER2_MODEL_TIERS,
           });
+          const extraction = selectHuntCallModel({
+            tierModel: models.frontier,
+            cyberModel: models.cyber,
+          });
+          const esql = selectHuntCallModel({
+            tierModel: models.frontier,
+            cyberModel: models.cyber,
+            messagesOnly: true,
+          });
 
-          if (!models.frontier) {
+          if (!extraction || !esql) {
             const failure = mostSevereFailure(failures);
             return response.customError({
               // A resolution that threw is ours to fix, not a missing connector the caller can add.
@@ -99,7 +116,7 @@ export const registerHuntBehaviorRoute = ({
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const body: HuntBehaviorResponse = await huntBehavior(
-            { extraction: models.frontier, esql: models.frontier },
+            { extraction, esql },
             logger,
             {
               text,
