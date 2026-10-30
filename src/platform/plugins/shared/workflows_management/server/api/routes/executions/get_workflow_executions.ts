@@ -31,7 +31,11 @@ import {
   assertCanReadManagedWorkflowExecution,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
-import { validatePaginationWindow, workflowIdParamSchema } from '../utils/schemas';
+import {
+  hasSearchAfterCursor,
+  validatePaginationWindow,
+  workflowIdParamSchema,
+} from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const executionStatusSchema = schema.oneOf(
@@ -215,7 +219,9 @@ export function registerGetWorkflowExecutionsRoute({
               },
               {
                 validate: (query) =>
-                  query.searchAfter ? undefined : validatePaginationWindow(MAX_PAGE_SIZE)(query),
+                  hasSearchAfterCursor(query.searchAfter)
+                    ? undefined
+                    : validatePaginationWindow(MAX_PAGE_SIZE)(query),
               }
             ),
           },

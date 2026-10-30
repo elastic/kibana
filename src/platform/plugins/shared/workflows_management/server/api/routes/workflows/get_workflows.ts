@@ -10,6 +10,7 @@
 import path from 'path';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { ES_MAX_RESULT_WINDOW } from '../../../lib/workflow_history_pagination_error';
 import type { GetWorkflowsParams } from '../../workflows_management_api';
 import type { RouteDependencies } from '../types';
 import {
@@ -36,7 +37,7 @@ const querySchema = schema.object(
     size: schema.maybe(
       schema.number({
         min: 1,
-        max: MAX_PAGE_SIZE,
+        max: ES_MAX_RESULT_WINDOW,
         meta: { description: 'Number of results per page.' },
       })
     ),

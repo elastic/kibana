@@ -40,3 +40,16 @@ export const validatePaginationWindow =
       return `page * size must not exceed ${ES_MAX_RESULT_WINDOW}`;
     }
   };
+
+/** True when `searchAfter` is a JSON array with at least one sort value. */
+export const hasSearchAfterCursor = (searchAfter?: string): boolean => {
+  if (!searchAfter) {
+    return false;
+  }
+  try {
+    const parsed: unknown = JSON.parse(searchAfter);
+    return Array.isArray(parsed) && parsed.length > 0;
+  } catch {
+    return false;
+  }
+};

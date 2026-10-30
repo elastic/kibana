@@ -10,6 +10,7 @@
 import { schema as configSchema } from '@kbn/config-schema';
 import {
   executionIdParamSchema,
+  hasSearchAfterCursor,
   idParamSchema,
   validatePaginationWindow,
   workflowIdParamSchema,
@@ -57,5 +58,17 @@ describe('validatePaginationWindow', () => {
 
   it('accepts a request without a page', () => {
     expect(querySchema.validate({ size: 100 })).toEqual({ size: 100 });
+  });
+});
+
+describe('hasSearchAfterCursor', () => {
+  it.each([
+    ['[1700000000000,"id"]', true],
+    ['[]', false],
+    ['not json', false],
+    ['{}', false],
+    [undefined, false],
+  ])('returns %s -> %s', (searchAfter, expected) => {
+    expect(hasSearchAfterCursor(searchAfter)).toBe(expected);
   });
 });
