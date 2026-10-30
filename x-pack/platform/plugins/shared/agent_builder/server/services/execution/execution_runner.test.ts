@@ -292,12 +292,9 @@ describe('handleAgentExecution', () => {
     );
   });
 
-  it('runs a standalone execution with the reasoning level returned by resolveServices', async () => {
-    resolveServicesMock.mockResolvedValue({
-      selectedConnectorId: 'connector-1',
-      modelProvider: createModelProviderMock(),
-      reasoningLevel: 'high',
-    } as never);
+  it('forwards the caller reasoningLevel to the agent run unchanged', async () => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
     executeAgentMock.mockReturnValue(
       of({
         type: ChatEventType.messageComplete,
@@ -315,56 +312,16 @@ describe('handleAgentExecution', () => {
           reasoningLevel: 'low',
         },
       } as never,
-      deps: createDeps({ conversationClient: createConversationClientMock() }),
+      deps: createDeps({ conversationClient }),
       request: { headers: {} } as never,
       abortSignal: new AbortController().signal,
     });
     await lastValueFrom(events$.pipe(toArray()));
 
-    expect(resolveServicesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
-    );
+    expect(resolveServicesMock).toHaveBeenCalledTimes(1);
+    expect(resolveServicesMock.mock.calls[0][0]).not.toHaveProperty('reasoningLevel');
     expect(executeAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ reasoningLevel: 'high' })
-    );
-  });
-
-  it('runs a conversation execution with the reasoning level returned by resolveServices', async () => {
-    const conversation = createEmptyConversation({
-      id: 'conversation-1',
-      title: 'Existing conversation',
-      agent_id: 'test-agent',
-    });
-    const conversationClient = createConversationClientMock();
-    conversationClient.get.mockResolvedValue(conversation);
-    conversationClient.update.mockResolvedValue(conversation);
-    resolveServicesMock.mockResolvedValue({
-      selectedConnectorId: 'connector-1',
-      modelProvider: createModelProviderMock(),
-      reasoningLevel: 'high',
-    } as never);
-    executeAgentMock.mockReturnValue(
-      of({
-        type: ChatEventType.roundComplete,
-        data: { round: createRound({}) },
-      } as RoundCompleteEvent)
-    );
-
-    const events$ = await runHandle({
-      agentParams: {
-        agentId: 'test-agent',
-        nextInput: { message: 'Hello' },
-        reasoningLevel: 'low',
-      },
-      conversationClient,
-    });
-    await lastValueFrom(events$.pipe(toArray()));
-
-    expect(resolveServicesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
-    );
-    expect(executeAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ reasoningLevel: 'high' })
+      expect.objectContaining({ reasoningLevel: 'low' })
     );
   });
 
