@@ -41,6 +41,7 @@ export type MachineType =
   | 'n2-standard-2'
   | 'n2-standard-4'
   | 'n2-standard-8'
+  | 'n2-standard-16'
   | 'n2d-custom-16-32768'
   | 'n2d-standard-2'
   | 'n2d-standard-8'
@@ -111,14 +112,18 @@ export const k8sMinimalAgent = (): AgentConfig => ({
 
 export const onDemandAgent = (machineType: MachineType): AgentConfig => ({ machineType });
 
+export const preemptibleAgent = (machineType: MachineType): AgentConfig => ({
+  machineType,
+  preemptible: true,
+});
+
 // For a non-preemptible agent restricted to these zones.
 export const agentZones = (zones: readonly Zone[]): Pick<AgentConfig, 'zones'> => ({
   zones: zones.join(','),
 });
 
 export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): AgentConfig => ({
-  machineType,
-  preemptible: true,
+  ...preemptibleAgent(machineType),
   spotZones: zones.join(','),
 });
 
