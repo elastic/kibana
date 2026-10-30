@@ -1880,7 +1880,7 @@
     "jest-snapshot": "29.7.0",
     "jest-specific-snapshot": "8.0.0",
     "jest-styled-components": "7.0.3",
-    "json-schema-typed": "8.0.2",
+    "json-schema-typed": "9.0.0",
     "keyv": "5.6.0",
     "license-checker": "25.0.1",
     "lighthouse": "13.4.1",
