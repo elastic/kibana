@@ -61,7 +61,7 @@ const probe = (over: Partial<RuleTuningVerdict> = {}): RuleTuningVerdict =>
     executionStatus: 'completed',
     stepExecutions: [{ stepId: DIAGNOSE_STEP_ID, output: { conversation_id: 'conv-1' } }],
     ...over,
-  }) as unknown as RuleTuningVerdict;
+  } as unknown as RuleTuningVerdict);
 
 const traceEsWith = (models: Array<{ model: string; chats: number }>) =>
   ({
@@ -74,7 +74,7 @@ const traceEsWith = (models: Array<{ model: string; chats: number }>) =>
         values: models.map(({ model, chats }) => [model, chats]),
       })),
     },
-  }) as unknown as EsClient;
+  } as unknown as EsClient);
 
 const pinClientWith = ({ readBack }: { readBack: string | null }) => {
   const update = jest.fn(async () => undefined);

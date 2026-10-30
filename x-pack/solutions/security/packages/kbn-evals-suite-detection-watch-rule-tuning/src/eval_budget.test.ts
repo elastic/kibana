@@ -120,21 +120,22 @@ describe('rule-tuning eval budget', () => {
   });
 
   it('keeps the worker fan-out able to open every gate at once', () => {
-    // The worker's run_reviews parallel branch must allow max >= max_rules_per_sweep so
-    // per-rule gates can be pending concurrently (the split's reason to exist). If
-    // someone shrinks one without the other, reviews serialize silently.
+    // Per-rule gates must be able to be pending at once. `run_reviews` starts each review
+    // with `workflow.executeAsync` and no fan-out cap, so a waiting `workflow.execute` or a
+    // `concurrency.max` below max_rules_per_sweep would serialize reviews silently.
     const worker = readWorker();
     const maxRules = Number(worker.match(/max_rules_per_sweep:\s*(\d+)/)?.[1]);
-    // `run_reviews` declares the only nested `concurrency:` block; its `max:` is the
-    // branch fan-out cap (a comment sits between the two, so match across lines).
-    const runReviews = worker.slice(worker.indexOf('- name: run_reviews'));
-    const concurrencyBlock = runReviews.slice(
-      runReviews.indexOf('concurrency:'),
-      runReviews.indexOf('steps:')
-    );
-    const maxBranches = Number(concurrencyBlock.match(/max:\s*(\d+)/)?.[1]);
+    const runReviewsStart = worker.indexOf('- name: run_reviews');
+    expect(runReviewsStart).toBeGreaterThan(-1);
+    const runReviews = worker.slice(runReviewsStart);
+    expect(runReviews).toMatch(/- name: run_review\n\s+type: workflow\.executeAsync\n/);
+
+    const header = runReviews.slice(0, runReviews.indexOf('steps:'));
+    const maxBranches = header.match(/max:\s*(\d+)/)?.[1];
     expect(maxRules).toBeGreaterThan(0);
-    expect(maxBranches).toBeGreaterThanOrEqual(maxRules);
+    if (maxBranches !== undefined) {
+      expect(Number(maxBranches)).toBeGreaterThanOrEqual(maxRules);
+    }
   });
 
   it('keeps the review gate the only 72h clock (no branch timeout can cancel a parked gate)', () => {

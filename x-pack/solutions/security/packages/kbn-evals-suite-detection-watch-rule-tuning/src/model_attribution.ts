@@ -207,7 +207,9 @@ export const pinInferenceFeatures = async ({
   if (!connector.id) {
     throw new Error(
       `Cannot pin inference features ${featureIds.join(', ')}: the eval connector fixture has no ` +
-        `id (name: ${connector.name ?? 'unknown'}). The workflow would run each tier's recommended ` +
+        `id (name: ${
+          connector.name ?? 'unknown'
+        }). The workflow would run each tier's recommended ` +
         `endpoint while the score docs name this connector's model.`
     );
   }

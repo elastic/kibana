@@ -342,25 +342,29 @@ describe('rule-tuning approval gate contract', () => {
     });
 
     it('refuses a rule type whose query is never previewed or applied', () => {
-      expect(supported({ ...plainQueryRule, type: 'new_terms' })).toBe(false);
+      expect(supported({ ...plainQueryRule, type: 'machine_learning' })).toBe(false);
+      expect(supported({ ...plainQueryRule, type: 'saved_query' })).toBe(false);
     });
 
-    it('supports threshold and schedule changes on both query and threshold rules', () => {
-      // #291874/#294332: the second clause only narrows THRESHOLD rules to the
-      // threshold/schedule arms; a query rule passes for every previewable type.
+    it('previews query changes on every query-language rule type', () => {
+      for (const type of ['eql', 'esql', 'new_terms', 'threat_match', 'threshold']) {
+        expect(supported({ ...plainQueryRule, type })).toBe(true);
+      }
+    });
+
+    it('limits threshold changes to threshold rules and allows schedule changes on both', () => {
       expect(supported({ ...plainQueryRule, type: 'threshold' }, 'threshold')).toBe(true);
       expect(supported({ ...plainQueryRule, type: 'threshold' }, 'schedule')).toBe(true);
-      expect(supported(plainQueryRule, 'threshold')).toBe(true);
       expect(supported(plainQueryRule, 'schedule')).toBe(true);
-      // A threshold rule cannot take a query/exception proposal.
-      expect(supported({ ...plainQueryRule, type: 'threshold' }, 'query')).toBe(false);
+      expect(supported(plainQueryRule, 'threshold')).toBe(false);
     });
 
-    it('refuses the rule modes whose preview fields cannot be omitted', () => {
-      expect(supported({ ...plainQueryRule, data_view_id: 'logs-view' })).toBe(false);
-      expect(supported({ ...plainQueryRule, timestamp_override: '@timestamp' })).toBe(false);
+    it('previews rules that carry a data view, timestamp override or alert suppression', () => {
+      // The preview forwards these fields from fetch_rule instead of refusing the rule.
+      expect(supported({ ...plainQueryRule, data_view_id: 'logs-view' })).toBe(true);
+      expect(supported({ ...plainQueryRule, timestamp_override: '@timestamp' })).toBe(true);
       expect(supported({ ...plainQueryRule, alert_suppression: { group_by: ['host.name'] } })).toBe(
-        false
+        true
       );
     });
 
