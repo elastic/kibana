@@ -270,6 +270,45 @@ describe('resolveConversation', () => {
   });
 });
 
+describe('admitNewConversation', () => {
+  const context = {
+    origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+    spaceId: 'default',
+    request: {} as KibanaRequest,
+    agentId: 'agent-1',
+  };
+
+  it('admits when no check is registered', async () => {
+    await expect(
+      createCallbackDeliveryService().admitNewConversation(context)
+    ).resolves.toBeUndefined();
+  });
+
+  it('runs every registered check in order', async () => {
+    const service = createCallbackDeliveryService();
+    const first = jest.fn().mockResolvedValue(undefined);
+    const second = jest.fn().mockResolvedValue(undefined);
+    service.setup().registerAdmissionCheck(first);
+    service.setup().registerAdmissionCheck(second);
+
+    await service.admitNewConversation(context);
+
+    expect(first).toHaveBeenCalledWith(context);
+    expect(second).toHaveBeenCalledWith(context);
+    expect(first.mock.invocationCallOrder[0]).toBeLessThan(second.mock.invocationCallOrder[0]);
+  });
+
+  it('propagates a refusal without running the next check', async () => {
+    const service = createCallbackDeliveryService();
+    const next = jest.fn();
+    service.setup().registerAdmissionCheck(jest.fn().mockRejectedValue(new Error('refused')));
+    service.setup().registerAdmissionCheck(next);
+
+    await expect(service.admitNewConversation(context)).rejects.toThrow('refused');
+    expect(next).not.toHaveBeenCalled();
+  });
+});
+
 describe('makeCallbackRequest', () => {
   afterEach(() => {
     jest.useRealTimers();

@@ -6,6 +6,8 @@
  */
 
 export type {
+  CallbackAdmissionCheck,
+  CallbackAdmissionContext,
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbackTransportDefinition,
