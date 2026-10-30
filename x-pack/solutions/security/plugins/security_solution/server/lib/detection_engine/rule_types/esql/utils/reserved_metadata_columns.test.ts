@@ -19,7 +19,7 @@ describe('removeReservedMetadataColumns', () => {
   });
 
   it('returns the removed column names without duplicates across documents', () => {
-    const documents = [
+    const documents: Array<Record<string, string>> = [
       { _source: '{"a":1}', _ignored: 'host.name' },
       { _source: '{"b":2}' },
       { 'host.name': 'host-1' },
