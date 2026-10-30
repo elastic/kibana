@@ -10,7 +10,16 @@
 import { parse } from 'yaml';
 import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW } from '.';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW } from './bound_investigation_completed';
+import CLEANUP_YAML from './cleanup.yaml';
+import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import BOUND_ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
+import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/continuous_onboarding.yaml';
+import SOURCE_RECONCILIATION_YAML from './knowledge_indicators/source_reconciliation.yaml';
+import SYNC_YAML from './knowledge_indicators/sync.yaml';
+import SCHEDULED_DETECTION_YAML from './scheduled_detection.yaml';
+import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
+import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowJsonSchema {
@@ -49,6 +58,7 @@ interface WorkflowStep {
 interface ParsedWorkflow {
   steps: WorkflowStep[];
   triggers?: Array<{
+    type?: string;
     inputs?: {
       properties?: Record<string, { type?: string; maxLength?: number }>;
     };
@@ -247,5 +257,41 @@ describe('significant events persistence workflow contracts', () => {
       completed_at: '{{ event.completed_at }}',
       outcome: '{{ event.status }}',
     });
+  });
+});
+
+describe('workflows that run as the detection engine service account', () => {
+  const startedBySchedule = [
+    ['cleanup', CLEANUP_YAML],
+    ['scheduled detection', SCHEDULED_DETECTION_YAML],
+    ['scheduled review', SCHEDULED_REVIEW_YAML],
+    ['sync', SYNC_YAML],
+    ['continuous onboarding', CONTINUOUS_ONBOARDING_YAML],
+  ];
+  const startedByServerCodeOrEvents = [
+    ['bound onboarding', BOUND_ONBOARDING_YAML],
+    ['bound orchestrator', BOUND_ORCHESTRATOR_YAML],
+    ['source reconciliation', SOURCE_RECONCILIATION_YAML],
+    ['investigation completed', INVESTIGATION_COMPLETED_YAML],
+  ];
+
+  // Anyone allowed to run workflows can start one through the generic run API, with any inputs.
+  it.each([...startedBySchedule, ...startedByServerCodeOrEvents])(
+    '%s refuses direct runs before doing anything',
+    (_name, yaml) => {
+      const { steps }: ParsedWorkflow = parse(yaml);
+      const [first] = steps;
+
+      expect(first.name).toBe('refuse_direct_runs');
+      expect(first.type).toBe('if');
+      expect(first.condition).toContain('execution.triggeredBy');
+      expect(first.steps?.[0].type).toBe('workflow.fail');
+    }
+  );
+
+  it.each(startedBySchedule)('%s has no manual trigger', (_name, yaml) => {
+    const { triggers }: ParsedWorkflow = parse(yaml);
+
+    expect(triggers?.map(({ type }) => type)).toEqual(['scheduled']);
   });
 });

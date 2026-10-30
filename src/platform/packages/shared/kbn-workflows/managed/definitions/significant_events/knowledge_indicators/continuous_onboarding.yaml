@@ -48,20 +48,21 @@ triggers:
   - type: scheduled
     with:
       every: '35m'
-  - type: manual
-    inputs:
-      - name: maxScheduledStreams
-        type: number
-        default: 5
-        description: 'Max streams to schedule per run; remaining eligible streams are skipped.'
-      - name: lookbackHours
-        type: number
-        default: 24
-        description: 'Hours of data to sample when identifying KIs.'
-      - name: extractionIntervalHours
-        type: number
-        description: 'Override for the min hours between extractions per stream. When omitted the Advanced Setting is used.'
 steps:
+  # Only the schedule starts this workflow. Anyone allowed to run workflows could otherwise run
+  # extraction as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "scheduled"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs continuous extraction as the Nightshift service account on its
+            schedule and cannot be run directly. This run was started by {{
+            execution.triggeredBy }}.
+
   # Step 1: Fetch eligible streams from the classification endpoint.
   - name: get_eligible
     type: kibana.request

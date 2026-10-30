@@ -19,6 +19,19 @@ triggers:
       condition: 'event.subject.type: "significant_event"'
 
 steps:
+  # Only an investigation event starts this workflow. A manual run could supply any event, and
+  # write it as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : ("nightshift-investigations.completed" or "nightshift-investigations.failed")'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow attaches investigations as the Nightshift service account and runs
+            only on investigation events. This run was started by {{ execution.triggeredBy }}.
+
   - name: attach_completed_investigation
     type: kibana.request
     with:

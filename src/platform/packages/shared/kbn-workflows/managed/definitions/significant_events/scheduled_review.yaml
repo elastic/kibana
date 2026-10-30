@@ -19,8 +19,21 @@ triggers:
   - type: scheduled
     with:
       every: "__REVIEW_INTERVAL_MINUTES__m"
-  - type: manual
 steps:
+  # Only the schedule starts this workflow. Anyone allowed to run workflows could otherwise run
+  # discovery as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "scheduled"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs the discovery review as the Nightshift service account on its
+            schedule and cannot be run directly. This run was started by {{
+            execution.triggeredBy }}.
+
   - name: run_review_until_drained
     type: while
     # Re-run while discovery found work this pass. A child error is deliberately

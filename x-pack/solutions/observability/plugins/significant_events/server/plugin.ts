@@ -34,7 +34,10 @@ import {
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { getNightshiftBoundSourceReconciliationWorkflowId } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundSourceReconciliationWorkflowId,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
@@ -544,7 +547,12 @@ export class SignificantEventsPlugin
             managementApi: reconciliationManagementApi,
             workflowId: getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
             workflowSpaceId: spaceId,
-          }).execute({ executionSpaceId: spaceId, inputs: { sourceId, sourceSlug }, request });
+          }).execute({
+            executionSpaceId: spaceId,
+            inputs: { sourceId, sourceSlug },
+            request,
+            triggeredBy: NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
+          });
         },
       })
     );
