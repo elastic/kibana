@@ -139,8 +139,9 @@ export interface AuthContext {
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
   /**
-   * The `fetch` for requests an auth type sends itself rather than through the axios client,
-   * such as token exchanges. Defaults to the global `fetch`; contract tests pass the mock's.
+   * Test-only `fetch` for requests an auth type sends itself rather than through the axios
+   * client, such as token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it
+   * for vendor calls; those go through `client`.
    */
   fetchTestOnly?: typeof fetch;
 }
@@ -329,8 +330,9 @@ export interface ActionContext {
    */
   relay?: RelayActionClient;
   /**
-   * The `fetch` for requests a handler sends itself rather than through `client`, such as token
-   * exchanges. Defaults to the global `fetch`; contract tests pass the mock's.
+   * Test-only `fetch` for requests a handler sends itself rather than through `client`, such as
+   * token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it for vendor
+   * calls; those go through `client`.
    */
   fetchTestOnly?: typeof fetch;
 }
