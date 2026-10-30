@@ -14,6 +14,7 @@ import {
   type QueryESQLControl,
 } from '@kbn/esql-types';
 import { getESQLControlVariablesFromState, getESQLQueryVariables } from '@kbn/esql-utils';
+import { getSectionIdByPanelId } from '../dashboard_state';
 import type { ResolveEsqlVariables } from '../resolve_panel';
 import type { ResolveEsqlControlColumnType } from '../types';
 
@@ -40,7 +41,7 @@ const toVariables = (
   );
 
 /** The variables a panel in the section sees: those of controls outside sections, and of its own section. */
-export const getEsqlVariablesForSection = (
+const getEsqlVariablesForSection = (
   variables: ESQLControlVariable[],
   sectionId: string | null | undefined
 ): ESQLControlVariable[] =>
@@ -58,23 +59,22 @@ export const getEsqlVariablesForSection = (
 export const createEsqlVariablesResolver = ({
   pinnedPanels = [],
   panels = [],
+  sectionIdByPanelId = getSectionIdByPanelId({ panels }),
   timeRange,
   resolveColumnType,
 }: {
   pinnedPanels?: DashboardAttachmentData['pinned_panels'];
   panels?: DashboardAttachmentData['panels'];
+  /** The section of each panel once the call is applied, which sets where a control in the grid applies. */
+  sectionIdByPanelId?: ReadonlyMap<string, string | null>;
   timeRange?: DashboardAttachmentData['time_range'];
   resolveColumnType?: ResolveEsqlControlColumnType;
 }): ((sectionId: string | null | undefined) => ResolveEsqlVariables) => {
-  const toEntries = (
-    controls: ReadonlyArray<Record<string, unknown>>,
-    group?: string
-  ): EsqlControlEntry[] =>
-    controls.flatMap(({ type, config }) => (type === ESQL_CONTROL ? [{ config, group }] : []));
-  const entries = [
-    ...toEntries(pinnedPanels),
-    ...panels.flatMap((widget) =>
-      isSection(widget) ? toEntries(widget.panels, widget.id) : toEntries([widget])
+  const gridPanels = panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
+  const entries: EsqlControlEntry[] = [
+    ...pinnedPanels.flatMap(({ type, config }) => (type === ESQL_CONTROL ? [{ config }] : [])),
+    ...gridPanels.flatMap(({ id, type, config }) =>
+      type === ESQL_CONTROL ? [{ config, group: sectionIdByPanelId.get(id) ?? undefined }] : []
     ),
   ];
   const variables = toVariables(entries);
@@ -102,18 +102,20 @@ export const createEsqlVariablesResolver = ({
     return columnType;
   };
 
-  return (sectionId) => async (queries) => {
-    const usedNames = new Set(queries.flatMap((query) => getESQLQueryVariables(query)));
-    const types: Record<string, string> = {};
-    await Promise.all(
-      entries.map(async (entry) => {
-        const { config, group } = entry;
-        const name = asQueryControl(config)?.variable_name;
-        if (!name || !usedNames.has(name) || (group && group !== sectionId)) return;
-        const columnType = await getColumnType(entry);
-        if (columnType) types[name] = columnType;
-      })
-    );
-    return getEsqlVariablesForSection(toVariables(entries, types), sectionId);
-  };
+  return (sectionId) =>
+    async (queries, { anyVariable = false } = {}) => {
+      const usedNames = new Set(queries.flatMap((query) => getESQLQueryVariables(query)));
+      const types: Record<string, string> = {};
+      await Promise.all(
+        entries.map(async (entry) => {
+          const { config, group } = entry;
+          const name = asQueryControl(config)?.variable_name;
+          if (!name || !(anyVariable || usedNames.has(name)) || (group && group !== sectionId))
+            return;
+          const columnType = await getColumnType(entry);
+          if (columnType) types[name] = columnType;
+        })
+      );
+      return getEsqlVariablesForSection(toVariables(entries, types), sectionId);
+    };
 };

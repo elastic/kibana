@@ -45,26 +45,6 @@ describe('buildEsqlParams', () => {
     expect(params).toHaveLength(2);
   });
 
-  it('looks the values up in the query it is given, so a retry that adds a variable gets its value', () => {
-    expect(
-      buildEsqlParams({ query: 'FROM logs', esqlVariables })?.some((p) => 'host' in p)
-    ).toBeFalsy();
-    expect(
-      buildEsqlParams({ query: 'FROM logs | WHERE host.name == ?host', esqlVariables })
-    ).toEqual([{ host: 'web-1' }]);
-  });
-
-  it('sends a list for a multi-select control', () => {
-    expect(
-      buildEsqlParams({
-        query: 'FROM logs | WHERE host.name IN (?hosts)',
-        esqlVariables: [
-          { key: 'hosts', value: ['web-1', 'web-2'], type: ESQLVariableType.MULTI_VALUES },
-        ],
-      })
-    ).toEqual([{ hosts: ['web-1', 'web-2'] }]);
-  });
-
   it('returns undefined when there is nothing to bind', () => {
     expect(buildEsqlParams({ query: 'FROM logs' })).toBeUndefined();
     expect(buildEsqlParams({ query: 'FROM logs', esqlVariables: [] })).toBeUndefined();

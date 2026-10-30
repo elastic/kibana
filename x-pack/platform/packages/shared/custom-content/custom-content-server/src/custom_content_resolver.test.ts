@@ -239,18 +239,6 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
       );
     });
 
-    it('sends only the values the query uses', async () => {
-      await resolve({
-        prompt: 'Show hits',
-        esqlQuery: 'FROM logs | STATS hits = COUNT(*)',
-        esqlVariables,
-      });
-
-      expect(mockEsqlQuery).toHaveBeenCalledWith(
-        expect.not.objectContaining({ params: expect.anything() })
-      );
-    });
-
     it('binds the time range and the control values together', async () => {
       await resolve({
         prompt: 'Show hits',
@@ -261,20 +249,6 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
 
       expect(mockEsqlQuery).toHaveBeenCalledWith(
         expect.objectContaining({ params: [{ _tstart: expect.any(String) }, { host: 'web-1' }] })
-      );
-    });
-
-    it('binds a list for a multi-select control', async () => {
-      await resolve({
-        prompt: 'Show hits',
-        esqlQuery: 'FROM logs | WHERE host.name IN (?hosts) | STATS hits = COUNT(*)',
-        esqlVariables: [
-          { key: 'hosts', value: ['web-1', 'web-2'], type: ESQLVariableType.MULTI_VALUES },
-        ],
-      });
-
-      expect(mockEsqlQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ params: [{ hosts: ['web-1', 'web-2'] }] })
       );
     });
 

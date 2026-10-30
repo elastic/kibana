@@ -44,8 +44,12 @@ export interface PanelAuthoringNote {
 /**
  * Gives the values of the dashboard's ES|QL controls that the queries refer to, ready to bind. Lazy,
  * since reading a control's value can take a request, so a panel asks only for what it runs.
+ * `anyVariable` is for a query that is not written yet, which can refer to any of them.
  */
-export type ResolveEsqlVariables = (queries: readonly string[]) => Promise<ESQLControlVariable[]>;
+export type ResolveEsqlVariables = (
+  queries: readonly string[],
+  options?: { anyVariable?: boolean }
+) => Promise<ESQLControlVariable[]>;
 
 export interface PanelResolutionRequestBase {
   /** Present when editing an existing panel; upsert has checked it matches the renderer. */

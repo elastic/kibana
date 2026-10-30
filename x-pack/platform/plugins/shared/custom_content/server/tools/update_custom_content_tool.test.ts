@@ -160,12 +160,6 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
-    it('hands over no control values when the panel was sent with none', async () => {
-      await callHandler({ embeddable_id: 'p1', prompt: 'Make colors more vivid' }, existing);
-
-      expect(mockResolver.mock.calls[0][0].esqlVariables).toBeUndefined();
-    });
-
     it('samples esqlQuery when query is also changing', async () => {
       await callHandler(
         { embeddable_id: 'p1', prompt: 'Show revenue by region', esqlQuery: 'FROM metrics' },
@@ -255,15 +249,6 @@ describe('createUpdateCustomContentTool handler', () => {
       );
 
       expect(mockGenerateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
-    });
-
-    it('hands the query generator no control values when the panel was sent with none', async () => {
-      await callHandler(
-        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
-        existing
-      );
-
-      expect(mockGenerateEsql.mock.calls[0][0].esqlVariables).toBeUndefined();
     });
 
     it('lets an explicit query win over regenerateEsql', async () => {

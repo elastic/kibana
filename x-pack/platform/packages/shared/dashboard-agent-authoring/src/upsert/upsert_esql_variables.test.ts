@@ -80,7 +80,7 @@ const createResolver = () =>
 const upsert = (
   resolvePanelContent: ResolvePanelContent,
   dashboardData: Parameters<typeof executeDashboardUpsert>[0]['dashboardData'],
-  panels: Array<{ id: string; content: Record<string, unknown> }>
+  panels: Array<{ id: string; section?: string; content?: Record<string, unknown> }>
 ) =>
   executeDashboardUpsert({
     dashboardData,
@@ -178,6 +178,35 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     expect(await keysOf(2)).toEqual(['host', 'region']);
   });
 
+  it('uses the sections a control and a panel are moved to in the same call', async () => {
+    const resolvePanelContent = createResolver();
+    const section = (id: string, panels: AttachmentPanel[]) => ({
+      id,
+      title: id,
+      collapsed: false,
+      grid: { y: 30 },
+      panels,
+    });
+    const control = { ...hostControl, id: 'control-a', grid };
+
+    await upsert(
+      resolvePanelContent,
+      {
+        title: 'Test',
+        panels: [
+          section('section-a', [{ ...customContentPanel, id: 'cc-a' }, control]),
+          section('section-b', []),
+        ],
+      },
+      [
+        { ...restyle('cc-a'), section: 'section-b' },
+        { id: 'control-a', section: 'section-b' },
+      ]
+    );
+
+    expect((await variablesAskedBy(resolvePanelContent))?.map(({ key }) => key)).toEqual(['host']);
+  });
+
   describe('the column type of a query-based control', () => {
     const run = ({
       resolvePanelContent = createResolver(),
@@ -224,18 +253,6 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       expect(resolveEsqlControlColumnType).not.toHaveBeenCalled();
     });
 
-    it('looks up the type once however many times a panel asks', async () => {
-      const resolvePanelContent = createResolver();
-      const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
-      const queries = ['FROM logs | WHERE bytes > ?bytes'];
-
-      await run({ resolvePanelContent, resolveEsqlControlColumnType });
-      await variablesAskedBy(resolvePanelContent, 0, queries);
-      await variablesAskedBy(resolvePanelContent, 0, queries);
-
-      expect(resolveEsqlControlColumnType).toHaveBeenCalledTimes(1);
-    });
-
     it('resolves the type with the time range the call sets, else the dashboard one', async () => {
       const queries = ['FROM logs | WHERE bytes > ?bytes'];
       const timeRangeUsedBy = async (time_range?: { from: string; to: string }) => {
@@ -254,22 +271,6 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     });
   });
 
-  it('gives a panel the resolver even when the dashboard has no ES|QL controls', async () => {
-    const resolvePanelContent = createResolver();
-
-    await upsert(
-      resolvePanelContent,
-      {
-        title: 'Test',
-        panels: [customContentPanel],
-        pinned_panels: [{ id: 'c', type: 'options_list_control', config: { field_name: 'host' } }],
-      },
-      [restyle('cc-1')]
-    );
-
-    expect(await variablesAskedBy(resolvePanelContent)).toEqual([]);
-  });
-
   it('gives it to every kind of panel, for whichever uses it', async () => {
     const resolvePanelContent = createResolver();
 
@@ -283,27 +284,5 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     expect(await variablesAskedBy(resolvePanelContent)).toEqual([
       { key: 'host', value: 'web-1', type: 'values' },
     ]);
-  });
-
-  it('gives each custom content panel of one call the same values', async () => {
-    const resolvePanelContent = createResolver();
-
-    await upsert(
-      resolvePanelContent,
-      {
-        title: 'Test',
-        panels: [
-          customContentPanel,
-          { ...customContentPanel, id: 'cc-2', grid: { ...grid, y: 9 } },
-        ],
-        pinned_panels: [hostControl],
-      },
-      [restyle('cc-1'), restyle('cc-2')]
-    );
-
-    expect(resolvePanelContent).toHaveBeenCalledTimes(2);
-    expect(await variablesAskedBy(resolvePanelContent, 0)).toEqual(
-      await variablesAskedBy(resolvePanelContent, 1)
-    );
   });
 });

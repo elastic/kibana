@@ -35,15 +35,22 @@ const resolveCustomContentState = async (
   generateEsql: CustomContentEsqlGenerator
 ): Promise<CustomContentState> => {
   const { nlQuery, esql, hasData, index, existingPanel } = request;
-  // A control's column type is looked up only for a variable that the queries use.
-  const getEsqlVariables = (queries: ReadonlyArray<string | null | undefined>) =>
-    request.resolveEsqlVariables?.(queries.filter((query): query is string => !!query));
+  // A control's column type is looked up only for a variable that the queries use, or for any when
+  // the query is yet to be generated.
+  const getEsqlVariables = (
+    queries: ReadonlyArray<string | null | undefined>,
+    options?: { anyVariable?: boolean }
+  ) =>
+    request.resolveEsqlVariables?.(
+      queries.filter((query): query is string => !!query),
+      options
+    );
   const generate = async (existingQueries: string[]) =>
     generateEsql({
       nlQuery: nlQuery ?? '',
       index,
       existingQueries,
-      esqlVariables: await getEsqlVariables([esql, ...existingQueries]),
+      esqlVariables: await getEsqlVariables([esql, ...existingQueries], { anyVariable: true }),
     });
 
   if (!existingPanel) {

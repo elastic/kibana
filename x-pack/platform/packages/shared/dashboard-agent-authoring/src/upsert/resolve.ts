@@ -88,19 +88,27 @@ export const resolvePlan = async ({
   resolvers: PanelResolvers;
   logger: Logger;
 }): Promise<ResolvedChanges> => {
+  // Where a panel, or a control in the grid, is once the call is applied.
+  const sectionIdByPanelId = getSectionIdByPanelId({ panels: existingPanels });
+  for (const { id, target } of panels) {
+    if (target !== undefined) sectionIdByPanelId.set(id, target);
+  }
   const getEsqlVariablesResolver = createEsqlVariablesResolver({
     pinnedPanels: existingControls,
     panels: existingPanels,
+    sectionIdByPanelId,
     timeRange,
     resolveColumnType: resolvers.resolveEsqlControlColumnType,
   });
-  const sectionIdByPanelId = getSectionIdByPanelId({ panels: existingPanels });
   const [attempts, resolvedControls] = await Promise.all([
     Promise.all(
-      panels.map(({ id, target, content }) => {
+      panels.map(({ id, content }) => {
         if (!content) return undefined;
-        const section = target === undefined ? sectionIdByPanelId.get(id) : target;
-        return resolveContent(content, resolvers, getEsqlVariablesResolver(section));
+        return resolveContent(
+          content,
+          resolvers,
+          getEsqlVariablesResolver(sectionIdByPanelId.get(id))
+        );
       })
     ),
     resolveControls({

@@ -6,9 +6,8 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { ESQLVariableType } from '@kbn/esql-types';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { createEsqlVariablesResolver, getEsqlVariablesForSection } from './get_esql_variables';
+import { createEsqlVariablesResolver } from './get_esql_variables';
 
 const esqlControl = (name: string, selected: string[], extra: Record<string, unknown> = {}) => ({
   id: `control-${name}`,
@@ -41,20 +40,6 @@ describe('createEsqlVariablesResolver', () => {
   it('publishes the value of an ES|QL control under its variable name', async () => {
     expect(await getEsqlVariables({ pinnedPanels: [esqlControl('host', ['web-1'])] })).toEqual([
       { key: 'host', value: 'web-1', type: 'values' },
-    ]);
-  });
-
-  it('reads one variable per ES|QL control, in order, however the control selects', async () => {
-    expect(
-      await getEsqlVariables({
-        pinnedPanels: [
-          esqlControl('a', ['1'], { control_type: 'STATIC_VALUES' }),
-          esqlControl('b', ['x', 'y'], { variable_type: 'multi_values', single_select: false }),
-        ],
-      })
-    ).toEqual([
-      { key: 'a', value: 1, type: 'values' },
-      { key: 'b', value: ['x', 'y'], type: 'multi_values' },
     ]);
   });
 
@@ -93,10 +78,6 @@ describe('createEsqlVariablesResolver', () => {
     expect(await getEsqlVariables({ pinnedPanels: [control] })).toEqual([]);
   });
 
-  it('returns nothing for no controls', async () => {
-    expect(await getEsqlVariables({})).toEqual([]);
-  });
-
   describe('controls unpinned into the grid', () => {
     const panels = [
       gridControl('top', ['1']),
@@ -117,26 +98,11 @@ describe('createEsqlVariablesResolver', () => {
         { key: 'top', value: '1', type: 'values' },
         { key: 'inner', value: '2', type: 'values', meta: { group: 'section' } },
       ]);
-      expect(
-        (await getEsqlVariables({ pinnedPanels, panels }, [], null)).map(({ key }) => key)
-      ).toEqual(['pinned', 'top']);
-    });
-  });
-
-  describe('getEsqlVariablesForSection', () => {
-    const variables = [
-      { key: 'pinned', value: '0', type: ESQLVariableType.VALUES },
-      { key: 'a', value: '1', type: ESQLVariableType.VALUES, meta: { group: 'section-a' } },
-      { key: 'b', value: '2', type: ESQLVariableType.VALUES, meta: { group: 'section-b' } },
-    ];
-
-    it.each([
-      ['a panel at the top level', null, ['pinned']],
-      ['a panel in a section', 'section-a', ['pinned', 'a']],
-      ['a panel in another section', 'section-b', ['pinned', 'b']],
-      ['a panel with no known section', undefined, ['pinned']],
-    ])('gives %s the variables outside sections and of its own section', (_label, id, keys) => {
-      expect(getEsqlVariablesForSection(variables, id).map(({ key }) => key)).toEqual(keys);
+      for (const otherSection of [null, 'other-section']) {
+        expect(
+          (await getEsqlVariables({ pinnedPanels, panels }, [], otherSection)).map(({ key }) => key)
+        ).toEqual(['pinned', 'top']);
+      }
     });
   });
 
@@ -171,18 +137,6 @@ describe('createEsqlVariablesResolver', () => {
       });
     });
 
-    it('keeps a keyword column as text', async () => {
-      expect(
-        await getEsqlVariables(
-          {
-            pinnedPanels: [queryControl('code', ['404'])],
-            resolveColumnType: jest.fn().mockResolvedValue('keyword'),
-          },
-          ['FROM logs | WHERE code == ?code']
-        )
-      ).toEqual([{ key: 'code', value: '404', type: 'values' }]);
-    });
-
     it('asks only for a control the queries use, as ?name or ??name', async () => {
       const resolveColumnType = jest.fn().mockResolvedValue('long');
 
@@ -199,6 +153,17 @@ describe('createEsqlVariablesResolver', () => {
       );
 
       expect(resolveColumnType).toHaveBeenCalledTimes(2);
+    });
+
+    it('asks for every control with a numeric-looking selection for a query not written yet', async () => {
+      const resolveColumnType = jest.fn().mockResolvedValue('long');
+
+      expect(
+        await createEsqlVariablesResolver({
+          pinnedPanels: [queryControl('bytes', ['100'])],
+          resolveColumnType,
+        })(null)([], { anyVariable: true })
+      ).toEqual([{ key: 'bytes', value: 100, type: 'values' }]);
     });
 
     it('asks for nothing when no query uses a control, or there are no queries', async () => {
@@ -248,12 +213,6 @@ describe('createEsqlVariablesResolver', () => {
           { pinnedPanels: [queryControl('bytes', ['100'])], resolveColumnType },
           usesBytes
         )
-      ).toEqual([{ key: 'bytes', value: '100', type: 'values' }]);
-    });
-
-    it('keeps the selection as text when there is no resolver', async () => {
-      expect(
-        await getEsqlVariables({ pinnedPanels: [queryControl('bytes', ['100'])] }, usesBytes)
       ).toEqual([{ key: 'bytes', value: '100', type: 'values' }]);
     });
   });

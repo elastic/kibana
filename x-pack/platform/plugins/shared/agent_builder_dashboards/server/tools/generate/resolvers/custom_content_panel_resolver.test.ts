@@ -150,14 +150,14 @@ describe('createCustomContentPanelResolver', () => {
       resolveEsqlVariables.mockResolvedValue(esqlVariables);
     });
 
-    it('asks for those the own query of a new panel uses, and hands them to the template resolver', async () => {
+    it('asks for those the own query of a new panel uses to sample it', async () => {
       await resolve(addRequest({ esql: hostQuery, hasData: true, resolveEsqlVariables }));
 
-      expect(resolveEsqlVariables).toHaveBeenCalledWith([hostQuery]);
+      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery], undefined);
       expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
     });
 
-    it('asks for those the existing query uses before regenerating it, and for the new query to sample it', async () => {
+    it('asks for any variable before generating a query, and for those the new query uses to sample it', async () => {
       const existingQuery = 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)';
       generateEsql.mockResolvedValue('FROM logs | STATS errors = COUNT(*)');
 
@@ -172,13 +172,17 @@ describe('createCustomContentPanelResolver', () => {
         )
       );
 
-      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [existingQuery]);
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [existingQuery], {
+        anyVariable: true,
+      });
       expect(generateEsql).toHaveBeenCalledWith(
         expect.objectContaining({ existingQueries: [existingQuery], esqlVariables })
       );
-      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(2, [
-        'FROM logs | STATS errors = COUNT(*)',
-      ]);
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(
+        2,
+        ['FROM logs | STATS errors = COUNT(*)'],
+        undefined
+      );
       expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
     });
 
@@ -190,8 +194,8 @@ describe('createCustomContentPanelResolver', () => {
       );
 
       expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
-      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, []);
-      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery]);
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [], { anyVariable: true });
+      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery], undefined);
       expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
     });
 

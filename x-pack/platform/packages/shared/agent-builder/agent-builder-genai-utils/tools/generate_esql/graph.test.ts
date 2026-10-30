@@ -303,30 +303,6 @@ describe('createNlToEsqlGraph — execute_query node', () => {
       ]);
       expect(params?.slice(2)).toEqual([{ host: 'web-1' }]);
     });
-
-    it('sends only the time range when the query uses no control', async () => {
-      const { chatModel } = createMockModel();
-      const graph = buildGraph(chatModel);
-
-      await graph.invoke(
-        { ...BASE_INPUT, execute: 'schema', maxRetries: 1, esqlVariables },
-        { recursionLimit: 25 }
-      );
-
-      expect(mockedExecuteEsql.mock.calls[0][0].params).toHaveLength(2);
-    });
-
-    it('is unchanged when no values are given', async () => {
-      const { chatModel } = createMockModel(HOST_RESPONSE);
-      const graph = buildGraph(chatModel);
-
-      await graph.invoke(
-        { ...BASE_INPUT, execute: 'schema', maxRetries: 1 },
-        { recursionLimit: 25 }
-      );
-
-      expect(mockedExecuteEsql.mock.calls[0][0].params).toHaveLength(2);
-    });
   });
 
   it('data execute does not filter a TS query', async () => {

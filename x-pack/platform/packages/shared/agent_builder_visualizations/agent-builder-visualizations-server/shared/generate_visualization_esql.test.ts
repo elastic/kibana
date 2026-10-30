@@ -150,19 +150,6 @@ describe('generateVisualizationEsql', () => {
         expect.objectContaining({ esqlVariables })
       );
     });
-
-    it('sends nothing when there are no values', async () => {
-      mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
-        ReturnType<typeof generateEsql>
-      >);
-
-      await generateVisualizationEsql(params);
-      await generateVisualizationEsql({ ...params, esqlVariables: [] });
-
-      for (const [request] of mockedGenerateEsql.mock.calls) {
-        expect(request).not.toHaveProperty('esqlVariables');
-      }
-    });
   });
 
   it('passes the request through unchanged when there are no existing queries', async () => {

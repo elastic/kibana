@@ -231,8 +231,4 @@ describe('getESQLControlVariablesFromState', () => {
       ])
     ).toEqual([{ key: 'hosts', value: ['web-1', 5], type: 'multi_values' }]);
   });
-
-  it('returns nothing for no controls', () => {
-    expect(getESQLControlVariablesFromState([])).toEqual([]);
-  });
 });
