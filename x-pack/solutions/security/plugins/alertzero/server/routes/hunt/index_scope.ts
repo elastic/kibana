@@ -54,6 +54,14 @@ export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: Rout
             indexPatterns,
             logger,
           });
+          if (scope.resolution === 'blocked:empty_universe') {
+            // `blocked:discovery_failed` already warns inside `resolveHuntScope`.
+            logger.warn(
+              `Hunt index scope for space ${spaceId} is ${
+                scope.resolution
+              }: the caller resolved none of ${scope.missing.join(', ')}`
+            );
+          }
           const body: HuntIndexScopeResponse = scope;
 
           return response.ok({ body });

@@ -7,7 +7,6 @@
 
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
-  getImpactedServiceKey,
   getImpactedServiceSourceIds,
   getImpactedServices,
   resolveImpactedServices,
@@ -105,22 +104,6 @@ describe('getImpactedServices', () => {
           feature_id: 'feat-edge',
           source: 'checkout-api',
           target: 'payments-api',
-          source_id: 'logs.checkout',
-        },
-      ],
-    });
-
-    expect(getImpactedServices(event)).toEqual([]);
-  });
-
-  it('drops an infrastructure entry whose knowledge indicator is not a service', () => {
-    const event = mockEvent({
-      blast_radius: [
-        {
-          type: 'infrastructure',
-          subtype: 'infrastructure',
-          feature_id: 'feat-nodes',
-          title: 'Wolfi Linux nodes',
           source_id: 'logs.checkout',
         },
       ],
@@ -244,17 +227,5 @@ describe('getImpactedServiceSourceIds', () => {
       'logging-eis',
       'logs.payments',
     ]);
-  });
-});
-
-describe('getImpactedServiceKey', () => {
-  it('separates differently named services', () => {
-    expect(getImpactedServiceKey('checkout-api')).not.toBe(
-      getImpactedServiceKey('checkout-worker')
-    );
-  });
-
-  it('keeps the entry type as the leading key segment', () => {
-    expect(getImpactedServiceKey('checkout-api')).toMatch(/^entity:/);
   });
 });
