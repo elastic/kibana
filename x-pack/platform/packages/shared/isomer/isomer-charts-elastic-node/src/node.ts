@@ -33,6 +33,8 @@ const workerEntry = join(
 export interface NodeChartEngine extends ChartEngine {
   /** Stops the drawing thread; a draw after this rejects. */
   close: () => Promise<void>;
+  /** The drawing thread's memory after its last drawing, reported only with `ISOMER_MEMORY_PROBE` set. */
+  memory: () => NodeJS.MemoryUsage | undefined;
 }
 
 /**
@@ -94,9 +96,11 @@ export const defineElasticChartsNodeEngine = async ({
     }
     return entry;
   };
+  let lastMemory: NodeJS.MemoryUsage | undefined;
   worker.on('message', (reply: DrawReply) => {
     const entry = settle(reply.id);
     if ('artifact' in reply) {
+      lastMemory = reply.memory ?? lastMemory;
       entry?.resolve(reply.artifact);
     } else {
       entry?.reject(new Error(reply.error));
@@ -131,5 +135,6 @@ export const defineElasticChartsNodeEngine = async ({
     close: async () => {
       await worker.terminate();
     },
+    memory: () => lastMemory,
   };
 };

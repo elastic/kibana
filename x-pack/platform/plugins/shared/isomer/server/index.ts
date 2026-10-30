@@ -16,5 +16,7 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 export { config } from './config';
 export type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
 export type { DrawOptions, IsomerDrawing } from './charts_drawing';
+export type { HostDrawOptions } from './render_host/protocol';
+export type { RenderHost } from './render_host/client';
 export type { IsomerEms, MapBasemap, MapView } from './ems';
 export type { KibanaIsomerRuntime } from '@kbn/isomer';

@@ -17,6 +17,7 @@ xpack.isomer.charts.serverDraw: true
 - In dev mode, a hidden `isomerChartsBench` app draws compositions in the browser with the Elastic Charts engine, either chart by chart at a given size or as a whole composition, for comparison with Lens.
 - In dev mode with server drawing on, `POST /internal/isomer/charts/render` renders with per-request hints and chart size.
 - `scripts/render_dashboards.js`, a dev tool for the charts spike rather than for general use, draws converted dashboards on the server through the plugin's own drawing: a self-contained HTML grid page and a 2x PNG of it per dashboard. With `--compare` it also diffs each drawn panel against its Lens reference.
+- `ISOMER_MEMORY_PROBE=1` logs one line per server drawing to stderr: live heap and external memory after a forced GC at each stage (charts drawn, markup rendered, rasterized, released), the chart thread's own heap, the peak RSS, heap and external across the draw, and what remains after. Set it to a `.log` file name to append each record as JSON under `data/` as well. It works in Kibana, in the render process, and in `scripts/probe_memory.js`, which draws one exported composition (`*.isomer.json` from the composition route) over and over and tabulates the records: `--format pdf|png|html`, `--pixel-ratio`, `--scale`, `--inline`, or `--render-host` with `--heap-mb` and `--pdf-thread worker|inline`.
 
 ## Follow-ups
 

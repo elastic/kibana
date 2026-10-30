@@ -21,6 +21,7 @@ import {
 import { createRuntime } from './create_runtime';
 import type { IsomerPluginConfig } from './config';
 import { createIsomerEms, type IsomerEms } from './ems';
+import { createRenderHost, type RenderHost } from './render_host/client';
 
 export type IsomerPluginSetup = Record<string, never>;
 
@@ -35,6 +36,12 @@ export interface IsomerPluginStart {
    * The first call starts the drawing thread. Rejects unless `xpack.isomer.charts.serverDraw` is on.
    */
   getDrawing: () => Promise<IsomerDrawing>;
+  /**
+   * Resolves the render host: PNGs and PDFs drawn in a forked process that owns the drawing engines, so Kibana's
+   * process keeps none of their memory. The process starts on the first drawing and exits when idle. Rejects
+   * unless `xpack.isomer.charts.serverDraw` is on.
+   */
+  getRenderHost: () => Promise<RenderHost>;
   /**
    * Elastic Maps Service for server drawing: boundary files loaded into the drawing's maps, and raster basemaps.
    * `undefined` when EMS is off (`map.includeElasticMapsService: false`, or no `mapsEms` plugin).
@@ -56,6 +63,7 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   private readonly serverDraw: boolean;
   private runtime?: Promise<KibanaIsomerRuntime>;
   private drawing?: Promise<ChartsDrawing>;
+  private renderHost?: Promise<RenderHost>;
   // The drawing's boundary files: EMS loads into it, so every render sees what any request loaded.
   private readonly geometry: MapGeometry = {};
   private ems?: IsomerEms;
@@ -85,13 +93,22 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   }
 
   start(): IsomerPluginStart {
-    return { getRuntime: this.getRuntime, getDrawing: this.getDrawing, getEms: () => this.ems };
+    return {
+      getRuntime: this.getRuntime,
+      getDrawing: this.getDrawing,
+      getRenderHost: this.getRenderHost,
+      getEms: () => this.ems,
+    };
   }
 
   async stop() {
-    const drawing = this.drawing;
+    const { drawing, renderHost } = this;
     this.drawing = undefined;
-    await drawing?.then(({ close }) => close()).catch(() => undefined);
+    this.renderHost = undefined;
+    await Promise.all([
+      drawing?.then(({ close }) => close()).catch(() => undefined),
+      renderHost?.then(({ close }) => close()).catch(() => undefined),
+    ]);
   }
 
   /** Dev only: draws with per-request hints and chart size, for comparison with Lens. */
@@ -142,6 +159,17 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
         }
       );
     return this.drawing;
+  };
+
+  private readonly getRenderHost = (): Promise<RenderHost> => {
+    if (!this.serverDraw) {
+      return Promise.reject(new Error('Server drawing is off: set xpack.isomer.charts.serverDraw'));
+    }
+    // The process gets the boundary files once, as it starts; what EMS loads after that stays here.
+    this.renderHost ??= this.loadWorld().then(() =>
+      createRenderHost({ geometry: this.geometry, pdfThread: 'inline' })
+    );
+    return this.renderHost;
   };
 
   /** The world outlines the maps pack draws under every map without a basemap: EMS's, else the Maps fixture's. */
