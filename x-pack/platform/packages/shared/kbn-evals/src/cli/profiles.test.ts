@@ -194,6 +194,13 @@ describe('redactUrlCredentials', () => {
     expect(redactUrlCredentials('http://localhost:9200')).toContain('localhost:9200');
   });
 
+  it('does not mistake `user:pass@host` for a URL with a scheme', () => {
+    const redacted = redactUrlCredentials('elastic:s3cret@host:9200');
+
+    expect(redacted).toBe('[unparseable URL]');
+    expect(redacted).not.toContain('s3cret');
+  });
+
   it('returns a placeholder for unparseable input without echoing it', () => {
     const redacted = redactUrlCredentials('not a url with s3cret');
 
