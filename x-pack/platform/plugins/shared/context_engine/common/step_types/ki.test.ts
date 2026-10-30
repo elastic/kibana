@@ -147,6 +147,10 @@ describe('kiFieldsSchema', () => {
     ).toBe(false);
   });
 
+  it('drops user_id on update', () => {
+    expect(kiPartialFieldsSchema.parse({ user_id: 'alice', title: 't' })).toEqual({ title: 't' });
+  });
+
   it('accepts an ISO 8601 expires_at', () => {
     const result = kiFieldsSchema.safeParse({
       type: 'index_metadata',

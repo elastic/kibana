@@ -168,10 +168,15 @@ export const kiFieldsSchema = lazySchema(() =>
   })
 );
 
-/** The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry. */
-export const kiPartialFieldsSchema = kiFieldsSchema.partial().extend({
-  expires_at: kiFieldsSchema.shape.expires_at.nullable(),
-});
+/**
+ * The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry;
+ * `user_id` is fixed at creation.
+ */
+export const kiPartialFieldsSchema = lazySchema(() =>
+  kiFieldsSchema.omit({ user_id: true }).partial().extend({
+    expires_at: kiFieldsSchema.shape.expires_at.nullable(),
+  })
+);
 
 export type KiFields = z.infer<typeof kiFieldsSchema>;
 export type KiPartialFields = z.infer<typeof kiPartialFieldsSchema>;

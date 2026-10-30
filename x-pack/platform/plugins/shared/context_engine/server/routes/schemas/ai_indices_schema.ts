@@ -395,16 +395,6 @@ export const updateKiBodySchema = schema.object({
       maxLength: MAX_KI_CONTENT_LENGTH,
       meta: { description: 'The content for the Knowledge Indicator.' },
     }),
-    user_id: schema.maybe(
-      schema.string({
-        minLength: 1,
-        maxLength: MAX_AI_INDEX_USER_ID_LENGTH,
-        meta: {
-          description:
-            'The user the Knowledge Indicator is scoped to. Unset means shared with every user.',
-        },
-      })
-    ),
   }),
 });
 

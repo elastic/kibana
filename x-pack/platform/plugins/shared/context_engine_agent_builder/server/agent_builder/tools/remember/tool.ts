@@ -76,7 +76,7 @@ const rememberSchema = lazySchema(() =>
       .max(MAX_AI_INDEX_USER_ID_LENGTH)
       .optional()
       .describe(
-        'The user this memory belongs to; only reads scoped to that user_id recall it. Omit for a memory shared with every user. When revising, omit to keep the existing value.'
+        'The user this memory is scoped to; reads that pass a user_id only recall memories with that user_id or none. Omit for a memory shared with every user. When revising, omit or pass the existing value.'
       ),
     type: memoryTypeSchema.describe(
       'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis. When revising a memory, use its existing type.'
@@ -224,6 +224,9 @@ export const createRememberTool = ({
         }
         if (isKiDeleted(revision.source)) {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
+        }
+        if (params.user_id !== undefined && params.user_id !== revision.source.user_id) {
+          throw new Error(`Memory '${params.id}' cannot change its user_id.`);
         }
 
         existingDocument = revision.source;

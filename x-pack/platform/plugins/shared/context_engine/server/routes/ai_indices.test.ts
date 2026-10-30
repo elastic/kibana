@@ -1539,6 +1539,9 @@ describe('ai indices routes', () => {
       expect(() =>
         bodySchema.validate({ ki: { content: 'Updated content', title: 'Updated title' } })
       ).toThrow();
+      expect(() =>
+        bodySchema.validate({ ki: { content: 'Updated content', user_id: 'alice' } })
+      ).toThrow(/user_id/);
     });
 
     it('passes the index query param as backingIndex to updateKi', async () => {
