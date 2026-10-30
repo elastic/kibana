@@ -131,6 +131,8 @@ function throwIfExtractObservablesChangedToTrue(requests: UpdateRequestWithOrigi
     const requestedValue = updateReq.settings?.extractObservables;
     const storedValue = originalCase.attributes.settings.extractObservables;
 
+    // `settings` is an object, so a change to another setting (for example `syncAlerts`) keeps the
+    // whole object in the request, including an unchanged `extractObservables: true`.
     if (requestedValue === true && storedValue !== true) {
       assertCanStoreExtractObservables({
         owner: originalCase.attributes.owner,

@@ -8692,7 +8692,7 @@
               }
             ],
             "observableTypes": [],
-            "extractObservables": true,
+            "extractObservables": false,
             "workflowTags": [
               "soc-triage"
             ],
@@ -8854,7 +8854,7 @@
               ]
             }
           ],
-          "extractObservables": true,
+          "extractObservables": false,
           "workflowTags": [
             "soc-triage"
           ],
@@ -8952,7 +8952,7 @@
               "type": "toggle"
             }
           ],
-          "extractObservables": true,
+          "extractObservables": false,
           "workflowTags": [
             "soc-triage",
             "enrichment"

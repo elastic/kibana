@@ -141268,7 +141268,7 @@ components:
               type: text
               required: false
           error: null
-          extractObservables: true
+          extractObservables: false
           id: 856ee650-6c82-11ee-a20a-6164169afa58
           mappings: []
           observableTypes: []
@@ -141719,7 +141719,7 @@ components:
             type: text
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
@@ -141832,7 +141832,7 @@ components:
             type: toggle
             required: false
         error: null
-        extractObservables: true
+        extractObservables: false
         id: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
         mappings:
           - action_type: overwrite
