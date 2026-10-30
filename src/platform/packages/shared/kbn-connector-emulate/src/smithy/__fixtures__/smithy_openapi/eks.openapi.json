@@ -1,0 +1,3411 @@
+{
+ "openapi": "3.0.2",
+ "info": {
+  "title": "Amazon Elastic Kubernetes Service",
+  "version": "2017-11-01"
+ },
+ "paths": {
+  "/access-policies": {
+   "get": {
+    "operationId": "ListAccessPolicies",
+    "parameters": [
+     {
+      "name": "maxResults",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 100,
+       "minimum": 1
+      }
+     },
+     {
+      "name": "nextToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListAccessPolicies 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAccessPoliciesResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters": {
+   "get": {
+    "operationId": "ListClusters",
+    "parameters": [
+     {
+      "name": "maxResults",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 100,
+       "minimum": 1
+      }
+     },
+     {
+      "name": "nextToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "include",
+      "in": "query",
+      "style": "form",
+      "schema": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "explode": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListClusters 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListClustersResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "503": {
+      "description": "ServiceUnavailableException 503 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/access-entries": {
+   "get": {
+    "operationId": "ListAccessEntries",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "associatedPolicyArn",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "maxResults",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 100,
+       "minimum": 1
+      }
+     },
+     {
+      "name": "nextToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListAccessEntries 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAccessEntriesResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "operationId": "CreateAccessEntry",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateAccessEntryRequestContent"
+       }
+      }
+     },
+     "required": true
+    },
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "CreateAccessEntry 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreateAccessEntryResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "ResourceLimitExceededException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceLimitExceededExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "ResourceInUseException 409 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceInUseExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/access-entries/{principalArn}": {
+   "delete": {
+    "operationId": "DeleteAccessEntry",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "principalArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DeleteAccessEntry 200 response"
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "DescribeAccessEntry",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "principalArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DescribeAccessEntry 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeAccessEntryResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "operationId": "UpdateAccessEntry",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UpdateAccessEntryRequestContent"
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "principalArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "UpdateAccessEntry 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateAccessEntryResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/access-entries/{principalArn}/access-policies": {
+   "get": {
+    "operationId": "ListAssociatedAccessPolicies",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "principalArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "maxResults",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 100,
+       "minimum": 1
+      }
+     },
+     {
+      "name": "nextToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListAssociatedAccessPolicies 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListAssociatedAccessPoliciesResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "operationId": "AssociateAccessPolicy",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssociateAccessPolicyRequestContent"
+       }
+      }
+     },
+     "required": true
+    },
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "principalArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "AssociateAccessPolicy 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AssociateAccessPolicyResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/access-entries/{principalArn}/access-policies/{policyArn}": {
+   "delete": {
+    "operationId": "DisassociateAccessPolicy",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "principalArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "policyArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DisassociateAccessPolicy 200 response"
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/node-groups": {
+   "get": {
+    "operationId": "ListNodegroups",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "maxResults",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 100,
+       "minimum": 1
+      }
+     },
+     {
+      "name": "nextToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListNodegroups 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListNodegroupsResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "503": {
+      "description": "ServiceUnavailableException 503 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/node-groups/{nodegroupName}": {
+   "get": {
+    "operationId": "DescribeNodegroup",
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "nodegroupName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DescribeNodegroup 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeNodegroupResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "503": {
+      "description": "ServiceUnavailableException 503 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{clusterName}/node-groups/{nodegroupName}/update-config": {
+   "post": {
+    "operationId": "UpdateNodegroupConfig",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UpdateNodegroupConfigRequestContent"
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "clusterName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "nodegroupName",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "UpdateNodegroupConfig 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateNodegroupConfigResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "ResourceInUseException 409 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceInUseExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{name}": {
+   "get": {
+    "operationId": "DescribeCluster",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DescribeCluster 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeClusterResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "ClientException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ClientExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "503": {
+      "description": "ServiceUnavailableException 503 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServiceUnavailableExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{name}/update-config": {
+   "post": {
+    "operationId": "UpdateClusterConfig",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UpdateClusterConfigRequestContent"
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "UpdateClusterConfig 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/UpdateClusterConfigResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "ResourceInUseException 409 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceInUseExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "429": {
+      "description": "ThrottlingException 429 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ThrottlingExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{name}/updates": {
+   "get": {
+    "operationId": "ListUpdates",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "nodegroupName",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "addonName",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "capabilityName",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "nextToken",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "maxResults",
+      "in": "query",
+      "schema": {
+       "type": "number",
+       "maximum": 100,
+       "minimum": 1
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListUpdates 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListUpdatesResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/clusters/{name}/updates/{updateId}": {
+   "get": {
+    "operationId": "DescribeUpdate",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "updateId",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     },
+     {
+      "name": "nodegroupName",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "addonName",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "capabilityName",
+      "in": "query",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "DescribeUpdate 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DescribeUpdateResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "InvalidParameterException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/InvalidParameterExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "ResourceNotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ResourceNotFoundExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "500": {
+      "description": "ServerException 500 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ServerExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/tags/{resourceArn}": {
+   "get": {
+    "operationId": "ListTagsForResource",
+    "parameters": [
+     {
+      "name": "resourceArn",
+      "in": "path",
+      "schema": {
+       "type": "string"
+      },
+      "required": true
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "ListTagsForResource 200 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListTagsForResourceResponseContent"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "BadRequestException 400 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/BadRequestExceptionResponseContent"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "NotFoundException 404 response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NotFoundExceptionResponseContent"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "AMITypes": {
+    "type": "string",
+    "enum": [
+     "AL2_x86_64",
+     "AL2_x86_64_GPU",
+     "AL2_ARM_64",
+     "CUSTOM",
+     "BOTTLEROCKET_ARM_64",
+     "BOTTLEROCKET_x86_64",
+     "BOTTLEROCKET_ARM_64_FIPS",
+     "BOTTLEROCKET_x86_64_FIPS",
+     "BOTTLEROCKET_ARM_64_NVIDIA",
+     "BOTTLEROCKET_x86_64_NVIDIA",
+     "BOTTLEROCKET_ARM_64_NVIDIA_FIPS",
+     "BOTTLEROCKET_x86_64_NVIDIA_FIPS",
+     "WINDOWS_CORE_2019_x86_64",
+     "WINDOWS_FULL_2019_x86_64",
+     "WINDOWS_CORE_2022_x86_64",
+     "WINDOWS_FULL_2022_x86_64",
+     "WINDOWS_CORE_2025_x86_64",
+     "WINDOWS_FULL_2025_x86_64",
+     "AL2023_x86_64_STANDARD",
+     "AL2023_ARM_64_STANDARD",
+     "AL2023_x86_64_NEURON",
+     "AL2023_x86_64_NVIDIA",
+     "AL2023_ARM_64_NVIDIA"
+    ]
+   },
+   "AccessConfigResponse": {
+    "type": "object",
+    "properties": {
+     "bootstrapClusterCreatorAdminPermissions": {
+      "type": "boolean"
+     },
+     "authenticationMode": {
+      "$ref": "#/components/schemas/AuthenticationMode"
+     }
+    }
+   },
+   "AccessEntry": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "principalArn": {
+      "type": "string"
+     },
+     "kubernetesGroups": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "accessEntryArn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "modifiedAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "tags": {
+      "$ref": "#/components/schemas/TagMap"
+     },
+     "username": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   },
+   "AccessPolicy": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     }
+    }
+   },
+   "AccessScope": {
+    "type": "object",
+    "properties": {
+     "type": {
+      "$ref": "#/components/schemas/AccessScopeType"
+     },
+     "namespaces": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "AccessScopeType": {
+    "type": "string",
+    "enum": [
+     "cluster",
+     "namespace"
+    ]
+   },
+   "ActiveCertificateAuthority": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "activatedBy": {
+      "$ref": "#/components/schemas/CertificateAuthorityActivatedBy"
+     }
+    }
+   },
+   "AssociateAccessPolicyRequestContent": {
+    "type": "object",
+    "properties": {
+     "policyArn": {
+      "type": "string"
+     },
+     "accessScope": {
+      "$ref": "#/components/schemas/AccessScope"
+     }
+    },
+    "required": [
+     "accessScope",
+     "policyArn"
+    ]
+   },
+   "AssociateAccessPolicyResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "principalArn": {
+      "type": "string"
+     },
+     "associatedAccessPolicy": {
+      "$ref": "#/components/schemas/AssociatedAccessPolicy"
+     }
+    }
+   },
+   "AssociatedAccessPolicy": {
+    "type": "object",
+    "properties": {
+     "policyArn": {
+      "type": "string"
+     },
+     "accessScope": {
+      "$ref": "#/components/schemas/AccessScope"
+     },
+     "associatedAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "modifiedAt": {
+      "type": "number",
+      "format": "double"
+     }
+    }
+   },
+   "AuthenticationMode": {
+    "type": "string",
+    "enum": [
+     "API",
+     "API_AND_CONFIG_MAP",
+     "CONFIG_MAP"
+    ]
+   },
+   "AutoScalingGroup": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     }
+    }
+   },
+   "BadRequestExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "BlockStorage": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    }
+   },
+   "Cancellation": {
+    "type": "object",
+    "properties": {
+     "status": {
+      "$ref": "#/components/schemas/CancellationStatus"
+     },
+     "reason": {
+      "type": "string"
+     }
+    }
+   },
+   "CancellationStatus": {
+    "type": "string",
+    "enum": [
+     "InProgress",
+     "Failed",
+     "Successful"
+    ]
+   },
+   "CapacityTypes": {
+    "type": "string",
+    "enum": [
+     "ON_DEMAND",
+     "SPOT",
+     "CAPACITY_BLOCK"
+    ]
+   },
+   "Certificate": {
+    "type": "object",
+    "properties": {
+     "data": {
+      "type": "string"
+     },
+     "active": {
+      "$ref": "#/components/schemas/ActiveCertificateAuthority"
+     }
+    }
+   },
+   "CertificateAuthorityActivatedBy": {
+    "type": "string",
+    "enum": [
+     "EKS",
+     "CUSTOMER"
+    ]
+   },
+   "ClientExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "addonName": {
+      "type": "string"
+     },
+     "subscriptionId": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "Cluster": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "arn": {
+      "type": "string"
+     },
+     "createdAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "version": {
+      "type": "string"
+     },
+     "endpoint": {
+      "type": "string"
+     },
+     "roleArn": {
+      "type": "string"
+     },
+     "resourcesVpcConfig": {
+      "$ref": "#/components/schemas/VpcConfigResponse"
+     },
+     "kubernetesNetworkConfig": {
+      "$ref": "#/components/schemas/KubernetesNetworkConfigResponse"
+     },
+     "logging": {
+      "$ref": "#/components/schemas/Logging"
+     },
+     "identity": {
+      "$ref": "#/components/schemas/Identity"
+     },
+     "status": {
+      "$ref": "#/components/schemas/ClusterStatus"
+     },
+     "certificateAuthority": {
+      "$ref": "#/components/schemas/Certificate"
+     },
+     "clientRequestToken": {
+      "type": "string"
+     },
+     "platformVersion": {
+      "type": "string"
+     },
+     "tags": {
+      "$ref": "#/components/schemas/TagMap"
+     },
+     "encryptionConfig": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/EncryptionConfig"
+      },
+      "maxItems": 1,
+      "minItems": 0
+     },
+     "connectorConfig": {
+      "$ref": "#/components/schemas/ConnectorConfigResponse"
+     },
+     "id": {
+      "type": "string"
+     },
+     "health": {
+      "$ref": "#/components/schemas/ClusterHealth"
+     },
+     "outpostConfig": {
+      "$ref": "#/components/schemas/OutpostConfigResponse"
+     },
+     "accessConfig": {
+      "$ref": "#/components/schemas/AccessConfigResponse"
+     },
+     "upgradePolicy": {
+      "$ref": "#/components/schemas/UpgradePolicyResponse"
+     },
+     "zonalShiftConfig": {
+      "$ref": "#/components/schemas/ZonalShiftConfigResponse"
+     },
+     "remoteNetworkConfig": {
+      "$ref": "#/components/schemas/RemoteNetworkConfigResponse"
+     },
+     "computeConfig": {
+      "$ref": "#/components/schemas/ComputeConfigResponse"
+     },
+     "storageConfig": {
+      "$ref": "#/components/schemas/StorageConfigResponse"
+     },
+     "deletionProtection": {
+      "type": "boolean"
+     },
+     "controlPlaneScalingConfig": {
+      "$ref": "#/components/schemas/ControlPlaneScalingConfig"
+     },
+     "kubeApiServerConfig": {
+      "$ref": "#/components/schemas/KubeApiServerConfigResponse"
+     },
+     "kubeSchedulerConfig": {
+      "$ref": "#/components/schemas/KubeSchedulerConfigResponse"
+     },
+     "kubeControllerManagerConfig": {
+      "$ref": "#/components/schemas/KubeControllerManagerConfigResponse"
+     }
+    }
+   },
+   "ClusterHealth": {
+    "type": "object",
+    "properties": {
+     "issues": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/ClusterIssue"
+      }
+     }
+    }
+   },
+   "ClusterIssue": {
+    "type": "object",
+    "properties": {
+     "code": {
+      "$ref": "#/components/schemas/ClusterIssueCode"
+     },
+     "message": {
+      "type": "string"
+     },
+     "resourceIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "ClusterIssueCode": {
+    "type": "string",
+    "enum": [
+     "AccessDenied",
+     "ClusterUnreachable",
+     "ConfigurationConflict",
+     "InternalFailure",
+     "ResourceLimitExceeded",
+     "ResourceNotFound",
+     "IamRoleNotFound",
+     "VpcNotFound",
+     "InsufficientFreeAddresses",
+     "Ec2ServiceNotSubscribed",
+     "Ec2SubnetNotFound",
+     "Ec2SecurityGroupNotFound",
+     "KmsGrantRevoked",
+     "KmsKeyNotFound",
+     "KmsKeyMarkedForDeletion",
+     "KmsKeyDisabled",
+     "StsRegionalEndpointDisabled",
+     "UnsupportedVersion",
+     "Other"
+    ]
+   },
+   "ClusterStatus": {
+    "type": "string",
+    "enum": [
+     "CREATING",
+     "ACTIVE",
+     "DELETING",
+     "FAILED",
+     "UPDATING",
+     "PENDING"
+    ]
+   },
+   "ComputeConfigRequest": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "nodePools": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "nodeRoleArn": {
+      "type": "string"
+     }
+    }
+   },
+   "ComputeConfigResponse": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "nodePools": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "nodeRoleArn": {
+      "type": "string"
+     }
+    }
+   },
+   "ConnectorConfigResponse": {
+    "type": "object",
+    "properties": {
+     "activationId": {
+      "type": "string"
+     },
+     "activationCode": {
+      "type": "string"
+     },
+     "activationExpiry": {
+      "type": "number",
+      "format": "double"
+     },
+     "provider": {
+      "type": "string"
+     },
+     "roleArn": {
+      "type": "string"
+     }
+    }
+   },
+   "ControlPlaneEgressModeType": {
+    "type": "string",
+    "enum": [
+     "AWS_MANAGED",
+     "CUSTOMER_ROUTED",
+     "CUSTOMER_ISOLATED"
+    ]
+   },
+   "ControlPlanePlacementResponse": {
+    "type": "object",
+    "properties": {
+     "groupName": {
+      "type": "string"
+     },
+     "spreadLevel": {
+      "$ref": "#/components/schemas/SpreadLevel"
+     }
+    }
+   },
+   "ControlPlaneScalingConfig": {
+    "type": "object",
+    "properties": {
+     "tier": {
+      "$ref": "#/components/schemas/ProvisionedControlPlaneTier"
+     }
+    }
+   },
+   "CreateAccessEntryRequestContent": {
+    "type": "object",
+    "properties": {
+     "principalArn": {
+      "type": "string"
+     },
+     "kubernetesGroups": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "tags": {
+      "$ref": "#/components/schemas/TagMap"
+     },
+     "clientRequestToken": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "principalArn"
+    ]
+   },
+   "CreateAccessEntryResponseContent": {
+    "type": "object",
+    "properties": {
+     "accessEntry": {
+      "$ref": "#/components/schemas/AccessEntry"
+     }
+    }
+   },
+   "DescribeAccessEntryResponseContent": {
+    "type": "object",
+    "properties": {
+     "accessEntry": {
+      "$ref": "#/components/schemas/AccessEntry"
+     }
+    }
+   },
+   "DescribeClusterResponseContent": {
+    "type": "object",
+    "properties": {
+     "cluster": {
+      "$ref": "#/components/schemas/Cluster"
+     }
+    }
+   },
+   "DescribeNodegroupResponseContent": {
+    "type": "object",
+    "properties": {
+     "nodegroup": {
+      "$ref": "#/components/schemas/Nodegroup"
+     }
+    }
+   },
+   "DescribeUpdateResponseContent": {
+    "type": "object",
+    "properties": {
+     "update": {
+      "$ref": "#/components/schemas/Update"
+     }
+    }
+   },
+   "ElasticLoadBalancing": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    }
+   },
+   "EncryptionConfig": {
+    "type": "object",
+    "properties": {
+     "resources": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "description": "This shape is deprecated since 2025-03-05: Deprecated. Amazon EKS encrypts all Kubernetes API data by default, so this value no longer determines which resources are encrypted.",
+      "deprecated": true
+     },
+     "provider": {
+      "$ref": "#/components/schemas/Provider"
+     }
+    }
+   },
+   "ErrorCode": {
+    "type": "string",
+    "enum": [
+     "SubnetNotFound",
+     "SecurityGroupNotFound",
+     "EniLimitReached",
+     "IpNotAvailable",
+     "AccessDenied",
+     "OperationNotPermitted",
+     "VpcIdNotFound",
+     "Unknown",
+     "NodeCreationFailure",
+     "PodEvictionFailure",
+     "InsufficientFreeAddresses",
+     "ClusterUnreachable",
+     "InsufficientNumberOfReplicas",
+     "ConfigurationConflict",
+     "AdmissionRequestDenied",
+     "UnsupportedAddonModification",
+     "K8sResourceNotFound"
+    ]
+   },
+   "ErrorDetail": {
+    "type": "object",
+    "properties": {
+     "errorCode": {
+      "$ref": "#/components/schemas/ErrorCode"
+     },
+     "errorMessage": {
+      "type": "string"
+     },
+     "resourceIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "EtcdPlacementResponse": {
+    "type": "object",
+    "properties": {
+     "spreadLevel": {
+      "$ref": "#/components/schemas/SpreadLevel"
+     }
+    }
+   },
+   "HorizontalPodAutoscalerControllerConfigRequest": {
+    "type": "object",
+    "properties": {
+     "horizontalPodAutoscalerSyncPeriod": {
+      "type": "string"
+     }
+    }
+   },
+   "HorizontalPodAutoscalerControllerConfigResponse": {
+    "type": "object",
+    "properties": {
+     "horizontalPodAutoscalerSyncPeriod": {
+      "type": "string"
+     }
+    }
+   },
+   "Identity": {
+    "type": "object",
+    "properties": {
+     "oidc": {
+      "$ref": "#/components/schemas/OIDC"
+     }
+    }
+   },
+   "InvalidParameterExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "fargateProfileName": {
+      "type": "string"
+     },
+     "addonName": {
+      "type": "string"
+     },
+     "subscriptionId": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "InvalidRequestExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "addonName": {
+      "type": "string"
+     },
+     "subscriptionId": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "IpFamily": {
+    "type": "string",
+    "enum": [
+     "ipv4",
+     "ipv6"
+    ]
+   },
+   "Issue": {
+    "type": "object",
+    "properties": {
+     "code": {
+      "$ref": "#/components/schemas/NodegroupIssueCode"
+     },
+     "message": {
+      "type": "string"
+     },
+     "resourceIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "KubeApiServerConfigRequest": {
+    "type": "object",
+    "properties": {
+     "eventTtl": {
+      "type": "string"
+     },
+     "serviceNodePortRange": {
+      "$ref": "#/components/schemas/ServiceNodePortRange"
+     }
+    }
+   },
+   "KubeApiServerConfigResponse": {
+    "type": "object",
+    "properties": {
+     "eventTtl": {
+      "type": "string"
+     },
+     "serviceNodePortRange": {
+      "$ref": "#/components/schemas/ServiceNodePortRange"
+     }
+    }
+   },
+   "KubeControllerManagerConfigRequest": {
+    "type": "object",
+    "properties": {
+     "podGcControllerConfig": {
+      "$ref": "#/components/schemas/PodGcControllerConfigRequest"
+     },
+     "horizontalPodAutoscalerControllerConfig": {
+      "$ref": "#/components/schemas/HorizontalPodAutoscalerControllerConfigRequest"
+     }
+    }
+   },
+   "KubeControllerManagerConfigResponse": {
+    "type": "object",
+    "properties": {
+     "podGcControllerConfig": {
+      "$ref": "#/components/schemas/PodGcControllerConfigResponse"
+     },
+     "horizontalPodAutoscalerControllerConfig": {
+      "$ref": "#/components/schemas/HorizontalPodAutoscalerControllerConfigResponse"
+     }
+    }
+   },
+   "KubeSchedulerConfigRequest": {
+    "type": "object",
+    "properties": {
+     "nodeResourcesFit": {
+      "$ref": "#/components/schemas/NodeResourcesFitConfig"
+     }
+    }
+   },
+   "KubeSchedulerConfigResponse": {
+    "type": "object",
+    "properties": {
+     "nodeResourcesFit": {
+      "$ref": "#/components/schemas/NodeResourcesFitConfig"
+     }
+    }
+   },
+   "KubernetesNetworkConfigRequest": {
+    "type": "object",
+    "properties": {
+     "serviceIpv4Cidr": {
+      "type": "string"
+     },
+     "ipFamily": {
+      "$ref": "#/components/schemas/IpFamily"
+     },
+     "elasticLoadBalancing": {
+      "$ref": "#/components/schemas/ElasticLoadBalancing"
+     }
+    }
+   },
+   "KubernetesNetworkConfigResponse": {
+    "type": "object",
+    "properties": {
+     "serviceIpv4Cidr": {
+      "type": "string"
+     },
+     "serviceIpv6Cidr": {
+      "type": "string"
+     },
+     "ipFamily": {
+      "$ref": "#/components/schemas/IpFamily"
+     },
+     "elasticLoadBalancing": {
+      "$ref": "#/components/schemas/ElasticLoadBalancing"
+     }
+    }
+   },
+   "LaunchTemplateSpecification": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     }
+    }
+   },
+   "ListAccessEntriesResponseContent": {
+    "type": "object",
+    "properties": {
+     "accessEntries": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    }
+   },
+   "ListAccessPoliciesResponseContent": {
+    "type": "object",
+    "properties": {
+     "accessPolicies": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/AccessPolicy"
+      }
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    }
+   },
+   "ListAssociatedAccessPoliciesResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "principalArn": {
+      "type": "string"
+     },
+     "nextToken": {
+      "type": "string"
+     },
+     "associatedAccessPolicies": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/AssociatedAccessPolicy"
+      }
+     }
+    }
+   },
+   "ListClustersResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusters": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    }
+   },
+   "ListNodegroupsResponseContent": {
+    "type": "object",
+    "properties": {
+     "nodegroups": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    }
+   },
+   "ListTagsForResourceResponseContent": {
+    "type": "object",
+    "properties": {
+     "tags": {
+      "$ref": "#/components/schemas/TagMap"
+     }
+    }
+   },
+   "ListUpdatesResponseContent": {
+    "type": "object",
+    "properties": {
+     "updateIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "nextToken": {
+      "type": "string"
+     }
+    }
+   },
+   "LogSetup": {
+    "type": "object",
+    "properties": {
+     "types": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/LogType"
+      }
+     },
+     "enabled": {
+      "type": "boolean"
+     }
+    }
+   },
+   "LogType": {
+    "type": "string",
+    "enum": [
+     "api",
+     "audit",
+     "authenticator",
+     "controllerManager",
+     "scheduler"
+    ]
+   },
+   "Logging": {
+    "type": "object",
+    "properties": {
+     "clusterLogging": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/LogSetup"
+      }
+     }
+    }
+   },
+   "NodeRepairConfig": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "maxUnhealthyNodeThresholdCount": {
+      "type": "number",
+      "minimum": 1
+     },
+     "maxUnhealthyNodeThresholdPercentage": {
+      "type": "number",
+      "maximum": 100,
+      "minimum": 1
+     },
+     "maxParallelNodesRepairedCount": {
+      "type": "number",
+      "minimum": 1
+     },
+     "maxParallelNodesRepairedPercentage": {
+      "type": "number",
+      "maximum": 100,
+      "minimum": 1
+     },
+     "nodeRepairConfigOverrides": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/NodeRepairConfigOverrides"
+      }
+     }
+    }
+   },
+   "NodeRepairConfigOverrides": {
+    "type": "object",
+    "properties": {
+     "nodeMonitoringCondition": {
+      "type": "string"
+     },
+     "nodeUnhealthyReason": {
+      "type": "string"
+     },
+     "minRepairWaitTimeMins": {
+      "type": "number",
+      "minimum": 1
+     },
+     "repairAction": {
+      "$ref": "#/components/schemas/RepairAction"
+     }
+    }
+   },
+   "NodeResourcesFitConfig": {
+    "type": "object",
+    "properties": {
+     "scoringStrategy": {
+      "$ref": "#/components/schemas/ScoringStrategy"
+     }
+    }
+   },
+   "Nodegroup": {
+    "type": "object",
+    "properties": {
+     "nodegroupName": {
+      "type": "string"
+     },
+     "nodegroupArn": {
+      "type": "string"
+     },
+     "clusterName": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string"
+     },
+     "releaseVersion": {
+      "type": "string"
+     },
+     "createdAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "modifiedAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "status": {
+      "$ref": "#/components/schemas/NodegroupStatus"
+     },
+     "capacityType": {
+      "$ref": "#/components/schemas/CapacityTypes"
+     },
+     "scalingConfig": {
+      "$ref": "#/components/schemas/NodegroupScalingConfig"
+     },
+     "instanceTypes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "subnets": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "remoteAccess": {
+      "$ref": "#/components/schemas/RemoteAccessConfig"
+     },
+     "amiType": {
+      "$ref": "#/components/schemas/AMITypes"
+     },
+     "nodeRole": {
+      "type": "string"
+     },
+     "labels": {
+      "$ref": "#/components/schemas/labelsMap"
+     },
+     "taints": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Taint"
+      }
+     },
+     "resources": {
+      "$ref": "#/components/schemas/NodegroupResources"
+     },
+     "diskSize": {
+      "type": "number"
+     },
+     "health": {
+      "$ref": "#/components/schemas/NodegroupHealth"
+     },
+     "updateConfig": {
+      "$ref": "#/components/schemas/NodegroupUpdateConfig"
+     },
+     "nodeRepairConfig": {
+      "$ref": "#/components/schemas/NodeRepairConfig"
+     },
+     "launchTemplate": {
+      "$ref": "#/components/schemas/LaunchTemplateSpecification"
+     },
+     "tags": {
+      "$ref": "#/components/schemas/TagMap"
+     },
+     "warmPoolConfig": {
+      "$ref": "#/components/schemas/WarmPoolConfig"
+     }
+    }
+   },
+   "NodegroupHealth": {
+    "type": "object",
+    "properties": {
+     "issues": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Issue"
+      }
+     }
+    }
+   },
+   "NodegroupIssueCode": {
+    "type": "string",
+    "enum": [
+     "AutoScalingGroupNotFound",
+     "AutoScalingGroupInvalidConfiguration",
+     "Ec2SecurityGroupNotFound",
+     "Ec2SecurityGroupDeletionFailure",
+     "Ec2LaunchTemplateNotFound",
+     "Ec2LaunchTemplateVersionMismatch",
+     "Ec2SubnetNotFound",
+     "Ec2SubnetInvalidConfiguration",
+     "IamInstanceProfileNotFound",
+     "Ec2SubnetMissingIpv6Assignment",
+     "IamLimitExceeded",
+     "IamNodeRoleNotFound",
+     "NodeCreationFailure",
+     "AsgInstanceLaunchFailures",
+     "InstanceLimitExceeded",
+     "InsufficientFreeAddresses",
+     "AccessDenied",
+     "InternalFailure",
+     "ClusterUnreachable",
+     "AmiIdNotFound",
+     "AutoScalingGroupOptInRequired",
+     "AutoScalingGroupRateLimitExceeded",
+     "Ec2LaunchTemplateDeletionFailure",
+     "Ec2LaunchTemplateInvalidConfiguration",
+     "Ec2LaunchTemplateMaxLimitExceeded",
+     "Ec2SubnetListTooLong",
+     "IamThrottling",
+     "NodeTerminationFailure",
+     "PodEvictionFailure",
+     "SourceEc2LaunchTemplateNotFound",
+     "LimitExceeded",
+     "Unknown",
+     "AutoScalingGroupInstanceRefreshActive",
+     "KubernetesLabelInvalid",
+     "Ec2LaunchTemplateVersionMaxLimitExceeded",
+     "Ec2InstanceTypeDoesNotExist"
+    ]
+   },
+   "NodegroupResources": {
+    "type": "object",
+    "properties": {
+     "autoScalingGroups": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/AutoScalingGroup"
+      }
+     },
+     "remoteAccessSecurityGroup": {
+      "type": "string"
+     }
+    }
+   },
+   "NodegroupScalingConfig": {
+    "type": "object",
+    "properties": {
+     "minSize": {
+      "type": "number",
+      "minimum": 0
+     },
+     "maxSize": {
+      "type": "number",
+      "minimum": 1
+     },
+     "desiredSize": {
+      "type": "number",
+      "minimum": 0
+     }
+    }
+   },
+   "NodegroupStatus": {
+    "type": "string",
+    "enum": [
+     "CREATING",
+     "ACTIVE",
+     "UPDATING",
+     "DELETING",
+     "CREATE_FAILED",
+     "DELETE_FAILED",
+     "DEGRADED"
+    ]
+   },
+   "NodegroupUpdateConfig": {
+    "type": "object",
+    "properties": {
+     "maxUnavailable": {
+      "type": "number",
+      "minimum": 1
+     },
+     "maxUnavailablePercentage": {
+      "type": "number",
+      "maximum": 100,
+      "minimum": 1
+     },
+     "updateStrategy": {
+      "$ref": "#/components/schemas/NodegroupUpdateStrategies"
+     }
+    }
+   },
+   "NodegroupUpdateStrategies": {
+    "type": "string",
+    "enum": [
+     "DEFAULT",
+     "MINIMAL"
+    ]
+   },
+   "NotFoundExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "OIDC": {
+    "type": "object",
+    "properties": {
+     "issuer": {
+      "type": "string"
+     }
+    }
+   },
+   "OutpostConfigResponse": {
+    "type": "object",
+    "properties": {
+     "outpostArns": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "controlPlaneInstanceType": {
+      "type": "string"
+     },
+     "controlPlanePlacement": {
+      "$ref": "#/components/schemas/ControlPlanePlacementResponse"
+     },
+     "etcdInstanceType": {
+      "type": "string"
+     },
+     "etcdPlacement": {
+      "$ref": "#/components/schemas/EtcdPlacementResponse"
+     }
+    },
+    "required": [
+     "controlPlaneInstanceType",
+     "outpostArns"
+    ]
+   },
+   "PodGcControllerConfigRequest": {
+    "type": "object",
+    "properties": {
+     "terminatedPodGcThreshold": {
+      "type": "number",
+      "maximum": 1000000,
+      "minimum": 1
+     }
+    }
+   },
+   "PodGcControllerConfigResponse": {
+    "type": "object",
+    "properties": {
+     "terminatedPodGcThreshold": {
+      "type": "number",
+      "maximum": 1000000,
+      "minimum": 1
+     }
+    }
+   },
+   "Provider": {
+    "type": "object",
+    "properties": {
+     "keyArn": {
+      "type": "string"
+     }
+    }
+   },
+   "ProvisionedControlPlaneTier": {
+    "type": "string",
+    "enum": [
+     "standard",
+     "tier-xl",
+     "tier-2xl",
+     "tier-4xl",
+     "tier-8xl"
+    ]
+   },
+   "RemoteAccessConfig": {
+    "type": "object",
+    "properties": {
+     "ec2SshKey": {
+      "type": "string"
+     },
+     "sourceSecurityGroups": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "RemoteNetworkConfigRequest": {
+    "type": "object",
+    "properties": {
+     "remoteNodeNetworks": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/RemoteNodeNetwork"
+      },
+      "maxItems": 1,
+      "minItems": 0
+     },
+     "remotePodNetworks": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/RemotePodNetwork"
+      },
+      "maxItems": 1,
+      "minItems": 0
+     }
+    }
+   },
+   "RemoteNetworkConfigResponse": {
+    "type": "object",
+    "properties": {
+     "remoteNodeNetworks": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/RemoteNodeNetwork"
+      },
+      "maxItems": 1,
+      "minItems": 0
+     },
+     "remotePodNetworks": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/RemotePodNetwork"
+      },
+      "maxItems": 1,
+      "minItems": 0
+     }
+    }
+   },
+   "RemoteNodeNetwork": {
+    "type": "object",
+    "properties": {
+     "cidrs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "RemotePodNetwork": {
+    "type": "object",
+    "properties": {
+     "cidrs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "RepairAction": {
+    "type": "string",
+    "enum": [
+     "Replace",
+     "Reboot",
+     "NoAction"
+    ]
+   },
+   "ResourceInUseExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "addonName": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "ResourceLimitExceededExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "subscriptionId": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "ResourceNotFoundExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "fargateProfileName": {
+      "type": "string"
+     },
+     "addonName": {
+      "type": "string"
+     },
+     "subscriptionId": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "ResourceWeight": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string",
+      "maxLength": 253,
+      "minLength": 1
+     },
+     "weight": {
+      "type": "number",
+      "maximum": 100,
+      "minimum": 1
+     }
+    }
+   },
+   "ScoringStrategy": {
+    "type": "object",
+    "properties": {
+     "type": {
+      "$ref": "#/components/schemas/ScoringStrategyType"
+     },
+     "resources": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/ResourceWeight"
+      },
+      "maxItems": 100,
+      "minItems": 0
+     }
+    }
+   },
+   "ScoringStrategyType": {
+    "type": "string",
+    "enum": [
+     "LeastAllocated",
+     "MostAllocated"
+    ]
+   },
+   "ServerExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "nodegroupName": {
+      "type": "string"
+     },
+     "addonName": {
+      "type": "string"
+     },
+     "subscriptionId": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "ServiceNodePortRange": {
+    "type": "object",
+    "properties": {
+     "minPort": {
+      "type": "number",
+      "default": 0
+     },
+     "maxPort": {
+      "type": "number",
+      "default": 0
+     }
+    }
+   },
+   "ServiceUnavailableExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "SpreadLevel": {
+    "type": "string",
+    "enum": [
+     "host",
+     "rack"
+    ]
+   },
+   "StorageConfigRequest": {
+    "type": "object",
+    "properties": {
+     "blockStorage": {
+      "$ref": "#/components/schemas/BlockStorage"
+     }
+    }
+   },
+   "StorageConfigResponse": {
+    "type": "object",
+    "properties": {
+     "blockStorage": {
+      "$ref": "#/components/schemas/BlockStorage"
+     }
+    }
+   },
+   "SupportType": {
+    "type": "string",
+    "enum": [
+     "STANDARD",
+     "EXTENDED"
+    ]
+   },
+   "TagMap": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "string",
+     "maxLength": 256,
+     "minLength": 0
+    },
+    "maxProperties": 50,
+    "minProperties": 1
+   },
+   "Taint": {
+    "type": "object",
+    "properties": {
+     "key": {
+      "type": "string",
+      "maxLength": 63,
+      "minLength": 1
+     },
+     "value": {
+      "type": "string",
+      "maxLength": 63,
+      "minLength": 0
+     },
+     "effect": {
+      "$ref": "#/components/schemas/TaintEffect"
+     }
+    }
+   },
+   "TaintEffect": {
+    "type": "string",
+    "enum": [
+     "NO_SCHEDULE",
+     "NO_EXECUTE",
+     "PREFER_NO_SCHEDULE"
+    ]
+   },
+   "ThrottlingExceptionResponseContent": {
+    "type": "object",
+    "properties": {
+     "clusterName": {
+      "type": "string"
+     },
+     "message": {
+      "type": "string"
+     }
+    }
+   },
+   "Update": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "status": {
+      "$ref": "#/components/schemas/UpdateStatus"
+     },
+     "type": {
+      "$ref": "#/components/schemas/UpdateType"
+     },
+     "params": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/UpdateParam"
+      }
+     },
+     "createdAt": {
+      "type": "number",
+      "format": "double"
+     },
+     "errors": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/ErrorDetail"
+      }
+     },
+     "cancellation": {
+      "$ref": "#/components/schemas/Cancellation"
+     }
+    }
+   },
+   "UpdateAccessConfigRequest": {
+    "type": "object",
+    "properties": {
+     "authenticationMode": {
+      "$ref": "#/components/schemas/AuthenticationMode"
+     }
+    }
+   },
+   "UpdateAccessEntryRequestContent": {
+    "type": "object",
+    "properties": {
+     "kubernetesGroups": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "clientRequestToken": {
+      "type": "string"
+     },
+     "username": {
+      "type": "string"
+     }
+    }
+   },
+   "UpdateAccessEntryResponseContent": {
+    "type": "object",
+    "properties": {
+     "accessEntry": {
+      "$ref": "#/components/schemas/AccessEntry"
+     }
+    }
+   },
+   "UpdateClusterConfigRequestContent": {
+    "type": "object",
+    "properties": {
+     "resourcesVpcConfig": {
+      "$ref": "#/components/schemas/VpcConfigRequest"
+     },
+     "logging": {
+      "$ref": "#/components/schemas/Logging"
+     },
+     "clientRequestToken": {
+      "type": "string"
+     },
+     "accessConfig": {
+      "$ref": "#/components/schemas/UpdateAccessConfigRequest"
+     },
+     "upgradePolicy": {
+      "$ref": "#/components/schemas/UpgradePolicyRequest"
+     },
+     "zonalShiftConfig": {
+      "$ref": "#/components/schemas/ZonalShiftConfigRequest"
+     },
+     "computeConfig": {
+      "$ref": "#/components/schemas/ComputeConfigRequest"
+     },
+     "kubernetesNetworkConfig": {
+      "$ref": "#/components/schemas/KubernetesNetworkConfigRequest"
+     },
+     "storageConfig": {
+      "$ref": "#/components/schemas/StorageConfigRequest"
+     },
+     "remoteNetworkConfig": {
+      "$ref": "#/components/schemas/RemoteNetworkConfigRequest"
+     },
+     "deletionProtection": {
+      "type": "boolean"
+     },
+     "controlPlaneScalingConfig": {
+      "$ref": "#/components/schemas/ControlPlaneScalingConfig"
+     },
+     "kubeApiServerConfig": {
+      "$ref": "#/components/schemas/KubeApiServerConfigRequest"
+     },
+     "kubeSchedulerConfig": {
+      "$ref": "#/components/schemas/KubeSchedulerConfigRequest"
+     },
+     "kubeControllerManagerConfig": {
+      "$ref": "#/components/schemas/KubeControllerManagerConfigRequest"
+     }
+    }
+   },
+   "UpdateClusterConfigResponseContent": {
+    "type": "object",
+    "properties": {
+     "update": {
+      "$ref": "#/components/schemas/Update"
+     }
+    }
+   },
+   "UpdateLabelsPayload": {
+    "type": "object",
+    "properties": {
+     "addOrUpdateLabels": {
+      "$ref": "#/components/schemas/labelsMap"
+     },
+     "removeLabels": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "UpdateNodegroupConfigRequestContent": {
+    "type": "object",
+    "properties": {
+     "labels": {
+      "$ref": "#/components/schemas/UpdateLabelsPayload"
+     },
+     "taints": {
+      "$ref": "#/components/schemas/UpdateTaintsPayload"
+     },
+     "scalingConfig": {
+      "$ref": "#/components/schemas/NodegroupScalingConfig"
+     },
+     "updateConfig": {
+      "$ref": "#/components/schemas/NodegroupUpdateConfig"
+     },
+     "nodeRepairConfig": {
+      "$ref": "#/components/schemas/NodeRepairConfig"
+     },
+     "warmPoolConfig": {
+      "$ref": "#/components/schemas/WarmPoolConfig"
+     },
+     "clientRequestToken": {
+      "type": "string"
+     }
+    }
+   },
+   "UpdateNodegroupConfigResponseContent": {
+    "type": "object",
+    "properties": {
+     "update": {
+      "$ref": "#/components/schemas/Update"
+     }
+    }
+   },
+   "UpdateParam": {
+    "type": "object",
+    "properties": {
+     "type": {
+      "$ref": "#/components/schemas/UpdateParamType"
+     },
+     "value": {
+      "type": "string"
+     }
+    }
+   },
+   "UpdateParamType": {
+    "type": "string",
+    "enum": [
+     "Version",
+     "PlatformVersion",
+     "EndpointPrivateAccess",
+     "EndpointPublicAccess",
+     "ClusterLogging",
+     "DesiredSize",
+     "LabelsToAdd",
+     "LabelsToRemove",
+     "TaintsToAdd",
+     "TaintsToRemove",
+     "MaxSize",
+     "MinSize",
+     "ReleaseVersion",
+     "PublicAccessCidrs",
+     "LaunchTemplateName",
+     "LaunchTemplateVersion",
+     "IdentityProviderConfig",
+     "EncryptionConfig",
+     "AddonVersion",
+     "ServiceAccountRoleArn",
+     "ResolveConflicts",
+     "MaxUnavailable",
+     "MaxUnavailablePercentage",
+     "NodeRepairEnabled",
+     "UpdateStrategy",
+     "ConfigurationValues",
+     "SecurityGroups",
+     "Subnets",
+     "AuthenticationMode",
+     "PodIdentityAssociations",
+     "UpgradePolicy",
+     "ZonalShiftConfig",
+     "ComputeConfig",
+     "StorageConfig",
+     "KubernetesNetworkConfig",
+     "RemoteNetworkConfig",
+     "DeletionProtection",
+     "NodeRepairConfig",
+     "RoleArn",
+     "RoleMappingsToAddOrUpdate",
+     "RoleMappingsToRemove",
+     "NetworkAccess",
+     "VendedLogs",
+     "UpdatedTier",
+     "PreviousTier",
+     "EnableCrossNamespace",
+     "DisabledServices",
+     "WarmPoolEnabled",
+     "WarmPoolMaxGroupPreparedCapacity",
+     "WarmPoolMinSize",
+     "WarmPoolState",
+     "WarmPoolReuseOnScaleIn",
+     "ControlPlaneEgressMode",
+     "KubeApiServerConfig",
+     "KubeSchedulerConfig",
+     "KubeControllerManagerConfig",
+     "ActiveCertificateAuthority",
+     "TrustedCertificateAuthorities",
+     "CertificateAuthorityId",
+     "SigningStatus"
+    ]
+   },
+   "UpdateStatus": {
+    "type": "string",
+    "enum": [
+     "InProgress",
+     "Failed",
+     "Cancelled",
+     "Successful"
+    ]
+   },
+   "UpdateTaintsPayload": {
+    "type": "object",
+    "properties": {
+     "addOrUpdateTaints": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Taint"
+      }
+     },
+     "removeTaints": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Taint"
+      }
+     }
+    }
+   },
+   "UpdateType": {
+    "type": "string",
+    "enum": [
+     "VersionUpdate",
+     "EndpointAccessUpdate",
+     "LoggingUpdate",
+     "ConfigUpdate",
+     "AssociateIdentityProviderConfig",
+     "DisassociateIdentityProviderConfig",
+     "AssociateEncryptionConfig",
+     "AddonUpdate",
+     "VpcConfigUpdate",
+     "AccessConfigUpdate",
+     "UpgradePolicyUpdate",
+     "ZonalShiftConfigUpdate",
+     "AutoModeUpdate",
+     "RemoteNetworkConfigUpdate",
+     "DeletionProtectionUpdate",
+     "CapabilityUpdate",
+     "ControlPlaneScalingConfigUpdate",
+     "VendedLogsUpdate",
+     "ControlPlaneEgressUpdate",
+     "VersionRollback",
+     "ControlPlaneComponentConfigUpdate",
+     "CertificateAuthorityUpdate"
+    ]
+   },
+   "UpgradePolicyRequest": {
+    "type": "object",
+    "properties": {
+     "supportType": {
+      "$ref": "#/components/schemas/SupportType"
+     }
+    }
+   },
+   "UpgradePolicyResponse": {
+    "type": "object",
+    "properties": {
+     "supportType": {
+      "$ref": "#/components/schemas/SupportType"
+     }
+    }
+   },
+   "VpcConfigRequest": {
+    "type": "object",
+    "properties": {
+     "subnetIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "securityGroupIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "endpointPublicAccess": {
+      "type": "boolean"
+     },
+     "endpointPrivateAccess": {
+      "type": "boolean"
+     },
+     "publicAccessCidrs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "controlPlaneEgressMode": {
+      "$ref": "#/components/schemas/ControlPlaneEgressModeType"
+     }
+    }
+   },
+   "VpcConfigResponse": {
+    "type": "object",
+    "properties": {
+     "subnetIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "securityGroupIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "clusterSecurityGroupId": {
+      "type": "string"
+     },
+     "vpcId": {
+      "type": "string"
+     },
+     "endpointPublicAccess": {
+      "type": "boolean",
+      "default": false
+     },
+     "endpointPrivateAccess": {
+      "type": "boolean",
+      "default": false
+     },
+     "publicAccessCidrs": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "controlPlaneEgressMode": {
+      "$ref": "#/components/schemas/ControlPlaneEgressModeType"
+     }
+    }
+   },
+   "WarmPoolConfig": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "minSize": {
+      "type": "number",
+      "minimum": 0
+     },
+     "maxGroupPreparedCapacity": {
+      "type": "number"
+     },
+     "poolState": {
+      "$ref": "#/components/schemas/WarmPoolState"
+     },
+     "reuseOnScaleIn": {
+      "type": "boolean"
+     }
+    }
+   },
+   "WarmPoolState": {
+    "type": "string",
+    "enum": [
+     "STOPPED",
+     "RUNNING",
+     "HIBERNATED"
+    ]
+   },
+   "ZonalShiftConfigRequest": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    }
+   },
+   "ZonalShiftConfigResponse": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     }
+    }
+   },
+   "labelsMap": {
+    "type": "object",
+    "additionalProperties": {
+     "type": "string",
+     "maxLength": 63,
+     "minLength": 1
+    }
+   }
+  },
+  "securitySchemes": {
+   "aws.auth.sigv4": {
+    "type": "apiKey",
+    "description": "AWS Signature Version 4 authentication",
+    "name": "Authorization",
+    "in": "header",
+    "x-amazon-apigateway-authtype": "awsSigv4"
+   }
+  }
+ },
+ "security": [
+  {
+   "aws.auth.sigv4": []
+  }
+ ]
+}
