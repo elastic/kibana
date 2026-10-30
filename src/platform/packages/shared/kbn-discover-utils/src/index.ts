@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Everything exported from here must stay free of React, EUI and other browser-only
-// libraries so that server code can import `@kbn/discover-utils` without loading them.
-// React components, hooks and React/EUI-dependent helpers live in `@kbn/discover-utils/components`.
+// Everything exported from here must stay free of EUI and other browser-only libraries so that
+// server code can import `@kbn/discover-utils` without loading them.
+// React components, hooks and EUI-dependent helpers live in `@kbn/discover-utils/components`.
 
 export * from './constants';
 export * as fieldConstants from './field_constants';

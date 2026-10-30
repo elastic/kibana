@@ -9,10 +9,12 @@
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import {
+  FIELD_FORMAT_IDS,
+  type TextContextTypeOptions,
+} from '@kbn/field-formats-plugin/common/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { TextContextTypeOptions } from '@kbn/field-formats-plugin/common/types';
 
 /** Base parameters for field value formatting functions */
 export interface FormatFieldValueBaseParams {

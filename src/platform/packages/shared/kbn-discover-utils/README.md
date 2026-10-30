@@ -6,7 +6,7 @@ unified components. This are mainly shared types, utils and mocks.
 ## Entry points
 
 - `@kbn/discover-utils`: constants, types and pure utilities. Safe to import from server code;
-  it must stay free of React, EUI and other browser-only libraries.
-- `@kbn/discover-utils/components`: React components, hooks and React/EUI-dependent helpers
+  it must stay free of EUI and other browser-only libraries.
+- `@kbn/discover-utils/components`: React components, hooks and EUI-dependent helpers
   (`ErrorCallout`, `LogLevelBadge`, `usePager`, `formatFieldValueReact`, `getLogLevelColor`, …).
   Browser code only.
