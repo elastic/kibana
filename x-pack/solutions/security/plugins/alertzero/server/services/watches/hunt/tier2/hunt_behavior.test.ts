@@ -1679,4 +1679,166 @@ describe('huntBehavior', () => {
       expect(result.next_step).not.toContain('partially hunted');
     });
   });
+  describe('techniques an earlier run already searched', () => {
+    const catalogIds = () => [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+    const candidatesFor = (ids: string[]) =>
+      ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: 'evidence',
+        // Ascending, so the last ids are the highest-confidence ones.
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+    it('spends the budget on the techniques not yet searched instead of the same top ones', async () => {
+      const ids = catalogIds();
+      const highest = ids.slice(2);
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(candidatesFor(ids)),
+        logger,
+        { ...executeParams, already_searched_technique_ids: highest },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors.map((b) => b.technique_id).sort()).toEqual(ids.slice(0, 2).sort());
+      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
+    });
+
+    it('reports no gap and no behavior for a technique it skipped as already searched', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004'] },
+        esClient
+      );
+
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.indexed_behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.incomplete).toBeUndefined();
+    });
+
+    it('does not report a gap for an already-searched technique whose quote no longer grounds', async () => {
+      // The model's quotes vary between runs. A technique the ledger already settled must not turn
+      // into a retryable gap because this run's quote for it is not in the report text.
+      const result = await huntBehavior(
+        buildMockModel([
+          t1566Candidate,
+          { ...t1078Candidate, evidence_quote: 'never written in the report' },
+        ]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004'] },
+        esClient
+      );
+
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.incomplete).toBeUndefined();
+    });
+
+    it('says there was nothing new to hunt when every extracted technique was already searched', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004', 'T1566'] },
+        esClient
+      );
+
+      expect(generateEsqlMock).not.toHaveBeenCalled();
+      expect(result.behaviors).toEqual([]);
+      expect(result.incomplete).toBeUndefined();
+      expect(result.next_step).toContain('already searched by an earlier run');
+    });
+
+    it('hunts everything when the earlier run recorded nothing', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: [] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(2);
+    });
+
+    describe('techniques an earlier run left pending', () => {
+      it('reports one the extraction did not return as a retryable gap, so the run is not complete', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: [],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+      });
+
+      it('reports it even when every extracted technique was already searched', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: ['T1078.004'],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(generateEsqlMock).not.toHaveBeenCalled();
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+        expect(result.next_step).toContain('the report is settled');
+        expect(result.next_step).not.toContain('No extracted candidate survived validation');
+      });
+
+      it('reports it when the extraction returned nothing at all', async () => {
+        const result = await huntBehavior(
+          buildMockModel([]),
+          logger,
+          { ...executeParams, pending_technique_ids: ['T1566'] },
+          esClient
+        );
+
+        expect(result.status).toBe('no_behaviors_found');
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+      });
+
+      it('adds no gap for one the extraction returned again, which gets its own query', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate, t1566Candidate]),
+          logger,
+          { ...executeParams, pending_technique_ids: ['T1566'] },
+          esClient
+        );
+
+        expect(result.behaviors.map((b) => b.technique_id)).toContain('T1566');
+        expect(result.incomplete).toBeUndefined();
+      });
+
+      it('adds no gap for one an earlier run has since searched', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: ['T1566'],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(result.incomplete).toBeUndefined();
+      });
+    });
+  });
 });
