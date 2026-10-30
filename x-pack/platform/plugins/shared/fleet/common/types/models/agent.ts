@@ -40,6 +40,7 @@ export type AgentActionType =
   | 'UPGRADE'
   | 'ROLLBACK'
   | 'RESTART'
+  | 'UNINSTALL'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'
@@ -111,6 +112,7 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  uninstall_pending?: boolean;
   audit_unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
@@ -298,6 +300,10 @@ export interface FleetServerAgent {
    * Date/time the Elastic Agent unenrolled started
    */
   unenrollment_started_at?: string;
+  /**
+   * True when the agent was unenrolled as the first step of the Fleet UNINSTALL flow
+   */
+  uninstall_pending?: boolean;
   /**
    * Date/time the Elastic Agent was last upgraded
    */

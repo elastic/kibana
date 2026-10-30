@@ -226,6 +226,8 @@ export const AGENT_API_ROUTES = {
   BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
   RESTART_PATTERN: `${API_ROOT}/agents/{agentId}/restart`,
   BULK_RESTART_PATTERN: `${API_ROOT}/agents/bulk_restart`,
+  UNINSTALL_PATTERN: `${API_ROOT}/agents/{agentId}/uninstall`,
+  BULK_UNINSTALL_PATTERN: `${API_ROOT}/agents/bulk_uninstall`,
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
