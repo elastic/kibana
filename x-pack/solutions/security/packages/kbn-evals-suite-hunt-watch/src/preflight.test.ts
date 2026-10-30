@@ -304,6 +304,17 @@ describe('runPreflight', () => {
     expect(settingsWrites).toEqual([]);
   });
 
+  it.each(['false', '0'])('treats CI=%s as outside CI', async (ci) => {
+    process.env.CI = ci;
+    await expect(
+      run(
+        buildMockFetch({
+          existingSpaces: { default: { id: 'default', name: 'Default', solution: 'classic' } },
+        })
+      )
+    ).rejects.toThrow(/"default" space uses the "classic" solution view/);
+  });
+
   it('still converts the non-default eval spaces outside CI', async () => {
     delete process.env.CI;
     const spaceWrites: MockOverrides['spaceWrites'] = [];

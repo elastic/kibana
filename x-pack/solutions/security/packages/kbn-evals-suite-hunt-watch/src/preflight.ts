@@ -111,12 +111,12 @@ const ensureSecuritySpace = async ({
 
   // The conversion is never reverted, so it is only done on a disposable CI stack. On a
   // developer's long-lived stack it would silently change the `default` space's navigation.
-  if (spaceId === DEFAULT_EVAL_SPACE_ID && !process.env.CI) {
+  if (spaceId === DEFAULT_EVAL_SPACE_ID && process.env.CI?.toLowerCase() !== 'true') {
     throw new Error(
       `[hunt-watch] the "${spaceId}" space uses the "${
         existing.solution ?? 'classic'
       }" solution view, but AlertZero routes 404 outside a Security space. The suite only ` +
-        `converts "${spaceId}" automatically when CI is set because the change is not ` +
+        `converts "${spaceId}" automatically when CI=true because the change is not ` +
         `reverted. Switch it to the Security solution view in Stack Management > Spaces, ` +
         `or run the suite on a throwaway stack.`
     );
@@ -516,7 +516,7 @@ export const runPreflight = async ({
   // does not match" on the next run against a long-lived stack). They are eval-only and
   // `ensureSecuritySpace` is idempotent, so a CI stack discards them and a local one reuses them.
   // The Security solution view is not reverted either, `default` included: the Worker stays
-  // enabled there between runs. That is why `default` is only converted when CI is set.
+  // enabled there between runs. That is why `default` is only converted when CI=true.
   const restoreConnectors: PreflightCleanup = async () => {
     for (const spaceId of EVAL_SPACE_IDS) {
       try {
