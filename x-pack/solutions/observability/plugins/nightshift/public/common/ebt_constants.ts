@@ -39,6 +39,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   OPEN_IN_CHAT: 'openInChat',
   OPEN_KNOWLEDGE_PURGE_CONFIRMATION: 'openKnowledgePurgeConfirmation',
   OPEN_RESET_CONFIRMATION: 'openResetConfirmation',
+  OPEN_START_INVESTIGATION: 'openStartInvestigation',
   PREVIEW_KNOWLEDGE_PURGE: 'previewKnowledgePurge',
   PAUSE_DETECTION_ENGINE: 'pauseDetectionEngine',
   RESET_TUNING_DOCUMENT: 'resetTuningDocument',
@@ -59,6 +60,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_DETECTION_TAB: 'viewDetectionTab',
   VIEW_ENTITY: 'viewEntity',
   VIEW_KNOWLEDGE: 'viewKnowledge',
+  VIEW_KNOWLEDGE_INDICATOR_SOURCE: 'viewKnowledgeIndicatorSource',
   VIEW_RULE: 'viewRule',
   VIEW_SIGNAL: 'viewSignal',
   VIEW_SETTINGS: 'viewSettings',
@@ -75,6 +77,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   AUTOMATIONS_LIST: 'automationsList',
   IMPACTED_SERVICES: 'nightshiftImpactedServices',
   INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
+  KNOWLEDGE_INDICATOR_FLYOUT: 'nightshiftKnowledgeIndicatorFlyout',
   MARK_SIGNIFICANT_EVENT_INACTIVE_MODAL: 'nightshiftMarkSignificantEventInactiveModal',
   DETECTION_FLYOUT: 'nightshiftDetectionFlyout',
   DETECTION_FLYOUT_ENTITIES: 'nightshiftDetectionFlyoutEntities',
@@ -92,6 +95,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SETTINGS: 'nightshiftSettings',
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
+  START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   STATUS_SUMMARY: 'nightshiftStatusSummary',
 } as const;
 

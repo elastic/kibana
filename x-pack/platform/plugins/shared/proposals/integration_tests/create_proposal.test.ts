@@ -215,6 +215,7 @@ describe('create-investigation-proposal workflow execution', () => {
       await fixture.resume(true, 'analyst');
 
       expect(fixture.onlyProposal().decidedBy).toEqual(approver);
+      expect(fixture.onlyProposal().decisionMode).toBe('manual');
     });
 
     it('should fall back to the responder when the resolution runs as no user', async () => {
@@ -673,8 +674,10 @@ describe('create-investigation-proposal workflow execution', () => {
 
       // Never parked: the first proposal was decided without a human, and its
       // action failed, so it was re-offered — this time gated.
-      const [first] = fixture.proposals();
+      const [first, retry] = fixture.proposals();
       expect(first.decision).toBe('approved');
+      expect(first.decisionMode).toBe('auto');
+      expect(retry.decisionMode).toBeUndefined();
       expect(fixture.stepExecutions('await_decision', 'waitForApproval')).toHaveLength(1);
       expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
     });
