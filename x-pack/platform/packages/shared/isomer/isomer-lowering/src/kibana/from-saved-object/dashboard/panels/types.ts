@@ -44,6 +44,7 @@ export const deepLinkFor = (
     case 'map':
       return `${base}/app/maps/map/${encodeURIComponent(refId)}`;
     case 'search':
+    case 'discover_session':
       return `${base}/app/discover#/view/${encodeURIComponent(refId)}`;
     case 'links':
       return `${base}/app/dashboards#/links/${encodeURIComponent(refId)}`;

@@ -6,7 +6,8 @@
  */
 
 /**
- * Kibana 9.4 renamed the Lens embeddable from `lens` to `vis` and aggregation-based visualizations from `visualization` to `legacy_vis`.
+ * Kibana 9.4 renamed the Lens embeddable from `lens` to `vis`, aggregation-based visualizations from `visualization` to
+ * `legacy_vis` and saved searches from `search` to `discover_session`. References keep the saved object type.
  *
  * @see https://github.com/elastic/kibana/pull/260040
  */
@@ -15,3 +16,6 @@ export const isLensPanelType = (type: string | undefined): boolean =>
 
 export const isVisualizationPanelType = (type: string | undefined): boolean =>
   type === 'visualization' || type === 'legacy_vis';
+
+export const isSavedSearchPanelType = (type: string | undefined): boolean =>
+  type === 'search' || type === 'discover_session';

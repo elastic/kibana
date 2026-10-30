@@ -6,6 +6,7 @@
  */
 
 import { fromKibanaDashboardSavedObject } from './kibana/from-saved-object/dashboard/from_dashboard_saved_object';
+import { findPanelReference } from './kibana/from-saved-object/dashboard/panel_reference';
 import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
 import { planAdaptiveDashboard } from './kibana/plan/plan_adaptive_dashboard';
 import { resolveInstantMs } from './kibana/from-saved-object/lens/time';
@@ -77,7 +78,7 @@ export interface PlannedDashboard {
 interface DashboardPanelJson {
   panelIndex: string;
   panelRefName?: string;
-  gridData?: GridData;
+  gridData?: GridData & { i?: string };
   embeddableConfig?: {
     attributes?: Envelope['attributes'];
     timeRange?: TimeRange;
@@ -358,8 +359,9 @@ export const planDashboard = (
 
   // By-reference panels resolve to their saved object; by-value panels carry their attributes inline.
   const lensByPanelId = new Map(
-    panelJson.map(({ panelIndex, panelRefName, embeddableConfig }) => {
-      const reference = dashboard.references?.find(({ name }) => name === panelRefName);
+    panelJson.map((panel) => {
+      const { panelIndex, embeddableConfig } = panel;
+      const reference = findPanelReference(panel, dashboard.references);
       const byReference = reference && index.get(`${reference.type}:${reference.id}`);
       const byValue = embeddableConfig?.attributes && {
         id: undefined,

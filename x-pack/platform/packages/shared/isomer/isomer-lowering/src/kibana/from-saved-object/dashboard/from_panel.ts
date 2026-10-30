@@ -7,18 +7,23 @@
 
 import type { AdaptivePanel } from '../../model/adaptive_dashboard';
 
-import { isVisualizationPanelType } from './panel_types';
+import { isSavedSearchPanelType, isVisualizationPanelType } from './panel_types';
 import { lowerImagePanel } from './panels/image';
 import { lowerLinksPanel } from './panels/links';
 import { lowerMapPanel } from './panels/map';
+import { lowerMarkdownPanel } from './panels/markdown';
 import { lowerSavedSearchPanel } from './panels/saved_search';
 import { type LowerPanelArgs, unsupportedPanel } from './panels/types';
+import { lowerVegaPanel } from './panels/vega';
 import { lowerVisualizationPanel } from './panels/visualization';
 
 export const lowerLongTailPanel = (args: LowerPanelArgs): AdaptivePanel => {
   const { panel, refType } = args;
   if (isVisualizationPanelType(refType)) {
     return lowerVisualizationPanel(args);
+  }
+  if (isSavedSearchPanelType(refType)) {
+    return lowerSavedSearchPanel(args);
   }
   switch (refType) {
     case 'links':
@@ -27,8 +32,10 @@ export const lowerLongTailPanel = (args: LowerPanelArgs): AdaptivePanel => {
       return lowerImagePanel(args);
     case 'map':
       return lowerMapPanel(args);
-    case 'search':
-      return lowerSavedSearchPanel(args);
+    case 'markdown':
+      return lowerMarkdownPanel(args);
+    case 'vega':
+      return lowerVegaPanel(args);
     default:
       args.diagnostics.push({
         level: 'warn',
