@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { RouteBreadcrumbsContextProvider } from '../breadcrumbs/route_breadcrumbs_context';
 import { digitalExperienceRouter } from '../routes';
@@ -37,11 +38,18 @@ export const renderApp = ({
       <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
         <RouterProvider history={history} router={router}>
           <div className={APP_WRAPPER_CLASS} data-test-subj="digitalExperienceMainContainer">
-            <PageTemplate>
+            {/* In-app links (getUrlForApp hrefs) navigate through the app's history instead of
+            reloading Kibana. */}
+            <RedirectAppLinks coreStart={{ application: core.application }}>
+              {/* Outside the template's error boundary, so an invalid URL param reaches the
+              router's boundary, which removes it from the URL. */}
               <RouteBreadcrumbsContextProvider>
-                <RouteRenderer />
+                {/* Unpadded, so each page's AppHeader spans the page; pages pad their own content. */}
+                <PageTemplate pageSectionProps={{ paddingSize: 'none' }}>
+                  <RouteRenderer />
+                </PageTemplate>
               </RouteBreadcrumbsContextProvider>
-            </PageTemplate>
+            </RedirectAppLinks>
           </div>
         </RouterProvider>
       </KibanaContextProvider>

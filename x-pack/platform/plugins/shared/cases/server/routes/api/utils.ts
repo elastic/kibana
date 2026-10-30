@@ -6,7 +6,7 @@
  */
 
 import type { Boom } from '@hapi/boom';
-import { boomify, isBoom } from '@hapi/boom';
+import { badRequest as boomBadRequest, boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type {
   CustomHttpResponseOptions,
@@ -20,6 +20,7 @@ import { isCaseError, isHTTPError } from '../../common/error';
 import { getTypedApiErrorAttributes } from '../../common/api_errors';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { CASE_FILES_URL, FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -111,4 +112,15 @@ export const getAttachmentRequestType = (attachment: AttachmentRequestV2): strin
   }
 
   return attachment.type;
+};
+
+/**
+ * Throws a 400 for file attachments, which must be uploaded through the case files route.
+ */
+export const throwIfFileAttachment = ({ type }: { type: string }): void => {
+  if (type === FILE_ATTACHMENT_TYPE) {
+    throw boomBadRequest(
+      `This API doesn't support file attachments. To attach a file, use POST ${CASE_FILES_URL}.`
+    );
+  }
 };

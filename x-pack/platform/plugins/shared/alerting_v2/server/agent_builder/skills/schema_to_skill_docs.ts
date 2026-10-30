@@ -1086,7 +1086,7 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
-    '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
+    '- **Search first**: run `platform.alerting.find_action_policies` for existing policies before adding',
     '  another catch-all or overlapping tag matcher.',
     '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  alerts into a single notification; only use it when the user wants one combined',
@@ -1185,6 +1185,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '- Top-level fields: `{{ inputs.payload.<field> }}`',
     '- Alert iteration: `{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}`',
     '- Rule metadata: `{{ inputs.payload.rules[alert.rule_id].name }}`',
+    '- Alert details link: `{{ alert.alert_url }}` (absolute URL; include it in every notification)',
     '',
     '### `data` (dynamic query columns)',
     '',
@@ -1223,9 +1224,8 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '          Host: {{ alert.data.host.name | default: "unknown" }}',
     '          Errors: {{ alert.data.error_count | default: "n/a" }}',
     '          Status: {{ alert.alert_status }}',
+    '          View alert: {{ alert.alert_url }}',
     '        {% endfor %}',
-    '',
-    '        View execution: {{ execution.url }}',
     '```'
   );
 

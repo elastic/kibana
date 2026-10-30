@@ -226,6 +226,16 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           </EuiFlexGroup>
         </>
       )}
+      {agent.service_account_id && (
+        <>
+          <EuiSpacer size="s" />
+          <div>
+            <EuiBadge color="hollow" iconType="user" data-test-subj="agentOverviewRunsAsBadge">
+              {labels.executionIdentity.runsAsBadge(agent.service_account_id)}
+            </EuiBadge>
+          </div>
+        </>
+      )}
       <EuiSpacer size="m" />
     </>
   );

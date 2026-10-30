@@ -30,11 +30,13 @@ const bodyPanelStyles = css`
 export const SettingsSection = ({
   title,
   titleAdornment,
+  headerAction,
   children,
   'data-test-subj': dataTestSubject,
 }: {
   title: ReactNode;
   titleAdornment?: ReactNode;
+  headerAction?: ReactNode;
   children: ReactNode;
   'data-test-subj'?: string;
 }) => (
@@ -53,6 +55,13 @@ export const SettingsSection = ({
           </EuiText>
         </EuiFlexItem>
         {titleAdornment && <EuiFlexItem grow={false}>{titleAdornment}</EuiFlexItem>}
+        {headerAction && (
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>{headerAction}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" css={bodyPanelStyles}>

@@ -12,6 +12,11 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { createStore } from 'redux-v4';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { ALERT_RULE_TYPE_ID, EVENT_KIND } from '@kbn/rule-data-utils';
+import {
+  ALERT_ATTACK_DISCOVERY_TITLE,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
 import { AttackFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
@@ -178,7 +183,15 @@ describe('AttackFlyoutHeader', () => {
   });
 
   it('opens notes in a nested system flyout when notes button is clicked', async () => {
-    const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
+    const hit = {
+      id: '1',
+      raw: { _id: '1' },
+      flattened: {
+        [EVENT_KIND]: 'signal',
+        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+        [ALERT_ATTACK_DISCOVERY_TITLE]: 'Suspicious activity',
+      },
+    } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
 
@@ -207,6 +220,7 @@ describe('AttackFlyoutHeader', () => {
         ownFocus: false,
         resizable: true,
         size: 'm',
+        title: 'Notes: Suspicious activity',
       })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
