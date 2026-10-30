@@ -15,8 +15,8 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
@@ -28,7 +28,12 @@ import { formatCompactNumber } from '../../../../utils/format_compact_number';
 
 const POPOVER_WIDTH_WITHOUT_TABLE = 200;
 const POPOVER_MIN_WIDTH_WITH_TABLE = 430;
+const POPOVER_MAX_WIDTH = 'calc(100vw - 4rem)';
 const MIN_MODELS_FOR_TABS = 2;
+
+const tabsStyles = ({ euiTheme }: UseEuiTheme) => ({ paddingBlockEnd: euiTheme.size.m });
+const footerStyles = ({ euiTheme }: UseEuiTheme) => ({ paddingBlockStart: euiTheme.size.m });
+const metadataRowStyles = ({ euiTheme }: UseEuiTheme) => ({ paddingBlock: euiTheme.size.xs });
 
 const labels = {
   tabsLegend: i18n.translate('xpack.agentBuilder.response.metadataPopover.tabsLegend', {
@@ -101,7 +106,6 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<MetadataTab>('total');
-  const { euiTheme } = useEuiTheme();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((v) => !v), []);
@@ -159,13 +163,13 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
           gutterSize="none"
           css={css`
             ${hasSeveralModels
-              ? `min-width: ${POPOVER_MIN_WIDTH_WITH_TABLE}px;`
+              ? `min-width: min(${POPOVER_MIN_WIDTH_WITH_TABLE}px, ${POPOVER_MAX_WIDTH});`
               : `width: ${POPOVER_WIDTH_WITHOUT_TABLE}px;`}
-            max-width: calc(100vw - 4rem);
+            max-width: ${POPOVER_MAX_WIDTH};
           `}
         >
           {hasSeveralModels && (
-            <EuiFlexItem grow={false} css={{ paddingBlockEnd: euiTheme.size.m }}>
+            <EuiFlexItem grow={false} css={tabsStyles}>
               <EuiButtonGroup
                 legend={labels.tabsLegend}
                 variant="selection"
@@ -230,7 +234,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
               <MetadataDivider />
             </>
           )}
-          <EuiFlexItem grow={false} css={{ paddingBlockStart: euiTheme.size.m }}>
+          <EuiFlexItem grow={false} css={footerStyles}>
             <EuiButton
               iconType="code"
               size="s"
@@ -273,22 +277,19 @@ interface MetadataRowProps {
   isSubRow?: boolean;
 }
 
-const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = false }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiFlexItem grow={false} css={{ paddingBlock: euiTheme.size.xs }}>
-      <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
-            {isSubRow ? label : <strong>{label}</strong>}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
-            {value}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-};
+const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = false }) => (
+  <EuiFlexItem grow={false} css={metadataRowStyles}>
+    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
+          {isSubRow ? label : <strong>{label}</strong>}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
+          {value}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);

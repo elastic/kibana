@@ -95,12 +95,14 @@ const ReportedTokens: React.FC<{ value?: number }> = ({ value }) =>
     <>{formatCompactNumber(value)}</>
   );
 
-const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <EuiText size="xs">{children}</EuiText>
-);
+const noWrapStyles = css({ whiteSpace: 'nowrap' });
+const rightAlignedNoWrapStyles = css({ whiteSpace: 'nowrap', textAlign: 'right' });
 
-const wrappingHeaderStyles = css({ whiteSpace: 'normal' });
-const rightAlignedHeaderStyles = css({ whiteSpace: 'normal', textAlign: 'right' });
+const TextCell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <EuiText size="xs" css={noWrapStyles}>
+    {children}
+  </EuiText>
+);
 
 interface HeaderCellProps {
   isRightAligned?: boolean;
@@ -114,7 +116,7 @@ const HeaderCell: React.FC<React.PropsWithChildren<HeaderCellProps>> = ({
   subLabel,
   hasSecondLine = false,
 }) => (
-  <EuiText size="xs" css={isRightAligned ? rightAlignedHeaderStyles : wrappingHeaderStyles}>
+  <EuiText size="xs" css={isRightAligned ? rightAlignedNoWrapStyles : noWrapStyles}>
     <strong>{children}</strong>
     {hasSecondLine && (
       <div aria-hidden={!subLabel}>{subLabel ? <strong>{subLabel}</strong> : <>&nbsp;</>}</div>
@@ -128,23 +130,28 @@ const truncatedTextStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const nameContainerStyles = css({ flexGrow: 1, width: 0, minWidth: 0 });
+const shrinkableStyles = css({ minWidth: 0 });
+
 const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = ({
   label,
   tooltip,
   color,
 }) => (
-  <EuiToolTip content={tooltip} display="block">
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="dot" color={color} aria-hidden="true" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="xs" css={truncatedTextStyles}>
-          {label}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiToolTip>
+  <div css={nameContainerStyles}>
+    <EuiToolTip content={tooltip} display="block">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="dot" color={color} aria-hidden="true" />
+        </EuiFlexItem>
+        <EuiFlexItem css={shrinkableStyles}>
+          <EuiText size="xs" css={truncatedTextStyles}>
+            {label}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  </div>
 );
 
 const getColumns = (
@@ -155,11 +162,12 @@ const getColumns = (
   {
     field: 'label',
     name: <HeaderCell hasSecondLine={hasSecondHeaderLine}>{labels.model}</HeaderCell>,
+    width: '100%',
     render: (label: string, { color, fullName }: ModelRow) =>
       color ? (
         <ModelName label={label} tooltip={fullName ?? label} color={color} />
       ) : (
-        <Cell>{label}</Cell>
+        <TextCell>{label}</TextCell>
       ),
   },
   {
@@ -171,9 +179,9 @@ const getColumns = (
     ),
     align: RIGHT_ALIGNMENT,
     render: (llmCalls: number) => (
-      <Cell>
+      <TextCell>
         <strong>{formatCompactNumber(llmCalls)}</strong>
-      </Cell>
+      </TextCell>
     ),
   },
   {
@@ -189,7 +197,7 @@ const getColumns = (
     ),
     align: RIGHT_ALIGNMENT,
     render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
-      <Cell>
+      <TextCell>
         <strong>{formatCompactNumber(inputTokens)}</strong>
         {hasCache && (
           <>
@@ -199,7 +207,7 @@ const getColumns = (
             </EuiTextColor>
           </>
         )}
-      </Cell>
+      </TextCell>
     ),
   },
   {
@@ -215,7 +223,7 @@ const getColumns = (
     ),
     align: RIGHT_ALIGNMENT,
     render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
-      <Cell>
+      <TextCell>
         <strong>{formatCompactNumber(outputTokens)}</strong>
         {hasReasoning && (
           <>
@@ -225,7 +233,7 @@ const getColumns = (
             </EuiTextColor>
           </>
         )}
-      </Cell>
+      </TextCell>
     ),
   },
 ];

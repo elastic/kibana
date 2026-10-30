@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen, within } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import type { ExecutionTerminatedEvent, RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { createExecutionTerminatedEvent } from '../items/execution_terminated_event.factory';
 import { ExecutionMetadataPopover } from './execution_metadata_popover';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: EuiProvider });
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: {}, settings: {} } }),
