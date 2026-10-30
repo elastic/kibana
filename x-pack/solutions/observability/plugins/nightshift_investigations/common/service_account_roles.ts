@@ -23,11 +23,6 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
     cluster: ['monitor_inference'],
     indices: [
       {
-        names: ['logs-*', 'metrics-*', 'traces-*', 'apm-*'],
-        privileges: ['read', 'view_index_metadata'],
-        allow_restricted_indices: false,
-      },
-      {
         names: [
           'ai-index-idx-nightshift-cortex',
           'ai-index-idx-nightshift-semantic-memory',
