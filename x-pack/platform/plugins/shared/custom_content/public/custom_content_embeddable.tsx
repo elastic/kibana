@@ -541,6 +541,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
               isInteractive={viewMode !== 'non-interactive'}
+              minHeight={0}
               requestAdapter={requestAdapter}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
