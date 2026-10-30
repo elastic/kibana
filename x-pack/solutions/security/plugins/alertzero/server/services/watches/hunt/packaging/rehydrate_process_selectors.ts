@@ -31,7 +31,10 @@ const MAX_REHYDRATE_DOCS = 100;
 const MAX_PROCESS_SELECTORS_PER_HOST = 5;
 /** Only Defend's own entity_id works in a Defend response action. */
 const DEFEND_PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-*';
-/** Defend data loaded outside a data stream, e.g. `logs-endpoint.events.00e5ea78.2026.10.08`. */
+/**
+ * Defend data loaded outside a data stream, e.g. `logs-endpoint.events.00e5ea78.2026.10.08`. Such
+ * a name does not say which event types it holds, so the `event.category` filter keeps only process.
+ */
 const DEFEND_PLAIN_EVENTS_INDEX_PREFIX = 'logs-endpoint.events.';
 /** Stands in for a document without `@timestamp`: sorts oldest and is never used to bound a search. */
 const MISSING_TIMESTAMP = new Date(0).toISOString();
@@ -160,6 +163,7 @@ const findExitedAt = async (
       // A missing plain index should not fail the whole lookup.
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [

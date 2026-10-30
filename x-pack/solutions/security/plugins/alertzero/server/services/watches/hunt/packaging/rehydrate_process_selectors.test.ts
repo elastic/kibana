@@ -585,6 +585,8 @@ describe('makeRehydrateProcessSelectors', () => {
         expect.objectContaining({
           index: ['logs-endpoint.events.process-*', packIndex],
           ignore_unavailable: true,
+          size: 0,
+          track_total_hits: false,
         })
       );
     });
