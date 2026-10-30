@@ -14,7 +14,7 @@ Applies to: {{stack}} 9.4.6–9.4.8, 9.5.3–9.5.5
 
 **Details**
 
-For integration packages that declare their {{agent}} version requirement only in the package manifest (`conditions.agent.version`), and not in an input template, edits to a package policy are not applied to {{agent}}s running version 9.4 or later. {{fleet}} keeps a copy of the package policy inputs for each {{agent}} version, and does not refresh that copy when the package policy is edited. The {{fleet}} UI and API show the edited values, but the policy that {{agent}}s receive keeps the old ones. Restarting {{agent}} or {{fleet-server}} does not help.
+For integration packages that declare their {{agent}} version requirement only in the package manifest (`conditions.agent.version`), and not in an input template, edits to an integration policy are not applied to {{agent}}s running version 9.4 or later. {{fleet}} keeps a copy of the integration policy inputs for each {{agent}} version, and does not refresh that copy when the integration policy is edited. The {{fleet}} UI and API show the edited values, but the policy that {{agent}}s receive keeps the old ones. Restarting {{agent}} or {{fleet-server}} does not help.
 
 For example, the AWS integration version 7.1.5 requires {{agent}} `^9.4.0` in its manifest only. After you change a setting such as `queue_url` in an AWS CloudTrail integration policy, {{agent}}s continue to use the previous value.
 
