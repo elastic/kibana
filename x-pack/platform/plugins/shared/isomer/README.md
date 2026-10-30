@@ -12,6 +12,14 @@ xpack.isomer.charts.serverDraw: true
 
 `server/charts_drawing.ts` draws charts with Elastic Charts in a jsdom window on Skia (`@kbn/isomer-charts-elastic-node`), in a worker thread: `html` carries each chart as drawn, and `snapshot` returns a PNG rasterized by takumi. With this setting, the dev tools below use it; it isn't on the start contract yet.
 
+## Drawing in the render service
+
+```yaml
+xpack.isomer.renderService.url: http://localhost:3000
+```
+
+With this setting, `getRenderHost()` draws in the Isomer render service (`scripts/render_service`) instead of a forked process: the same draw options, posted to `POST /v1/render-composition` with the vocabulary digest of this runtime's packs (`server/vocabulary.ts`), which the service checks before it draws. A saturated or draining answer is retried until `xpack.isomer.renderService.timeoutMs`. With `serverDraw` also on, the forked process draws whenever the service is unavailable or renders another vocabulary; a request the service rejected on its merits is not retried locally.
+
 ## Dev tools
 
 - In dev mode, a hidden `isomerChartsBench` app draws compositions in the browser with the Elastic Charts engine, either chart by chart at a given size or as a whole composition, for comparison with Lens.

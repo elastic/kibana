@@ -10,15 +10,18 @@ import { createKibanaIsomerRuntime } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
 import { vegaExample, type VegaNode } from '@kbn/isomer-primitives-vega';
 import { IsomerPlugin } from './plugin';
+import { describeVocabulary } from './vocabulary';
 
 jest.mock('@kbn/isomer', () => {
   const actual = jest.requireActual('@kbn/isomer');
   return { ...actual, createKibanaIsomerRuntime: jest.fn(actual.createKibanaIsomerRuntime) };
 });
 
-const startPlugin = () => {
+const startPlugin = (
+  renderService: { url?: string; timeoutMs: number } = { timeoutMs: 60_000 }
+) => {
   const plugin = new IsomerPlugin(
-    coreMock.createPluginInitializerContext({ charts: { serverDraw: false } })
+    coreMock.createPluginInitializerContext({ charts: { serverDraw: false }, renderService })
   );
   plugin.setup(coreMock.createSetup());
   return plugin.start();
@@ -93,5 +96,35 @@ describe('IsomerPlugin', () => {
 
   it('rejects getDrawing while server drawing is off', async () => {
     await expect(startPlugin().getDrawing()).rejects.toThrow('Server drawing is off');
+  });
+
+  it('rejects getRenderHost with neither server drawing nor a render service', async () => {
+    await expect(startPlugin().getRenderHost()).rejects.toThrow(
+      'set xpack.isomer.charts.serverDraw or xpack.isomer.renderService.url'
+    );
+  });
+
+  it('draws in the render service when one is configured, naming the vocabulary it composes in', async () => {
+    const fetchSpy = jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(new Uint8Array([1, 2, 3]), { status: 200 }));
+    try {
+      const { getRenderHost, getRuntime } = startPlugin({
+        url: 'http://render.test:3000',
+        timeoutMs: 60_000,
+      });
+      const host = await getRenderHost();
+      expect(host.pid).toBeUndefined();
+      expect([...(await host.drawPng(composition, { width: 400 }))]).toEqual([1, 2, 3]);
+      const [url, init] = fetchSpy.mock.calls[0];
+      expect(url).toBe('http://render.test:3000/v1/render-composition');
+      const body = JSON.parse(init?.body as string);
+      expect(body.options).toEqual({ width: 400, format: 'png' });
+      expect(body.expects).toEqual({
+        vocabulary: describeVocabulary(await getRuntime()).vocabulary,
+      });
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 });
