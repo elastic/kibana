@@ -237,7 +237,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     this.searchMethodsService = new SearchMethodsService(
       this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric,
-      { getEsQueryConfig: async () => getEsQueryConfig(uiSettings) }
+      {
+        getEsQueryConfig: async () => getEsQueryConfig(uiSettings),
+        getLocale: () => i18n.getLocale(),
+      }
     );
 
     const loadingCount$ = new BehaviorSubject(0);
