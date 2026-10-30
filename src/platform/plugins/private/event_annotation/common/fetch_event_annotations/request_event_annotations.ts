@@ -98,7 +98,8 @@ export const requestEventAnnotations = (
       )
     );
     const timezone = getTimeZone(uiSettings);
-    const esqlTables = await Promise.all(
+    // Started without awaiting so ES|QL and DSL requests run concurrently
+    const esqlTablesPromise = Promise.all(
       esqlAnnotations.map(async (annotation) => {
         const { datatable } = await esql(
           {
@@ -139,100 +140,101 @@ export const requestEventAnnotations = (
       })
     );
 
-    const uniqueDataViewsToLoad = args.groups
-      .flatMap((g) =>
-        g.annotations.some((a) => a.type === 'query_point_event_annotation') && g.dataView
-          ? [g.dataView.value]
-          : []
-      )
-      .reduce<DataViewSpec[]>((acc, current) => {
-        if (acc.find((el) => el.id === current.id)) return acc;
-        return [...acc, current];
-      }, []);
+    const fetchDslTable = async (): Promise<Datatable> => {
+      const uniqueDataViewsToLoad = args.groups
+        .flatMap((g) =>
+          g.annotations.some((a) => a.type === 'query_point_event_annotation') && g.dataView
+            ? [g.dataView.value]
+            : []
+        )
+        .reduce<DataViewSpec[]>((acc, current) => {
+          if (acc.find((el) => el.id === current.id)) return acc;
+          return [...acc, current];
+        }, []);
 
-    const loadedDataViews = await Promise.all(
-      uniqueDataViewsToLoad.map((dataView) => dataViews.create(dataView, true))
-    );
-
-    const [manualGroups, queryGroups] = partition(
-      regroupForRequestOptimization(args, input, loadedDataViews),
-      isManualSubGroup
-    );
-
-    const manualAnnotationDatatableRows = manualGroups.length
-      ? convertManualToDatatableRows(manualGroups[0], interval, getTimeZone(uiSettings))
-      : [];
-    if (!queryGroups.length) {
-      const manualTable = manualAnnotationDatatableRows.length
-        ? wrapRowsInDatatable(manualAnnotationDatatableRows)
-        : emptyDatatable;
-      return esqlTables.length
-        ? mergeAnnotationDatatables([manualTable, ...esqlTables])
-        : manualTable;
-    }
-
-    const createEsaggsSingleRequest = async ({
-      dataView,
-      aggConfigs,
-      timeFields,
-      ignoreGlobalFilters,
-    }: {
-      dataView: DataView;
-      aggConfigs: AggConfigs;
-      timeFields: string[];
-      ignoreGlobalFilters: boolean;
-    }) =>
-      lastValueFrom(
-        handleRequest({
-          aggs: aggConfigs,
-          indexPattern: dataView,
-          timeFields,
-          filters: ignoreGlobalFilters ? undefined : input?.filters,
-          query: ignoreGlobalFilters ? undefined : (input?.query as any),
-          projectRouting: input?.projectRouting,
-          timeRange: input?.timeRange,
-          abortSignal,
-          inspectorAdapters,
-          searchSessionId: getSearchSessionId(),
-          searchSourceService: searchSource,
-          getNow,
-          executionContext: getExecutionContext(),
-          title: i18n.translate(
-            'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
-            {
-              defaultMessage: 'Annotations',
-            }
-          ),
-          description: i18n.translate(
-            'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.description',
-            {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the annotations.',
-            }
-          ),
-        })
+      const loadedDataViews = await Promise.all(
+        uniqueDataViewsToLoad.map((dataView) => dataViews.create(dataView, true))
       );
 
-    const esaggsGroups = await prepareEsaggsForQueryGroups(queryGroups, interval, aggs);
+      const [manualGroups, queryGroups] = partition(
+        regroupForRequestOptimization(args, input, loadedDataViews),
+        isManualSubGroup
+      );
 
-    const allQueryAnnotationsConfigs = queryGroups.flatMap((group) => group.annotations);
+      const manualAnnotationDatatableRows = manualGroups.length
+        ? convertManualToDatatableRows(manualGroups[0], interval, getTimeZone(uiSettings))
+        : [];
+      if (!queryGroups.length) {
+        const manualTable = manualAnnotationDatatableRows.length
+          ? wrapRowsInDatatable(manualAnnotationDatatableRows)
+          : emptyDatatable;
+        return manualTable;
+      }
 
-    const esaggsResponses = await Promise.all(
-      esaggsGroups.map(async ({ esaggsParams, fieldsColIdMap, fieldDisplayNames }) => ({
-        response: await createEsaggsSingleRequest(esaggsParams),
-        fieldsColIdMap,
-        fieldDisplayNames,
-      }))
-    );
+      const createEsaggsSingleRequest = async ({
+        dataView,
+        aggConfigs,
+        timeFields,
+        ignoreGlobalFilters,
+      }: {
+        dataView: DataView;
+        aggConfigs: AggConfigs;
+        timeFields: string[];
+        ignoreGlobalFilters: boolean;
+      }) =>
+        lastValueFrom(
+          handleRequest({
+            aggs: aggConfigs,
+            indexPattern: dataView,
+            timeFields,
+            filters: ignoreGlobalFilters ? undefined : input?.filters,
+            query: ignoreGlobalFilters ? undefined : (input?.query as any),
+            projectRouting: input?.projectRouting,
+            timeRange: input?.timeRange,
+            abortSignal,
+            inspectorAdapters,
+            searchSessionId: getSearchSessionId(),
+            searchSourceService: searchSource,
+            getNow,
+            executionContext: getExecutionContext(),
+            title: i18n.translate(
+              'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
+              {
+                defaultMessage: 'Annotations',
+              }
+            ),
+            description: i18n.translate(
+              'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.description',
+              {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the annotations.',
+              }
+            ),
+          })
+        );
 
-    const legacyTable = postprocessAnnotations(
-      esaggsResponses,
-      allQueryAnnotationsConfigs,
-      manualAnnotationDatatableRows
-    );
-    return esqlTables.length
-      ? mergeAnnotationDatatables([legacyTable, ...esqlTables])
-      : legacyTable;
+      const esaggsGroups = await prepareEsaggsForQueryGroups(queryGroups, interval, aggs);
+
+      const allQueryAnnotationsConfigs = queryGroups.flatMap((group) => group.annotations);
+
+      const esaggsResponses = await Promise.all(
+        esaggsGroups.map(async ({ esaggsParams, fieldsColIdMap, fieldDisplayNames }) => ({
+          response: await createEsaggsSingleRequest(esaggsParams),
+          fieldsColIdMap,
+          fieldDisplayNames,
+        }))
+      );
+
+      const legacyTable = postprocessAnnotations(
+        esaggsResponses,
+        allQueryAnnotationsConfigs,
+        manualAnnotationDatatableRows
+      );
+      return legacyTable;
+    };
+
+    const [esqlTables, dslTable] = await Promise.all([esqlTablesPromise, fetchDslTable()]);
+    return esqlTables.length ? mergeAnnotationDatatables([dslTable, ...esqlTables]) : dslTable;
   });
 };
 
