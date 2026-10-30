@@ -11,7 +11,12 @@ import type { InferenceClient } from '@kbn/inference-common';
 
 import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
-import { getDefaultArguments } from '..';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
+  getDefaultArguments,
+} from '..';
 import { DEFAULT_TIMEOUT } from './constants';
 
 const connectorId = 'mock-connector-id';
@@ -124,6 +129,23 @@ describe('ActionsClientLlm', () => {
       });
       expect(result).toEqual(mockActionResponse.message);
     });
+    it('rejects an empty unified completion when llmType is inference', async () => {
+      actionsClient.execute.mockResolvedValue({
+        actionId: connectorId,
+        data: { choices: [{ message: { content: '', tool_calls: [] } }] },
+        status: 'ok',
+      });
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        isInferenceEndpoint: false,
+        llmType: 'inference',
+        logger: mockLogger,
+      });
+
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(EmptyModelResponseError);
+    });
+
     it('returns the expected content when _call is invoked', async () => {
       const actionsClientLlm = new ActionsClientLlm({
         actionsClient,
@@ -235,6 +257,27 @@ describe('ActionsClientLlm', () => {
       );
     });
 
+    it('rejects with an empty-response error the response has no content', async () => {
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: { message: '' },
+          status: 'ok',
+        })
+      );
+
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+      });
+
+      const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+      expect(error).toBeInstanceOf(EmptyModelResponseError);
+      expect(error.message).toContain(connectorId);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
     describe('isInferenceEndpoint', () => {
       const mockInferenceClient = {
         chatComplete: jest.fn(),
@@ -315,6 +358,80 @@ describe('ActionsClientLlm', () => {
         await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
 
         expect(getDebugMessages().some((message) => message.includes('quota exceeded'))).toBe(true);
+      });
+
+      it('rejects with an empty-response error when the model returns no content', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '',
+          model: 'test-model',
+          tokens: { completion: 0, prompt: 128390, total: 128390 },
+          toolCalls: [],
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          model: 'test-model',
+        });
+
+        const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+        expect(error).toBeInstanceOf(EmptyModelResponseError);
+        expect(error.message).toContain(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
+        expect(error.message).toContain(connectorId);
+        expect(error.message).toContain('test-model');
+        expect(error.message).toContain('prompt tokens: 128390');
+        expect(error.message).toContain('completion tokens: 0');
+        expect(error).toEqual(
+          expect.objectContaining({
+            code: EMPTY_MODEL_RESPONSE_ERROR_CODE,
+            completionTokens: 0,
+            connectorId,
+            promptTokens: 128390,
+          })
+        );
+        // logged at `error` (persisted), not debug-only: serverless has no log-level switch
+        expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      });
+
+      it('treats a whitespace-only response as an empty response', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '   \n',
+          toolCalls: [],
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow(EmptyModelResponseError);
+      });
+
+      it('does NOT treat a tool-call-only response as an empty response', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '',
+          toolCalls: [{ function: { arguments: '{}', name: 'some_tool' }, id: 'tool-call-1' }],
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        const result = await actionsClientLlm._call(prompt);
+
+        expect(result).toEqual('');
+        expect(mockLogger.error).not.toHaveBeenCalled();
       });
 
       it('rejects when inferenceClient is not provided', async () => {

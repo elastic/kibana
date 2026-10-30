@@ -6,6 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { EmptyModelResponseError } from '@kbn/langchain/server';
+import { getEmptyModelResponseError } from '../../../lib/langchain/output_chunking/nodes/helpers/empty_model_response';
 import { throwIfErrorCountsExceeded } from '.';
 
 const mockLogger = {
@@ -180,6 +182,65 @@ describe('throwIfErrorCountsExceeded', () => {
           maxHallucinationFailures: 5,
         })
       ).toThrow(/hallucination/i);
+    });
+  });
+
+  describe('when the errors are empty model responses', () => {
+    const emptyModelResponseError = getEmptyModelResponseError({
+      cause: new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+        model: 'test-model',
+        promptTokens: 128390,
+        responseBody: '',
+      }),
+      generationAttempts: 9,
+      llmType: 'inference',
+      nodeName: 'generate',
+    });
+
+    const getMessage = () => {
+      try {
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: [emptyModelResponseError],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        });
+      } catch (error) {
+        return (error as Error).message;
+      }
+
+      throw new Error('expected throwIfErrorCountsExceeded to throw');
+    };
+
+    it('does NOT tell the user to send fewer alerts', () => {
+      expect(getMessage()).not.toContain('Try sending fewer alerts');
+    });
+
+    it('names the empty model response as the cause', () => {
+      expect(getMessage()).toContain('The model returned an empty response');
+      expect(getMessage()).toContain('will not help');
+    });
+
+    it('keeps the connector, model and token counts in the thrown message', () => {
+      const message = getMessage();
+
+      expect(message).toContain('test-connector-id');
+      expect(message).toContain('test-model');
+      expect(message).toContain('prompt tokens: 128390');
+    });
+
+    it('keeps the existing remedy when the errors are not empty model responses', () => {
+      expect(() =>
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: ['generate node is unable to parse (fake) response from attempt 9'],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        })
+      ).toThrow(/Try sending fewer alerts/);
     });
   });
 
