@@ -18,7 +18,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
  * plugin to the plugin system, so `setup` is never called.
  */
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   /**
    * Escalations are AlertZero-only for now. When `false` (Observability serverless) the plugin
    * registers no escalations sub-feature, routes, or template UI, and the privileges probe reports
