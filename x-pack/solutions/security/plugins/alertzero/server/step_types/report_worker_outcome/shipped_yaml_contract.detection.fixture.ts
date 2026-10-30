@@ -35,6 +35,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           resolve_enabled_rules: { output: { rule_revision_keys: ',' } },
           resolve_fanout_rows: { output: { rows: [['rule-1'], ['rule-2']] } },
           resolve_screened_rules: { output: { count: 2 } },
+          resolve_read_failure: { output: { failed: false } },
           screen_rule_fp_rates: { output: { values: [] } },
         },
       },
@@ -43,15 +44,22 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         steps: {
           harvest_fp_alerts_by_rule: { error: { message: 'search failed' } },
           list_active_reviews: { error: { message: 'HTTP 500' } },
+          resolve_read_failure: { output: { failed: true } },
         },
       },
       {
         consts: { no_rows: [] },
-        steps: { list_enabled_rules: { error: { message: 'HTTP 500' } } },
+        steps: {
+          list_enabled_rules: { error: { message: 'HTTP 500' } },
+          resolve_read_failure: { output: { failed: true } },
+        },
       },
       {
         consts: { no_rows: [] },
-        steps: { screen_rule_fp_rates: { error: { message: 'search failed' } } },
+        steps: {
+          resolve_read_failure: { output: { failed: true } },
+          screen_rule_fp_rates: { error: { message: 'search failed' } },
+        },
       },
       {
         consts: { no_rows: [] },
@@ -59,6 +67,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           list_enabled_rules: { output: { data: [], total: 10001 } },
           resolve_enabled_rules: { output: { rule_revision_keys: ',', truncated: true } },
           resolve_fanout_rows: { output: { rows: [['rule-1']] } },
+          resolve_read_failure: { output: { failed: false } },
         },
       },
     ],
