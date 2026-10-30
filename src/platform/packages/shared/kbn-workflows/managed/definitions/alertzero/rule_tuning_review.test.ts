@@ -26,6 +26,8 @@ interface YamlStep {
   type: string;
   if?: string;
   with?: Record<string, unknown>;
+  steps?: YamlStep[];
+  cases?: Array<{ steps?: YamlStep[] }>;
 }
 
 const definition = parse(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.yaml) as {
@@ -34,7 +36,11 @@ const definition = parse(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.yaml) as {
 };
 
 const flatten = (steps: YamlStep[]): YamlStep[] =>
-  steps.flatMap((step) => [step, ...flatten(((step as any).steps ?? []) as YamlStep[])]);
+  steps.flatMap((step) => [
+    step,
+    ...flatten(step.steps ?? []),
+    ...(step.cases ?? []).flatMap((switchCase) => flatten(switchCase.steps ?? [])),
+  ]);
 
 const allSteps = flatten(definition.steps);
 const stepByName = (name: string) => allSteps.find((step) => step.name === name);
@@ -110,5 +116,170 @@ describe('rule_tuning_review oversized exception handling', () => {
         ''
       );
     });
+  });
+});
+
+/**
+ * The exception name is built once in `build_exception_name` and read by both
+ * the card (`attach_exception`) and the action input (`propose_exception`), so
+ * the card always shows the name that approval creates.
+ */
+describe('rule_tuning_review exception name', () => {
+  const NAME_STEP = 'build_exception_name';
+  const NAME_OUTPUT = '{{ steps.build_exception_name.output.name }}';
+  const RULE_NAME = 'Seeded rule for timestamp override backtest';
+  const MAX_NAME_LENGTH = 256;
+
+  const nameTemplate = stepByName(NAME_STEP)?.with?.name as string;
+
+  const renderName = (exceptionName: unknown, ruleName: string = RULE_NAME): string =>
+    createWorkflowLiquidEngine().parseAndRenderSync(nameTemplate, {
+      steps: {
+        diagnose_rule: { output: { structured_output: { exception_name: exceptionName } } },
+        fetch_rule: { output: { name: ruleName } },
+      },
+      consts: definition.consts,
+    });
+
+  it('mirrors the action name bound in consts', () => {
+    expect(definition.consts.max_exception_name_length).toBe(MAX_NAME_LENGTH);
+  });
+
+  it('is a data.set step that runs only for an exception recommendation', () => {
+    const step = stepByName(NAME_STEP);
+    expect(step?.type).toBe('data.set');
+    expect(step?.if).toContain("change_type == 'exception'");
+  });
+
+  it('runs after diagnose_rule and before both steps that read it', () => {
+    const index = (name: string) => allSteps.findIndex((step) => step.name === name);
+    expect(index(NAME_STEP)).toBeGreaterThan(index('diagnose_rule'));
+    expect(index(NAME_STEP)).toBeLessThan(index('attach_exception'));
+    expect(index(NAME_STEP)).toBeLessThan(index('propose_exception'));
+  });
+
+  it('feeds the card and the action input from the same output', () => {
+    const card = (stepByName('attach_exception')?.with?.data as { name: string }).name;
+    const actionInput = (
+      stepByName('propose_exception')?.with?.inputs as { actionInput: { name: string } }
+    ).actionInput.name;
+    expect(card).toBe(NAME_OUTPUT);
+    expect(actionInput).toBe(NAME_OUTPUT);
+  });
+
+  describe('name template', () => {
+    it('uses the descriptive name from the agent', () => {
+      expect(renderName('Known non-threat hosts excluded from indicator match')).toBe(
+        'Known non-threat hosts excluded from indicator match'
+      );
+    });
+
+    it('trims whitespace around the agent name', () => {
+      expect(renderName('  Known backup agent runs  ')).toBe('Known backup agent runs');
+    });
+
+    it.each([
+      ['missing', undefined],
+      ['null', null],
+      ['empty', ''],
+      ['blank', '   '],
+    ])('falls back to "Tuning: <rule name>" when the agent name is %s', (_label, value) => {
+      expect(renderName(value)).toBe(`Tuning: ${RULE_NAME}`);
+    });
+
+    it('cuts an agent name longer than the action limit', () => {
+      expect(renderName('a'.repeat(MAX_NAME_LENGTH + 44))).toBe('a'.repeat(MAX_NAME_LENGTH));
+    });
+
+    it('keeps an agent name of exactly the limit', () => {
+      expect(renderName('b'.repeat(MAX_NAME_LENGTH))).toBe('b'.repeat(MAX_NAME_LENGTH));
+    });
+
+    it('keeps the fallback within the action limit for a long rule name', () => {
+      const rendered = renderName(undefined, 'r'.repeat(MAX_NAME_LENGTH));
+      expect(rendered).toHaveLength(MAX_NAME_LENGTH);
+      expect(rendered.startsWith('Tuning: ')).toBe(true);
+    });
+  });
+
+  describe('diagnose_rule schema', () => {
+    interface SchemaArm {
+      properties: Record<string, { const?: string; type?: string }>;
+      required: string[];
+    }
+    const { oneOf: arms } = stepByName('diagnose_rule')?.with?.schema as { oneOf: SchemaArm[] };
+    const armFor = (changeType: string) =>
+      arms.find(({ properties }) => properties.change_type.const === changeType);
+
+    it('asks the exception arm for a string exception_name', () => {
+      expect(armFor('exception')?.properties.exception_name?.type).toBe('string');
+      expect(armFor('exception')?.required).toContain('exception_name');
+    });
+
+    it('leaves every other arm without exception_name', () => {
+      const others = arms.filter(({ properties }) => properties.change_type.const !== 'exception');
+      expect(others).toHaveLength(5);
+      others.forEach(({ properties }) => expect(properties.exception_name).toBeUndefined());
+    });
+  });
+});
+
+/**
+ * The proposal comment is what an analyst reads in AlertZero before approving. For an
+ * exception it must name the exception and list its conditions. `bound_exception_entries`
+ * hands the entries over as a JSON string, which a Liquid `for` loop cannot parse inline.
+ */
+describe('rule_tuning_review proposal comment for an exception', () => {
+  const EXCEPTION_NAME = 'Known non-threat hosts excluded from indicator match';
+  const commentTemplate = stepByName('compose_proposal')?.with?.comment as string;
+
+  const entriesJson = JSON.stringify([
+    { field: 'user.name', operator: 'is', value: 'svc-backup' },
+    { field: 'host.name', operator: 'is_one_of', values: ['jump-box-03', 'db-host-11'] },
+    { field: 'process.parent.name', operator: 'exists' },
+  ]);
+
+  const renderComment = (): string =>
+    createWorkflowLiquidEngine().parseAndRenderSync(commentTemplate, {
+      inputs: { fp_count: 12, alert_ids: ['a', 'b'], last_fp_at: '2026-10-30T10:56:58.555Z' },
+      steps: {
+        diagnose_rule: {
+          output: {
+            structured_output: {
+              change_type: 'exception',
+              title: 'Exclude benign backup agent',
+              summary: 'A known backup service triggers this rule.',
+            },
+          },
+        },
+        compose_evidence: { output: { rule_line: 'Rule: Backup', fp_summary: '12 of 12' } },
+        fetch_rule: { output: { name: 'Backup', type: 'query' } },
+        bound_exception_entries: { output: { entries_json: entriesJson } },
+        build_exception_name: { output: { name: EXCEPTION_NAME } },
+      },
+      consts: definition.consts,
+    });
+
+  const exceptionSection = (): string => {
+    const comment = renderComment();
+    const start = comment.indexOf('Proposed exception:');
+    return start === -1 ? '' : comment.slice(start, comment.indexOf('Approve to add', start));
+  };
+
+  it('lists every condition as a bullet', () => {
+    const section = exceptionSection();
+    expect(section).toContain('- user.name is svc-backup');
+    expect(section).toContain('- host.name is_one_of jump-box-03, db-host-11');
+    expect(section).toContain('- process.parent.name exists');
+  });
+
+  it('renders no empty bullet', () => {
+    expect(exceptionSection()).not.toMatch(/^- *$/m);
+  });
+
+  it('names the exception under "Proposed exception:", before the conditions', () => {
+    const section = exceptionSection();
+    expect(section).toContain(EXCEPTION_NAME);
+    expect(section.indexOf(EXCEPTION_NAME)).toBeLessThan(section.indexOf('- user.name'));
   });
 });

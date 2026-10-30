@@ -133,6 +133,9 @@ consts:
   # schema (see the note above exception_entries).
   max_exception_entries: 100
   max_exception_values: 1000
+  # Mirrors the `maxLength` of `name` in the add-rule-exception action input. Applied by
+  # build_exception_name, not in the agent schema, for the same reason as the caps above.
+  max_exception_name_length: 256
   # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
   # list. The attachment shows the first 20 ids. The proposal text does not.
   alerts_per_attachment: 20
@@ -412,6 +415,10 @@ steps:
             is_one_of / is_not_one_of              → populate `values` (array, required)
             exists / does_not_exist                → no value needed
           Glob patterns for matches/does_not_match: * matches any sequence, ? matches one char.
+          Populate exception_name with a short name for the exception. Name the entities
+          it excludes and say why they are benign, for example "Known non-threat hosts
+          excluded from indicator match". Do not repeat the rule name. Use 80 characters
+          or less.
 
         query  — The query is too broad and FPs share a pattern not worth
           excepting individually. The rule stays a "{{ steps.fetch_rule.output.type }}" rule.
@@ -482,6 +489,10 @@ steps:
               confidence:
                 type: string
                 enum: [low, medium, high]
+              # No maxLength: the name is cut to consts.max_exception_name_length in
+              # build_exception_name, like the entry caps below, to keep this schema simple.
+              exception_name:
+                type: string
               # Field-level bounds mirror the platform exception schema, which the
               # action and the step validate against. No maxItems on this array or on
               # `values` on purpose: Gemini answers 400 to this schema when either cap
@@ -534,7 +545,7 @@ steps:
                           type: string
                           enum: [exists, does_not_exist]
                       required: [field, operator]
-            required: [change_type, summary, exception_entries, title, fp_pattern, reasoning, confidence]
+            required: [change_type, summary, exception_entries, exception_name, title, fp_pattern, reasoning, confidence]
           - type: object
             properties:
               change_type:
@@ -710,6 +721,23 @@ steps:
         {%- endif -%}
         {%- endfor -%}
         ]
+
+  # The exception's name, built once so the card (attach_exception) and the action
+  # input (propose_exception) carry the same text. It is the agent's exception_name.
+  # A missing or blank one falls back to the rule-name form, so an older or incomplete
+  # agent output does not fail the run. The action rejects a name over its limit, so
+  # the result is cut to it, fallback included.
+  - name: build_exception_name
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      name: >-
+        {%- assign picked = steps.diagnose_rule.output.structured_output.exception_name | strip -%}
+        {%- if picked == blank -%}{%- assign picked = 'Tuning: ' | append: steps.fetch_rule.output.name -%}{%- endif -%}
+        {{- picked | truncate: consts.max_exception_name_length, '' -}}
 
   - name: build_exception_filter
     type: security.buildExceptionEntriesFilter
@@ -1068,7 +1096,10 @@ steps:
         ```
         {% when "exception" %}
         Proposed exception:
-        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
+        **{{ steps.build_exception_name.output.name }}**
+        {%- comment -%} A `for` tag cannot take a filter, so parse the entries first. {%- endcomment %}
+        {% assign exception_entries = steps.bound_exception_entries.output.entries_json | json_parse %}
+        {% for entry in exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
@@ -1220,7 +1251,7 @@ steps:
               id: "proposed-exception"
               type: security.exception
               data:
-                name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                name: "{{ steps.build_exception_name.output.name }}"
                 description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
                 entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
               description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
@@ -1240,7 +1271,7 @@ steps:
                 actionInput:
                   rule_id: "{{ inputs.rule_uuid }}"
                   expected_revision: "${{ steps.fetch_rule.output.revision }}"
-                  name: "Tuning: {{ steps.fetch_rule.output.name }}"
+                  name: "{{ steps.build_exception_name.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
                   entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
