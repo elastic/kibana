@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
@@ -42,9 +43,37 @@ const StyledSpan = styled.span<{
   }
 `;
 
+const legendTextStyles = css`
+  display: grid;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+`;
+
+// Non-breaking hyphens, so a narrow legend never splits the placeholder across lines.
+const NO_SHARE = '\u2011\u2011';
+
+const reservedSpaceStyles = css`
+  visibility: hidden;
+`;
+
+function LegendText({ label, rank }: { label: string; rank: number | string }) {
+  return (
+    <FormattedMessage
+      id="xpack.observability.ux.coreVitals.paletteLegend.rankPercentage"
+      defaultMessage="{labelsInd} ({ranksInd}%)"
+      values={{
+        labelsInd: label,
+        ranksInd: rank,
+      }}
+    />
+  );
+}
+
 interface Props {
   onItemHover: (ind: number | null) => void;
-  ranks: number[];
+  ranks?: number[];
   thresholds: Thresholds;
   title: string;
   isCls?: boolean;
@@ -69,20 +98,23 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }:
           }}
         >
           <EuiToolTip
-            content={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
+            content={ranks && getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
             position="bottom"
           >
-            <StyledSpan darkMode={darkMode} tabIndex={0}>
-              <PaletteLegend color={color}>
-                <EuiText size="xs" data-test-subj={`${labels[ind]}-${ranks?.[ind]}`}>
-                  <FormattedMessage
-                    id="xpack.observability.ux.coreVitals.paletteLegend.rankPercentage"
-                    defaultMessage="{labelsInd} ({ranksInd}%)"
-                    values={{
-                      labelsInd: labels[ind],
-                      ranksInd: ranks?.[ind],
-                    }}
-                  />
+            <StyledSpan darkMode={darkMode} tabIndex={ranks ? 0 : undefined}>
+              <PaletteLegend color={ranks ? color : 'subdued'}>
+                <EuiText
+                  size="xs"
+                  data-test-subj={ranks && `${labels[ind]}-${ranks[ind]}`}
+                  css={legendTextStyles}
+                >
+                  {/* Sized by the widest share, so loading and loaded legends wrap alike. */}
+                  <span aria-hidden={true} css={reservedSpaceStyles}>
+                    <LegendText label={labels[ind]} rank={100} />
+                  </span>
+                  <span>
+                    <LegendText label={labels[ind]} rank={ranks?.[ind] ?? NO_SHARE} />
+                  </span>
                 </EuiText>
               </PaletteLegend>
             </StyledSpan>
