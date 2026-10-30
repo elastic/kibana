@@ -646,7 +646,7 @@ const noReviewChildError = (
  * child means the rule was not harvested.
  *
  * A settled worker that requested a review gets `REVIEW_CHILD_GRACE_MS` for that child to
- * appear: `run_review` is fire-and-forget, so the worker routinely settles first.
+ * appear.
  *
  * More than one child is always fatal — it means the cancel pass missed something or the
  * stack is shared — and is reported as such rather than as a seeding problem.
@@ -851,9 +851,8 @@ export const runRuleTuningWorkflow = async ({
     startedAt,
   });
 
-  // `run_review` is `workflow.executeAsync`, so the review usually starts only after the
-  // worker settled and the loop above never saw it. Drive it to a terminal status here,
-  // approving its gate, so the proposal read below sees a finished review.
+  // The review usually starts after the worker settled, so the loop above never saw it.
+  // Drive it to a terminal status, approving its gate, so the proposal read sees a finished review.
   let review = await getExecution(fetch, reviewChild.id);
   while (!isTerminal(review.status) && Date.now() < deadline) {
     if (!approvedReviews.has(review.id) && (await isReviewAtApprovalGate({ fetch, review }))) {

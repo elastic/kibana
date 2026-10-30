@@ -234,9 +234,7 @@ export const INFERENCE_SETTINGS_HEADERS = {
  *   - ALERTZERO_(EFFICIENT|BALANCED|FRONTIER)_INFERENCE_FEATURE_ID (@kbn/alertzero-common). Every
  *     alertzero tier registers `ignoreGlobalDefault: true`, so `genAiSettings:defaultAIConnector`
  *     never reaches them. The review's `diagnose_rule` resolves `connector-id-by-feature:
- *     alertzero_balanced`, whose first recommended endpoint is claude-5-sonnet. These replaced
- *     the agentic/fast/reasoning tiers; pinning the old ids still read back fine but left every
- *     review call on sonnet whatever the candidate was.
+ *     alertzero_balanced`, whose first recommended endpoint is claude-5-sonnet.
  *   - AGENT_BUILDER_(FAST_)INFERENCE_FEATURE_ID (@kbn/agent-builder-common). The agent run's own
  *     low-effort calls (conversation title generation) go through `agent_builder_fast`, whose
  *     first recommended endpoint is gemini-flash-lite.
