@@ -23,6 +23,9 @@ export class AlertZeroQueuePage {
   }
 
   async goto() {
-    await this.page.gotoApp('alertzero', { readyWhen: this.trendChartRow });
+    // FIXME: `gotoApp` has no `readyWhen` option on 9.6. Use `readyWhen: this.trendChartRow`
+    // and remove this wait after https://github.com/elastic/kibana/pull/300454 is backported.
+    await this.page.gotoApp('alertzero');
+    await this.trendChartRow.waitFor({ state: 'visible' });
   }
 }
