@@ -294,6 +294,41 @@ describe('Calculate risk scores with ESQL', () => {
       ).toThrow('Entity ID contains an unsupported control character');
     });
 
+    it.each([
+      ['whitespace/METADATA injection', '.alerts-security.alerts-default METADATA _index'],
+      ['pipe injection', '.alerts-security.alerts-default | LIMIT 0'],
+      ['comment injection', '.alerts-security.alerts-default,zz* | LIMIT 0 //'],
+      [
+        'report payload A',
+        '.alerts-security.alerts-alpha,.alerts-security.alerts-beta,zz* METADATA _index,/* * */_source',
+      ],
+    ])('throws when the source index is not a valid index expression (%s)', (_label, index) => {
+      const message = `Risk scoring source index ${index} is not a valid index expression`;
+
+      expect(() =>
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500, index)
+      ).toThrow(message);
+      expect(() =>
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          index
+        )
+      ).toThrow(message);
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          index,
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow(message);
+    });
+
     it('ranks risk inputs by the numeric risk score in every scoring query', () => {
       const queries = [
         getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500),
