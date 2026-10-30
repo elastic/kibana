@@ -6,7 +6,8 @@
  */
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -31,6 +32,7 @@ interface CapturedWaterfallProps {
   selectedSample?: { traceId: string; transactionId: string } | null;
   selectedSampleIndex?: number;
   traceSamples?: Array<{ traceId: string; transactionId: string }>;
+  onSampleClick?: (sample: { traceId: string; transactionId: string }, index: number) => void;
 }
 
 const mockWaterfallWithSummarySpy = jest.fn<void, [CapturedWaterfallProps]>();
@@ -50,10 +52,12 @@ function Wrapper({
   children,
   urlParams,
   search,
+  onHistory,
 }: {
   children?: ReactNode;
   urlParams?: Partial<UrlParams>;
   search?: string;
+  onHistory?: (history: ReturnType<typeof createMemoryHistory>) => void;
 }) {
   const KibanaReactContext = createKibanaReactContext({
     ...coreMock,
@@ -65,6 +69,7 @@ function Wrapper({
   const history = createMemoryHistory();
   jest.spyOn(history, 'push');
   jest.spyOn(history, 'replace');
+  onHistory?.(history);
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
@@ -355,6 +360,79 @@ describe('transaction_details/distribution', () => {
           const lastProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
           expect(lastProps?.selectedSampleIndex).toBeUndefined();
           expect(lastProps?.selectedSample).toBe(lastProps?.traceSamples?.[0]);
+        });
+
+        // Interaction regression for #4744: paging onto the second member of a
+        // duplicate pair must write `sampleIndex` to the URL and move the active
+        // page, and browser-back must step the pager back. Inspecting initial
+        // props alone would stay green even if `onSampleClick` stopped
+        // forwarding the clicked index, so drive the click and history here.
+        it('writes sampleIndex on next and restores it on back for a duplicate pair', async () => {
+          let history: History | undefined;
+
+          render(
+            <TransactionDistribution
+              onChartSelection={jest.fn()}
+              onClearSelection={jest.fn()}
+              traceSamplesFetchResult={{
+                data: { traceSamples: pairedTraceSamples },
+                status: useFetcherModule.FETCH_STATUS.SUCCESS,
+                error: undefined,
+              }}
+            />,
+            {
+              wrapper: ({ children }: { children?: ReactNode }) => (
+                <Wrapper
+                  urlParams={{ traceId: 'trace-shared', transactionId: 'tx-shared' }}
+                  search={fromQuery({ sampleIndex: 0 })}
+                  onHistory={(h) => {
+                    history = h;
+                  }}
+                >
+                  {children}
+                </Wrapper>
+              ),
+            }
+          );
+
+          await waitFor(() => {
+            expect(mockWaterfallWithSummarySpy).toHaveBeenCalled();
+          });
+
+          // The pager starts on the first member of the pair.
+          const initialProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+          expect(initialProps?.selectedSampleIndex).toBe(0);
+          expect(initialProps?.selectedSample).toBe(initialProps?.traceSamples?.[0]);
+
+          // Simulate clicking "next" onto the second, identical-id sample. The
+          // pager forwards the clicked index via onSampleClick.
+          act(() => {
+            initialProps?.onSampleClick?.(pairedTraceSamples[1], 1);
+          });
+
+          await waitFor(() => {
+            const props = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+            expect(props?.selectedSampleIndex).toBe(1);
+          });
+
+          // The URL carries the new position while the shared ids are unchanged.
+          expect(toQuery(history?.location.search).sampleIndex).toBe('1');
+          const afterNext = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+          expect(afterNext?.selectedSample).toBe(afterNext?.traceSamples?.[1]);
+
+          // Browser-back steps the pager back to the first member of the pair.
+          act(() => {
+            history?.goBack();
+          });
+
+          await waitFor(() => {
+            const props = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+            expect(props?.selectedSampleIndex).toBe(0);
+          });
+
+          expect(toQuery(history?.location.search).sampleIndex).toBe('0');
+          const afterBack = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+          expect(afterBack?.selectedSample).toBe(afterBack?.traceSamples?.[0]);
         });
       });
     });
