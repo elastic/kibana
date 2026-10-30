@@ -6,11 +6,7 @@
  */
 
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import {
-  bulkCreateAttachments,
-  createCase,
-  deleteAllCaseItems,
-} from '../../../common/lib/api';
+import { bulkCreateAttachments, createCase, deleteAllCaseItems } from '../../../common/lib/api';
 import { getPostCaseRequest } from '../../../common/lib/mock';
 
 const ALERT_TYPES = [

@@ -70,10 +70,7 @@ export const withCasesV4Replacement = (feature: KibanaFeatureConfig): KibanaFeat
   }
 
   const { all, read } = feature.privileges;
-  const replace = (
-    privilege: typeof all,
-    privilegeId: 'all' | 'read'
-  ): typeof all => ({
+  const replace = (privilege: typeof all, privilegeId: 'all' | 'read'): typeof all => ({
     ...privilege,
     replacedBy: privilege.replacedBy
       ? retargetReplacedBy(privilege.replacedBy)
@@ -84,7 +81,8 @@ export const withCasesV4Replacement = (feature: KibanaFeatureConfig): KibanaFeat
     ...feature,
     deprecated: {
       notice: i18n.translate('xpack.cases.features.casesFeatureV4.deprecationMessage', {
-        defaultMessage: 'The {currentId} permissions are deprecated, please see {casesFeatureIdV4}.',
+        defaultMessage:
+          'The {currentId} permissions are deprecated, please see {casesFeatureIdV4}.',
         values: { currentId: feature.id, casesFeatureIdV4: FEATURE_ID_V4 },
       }),
     },

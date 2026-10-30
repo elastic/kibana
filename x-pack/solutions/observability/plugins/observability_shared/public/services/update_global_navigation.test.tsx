@@ -180,6 +180,28 @@ describe('updateGlobalNavigation', () => {
     });
   });
 
+  describe('with the top-level Cases app', () => {
+    it('keeps the app accessible but hides its Cases link for casesV4 users', () => {
+      const capabilities = {
+        casesV4: { read_cases: true },
+        ...noObservabilityCapabilities,
+      } as unknown as ApplicationStart['capabilities'];
+      const caseRoute = { id: 'cases', title: 'Cases', order: 8003, path: '/cases', visibleIn: [] };
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({ capabilities, deepLinks: [caseRoute], updater$, pricing });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [{ ...caseRoute, visibleIn: [] }],
+        status: AppStatus.accessible,
+        visibleIn: [],
+      });
+    });
+  });
+
   describe('when one observability app is enabled', () => {
     it('shows the overview link', () => {
       const capabilities = {

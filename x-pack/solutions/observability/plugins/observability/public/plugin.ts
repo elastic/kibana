@@ -276,8 +276,11 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
-    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
+    const casesLocatorOptions = {
+      topLevelAppEnabled: pluginsSetup.cases?.config.topLevelAppEnabled ?? false,
+    };
+    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition(casesLocatorOptions));
+    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition(casesLocatorOptions));
     pluginsSetup.share.url.locators.create(new AlertsLocatorDefinition());
 
     const logsLocator =

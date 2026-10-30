@@ -43,6 +43,8 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  /** Used to scope an ownerless context (the top-level app) to one case's owner. */
+  getFilesClient?: (scope: string) => ScopedFilesClient;
 }
 
 export interface CasesContextProps
@@ -105,6 +107,7 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      getFilesClient,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.

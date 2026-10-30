@@ -115,6 +115,11 @@ export const createNavigationTree = ({
         },
         isCasesAvailable
       ),
+      // Shown instead of the node above when Cases runs as the top-level app.
+      ...filterForFeatureAvailability(
+        { link: 'cases' as const, icon: 'briefcase' },
+        isCasesAvailable
+      ),
       {
         title: i18n.translate('xpack.serverlessObservability.nav.slo', {
           defaultMessage: 'SLOs',

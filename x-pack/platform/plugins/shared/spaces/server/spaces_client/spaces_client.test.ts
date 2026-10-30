@@ -459,8 +459,10 @@ describe('disabled features consolidated from several categories', () => {
   ];
 
   const getDisabledFeatures = async (disabledFeatures: string[]) => {
-    const features = featuresPluginMock.createStart();
-    features.getKibanaFeatures.mockReturnValue(consolidatedFeatures as unknown as KibanaFeature[]);
+    const consolidatedFeaturesStart = featuresPluginMock.createStart();
+    consolidatedFeaturesStart.getKibanaFeatures.mockReturnValue(
+      consolidatedFeatures as unknown as KibanaFeature[]
+    );
     const repository = savedObjectsRepositoryMock.create();
     repository.get.mockResolvedValue({
       id: 'space',
@@ -474,7 +476,7 @@ describe('disabled features consolidated from several categories', () => {
       repository,
       [],
       'traditional',
-      features,
+      consolidatedFeaturesStart,
       undefined
     );
     return (await client.get('space')).disabledFeatures;

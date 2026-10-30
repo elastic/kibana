@@ -53,9 +53,8 @@ import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { OWNERS } from '../../../common/constants';
-import { getOwnersFilter } from '../../authorization/utils';
 import {
+  OWNERS,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   MAX_ATTACHMENT_ID_LENGTH,
@@ -65,6 +64,7 @@ import {
   MAX_CONCURRENT_SEARCHES,
   MAX_OWNER_LENGTH,
 } from '../../../common/constants';
+import { getOwnersFilter } from '../../authorization/utils';
 import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';

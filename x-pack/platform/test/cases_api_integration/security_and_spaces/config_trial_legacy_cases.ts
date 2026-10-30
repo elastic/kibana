@@ -12,10 +12,7 @@ import { createTestConfig } from '../common/config';
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
-  testFiles: [
-    require.resolve('./tests/legacy_characterization'),
-    require.resolve('./tests/trial'),
-  ],
+  testFiles: [require.resolve('./tests/legacy_characterization'), require.resolve('./tests/trial')],
   publicBaseUrl: true,
   kbnServerArgs: [
     '--xpack.cases.templates.enabled=true',

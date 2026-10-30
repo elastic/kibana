@@ -113,12 +113,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it(`casesV4 read can read but not change a ${owner} case`, async () => {
-            const theCase = await createCase(
-              supertest,
-              getPostCaseRequest({ owner }),
-              200,
-              { user: superUser, space }
-            );
+            const theCase = await createCase(supertest, getPostCaseRequest({ owner }), 200, {
+              user: superUser,
+              space,
+            });
             await getCase({ supertest: supertestWithoutAuth, caseId: theCase.id, auth: readAuth });
             await createCase(supertestWithoutAuth, getPostCaseRequest({ owner }), 403, readAuth);
             await updateCase({
@@ -173,10 +171,15 @@ export default ({ getService }: FtrProviderContext): void => {
         disabledFeatures: ['observabilityCasesV3'],
       });
       try {
-        await createCase(supertestWithoutAuth, getPostCaseRequest({ owner: 'observability' }), 200, {
-          user: casesV4User('all'),
-          space: 'no_obs_cases_space',
-        });
+        await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'observability' }),
+          200,
+          {
+            user: casesV4User('all'),
+            space: 'no_obs_cases_space',
+          }
+        );
       } finally {
         await spacesService.delete('no_obs_cases_space');
       }

@@ -36,7 +36,6 @@ const withoutConnectors = <T extends string>(values: readonly T[]): T[] =>
     (value) => value !== GET_CONNECTORS_CONFIGURE_API_TAG && value !== CASES_CONNECTORS_CAPABILITY
   );
 
-
 /**
  * The single Cases feature. The space is its only access boundary, so every privilege grants its
  * operations for every owner, including each owner's file kinds.

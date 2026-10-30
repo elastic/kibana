@@ -6,8 +6,14 @@
  */
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { setTopLevelAppEnabled } from './cases_app_path';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  GENERAL_CASES_OWNER,
+  OBSERVABILITY_OWNER,
+  OWNER_INFO,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 import {
   flattenCaseSavedObject,
   transformNewComment,
@@ -1579,6 +1585,41 @@ describe('common utils', () => {
     const publicBaseUrl = 'https://example.com';
     const caseId = 'my-case-id';
     const commentId = 'my-comment-id';
+
+    describe('with the top-level Cases app', () => {
+      beforeEach(() => setTopLevelAppEnabled(true));
+      afterEach(() => setTopLevelAppEnabled(false));
+
+      it.each([SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER, 'invalid'])(
+        'links a %s case to /app/cases',
+        (owner) => {
+          expect(getCaseViewPath({ publicBaseUrl, spaceId: 'default', caseId, owner })).toBe(
+            'https://example.com/app/cases/my-case-id'
+          );
+        }
+      );
+
+      it('keeps the space, comment, and tab', () => {
+        expect(
+          getCaseViewPath({
+            publicBaseUrl,
+            spaceId: 'test-space',
+            caseId,
+            owner: OBSERVABILITY_OWNER,
+            commentId,
+          })
+        ).toBe('https://example.com/s/test-space/app/cases/my-case-id/my-comment-id');
+        expect(
+          getCaseViewPath({
+            publicBaseUrl,
+            spaceId: 'default',
+            caseId,
+            owner: SECURITY_SOLUTION_OWNER,
+            tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+          })
+        ).toBe('https://example.com/app/cases/my-case-id/?tabId=alerts');
+      });
+    });
 
     it('returns the case view path correctly', () => {
       expect(

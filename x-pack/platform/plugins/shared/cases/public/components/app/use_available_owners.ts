@@ -25,12 +25,12 @@ export const useAvailableCasesOwners = (
 ): string[] => {
   const { capabilities: kibanaCapabilities } = useKibana().services.application;
   const topLevelAppEnabled = isTopLevelAppEnabled();
-  const { data: availableOwners = [] } = useGetAvailableOwners({ enabled: topLevelAppEnabled });
+  const { data: serverOwners = [] } = useGetAvailableOwners({ enabled: topLevelAppEnabled });
 
   if (topLevelAppEnabled) {
     // casesV4 grants every owner alike, so its capabilities gate all of them; which owners exist
     // and which the user's (possibly legacy) role can read comes from the server.
-    return hasCapabilities(kibanaCapabilities[FEATURE_ID_V4], capabilities) ? availableOwners : [];
+    return hasCapabilities(kibanaCapabilities[FEATURE_ID_V4], capabilities) ? serverOwners : [];
   }
 
   return Object.entries(kibanaCapabilities).reduce(
@@ -53,7 +53,9 @@ const hasCapabilities = (
   capabilities: Capability[]
 ) =>
   kibanaCapability != null &&
-  capabilities.every((cap) => !!kibanaCapability[`${cap}_cases`] || !!kibanaCapability[`cases_${cap}`]);
+  capabilities.every(
+    (cap) => !!kibanaCapability[`${cap}_cases`] || !!kibanaCapability[`cases_${cap}`]
+  );
 
 const getOwnerFromFeatureID = (featureID: string) => {
   if (featureID === FEATURE_ID_V3) {

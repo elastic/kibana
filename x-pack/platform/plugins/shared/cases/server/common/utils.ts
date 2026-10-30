@@ -52,6 +52,7 @@ import {
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
+import { getCasesAppBasePath } from './cases_app_path';
 
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
@@ -678,8 +679,7 @@ export const getCaseViewPath = (params: {
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
   const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
-  const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
-  const basePath = `${publicBaseUrlWithSpace}${ownerInfo.appBasePath}${ownerInfo.casesBasePath}`;
+  const basePath = `${publicBaseUrlWithSpace}${getCasesAppBasePath(owner)}`;
 
   if (commentId) {
     const commentPath = normalizePath(

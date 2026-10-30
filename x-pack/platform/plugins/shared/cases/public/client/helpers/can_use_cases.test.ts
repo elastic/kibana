@@ -129,10 +129,7 @@ describe('canUseCases', () => {
 describe('canUseCases with the top-level Cases app', () => {
   it('returns the casesV4 permissions whatever the owners', () => {
     expect(
-      canUseCases(
-        { ...hasNone, casesV4: allCasesCapabilities() },
-        true
-      )([SECURITY_SOLUTION_OWNER])
+      canUseCases({ ...hasNone, casesV4: allCasesCapabilities() }, true)([SECURITY_SOLUTION_OWNER])
     ).toEqual(allCasesPermissions());
   });
 

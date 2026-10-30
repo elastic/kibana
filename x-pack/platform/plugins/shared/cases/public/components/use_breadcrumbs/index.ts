@@ -12,6 +12,7 @@ import { KibanaServices, useKibana, useNavigation } from '../../common/lib/kiban
 import type { ICasesDeepLinkId } from '../../common/navigation';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useApplication } from '../../common/lib/kibana/use_application';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 
 const getCasesBreadcrumbTitle = (deepLinkId: ICasesDeepLinkId): string => {
   const titles: Record<ICasesDeepLinkId, string> = {
@@ -80,6 +81,10 @@ const useApplyBreadcrumbs = () => {
   );
 };
 
+// In the top-level Cases app the app itself is the root, so there is no host app crumb.
+const getHostAppBreadcrumbs = (appTitle: string | undefined, href: string): ChromeBreadcrumb[] =>
+  isTopLevelAppEnabled() ? [] : [{ text: appTitle, href }];
+
 export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
   const { appId, appTitle } = useApplication();
   const { getAppUrl } = useNavigation(appId);
@@ -87,7 +92,7 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
 
   useEffect(() => {
     applyBreadcrumbs([
-      { text: appTitle, href: getAppUrl() },
+      ...getHostAppBreadcrumbs(appTitle, getAppUrl()),
       {
         text: getCasesBreadcrumbTitle(CasesDeepLinkId.cases),
         ...(pageDeepLink !== CasesDeepLinkId.cases
@@ -118,7 +123,7 @@ export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
       text: caseTitle,
     };
     const casesBreadcrumbs: ChromeBreadcrumb[] = [
-      { text: appTitle, href: getAppUrl() },
+      ...getHostAppBreadcrumbs(appTitle, getAppUrl()),
       {
         text: getCasesBreadcrumbTitle(CasesDeepLinkId.cases),
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
@@ -136,7 +141,7 @@ export const useCasesTemplatesBreadcrumbs = (templateTitle?: string) => {
 
   useEffect(() => {
     const breadcrumbs: ChromeBreadcrumb[] = [
-      { text: appTitle, href: getAppUrl() },
+      ...getHostAppBreadcrumbs(appTitle, getAppUrl()),
       {
         text: getCasesBreadcrumbTitle(CasesDeepLinkId.cases),
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),

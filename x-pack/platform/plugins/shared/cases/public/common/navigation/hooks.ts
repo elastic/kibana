@@ -10,6 +10,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import {
   APP_ID,
+  CASES_APP_ID,
   CASES_CONFIGURE_PATH,
   CASES_CREATE_PATH,
   CASES_CONFIGURE_TEMPLATES_PATH,
@@ -22,6 +23,20 @@ import type { CaseViewPathParams, CaseViewPathSearchParams, TemplateViewPathPara
 import { generateCaseViewPath, generateConfigureTemplateEditPath } from './paths';
 import { stringifyToURL, parseURL } from '../../components/utils';
 import { useApplication } from '../lib/kibana/use_application';
+import { isTopLevelAppEnabled } from '../top_level_app';
+
+/**
+ * Where Cases pages live: the top-level `cases` app when it is on, otherwise the app currently
+ * hosting Cases, through its `cases` deep link.
+ */
+const useCasesAppTarget = (
+  deepLinkId: ICasesDeepLinkId | undefined = APP_ID
+): { appId: string | undefined; deepLinkId: ICasesDeepLinkId | undefined } => {
+  const { appId } = useApplication();
+  return isTopLevelAppEnabled()
+    ? { appId: CASES_APP_ID, deepLinkId: undefined }
+    : { appId, deepLinkId };
+};
 
 export const useCaseViewParams = () => useParams<CaseViewPathParams>();
 
@@ -53,15 +68,15 @@ export const useCasesNavigation = ({
   path?: string;
   deepLinkId?: ICasesDeepLinkId;
 }): UseCasesNavigation => {
-  const { appId } = useApplication();
+  const { appId, deepLinkId: targetDeepLinkId } = useCasesAppTarget(deepLinkId);
   const { navigateTo, getAppUrl } = useNavigation(appId);
   const getCasesUrl = useCallback<GetCasesUrl>(
-    (absolute) => getAppUrl({ path, deepLinkId, absolute }),
-    [getAppUrl, deepLinkId, path]
+    (absolute) => getAppUrl({ path, deepLinkId: targetDeepLinkId, absolute }),
+    [getAppUrl, targetDeepLinkId, path]
   );
   const navigateToCases = useCallback<NavigateToCases>(
-    () => navigateTo({ path, deepLinkId }),
-    [navigateTo, deepLinkId, path]
+    () => navigateTo({ path, deepLinkId: targetDeepLinkId }),
+    [navigateTo, targetDeepLinkId, path]
   );
   return [getCasesUrl, navigateToCases];
 };
@@ -136,9 +151,8 @@ type GetEditTemplateUrl = (pathParams: TemplateViewPathParams, absolute?: boolea
 type NavigateToEditTemplate = (pathParams: TemplateViewPathParams) => void;
 
 export const useCasesEditTemplateNavigation = () => {
-  const { appId } = useApplication();
+  const { appId, deepLinkId } = useCasesAppTarget();
   const { navigateTo, getAppUrl } = useNavigation(appId);
-  const deepLinkId = APP_ID;
 
   const getCasesEditTemplateUrl = useCallback<GetEditTemplateUrl>(
     (pathParams, absolute) =>
@@ -166,9 +180,8 @@ type GetCaseViewUrl = (pathParams: CaseViewPathParams, absolute?: boolean) => st
 type NavigateToCaseView = (pathParams: CaseViewPathParams) => void;
 
 export const useCaseViewNavigation = () => {
-  const { appId } = useApplication();
+  const { appId, deepLinkId } = useCasesAppTarget();
   const { navigateTo, getAppUrl } = useNavigation(appId);
-  const deepLinkId = APP_ID;
 
   const getCaseViewUrl = useCallback<GetCaseViewUrl>(
     (pathParams, absolute) =>

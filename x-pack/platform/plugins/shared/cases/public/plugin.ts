@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
-import { APP_ID, APP_PATH } from '../common/constants';
+import { APP_ID, APP_PATH, CASES_APP_ID, CASES_APP_PATH, FEATURE_ID_V4 } from '../common/constants';
+import { getCasesDeepLinks } from './common/navigation/deep_links';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { registerCasesSteps, registerCasesWorkflowTriggers } from './workflows';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -68,6 +78,7 @@ export class CasesUiPlugin
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
+    const topLevelAppEnabled = config.topLevelApp?.enabled === true;
     registerCaseFileKinds(config.files, plugins.files);
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -75,9 +86,52 @@ export class CasesUiPlugin
         title: APP_TITLE,
         description: APP_DESC,
         icon: 'casesApp',
-        path: APP_PATH,
+        path: topLevelAppEnabled ? CASES_APP_PATH : APP_PATH,
         showOnHomePage: false,
         category: 'admin',
+      });
+    }
+
+    if (topLevelAppEnabled) {
+      const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+      void core.getStartServices().then(([coreStart]) => {
+        // casesV4 does not list the app (see its feature definition), so access follows its UI
+        // capabilities, which legacy roles inherit through `replacedBy`.
+        const canRead = getUICapabilities(coreStart.application.capabilities[FEATURE_ID_V4]).read;
+        appUpdater$.next(() => (canRead ? {} : { status: AppStatus.inaccessible, visibleIn: [] }));
+      });
+
+      core.application.register({
+        id: CASES_APP_ID,
+        title: APP_TITLE,
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        euiIconType: 'casesApp',
+        appRoute: CASES_APP_PATH,
+        order: 1150,
+        updater$: appUpdater$,
+        visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
+        deepLinks: getCasesDeepLinks({
+          basePath: '/',
+          templatesEnabled: config.templates?.enabled === true,
+        }).deepLinks,
+        async mount(params: AppMountParameters) {
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            CasesPublicStartDependencies,
+            unknown
+          ];
+
+          const { renderApp } = await import('./application');
+
+          return renderApp({
+            mountParams: params,
+            coreStart,
+            pluginsStart,
+            storage,
+            kibanaVersion,
+            unifiedAttachmentTypeRegistry,
+          });
+        },
       });
     }
 
@@ -87,12 +141,23 @@ export class CasesUiPlugin
         title: APP_TITLE,
         order: 1,
         mainPaddingSize: 'none',
+        // With the top-level app on, this mount only redirects old Stack Management links.
+        ...(topLevelAppEnabled ? { hideFromSidebar: true, visibleIn: [] } : {}),
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             CasesPublicStartDependencies,
             unknown
           ];
+
+          if (topLevelAppEnabled) {
+            const { pathname, search, hash } = params.history.location;
+            void coreStart.application.navigateToApp(CASES_APP_ID, {
+              path: `${pathname}${search}${hash}`,
+              replace: true,
+            });
+            return () => {};
+          }
 
           const { renderApp } = await import('./application');
 
@@ -126,6 +191,7 @@ export class CasesUiPlugin
           this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
+      config: { topLevelAppEnabled },
     };
   }
 
@@ -183,6 +249,8 @@ export class CasesUiPlugin
         attachmentsEnabled: config?.attachments?.enabled ?? false,
         chatEnabled: config?.chat?.enabled ?? false,
         runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
+        topLevelAppEnabled: config?.topLevelApp?.enabled ?? false,
+        customStatusesEnabled: config?.customStatuses?.enabled ?? false,
       },
       api: createClientAPI({ http: core.http }),
       ui: {

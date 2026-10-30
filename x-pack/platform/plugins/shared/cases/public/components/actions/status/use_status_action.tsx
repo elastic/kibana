@@ -13,8 +13,7 @@ import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseStatuses } from '../../../../common/types/domain';
-import { OWNER_INFO } from '../../../../common/constants';
-import { isValidOwner } from '../../../../common/utils/owner';
+import { getCaseAppTarget } from '../../../common/top_level_app';
 
 import * as i18n from './translations';
 import type { UseActionProps } from '../types';
@@ -81,11 +80,11 @@ const getUpdateSuccessToast = ({
   }
 
   const theCase = cases[0];
-  const appIdToNavigateTo = isValidOwner(theCase.owner) ? OWNER_INFO[theCase.owner].appId : appId;
+  const { appId: appIdToNavigateTo, deepLinkId } = getCaseAppTarget(theCase.owner, appId);
   const alertsUrl =
     appIdToNavigateTo != null
       ? application.getUrlForApp(appIdToNavigateTo, {
-          deepLinkId: 'cases',
+          deepLinkId,
           path: generateCaseViewPath({
             detailName: theCase.id,
             tabId: CASE_VIEW_PAGE_TABS.ALERTS,

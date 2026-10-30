@@ -48,6 +48,7 @@ import {
   getTopLevelAppCasesKibanaFeatures,
   withCasesV4Replacement,
 } from './features';
+import { setTopLevelAppEnabled } from './common/cases_app_path';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
@@ -164,6 +165,8 @@ export class CasePlugin
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
+
+    setTopLevelAppEnabled(this.caseConfig.topLevelApp.enabled);
 
     if (this.caseConfig.topLevelApp.enabled) {
       const { v4, legacy } = getTopLevelAppCasesKibanaFeatures(this.caseConfig.topLevelApp);

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { CASES_APP_ID } from '@kbn/cases-plugin/common';
 
 import { observabilityFeatureId } from '../../../common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -14,7 +16,28 @@ import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 
+/** Sends old Observability Cases links to the same page of the top-level Cases app. */
+function RedirectToCasesApp() {
+  const { application } = useKibana().services;
+  const { pathname, search, hash } = useLocation();
+
+  useEffect(() => {
+    void application.navigateToApp(CASES_APP_ID, {
+      path: `${pathname.replace(/^\/cases/, '')}${search}${hash}`,
+      replace: true,
+    });
+  }, [application, pathname, search, hash]);
+
+  return null;
+}
+
 export function CasesPage() {
+  const topLevelAppEnabled = useKibana().services.cases?.config.topLevelAppEnabled ?? false;
+
+  return topLevelAppEnabled ? <RedirectToCasesApp /> : <ObservabilityCasesPage />;
+}
+
+function ObservabilityCasesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const canUseCases = useKibana().services.cases?.helpers.canUseCases;
   const userCasesPermissions = canUseCases?.([observabilityFeatureId]);

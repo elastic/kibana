@@ -8,7 +8,6 @@
 import type { ErrorToastOptions, ToastInputFields, ToastOptions } from '@kbn/core/public';
 import { useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
@@ -21,7 +20,7 @@ import {
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
-import { OWNER_INFO } from '../../common/constants';
+import { getCaseAppTarget } from './top_level_app';
 import { useApplication } from './lib/kibana/use_application';
 import { isAlertAttachmentType } from '../../common/utils/attachments';
 
@@ -130,14 +129,12 @@ export const useCasesToast = () => {
         title?: string;
         content?: string;
       }) => {
-        const appIdToNavigateTo = isValidOwner(theCase.owner)
-          ? OWNER_INFO[theCase.owner].appId
-          : appId;
+        const { appId: appIdToNavigateTo, deepLinkId } = getCaseAppTarget(theCase.owner, appId);
 
         const url =
           appIdToNavigateTo != null
             ? getUrlForApp(appIdToNavigateTo, {
-                deepLinkId: 'cases',
+                deepLinkId,
                 path: generateCaseViewPath({ detailName: theCase.id }),
               })
             : null;

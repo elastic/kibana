@@ -15,6 +15,7 @@ import type {
   MAPS_APP_ID,
   CANVAS_APP_ID,
   GRAPH_APP_ID,
+  CASES_APP_ID,
 } from './constants';
 
 export type AppId =
@@ -23,7 +24,8 @@ export type AppId =
   | typeof VISUALIZE_APP_ID
   | typeof MAPS_APP_ID
   | typeof CANVAS_APP_ID
-  | typeof GRAPH_APP_ID;
+  | typeof GRAPH_APP_ID
+  | typeof CASES_APP_ID;
 
 export type DeepLinkId = AppId;
 

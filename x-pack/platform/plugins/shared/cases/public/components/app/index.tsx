@@ -13,6 +13,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_fram
 import { APP_OWNER } from '../../../common/constants';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import type { CasesRoutesProps } from './types';
 
 export type CasesProps = CasesRoutesProps;
@@ -33,7 +34,9 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
       {getCasesLazy({
         unifiedAttachmentTypeRegistry,
         getFilesClient,
-        owner: [APP_OWNER],
+        // The top-level app shows every solution's cases; each case view scopes itself to its
+        // case's owner (see CaseOwnerScope).
+        owner: isTopLevelAppEnabled() ? [] : [APP_OWNER],
         permissions: userCapabilities.generalCasesV3,
         basePath: '/',
       })}

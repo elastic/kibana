@@ -62,7 +62,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const [updated] = await updateCase({
         supertest,
         params: {
-          cases: [{ id: theCase.id, version: theCase.version, status: CaseStatuses['in-progress'] }],
+          cases: [
+            { id: theCase.id, version: theCase.version, status: CaseStatuses['in-progress'] },
+          ],
         },
       });
 
