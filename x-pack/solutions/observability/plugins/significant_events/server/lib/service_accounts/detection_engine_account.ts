@@ -30,7 +30,11 @@ export const registerDetectionEngineWorkloadType = (core: CoreSetup): void => {
 
 /** The refusal for detection engine work in a space that is not set up to run as its accounts. */
 export const createNotSetUpError = (): StatusError =>
-  new StatusError('Nightshift is not set up in this space', 503);
+  new StatusError(
+    'Nightshift is not set up in this space. A user with the manage_security privilege must set it ' +
+      'up: POST /internal/significant_events/service_account/_enable in this space.',
+    503
+  );
 
 /** The id of the account the space's detection engine runs as, or `undefined` when not set up. */
 export const getDetectionEngineAccountId = async ({
