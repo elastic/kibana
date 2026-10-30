@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { useKibanaContextForPluginProvider } from './utils/use_kibana';
 import type { DataUsageStartDependencies, DataUsagePublicStart } from './types';
 import { PLUGIN_ID } from '../common';

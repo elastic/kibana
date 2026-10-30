@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';

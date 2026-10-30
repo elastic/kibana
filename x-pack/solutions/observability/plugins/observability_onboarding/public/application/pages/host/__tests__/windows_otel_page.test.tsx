@@ -34,7 +34,7 @@ jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
   ),
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
     onPageRefreshStart: jest.fn(),

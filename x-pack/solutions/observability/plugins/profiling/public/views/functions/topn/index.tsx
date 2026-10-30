@@ -7,7 +7,7 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import type { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';

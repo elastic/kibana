@@ -12,7 +12,7 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsTourProvider } from '../streams_tour';

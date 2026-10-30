@@ -16,7 +16,7 @@ import {
   EuiIconTip,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import type { InfoIndicators } from '../../../../common/types';
 import { useSummaryPanelContext } from '../../../hooks';
 import {

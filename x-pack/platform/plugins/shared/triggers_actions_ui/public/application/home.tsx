@@ -14,7 +14,7 @@ import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import {
   getCreateRuleRoute,
   getCreateRuleFromTemplateRoute,

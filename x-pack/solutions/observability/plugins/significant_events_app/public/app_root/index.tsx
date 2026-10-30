@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsAppContextProvider } from './app_context_provider';
 import { significantEventsAppRouter } from '../routes/config';

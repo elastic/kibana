@@ -18,7 +18,7 @@ import { useHostCountContext } from '../hooks/use_host_count';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
 }));
 jest.mock('../hooks/use_hosts_table');

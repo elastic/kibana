@@ -49,7 +49,7 @@ jest.mock('@kbn/response-ops-rule-form', () => ({
   RuleTypeModal: () => <div data-test-subj="ruleTypeModal">{'Render Rule Type Modal'}</div>,
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 

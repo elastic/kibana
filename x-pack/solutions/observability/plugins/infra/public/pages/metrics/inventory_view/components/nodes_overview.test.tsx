@@ -15,7 +15,7 @@ import { InfraFormatterType } from '../../../../common/inventory/types';
 import type { InfraWaffleMapOptions } from '../../../../common/inventory/types';
 import { NodesOverview } from './nodes_overview';
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
 }));
 

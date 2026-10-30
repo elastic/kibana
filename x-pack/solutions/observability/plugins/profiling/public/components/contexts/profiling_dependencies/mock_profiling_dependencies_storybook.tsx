@@ -16,7 +16,7 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import type { ProfilingDependencies } from './profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from './profiling_dependencies_context';
 import { profilingRouter } from '../../../routing';

@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import useToggle from 'react-use/lib/useToggle';

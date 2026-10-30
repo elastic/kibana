@@ -34,7 +34,7 @@ jest.mock('../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePageReady: jest.fn(),
 }));
 

@@ -12,7 +12,7 @@ import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/mainten
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { IToasts } from '@kbn/core/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   cleanup,
@@ -142,7 +142,7 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 });
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 jest.mock('@kbn/cps-utils', () => ({
   ...jest.requireActual('@kbn/cps-utils'),
   useRouteBasedCpsPickerAccess: jest.fn(),
