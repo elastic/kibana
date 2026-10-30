@@ -434,10 +434,13 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain('#### Status by Branch');
   });
 
-  it("lists the suite's distinct errors merged across tests, most builds first, each collapsed under its share of failed builds", () => {
+  it("lists the suite's distinct errors merged across tests, most builds first, the first open and the rest collapsed under their share of failed builds", () => {
     const { suite, report } = multiTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
-    expect(body).toContain('#### Failures by Error Message\n\n2 distinct errors:\n\n<details>');
+    expect(body).toContain(
+      '#### Failures by Error Message\n\n2 distinct errors:\n\n<details open>\n<summary><b>100% of failed builds</b>'
+    );
+    expect(body).toContain('</details>\n\n<details>\n<summary><b>5% of failed builds</b>');
     // 20 builds of test a and 3 of test b, two of which are a's: a build failing both counts once
     expect(body).toContain(
       '<summary><b>100% of failed builds</b> (21 of 21) · ' +
@@ -475,7 +478,7 @@ describe('renderFlakySuiteIssueBody', () => {
       flakyTest({ errors: [{ ...flakyTest().errors[0], branches: [] }] }),
     ]);
     const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });
-    expect(body).toContain('1 distinct error:\n\n<details>');
+    expect(body).toContain('1 distinct error:\n\n<details open>');
     expect(body).toContain('| **Branches** | - |');
     expect(body).not.toContain('were excluded');
   });
@@ -520,7 +523,8 @@ describe('renderFlakySuiteIssueBody', () => {
     }));
     const report = flakyReport([flakyTest({ errors })]);
     const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });
-    expect(body.match(/<details>/g)).toHaveLength(4);
+    expect(body.match(/<details open>/g)).toHaveLength(1);
+    expect(body.match(/<details>/g)).toHaveLength(3);
     expect(body).toContain('and 2 more errors.');
 
     const none = flakyReport([flakyTest({ errors: [] })]);
