@@ -155,7 +155,7 @@
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.5.1",
-    "@elastic/ems-client": "8.7.0",
+    "@elastic/ems-client": "8.8.1",
     "@elastic/esql": "4.34.0",
     "@elastic/esql-definitions": "4.34.0",
     "@elastic/eui": "123.2.0",
