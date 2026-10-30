@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
-        "line": 91,
-        "column": 39
+        "line": 98,
+        "column": 12
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
-        "line": 123,
-        "column": 11
+        "line": 127,
+        "column": 12
       }
     },
     {
@@ -49,7 +49,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
         "line": 151,
-        "column": 84
+        "column": 12
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
-        "line": 215,
-        "column": 22
+        "line": 192,
+        "column": 12
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/chart_preview.spec.ts",
-        "line": 218,
-        "column": 27
+        "line": 209,
+        "column": 12
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/check_and_load_integration.spec.ts",
-        "line": 76,
-        "column": 42
+        "line": 83,
+        "column": 12
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/check_and_load_integration.spec.ts",
-        "line": 89,
-        "column": 25
+        "line": 100,
+        "column": 12
       }
     },
     {
@@ -128,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/check_and_load_integration.spec.ts",
-        "line": 105,
-        "column": 26
+        "line": 121,
+        "column": 12
       }
     },
     {
@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
-        "line": 58,
-        "column": 85
+        "line": 63,
+        "column": 12
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
-        "line": 69,
-        "column": 53
+        "line": 80,
+        "column": 12
       }
     },
     {
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
-        "line": 80,
-        "column": 99
+        "line": 92,
+        "column": 12
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
-        "line": 95,
-        "column": 15
+        "line": 114,
+        "column": 12
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_details.spec.ts",
-        "line": 114,
-        "column": 79
+        "line": 127,
+        "column": 12
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_rollover.spec.ts",
-        "line": 44,
-        "column": 31
+        "line": 48,
+        "column": 12
       }
     },
     {
@@ -238,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings_created_on.spec.ts",
-        "line": 39,
-        "column": 69
+        "line": 48,
+        "column": 12
       }
     },
     {
@@ -254,8 +254,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
-        "line": 71,
-        "column": 13
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -270,8 +270,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
-        "line": 76,
-        "column": 7
+        "line": 93,
+        "column": 12
       }
     },
     {
@@ -286,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
-        "line": 91,
-        "column": 6
+        "line": 111,
+        "column": 12
       }
     },
     {
@@ -302,8 +302,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
-        "line": 105,
-        "column": 16
+        "line": 129,
+        "column": 12
       }
     },
     {
@@ -318,8 +318,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_settings.spec.ts",
-        "line": 119,
-        "column": 25
+        "line": 149,
+        "column": 12
       }
     },
     {
@@ -334,8 +334,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs_closed_data_streams.spec.ts",
-        "line": 67,
-        "column": 39
+        "line": 73,
+        "column": 12
       }
     },
     {
@@ -350,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs_closed_data_streams.spec.ts",
-        "line": 77,
-        "column": 18
+        "line": 89,
+        "column": 12
       }
     },
     {
@@ -366,8 +366,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs.spec.ts",
-        "line": 74,
-        "column": 13
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -382,13 +382,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 95,
+        "column": 12
       }
     },
     {
-      "id": "41ec8497fea4c2f-2e4bf3983db39c1",
-      "title": "Dataset quality - data stream total docs returns a 403 when the user does not have sufficient privileges",
+      "id": "41ec8497fea4c2f-7dba7e76d925111",
+      "title": "Dataset quality - data stream total docs returns no documents when the user cannot access any data streams",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -398,8 +398,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_stream_total_docs.spec.ts",
-        "line": 100,
-        "column": 26
+        "line": 110,
+        "column": 12
       }
     },
     {
@@ -412,8 +412,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store_retention_serverless.spec.ts",
-        "line": 68,
-        "column": 13
+        "line": 74,
+        "column": 12
       }
     },
     {
@@ -426,8 +426,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store_retention_stateful.spec.ts",
-        "line": 68,
-        "column": 13
+        "line": 74,
+        "column": 12
       }
     },
     {
@@ -442,8 +442,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
-        "line": 97,
-        "column": 18
+        "line": 91,
+        "column": 12
       }
     },
     {
@@ -458,8 +458,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
-        "line": 112,
-        "column": 26
+        "line": 107,
+        "column": 12
       }
     },
     {
@@ -474,8 +474,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
-        "line": 130,
-        "column": 42
+        "line": 128,
+        "column": 12
       }
     },
     {
@@ -490,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/data_streams_failure_store.spec.ts",
-        "line": 147,
-        "column": 7
+        "line": 146,
+        "column": 12
       }
     },
     {
@@ -506,8 +506,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_closed_data_streams.spec.ts",
-        "line": 75,
-        "column": 13
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -522,8 +522,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_closed_data_streams.spec.ts",
-        "line": 86,
-        "column": 14
+        "line": 94,
+        "column": 12
       }
     },
     {
@@ -538,8 +538,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_namespaces.spec.ts",
-        "line": 110,
-        "column": 7
+        "line": 99,
+        "column": 12
       }
     },
     {
@@ -554,8 +554,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs_no_documents.spec.ts",
-        "line": 33,
-        "column": 15
+        "line": 32,
+        "column": 12
       }
     },
     {
@@ -571,7 +571,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_docs.spec.ts",
         "line": 74,
-        "column": 75
+        "column": 12
       }
     },
     {
@@ -586,8 +586,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_analyze.spec.ts",
-        "line": 97,
-        "column": 37
+        "line": 95,
+        "column": 12
       }
     },
     {
@@ -602,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_analyze.spec.ts",
-        "line": 117,
-        "column": 16
+        "line": 122,
+        "column": 12
       }
     },
     {
@@ -618,8 +618,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_values.spec.ts",
-        "line": 58,
-        "column": 13
+        "line": 62,
+        "column": 12
       }
     },
     {
@@ -634,8 +634,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_field_values.spec.ts",
-        "line": 70,
-        "column": 27
+        "line": 80,
+        "column": 12
       }
     },
     {
@@ -650,8 +650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
-        "line": 82,
-        "column": 13
+        "line": 86,
+        "column": 12
       }
     },
     {
@@ -666,8 +666,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
-        "line": 92,
-        "column": 25
+        "line": 101,
+        "column": 12
       }
     },
     {
@@ -682,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
-        "line": 107,
-        "column": 20
+        "line": 120,
+        "column": 12
       }
     },
     {
@@ -698,8 +698,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/degraded_fields.spec.ts",
-        "line": 145,
-        "column": 29
+        "line": 152,
+        "column": 12
       }
     },
     {
@@ -714,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_closed_index.spec.ts",
-        "line": 114,
-        "column": 13
+        "line": 118,
+        "column": 12
       }
     },
     {
@@ -730,8 +730,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_errors.spec.ts",
-        "line": 79,
-        "column": 13
+        "line": 86,
+        "column": 12
       }
     },
     {
@@ -746,8 +746,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_errors.spec.ts",
-        "line": 92,
-        "column": 71
+        "line": 105,
+        "column": 12
       }
     },
     {
@@ -763,7 +763,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_rollover.spec.ts",
         "line": 117,
-        "column": 85
+        "column": 12
       }
     },
     {
@@ -778,8 +778,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_stats.spec.ts",
-        "line": 81,
-        "column": 46
+        "line": 89,
+        "column": 12
       }
     },
     {
@@ -794,8 +794,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs_stats.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 111,
+        "column": 12
       }
     },
     {
@@ -810,8 +810,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs.spec.ts",
-        "line": 89,
-        "column": 13
+        "line": 96,
+        "column": 12
       }
     },
     {
@@ -826,8 +826,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/failed_docs.spec.ts",
-        "line": 96,
-        "column": 99
+        "line": 106,
+        "column": 12
       }
     },
     {
@@ -842,8 +842,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
-        "line": 59,
-        "column": 13
+        "line": 58,
+        "column": 12
       }
     },
     {
@@ -858,8 +858,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
-        "line": 70,
-        "column": 74
+        "line": 74,
+        "column": 12
       }
     },
     {
@@ -874,8 +874,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 101,
+        "column": 12
       }
     },
     {
@@ -890,8 +890,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
-        "line": 106,
-        "column": 26
+        "line": 123,
+        "column": 12
       }
     },
     {
@@ -906,8 +906,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integration_dashboards.spec.ts",
-        "line": 119,
-        "column": 16
+        "line": 141,
+        "column": 12
       }
     },
     {
@@ -922,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integrations.spec.ts",
-        "line": 80,
-        "column": 61
+        "line": 94,
+        "column": 12
       }
     },
     {
@@ -938,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/integrations.spec.ts",
-        "line": 105,
-        "column": 17
+        "line": 127,
+        "column": 12
       }
     },
     {
@@ -954,8 +954,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_categorized.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 72,
+        "column": 12
       }
     },
     {
@@ -970,8 +970,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_multiple_types.spec.ts",
-        "line": 79,
-        "column": 13
+        "line": 84,
+        "column": 12
       }
     },
     {
@@ -986,8 +986,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_admin.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 48,
+        "column": 12
+      }
+    },
+    {
+      "id": "3fadf5b52047889-a5a6e944f6b621d",
+      "title": "Dataset quality - complement-pattern privileges returns accessible concrete streams without leaking excluded streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_complement_pattern.spec.ts",
+        "line": 54,
+        "column": 12
       }
     },
     {
@@ -1002,8 +1018,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
-        "line": 45,
-        "column": 28
+        "line": 50,
+        "column": 12
       }
     },
     {
@@ -1018,8 +1034,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
-        "line": 63,
-        "column": 27
+        "line": 72,
+        "column": 12
       }
     },
     {
@@ -1034,8 +1050,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_monitor.spec.ts",
-        "line": 77,
-        "column": 27
+        "line": 93,
+        "column": 12
       }
     },
     {
@@ -1050,8 +1066,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_no_access.spec.ts",
-        "line": 44,
-        "column": 28
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -1066,8 +1082,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats_privileges_read_only.spec.ts",
-        "line": 44,
-        "column": 28
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -1082,8 +1098,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
-        "line": 50,
-        "column": 45
+        "line": 59,
+        "column": 12
       }
     },
     {
@@ -1098,8 +1114,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
-        "line": 74,
-        "column": 75
+        "line": 95,
+        "column": 12
       }
     },
     {
@@ -1114,8 +1130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
-        "line": 87,
-        "column": 27
+        "line": 106,
+        "column": 12
       }
     },
     {
@@ -1130,103 +1146,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/stats.spec.ts",
-        "line": 97,
-        "column": 18
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-764ad3197a87f0a",
-      "title": "Dataset quality - types privileges returns no privileges with a single type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 42,
-        "column": 5
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-fcfe668b6b3d68e",
-      "title": "Dataset quality - types privileges returns no privileges with multiple types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 54,
-        "column": 74
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-22848601b3cca4a",
-      "title": "Dataset quality - types privileges returns full privileges with a single type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 65,
-        "column": 5
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-cbe98b9c71b9baf",
-      "title": "Dataset quality - types privileges returns full privileges with multiple types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 74,
-        "column": 7
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-5c054d590d77893",
-      "title": "Dataset quality - types privileges returns full privileges with all types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 88,
-        "column": 12
-      }
-    },
-    {
-      "id": "1dc26ce5729a894-a1215da7a825fff",
-      "title": "Dataset quality - types privileges returns the expected response structure",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/types_privileges.spec.ts",
-        "line": 106,
+        "line": 117,
         "column": 12
       }
     },
@@ -1240,8 +1160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store_lifecycle_stateful.spec.ts",
-        "line": 45,
-        "column": 45
+        "line": 54,
+        "column": 12
       }
     },
     {
@@ -1256,8 +1176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store.spec.ts",
-        "line": 43,
-        "column": 45
+        "line": 52,
+        "column": 12
       }
     },
     {
@@ -1272,8 +1192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store.spec.ts",
-        "line": 52,
-        "column": 62
+        "line": 66,
+        "column": 12
       }
     },
     {
@@ -1288,8 +1208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_failure_store.spec.ts",
-        "line": 64,
-        "column": 7
+        "line": 80,
+        "column": 12
       }
     },
     {
@@ -1304,8 +1224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_field_limit.spec.ts",
-        "line": 68,
-        "column": 11
+        "line": 80,
+        "column": 12
       }
     },
     {
@@ -1320,8 +1240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/dataset_quality/test/scout/api/tests/update_field_limit.spec.ts",
-        "line": 87,
-        "column": 34
+        "line": 105,
+        "column": 12
       }
     }
   ]

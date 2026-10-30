@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataStreamDocsStat, DatasetUserPrivileges } from '../../../../common/api_types';
+import type { DataStreamDocsStat } from '../../../../common/api_types';
 import type { DataStreamStat, DataStreamStatType } from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
 import type {
@@ -42,8 +42,9 @@ export interface WithFilters {
 export type DictionaryType<T> = Record<DataStreamType, T[]>;
 
 export interface WithDataStreamStats {
-  datasetUserPrivileges: DatasetUserPrivileges;
+  canViewIntegrations: boolean;
   dataStreamStats: DataStreamStatType[];
+  useInitialDataStreamStats: boolean;
 }
 
 export interface WithTotalDocs {

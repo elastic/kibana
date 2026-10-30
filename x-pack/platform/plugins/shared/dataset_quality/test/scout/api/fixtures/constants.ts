@@ -16,7 +16,6 @@ export const API = {
   DEGRADED_DOCS: `${dataStreams}/degraded_docs`,
   FAILED_DOCS: `${dataStreams}/failed_docs`,
   TOTAL_DOCS: `${dataStreams}/total_docs`,
-  TYPES_PRIVILEGES: `${dataStreams}/types_privileges`,
   INTEGRATIONS: `${DATASET_QUALITY_API_BASE}/integrations`,
   CHART_PREVIEW: `${DATASET_QUALITY_API_BASE}/rule_types/degraded_docs/chart_preview`,
   integrationDashboards: (integration: string) =>

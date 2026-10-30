@@ -11,25 +11,21 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom } from 'xstate';
 import { assign, fromCallback, fromPromise, setup } from 'xstate';
 import type {
-  DatasetTypesPrivileges,
   DataStreamDocsStat,
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
 import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../../common/constants';
-import type {
-  DataStreamStatServiceResponse,
-  GetDataStreamsTypesPrivilegesResponse,
-} from '../../../../common/data_streams_stats';
+import type { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
 import type { DataStreamType } from '../../../../common/types';
+import { indexNameToDataStreamParts } from '../../../../common/utils';
 import type { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { generateDatasets } from '../../../utils';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../../common/notifications';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   fetchDatasetStatsFailedNotifier,
-  fetchDatasetTypesPrivilegesFailedNotifier,
   fetchDegradedStatsFailedNotifier,
   fetchFailedStatsFailedNotifier,
   fetchIntegrationsFailedNotifier,
@@ -156,15 +152,16 @@ const createPureDatasetQualityControllerStateMachine = (
         };
       }),
       // Placeholder actions that get overridden in provide()
-      storeAuthorizedDatasetTypes: assign(() => ({})),
+      storeAccessibleDatasetTypes: assign(() => ({})),
       storeDataStreamStats: assign(() => ({})),
+      markInitialDataStreamStatsLoaded: assign(() => ({})),
+      prepareForDataStreamRediscovery: assign(() => ({})),
       storeTotalDocStats: assign(() => ({})),
       storeDegradedDocStats: assign(() => ({})),
       storeFailedDocStats: assign(() => ({})),
       storeNonAggregatableDatasets: assign(() => ({})),
       storeIntegrations: assign(() => ({})),
       resetLoadedTotalDocsTypes: assign(() => ({ loadedTotalDocsTypes: [] })),
-      notifyFetchDatasetTypesPrivilegesFailed: () => {},
       notifyFetchDatasetStatsFailed: () => {},
       notifyFetchDegradedStatsFailed: () => {},
       notifyFetchNonAggregatableDatasetsFailed: () => {},
@@ -175,7 +172,6 @@ const createPureDatasetQualityControllerStateMachine = (
       notifyUpdateFailureStoreFailed: () => {},
     },
     actors: {
-      loadDatasetTypesPrivileges: getPlaceholderFor(createLoadDatasetTypesPrivilegesActor),
       loadDataStreamStats: getPlaceholderFor(createLoadDataStreamStatsActor),
       loadDataStreamDocsStats: getPlaceholderFor(createLoadDataStreamDocsStatsActor),
       loadDegradedDocs: getPlaceholderFor(createLoadDegradedDocsActor),
@@ -185,18 +181,16 @@ const createPureDatasetQualityControllerStateMachine = (
       updateFailureStore: getPlaceholderFor(createUpdateFailureStoreActor),
     },
     guards: {
-      hasAuthorizedTypes: ({ event }) => {
+      hasAccessibleDataStreams: ({ event }) => {
         if (!('output' in event) || typeof event.output !== 'object' || !event.output) {
           return false;
         }
 
-        const output = event.output as GetDataStreamsTypesPrivilegesResponse;
+        const output = event.output as DataStreamStatServiceResponse;
 
-        return (
-          'datasetTypesPrivileges' in output &&
-          extractAuthorizedDatasetTypes(output.datasetTypesPrivileges).length > 0
-        );
+        return extractAccessibleDatasetTypes(output.dataStreamsStats).length > 0;
       },
+      shouldUseInitialDataStreamStats: ({ context }) => context.useInitialDataStreamStats,
       checkIfActionForbidden: ({ event }) => {
         if (!('error' in event) || typeof event.error !== 'object' || event.error === null) {
           return false;
@@ -226,34 +220,68 @@ const createPureDatasetQualityControllerStateMachine = (
     states: {
       initializing: {
         invoke: {
-          src: 'loadDatasetTypesPrivileges',
+          src: 'loadDataStreamStats',
+          input: ({ context }) => context,
           onDone: [
             {
               target: 'main',
-              actions: ['storeAuthorizedDatasetTypes'],
-              guard: 'hasAuthorizedTypes',
+              actions: ['storeAccessibleDatasetTypes', 'storeDataStreamStats'],
+              guard: 'hasAccessibleDataStreams',
             },
             {
               target: 'emptyState',
+              actions: ['storeAccessibleDatasetTypes', 'storeDataStreamStats'],
             },
           ],
           onError: {
             target: 'initializationFailed',
-            actions: ['notifyFetchDatasetTypesPrivilegesFailed'],
+            actions: ['notifyFetchDatasetStatsFailed'],
           },
         },
       },
-      initializationFailed: {},
-      emptyState: {},
+      initializationFailed: {
+        on: {
+          REFRESH_DATA: {
+            target: '#DatasetQualityController.initializing',
+            actions: ['prepareForDataStreamRediscovery'],
+          },
+        },
+      },
+      emptyState: {
+        on: {
+          REFRESH_DATA: {
+            target: '#DatasetQualityController.initializing',
+            actions: ['prepareForDataStreamRediscovery'],
+          },
+        },
+      },
       main: {
         type: 'parallel',
+        on: {
+          REFRESH_DATA: {
+            target: '#DatasetQualityController.initializing',
+            actions: ['prepareForDataStreamRediscovery'],
+          },
+        },
         states: {
           stats: {
             type: 'parallel',
             states: {
               datasets: {
-                initial: 'fetching',
+                initial: 'checkingInitialData',
                 states: {
+                  checkingInitialData: {
+                    always: [
+                      {
+                        target: 'loaded',
+                        guard: 'shouldUseInitialDataStreamStats',
+                        actions: ['markInitialDataStreamStatsLoaded'],
+                      },
+                      {
+                        target: 'fetching',
+                      },
+                    ],
+                  },
                   fetching: {
                     invoke: {
                       src: 'loadDataStreamStats',
@@ -274,9 +302,6 @@ const createPureDatasetQualityControllerStateMachine = (
                   UPDATE_TIME_RANGE: {
                     target: '.fetching',
                     actions: ['storeTimeRange'],
-                  },
-                  REFRESH_DATA: {
-                    target: '.fetching',
                   },
                 },
               },
@@ -310,9 +335,6 @@ const createPureDatasetQualityControllerStateMachine = (
                   UPDATE_TIME_RANGE: {
                     target: '.fetching',
                     actions: ['storeTimeRange'],
-                  },
-                  REFRESH_DATA: {
-                    target: '.fetching',
                   },
                 },
               },
@@ -352,9 +374,6 @@ const createPureDatasetQualityControllerStateMachine = (
                     target: '.fetching',
                     actions: ['storeTimeRange'],
                   },
-                  REFRESH_DATA: {
-                    target: '.fetching',
-                  },
                 },
               },
               docsStats: {
@@ -392,9 +411,6 @@ const createPureDatasetQualityControllerStateMachine = (
                     target: '.fetching',
                     actions: ['storeTimeRange'],
                   },
-                  REFRESH_DATA: {
-                    target: '.fetching',
-                  },
                 },
               },
               nonAggregatableDatasets: {
@@ -425,9 +441,6 @@ const createPureDatasetQualityControllerStateMachine = (
                 },
                 on: {
                   UPDATE_TIME_RANGE: {
-                    target: '.fetching',
-                  },
-                  REFRESH_DATA: {
                     target: '.fetching',
                   },
                 },
@@ -476,9 +489,6 @@ const createPureDatasetQualityControllerStateMachine = (
                 target: '.fetching',
                 actions: ['storeTimeRange'],
               },
-              REFRESH_DATA: {
-                target: '.fetching',
-              },
               UPDATE_INTEGRATIONS: {
                 target: '.loaded',
                 actions: ['storeIntegrationsFilter'],
@@ -515,8 +525,8 @@ const createPureDatasetQualityControllerStateMachine = (
                   src: 'updateFailureStore',
                   input: ({ context, event }) => ({ context, event }),
                   onDone: {
-                    target: '#DatasetQualityController.main.stats.datasets.fetching',
-                    actions: ['notifyUpdateFailureStoreSuccess'],
+                    target: '#DatasetQualityController.initializing',
+                    actions: ['notifyUpdateFailureStoreSuccess', 'prepareForDataStreamRediscovery'],
                   },
                   onError: {
                     target: 'idle',
@@ -548,12 +558,11 @@ export const createDatasetQualityControllerStateMachine = ({
 
   return createPureDatasetQualityControllerStateMachine(initialContext).provide({
     actions: {
-      storeAuthorizedDatasetTypes: assign(({ context, event }) => {
+      storeAccessibleDatasetTypes: assign(({ context, event }) => {
         if (!('output' in event)) return {};
 
-        const output = event.output as GetDataStreamsTypesPrivilegesResponse;
-
-        const authorizedDatasetTypes = extractAuthorizedDatasetTypes(output.datasetTypesPrivileges);
+        const output = event.output as DataStreamStatServiceResponse;
+        const authorizedDatasetTypes = extractAccessibleDatasetTypes(output.dataStreamsStats);
 
         const filterTypes = context.filters.types as DataStreamType[];
 
@@ -570,16 +579,27 @@ export const createDatasetQualityControllerStateMachine = ({
         };
       }),
 
-      storeDataStreamStats: assign(({ event }) => {
+      storeDataStreamStats: assign(({ context, event }) => {
         if (!('output' in event)) return {};
 
         const output = event.output as DataStreamStatServiceResponse;
 
         return {
-          dataStreamStats: output.dataStreamsStats as DataStreamStat[],
-          datasetUserPrivileges: output.datasetUserPrivileges,
+          dataStreamStats: filterDataStreamsBySelectedTypes(
+            output.dataStreamsStats as DataStreamStat[],
+            context.filters.types
+          ),
+          canViewIntegrations: output.canViewIntegrations,
         };
       }),
+
+      markInitialDataStreamStatsLoaded: assign(() => ({
+        useInitialDataStreamStats: false,
+      })),
+
+      prepareForDataStreamRediscovery: assign(() => ({
+        useInitialDataStreamStats: true,
+      })),
 
       storeTotalDocStats: assign(({ context, event }) => {
         if (!('data' in event) || !('dataStreamType' in event)) {
@@ -631,12 +651,6 @@ export const createDatasetQualityControllerStateMachine = ({
         return { integrations: event.output as Integration[] };
       }),
 
-      notifyFetchDatasetTypesPrivilegesFailed: ({ event }) => {
-        if ('error' in event) {
-          fetchDatasetTypesPrivilegesFailedNotifier(toasts, event.error as Error);
-        }
-      },
-
       notifyFetchDatasetStatsFailed: ({ event }) => {
         if ('error' in event) {
           fetchDatasetStatsFailedNotifier(toasts, event.error as Error);
@@ -681,7 +695,6 @@ export const createDatasetQualityControllerStateMachine = ({
       },
     },
     actors: {
-      loadDatasetTypesPrivileges: createLoadDatasetTypesPrivilegesActor(actorDeps),
       loadDataStreamStats: createLoadDataStreamStatsActor(actorDeps),
       loadDataStreamDocsStats: createLoadDataStreamDocsStatsActor(actorDeps),
       loadDegradedDocs: createLoadDegradedDocsActor(actorDeps),
@@ -697,17 +710,41 @@ export type DatasetQualityControllerStateService = ActorRefFrom<
   ReturnType<typeof createDatasetQualityControllerStateMachine>
 >;
 
-const extractAuthorizedDatasetTypes = (datasetTypesPrivileges: DatasetTypesPrivileges) =>
-  Object.entries(datasetTypesPrivileges)
-    .filter(([_type, priv]) => priv.canMonitor || priv.canRead)
-    .map(([type, _priv]) => type.replace(/-\*-\*$/, '')) as DataStreamType[];
+const extractAccessibleDatasetTypes = (
+  dataStreams: DataStreamStatServiceResponse['dataStreamsStats']
+): DataStreamType[] => [
+  ...new Set(
+    dataStreams
+      .map(({ name }) => indexNameToDataStreamParts(name).type)
+      .filter((type): type is DataStreamType => KNOWN_TYPES.includes(type as DataStreamType))
+  ),
+];
+
+const filterDataStreamsBySelectedTypes = (
+  dataStreams: DataStreamStat[],
+  selectedTypes: string[]
+): DataStreamStat[] => {
+  const accessibleTypes = extractAccessibleDatasetTypes(dataStreams);
+  const validSelectedTypes = selectedTypes.filter(
+    (type): type is DataStreamType =>
+      KNOWN_TYPES.includes(type as DataStreamType) &&
+      accessibleTypes.includes(type as DataStreamType)
+  );
+  const visibleTypes = validSelectedTypes.length > 0 ? validSelectedTypes : accessibleTypes;
+
+  return dataStreams.filter(({ name }) =>
+    visibleTypes.includes(indexNameToDataStreamParts(name).type as DataStreamType)
+  );
+};
 
 const getValidDatasetTypes = (
   context: DatasetQualityControllerContext,
   isDatasetQualityAllSignalsAvailable: boolean
 ) =>
   (isDatasetQualityAllSignalsAvailable
-    ? context.filters.types.length
+    ? context.authorizedDatasetTypes.length === 0
+      ? KNOWN_TYPES
+      : context.filters.types.length
       ? context.filters.types
       : context.authorizedDatasetTypes
     : [DEFAULT_DATASET_TYPE]) as DataStreamType[];
@@ -720,13 +757,6 @@ interface ActorDeps {
   dataStreamStatsClient: IDataStreamsStatsClient;
   isDatasetQualityAllSignalsAvailable: boolean;
 }
-
-const createLoadDatasetTypesPrivilegesActor = ({ dataStreamStatsClient }: ActorDeps) =>
-  fromPromise(async () =>
-    dataStreamStatsClient.getDataStreamsTypesPrivileges({
-      types: KNOWN_TYPES,
-    })
-  );
 
 const createLoadDataStreamStatsActor = ({
   dataStreamStatsClient,
