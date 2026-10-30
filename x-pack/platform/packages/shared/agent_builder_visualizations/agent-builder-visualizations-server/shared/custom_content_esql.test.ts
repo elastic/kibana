@@ -34,7 +34,7 @@ describe('generateCustomContentEsql', () => {
   });
 
   it('passes the request through with the custom content instructions', async () => {
-    const result = await generateCustomContentEsql({ ...params, noQueryHint: 'Pass an index.' });
+    const result = await generateCustomContentEsql(params);
 
     expect(mockGenerate).toHaveBeenCalledWith({
       ...params,
@@ -46,19 +46,17 @@ describe('generateCustomContentEsql', () => {
   it('throws with the reason and the caller hint when no query is produced', async () => {
     mockGenerate.mockResolvedValue({ query: undefined, error: 'index not found' });
 
-    await expect(
-      generateCustomContentEsql({ ...params, noQueryHint: 'Pass an index.' })
-    ).rejects.toThrow(
-      'Could not generate an ES|QL query for this panel: index not found. Pass an index.'
+    await expect(generateCustomContentEsql(params)).rejects.toThrow(
+      'Could not generate an ES|QL query for this panel: index not found. Pass an exact "index"'
     );
   });
 
   it('says no query was produced when the generator gives no reason', async () => {
     mockGenerate.mockResolvedValue({ query: undefined });
 
-    await expect(
-      generateCustomContentEsql({ ...params, noQueryHint: 'Pass an index.' })
-    ).rejects.toThrow('no query was produced. Pass an index.');
+    await expect(generateCustomContentEsql(params)).rejects.toThrow(
+      'no query was produced. Pass an exact "index"'
+    );
   });
 
   describe('instructions', () => {

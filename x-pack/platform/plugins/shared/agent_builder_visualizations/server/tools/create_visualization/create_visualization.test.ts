@@ -12,31 +12,24 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
 } from '@kbn/agent-builder-visualizations-common';
 import {
+  buildCustomContentConfig,
   buildLensConfig,
   buildVegaConfig,
-  generateCustomContentEsql,
   selectDefaultTimeRange,
 } from '@kbn/agent-builder-visualizations-server';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  buildCustomContentConfig: jest.fn(),
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
-  generateCustomContentEsql: jest.fn(),
   selectDefaultTimeRange: jest.fn(),
-}));
-
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(),
 }));
 
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
 const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
-const mockGenerateEsql = generateCustomContentEsql as jest.Mock;
-const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
-const mockResolveTemplate = jest.fn();
+const mockBuildCustomContent = buildCustomContentConfig as jest.Mock;
 
 const createLogger = (): Logger =>
   ({
@@ -329,12 +322,11 @@ describe('createVisualizationTool handler', () => {
       to: 'now',
       mode: 'relative',
     });
-    mockGenerateEsql.mockResolvedValue('FROM logs | STATS count() BY host');
-    mockResolveTemplate.mockResolvedValue({
+    mockBuildCustomContent.mockResolvedValue({
+      esqlQuery: 'FROM logs | STATS count() BY host',
       template: '<div>{{ row["host"].value }}</div>',
       height: 420,
     });
-    mockCreateTemplateResolver.mockReturnValue(mockResolveTemplate);
   });
 
   it('builds a Lens visualization and persists it', async () => {
@@ -722,27 +714,55 @@ describe('createVisualizationTool handler', () => {
   });
 
   describe('custom content', () => {
-    it('generates the template server-side and persists it under visualization.template', async () => {
+    const STORED_ATTACHMENT = {
+      id: 'att-1',
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'custom_content',
+            query: 'a status board per host',
+            visualization: { template: '<div>old</div>' },
+            esql: 'FROM logs | STATS count() BY host',
+          },
+        },
+      ],
+    };
+
+    const storedAttachment = (data: Record<string, unknown> = {}) => {
+      const attachments = createAttachments();
+      attachments.getAttachmentRecord.mockReturnValue({
+        ...STORED_ATTACHMENT,
+        versions: [{ version: 1, data: { ...STORED_ATTACHMENT.versions[0].data, ...data } }],
+      });
+      return attachments;
+    };
+
+    it('builds a new panel with the custom content builder and persists the template', async () => {
       const { result, attachments } = await runHandler({
         query: 'a status board per host',
+        index: 'logs-*',
         target: customContentTarget({ esql: 'FROM logs | STATS count() BY host' }),
       });
 
       expect(mockBuildLens).not.toHaveBeenCalled();
       expect(mockBuildVega).not.toHaveBeenCalled();
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
         expect.objectContaining({
-          prompt: 'a status board per host',
-          esqlQuery: 'FROM logs | STATS count() BY host',
+          nlQuery: 'a status board per host',
+          index: 'logs-*',
+          esql: 'FROM logs | STATS count() BY host',
+          hasData: true,
+          existing: undefined,
         })
       );
-
       expect(attachments.add).toHaveBeenCalledWith(
         expect.objectContaining({
           type: VISUALIZATION_ATTACHMENT_TYPE,
           data: expect.objectContaining({
             renderer: 'custom_content',
+            query: 'a status board per host',
             visualization: { template: '<div>{{ row["host"].value }}</div>', height: 420 },
             esql: 'FROM logs | STATS count() BY host',
           }),
@@ -760,7 +780,7 @@ describe('createVisualizationTool handler', () => {
     it('does not return the template in the tool result', async () => {
       const { result } = await runHandler({
         query: 'a status board per host',
-        target: customContentTarget({ esql: 'FROM logs | STATS count() BY host' }),
+        target: customContentTarget(),
       });
 
       const [{ data }] = result.results;
@@ -768,33 +788,145 @@ describe('createVisualizationTool handler', () => {
       expect(JSON.stringify(data)).not.toContain('row["host"]');
     });
 
-    it('generates the ES|QL query for a new panel when esql is omitted', async () => {
-      const { result } = await runHandler({
-        query: 'a status board per host',
-        index: 'logs-*',
+    it('treats leftover esql: null as omitted', async () => {
+      await runHandler({
+        query: 'document count per minute as a line chart',
+        target: customContentTarget({ esql: null }),
+      });
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({ esql: undefined })
+      );
+    });
+
+    it('persists a panel without data with no esql when the builder returns no query', async () => {
+      mockBuildCustomContent.mockResolvedValue({ template: '<div>banner</div>', height: 200 });
+
+      const { result, attachments } = await runHandler({
+        query: 'a banner',
+        target: customContentTarget({ has_data: false }),
+      });
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({ hasData: false })
+      );
+      expect(attachments.add.mock.calls[0][0].data).not.toHaveProperty('esql');
+      expect(result.results[0].data.esql).toBeUndefined();
+    });
+
+    it('passes the time range the user named to the builder', async () => {
+      await runHandler({
+        query: 'errors last week',
+        time_range: { from: 'now-7d', to: 'now' },
         target: customContentTarget(),
       });
 
-      expect(mockGenerateEsql).toHaveBeenCalledWith(
-        expect.objectContaining({ nlQuery: 'a status board per host', index: 'logs-*' })
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' } })
       );
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM logs | STATS count() BY host' })
-      );
-
-      const [{ data }] = result.results;
-      expect(data.esql).toBe('FROM logs | STATS count() BY host');
     });
 
-    // Data-free is a request, not what you get when a query cannot be generated.
-    it('fails rather than falling back to a data-free panel when query generation fails', async () => {
-      mockGenerateEsql.mockRejectedValue(
-        new Error(
-          'Could not generate an ES|QL query for this panel: no suitable index. Pass a hint.'
-        )
+    it('hands the stored query and template of the attachment to the builder on an update', async () => {
+      const { result, attachments } = await runHandler(
+        { query: 'use a darker background', target: attachmentTarget('att-1') },
+        { attachments: storedAttachment() }
       );
 
-      const { result } = await runHandler({
+      expect(mockBuildLens).not.toHaveBeenCalled();
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'use a darker background',
+          esql: undefined,
+          hasData: undefined,
+          regenerateESQL: undefined,
+          existing: {
+            esqlQuery: 'FROM logs | STATS count() BY host',
+            template: '<div>old</div>',
+          },
+        })
+      );
+      expect(attachments.update).toHaveBeenCalled();
+      const [{ data }] = result.results;
+      expect(data.renderer).toBe('custom_content');
+      expect(data.attachment_id).toBe('att-1');
+    });
+
+    it('hands the stored template of a panel without data to the builder', async () => {
+      const attachments = storedAttachment({ esql: undefined });
+
+      await runHandler(
+        { query: 'add the total', target: attachmentTarget('att-1', { has_data: true }) },
+        { attachments }
+      );
+
+      expect(mockBuildCustomContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hasData: true,
+          existing: { esqlQuery: undefined, template: '<div>old</div>' },
+        })
+      );
+    });
+
+    it('forwards regenerate_esql and a supplied esql on an update', async () => {
+      await runHandler(
+        {
+          query: 'also split by operating system',
+          target: attachmentTarget('att-1', { regenerate_esql: true }),
+        },
+        { attachments: storedAttachment() }
+      );
+      await runHandler(
+        {
+          query: 'use this query',
+          target: attachmentTarget('att-1', { esql: 'FROM metrics-*' }),
+        },
+        { attachments: storedAttachment() }
+      );
+
+      expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ regenerateESQL: true })
+      );
+      expect(mockBuildCustomContent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ esql: 'FROM metrics-*' })
+      );
+    });
+
+    it('persists the query the builder returns on an update, and drops it when there is none', async () => {
+      mockBuildCustomContent.mockResolvedValue({ template: '<div>static</div>', height: 200 });
+      const attachments = storedAttachment();
+
+      const { result } = await runHandler(
+        { query: 'make it static', target: attachmentTarget('att-1', { has_data: false }) },
+        { attachments }
+      );
+
+      expect(attachments.update.mock.calls[0][1].data).not.toHaveProperty('esql');
+      expect(result.results[0].data.esql).toBeUndefined();
+    });
+
+    it('fails instead of silently dropping the query when regenerate_esql meets has_data: false', async () => {
+      const { result } = await runHandler(
+        {
+          query: 'regenerate it',
+          target: attachmentTarget('att-1', { regenerate_esql: true, has_data: false }),
+        },
+        { attachments: storedAttachment() }
+      );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.error);
+      expect(data.message).toContain('regenerate_esql');
+      expect(mockBuildCustomContent).not.toHaveBeenCalled();
+    });
+
+    it('reports a builder failure as an error result with its message', async () => {
+      mockBuildCustomContent.mockRejectedValue(
+        new Error('Could not generate an ES|QL query for this panel: no suitable index')
+      );
+
+      const { result, attachments } = await runHandler({
         query: 'a status board per host',
         target: customContentTarget(),
       });
@@ -802,366 +934,7 @@ describe('createVisualizationTool handler', () => {
       const [{ type, data }] = result.results;
       expect(type).toBe(ToolResultType.error);
       expect(data.message).toContain('Could not generate an ES|QL query');
-      expect(mockResolveTemplate).not.toHaveBeenCalled();
-    });
-
-    it('generates a query when leftover esql: null means the agent has none in hand', async () => {
-      const { result } = await runHandler({
-        query: 'document count per minute over time as a line chart',
-        index: 'kibana_sample_data_logs',
-        target: customContentTarget({ esql: null }),
-      });
-
-      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    it('persists a data-free panel with no esql when has_data is false', async () => {
-      const { result, attachments } = await runHandler({
-        query: 'a welcome banner',
-        target: customContentTarget({ has_data: false }),
-      });
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ prompt: 'a welcome banner', esqlQuery: undefined })
-      );
-      expect(attachments.add).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.not.objectContaining({ esql: expect.anything() }),
-        })
-      );
-
-      const [{ data }] = result.results;
-      expect(data.esql).toBeUndefined();
-    });
-
-    // A supplied query is the strongest signal that the panel has data, so it wins
-    // over a has_data: false passed alongside it.
-    it('keeps the supplied esql when has_data: false is passed together with it', async () => {
-      const { result, attachments } = await runHandler({
-        query: 'a status board per host',
-        target: customContentTarget({
-          esql: 'FROM logs | STATS count() BY host',
-          has_data: false,
-        }),
-      });
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM logs | STATS count() BY host' })
-      );
-      expect(attachments.add).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ esql: 'FROM logs | STATS count() BY host' }),
-        })
-      );
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    it('treats an empty esql as omitted and generates a query', async () => {
-      const { result } = await runHandler({
-        query: 'a status board per host',
-        index: 'logs-*',
-        target: customContentTarget({ esql: '' }),
-      });
-
-      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    const dataAttachment = () => {
-      const attachments = createAttachments();
-      attachments.getAttachmentRecord.mockReturnValue({
-        id: 'att-1',
-        current_version: 1,
-        versions: [
-          {
-            version: 1,
-            data: {
-              renderer: 'custom_content',
-              query: 'a status board per host',
-              visualization: { template: '<div>old</div>' },
-              esql: 'FROM logs | STATS count() BY host',
-            },
-          },
-        ],
-      });
-      return attachments;
-    };
-
-    it('keeps the custom content renderer and query when updating with esql omitted', async () => {
-      const { result } = await runHandler(
-        { query: 'use a darker background', target: attachmentTarget('att-1') },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockBuildLens).not.toHaveBeenCalled();
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      // A style-only edit refines the existing template rather than re-sampling the query.
-      expect(mockResolveTemplate).toHaveBeenCalledWith({
-        prompt: 'use a darker background',
-        esqlQuery: undefined,
-        existingTemplate: '<div>old</div>',
-        hasExistingQuery: true,
-      });
-
-      const [{ data }] = result.results;
-      expect(data.renderer).toBe('custom_content');
-      expect(data.attachment_id).toBe('att-1');
-      expect(data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    it('keeps a stored query when an update passes leftover esql: null', async () => {
-      const { result } = await runHandler(
-        { query: 'use a darker background', target: attachmentTarget('att-1', { esql: null }) },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    // A redundant has_data: true on a style-only edit must not regenerate a working
-    // query from the styling prompt.
-    it('keeps the stored query when an update passes has_data: true on a data-backed panel', async () => {
-      const { result } = await runHandler(
-        {
-          query: 'use a darker background',
-          target: attachmentTarget('att-1', { has_data: true }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
-      );
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    it('regenerates the stored query when an update passes regenerate_esql: true', async () => {
-      mockGenerateEsql.mockResolvedValue('FROM logs | STATS count() BY host, os');
-
-      const { result } = await runHandler(
-        {
-          query: 'also split by operating system',
-          index: 'logs',
-          target: attachmentTarget('att-1', { regenerate_esql: true }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).toHaveBeenCalledWith(
-        expect.objectContaining({
-          nlQuery: 'also split by operating system',
-          index: 'logs',
-          existingQueries: ['FROM logs | STATS count() BY host'],
-        })
-      );
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esqlQuery: 'FROM logs | STATS count() BY host, os',
-          existingTemplate: '<div>old</div>',
-          hasExistingQuery: false,
-        })
-      );
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host, os');
-    });
-
-    it('fails instead of silently dropping the query when regenerate_esql meets has_data: false', async () => {
-      const { result } = await runHandler(
-        {
-          query: 'also split by operating system',
-          target: attachmentTarget('att-1', { regenerate_esql: true, has_data: false }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      const [{ type, data }] = result.results;
-      expect(type).toBe(ToolResultType.error);
-      expect(data.message).toContain('regenerate_esql');
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).not.toHaveBeenCalled();
-    });
-
-    it('lets a supplied esql win over regenerate_esql', async () => {
-      await runHandler(
-        {
-          query: 'use my query',
-          target: attachmentTarget('att-1', {
-            esql: 'FROM logs | STATS errors = COUNT() BY host',
-            regenerate_esql: true,
-          }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-    });
-
-    it('re-samples when an update supplies a different esql', async () => {
-      const { result } = await runHandler(
-        {
-          query: 'show error counts instead',
-          target: attachmentTarget('att-1', { esql: 'FROM logs | STATS errors = COUNT() BY host' }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esqlQuery: 'FROM logs | STATS errors = COUNT() BY host',
-          existingTemplate: '<div>old</div>',
-          hasExistingQuery: false,
-        })
-      );
-
-      const [{ data }] = result.results;
-      expect(data.esql).toBe('FROM logs | STATS errors = COUNT() BY host');
-    });
-
-    it('drops the query when an update passes has_data: false', async () => {
-      const { result, attachments } = await runHandler(
-        {
-          query: 'turn this into a plain banner',
-          target: attachmentTarget('att-1', { has_data: false }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith({
-        prompt: 'turn this into a plain banner',
-        esqlQuery: undefined,
-        existingTemplate: '<div>old</div>',
-        hasExistingQuery: false,
-      });
-      expect(attachments.update).toHaveBeenCalledWith(
-        'att-1',
-        expect.objectContaining({
-          data: expect.not.objectContaining({ esql: expect.anything() }),
-        })
-      );
-
-      const [{ data }] = result.results;
-      expect(data.esql).toBeUndefined();
-    });
-
-    it('replaces the query when an update passes has_data: false together with an esql', async () => {
-      const { result, attachments } = await runHandler(
-        {
-          query: 'show error counts instead',
-          target: attachmentTarget('att-1', {
-            esql: 'FROM logs | STATS errors = COUNT() BY host',
-            has_data: false,
-          }),
-        },
-        { attachments: dataAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esqlQuery: 'FROM logs | STATS errors = COUNT() BY host',
-          hasExistingQuery: false,
-        })
-      );
-      expect(attachments.update).toHaveBeenCalledWith(
-        'att-1',
-        expect.objectContaining({
-          data: expect.objectContaining({ esql: 'FROM logs | STATS errors = COUNT() BY host' }),
-        })
-      );
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS errors = COUNT() BY host');
-    });
-
-    const dataFreeAttachment = () => {
-      const attachments = createAttachments();
-      attachments.getAttachmentRecord.mockReturnValue({
-        id: 'banner',
-        type: VISUALIZATION_ATTACHMENT_TYPE,
-        current_version: 1,
-        versions: [
-          {
-            version: 1,
-            data: {
-              renderer: 'custom_content',
-              query: 'a welcome banner',
-              visualization: { template: '<div>hi</div>' },
-            },
-          },
-        ],
-      });
-      return attachments;
-    };
-
-    // A wording tweak to a data-free panel must neither invent a query nor fail.
-    it('keeps a data-free panel data-free when updating with esql omitted', async () => {
-      const { result } = await runHandler(
-        { query: 'make the subtitle smaller', target: attachmentTarget('banner') },
-        { attachments: dataFreeAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith({
-        prompt: 'make the subtitle smaller',
-        esqlQuery: undefined,
-        existingTemplate: '<div>hi</div>',
-        hasExistingQuery: false,
-      });
-
-      const [{ type, data }] = result.results;
-      expect(type).toBe(ToolResultType.visualization);
-      expect(data.esql).toBeUndefined();
-    });
-
-    it('adds data to a data-free panel when an update supplies an esql', async () => {
-      const { result } = await runHandler(
-        {
-          query: 'show the log count too',
-          target: attachmentTarget('banner', { esql: 'FROM logs | STATS count() BY host' }),
-        },
-        { attachments: dataFreeAttachment() }
-      );
-
-      expect(mockGenerateEsql).not.toHaveBeenCalled();
-      expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esqlQuery: 'FROM logs | STATS count() BY host',
-          existingTemplate: '<div>hi</div>',
-        })
-      );
-
-      const [{ data }] = result.results;
-      expect(data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    it('generates a query when an update passes has_data: true on a data-free panel', async () => {
-      const { result } = await runHandler(
-        {
-          query: 'show the log count too',
-          target: attachmentTarget('banner', { has_data: true }),
-        },
-        { attachments: dataFreeAttachment() }
-      );
-
-      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
-      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
-    });
-
-    it('reports a template generation failure as an error result', async () => {
-      mockResolveTemplate.mockRejectedValue(new Error('ES|QL query is invalid'));
-
-      const { result } = await runHandler({
-        query: 'a status board per host',
-        target: customContentTarget({ esql: 'FROM nope' }),
-      });
-
-      const [{ type, data }] = result.results;
-      expect(type).toBe(ToolResultType.error);
-      expect(data.message).toContain('ES|QL query is invalid');
+      expect(attachments.add).not.toHaveBeenCalled();
     });
   });
 });

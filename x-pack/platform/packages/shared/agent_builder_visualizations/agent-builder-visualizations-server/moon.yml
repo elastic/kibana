@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/custom-content-server'
   - '@kbn/esql-server-utils'
   - '@kbn/esql-utils'
   - '@kbn/lens-embeddable-utils'

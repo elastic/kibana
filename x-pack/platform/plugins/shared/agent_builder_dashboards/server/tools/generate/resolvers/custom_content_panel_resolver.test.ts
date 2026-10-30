@@ -5,13 +5,23 @@
  * 2.0.
  */
 
+import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
 } from '@kbn/dashboard-agent-authoring';
+import type { Logger } from '@kbn/logging';
 import { createCustomContentPanelResolver } from './custom_content_panel_resolver';
+
+jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  buildCustomContentConfig: jest.fn(),
+}));
+
+const mockedBuild = jest.mocked(buildCustomContentConfig);
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };
 
@@ -41,293 +51,133 @@ const editRequest = (
 });
 
 describe('createCustomContentPanelResolver', () => {
-  const resolveTemplate = jest.fn();
-  const generateEsql = jest.fn();
-  const resolve = createCustomContentPanelResolver({ resolveTemplate, generateEsql });
+  const deps = {
+    logger: {} as Logger,
+    modelProvider: {} as ModelProvider,
+    events: {} as ToolEventEmitter,
+    esClient: {} as IScopedClusterClient,
+  };
+  const resolve = createCustomContentPanelResolver(deps);
 
   beforeEach(() => {
-    resolveTemplate.mockReset();
-    resolveTemplate.mockResolvedValue({ template: '<div>resolved</div>', height: 320 });
-    generateEsql.mockReset();
-    generateEsql.mockResolvedValue('FROM logs-* | STATS count = COUNT(*) BY host');
+    mockedBuild.mockReset();
+    mockedBuild.mockResolvedValue({
+      esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
+      template: '<div>resolved</div>',
+      height: 320,
+    });
   });
 
   describe('new panels', () => {
-    it('generates a template from the query', async () => {
-      const result = await resolve(addRequest());
+    it('builds the panel from the request and the host deps, with nothing existing', async () => {
+      const result = await resolve(addRequest({ hasData: true, index: 'logs-*' }));
 
-      expect(resolveTemplate).toHaveBeenCalledWith({ prompt: 'Show KPI', esqlQuery: undefined });
+      expect(mockedBuild).toHaveBeenCalledWith({
+        nlQuery: 'Show KPI',
+        index: 'logs-*',
+        esql: undefined,
+        hasData: true,
+        regenerateESQL: undefined,
+        existing: undefined,
+        ...deps,
+      });
       expect(result).toEqual({
         type: 'success',
         panelContent: {
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-          config: { esql_query: undefined, template: '<div>resolved</div>' },
-        },
-      });
-    });
-
-    it('samples and stores the ES|QL query when present', async () => {
-      const result = await resolve(addRequest({ esql: 'FROM logs-* | STATS count = COUNT(*)' }));
-
-      expect(resolveTemplate).toHaveBeenCalledWith({
-        prompt: 'Show KPI',
-        esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
-      });
-      expect(result).toMatchObject({
-        panelContent: { config: { esql_query: ['FROM logs-* | STATS count = COUNT(*)'] } },
-      });
-    });
-
-    it('does not generate a query when hasData is false', async () => {
-      await resolve(addRequest({ hasData: false }));
-
-      expect(generateEsql).not.toHaveBeenCalled();
-      expect(resolveTemplate).toHaveBeenCalledWith({ prompt: 'Show KPI', esqlQuery: undefined });
-    });
-
-    it('generates, samples and stores a query when hasData is true', async () => {
-      const result = await resolve(addRequest({ hasData: true, index: 'logs-*' }));
-
-      expect(generateEsql).toHaveBeenCalledWith({
-        nlQuery: 'Show KPI',
-        index: 'logs-*',
-        existingQueries: [],
-      });
-      expect(resolveTemplate).toHaveBeenCalledWith({
-        prompt: 'Show KPI',
-        esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
-      });
-      expect(result).toMatchObject({
-        panelContent: {
-          config: { esql_query: ['FROM logs-* | STATS count = COUNT(*) BY host'] },
-        },
-      });
-    });
-
-    it('uses an explicit query instead of generating one', async () => {
-      await resolve(addRequest({ esql: 'FROM metrics-*', hasData: true }));
-
-      expect(generateEsql).not.toHaveBeenCalled();
-      expect(resolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM metrics-*' })
-      );
-    });
-
-    it('fails the panel, without a template, when the query cannot be generated', async () => {
-      generateEsql.mockRejectedValue(new Error('Could not generate an ES|QL query for this panel'));
-
-      const result = await resolve(addRequest({ hasData: true }));
-
-      expect(resolveTemplate).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        type: 'failure',
-        error: 'Could not generate an ES|QL query for this panel',
-      });
-    });
-
-    it('returns a failure when template generation throws', async () => {
-      resolveTemplate.mockRejectedValue(
-        new Error('Generated template was rejected: contains a <script> tag.')
-      );
-
-      const result = await resolve(addRequest());
-
-      expect(result).toEqual({
-        type: 'failure',
-        error: 'Generated template was rejected: contains a <script> tag.',
-      });
-    });
-  });
-
-  describe('edits', () => {
-    it('refines the existing template and keeps the existing query without re-sampling it', async () => {
-      const result = await resolve(
-        editRequest(
-          customContentPanel({ template: '<div>old</div>', esql_query: ['FROM logs-*'] }),
-          { nlQuery: 'Updated' }
-        )
-      );
-
-      expect(resolveTemplate).toHaveBeenCalledWith({
-        prompt: 'Updated',
-        esqlQuery: undefined,
-        existingTemplate: '<div>old</div>',
-        hasExistingQuery: true,
-      });
-      expect(result).toMatchObject({
-        panelContent: { config: { esql_query: ['FROM logs-*'], template: '<div>resolved</div>' } },
-      });
-    });
-
-    it('keeps the settings of the panel that are not the query or the template', async () => {
-      const timeRange = { from: 'now-7d', to: 'now' };
-
-      const result = await resolve(
-        editRequest(
-          customContentPanel({
-            template: '<div>old</div>',
-            esql_query: ['FROM logs-*'],
-            title: 'Errors by host',
-            description: 'Last week',
-            time_range: timeRange,
-          }),
-          { nlQuery: 'Make the badges blue' }
-        )
-      );
-
-      expect(result).toMatchObject({
-        panelContent: {
           config: {
-            title: 'Errors by host',
-            description: 'Last week',
-            time_range: timeRange,
-            esql_query: ['FROM logs-*'],
+            esql_query: ['FROM logs-* | STATS count = COUNT(*) BY host'],
             template: '<div>resolved</div>',
           },
         },
       });
     });
 
-    it('drops the query but keeps the other settings when the edit removes it', async () => {
-      const result = await resolve(
-        editRequest(
-          customContentPanel({
-            template: '<div>old</div>',
-            esql_query: ['FROM logs-*'],
-            title: 'Errors by host',
-          }),
-          { esql: null }
-        )
+    it('stores no query for a panel without data', async () => {
+      mockedBuild.mockResolvedValue({ template: '<div>banner</div>', height: 200 });
+
+      const result = await resolve(addRequest({ hasData: false }));
+
+      expect(result).toMatchObject({
+        panelContent: { config: { esql_query: undefined, template: '<div>banner</div>' } },
+      });
+    });
+
+    it('passes a user-supplied query through', async () => {
+      await resolve(addRequest({ esql: 'FROM metrics-*', hasData: true }));
+
+      expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: 'FROM metrics-*' }));
+    });
+  });
+
+  describe('edits', () => {
+    const panel = customContentPanel({
+      template: '<div>old</div>',
+      esql_query: ['FROM logs-*'],
+      title: 'Errors by host',
+      description: 'Last week',
+      time_range: { from: 'now-7d', to: 'now' },
+    });
+
+    it('hands the stored query and template to the builder', async () => {
+      await resolve(editRequest(panel, { nlQuery: 'Make the badges blue' }));
+
+      expect(mockedBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'Make the badges blue',
+          existing: { esqlQuery: 'FROM logs-*', template: '<div>old</div>' },
+        })
       );
+    });
+
+    it('forwards the data flags', async () => {
+      await resolve(
+        editRequest(panel, {
+          nlQuery: 'Also show the average bytes',
+          regenerateESQL: true,
+          hasData: true,
+          index: 'logs-*',
+        })
+      );
+
+      expect(mockedBuild).toHaveBeenCalledWith(
+        expect.objectContaining({ regenerateESQL: true, hasData: true, index: 'logs-*' })
+      );
+    });
+
+    it('keeps the settings of the panel that are not the query or the template', async () => {
+      const result = await resolve(editRequest(panel, { nlQuery: 'Make it blue' }));
+
+      expect(result).toMatchObject({
+        panelContent: {
+          config: {
+            title: 'Errors by host',
+            description: 'Last week',
+            time_range: { from: 'now-7d', to: 'now' },
+            esql_query: ['FROM logs-* | STATS count = COUNT(*) BY host'],
+            template: '<div>resolved</div>',
+          },
+        },
+      });
+    });
+
+    it('drops the query but keeps the other settings when the builder returns none', async () => {
+      mockedBuild.mockResolvedValue({ template: '<div>static</div>', height: 200 });
+
+      const result = await resolve(editRequest(panel, { esql: null }));
 
       expect(result).toMatchObject({
         panelContent: { config: { title: 'Errors by host', esql_query: undefined } },
       });
     });
+  });
 
-    it('resolves from the existing template when the edit carries no query', async () => {
-      await resolve(
-        editRequest(customContentPanel({ template: '<div>old</div>' }), {
-          esql: 'FROM metrics-*',
-        })
-      );
+  it('turns a builder failure into a failed attempt with its message', async () => {
+    mockedBuild.mockRejectedValue(new Error('Could not generate an ES|QL query for this panel'));
 
-      expect(resolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ prompt: '', existingTemplate: '<div>old</div>' })
-      );
-    });
-
-    it('samples a replaced query', async () => {
-      const result = await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), {
-          esql: 'FROM metrics-*',
-        })
-      );
-
-      expect(resolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM metrics-*', hasExistingQuery: false })
-      );
-      expect(result).toMatchObject({
-        panelContent: { config: { esql_query: ['FROM metrics-*'] } },
-      });
-    });
-
-    it('does not generate a query for a style-only edit', async () => {
-      await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
-          nlQuery: 'Make the badges blue',
-        })
-      );
-
-      expect(generateEsql).not.toHaveBeenCalled();
-    });
-
-    it('regenerates the query from the existing one when regenerateESQL is set', async () => {
-      const result = await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
-          nlQuery: 'Also show the error rate',
-          regenerateESQL: true,
-          index: 'logs-*',
-        })
-      );
-
-      expect(generateEsql).toHaveBeenCalledWith({
-        nlQuery: 'Also show the error rate',
-        index: 'logs-*',
-        existingQueries: ['FROM logs-*'],
-      });
-      expect(resolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY host',
-          hasExistingQuery: false,
-        })
-      );
-      expect(result).toMatchObject({
-        panelContent: {
-          config: { esql_query: ['FROM logs-* | STATS count = COUNT(*) BY host'] },
-        },
-      });
-    });
-
-    it('lets an explicit query win over regenerateESQL', async () => {
-      await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), {
-          nlQuery: 'Change the data',
-          regenerateESQL: true,
-          esql: 'FROM metrics-*',
-        })
-      );
-
-      expect(generateEsql).not.toHaveBeenCalled();
-      expect(resolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: 'FROM metrics-*' })
-      );
-    });
-
-    it('generates a query for a static panel when hasData is true', async () => {
-      await resolve(
-        editRequest(customContentPanel({ template: '<div>banner</div>' }), {
-          nlQuery: 'Show request counts per host',
-          hasData: true,
-        })
-      );
-
-      expect(generateEsql).toHaveBeenCalledWith(
-        expect.objectContaining({ nlQuery: 'Show request counts per host', existingQueries: [] })
-      );
-    });
-
-    it('keeps the stored query when hasData is true and the panel already has one', async () => {
-      await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
-          nlQuery: 'Restyle',
-          hasData: true,
-        })
-      );
-
-      expect(generateEsql).not.toHaveBeenCalled();
-    });
-
-    it('removes the query when hasData is false', async () => {
-      const result = await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), {
-          nlQuery: 'Make it a static banner',
-          hasData: false,
-        })
-      );
-
-      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
-    });
-
-    it('removes the query when esql is null', async () => {
-      const result = await resolve(
-        editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), { esql: null })
-      );
-
-      expect(resolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: false })
-      );
-      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
+    expect(await resolve(addRequest({ hasData: true }))).toEqual({
+      type: 'failure',
+      error: 'Could not generate an ES|QL query for this panel',
     });
   });
 });
