@@ -11,7 +11,7 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { MetricsGridSettings, MetricsGridSort } from '@kbn/discover-utils';
+import type { DataTableRecord, MetricsGridSettings, MetricsGridSort } from '@kbn/discover-utils';
 import type { ValuesType } from 'utility-types';
 import type { ExternalServices } from './context/external_services';
 import type { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from './common/constants';
@@ -24,6 +24,10 @@ interface ChartSectionActions {
     isApproximate?: boolean;
   }) => void;
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+  /**
+   * Opens or updates the document flyout, as Discover's context awareness toolkit does.
+   */
+  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
