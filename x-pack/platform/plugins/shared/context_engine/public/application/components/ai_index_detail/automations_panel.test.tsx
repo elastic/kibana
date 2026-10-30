@@ -40,18 +40,21 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
   useWorkflowsCapabilities: () => ({
     canExecuteWorkflow: true,
+    canUpdateWorkflow: true,
   }),
 }));
 
 jest.mock('./automation_row', () => ({
   AutomationRow: ({
     workflowSummary,
+    canConfigure,
     onDelete,
   }: {
     workflowSummary?: { name?: string };
+    canConfigure: boolean;
     onDelete: () => Promise<void>;
   }) => (
-    <div data-test-subj="contextAiIndexAutomationRow">
+    <div data-test-subj="contextAiIndexAutomationRow" data-can-configure={String(canConfigure)}>
       {workflowSummary?.name}
       <button type="button" data-test-subj="stubAutomationRowDelete" onClick={() => onDelete()}>
         Delete
@@ -305,6 +308,25 @@ describe('AutomationsPanel', () => {
 
     expect(screen.getAllByTestId('contextAiIndexAutomationRow')).toHaveLength(automations.length);
   });
+
+  it.each([
+    [false, 'true'],
+    [true, 'false'],
+  ])(
+    'lets rows be configured only on unmanaged AI indices (managed: %s)',
+    (isManaged, expected) => {
+      mockUseAutomationsEditor.mockReturnValue(
+        editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
+      );
+
+      renderPanel({ isManaged });
+
+      expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveAttribute(
+        'data-can-configure',
+        expected
+      );
+    }
+  );
 
   it('passes onDelete to each row so deleteAutomation is called with the workflow id', async () => {
     const deleteAutomation = jest.fn().mockResolvedValue(undefined);
