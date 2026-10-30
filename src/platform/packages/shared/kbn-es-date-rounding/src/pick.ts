@@ -28,8 +28,6 @@ const WEEK_MS = 6048e5;
 const MONTH_MS = 30 * DAY_MS;
 const YEAR_MS = 365 * DAY_MS;
 
-const DST_WALK_CAP = 1_000_000;
-
 type CalendarAdd = 'day' | 'week' | 'month' | 'year';
 type CalendarStartOf = 'day' | 'isoWeek' | 'month' | 'year';
 type FixedUnit = 'millisecond' | 'second' | 'minute' | 'hour';
@@ -244,86 +242,171 @@ function calendarFits(
   range: ZonedDateRange,
   maxBuckets: number
 ): boolean {
-  let cursor = alignCalendar(range.from, interval, range.timeZone);
+  const periods = offsetPeriods(range.timeZone);
+  let cursor = localDayStart(periods, localDate(periods, range.from).startOf(interval.startOf));
   let count = 0;
   while (cursor < range.to) {
     count += 1;
     if (count > maxBuckets) {
       return false;
     }
-    cursor = moment.tz(cursor, range.timeZone).add(interval.amount, interval.add).valueOf();
+    cursor = localDayStart(periods, localDate(periods, cursor).add(interval.amount, interval.add));
   }
   return true;
+}
+
+/** Local calendar date of `utcMillis`, as a UTC moment so date math ignores offsets. */
+function localDate(periods: readonly OffsetPeriod[], utcMillis: number): moment.Moment {
+  const { offsetMs } = periods[periodIndexAt(periods, utcMillis)];
+  return moment.utc(utcMillis + offsetMs).startOf('day');
 }
 
 /**
- * Count fixed-width buckets the way ES `roundingIsOkFixedWidthUnit` does: divide evenly
- * inside a constant UTC-offset period, then realign after each DST transition.
+ * First instant of the local midnight `date`, like ES calendar rounding: the earlier instant when
+ * midnight repeats, the transition instant when a forward jump skips it.
+ */
+function localDayStart(periods: readonly OffsetPeriod[], date: moment.Moment): number {
+  const localMillis = date.valueOf();
+  for (let i = periodIndexAt(periods, localMillis - DAY_MS); i < periods.length; i++) {
+    const { start, end, offsetMs } = periods[i];
+    const utcMillis = localMillis - offsetMs;
+    if (utcMillis < start) {
+      return start;
+    }
+    if (utcMillis < end) {
+      return utcMillis;
+    }
+  }
+  return localMillis - periods[periods.length - 1].offsetMs;
+}
+
+/**
+ * Count the distinct bucket keys that ES `fixed_interval` + `time_zone` rounding assigns to
+ * instants in `[range.from, range.to)`. Keys are walked one by one around offset changes; inside a
+ * constant-offset period every local boundary is a key, so those are counted arithmetically.
  */
 function fixedFits(interval: FixedInterval, range: ZonedDateRange, maxBuckets: number): boolean {
   const width = interval.nominalMs;
-  let boundary = alignFixed(range.from, interval, range.timeZone);
-  let count = 0;
-  let iterations = 0;
-  while (boundary < range.to) {
-    iterations += 1;
-    if (iterations > DST_WALK_CAP) {
-      return false;
+  const periods = offsetPeriods(range.timeZone);
+  let index = periodIndexAt(periods, range.from);
+  let cursor = range.from;
+  let key = roundFixed(periods, index, cursor, width);
+  let count = 1;
+  while (count <= maxBuckets) {
+    const { end, offsetMs } = periods[index];
+    if (key === cursor && localFloor(cursor, offsetMs, width) === cursor + offsetMs) {
+      const boundariesBeforeLimit = Math.ceil((Math.min(end, range.to) - cursor) / width) - 1;
+      count += boundariesBeforeLimit;
+      cursor += boundariesBeforeLimit * width;
+      key = cursor;
     }
-    const transition = nextTransitionAfter(boundary, range.timeZone);
-    const periodEnd = transition ?? Number.POSITIVE_INFINITY;
-    const limit = Math.min(periodEnd, range.to);
-    const inPeriod = Math.floor((limit - boundary + width - 1) / width);
-    if (inPeriod < 1) {
-      return false;
+    cursor = Math.min(localFloor(cursor, offsetMs, width) + width - offsetMs, end);
+    if (cursor >= range.to) {
+      return count <= maxBuckets;
     }
-    count += inPeriod;
-    if (count > maxBuckets) {
-      return false;
+    if (cursor === end) {
+      index += 1;
     }
-    if (periodEnd >= range.to) {
-      break;
+    const next = roundFixed(periods, index, cursor, width);
+    if (next !== key) {
+      count += 1;
+      key = next;
     }
-    const next = firstBoundaryOnOrAfter(periodEnd, interval, range.timeZone);
-    if (next <= boundary) {
-      return false;
-    }
-    boundary = next;
   }
-  return true;
+  return false;
 }
 
-/** Round `from` down to the interval's calendar unit in `timeZone`. */
-function alignCalendar(from: number, interval: CalendarInterval, timeZone: IanaTimeZone): number {
-  return moment.tz(from, timeZone).startOf(interval.startOf).valueOf();
+/** Local time of `utcMillis` at `offsetMs`, rounded down to a multiple of `width`. */
+function localFloor(utcMillis: number, offsetMs: number, width: number): number {
+  return Math.floor((utcMillis + offsetMs) / width) * width;
 }
 
-/** Round `from` down to a local-offset epoch multiple of the fixed width (`fixed_interval` + `time_zone`). */
-function alignFixed(from: number, interval: FixedInterval, timeZone: IanaTimeZone): number {
-  const width = interval.nominalMs;
-  const offsetMs = moment.tz(from, timeZone).utcOffset() * 60 * 1000;
-  const local = from + offsetMs;
-  const localOffset = ((local % width) + width) % width;
-  return from - localOffset;
+/**
+ * ES `TimeIntervalRounding` in a zone with offset changes: round the local time down, then map it
+ * back to UTC. A rounded local time skipped by a forward jump maps to the transition instant; one
+ * that only exists before the transition rounds the last instant before it instead.
+ */
+function roundFixed(
+  periods: readonly OffsetPeriod[],
+  index: number,
+  utcMillis: number,
+  width: number
+): number {
+  const { start, offsetMs } = periods[index];
+  const roundedLocal = localFloor(utcMillis, offsetMs, width);
+  const rounded = roundedLocal - offsetMs;
+  if (rounded >= start) {
+    return rounded;
+  }
+  return (
+    gapTransitionAt(periods, index, roundedLocal) ??
+    roundFixed(periods, index - 1, start - 1, width)
+  );
 }
 
-/** Next DST/offset transition after `utcMillis`, if the zone has one. */
-function nextTransitionAfter(utcMillis: number, timeZone: IanaTimeZone): number | undefined {
+/** Start of the forward transition at or before `periods[index]` whose skipped local times contain `localMillis`. */
+function gapTransitionAt(
+  periods: readonly OffsetPeriod[],
+  index: number,
+  localMillis: number
+): number | undefined {
+  for (let i = index; i > 0; i--) {
+    const { start, offsetMs } = periods[i];
+    if (localMillis >= start + offsetMs) {
+      return undefined;
+    }
+    if (localMillis >= start + periods[i - 1].offsetMs) {
+      return start;
+    }
+  }
+  return undefined;
+}
+
+interface OffsetPeriod {
+  readonly start: number;
+  readonly end: number;
+  readonly offsetMs: number;
+}
+
+const OFFSET_PERIODS = new Map<IanaTimeZone, readonly OffsetPeriod[]>();
+
+/** Contiguous `[start, end)` UTC spans of `timeZone` with a constant offset, covering all instants. */
+function offsetPeriods(timeZone: IanaTimeZone): readonly OffsetPeriod[] {
+  const cached = OFFSET_PERIODS.get(timeZone);
+  if (cached) {
+    return cached;
+  }
   const zone = moment.tz.zone(timeZone);
   if (zone == null) {
-    return undefined;
+    throw new Error(`Invalid IANA time zone: ${timeZone}`);
   }
-  return zone.untils.find((until) => Number.isFinite(until) && until > utcMillis);
+  const periods: OffsetPeriod[] = [];
+  zone.untils.forEach((until, i) => {
+    const offsetMs = -zone.offsets[i] * MINUTE_MS;
+    const last = periods[periods.length - 1];
+    if (last?.offsetMs === offsetMs) {
+      periods[periods.length - 1] = { ...last, end: until };
+    } else {
+      periods.push({ start: last?.end ?? Number.NEGATIVE_INFINITY, end: until, offsetMs });
+    }
+  });
+  OFFSET_PERIODS.set(timeZone, periods);
+  return periods;
 }
 
-/** First fixed-interval boundary at or after `utcMillis` in the zone offset that applies there. */
-function firstBoundaryOnOrAfter(
-  utcMillis: number,
-  interval: FixedInterval,
-  timeZone: IanaTimeZone
-): number {
-  const rounded = alignFixed(utcMillis, interval, timeZone);
-  return rounded < utcMillis ? rounded + interval.nominalMs : rounded;
+/** Index of the period containing `utcMillis`. */
+function periodIndexAt(periods: readonly OffsetPeriod[], utcMillis: number): number {
+  let low = 0;
+  let high = periods.length - 1;
+  while (low < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (periods[mid].end <= utcMillis) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
 }
 
 function toPublic(interval: InternalInterval): DateInterval {
