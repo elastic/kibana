@@ -14,6 +14,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useDetectionEntities } from '../../data/detection_entities/use_detection_entities';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
+import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
@@ -24,6 +25,7 @@ jest.mock('../../components/app_header', () => ({
 jest.mock('../../data/detection_overview/use_detection_overview');
 jest.mock('../../data/detection_entities/use_detection_entities');
 jest.mock('../../data/maintenance/use_significant_events_maintenance');
+jest.mock('../../data/sources/use_fetch_sources');
 jest.mock('../../hooks/use_developer_mode');
 jest.mock('./events/events_tab', () => ({
   EventsTab: () => <div data-test-subj="eventsTabStub" />,
@@ -35,10 +37,15 @@ jest.mock('./signals/signals_tab', () => ({
   SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
 jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
+jest.mock('../../sources/recommended_sources/recommended_sources_table', () => ({
+  RecommendedSourcesTable: () => <div data-test-subj="recommendedSourcesTableStub" />,
+}));
+let mockCanManage = true;
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
+        capabilities: { nightshift: { show: true, manage: mockCanManage } },
         getUrlForApp: () => '/app/nightshift/',
       },
     },
@@ -48,8 +55,12 @@ jest.mock('../../hooks/use_kibana', () => ({
 const mockUseDetectionOverview = useDetectionOverview as jest.Mock;
 const mockUseDetectionEntities = useDetectionEntities as jest.Mock;
 const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
+const mockUseFetchSources = useFetchSources as jest.Mock;
 const mockUseDeveloperMode = useDeveloperMode as jest.Mock;
 const refetch = jest.fn();
+let mockSourcesCount = 1;
+let mockHistoryDetections = 0;
+let mockHistorySignificantEvents = 0;
 
 const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'events') => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
@@ -68,7 +79,16 @@ const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'e
 describe('DetectionPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanManage = true;
+    mockSourcesCount = 1;
+    mockHistoryDetections = 0;
+    mockHistorySignificantEvents = 0;
     mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: false });
+    mockUseFetchSources.mockImplementation(() => ({
+      data: mockSourcesCount,
+      isLoading: false,
+      isError: false,
+    }));
     mockUseDetectionEntities.mockReturnValue({
       data: { entities: [], unassigned: { rules: 0, active_events: 0 }, truncated: false },
       isLoading: false,
@@ -80,18 +100,61 @@ describe('DetectionPage', () => {
       isLoading: false,
       isError: false,
     });
-    mockUseDetectionOverview.mockReturnValue({
-      data: {
-        entities: 6,
-        knowledge_indicators: 113,
-        active_rules: 80,
-        detections: 40,
-        significant_events: 23,
-      },
+    mockUseDetectionOverview.mockImplementation(({ from }: { from: string }) => ({
+      data:
+        from === 'now-10y'
+          ? {
+              entities: 0,
+              knowledge_indicators: 0,
+              active_rules: 0,
+              detections: mockHistoryDetections,
+              significant_events: mockHistorySignificantEvents,
+            }
+          : {
+              entities: 6,
+              knowledge_indicators: 113,
+              active_rules: 80,
+              detections: 40,
+              significant_events: 23,
+            },
       isLoading: false,
       isError: false,
       refetch,
-    });
+    }));
+  });
+
+  it('shows onboarding when the space has no sources or history', () => {
+    mockSourcesCount = 0;
+    renderPage();
+
+    expect(screen.getByTestId('nightshiftDetectionOnboarding')).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionTab-events')).not.toBeInTheDocument();
+  });
+
+  it('shows earlier results and a warning when the space has no sources', async () => {
+    mockSourcesCount = 0;
+    mockHistoryDetections = 1;
+    renderPage();
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionNoSourcesCallout')).toBeInTheDocument();
+  });
+
+  it('shows the normal detection workspace when the space has a source', async () => {
+    renderPage();
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionOnboarding')).not.toBeInTheDocument();
+  });
+
+  it('shows the locked onboarding to a viewer with no sources or history', () => {
+    mockSourcesCount = 0;
+    mockCanManage = false;
+    renderPage();
+
+    expect(screen.getByTestId('nightshiftDetectionOnboardingLocked')).toBeInTheDocument();
+    expect(screen.queryByTestId('recommendedSourcesTableStub')).not.toBeInTheDocument();
   });
 
   it('shows the Rules tab on the rules route', async () => {
@@ -194,7 +257,7 @@ describe('DetectionPage', () => {
     renderPage('/detections/events?rangeFrom=now-5zz&rangeTo=now');
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
-    expect(mockUseDetectionOverview).toHaveBeenLastCalledWith({ from: 'now-24h', to: 'now' });
+    expect(mockUseDetectionOverview).toHaveBeenCalledWith({ from: 'now-24h', to: 'now' });
   });
 
   it('keeps entities and every tab filter when switching tabs, but not the page or flyout', async () => {
