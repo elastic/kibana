@@ -14,6 +14,7 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiInputPopover,
   EuiLoadingSpinner,
   useEuiTheme,
@@ -243,18 +244,24 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
   return (
     <EuiFlexGroup direction="column" alignItems="flexEnd">
       <EuiFlexItem>
-        <EuiInputPopover
-          input={input}
-          isOpen={isPopoverOpen}
-          closePopover={handleClosePopover}
-          panelPaddingSize="none"
-          anchorPosition="downRight"
+        <EuiFormRow
+          isInvalid={field.errors.length > 0}
+          error={field.errors.map(({ message }) => message)}
           fullWidth={fullWidth}
-          panelMinWidth={300}
-          data-test-subj="connectorSelectorPopover"
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiInputPopover>
+          <EuiInputPopover
+            input={input}
+            isOpen={isPopoverOpen}
+            closePopover={handleClosePopover}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+            fullWidth={fullWidth}
+            panelMinWidth={300}
+            data-test-subj="connectorSelectorPopover"
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiInputPopover>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -392,7 +392,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
           <>
             <KbnDangerCallout
               announceOnMount
-              iconType="error"
               size="s"
               title={i18n.INTEGRATION_DETAILS_INVALID_CALLOUT_TITLE}
               data-test-subj="integrationDetailsInvalidCallout"

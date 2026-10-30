@@ -179,21 +179,22 @@ describe('ConnectorSelector', () => {
       expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
     });
 
-    it('should keep the control when the connector fails validation but connectors exist', async () => {
+    it('should show an inline error when the connector fails validation but connectors exist', async () => {
       mockUseLoadConnectors.mockReturnValue({
         data: mockConnectors.map((connector) => ({ ...connector, isMissingSecrets: true })),
         isLoading: false,
         refetch: mockRefetch,
       });
 
-      const { getByTestId } = await renderConnectorSelector();
+      const { getByTestId, queryByText } = await renderConnectorSelector();
+      expect(queryByText('Connector required')).not.toBeInTheDocument();
 
       await act(async () => {
         await testForm.validateFields(['connectorId']);
       });
 
-      expect(testForm.getFields().connectorId.errors).toHaveLength(1);
       expect(getByTestId('connector-selector')).toBeInTheDocument();
+      expect(queryByText('Connector required')).toBeInTheDocument();
     });
 
     it('should show loading spinner when connectors are loading', async () => {
