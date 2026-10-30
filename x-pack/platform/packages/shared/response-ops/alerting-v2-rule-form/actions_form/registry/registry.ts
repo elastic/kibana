@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ALERT_LOOP_VARIABLE, ALERT_RULE_PATH, ALERTS_LOOP } from '../constants';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
@@ -15,16 +16,16 @@ const EMAIL_PARAMS_TEMPLATE = `to:
   - ""
 subject: ""
 message: |
-  {% for alert in inputs.payload.alerts %}
-  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
+  ${ALERTS_LOOP}
+  - {{ ${ALERT_RULE_PATH}.name | default: "Alert" }} ({{ ${ALERT_LOOP_VARIABLE}.alert_status }}): {{ ${ALERT_LOOP_VARIABLE}.alert_url }}
   {% endfor %}
 `;
 
 // ToDo: add a channel selector to the Slack (v2) step form
 const SLACK2_PARAMS_TEMPLATE = `channel: ""
 text: |
-  {% for alert in inputs.payload.alerts %}
-  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
+  ${ALERTS_LOOP}
+  - {{ ${ALERT_RULE_PATH}.name | default: "Alert" }} ({{ ${ALERT_LOOP_VARIABLE}.alert_status }}): <{{ ${ALERT_LOOP_VARIABLE}.alert_url }}|View alert>
   {% endfor %}
 `;
 
