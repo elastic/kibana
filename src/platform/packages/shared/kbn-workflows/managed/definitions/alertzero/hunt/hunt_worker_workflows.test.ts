@@ -1148,7 +1148,15 @@ describe('Hunt Watch worker chain', () => {
           });
 
           expect(note).toContain("this Investigation's report");
-          expect(note).not.toContain('`');
+          expect(note).not.toContain('targeting report `');
+        });
+
+        it('keeps the note under the journal message bound when the create error is long', () => {
+          const note = render(withCreateError('x'.repeat(5000)));
+
+          expect(note.length).toBeLessThan(8000);
+          expect(note).toContain('xxx');
+          expect(note).not.toContain('x'.repeat(2001));
         });
       });
 

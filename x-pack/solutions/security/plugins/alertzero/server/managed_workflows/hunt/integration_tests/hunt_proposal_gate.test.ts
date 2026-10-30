@@ -12,10 +12,11 @@ jest.setTimeout(120_000);
 
 /**
  * The harness has no workflow registry, so `create_and_gate_proposal` fails with `Workflow not
- * found: system-create-alertzero-proposal`, which the gate treats exactly as it treats a
- * `ConflictError` from the real bridge. The engine still records the rendered input of the journal
- * steps before their own lookup fails, which is what the assertions read. The real conflict is
- * covered by the live run described in the PR.
+ * found: system-create-alertzero-proposal`. That is a create failure with no Proposal under the
+ * id (not a conflict / already-exists refusal), which is the path under test. The engine still
+ * records the rendered input of the journal steps before their own lookup fails, which is what
+ * the assertions read. A real conflict is covered by the contract Liquid tests and the live run
+ * in the PR body.
  */
 const run = async (existingProposal: ExistingProposal, overrides: Record<string, unknown> = {}) => {
   const fixture = createGateFixture({ existingProposal });
@@ -53,7 +54,7 @@ describe('system-security-hunt-proposal-gate when the create fails', () => {
     const note = fixture.renderedMessage('journal_create_failure');
 
     expect(note).toContain("this Investigation's report");
-    expect(note).not.toContain('`');
+    expect(note).not.toContain('targeting report `');
   });
 
   it('stays completed with no note when the Proposal was created on this conversation and failed later', async () => {

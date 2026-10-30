@@ -220,8 +220,11 @@ steps:
     type: data.set
     with:
       create_failed: "${{ steps.create_and_gate_proposal.error.message != nil and steps.create_and_gate_proposal.error.message != empty and variables.lost_race != true and variables.own_proposal_exists != true and variables.create_conflict != true }}"
+      # Error text is truncated: `system-alertzero-journal-note` rejects messages over 8000, and
+      # a nested workflow failure can carry an unbounded message. Same 2000 cut coverage_review
+      # uses on journaled errors. Title is capped so a long mint label cannot spend the rest.
       create_failure_note: |-
-        The Proposal for "{{ inputs.title | default: 'the proposed action' }}" could not be created: {{ steps.create_and_gate_proposal.error.message }}. No Proposal was found under its id when this run looked, so it is not in the Proposal queue as far as this run could tell, and it will not be retried automatically because this run already marked the report hunted. {% if inputs.reportId != nil and inputs.reportId != empty %}A manual run targeting report `{{ inputs.reportId }}` retries it.{% else %}A manual run targeting this Investigation's report retries it.{% endif %} This Investigation stays open until an analyst closes it.
+        The Proposal for "{{ inputs.title | default: 'the proposed action' | truncate: 200 }}" could not be created: {{ steps.create_and_gate_proposal.error.message | truncate: 2000 }}. No Proposal was found under its id when this run looked, so it is not in the Proposal queue as far as this run could tell, and it will not be retried automatically because this run already marked the report hunted. {% if inputs.reportId != nil and inputs.reportId != empty %}A manual run targeting report `{{ inputs.reportId }}` retries it.{% else %}A manual run targeting this Investigation's report retries it.{% endif %} This Investigation stays open until an analyst closes it.
 
   - name: journal_create_failure
     type: workflow.execute
@@ -428,7 +431,7 @@ steps:
     type: workflow.fail
     if: "${{ variables.create_failed == true }}"
     with:
-      message: "Proposal creation failed: {{ steps.create_and_gate_proposal.error.message }}"
+      message: "Proposal creation failed: {{ steps.create_and_gate_proposal.error.message | truncate: 2000 }}"
 
   - name: emit_result
     type: workflow.output
