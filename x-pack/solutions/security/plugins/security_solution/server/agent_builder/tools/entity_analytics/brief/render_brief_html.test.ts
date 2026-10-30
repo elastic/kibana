@@ -118,9 +118,12 @@ describe('renderBriefHtml', () => {
   it('renders the fixture brief', () => {
     const { html } = renderBriefHtml(fixtureViewModel);
 
-    expect(html).toMatchSnapshot();
+    expect(html).toContain("@font-face{font-family:'Elastic UI Numeric'");
+    expect(html.replace(/base64,[^)]+/, 'base64,…')).toMatchSnapshot();
     // The recommended step comes before the priorities, and there is no footer.
-    expect(html.indexOf('Recommended next step')).toBeLessThan(html.indexOf('<h2>Priorities</h2>'));
+    expect(html.indexOf('Recommended next step')).toBeLessThan(
+      html.indexOf('<h2>Entities to investigate first</h2>')
+    );
     expect(html).not.toContain('<footer');
   });
 
@@ -131,33 +134,50 @@ describe('renderBriefHtml', () => {
     expect(html).toContain('.brief .priority{');
   });
 
-  it('shows up to three watchlists as pills, and counts the rest', () => {
-    const watchlists = ['One', 'Two', 'Three', 'Four', 'Five'];
-    const { html } = renderBriefHtml({
+  it('lists first seen and every watchlist in one line under the badges, and makes room when it wraps', () => {
+    const withFacts = (watchlists: string[], firstSeen?: string) => ({
       ...fixtureViewModel,
-      priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
+      priorities: [{ ...fixtureViewModel.priorities[0], watchlists, firstSeen }],
     });
+    const key = (label: string) => `<span class="fact-key">${label}:</span>`;
 
-    expect(html.match(/class="pill watchlist"/g)).toHaveLength(3);
-    expect(html).not.toContain('>Four<');
-    expect(html).toContain('+2 more');
+    const { html } = renderBriefHtml(
+      withFacts(['One', 'Two', 'Three', 'Four', 'Five'], '2 days ago')
+    );
+    expect(html).toContain(
+      `<p class="fact">${key('First seen')} 2 days ago · ${key(
+        'Watchlist'
+      )} One, Two, Three, Four, Five</p>`
+    );
+    expect(renderBriefHtml(withFacts(['One'])).html).toContain(
+      `<p class="fact">${key('Watchlist')} One</p>`
+    );
+
+    const withoutFacts = renderBriefHtml(withFacts([])).html;
+    expect(withoutFacts).not.toContain(key('First seen'));
+    expect(withoutFacts).not.toContain(key('Watchlist'));
+    expect(
+      renderBriefHtml(withFacts(['a', 'b', 'c'].map((letter) => letter.repeat(100)))).height
+    ).toBeGreaterThan(renderBriefHtml(withFacts(['Privileged User'])).height + 30);
   });
 
-  it('keeps a long watchlist name whole in the pill title, which the stylesheet clips, and makes room for pills that wrap under the title', () => {
-    const withWatchlists = (watchlists: string[]) => ({
+  it('writes the risk badge as level then score, with the resolution icon only for a group', () => {
+    const withRisk = (of: 'entity' | 'resolution group') => ({
       ...fixtureViewModel,
-      priorities: [{ ...fixtureViewModel.priorities[0], watchlists }],
+      priorities: [
+        {
+          ...fixtureViewModel.priorities[0],
+          risk: { score: 98, level: 'Critical', of },
+        },
+      ],
     });
-    const longName = 'w'.repeat(100);
 
-    expect(renderBriefHtml(withWatchlists([longName])).html).toContain(
-      `title="Watchlist: ${longName}"`
+    const own = renderBriefHtml(withRisk('entity')).html;
+    expect(own).toContain('<span class="badge risk level-critical">Risk: Critical, 98</span>');
+    expect(own).not.toContain('aria-label="resolution group"');
+    expect(renderBriefHtml(withRisk('resolution group')).html).toMatch(
+      /<span class="badge risk level-critical"><svg [^>]*aria-label="resolution group">.*<\/svg>Risk: Critical, 98<\/span>/
     );
-    expect(renderBriefHtml(withWatchlists([longName])).html).toContain('.watchlist{');
-    // Three pills of 31 characters don't fit beside the title: they take a second row under it.
-    expect(
-      renderBriefHtml(withWatchlists(['a', 'b', 'c'].map((letter) => letter.repeat(31)))).height
-    ).toBeGreaterThan(renderBriefHtml(withWatchlists(['Privileged User'])).height + 30);
   });
 
   it("heads the card with the model's title, or a fixed one, and lists the view under it", () => {
@@ -167,11 +187,10 @@ describe('renderBriefHtml', () => {
     }).html;
     expect(withTitle).toContain('<h1>Alerts spread across hosts</h1>');
     expect(withTitle).toContain(
-      '<span class="fact-key">Generated:</span> 20 Oct 2026, 10:53 UTC</p>'
+      '<p class="fact"><span class="fact-key">Generated:</span> 20 Oct 2026, 10:53 UTC · <span class="fact-key">Time range:</span> Last 7 days</p>'
     );
-    expect(withTitle).toContain('<span class="fact-key">Timeframe:</span> Last 7 days</p>');
-    expect(withTitle).not.toContain('fact-key">Scope');
-    expect(withTitle).not.toContain('fact-key">Not checked');
+    expect(withTitle).not.toContain('fact-key">Coverage');
+    expect(withTitle).not.toContain('fact-key">Not included');
 
     const withoutTitle = renderBriefHtml(fixtureViewModel).html;
     expect(withoutTitle).toContain(`<h1>${NO_PRIORITIES_TITLE}</h1>`);
@@ -179,14 +198,17 @@ describe('renderBriefHtml', () => {
     expect(quiet).toContain(`<h1>${QUIET_TITLE}</h1>`);
   });
 
-  it('puts the filters, selected tile and space after the timeframe, and shows Scope and Not checked when they apply', () => {
+  it('puts the filters, selected tile and space after the time range, then Coverage and Not included when they apply, all in one line', () => {
     const { html } = renderBriefHtml({
       ...fixtureViewModel,
       scope: {
         ...fixtureViewModel.scope,
         spaceId: 'soc',
         focusTileTitle: 'Risk movers',
-        entityFilters: ['Risk level: Critical, High'],
+        entityFilters: [
+          { label: 'Risk level', value: 'Critical, High' },
+          { label: 'Watchlist', value: '2 selected' },
+        ],
         sample: 'Based on the 25 highest-ranked of at least 2,670 flagged entities',
       },
       notChecked: {
@@ -194,15 +216,30 @@ describe('renderBriefHtml', () => {
         notFound: '3 flagged entities not found in the Entity Store',
       },
     });
+    const key = (label: string) => `<span class="fact-key">${label}:</span>`;
     expect(html).toContain(
-      'Timeframe:</span> Last 7 days · Risk level: Critical, High · Selected: Risk movers · Space: soc</p>'
+      `${key('Time range')} Last 7 days · ${key('Risk level')} Critical, High · ${key(
+        'Watchlist'
+      )} 2 selected · ${key('Attention tile')} Risk movers · ${key('Space')} soc · ${key(
+        'Coverage'
+      )} Based on the 25 highest-ranked of at least 2,670 flagged entities; 3 flagged entities not found in the Entity Store · ${key(
+        'Not included'
+      )} Entities with anomalies, alert details (data couldn&#39;t be loaded)</p>`
     );
+  });
+
+  it('shows Coverage for missing entities alone, without a sample', () => {
+    const { html } = renderBriefHtml({
+      ...fixtureViewModel,
+      notChecked: {
+        unreadable: [],
+        notFound: '3 flagged entities not found in the Entity Store',
+      },
+    });
     expect(html).toContain(
-      'Scope:</span> Based on the 25 highest-ranked of at least 2,670 flagged entities</p>'
+      '<span class="fact-key">Coverage:</span> 3 flagged entities not found in the Entity Store</p>'
     );
-    expect(html).toContain(
-      'Not checked (the data couldn&#39;t be read):</span> Entities with anomalies, alert details · 3 flagged entities not found in the Entity Store</p>'
-    );
+    expect(html).not.toContain('fact-key">Not included');
   });
 
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {
@@ -244,7 +281,7 @@ describe('renderBriefHtml', () => {
       recommendation: undefined,
     });
 
-    expect(html).toContain('<h2>Priorities</h2>');
+    expect(html).toContain('<h2>Entities to investigate first</h2>');
     expect(html).toContain('No entity in this view has enough evidence to prioritize.');
     expect(html).not.toContain('This period at a glance');
     expect(height).toBeLessThan(500);

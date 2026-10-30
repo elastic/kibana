@@ -15,17 +15,25 @@ import { estimateBriefHeight } from './estimate_brief_height';
 import { buildRiskHistoryContext } from './risk_history_chart';
 import type { BriefViewModel } from './view_model';
 import {
-  MAX_WATCHLIST_PILLS,
   NO_PRIORITIES_LINE,
   getHeaderRows,
+  getPriorityFacts,
   getShownCounts,
   getTitle,
   hasPrioritiesSection,
 } from './view_model';
 
+/** The page's numeric font, inlined because the sandbox fetches nothing. Like Kibana's, it covers only digits and their punctuation. */
+const loadNumericFontFace = (): string => {
+  const font = fs
+    .readFileSync(path.join(__dirname, 'fonts', 'ElasticUINumeric-Variable.woff2'))
+    .toString('base64');
+  return `@font-face{font-family:'Elastic UI Numeric';font-style:normal;font-weight:100 900;src:url(data:font/woff2;base64,${font}) format('woff2');unicode-range:U+20,U+24-25,U+28-29,U+2B-2F,U+30-3A,U+A0,U+202F,U+2212}\n`;
+};
+
 const loadFiles = once(() => ({
   template: fs.readFileSync(path.join(__dirname, 'brief.mustache.html'), 'utf8'),
-  css: fs.readFileSync(path.join(__dirname, 'brief.css'), 'utf8'),
+  css: loadNumericFontFace() + fs.readFileSync(path.join(__dirname, 'brief.css'), 'utf8'),
   riskHistoryChart: fs.readFileSync(
     path.join(__dirname, 'risk_history_chart.mustache.html'),
     'utf8'
@@ -53,7 +61,12 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
   return {
     css,
     title: getTitle(viewModel),
-    headerRows: getHeaderRows(viewModel),
+    // `label` and `separator` are set on every part, so a part never reads its row's fields.
+    headerRows: getHeaderRows(viewModel).map(({ key, parts }, rowIndex) => ({
+      key,
+      rowSeparator: rowIndex > 0,
+      parts: parts.map(({ label = '', value }, index) => ({ label, value, separator: index > 0 })),
+    })),
     summary,
     periodLabel: scope.periodLabel,
     hasCounts: getShownCounts(viewModel).length > 0,
@@ -71,7 +84,8 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
     priorities: priorities.map((priority) => ({
       ...priority,
       typeLabel: upperFirst(priority.type),
-      meta: priority.firstSeen && `First seen ${priority.firstSeen}`,
+      facts: getPriorityFacts(priority).map((fact, index) => ({ ...fact, separator: index > 0 })),
+      hasFacts: getPriorityFacts(priority).length > 0,
       risk: priority.risk && {
         ...priority.risk,
         score: formatCount(priority.risk.score),
@@ -82,8 +96,6 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
         text: formatStoredValue(priority.assetCriticality),
         key: priority.assetCriticality,
       },
-      watchlists: priority.watchlists.slice(0, MAX_WATCHLIST_PILLS),
-      moreWatchlists: Math.max(0, priority.watchlists.length - MAX_WATCHLIST_PILLS),
       riskHistory:
         priority.riskHistory &&
         priority.riskHistory.points.length >= 2 &&

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
 import moment from 'moment';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -31,8 +30,6 @@ export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.
 /** The titles when the model wrote none: nothing flagged, or nothing with enough evidence to prioritize. */
 export const QUIET_TITLE = 'All clear: nothing needs immediate attention';
 export const NO_PRIORITIES_TITLE = 'Nothing to prioritize right now';
-/** The watchlists shown as pills, and the rest counted. */
-export const MAX_WATCHLIST_PILLS = 3;
 export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
 
 const RiskHistory = lazySchema(() =>
@@ -59,7 +56,7 @@ export const BriefViewModel = lazySchema(() =>
       capturedAt: z.iso.datetime(),
       spaceId: z.string(),
       focusTileTitle: z.string().optional(),
-      entityFilters: z.array(z.string()),
+      entityFilters: z.array(z.object({ label: z.string(), value: z.string() })),
       sample: z.string().optional(),
     }),
     /** What wasn't checked: what couldn't be read, and the flagged entities the Entity Store didn't have. */
@@ -279,33 +276,57 @@ const describeQuietView = ({ tiles }: EntityAnalyticsScope): string => {
 export const getTitle = ({ title, summary }: BriefViewModel): string =>
   title ?? (summary === QUIET_LINE ? QUIET_TITLE : NO_PRIORITIES_TITLE);
 
-/** The rows under the title. Scope and Not checked appear only when they apply. */
+/** A part of a header row: a value, after its label when it has one. */
+export interface HeaderPart {
+  label?: string;
+  value: string;
+}
+
+/** The rows under the title, their parts joined with a dot. Coverage and Not included appear only when they apply. */
 export const getHeaderRows = ({
   scope,
   notChecked,
-}: BriefViewModel): Array<{ key: string; value: string }> => {
-  const timeframe = [
-    `Last ${scope.periodLabel}`,
-    ...scope.entityFilters,
-    ...(scope.focusTileTitle ? [`Selected: ${scope.focusTileTitle}`] : []),
-    ...(scope.spaceId === DEFAULT_SPACE_ID ? [] : [`Space: ${scope.spaceId}`]),
-  ];
+}: BriefViewModel): Array<{ key: string; parts: HeaderPart[] }> => {
   const { unreadable, notFound } = notChecked;
-  const notCheckedValue = compact([unreadable.join(', '), notFound]).join(' · ');
+  const coverage = [scope.sample, notFound].filter(Boolean).join('; ');
   return [
-    { key: 'Generated', value: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]') },
-    { key: 'Timeframe', value: timeframe.join(' · ') },
-    ...(scope.sample ? [{ key: 'Scope', value: scope.sample }] : []),
-    ...(notCheckedValue
+    {
+      key: 'Generated',
+      parts: [{ value: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]') }],
+    },
+    {
+      key: 'Time range',
+      parts: [
+        { value: `Last ${scope.periodLabel}` },
+        ...scope.entityFilters,
+        ...(scope.focusTileTitle ? [{ label: 'Attention tile', value: scope.focusTileTitle }] : []),
+        ...(scope.spaceId === DEFAULT_SPACE_ID ? [] : [{ label: 'Space', value: scope.spaceId }]),
+      ],
+    },
+    ...(coverage ? [{ key: 'Coverage', parts: [{ value: coverage }] }] : []),
+    ...(unreadable.length > 0
       ? [
           {
-            key: unreadable.length > 0 ? "Not checked (the data couldn't be read)" : 'Not checked',
-            value: notCheckedValue,
+            key: 'Not included',
+            parts: [{ value: `${unreadable.join(', ')} (data couldn't be loaded)` }],
           },
         ]
       : []),
   ];
 };
+
+/** A header row as plain text. */
+export const headerRowText = ({ key, parts }: { key: string; parts: HeaderPart[] }): string =>
+  `${key}: ${parts.map(({ label, value }) => (label ? `${label}: ${value}` : value)).join(' · ')}`;
+
+/** The line under a priority's badges: when it was first seen and its watchlists, each only when known. */
+export const getPriorityFacts = ({
+  firstSeen,
+  watchlists,
+}: BriefViewModel['priorities'][number]): Array<{ key: string; value: string }> => [
+  ...(firstSeen ? [{ key: 'First seen', value: firstSeen }] : []),
+  ...(watchlists.length > 0 ? [{ key: 'Watchlist', value: watchlists.join(', ') }] : []),
+];
 
 /** A zero that didn't change says nothing, so it gets no count. */
 export const getShownCounts = ({ counts }: BriefViewModel): BriefViewModel['counts'] =>

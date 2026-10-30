@@ -7,7 +7,7 @@
 
 // injectCsp() in prepare_html.ts de-dupes on an exact string match of this value.
 export const CUSTOM_CONTENT_CSP_META =
-  "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; form-action 'none';\">";
+  "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'; font-src data:; form-action 'none';\">";
 
 // Scripts, same-origin access, popups and forms stay off. The one token lets a user click move the
 // top window, which is only safe because sanitizeHtml leaves nothing but links to the allowed apps.

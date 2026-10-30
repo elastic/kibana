@@ -2,10 +2,9 @@
 .brief *{box-sizing:border-box}
 .brief h1,.brief h2,.brief h3,.brief p,.brief ol,.brief figure{margin:0}
 .brief .meta{font-size:12px;line-height:1.4;color:var(--cc-color-text-subdued,var(--cc-color-text))}
-.brief .header{padding-bottom:16px;border-bottom:1px solid var(--cc-color-border)}
-/* The rows under the title: EUI's xs body text, subdued, with the keys in bold. */
+.brief .header{padding-bottom:24px;border-bottom:1px solid var(--cc-color-border)}
+/* The details under a title: EUI's xs body text, subdued, with the keys in bold. */
 .brief .fact{font-size:12px;line-height:16px;color:var(--cc-color-text-subdued,var(--cc-color-text))}
-.brief .fact+.fact{margin-top:4px}
 .brief .fact-key{font-weight:600}
 .brief .eyebrow{margin-bottom:4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--cc-color-primary)}
 .brief h1,.brief h2,.brief h3,.brief .name{color:var(--cc-color-text-heading,var(--cc-color-text))}
@@ -14,7 +13,8 @@
 .brief h2,.brief .name{font-size:16px;font-weight:600;line-height:1.3}
 .brief h2{margin-bottom:12px}
 .brief h2.tight{margin-bottom:8px}
-.brief h3{margin-bottom:8px;font-size:14px;font-weight:600;line-height:20px}
+.brief h3,.brief .chart .label{font-size:14px;font-weight:600;line-height:20px}
+.brief h3{margin-bottom:4px}
 /* The counts mirror the page's Needs-attention tiles: title top-left, value and trend badge bottom-right. */
 .brief .counts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
 .brief .count{display:flex;flex-direction:column;align-items:flex-end;padding:12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-panel,12px);background:var(--cc-color-surface)}
@@ -31,34 +31,32 @@
 .brief .priority{display:grid;grid-template-columns:24px 1fr;gap:8px 12px;padding:12px 16px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-panel,12px);background:var(--cc-color-surface)}
 /* Everything after the rank and the title row spans under the title. */
 .brief .priority>:nth-child(n+3){grid-column:2/-1}
-/* The pills share the title's row, and wrap under it when they don't fit beside a title of at least 12 characters. */
-.brief .head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 12px}
-.brief .who{flex:1 1 12ch;min-width:12ch}
+/* The pills sit in their own row under the title. */
+.brief .head{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .brief .rank{display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-size:12px;font-weight:600}
 .brief .name{overflow-wrap:anywhere}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;max-width:100%}
-.brief .pill{display:inline-flex;align-items:center;gap:4px;padding:0 8px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-s);background:var(--cc-color-surface);font-size:12px;font-weight:500;line-height:22px;white-space:nowrap}
-.brief .watchlist{display:inline-block;max-width:40ch;overflow:hidden;text-overflow:ellipsis;border-color:color-mix(in srgb,var(--cc-color-primary) 30%,transparent);background:color-mix(in srgb,var(--cc-color-primary) 10%,transparent);font-weight:450}
 /* The badges mirror the entity flyout header's EuiBadges: a hollow type badge, and the risk level tinted like the flyout's. */
 .brief .badge{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 9px;border:1px solid transparent;border-radius:24px;font-size:12px;font-weight:450;line-height:18px;white-space:nowrap}
-.brief .entity-type{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text-heading,var(--cc-color-text))}
+.brief .hollow{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text-heading,var(--cc-color-text))}
 .brief .risk{font-weight:500;background:var(--cc-color-background-subdued);color:var(--cc-color-text-subdued,var(--cc-color-text))}
 .brief .level-critical{background:var(--cc-color-background-danger);color:var(--cc-color-text-danger)}
 .brief .level-high{background:var(--cc-color-background-risk);color:var(--cc-color-text-risk)}
 .brief .level-moderate{background:var(--cc-color-background-warning);color:var(--cc-color-text-warning)}
 .brief .level-low{background:var(--cc-color-background-neutral);color:var(--cc-color-text-neutral)}
-/* Criticality mirrors the page's EuiHealth: a dot centred in a 16 px icon box, then the label. */
-.brief .criticality{display:inline-flex;align-items:center;gap:4px;height:20px;font-size:12px;line-height:16px;white-space:nowrap}
-.brief .criticality .dot{margin:0 4px}
 /* The page's criticality colours: EUI's severity colours, which the card's tokens don't carry. */
 .brief .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#E3E8F2}
 .brief .dot[data-level=extreme_impact]{background:#EE4C48}
 .brief .dot[data-level=high_impact]{background:#FF995E}
 .brief .dot[data-level=medium_impact]{background:#FCD883}
 .brief .dot[data-level=low_impact]{background:#B5E5F2}
-.brief .why{margin-top:-4px}
-.brief .chart{padding-top:8px;border-top:1px solid var(--cc-color-border)}
-.brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;font-size:12px}
+/* Each paragraph's heading sits 12 px under the block above it; the last block and any visualization get more room. */
+.brief .block{margin-top:4px}
+.brief .priority>:not(.block)+.block{margin-top:8px}
+.brief .next{margin-bottom:8px}
+.brief .chart{padding-top:16px;border-top:1px solid var(--cc-color-border)}
+.brief .chart .label{margin-right:12px;color:var(--cc-color-text-heading,var(--cc-color-text))}
+.brief .chart figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px;font-size:12px}
 .brief .chart figcaption span:last-child{font-weight:500}
 .brief .chart svg{display:block;color:var(--cc-color-primary)}
 .brief .chart line{stroke:var(--cc-color-border);stroke-dasharray:3 3}

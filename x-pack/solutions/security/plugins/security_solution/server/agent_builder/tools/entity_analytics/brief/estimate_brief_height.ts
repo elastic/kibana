@@ -9,8 +9,9 @@ import { sum, sumBy } from 'lodash';
 import { MIN_CHART_POINTS } from './risk_history_chart';
 import type { BriefViewModel } from './view_model';
 import {
-  MAX_WATCHLIST_PILLS,
   getHeaderRows,
+  getPriorityFacts,
+  headerRowText,
   getShownCounts,
   hasPrioritiesSection,
 } from './view_model';
@@ -22,34 +23,27 @@ const MARGIN = 30;
 const CHARACTERS_PER_LINE = { prose: 90, wide: 100, note: 120 };
 const HEIGHTS = {
   /** The padding around the brief, its header without the rows under the title, and the gap below. */
-  header: 106,
+  header: 114,
   /** A line of text. */
   line: 21,
   /** A section's heading and the gap above the section. */
   section: 57,
-  /** A line of a row under the title, with the gap above it. */
+  /** A line of the details under the title, with the gap above it. */
   note: 20,
-  /** A priority's padding, title row, next-step heading, and the gaps between its blocks, on top of its lines. */
-  priority: 128,
-  /** The risk history with its chart, or with the caption alone. */
-  chart: 140,
-  caption: 40,
+  /** A priority's padding, a line of its title, three headings, and the gaps between its blocks, on top of its lines. */
+  priority: 196,
+  /** The gap above a priority's first-seen and watchlist line. */
+  factsGap: 8,
+  /** The risk history with its chart and the gap above it, or with the caption alone. */
+  chart: 152,
+  caption: 52,
 };
 
-/** The title row is 666 px wide. Pills sit beside the title when they leave it 12 characters (about 92 px) and the gap. */
-const TITLE_ROW = { width: 666, gap: 12, minTitle: 92, nameCharacter: 9.5, nameLine: 21 };
-/** The widths of the pills, from measurements: the type, risk and criticality badges, and a character of a watchlist name. */
-const PILL_WIDTHS = {
-  type: 60,
-  risk: 115,
-  criticality: 110,
-  more: 85,
-  watchlistCharacter: 6.6,
-  watchlistPadding: 18,
-};
-/** A watchlist pill shows at most 40 characters of its name. */
-const MAX_WATCHLIST_CHARACTERS = 40;
-const PILL_ROW = { height: 24, gap: 6 };
+/** The title and the badges under it are 666 px wide. */
+const TITLE_ROW = { width: 666, nameCharacter: 9.5, nameLine: 21 };
+/** The widths of the badges, from their text: the type, risk and criticality badges. */
+const PILL_WIDTHS = { type: 60, risk: 135, criticality: 125 };
+const PILL_ROW = { height: 20, gap: 6 };
 /** The counts sit in a grid of tiles at least 160 px wide, so four fit in a row of the 736 px brief. */
 const COUNT_GRID = { perRow: 4, rowHeight: 162, gap: 8 };
 
@@ -66,40 +60,32 @@ export const estimateBriefHeight = (viewModel: BriefViewModel): number => {
   const { summary, recommendation, priorities } = viewModel;
   const prose = (text = ''): number =>
     text ? HEIGHTS.section + countLines(text) * HEIGHTS.line : 0;
-  /** What the pills add to the title row: rows under the title when they don't fit beside it, else the lines the title wraps to. */
-  const pillsHeight = ({
+  /** What the title and badges add past the title's first line: the lines it wraps to, and the badge rows under it. */
+  const headHeight = ({
     name,
     risk,
     assetCriticality,
-    watchlists,
   }: BriefViewModel['priorities'][number]): number => {
     const widths = [
       PILL_WIDTHS.type,
       ...(risk ? [PILL_WIDTHS.risk] : []),
       ...(assetCriticality ? [PILL_WIDTHS.criticality] : []),
-      ...watchlists
-        .slice(0, MAX_WATCHLIST_PILLS)
-        .map(
-          (watchlist) =>
-            Math.min(watchlist.length, MAX_WATCHLIST_CHARACTERS) * PILL_WIDTHS.watchlistCharacter +
-            PILL_WIDTHS.watchlistPadding
-        ),
-      ...(watchlists.length > MAX_WATCHLIST_PILLS ? [PILL_WIDTHS.more] : []),
     ];
     const total = sum(widths) + PILL_ROW.gap * Math.max(0, widths.length - 1);
-    const { width, gap, minTitle, nameCharacter, nameLine } = TITLE_ROW;
-    if (total + gap + minTitle > width) {
-      const rows = Math.ceil(total / width);
-      return PILL_ROW.gap + rows * PILL_ROW.height + (rows - 1) * PILL_ROW.gap;
-    }
-    const nameLines = Math.ceil((name.length * nameCharacter) / (width - gap - total));
-    return (nameLines - 1) * nameLine;
+    const { width, nameCharacter, nameLine } = TITLE_ROW;
+    const rows = Math.ceil(total / width);
+    const nameLines = Math.ceil((name.length * nameCharacter) / width);
+    return (nameLines - 1) * nameLine + rows * (PILL_ROW.height + PILL_ROW.gap);
   };
   const priorityHeight = (priority: BriefViewModel['priorities'][number]) => {
     const { assessment, whyFirst, nextStep, riskHistory } = priority;
+    const facts = getPriorityFacts(priority)
+      .map(({ key, value }) => `${key}: ${value}`)
+      .join(' · ');
     return (
-      pillsHeight(priority) +
+      headHeight(priority) +
       HEIGHTS.priority +
+      (facts ? HEIGHTS.factsGap + countLines(facts) * HEIGHTS.note : 0) +
       sumBy([assessment, whyFirst, nextStep], (text) =>
         countLines(text, CHARACTERS_PER_LINE.prose)
       ) *
@@ -114,10 +100,8 @@ export const estimateBriefHeight = (viewModel: BriefViewModel): number => {
   return (
     MARGIN +
     HEIGHTS.header +
-    sumBy(
-      getHeaderRows(viewModel),
-      ({ key, value }) => countLines(`${key}: ${value}`, CHARACTERS_PER_LINE.note) * HEIGHTS.note
-    ) +
+    countLines(getHeaderRows(viewModel).map(headerRowText).join(' · '), CHARACTERS_PER_LINE.note) *
+      HEIGHTS.note +
     prose(summary) +
     (getShownCounts(viewModel).length > 0
       ? HEIGHTS.section + countsHeight(getShownCounts(viewModel).length)

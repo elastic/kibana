@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renderBriefHtml renders the fixture brief 1`] = `
-"<style>.brief{max-width:736px;font:14px/1.5 var(--cc-font-family);color:var(--cc-color-text);font-variant-numeric:tabular-nums}
+"<style>@font-face{font-family:'Elastic UI Numeric';font-style:normal;font-weight:100 900;src:url(data:font/woff2;base64,…) format('woff2');unicode-range:U+20,U+24-25,U+28-29,U+2B-2F,U+30-3A,U+A0,U+202F,U+2212}
+.brief{max-width:736px;font:14px/1.5 var(--cc-font-family);color:var(--cc-color-text);font-variant-numeric:tabular-nums}
 .brief *{box-sizing:border-box}
 .brief h1,.brief h2,.brief h3,.brief p,.brief ol,.brief figure{margin:0}
 .brief .meta{font-size:12px;line-height:1.4;color:var(--cc-color-text-subdued,var(--cc-color-text))}
-.brief .header{padding-bottom:16px;border-bottom:1px solid var(--cc-color-border)}
-/* The rows under the title: EUI's xs body text, subdued, with the keys in bold. */
+.brief .header{padding-bottom:24px;border-bottom:1px solid var(--cc-color-border)}
+/* The details under a title: EUI's xs body text, subdued, with the keys in bold. */
 .brief .fact{font-size:12px;line-height:16px;color:var(--cc-color-text-subdued,var(--cc-color-text))}
-.brief .fact+.fact{margin-top:4px}
 .brief .fact-key{font-weight:600}
 .brief .eyebrow{margin-bottom:4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--cc-color-primary)}
 .brief h1,.brief h2,.brief h3,.brief .name{color:var(--cc-color-text-heading,var(--cc-color-text))}
@@ -17,7 +17,8 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief h2,.brief .name{font-size:16px;font-weight:600;line-height:1.3}
 .brief h2{margin-bottom:12px}
 .brief h2.tight{margin-bottom:8px}
-.brief h3{margin-bottom:8px;font-size:14px;font-weight:600;line-height:20px}
+.brief h3,.brief .chart .label{font-size:14px;font-weight:600;line-height:20px}
+.brief h3{margin-bottom:4px}
 /* The counts mirror the page's Needs-attention tiles: title top-left, value and trend badge bottom-right. */
 .brief .counts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
 .brief .count{display:flex;flex-direction:column;align-items:flex-end;padding:12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-panel,12px);background:var(--cc-color-surface)}
@@ -34,34 +35,32 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .priority{display:grid;grid-template-columns:24px 1fr;gap:8px 12px;padding:12px 16px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-panel,12px);background:var(--cc-color-surface)}
 /* Everything after the rank and the title row spans under the title. */
 .brief .priority>:nth-child(n+3){grid-column:2/-1}
-/* The pills share the title's row, and wrap under it when they don't fit beside a title of at least 12 characters. */
-.brief .head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 12px}
-.brief .who{flex:1 1 12ch;min-width:12ch}
+/* The pills sit in their own row under the title. */
+.brief .head{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .brief .rank{display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-size:12px;font-weight:600}
 .brief .name{overflow-wrap:anywhere}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;max-width:100%}
-.brief .pill{display:inline-flex;align-items:center;gap:4px;padding:0 8px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-s);background:var(--cc-color-surface);font-size:12px;font-weight:500;line-height:22px;white-space:nowrap}
-.brief .watchlist{display:inline-block;max-width:40ch;overflow:hidden;text-overflow:ellipsis;border-color:color-mix(in srgb,var(--cc-color-primary) 30%,transparent);background:color-mix(in srgb,var(--cc-color-primary) 10%,transparent);font-weight:450}
 /* The badges mirror the entity flyout header's EuiBadges: a hollow type badge, and the risk level tinted like the flyout's. */
 .brief .badge{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 9px;border:1px solid transparent;border-radius:24px;font-size:12px;font-weight:450;line-height:18px;white-space:nowrap}
-.brief .entity-type{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text-heading,var(--cc-color-text))}
+.brief .hollow{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text-heading,var(--cc-color-text))}
 .brief .risk{font-weight:500;background:var(--cc-color-background-subdued);color:var(--cc-color-text-subdued,var(--cc-color-text))}
 .brief .level-critical{background:var(--cc-color-background-danger);color:var(--cc-color-text-danger)}
 .brief .level-high{background:var(--cc-color-background-risk);color:var(--cc-color-text-risk)}
 .brief .level-moderate{background:var(--cc-color-background-warning);color:var(--cc-color-text-warning)}
 .brief .level-low{background:var(--cc-color-background-neutral);color:var(--cc-color-text-neutral)}
-/* Criticality mirrors the page's EuiHealth: a dot centred in a 16 px icon box, then the label. */
-.brief .criticality{display:inline-flex;align-items:center;gap:4px;height:20px;font-size:12px;line-height:16px;white-space:nowrap}
-.brief .criticality .dot{margin:0 4px}
 /* The page's criticality colours: EUI's severity colours, which the card's tokens don't carry. */
 .brief .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#E3E8F2}
 .brief .dot[data-level=extreme_impact]{background:#EE4C48}
 .brief .dot[data-level=high_impact]{background:#FF995E}
 .brief .dot[data-level=medium_impact]{background:#FCD883}
 .brief .dot[data-level=low_impact]{background:#B5E5F2}
-.brief .why{margin-top:-4px}
-.brief .chart{padding-top:8px;border-top:1px solid var(--cc-color-border)}
-.brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px;font-size:12px}
+/* Each paragraph's heading sits 12 px under the block above it; the last block and any visualization get more room. */
+.brief .block{margin-top:4px}
+.brief .priority>:not(.block)+.block{margin-top:8px}
+.brief .next{margin-bottom:8px}
+.brief .chart{padding-top:16px;border-top:1px solid var(--cc-color-border)}
+.brief .chart .label{margin-right:12px;color:var(--cc-color-text-heading,var(--cc-color-text))}
+.brief .chart figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px;font-size:12px}
 .brief .chart figcaption span:last-child{font-weight:500}
 .brief .chart svg{display:block;color:var(--cc-color-primary)}
 .brief .chart line{stroke:var(--cc-color-border);stroke-dasharray:3 3}
@@ -75,7 +74,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
   <header class=\\"header\\">
     <p class=\\"eyebrow\\">Entity Analytics AI brief</p>
     <h1>Nothing to prioritize right now</h1>
-    <p class=\\"fact\\"><span class=\\"fact-key\\">Generated:</span> 20 Oct 2026, 10:53 UTC</p><p class=\\"fact\\"><span class=\\"fact-key\\">Timeframe:</span> Last 7 days</p>
+    <p class=\\"fact\\"><span class=\\"fact-key\\">Generated:</span> 20 Oct 2026, 10:53 UTC · <span class=\\"fact-key\\">Time range:</span> Last 7 days</p>
   </header>
   <section class=\\"section\\">
     <h2 class=\\"tight\\">What needs attention</h2>
@@ -115,7 +114,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
     <p class=\\"prose\\">Start by reviewing the alerts and new High risk score tied to a.rodriguez, given its privileged, high-impact, multi-flagged status.</p>
   </section>
   <section class=\\"section\\">
-    <h2>Priorities</h2>
+    <h2>Entities to investigate first</h2>
     
     <ol class=\\"priorities\\">
       <li class=\\"priority\\">
@@ -123,19 +122,23 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"head\\">
         <div class=\\"who\\">
           <div class=\\"name\\">a.rodriguez</div>
-          
         </div>
         <div class=\\"pills\\">
-          <span class=\\"badge entity-type\\">User</span>
-          <span class=\\"badge risk level-high\\">Risk 76 High <svg viewBox=\\"0 0 16 16\\" width=\\"12\\" height=\\"12\\" role=\\"img\\" aria-label=\\"resolution group\\"><path fill=\\"currentColor\\" fill-rule=\\"evenodd\\" clip-rule=\\"evenodd\\" d=\\"M11.984 9.63a2 2 0 1 1-.707.707L8.5 7.56v3.857a2 2 0 1 1-1 0V7.56l-2.777 2.777a2 2 0 1 1-.707-.707L7.5 6.147V2.56L5.353 4.707 4.646 4 8 .646 11.353 4l-.707.707L8.5 2.56v3.586l3.484 3.485Zm1.016.724a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-6 3a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm-5-2a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z\\"/></svg></span>
-          <span class=\\"criticality\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
-          <span class=\\"pill watchlist\\" title=\\"Watchlist: Privileged User\\">Privileged User</span>
-          
+          <span class=\\"badge hollow\\">User</span>
+          <span class=\\"badge risk level-high\\"><svg viewBox=\\"0 0 16 16\\" width=\\"12\\" height=\\"12\\" role=\\"img\\" aria-label=\\"resolution group\\"><path fill=\\"currentColor\\" fill-rule=\\"evenodd\\" clip-rule=\\"evenodd\\" d=\\"M11.984 9.63a2 2 0 1 1-.707.707L8.5 7.56v3.857a2 2 0 1 1-1 0V7.56l-2.777 2.777a2 2 0 1 1-.707-.707L7.5 6.147V2.56L5.353 4.707 4.646 4 8 .646 11.353 4l-.707.707L8.5 2.56v3.586l3.484 3.485Zm1.016.724a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-6 3a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm-5-2a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z\\"/></svg>Risk: High, 76</span>
+          <span class=\\"badge hollow\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
         </div>
         </div>
-        <p class=\\"prose\\">Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.</p>
-        <p class=\\"prose why\\">Privilege and a fresh threshold crossing make it the clearest place to confirm first.</p>
-        <div class=\\"next\\">
+        <p class=\\"fact\\"><span class=\\"fact-key\\">Watchlist:</span> Privileged User</p>
+        <div class=\\"block\\">
+          <h3>Evidence</h3>
+          <p class=\\"prose\\">Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Why prioritized</h3>
+          <p class=\\"prose\\">Privilege and a fresh threshold crossing make it the clearest place to confirm first.</p>
+        </div>
+        <div class=\\"block next\\">
           <h3>Next step</h3>
           <p class=\\"prose\\">Review the alerts behind the new High risk score and confirm recent access activity.</p>
         </div>
@@ -162,19 +165,23 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"head\\">
         <div class=\\"who\\">
           <div class=\\"name\\">docker-host-prod-01</div>
-          <div class=\\"meta\\">First seen 2 days ago</div>
         </div>
         <div class=\\"pills\\">
-          <span class=\\"badge entity-type\\">Host</span>
-          <span class=\\"badge risk level-moderate\\">Risk 66 Moderate</span>
-          <span class=\\"criticality\\"><span class=\\"dot\\" data-level=\\"extreme_impact\\"></span>Extreme impact</span>
-          
-          
+          <span class=\\"badge hollow\\">Host</span>
+          <span class=\\"badge risk level-moderate\\">Risk: Moderate, 66</span>
+          <span class=\\"badge hollow\\"><span class=\\"dot\\" data-level=\\"extreme_impact\\"></span>Extreme impact</span>
         </div>
         </div>
-        <p class=\\"prose\\">A host that appeared this week and is already alerting looks more like a provisioning problem.</p>
-        <p class=\\"prose why\\">A new asset of this criticality is worth confirming on its own.</p>
-        <div class=\\"next\\">
+        <p class=\\"fact\\"><span class=\\"fact-key\\">First seen:</span> 2 days ago</p>
+        <div class=\\"block\\">
+          <h3>Evidence</h3>
+          <p class=\\"prose\\">A host that appeared this week and is already alerting looks more like a provisioning problem.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Why prioritized</h3>
+          <p class=\\"prose\\">A new asset of this criticality is worth confirming on its own.</p>
+        </div>
+        <div class=\\"block next\\">
           <h3>Next step</h3>
           <p class=\\"prose\\">Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p>
         </div>
@@ -184,19 +191,23 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"head\\">
         <div class=\\"who\\">
           <div class=\\"name\\">jump-box-01</div>
-          <div class=\\"meta\\">First seen 3 days ago</div>
         </div>
         <div class=\\"pills\\">
-          <span class=\\"badge entity-type\\">Host</span>
-          <span class=\\"badge risk level-moderate\\">Risk 58 Moderate</span>
-          <span class=\\"criticality\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
-          
-          
+          <span class=\\"badge hollow\\">Host</span>
+          <span class=\\"badge risk level-moderate\\">Risk: Moderate, 58</span>
+          <span class=\\"badge hollow\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
         </div>
         </div>
-        <p class=\\"prose\\">A new host with alerts of the same kind as the first priority is worth a second look.</p>
-        <p class=\\"prose why\\">Its recent appearance and the overlap in alert type put it ahead of the other hosts.</p>
-        <div class=\\"next\\">
+        <p class=\\"fact\\"><span class=\\"fact-key\\">First seen:</span> 3 days ago</p>
+        <div class=\\"block\\">
+          <h3>Evidence</h3>
+          <p class=\\"prose\\">A new host with alerts of the same kind as the first priority is worth a second look.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Why prioritized</h3>
+          <p class=\\"prose\\">Its recent appearance and the overlap in alert type put it ahead of the other hosts.</p>
+        </div>
+        <div class=\\"block next\\">
           <h3>Next step</h3>
           <p class=\\"prose\\">Review the alerts and confirm the host&#39;s role and ownership.</p>
         </div>

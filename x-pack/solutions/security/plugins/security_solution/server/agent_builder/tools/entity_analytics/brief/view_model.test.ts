@@ -134,7 +134,7 @@ describe('buildViewModel', () => {
         periodLabel: '7 days',
         spaceId: 'soc',
         focusTileTitle: 'Risk movers',
-        entityFilters: ['Risk level: High'],
+        entityFilters: [{ label: 'Risk level', value: 'High' }],
       },
       title: 'Alerts spread across hosts',
       summary: 'web_01 rose sharply',

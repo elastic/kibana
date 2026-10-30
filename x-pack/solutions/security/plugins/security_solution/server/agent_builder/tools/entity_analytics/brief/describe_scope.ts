@@ -49,11 +49,17 @@ const ENTITY_FILTER_LABELS: Record<string, string> = {
 };
 
 /** An entity filter as the filter bar labels it. Watchlist values are ids, so only their count is stated. */
-export const describeEntityFilter = (key: string, values: readonly string[]): string => {
+export const describeEntityFilter = (
+  key: string,
+  values: readonly string[]
+): { label: string; value: string } => {
   if (key === 'watchlists') {
-    return `On ${formatCountOf(values.length, 'selected watchlist', 'selected watchlists')}`;
+    return { label: 'Watchlist', value: `${formatCount(values.length)} selected` };
   }
-  return `${ENTITY_FILTER_LABELS[key] ?? key}: ${values.map(formatStoredValue).join(', ')}`;
+  return {
+    label: ENTITY_FILTER_LABELS[key] ?? key,
+    value: values.map(formatStoredValue).join(', '),
+  };
 };
 
 export const formatCount = (count: number): string => count.toLocaleString('en-US');
