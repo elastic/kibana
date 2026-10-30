@@ -107,12 +107,17 @@ export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): Merge
         droppedRows += 1;
         return;
       }
-      let state = entities.get(id);
-      if (!state) {
-        state = { row: {}, lastSeen: null, attributeSeen: new Map() };
+      const state: EntityState = entities.get(id) ?? {
+        row: {},
+        lastSeen: null,
+        attributeSeen: new Map(),
+      };
+
+      if (!entities.has(id)) {
         entities.set(id, state);
         provenance[id] = {};
       }
+
       mergeInto(state, row, columns, provenance[id], plan.indexPattern);
     });
   });
