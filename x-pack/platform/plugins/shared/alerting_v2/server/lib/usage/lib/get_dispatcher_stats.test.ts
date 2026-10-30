@@ -338,6 +338,43 @@ describe('getDispatcherStats', () => {
     expect(result.dispatcher_action_groups_count_by_outcome_24hr).toEqual({});
   });
 
+  it('ignores strategy and grouping mode values outside the known vocabularies', async () => {
+    // Events written by other versions can carry values the schema no longer accepts; letting
+    // them through would make Task Manager reject the whole state.
+    mockSearches(
+      {
+        ...emptyEventStatsAggregations,
+        throttled: {
+          doc_count: 2,
+          by_strategy: {
+            buckets: [
+              { key: 'none', doc_count: 1, action_groups: { value: 4 } },
+              { key: 'every_time', doc_count: 1, action_groups: { value: 1 } },
+            ],
+          },
+        },
+      },
+      {
+        ...emptyPolicyStatsAggregations,
+        dispatched_events: {
+          ...emptyPolicyStatsAggregations.dispatched_events,
+          by_grouping_mode: {
+            buckets: [groupingModeBucket('per_rule', 9, 9, 9), groupingModeBucket('all', 1, 1, 1)],
+          },
+        },
+      }
+    );
+
+    const result = await getDispatcherStats(esClient);
+
+    expect(result.dispatcher_action_groups_throttled_count_by_strategy_24hr).toEqual({
+      every_time: 1,
+    });
+    expect(result.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr).toEqual({
+      all: { p50: 1, p99: 1, avg: 1 },
+    });
+  });
+
   it('returns empty results when there are no dispatcher events', async () => {
     mockSearches(emptyEventStatsAggregations, emptyPolicyStatsAggregations);
 

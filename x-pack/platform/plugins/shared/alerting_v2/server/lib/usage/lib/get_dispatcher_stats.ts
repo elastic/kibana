@@ -10,11 +10,8 @@ import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  DispatchFailureReason,
-  GroupingMode,
-  ThrottleStrategy,
-} from '@kbn/alerting-v2-schemas';
+import type { DispatchFailureReason } from '@kbn/alerting-v2-schemas';
+import { groupingModeSchema, throttleStrategySchema } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
@@ -22,13 +19,11 @@ import {
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { TERMS_SIZE, bucketsToRecord } from './constants';
 import type {
-  DispatcherActionBucket,
   DispatcherEventStatsAggregations,
   DispatcherGroupingModeBucket,
   DispatcherPolicyActivityBucket,
   DispatcherPolicyStatsAggregations,
   DispatcherStatsResults,
-  DispatcherStrategyBucket,
   PercentilesAggregation,
   TermsBucket,
   ValueAggregation,
@@ -162,10 +157,11 @@ async function searchEventStats(esClient: ElasticsearchClient) {
     dispatcher_dispatch_failures_count_by_reason_24hr: bucketsToRecord<DispatchFailureReason>(
       aggs?.dispatch_failed.by_reason.buckets
     ),
-    dispatcher_action_groups_throttled_count_by_strategy_24hr: sumsToRecord<
-      ThrottleStrategy,
-      DispatcherStrategyBucket
-    >(aggs?.throttled.by_strategy.buckets ?? [], (bucket) => bucket.action_groups),
+    dispatcher_action_groups_throttled_count_by_strategy_24hr: sumsByKey(
+      aggs?.throttled.by_strategy.buckets ?? [],
+      literalValuesOf(throttleStrategySchema),
+      (bucket) => bucket.action_groups
+    ),
   };
 }
 
@@ -303,21 +299,33 @@ async function searchPolicyStats(esClient: ElasticsearchClient) {
     ),
     dispatcher_uncovered_rules_count_24hr:
       aggs?.unmatched_events.rule_refs.rules.uncovered_rules.value ?? 0,
-    dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr:
-      distributionsByKey<GroupingMode>(aggs?.dispatched_events.by_grouping_mode.buckets ?? []),
+    dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: distributionsByKey(
+      aggs?.dispatched_events.by_grouping_mode.buckets ?? [],
+      literalValuesOf(groupingModeSchema)
+    ),
   };
 }
 
+/** Values accepted by a union-of-literals schema, read at call time because the schemas are lazy. */
+const literalValuesOf = <T extends string>(schema: {
+  options: ReadonlyArray<{ values: Set<T> }>;
+}): T[] => schema.options.flatMap((option) => [...option.values]);
+
+/** One distribution per bucket whose key is in `keys`; other values (e.g. from older events) are ignored. */
 const distributionsByKey = <K extends string>(
-  buckets: DispatcherGroupingModeBucket[]
-): Partial<Record<K, Distribution>> =>
-  buckets.reduce<Partial<Record<K, Distribution>>>((acc, { key, policy_refs: refs }) => {
+  buckets: DispatcherGroupingModeBucket[],
+  keys: readonly K[]
+): Partial<Record<K, Distribution>> => {
+  const allowed = new Set<string>(keys);
+  return buckets.reduce<Partial<Record<K, Distribution>>>((acc, { key, policy_refs: refs }) => {
+    if (!allowed.has(key)) return acc;
     acc[key as K] = toDistribution(
       refs.policies.action_groups_percentiles,
       refs.policies.action_groups_avg
     );
     return acc;
   }, {});
+};
 
 /** Policies with at least one event of each kind; `broken` = failing with nothing dispatched. */
 const countByActivity = (
@@ -346,13 +354,13 @@ const toDistribution = (
 });
 
 /** Picks the summed value of the buckets whose key is one of `keys`; absent keys stay undefined. */
-const sumsByKey = <K extends string>(
-  buckets: DispatcherActionBucket[],
+const sumsByKey = <K extends string, B extends TermsBucket>(
+  buckets: B[],
   keys: readonly K[],
-  getSum: (bucket: DispatcherActionBucket) => ValueAggregation
+  getSum: (bucket: B) => ValueAggregation
 ): Partial<Record<K, number>> => {
   const allowed = new Set<string>(keys);
-  return sumsToRecord<K, DispatcherActionBucket>(
+  return sumsToRecord<K, B>(
     buckets.filter((bucket) => allowed.has(bucket.key)),
     getSum
   );
