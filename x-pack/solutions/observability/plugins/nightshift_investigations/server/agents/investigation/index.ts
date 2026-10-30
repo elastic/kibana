@@ -97,7 +97,7 @@ export interface InvestigationAgentTypeOptions {
   investigationToolsEnabled: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
-  telemetryConnectorId?: string;
+  /** The configured telemetry targets, whose connectors the agent is allowed to use. */
   telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
@@ -158,7 +158,6 @@ export const buildNightshiftAgentConfiguration = ({
   memoryEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
-  telemetryConnectorId,
   telemetryConfig,
   getCustomContextInstructions,
   logger,
@@ -182,17 +181,13 @@ export const buildNightshiftAgentConfiguration = ({
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConfig
-        ? [
-            ...new Set(
-              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
-                connectorId ? [connectorId] : []
-              )
-            ),
-          ]
-        : telemetryConnectorId
-        ? [telemetryConnectorId]
-        : [],
+      connector_ids: [
+        ...new Set(
+          getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+            connectorId ? [connectorId] : []
+          )
+        ),
+      ],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
@@ -230,8 +225,8 @@ export const buildNightshiftAgentConfiguration = ({
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/.connector-docs/elastic.md`.
+ * standalone prompt and no Elastic tools. Telemetry is reached through the telemetry target bound
+ * to the investigation, as described in `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
@@ -260,7 +255,6 @@ export const registerInvestigationAgentType = (
     decisionTreesEnabled = false,
     investigationToolsEnabled,
     proposalsEnabled,
-    telemetryConnectorId,
     telemetryConfig,
     getCustomContextInstructions,
     logger,
@@ -274,7 +268,6 @@ export const registerInvestigationAgentType = (
       decisionTreesEnabled,
       investigationToolsEnabled,
       proposalsEnabled,
-      telemetryConnectorId,
       telemetryConfig,
       getCustomContextInstructions,
       logger,

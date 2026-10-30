@@ -6,12 +6,10 @@
  */
 
 import { config } from './config';
-import { resolveTelemetryTarget } from './telemetry_targets';
+import { getTelemetryTargets, resolveTelemetryTarget } from './telemetry_targets';
 
 const sandbox = config.schema.validate({
   sandbox: {
-    telemetry_connector_id: 'legacy',
-    telemetry_readable_indices: 'legacy:logs-*',
     telemetry_targets: {
       c0: { connector_id: 'customer0', readable_indices: 'remote:logs-*' },
       orca: { connector_id: 'orca', readable_indices: 'logs-orcabench.*' },
@@ -19,11 +17,8 @@ const sandbox = config.schema.validate({
   },
 }).sandbox;
 
-it('preserves the legacy default and resolves named targets independently', () => {
-  expect(resolveTelemetryTarget(sandbox)).toEqual({
-    connectorId: 'legacy',
-    readableIndices: 'legacy:logs-*',
-  });
+it('resolves named targets and nothing else', () => {
+  expect(resolveTelemetryTarget(sandbox)).toEqual({});
   expect(resolveTelemetryTarget(sandbox, 'c0')).toEqual({
     connectorId: 'customer0',
     readableIndices: 'remote:logs-*',
@@ -35,14 +30,15 @@ it('preserves the legacy default and resolves named targets independently', () =
   expect(resolveTelemetryTarget(sandbox, 'none')).toEqual({});
 });
 
-it('does not reapply a named default to an existing legacy conversation', () => {
+it('leaves a conversation without a target untouched by the configured default', () => {
+  // Defaults are applied where a conversation is created, never when its stored target is read.
   expect(
     resolveTelemetryTarget({
       ...sandbox,
       telemetry_targets: sandbox?.telemetry_targets ?? {},
       default_telemetry_target: 'orca',
     })
-  ).toMatchObject({ connectorId: 'legacy' });
+  ).toEqual({});
   expect(
     resolveTelemetryTarget(
       {
@@ -63,8 +59,13 @@ it.each(['unknown', 'toString', '__proto__', 'UPPERCASE'])(
 );
 
 it('runs without telemetry when none is configured', () => {
-  expect(resolveTelemetryTarget(undefined)).toEqual({
-    connectorId: undefined,
-    readableIndices: undefined,
-  });
+  expect(resolveTelemetryTarget(undefined)).toEqual({});
+  expect(getTelemetryTargets(undefined)).toEqual([]);
+});
+
+it('lists every configured target', () => {
+  expect(getTelemetryTargets(sandbox)).toEqual([
+    { connectorId: 'customer0', readableIndices: 'remote:logs-*' },
+    { connectorId: 'orca', readableIndices: 'logs-orcabench.*' },
+  ]);
 });

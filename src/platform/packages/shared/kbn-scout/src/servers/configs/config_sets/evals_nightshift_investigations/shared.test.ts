@@ -120,7 +120,8 @@ describe.each([
   });
 
   it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
-    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+    // The hook generates this file per run; any readable YAML stands in for it here.
+    const telemetryConfig = SANDBOX_KIBANA_CONFIG;
     const exporters = JSON.stringify([
       {
         http: {

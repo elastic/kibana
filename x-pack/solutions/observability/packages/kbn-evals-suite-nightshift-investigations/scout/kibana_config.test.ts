@@ -12,7 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFromFiles } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 
-it('resolves credentials from the environment and preserves other preconfigured connectors', () => {
+it('resolves sandbox credentials and tracing exporters from the environment', () => {
   const originalEnv = process.env;
   const directory = mkdtempSync(Path.join(tmpdir(), 'nightshift-yaml-'));
   const existingConfig = Path.join(directory, 'existing.yml');
@@ -27,9 +27,6 @@ it('resolves credentials from the environment and preserves other preconfigured 
     SANDBOX_CLIENT_KEY_PATH: '/certs/tls.key',
     SANDBOX_CA_CERT_PATH: '',
     NIGHTSHIFT_TRACING_EXPORTERS: JSON.stringify(exporters),
-    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example.com',
-    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
-    NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
   };
   try {
     const config = getConfigFromFiles([
@@ -39,20 +36,11 @@ it('resolves credentials from the environment and preserves other preconfigured 
         'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/kibana.tracing.yml'
       ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
-      Path.join(__dirname, 'kibana.telemetry.yml'),
     ]);
+    // Telemetry targets come from the config the scout hook generates per run, so the committed
+    // files must leave unrelated preconfigured connectors untouched.
     expect(config.xpack.actions.preconfigured).toEqual({
       existing: { name: 'Existing connector' },
-      'nightshift-evals-telemetry': {
-        name: 'Remote Elasticsearch telemetry',
-        actionTypeId: '.http',
-        config: {
-          url: 'https://telemetry.example.com',
-          hasAuth: false,
-          authType: null,
-        },
-        secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
-      },
     });
     expect(config.xpack.sandbox.api_key).toBe('sandbox-key');
     expect(config.xpack.sandbox.ssl).toEqual({
@@ -60,10 +48,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
       key: '/certs/tls.key',
       certificate_authorities: '',
     });
-    expect(config.xpack.nightshift_investigations.sandbox).toEqual({
-      telemetry_connector_id: 'nightshift-evals-telemetry',
-      telemetry_readable_indices: 'remote:logs-*',
-    });
+    expect(config.xpack.nightshift_investigations).toBeUndefined();
     expect(
       schema
         .arrayOf(

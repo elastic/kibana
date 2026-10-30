@@ -28,26 +28,22 @@ import { writeElasticManifest } from './elastic_manifest';
  */
 export const createSandboxWorkspaceManager = ({
   getDeps,
-  telemetryConnectorId,
-  telemetryReadableIndices,
-  telemetryTargets,
+  telemetryTargets = [],
   getTelemetryTarget,
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
-  /** When set, `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest. */
-  telemetryConnectorId?: string;
-  telemetryReadableIndices?: string;
+  /**
+   * The configured telemetry targets. When one of them applies to a call,
+   * `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest.
+   */
   telemetryTargets?: TelemetryTarget[];
   getTelemetryTarget?: (callContext: SandboxCallContext) => Promise<TelemetryTarget | undefined>;
   logger: Logger;
 }) => {
   const lastWorkspaceKeys = new Map<SandboxSession, string>();
 
-  const configuredTargets = telemetryTargets ?? [
-    { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices },
-  ];
-  const telemetryConnectorIds = new Set(configuredTargets.map(({ connectorId }) => connectorId));
+  const telemetryConnectorIds = new Set(telemetryTargets.map(({ connectorId }) => connectorId));
   const callTargets = new WeakMap<SandboxCallContext, Promise<TelemetryTarget | undefined>>();
 
   const prepareCallContext = (
@@ -63,7 +59,7 @@ export const createSandboxWorkspaceManager = ({
           (id) => !telemetryConnectorIds.has(id) || id === boundTarget.connectorId
         );
       }
-      const allowedTargets = configuredTargets.filter(
+      const allowedTargets = telemetryTargets.filter(
         ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
       );
       // Custom agents can use several connectors; only infer guidance for an unambiguous source.

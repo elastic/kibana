@@ -10,6 +10,11 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const sandboxConfigSchema = schema.object({
+  /**
+   * Named telemetry sources the sandbox can query. Each names a preconfigured connector holding
+   * the Elasticsearch URL and API key; an investigation binds one of them on its conversation and
+   * its credentials are injected per command, only when the agent asks for it.
+   */
   telemetry_targets: schema.recordOf(
     schema.string({
       maxLength: 64,
@@ -24,15 +29,8 @@ const sandboxConfigSchema = schema.object({
     }),
     { defaultValue: {} }
   ),
+  /** Target bound to investigations that do not request one; otherwise they get no telemetry. */
   default_telemetry_target: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
-  /**
-   * Id of the preconfigured connector holding the Elasticsearch URL and API key the sandbox
-   * queries telemetry with. It is added to the investigator's connector allow-list; credentials
-   * are injected per command, only when the agent asks for it.
-   */
-  telemetry_connector_id: schema.maybe(schema.string()),
-  // Operator-supplied readable index patterns and remote names for the telemetry manifest.
-  telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
 });
 
 const cortexConfigSchema = schema.object({

@@ -137,11 +137,20 @@ if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
     echo "nightshift-investigations scout hook: remote telemetry requires sandbox credentials" >&2
     exit 1
   fi
-  telemetry_config="$script_dir/kibana.telemetry.yml"
 fi
 
 # Named targets coexist on one Scout stack. Each block supplies its own URL and API key.
 named_targets="$(printf '%s' "$config" | jq -c '.nightshift.telemetryTargets // {}')"
+# Kibana only knows named targets, so the single telemetry block becomes the `default` one and,
+# unless the profile names another, the default target. It wins over a same-named profile block:
+# the ORCA shard replaces this process's telemetry through it.
+if [[ -n "$telemetry_url" ]]; then
+  named_targets="$(printf '%s' "$named_targets" |
+    HOOK_TELEMETRY_URL="$telemetry_url" HOOK_TELEMETRY_KEY="$telemetry_key" \
+    HOOK_READABLE_INDICES="$readable_indices" jq -c '. + {default: ({
+      url: $ENV.HOOK_TELEMETRY_URL, apiKey: $ENV.HOOK_TELEMETRY_KEY
+    } + (if $ENV.HOOK_READABLE_INDICES != "" then {readableIndices: $ENV.HOOK_READABLE_INDICES} else {} end))}')"
+fi
 if ! printf '%s' "$named_targets" | jq -e '
   type == "object" and length <= 20 and all(to_entries[];
     (.key | test("^[a-z][a-z0-9_-]{0,63}$")) and .key != "none" and
@@ -159,6 +168,9 @@ if printf '%s' "$named_targets" | jq -e 'any(.[]; .url | contains("@"))' >/dev/n
   exit 1
 fi
 default_telemetry_target="$(config_value '.nightshift.defaultTelemetryTarget')"
+if [[ -z "$default_telemetry_target" && -n "$telemetry_url" ]]; then
+  default_telemetry_target=default
+fi
 if [[ -n "$default_telemetry_target" && "$default_telemetry_target" != none ]]; then
   if ! printf '%s' "$named_targets" | jq -e --arg target "$default_telemetry_target" 'has($target)' >/dev/null; then
     echo "nightshift-investigations scout hook: default telemetry target must name a configured target or none" >&2
@@ -175,34 +187,24 @@ if [[ "$named_targets" != '{}' || -n "$default_telemetry_target" && -n "$api_key
   config_directory="$script_dir/../../../../../../target/nightshift-evals-telemetry"
   mkdir -p "$config_directory"
   config_directory="$(cd "$config_directory" && pwd)"
-  generated_config="$(HOOK_HAS_LEGACY="$telemetry_url" HOOK_DEFAULT_TARGET="$default_telemetry_target" \
+  generated_config="$(HOOK_DEFAULT_TARGET="$default_telemetry_target" \
     jq -n --argjson names "$(printf '%s' "$named_targets" | jq -c 'keys')" '
       ($names | to_entries) as $targets |
       {
-        "xpack.actions.preconfigured": (($targets | map({
+        "xpack.actions.preconfigured": ($targets | map({
           key: ("nightshift-evals-telemetry-" + .value),
           value: {
             name: ("Elasticsearch telemetry: " + .value), actionTypeId: ".http",
             config: {url: ("${NIGHTSHIFT_TELEMETRY_TARGET_" + (.key | tostring) + "_URL}"), hasAuth: false, authType: null},
             secrets: {secretHeaders: {Authorization: ("ApiKey ${NIGHTSHIFT_TELEMETRY_TARGET_" + (.key | tostring) + "_API_KEY}")}}
           }
-        }) | from_entries) + (if $ENV.HOOK_HAS_LEGACY != "" then {
-          "nightshift-evals-telemetry": {
-            name: "Remote Elasticsearch telemetry", actionTypeId: ".http",
-            config: {url: "${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL}", hasAuth: false, authType: null},
-            secrets: {secretHeaders: {Authorization: "ApiKey ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY}"}}
-          }
-        } else {} end)),
+        }) | from_entries),
         "xpack.nightshift_investigations.sandbox": ({
           telemetry_targets: ($targets | map({key: .value, value: {
             connector_id: ("nightshift-evals-telemetry-" + .value),
             readable_indices: ("${NIGHTSHIFT_TELEMETRY_TARGET_" + (.key | tostring) + "_READABLE_INDICES}")
           }}) | from_entries)
-        } + (if $ENV.HOOK_DEFAULT_TARGET != "" then {default_telemetry_target: $ENV.HOOK_DEFAULT_TARGET} else {} end)
-        + (if $ENV.HOOK_HAS_LEGACY != "" then {
-          telemetry_connector_id: "nightshift-evals-telemetry",
-          telemetry_readable_indices: "${NIGHTSHIFT_SANDBOX_READABLE_INDICES}"
-        } else {} end))
+        } + (if $ENV.HOOK_DEFAULT_TARGET != "" then {default_telemetry_target: $ENV.HOOK_DEFAULT_TARGET} else {} end))
       }')"
   config_hash="$(printf '%s' "$generated_config" | shasum -a 256)"
   config_hash="${config_hash%% *}"

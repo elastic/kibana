@@ -170,7 +170,9 @@ describe('Nightshift investigation agent type', () => {
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        telemetryConfig: {
+          telemetry_targets: { c0: { connector_id: 'elasticsearch-telemetry' } },
+        },
         ...ALL_PLUGINS,
       })
     );
@@ -218,7 +220,6 @@ describe('Nightshift investigation agent type', () => {
         cortexEnabled: true,
         ...ALL_PLUGINS,
         telemetryConfig: {
-          telemetry_connector_id: 'legacy',
           telemetry_targets: {
             c0: { connector_id: 'c0-telemetry' },
             orca: { connector_id: 'orca-telemetry' },
@@ -228,7 +229,7 @@ describe('Nightshift investigation agent type', () => {
       'sa-a'
     );
 
-    expect(base.connector_ids).toEqual(['legacy', 'c0-telemetry', 'orca-telemetry']);
+    expect(base.connector_ids).toEqual(['c0-telemetry', 'orca-telemetry']);
     expect(base.workflow_ids).toEqual([
       'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
     ]);
@@ -302,7 +303,6 @@ it('allows configured telemetry connectors on the single investigator type', asy
       cortexEnabled: false,
       ...ALL_PLUGINS,
       telemetryConfig: {
-        telemetry_connector_id: 'legacy',
         telemetry_targets: {
           c0: { connector_id: 'customer0' },
           orca: { connector_id: 'orca' },
@@ -311,5 +311,5 @@ it('allows configured telemetry connectors on the single investigator type', asy
       },
     })
   );
-  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
+  expect(base.connector_ids).toEqual(['customer0', 'orca']);
 });

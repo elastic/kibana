@@ -19,13 +19,8 @@ export const resolveTelemetryTarget = (
   requestedTarget?: string
 ): TelemetryTarget => {
   const target = requestedTarget;
-  if (!target) {
-    return {
-      connectorId: sandbox?.telemetry_connector_id,
-      readableIndices: sandbox?.telemetry_readable_indices,
-    };
-  }
-  if (target === 'none') return {};
+  // Without a target (and without a configured default) an investigation gets no telemetry.
+  if (!target || target === 'none') return {};
   if (!telemetryTargetNameSchema.safeParse(target).success) {
     throw badRequest('Invalid telemetry target name');
   }
@@ -38,17 +33,8 @@ export const resolveTelemetryTarget = (
 
 export const getTelemetryTargets = (
   sandbox: NightshiftInvestigationsConfig['sandbox']
-): TelemetryTarget[] => [
-  ...(sandbox?.telemetry_connector_id
-    ? [
-        {
-          connectorId: sandbox.telemetry_connector_id,
-          readableIndices: sandbox.telemetry_readable_indices,
-        },
-      ]
-    : []),
-  ...Object.values(sandbox?.telemetry_targets ?? {}).map(({ connector_id, readable_indices }) => ({
+): TelemetryTarget[] =>
+  Object.values(sandbox?.telemetry_targets ?? {}).map(({ connector_id, readable_indices }) => ({
     connectorId: connector_id,
     readableIndices: readable_indices,
-  })),
-];
+  }));

@@ -10,7 +10,7 @@ import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SANDBOX_BASH_TOOL_ID } from './tool';
 import { ELASTIC_MANIFEST_PATH } from './connector_docs';
 
-/** Where the sandbox gets Elasticsearch credentials: the telemetry connector. */
+/** Where the sandbox gets Elasticsearch credentials: the connector of the bound telemetry target. */
 export interface ElasticCredentials {
   kind: 'connector';
   connectorId: string;

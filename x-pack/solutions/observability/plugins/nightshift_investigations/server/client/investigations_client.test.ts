@@ -1243,9 +1243,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     'defers an omitted target to the pending investigation binding %p',
     async (target) => {
       subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
-      const client = makeClient({
-        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-      });
+      const client = makeClient({ telemetryConfig });
 
       await expect(
         client.start({
@@ -1280,7 +1278,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-pending', {
         workflow_execution_ids: ['exec-original', 'exec-1'],
       });
-      const expectedConnectorId = target === 'none' ? undefined : target ?? 'legacy';
+      const expectedConnectorId = target === 'none' ? undefined : target;
       expect((await client.getTelemetryTarget('inv-pending')).connectorId).toBe(
         expectedConnectorId
       );
@@ -1784,25 +1782,17 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
-  it('keeps direct chats on the investigator working without an investigation template', async () => {
+  it('keeps direct chats on the investigator working without a bound target', async () => {
     withConversations(makeConversation({ id: 'chat-1', templateId: 'default' }));
-    await expect(
-      makeClient({
-        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-      }).getTelemetryTarget('chat-1')
-    ).resolves.toMatchObject({ connectorId: 'legacy' });
+    await expect(makeClient({ telemetryConfig }).getTelemetryTarget('chat-1')).resolves.toEqual({});
   });
 
-  it('keeps legacy telemetry when a named default is added', async () => {
+  it('does not retrofit the default target onto a conversation without one', async () => {
     withExecution();
     withConversations(makeConversation({ id: 'inv-1' }));
-    const client = makeClient({
-      telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-    });
+    const client = makeClient({ telemetryConfig });
     await client.ensureOrCreate('inv-1', 'exec-1');
-    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
-      connectorId: 'legacy',
-    });
+    await expect(client.getTelemetryTarget('inv-1')).resolves.toEqual({});
     expect(conversations.create).not.toHaveBeenCalled();
     expect(conversations.patchMetadata).not.toHaveBeenCalledWith(
       'inv-1',

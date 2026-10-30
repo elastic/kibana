@@ -231,7 +231,7 @@ describe('createSandboxWorkspaceManager', () => {
     expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
   });
 
-  describe('telemetryConnectorId', () => {
+  describe('telemetry targets', () => {
     let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
     let actions: ReturnType<typeof actionsMock.createStart>;
     let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -257,7 +257,7 @@ describe('createSandboxWorkspaceManager', () => {
       actions.inMemoryConnectors = [{ ...connector, secrets: {} }];
       managerWithTelemetry = createSandboxWorkspaceManager({
         getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        telemetryTargets: [{ connectorId: 'elasticsearch-telemetry' }],
         logger,
       });
     });
@@ -469,8 +469,12 @@ describe('createSandboxWorkspaceManager', () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
         getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        telemetryReadableIndices: 'Read remote-a:logs-service-*',
+        telemetryTargets: [
+          {
+            connectorId: 'elasticsearch-telemetry',
+            readableIndices: 'Read remote-a:logs-service-*',
+          },
+        ],
         logger,
       });
 
@@ -488,8 +492,12 @@ describe('createSandboxWorkspaceManager', () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
         getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        telemetryReadableIndices: 'Read remote-a:logs-service-*',
+        telemetryTargets: [
+          {
+            connectorId: 'elasticsearch-telemetry',
+            readableIndices: 'Read remote-a:logs-service-*',
+          },
+        ],
         logger,
       });
 
@@ -501,7 +509,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
     });
 
-    it('does not write elastic manifest when telemetryConnectorId is not set', async () => {
+    it('does not write elastic manifest when no telemetry target is configured', async () => {
       const session = createSessionMock(true);
       await manager.ensureWorkspaceReady({
         session,

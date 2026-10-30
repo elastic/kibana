@@ -273,7 +273,9 @@ describe('nightshift-investigations scout hook', () => {
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
       ...shell,
       NIGHTSHIFT_SANDBOX_READABLE_INDICES: '',
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
+      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: expect.stringContaining(
+        Path.join('target', 'nightshift-evals-telemetry')
+      ),
     });
     expect(
       runHook(
@@ -322,7 +324,7 @@ describe('nightshift-investigations scout hook', () => {
     };
     const PROFILE = { sandbox: SANDBOX, nightshift: { telemetry: TELEMETRY } };
 
-    it('resolves a profile block through the connector and manifest configuration', () => {
+    it('resolves a profile block into the default named target', () => {
       const { output } = runHook(PROFILE);
       expect(output).toEqual({
         env: {
@@ -330,7 +332,12 @@ describe('nightshift-investigations scout hook', () => {
           NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://remote.example.com',
           NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
           NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
-          NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
+          NIGHTSHIFT_TELEMETRY_TARGET_0_URL: 'https://remote.example.com',
+          NIGHTSHIFT_TELEMETRY_TARGET_0_API_KEY: 'remote-key',
+          NIGHTSHIFT_TELEMETRY_TARGET_0_READABLE_INDICES: 'remote:logs-*',
+          NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: expect.stringContaining(
+            Path.join('target', 'nightshift-evals-telemetry')
+          ),
         },
       });
 
@@ -341,13 +348,18 @@ describe('nightshift-investigations scout hook', () => {
           output.env.SANDBOX_KIBANA_CONFIG,
           output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG,
         ]);
-        expect(xpack.actions.preconfigured['nightshift-evals-telemetry']).toMatchObject({
+        expect(xpack.actions.preconfigured['nightshift-evals-telemetry-default']).toMatchObject({
           config: { url: 'https://remote.example.com' },
           secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
         });
         expect(xpack.nightshift_investigations.sandbox).toEqual({
-          telemetry_connector_id: 'nightshift-evals-telemetry',
-          telemetry_readable_indices: 'remote:logs-*',
+          default_telemetry_target: 'default',
+          telemetry_targets: {
+            default: {
+              connector_id: 'nightshift-evals-telemetry-default',
+              readable_indices: 'remote:logs-*',
+            },
+          },
         });
       } finally {
         process.env = originalEnv;
@@ -469,11 +481,9 @@ describe('ORCA CI shard', () => {
       process.env = { ...originalEnv, ...output.env };
       try {
         const { xpack } = getConfigFromFiles([output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG]);
-        expect(xpack.nightshift_investigations.sandbox.default_telemetry_target).toBeUndefined();
-        expect(xpack.nightshift_investigations.sandbox.telemetry_connector_id).toBe(
-          'nightshift-evals-telemetry'
-        );
-        expect(xpack.actions.preconfigured['nightshift-evals-telemetry']).toMatchObject({
+        // The profile's own default is dropped, so ORCA telemetry is what investigations get.
+        expect(xpack.nightshift_investigations.sandbox.default_telemetry_target).toBe('default');
+        expect(xpack.actions.preconfigured['nightshift-evals-telemetry-default']).toMatchObject({
           actionTypeId: '.http',
           config: { url: orca.url },
           secrets: { secretHeaders: { Authorization: `ApiKey ${orca.apiKey}` } },

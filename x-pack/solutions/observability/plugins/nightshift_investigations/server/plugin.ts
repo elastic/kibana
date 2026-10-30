@@ -272,21 +272,19 @@ export class NightshiftInvestigationsPlugin
         logger: this.logger,
       });
       const config = this.ctx.config.get();
-      const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
-        telemetryConnectorId,
+        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
-        telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
@@ -304,8 +302,6 @@ export class NightshiftInvestigationsPlugin
         const getSandboxStart = getGatedSandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart }),
-          telemetryConnectorId,
-          telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           telemetryTargets: getTelemetryTargets(config.sandbox),
           getTelemetryTarget: async ({ agentId, conversationId, request }) => {
             if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) return undefined;
@@ -515,7 +511,7 @@ export class NightshiftInvestigationsPlugin
               conversationId
                 ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
                     .connectorId
-                : this.ctx.config.get().sandbox?.telemetry_connector_id,
+                : undefined,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })

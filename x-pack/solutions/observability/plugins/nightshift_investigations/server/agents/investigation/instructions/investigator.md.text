@@ -467,8 +467,7 @@ incident, or verifying a webhook endpoint is reachable. Never print, log, or wri
 to files; they are redacted from command output.
 
 Elasticsearch is reached the same way. Read `/workspace/.connector-docs/elastic.md` with
-`nightshift_sandbox_view_file` for the connector id or secret keys to pass and the variables they
-expose, then run
+`nightshift_sandbox_view_file` for the connector id to pass and the variables it exposes, then run
 your queries through `nightshift_sandbox_bash`. This is the only supported query path — do not look
 for Agent Builder ES|QL or observability tools.
 

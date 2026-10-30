@@ -33,7 +33,7 @@ const options: NightshiftAgentTypeOptions = {
   memoryEnabled: true,
   investigationToolsEnabled: true,
   proposalsEnabled: true,
-  telemetryConnectorId: 'telemetry',
+  telemetryConfig: { telemetry_targets: { c0: { connector_id: 'telemetry' } } },
 };
 
 const configurationFor = async (
