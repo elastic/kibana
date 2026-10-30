@@ -15,6 +15,7 @@ import {
   SiemMigrationStatus,
 } from '../../../../../../common/siem_migrations/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { SiemMigrationsService } from '../../../../service';
 import { getRuleMigrationRuleMock } from '../../../../../../common/siem_migrations/model/__mocks__';
 import {
@@ -38,6 +39,7 @@ describe('BulkActions', () => {
     mockSiemMigrationsService.rules.getMissingCapabilities.mockReturnValue([]);
     useKibanaMock.mockReturnValue({
       services: {
+        ...createStartServicesMock(),
         siemMigrations: mockSiemMigrationsService,
       },
     } as unknown as ReturnType<typeof useKibana>);
