@@ -98,6 +98,7 @@ const createParams = (
     pipeline: 'kibana-on-merge',
     prependTitle: '',
     updateGithub: true,
+    perTestIssues: true,
     indexInEs: true,
     reportUpdate: true,
     bkMeta: {},
@@ -229,6 +230,33 @@ describe('processJUnitReports Jest and Cypress', () => {
     await processJUnitReports(['report.xml'], params);
 
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('processJUnitReports with issue creation off', () => {
+  it('updates tracked failures but opens no issue for new ones', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([createExistingIssue(failures[0])]);
+    params.perTestIssues = false;
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue).not.toHaveBeenCalled();
+    expect(failures[1].failureCount).toBe(0);
+  });
+
+  it('still indexes every failure and hands them to the file reporter', async () => {
+    const failures = [makeFailure(0), makeFailure(1)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+    params.perTestIssues = false;
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(2);
+    expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(2);
   });
 });
 

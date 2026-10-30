@@ -46,6 +46,7 @@ export async function processJUnitReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
     indexInEs,
     reportUpdate,
     bkMeta,
@@ -152,6 +153,12 @@ export async function processJUnitReports(
         if (updateGithub) {
           pushMessage(`Updated existing issue: ${url} (fail count: ${newCount})`);
         }
+        continue;
+      }
+
+      if (!perTestIssues) {
+        pushMessage('No failed-test issue tracks this test yet');
+        failure.failureCount = 0;
         continue;
       }
 
