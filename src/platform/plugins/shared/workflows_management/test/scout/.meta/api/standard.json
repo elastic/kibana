@@ -1,5 +1,5 @@
 {
-  "sha1": "67c4dc18de66ff9cbfecb75bfe897cadeea3f3ef",
+  "sha1": "17ff4d267b016a8460afe6d73b5457470df0086f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1141,6 +1141,45 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
         "line": 322,
         "column": 27
+      }
+    },
+    {
+      "id": "362db501e8862ba-3aa8b9a1c8c090c",
+      "title": "Workflow executor profile resolves the executor name for a user without bulkGetUserProfiles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 75,
+        "column": 5
+      }
+    },
+    {
+      "id": "362db501e8862ba-c0a159379f64266",
+      "title": "Workflow executor profile resolves the workflow owner name for the access control modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 132,
+        "column": 17
+      }
+    },
+    {
+      "id": "362db501e8862ba-10437f8c12f7904",
+      "title": "Workflow executor profile does not resolve the unvalidated entries of a public ACL for the access control modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 147,
+        "column": 14
       }
     },
     {
