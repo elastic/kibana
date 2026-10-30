@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { EntityInventorySearchProvider } from '../context/entity_inventory_search_context';
@@ -33,10 +32,6 @@ export const EntityInventoryPageShell = ({
         gutterSize="m"
         data-test-subj="entityInventoryPageShell"
         data-entity-category={entityCategory}
-        css={css`
-          /* Lets the content slot scroll instead of growing the page. */
-          min-height: 0;
-        `}
       >
         <EuiFlexItem grow={false}>
           <EntityInventorySearchBar />
@@ -46,14 +41,7 @@ export const EntityInventoryPageShell = ({
             {secondaryControls}
           </EuiFlexItem>
         )}
-        <EuiFlexItem
-          data-test-subj="entityInventoryPageContent"
-          css={css`
-            min-height: 0;
-          `}
-        >
-          {children}
-        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="entityInventoryPageContent">{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EntityInventorySearchProvider>
   );
