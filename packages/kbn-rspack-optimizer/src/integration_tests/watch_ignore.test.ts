@@ -14,11 +14,12 @@ import { EventEmitter, once } from 'events';
 import { setTimeout as delay } from 'timers/promises';
 import type { Compiler, Stats } from '@rspack/core';
 
-jest.mock('../config/create_single_compile_config', () => ({
-  createSingleCompileConfig: jest.fn(),
+jest.mock('../config/create_multi_compile_config', () => ({
+  ...jest.requireActual('../config/create_multi_compile_config'),
+  createMultiCompileConfig: jest.fn(),
 }));
 
-import { createSingleCompileConfig } from '../config/create_single_compile_config';
+import { createMultiCompileConfig, KIBANA_COMPILER } from '../config/create_multi_compile_config';
 import { runBuild } from '../run_build';
 
 describe('Rspack watch ignores', () => {
@@ -44,33 +45,36 @@ describe('Rspack watch ignores', () => {
       const builds: Stats[] = [];
       const invalidations: Array<string | null> = [];
       let compiler: Compiler | undefined;
-      jest.mocked(createSingleCompileConfig).mockResolvedValue({
+      jest.mocked(createMultiCompileConfig).mockResolvedValue({
         bundleCount: 1,
-        config: {
-          mode: 'development',
-          context: pluginDir,
-          entry,
-          cache: false,
-          output: { path: outputDir },
-          plugins: [
-            {
-              apply(watchCompiler: Compiler) {
-                compiler = watchCompiler;
-                watchCompiler.hooks.invalid.tap('WatchIgnoreTest', (file) => {
-                  invalidations.push(file);
-                });
-                watchCompiler.hooks.afterCompile.tap('WatchIgnoreTest', (compilation) => {
-                  // PluginWatchPlugin watches the entire plugin directory for manifest changes.
-                  compilation.contextDependencies.add(pluginDir);
-                });
-                watchCompiler.hooks.done.tap('WatchIgnoreTest', (stats) => {
-                  builds.push(stats);
-                  events.emit('build');
-                });
+        configs: [
+          {
+            name: KIBANA_COMPILER,
+            mode: 'development',
+            context: pluginDir,
+            entry,
+            cache: false,
+            output: { path: outputDir },
+            plugins: [
+              {
+                apply(watchCompiler: Compiler) {
+                  compiler = watchCompiler;
+                  watchCompiler.hooks.invalid.tap('WatchIgnoreTest', (file) => {
+                    invalidations.push(file);
+                  });
+                  watchCompiler.hooks.afterCompile.tap('WatchIgnoreTest', (compilation) => {
+                    // PluginWatchPlugin watches the entire plugin directory for manifest changes.
+                    compilation.contextDependencies.add(pluginDir);
+                  });
+                  watchCompiler.hooks.done.tap('WatchIgnoreTest', (stats) => {
+                    builds.push(stats);
+                    events.emit('build');
+                  });
+                },
               },
-            },
-          ],
-        },
+            ],
+          },
+        ],
       });
 
       const result = await runBuild({ repoRoot, watch: true, hmr: false });

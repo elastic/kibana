@@ -96,7 +96,7 @@ describe('buildInvestigationRound', () => {
       {
         tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
         tool_call_id: 'toolu_env',
-        params: { file_path: '/workspace/elastic.md' },
+        params: { file_path: '/workspace/.connector-docs/elastic.md' },
         results: esqlResult('elastic body'),
       },
       {
