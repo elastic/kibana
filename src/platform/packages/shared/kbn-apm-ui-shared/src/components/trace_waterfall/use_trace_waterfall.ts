@@ -36,7 +36,7 @@ const MISSING_ENTRY_WARNING = i18n.translate(
   'apmUiShared.traceWaterfallItem.warningMessage.missingEntryWarning',
   {
     defaultMessage:
-      'The selected transaction is missing from this truncated waterfall. A different transaction from the same trace is shown instead.',
+      'The selected transaction is missing from this waterfall. A different transaction from the same trace is shown instead.',
   }
 );
 

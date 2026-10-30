@@ -18,7 +18,7 @@ import {
   TRANSACTION_ID,
   TRANSACTION_MARKS_AGENT,
 } from '../../../common/es_fields/apm';
-import { ecsOnlyOptionalFields, fields, optionalFields } from './get_unified_trace_items_page';
+import { ecsOnlyOptionalFields, fields, optionalFields } from './trace_constants';
 
 const MAX_ANCESTOR_HOPS = 50;
 
@@ -85,10 +85,15 @@ export async function ensureFocusedTraceHits<THit extends FocusedTraceHit>({
   }
 
   const reserved: THit[] = [];
+  const walkedIds = new Set<string>();
   let idsToFetch = hitsById.has(focusedDocId) ? [] : [focusedDocId];
   let currentId = focusedDocId;
 
   for (let hop = 0; hop < MAX_ANCESTOR_HOPS; hop++) {
+    if (walkedIds.has(currentId)) {
+      break;
+    }
+    walkedIds.add(currentId);
     if (idsToFetch.length > 0) {
       const fetchedHits = await fetchTraceHitsByIds({
         apmEventClient,
@@ -114,12 +119,13 @@ export async function ensureFocusedTraceHits<THit extends FocusedTraceHit>({
 
     const currentHit = hitsById.get(currentId);
     const parentId = currentHit ? getTraceHitParentId(currentHit) : undefined;
-    if (!parentId || hitsById.has(parentId)) {
+    if (!parentId) {
       break;
     }
 
+    // A parent already on the ranked page still needs its own parent fetched.
     currentId = parentId;
-    idsToFetch = [parentId];
+    idsToFetch = hitsById.has(parentId) ? [] : [parentId];
   }
 
   if (reserved.length === 0) {
@@ -187,6 +193,10 @@ async function fetchTraceHitsByIds({
           filter: [
             ...termQuery(TRACE_ID, traceId),
             ...rangeQuery(start, end),
+            // The service flyout passes serviceName, and its ranked page is already
+            // limited to that service. Ancestors from other services stay out so they
+            // cannot take maxTraceItems slots. Callers that omit serviceName, such as
+            // transaction details, still reserve the full cross-service chain.
             ...termQuery(SERVICE_NAME, serviceName),
           ],
           // Child spans copy transaction.id from their transaction. Restrict that

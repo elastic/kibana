@@ -127,6 +127,31 @@ describe('ensureFocusedTraceHits', () => {
     expect(result.map(getTraceHitId)).toEqual(['focused', 'parent']);
   });
 
+  it('fetches a missing grandparent when the parent is already on the ranked page', async () => {
+    const parent = createHit({ id: 'parent', parentId: 'grandparent' });
+    const filler = createHit({ id: 'filler' });
+    const focused = createHit({ id: 'focused', parentId: 'parent' });
+    const grandparent = createHit({ id: 'grandparent' });
+
+    search
+      .mockResolvedValueOnce({ hits: { hits: [focused] } })
+      .mockResolvedValueOnce({ hits: { hits: [grandparent] } });
+
+    const result = await ensureFocusedTraceHits({
+      apmEventClient,
+      hits: [parent, filler],
+      focusedDocId: 'focused',
+      maxTraceItems: 3,
+      traceId: 'trace-1',
+      start: 0,
+      end: 1000,
+      ecsOnly: true,
+    });
+
+    expect(search).toHaveBeenCalledTimes(2);
+    expect(result.map(getTraceHitId)).toEqual(['focused', 'parent', 'grandparent']);
+  });
+
   it('keeps an already ranked focused document when a missing ancestor takes a slot', async () => {
     const rootA = createHit({ id: 'root-a' });
     const rootB = createHit({ id: 'root-b' });
