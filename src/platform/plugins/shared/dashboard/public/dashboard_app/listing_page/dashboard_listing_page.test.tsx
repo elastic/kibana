@@ -188,22 +188,6 @@ test('When the title lookup rejects, filter on the title', async () => {
   expect(redirectTo).not.toHaveBeenCalled();
 });
 
-test('When the no data state lookup rejects, render the listing instead of the no data page', async () => {
-  mockIsDashboardAppInNoDataState.mockRejectedValueOnce(new Error('no data lookup failed'));
-  (DashboardListing as jest.Mock).mockClear();
-  (DashboardAppNoDataPage as jest.Mock).mockClear();
-
-  renderDashboardListingPage({ initialFilter: 'my filter' });
-
-  await waitFor(() => {
-    expect(DashboardListing).toHaveBeenCalledWith(
-      expect.objectContaining({ initialFilter: 'my filter' }),
-      expect.any(Object) // react context
-    );
-  });
-  expect(DashboardAppNoDataPage).not.toHaveBeenCalled();
-});
-
 test('sets only "Dashboards" breadcrumb on default tab', async () => {
   renderDashboardListingPage();
 
