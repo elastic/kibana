@@ -101,7 +101,7 @@ describe('getESQLControlVariablesFromState', () => {
       ]);
     });
 
-    it('keeps them as saved for a control whose values come from a query and has no column type', () => {
+    it('guesses from the value for a control whose values come from a query and has no column type', () => {
       expect(
         getESQLControlVariablesFromState([
           {
@@ -113,14 +113,14 @@ describe('getESQLControlVariablesFromState', () => {
           {
             variable_name: 'codes',
             variable_type: 'multi_values',
-            selected_options: ['404', '500'],
+            selected_options: ['404', 'abc'],
             single_select: false,
             control_type: FROM_QUERY,
           },
         ])
       ).toEqual([
-        { key: 'code', value: '404', type: 'values' },
-        { key: 'codes', value: ['404', '500'], type: 'multi_values' },
+        { key: 'code', value: 404, type: 'values' },
+        { key: 'codes', value: [404, 'abc'], type: 'multi_values' },
       ]);
     });
 
@@ -163,14 +163,6 @@ describe('getESQLControlVariablesFromState', () => {
           { code: 'keyword' }
         )
       ).toEqual([{ key: 'code', value: 404, type: 'values' }]);
-    });
-
-    it('reads a control with no control type as one whose values come from a query', () => {
-      expect(
-        getESQLControlVariablesFromState([
-          { variable_name: 'code', variable_type: 'values', selected_options: ['404'] },
-        ])
-      ).toEqual([{ key: 'code', value: '404', type: 'values' }]);
     });
 
     it('passes a numeric option through as a number either way', () => {

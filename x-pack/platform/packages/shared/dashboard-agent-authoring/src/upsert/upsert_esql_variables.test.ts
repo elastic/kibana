@@ -209,6 +209,32 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     expect((await variablesAskedBy(resolvePanelContent))?.map(({ key }) => key)).toEqual(keys);
   });
 
+  it.each([
+    ['a pinned control', 'control-host', ['region']],
+    ['a control in the grid', 'grid-region', ['host']],
+  ])('does not bind the value of %s that the call removes', async (_label, removed, keys) => {
+    const resolvePanelContent = createResolver();
+    const regionControl = {
+      ...hostControl,
+      id: 'grid-region',
+      config: { ...hostControl.config, variable_name: 'region', selected_options: ['eu'] },
+      grid,
+    };
+
+    await executeDashboardUpsert({
+      dashboardData: {
+        title: 'Test',
+        panels: [customContentPanel, regionControl],
+        pinned_panels: [hostControl],
+      },
+      upsert: { panels: [restyle('cc-1')], remove: [removed] } as never,
+      logger,
+      resolvePanelContent,
+    });
+
+    expect((await variablesAskedBy(resolvePanelContent))?.map(({ key }) => key)).toEqual(keys);
+  });
+
   describe('the column type of a query-based control', () => {
     const run = ({
       resolvePanelContent = createResolver(),

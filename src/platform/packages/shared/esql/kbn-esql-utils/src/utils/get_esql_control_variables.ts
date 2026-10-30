@@ -40,12 +40,9 @@ export const getESQLControlVariablesFromState = (
     const options = (Array.isArray(selectedOptions) ? selectedOptions : []).filter(
       (option): option is string | number => ['string', 'number'].includes(typeof option)
     );
-    // A query-based control saves its selections as text, and without its column type they stay text.
-    const columnType = columnTypes[key];
-    const toValue = (option: string | number) => {
-      if (controlType === EsqlControlType.STATIC_VALUES) return castOption(option);
-      return columnType ? castOption(option, columnType) : option;
-    };
+    // Like a live control: cast by the column type of its query when it is known, else guess from the value.
+    const columnType = controlType === EsqlControlType.STATIC_VALUES ? undefined : columnTypes[key];
+    const toValue = (option: string | number) => castOption(option, columnType);
 
     // A control is single-select unless it says otherwise.
     const value =

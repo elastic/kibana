@@ -23,7 +23,7 @@ import type {
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import { getSectionIdByPanelId } from '../dashboard_state';
 import type { DashboardFailure } from '../utils';
-import type { PanelChange, PlannedPanel } from './plan';
+import type { PanelChange, PlannedPanel, PlannedRemovals } from './plan';
 
 interface PanelResolvers {
   resolvePanelContent: ResolvePanelContent;
@@ -67,7 +67,7 @@ export const resolvePlan = async ({
   existingControls,
   existingPanels,
   timeRange,
-  removedControlIds,
+  removals,
   takenIds,
   projectRouting,
   resolvers,
@@ -81,7 +81,8 @@ export const resolvePlan = async ({
   existingPanels: DashboardAttachmentData['panels'];
   /** The time range of the dashboard once the call is applied. */
   timeRange?: DashboardAttachmentData['time_range'];
-  removedControlIds: ReadonlySet<string>;
+  /** What the call removes: ES|QL controls that are removed publish no variable. */
+  removals: PlannedRemovals;
   /** Ids of the panels, sections, and controls the dashboard has or the call names. */
   takenIds: Iterable<string>;
   projectRouting?: string;
@@ -97,6 +98,7 @@ export const resolvePlan = async ({
     pinnedPanels: existingControls,
     panels: existingPanels,
     sectionIdByPanelId,
+    removedIds: new Set([...removals.controlIds, ...removals.panelIds]),
     timeRange,
     resolveColumnType: resolvers.resolveEsqlControlColumnType,
   });
@@ -114,7 +116,7 @@ export const resolvePlan = async ({
     resolveControls({
       controls,
       existingControls,
-      removedIds: removedControlIds,
+      removedIds: removals.controlIds,
       takenIds,
       resolveControlFieldCapabilities: resolvers.resolveControlFieldCapabilities,
       projectRouting,

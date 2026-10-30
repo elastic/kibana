@@ -78,7 +78,7 @@ export const executeDashboardUpsert = async ({
     existingControls: originalDashboardData.pinned_panels ?? [],
     existingPanels: originalDashboardData.panels,
     timeRange: plan.metadata.time_range ?? originalDashboardData.time_range,
-    removedControlIds: plan.removals.controlIds,
+    removals: plan.removals,
     takenIds: plan.reservedIds,
     projectRouting: originalDashboardData.project_routing,
     resolvers: {

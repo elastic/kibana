@@ -94,9 +94,9 @@ describe('createEsqlVariablesResolver', () => {
 
     it('reads them after the pinned ones, and a section control only for its own section', async () => {
       expect(await getEsqlVariables({ pinnedPanels, panels }, [], 'section')).toEqual([
-        { key: 'pinned', value: '0', type: 'values' },
-        { key: 'top', value: '1', type: 'values' },
-        { key: 'inner', value: '2', type: 'values', meta: { group: 'section' } },
+        { key: 'pinned', value: 0, type: 'values' },
+        { key: 'top', value: 1, type: 'values' },
+        { key: 'inner', value: 2, type: 'values', meta: { group: 'section' } },
       ]);
       for (const otherSection of [null, 'other-section']) {
         expect(
@@ -207,13 +207,13 @@ describe('createEsqlVariablesResolver', () => {
     it.each([
       ['cannot tell the type', jest.fn().mockResolvedValue(undefined)],
       ['fails', jest.fn().mockRejectedValue(new Error('boom'))],
-    ])('keeps the selection as text when the resolver %s', async (_label, resolveColumnType) => {
+    ])('guesses from the value when the resolver %s', async (_label, resolveColumnType) => {
       expect(
         await getEsqlVariables(
           { pinnedPanels: [queryControl('bytes', ['100'])], resolveColumnType },
           usesBytes
         )
-      ).toEqual([{ key: 'bytes', value: '100', type: 'values' }]);
+      ).toEqual([{ key: 'bytes', value: 100, type: 'values' }]);
     });
   });
 });

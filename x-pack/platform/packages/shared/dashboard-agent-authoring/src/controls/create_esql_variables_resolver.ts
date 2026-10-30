@@ -14,7 +14,7 @@ import {
   type QueryESQLControl,
 } from '@kbn/esql-types';
 import { getESQLControlVariablesFromState, getESQLQueryVariables } from '@kbn/esql-utils';
-import { getSectionIdByPanelId } from '../dashboard_state';
+import { getControlId, getSectionIdByPanelId } from '../dashboard_state';
 import type { ResolveEsqlVariables } from '../resolve_panel';
 import type { ResolveEsqlControlColumnType } from '../types';
 
@@ -62,6 +62,7 @@ export const createEsqlVariablesResolver = ({
   pinnedPanels = [],
   panels = [],
   sectionIdByPanelId = getSectionIdByPanelId({ panels }),
+  removedIds = new Set<string>(),
   timeRange,
   resolveColumnType,
 }: {
@@ -69,15 +70,23 @@ export const createEsqlVariablesResolver = ({
   panels?: DashboardAttachmentData['panels'];
   /** The section of each panel once the call is applied, which sets where a control in the grid applies. */
   sectionIdByPanelId?: ReadonlyMap<string, string | null>;
+  /** Ids the call removes: a control that is removed publishes no variable. */
+  removedIds?: ReadonlySet<string>;
   timeRange?: DashboardAttachmentData['time_range'];
   resolveColumnType?: ResolveEsqlControlColumnType;
 }): ((sectionId: string | null | undefined) => ResolveEsqlVariables) => {
   const gridPanels = panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
   const entries: EsqlControlEntry[] = [
-    ...pinnedPanels.flatMap(({ type, config }) => (type === ESQL_CONTROL ? [{ config }] : [])),
-    ...gridPanels.flatMap(({ id, type, config }) =>
-      type === ESQL_CONTROL ? [{ config, group: sectionIdByPanelId.get(id) ?? undefined }] : []
-    ),
+    ...pinnedPanels.flatMap((control) => {
+      const id = getControlId(control);
+      const isRemoved = id !== undefined && removedIds.has(id);
+      return control.type === ESQL_CONTROL && !isRemoved ? [{ config: control.config }] : [];
+    }),
+    ...gridPanels.flatMap(({ id, type, config }) => {
+      return type === ESQL_CONTROL && !removedIds.has(id)
+        ? [{ config, group: sectionIdByPanelId.get(id) ?? undefined }]
+        : [];
+    }),
   ];
   const variables = toVariables(entries);
   const columnTypes = new Map<EsqlControlEntry, Promise<string | undefined>>();
