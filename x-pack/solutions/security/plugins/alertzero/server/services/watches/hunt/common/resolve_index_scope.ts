@@ -56,7 +56,8 @@ export const unresolvedPatterns = (
     ...resolved.data_streams.flatMap(({ name, backing_indices: backing }) => [name, ...backing]),
   ];
   return patterns.filter(
-    (pattern) => !names.some(buildMatchesRequired(scopeGuardPatterns([pattern], crossProjectSearch)))
+    (pattern) =>
+      !names.some(buildMatchesRequired(scopeGuardPatterns([pattern], crossProjectSearch)))
   );
 };
 

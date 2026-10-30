@@ -237,9 +237,7 @@ export const resolveTier2Targets = async ({
         universeNarrowed = true;
         const dataset = datasetByPattern.get(pattern);
         const narrowed = (dataset?.data_streams ?? []).map((stream) => `${stream}*`);
-        const allowed = narrowed.filter((candidate) =>
-          staysInsideUniverse(candidate, universe)
-        );
+        const allowed = narrowed.filter((candidate) => staysInsideUniverse(candidate, universe));
         logger?.warn(
           `Hunt Tier 2 target "${pattern}" reaches outside the hunt universe; ${
             allowed.length > 0 ? `narrowed to ${allowed.join(', ')}` : 'dropping it from this run'
