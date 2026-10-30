@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
@@ -60,7 +52,6 @@ export const DetectionOverview = ({
   onRetry,
   compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -144,23 +135,9 @@ export const DetectionOverview = ({
               }}
             />
           ) : (
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
+            <EuiFlexGroup gutterSize="xl" justifyContent="spaceBetween" wrap>
               {metrics.map((metric) => (
-                <EuiFlexItem
-                  key={metric.testSubject}
-                  grow={false}
-                  css={css`
-                    padding-inline: ${euiTheme.size.l};
-
-                    &:first-of-type {
-                      padding-inline-start: 0;
-                    }
-
-                    &:not(:first-of-type) {
-                      border-inline-start: ${euiTheme.border.thin};
-                    }
-                  `}
-                >
+                <EuiFlexItem key={metric.testSubject} grow={false}>
                   <MetricCell {...metric} isLoading={isCountsLoading} />
                 </EuiFlexItem>
               ))}
