@@ -218,6 +218,18 @@ describe('<AgentEnrollmentFlyout />', () => {
           fireEvent.click(standaloneTab);
           expect(results.queryByTestId('configure-standalone-step')).toBeNull();
         });
+
+        it('shows a tooltip explaining the missing permissions', async () => {
+          fireEvent.mouseOver(results.getByTestId('standaloneTab').parentElement!);
+
+          await waitFor(() => {
+            expect(
+              results.getByText(
+                'Read access to Agent policies and Integrations is required to see the standalone instructions.'
+              )
+            ).toBeInTheDocument();
+          });
+        });
       });
     });
   });

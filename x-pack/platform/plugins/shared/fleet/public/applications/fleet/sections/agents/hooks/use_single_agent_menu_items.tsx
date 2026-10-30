@@ -296,6 +296,12 @@ export function useSingleAgentMenuItems({
           ),
           icon: 'inspect',
           disabled: !authz.integrations.readIntegrationPolicies || !agent.policy_id,
+          toolTipContent: !authz.integrations.readIntegrationPolicies ? (
+            <FormattedMessage
+              id="xpack.fleet.agentList.viewAgentPolicyDisabledTooltip"
+              defaultMessage="Agent policies and Integrations 'Read' privileges are required to view the policy."
+            />
+          ) : undefined,
           onClick: () => {
             callbacks.onViewAgentPolicyClick();
           },

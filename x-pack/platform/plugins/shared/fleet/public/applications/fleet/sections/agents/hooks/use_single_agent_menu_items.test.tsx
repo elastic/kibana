@@ -382,6 +382,7 @@ describe('useSingleAgentMenuItems', () => {
       const maintenance = result.current.find((item) => item.id === 'maintenance');
       const viewPolicy = maintenance?.children?.find((item) => item.id === 'view-agent-policy');
       expect(viewPolicy?.disabled).toBe(false);
+      expect(viewPolicy?.toolTipContent).toBeUndefined();
     });
 
     it('should disable view agent policy when user cannot read integration policies', () => {
@@ -406,6 +407,7 @@ describe('useSingleAgentMenuItems', () => {
       const maintenance = result.current.find((item) => item.id === 'maintenance');
       const viewPolicy = maintenance?.children?.find((item) => item.id === 'view-agent-policy');
       expect(viewPolicy?.disabled).toBe(true);
+      expect(viewPolicy?.toolTipContent).toBeDefined();
     });
   });
 
