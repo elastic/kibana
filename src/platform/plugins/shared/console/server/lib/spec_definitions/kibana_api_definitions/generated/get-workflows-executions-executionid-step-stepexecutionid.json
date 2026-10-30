@@ -1,0 +1,11 @@
+{
+  "get-workflows-executions-executionid-step-stepexecutionid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/step/{stepExecutionId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid-step-stepexecutionid"
+  }
+}

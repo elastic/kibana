@@ -1,0 +1,11 @@
+{
+  "get-fleet-agents-files-fileid-filename": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/files/{fileId}/{fileName}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents-files-fileid-filename"
+  }
+}

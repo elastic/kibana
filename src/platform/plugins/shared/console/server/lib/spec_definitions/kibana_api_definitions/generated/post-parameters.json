@@ -1,0 +1,23 @@
+{
+  "post-parameters": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/params"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-parameters",
+    "data_autocomplete_rules": {
+      "description": "",
+      "key": "",
+      "share_across_spaces": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "tags": [],
+      "value": ""
+    }
+  }
+}

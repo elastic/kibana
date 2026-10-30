@@ -1,0 +1,11 @@
+{
+  "getRuleTypes": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/rule_types"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getRuleTypes"
+  }
+}

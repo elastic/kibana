@@ -1,0 +1,14 @@
+{
+  "getAgentNameForService": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/agent_name"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getAgentNameForService",
+    "url_params": {
+      "serviceName": []
+    }
+  }
+}

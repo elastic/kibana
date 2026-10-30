@@ -1,0 +1,19 @@
+{
+  "post-alerting-v2-alerts-bulk-deactivate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/alerts/_bulk_deactivate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-alerts-bulk-deactivate",
+    "data_autocomplete_rules": {
+      "items": [
+        {
+          "alert_id": "",
+          "reason": ""
+        }
+      ]
+    }
+  }
+}

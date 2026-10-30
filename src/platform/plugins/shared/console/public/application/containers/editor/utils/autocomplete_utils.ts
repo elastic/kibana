@@ -26,6 +26,7 @@ import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
 import { isRecord } from '../../../../../common/utils/record_utils';
+import { KIBANA_API_PREFIX } from '../../../../../common/constants';
 import {
   END_OF_URL_TOKEN,
   i18nTexts,
@@ -48,10 +49,15 @@ export const getDocumentationLinkFromAutocomplete = (
   docLinkVersion: string
 ) => {
   // get the url parts from the request url
-  const { urlPathTokens } = parseUrl(request.url);
+  const { urlPathTokens: parsedTokens } = parseUrl(request.url);
+  const { isKibanaRequest, urlPathTokens } = splitKibanaApiPrefix(parsedTokens);
   // add the end of url token
   urlPathTokens.push(END_OF_URL_TOKEN);
-  const { endpoint } = populateContextForMethodAndUrl(request.method, urlPathTokens);
+  const { endpoint } = populateContextForMethodAndUrl(
+    request.method,
+    urlPathTokens,
+    isKibanaRequest
+  );
   if (endpoint && endpoint.documentation && endpoint.documentation.indexOf('http') !== -1) {
     return endpoint.documentation
       .replace('/master/', `/${docLinkVersion}/`)
@@ -101,11 +107,31 @@ export const getMethodCompletionItems = (
 };
 
 /*
+ * Kibana API requests use the `kbn:` url prefix (`kbn:/api/spaces/space` or `kbn:api/...`).
+ * This removes the prefix from the first path token so the remaining tokens can be matched
+ * against the Kibana API definitions.
+ */
+const splitKibanaApiPrefix = (
+  urlPathTokens: string[]
+): { isKibanaRequest: boolean; urlPathTokens: string[] } => {
+  const [first, ...rest] = urlPathTokens;
+  if (!first?.startsWith(KIBANA_API_PREFIX)) {
+    return { isKibanaRequest: false, urlPathTokens };
+  }
+  const unprefixed = first.slice(KIBANA_API_PREFIX.length);
+  return { isKibanaRequest: true, urlPathTokens: unprefixed ? [unprefixed, ...rest] : rest };
+};
+
+/*
  * This function initializes the autocomplete context for the provided method and url token path.
  */
-const populateContextForMethodAndUrl = (method: string, urlTokenPath: string[]) => {
+const populateContextForMethodAndUrl = (
+  method: string,
+  urlTokenPath: string[],
+  isKibanaRequest = false
+) => {
   // get autocomplete components for the request method
-  const components = getTopLevelUrlCompleteComponents(method);
+  const components = getTopLevelUrlCompleteComponents(method, isKibanaRequest);
   // this object will contain the information later, it needs to be initialized with some data
   // similar to the old ace editor context
   const context: AutoCompleteContext = {
@@ -151,7 +177,8 @@ export const getUrlPathCompletionItems = (
   // store already selected indices to exclude from suggestions
   let alreadySelectedIndices: string[] = [];
   // get the method and previous url parts for context
-  const { method, urlPathTokens } = parseLine(lineContent);
+  const { method, urlPathTokens: parsedTokens } = parseLine(lineContent);
+  const { isKibanaRequest, urlPathTokens } = splitKibanaApiPrefix(parsedTokens);
   // if the line ends with /, then we use all url path tokens for autocomplete suggestions
   // otherwise, we don't use the last token for populating the autocomplete context
   if (!lineContent.trim().endsWith('/')) {
@@ -169,7 +196,7 @@ export const getUrlPathCompletionItems = (
       partialToken = lastToken || '';
     }
   }
-  let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
+  let { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens, isKibanaRequest);
   autoCompleteSet = autoCompleteSet ?? [];
   // filter out non index names items if needed
   if (onlyIndexNames) {
@@ -232,9 +259,10 @@ export const getUrlParamsCompletionItems = (
   const lineContent = getRequestLineContentBeforePosition(model, position, requestStartColumn);
 
   // get the method and previous url parts for context
-  const { method, urlPathTokens, urlParamsTokens } = parseLine(lineContent);
+  const { method, urlPathTokens: parsedTokens, urlParamsTokens } = parseLine(lineContent);
+  const { isKibanaRequest, urlPathTokens } = splitKibanaApiPrefix(parsedTokens);
   urlPathTokens.push(END_OF_URL_TOKEN);
-  const context = populateContextForMethodAndUrl(method, urlPathTokens);
+  const context = populateContextForMethodAndUrl(method, urlPathTokens, isKibanaRequest);
 
   const urlParamsComponents =
     context.endpoint?.paramsAutocomplete.getTopLevelComponents(method) ?? [];
@@ -298,9 +326,10 @@ export const getBodyCompletionItems = async (
   // get the content on the method+url line, starting at the request itself
   const lineContent = model.getLineContent(requestStartLineNumber).slice(requestStartColumn - 1);
   // get the method and previous url parts for context
-  const { method, urlPathTokens } = parseLine(lineContent);
+  const { method, urlPathTokens: parsedTokens } = parseLine(lineContent);
+  const { isKibanaRequest, urlPathTokens } = splitKibanaApiPrefix(parsedTokens);
   urlPathTokens.push(END_OF_URL_TOKEN);
-  const context = populateContextForMethodAndUrl(method, urlPathTokens);
+  const context = populateContextForMethodAndUrl(method, urlPathTokens, isKibanaRequest);
 
   // get the content of the request body up until this position
   const bodyRange: monaco.IRange = {

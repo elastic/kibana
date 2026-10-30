@@ -1,0 +1,11 @@
+{
+  "put-security-entity-store-history-snapshot-enable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/history_snapshot/enable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store-history-snapshot-enable"
+  }
+}

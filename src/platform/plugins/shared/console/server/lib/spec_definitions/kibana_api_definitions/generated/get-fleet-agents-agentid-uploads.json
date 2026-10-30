@@ -1,0 +1,11 @@
+{
+  "get-fleet-agents-agentid-uploads": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/uploads"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents-agentid-uploads"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "get-logstash-pipelines": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/logstash/pipelines"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-logstash-pipelines"
+  }
+}

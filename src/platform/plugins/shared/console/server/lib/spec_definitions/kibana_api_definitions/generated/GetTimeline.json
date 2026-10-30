@@ -1,0 +1,15 @@
+{
+  "GetTimeline": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timeline"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetTimeline",
+    "url_params": {
+      "template_timeline_id": [],
+      "id": []
+    }
+  }
+}

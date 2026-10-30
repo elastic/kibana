@@ -1,0 +1,16 @@
+{
+  "post-context-engine-ai-index-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/_query"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-context-engine-ai-index-query",
+    "data_autocomplete_rules": {
+      "limit": "",
+      "params": {},
+      "query": ""
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "PerformAnonymizationFieldsBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/anonymization_fields/_bulk_action"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PerformAnonymizationFieldsBulkAction",
+    "data_autocomplete_rules": {
+      "create": [
+        {
+          "allowed": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "anonymized": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "field": ""
+        }
+      ],
+      "delete": {
+        "ids": [],
+        "query": ""
+      },
+      "update": [
+        {
+          "allowed": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "anonymized": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "id": ""
+        }
+      ]
+    }
+  }
+}

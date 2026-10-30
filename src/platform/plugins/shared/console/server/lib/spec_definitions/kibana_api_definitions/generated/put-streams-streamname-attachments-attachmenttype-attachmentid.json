@@ -1,0 +1,18 @@
+{
+  "put-streams-streamname-attachments-attachmenttype-attachmentid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-streamname-attachments-attachmenttype-attachmentid",
+    "url_components": {
+      "attachmentType": [
+        "dashboard",
+        "rule",
+        "slo"
+      ]
+    }
+  }
+}

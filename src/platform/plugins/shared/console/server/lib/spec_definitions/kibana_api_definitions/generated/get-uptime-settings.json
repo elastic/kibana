@@ -1,0 +1,11 @@
+{
+  "get-uptime-settings": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/uptime/settings"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-uptime-settings"
+  }
+}

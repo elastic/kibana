@@ -1,0 +1,82 @@
+{
+  "UpdateConversation": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/current_user/conversations/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UpdateConversation",
+    "data_autocomplete_rules": {
+      "apiConfig": {
+        "actionTypeId": "",
+        "connectorId": "",
+        "defaultSystemPromptId": "",
+        "model": "",
+        "provider": {
+          "__one_of": [
+            "OpenAI",
+            "Azure OpenAI",
+            "Other"
+          ]
+        }
+      },
+      "category": {
+        "__one_of": [
+          "assistant",
+          "insights"
+        ]
+      },
+      "excludeFromLastConversationStorage": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "id": "",
+      "messages": [
+        {
+          "content": "",
+          "id": "",
+          "isError": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "metadata": {
+            "contentReferences": {},
+            "interruptResumeValue": {},
+            "interruptValue": {}
+          },
+          "reader": {},
+          "refusal": "",
+          "role": {
+            "__one_of": [
+              "system",
+              "user",
+              "assistant"
+            ]
+          },
+          "timestamp": "",
+          "traceData": {
+            "traceId": "",
+            "transactionId": ""
+          },
+          "user": {
+            "id": "",
+            "name": ""
+          }
+        }
+      ],
+      "replacements": {},
+      "title": "",
+      "users": [
+        {
+          "id": "",
+          "name": ""
+        }
+      ]
+    }
+  }
+}

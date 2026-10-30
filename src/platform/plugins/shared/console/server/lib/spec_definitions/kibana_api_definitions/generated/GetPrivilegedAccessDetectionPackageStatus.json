@@ -1,0 +1,11 @@
+{
+  "GetPrivilegedAccessDetectionPackageStatus": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/privileged_user_monitoring/pad/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetPrivilegedAccessDetectionPackageStatus"
+  }
+}

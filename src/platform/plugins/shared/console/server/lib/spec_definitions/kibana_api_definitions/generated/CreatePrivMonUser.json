@@ -1,0 +1,31 @@
+{
+  "CreatePrivMonUser": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreatePrivMonUser",
+    "data_autocomplete_rules": {
+      "entity_analytics_monitoring": {
+        "labels": [
+          {
+            "field": "",
+            "source": {
+              "__one_of": [
+                "api",
+                "csv",
+                "index_sync"
+              ]
+            },
+            "value": ""
+          }
+        ]
+      },
+      "user": {
+        "name": ""
+      }
+    }
+  }
+}

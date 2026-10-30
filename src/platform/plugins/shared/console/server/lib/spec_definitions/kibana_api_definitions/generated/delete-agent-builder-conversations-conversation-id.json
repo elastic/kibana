@@ -1,0 +1,11 @@
+{
+  "delete-agent-builder-conversations-conversation-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-agent-builder-conversations-conversation-id"
+  }
+}

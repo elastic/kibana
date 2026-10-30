@@ -1,0 +1,52 @@
+{
+  "post-agent-builder-agents": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/agents"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-agents",
+    "data_autocomplete_rules": {
+      "access_control": {
+        "access_mode": {
+          "__one_of": [
+            "public",
+            "shared",
+            "private"
+          ]
+        }
+      },
+      "avatar_color": "",
+      "avatar_symbol": "",
+      "configuration": {
+        "ai_indices": [],
+        "approvals": {
+          "auto_approved_apis": {}
+        },
+        "connector_ids": [],
+        "enable_elastic_capabilities": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "instructions": "",
+        "plugin_ids": [],
+        "post_execution_workflow_ids": [],
+        "skill_ids": [],
+        "subagent_ids": [],
+        "tools": [
+          {
+            "tool_ids": []
+          }
+        ],
+        "workflow_ids": []
+      },
+      "description": "",
+      "id": "",
+      "labels": [],
+      "name": ""
+    }
+  }
+}

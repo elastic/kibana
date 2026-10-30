@@ -1,0 +1,14 @@
+{
+  "post-alerting-rule-id-mute-all": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}/_mute_all"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-id-mute-all",
+    "url_components": {
+      "id": "__kibana_rule"
+    }
+  }
+}

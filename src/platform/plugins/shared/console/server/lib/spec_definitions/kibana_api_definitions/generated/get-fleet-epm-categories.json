@@ -1,0 +1,15 @@
+{
+  "get-fleet-epm-categories": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/categories"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-categories",
+    "url_params": {
+      "prerelease": "__flag__",
+      "include_policy_templates": "__flag__"
+    }
+  }
+}

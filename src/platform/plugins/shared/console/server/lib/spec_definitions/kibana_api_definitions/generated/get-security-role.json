@@ -1,0 +1,15 @@
+{
+  "get-security-role": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security/role"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-security-role",
+    "url_params": {
+      "includeReservedRoles": "__flag__",
+      "replaceDeprecatedPrivileges": "__flag__"
+    }
+  }
+}

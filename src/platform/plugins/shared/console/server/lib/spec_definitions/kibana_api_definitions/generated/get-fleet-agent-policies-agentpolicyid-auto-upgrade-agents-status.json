@@ -1,0 +1,11 @@
+{
+  "get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "post-alerting-v2-rules-bulk-disable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_bulk_disable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-bulk-disable",
+    "data_autocomplete_rules": {
+      "ids": []
+    }
+  }
+}

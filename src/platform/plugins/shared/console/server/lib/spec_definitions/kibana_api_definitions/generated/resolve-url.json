@@ -1,0 +1,11 @@
+{
+  "resolve-url": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/short_url/_slug/{slug}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-resolve-url"
+  }
+}

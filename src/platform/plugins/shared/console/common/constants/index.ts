@@ -19,6 +19,13 @@ export {
   AUTOCOMPLETE_ATOMIC_RULE_KEYS,
   API_DOCS_LINK,
   KIBANA_API_DOC_LINKS_FILE,
+  KIBANA_API_DEFINITIONS_FOLDER,
 } from './autocomplete_definitions';
+export {
+  KIBANA_DYNAMIC_VALUE_SOURCES,
+  toKibanaDynamicValueMarker,
+  fromKibanaDynamicValueMarker,
+} from './kibana_dynamic_values';
+export type { KibanaDynamicValueSource } from './kibana_dynamic_values';
 export { DEFAULT_INPUT_VALUE } from './editor_input';
 export { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from './copy_as';

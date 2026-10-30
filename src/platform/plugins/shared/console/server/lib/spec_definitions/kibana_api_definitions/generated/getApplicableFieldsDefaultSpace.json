@@ -1,0 +1,15 @@
+{
+  "getApplicableFieldsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/fields"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getApplicableFieldsDefaultSpace",
+    "url_params": {
+      "owner": [],
+      "templateId": []
+    }
+  }
+}

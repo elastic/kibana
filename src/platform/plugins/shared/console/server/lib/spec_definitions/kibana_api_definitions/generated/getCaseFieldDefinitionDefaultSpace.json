@@ -1,0 +1,11 @@
+{
+  "getCaseFieldDefinitionDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/field_definitions/{field_definition_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseFieldDefinitionDefaultSpace"
+  }
+}

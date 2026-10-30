@@ -1,0 +1,103 @@
+{
+  "setCaseConfigurationDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/configure"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-setCaseConfigurationDefaultSpace",
+    "data_autocomplete_rules": {
+      "closure_type": {
+        "__one_of": [
+          "close-by-pushing",
+          "close-by-user"
+        ]
+      },
+      "connector": {
+        "fields": {},
+        "id": "",
+        "name": "",
+        "type": {
+          "__one_of": [
+            ".cases-webhook",
+            ".jira",
+            ".none",
+            ".resilient",
+            ".servicenow",
+            ".servicenow-sir",
+            ".swimlane"
+          ]
+        }
+      },
+      "customFields": [
+        {
+          "defaultValue": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "key": "",
+          "label": "",
+          "type": {
+            "__one_of": [
+              "text",
+              "toggle"
+            ]
+          },
+          "required": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        }
+      ],
+      "extractObservables": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "owner": {
+        "__one_of": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ]
+      },
+      "templates": [
+        {
+          "caseFields": {
+            "assignees": [
+              {}
+            ],
+            "category": "",
+            "connector": {},
+            "customFields": [
+              {}
+            ],
+            "description": "",
+            "settings": {},
+            "severity": {
+              "__one_of": [
+                "critical",
+                "high",
+                "low",
+                "medium"
+              ]
+            },
+            "tags": [],
+            "title": ""
+          },
+          "description": "",
+          "key": "",
+          "name": "",
+          "tags": []
+        }
+      ],
+      "workflowTags": []
+    }
+  }
+}

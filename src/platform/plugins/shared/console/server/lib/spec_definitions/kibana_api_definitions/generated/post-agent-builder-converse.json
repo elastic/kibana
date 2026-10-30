@@ -1,0 +1,94 @@
+{
+  "post-agent-builder-converse": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/converse"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-converse",
+    "data_autocomplete_rules": {
+      "_execution_mode": {
+        "__one_of": [
+          "local",
+          "task_manager"
+        ]
+      },
+      "access_control": {
+        "access_mode": {
+          "__one_of": [
+            "private",
+            "public"
+          ]
+        }
+      },
+      "action": {
+        "__one_of": [
+          "regenerate"
+        ]
+      },
+      "agent_id": "",
+      "attachments": [
+        {
+          "data": {},
+          "description": "",
+          "group_id": "",
+          "hidden": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "id": "",
+          "origin": "",
+          "type": ""
+        }
+      ],
+      "browser_api_tools": [
+        {
+          "description": "",
+          "id": "",
+          "schema": ""
+        }
+      ],
+      "configuration_overrides": {
+        "enable_elastic_capabilities": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "instructions": "",
+        "skill_ids": [],
+        "tools": [
+          {
+            "tool_ids": []
+          }
+        ]
+      },
+      "connector_id": "",
+      "conversation_id": "",
+      "execution_id": "",
+      "inference_id": "",
+      "input": "",
+      "project_routing": "",
+      "prompts": {},
+      "read_only": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "reasoning_level": {
+        "__one_of": [
+          "none",
+          "minimal",
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ]
+      }
+    }
+  }
+}

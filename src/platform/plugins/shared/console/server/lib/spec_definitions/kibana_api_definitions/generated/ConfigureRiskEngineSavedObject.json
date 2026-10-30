@@ -1,0 +1,40 @@
+{
+  "ConfigureRiskEngineSavedObject": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/risk_score/engine/saved_object/configure"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ConfigureRiskEngineSavedObject",
+    "data_autocomplete_rules": {
+      "enable_reset_to_zero": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "exclude_alert_statuses": [],
+      "exclude_alert_tags": [],
+      "filters": [
+        {
+          "entity_types": [
+            {
+              "__one_of": [
+                "host",
+                "user",
+                "service"
+              ]
+            }
+          ],
+          "filter": ""
+        }
+      ],
+      "page_size": "",
+      "range": {
+        "end": "",
+        "start": ""
+      }
+    }
+  }
+}

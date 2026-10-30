@@ -1,0 +1,26 @@
+{
+  "EndpointGetProcessesAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/running_procs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointGetProcessesAction",
+    "data_autocomplete_rules": {
+      "agent_type": {
+        "__one_of": [
+          "endpoint",
+          "sentinel_one",
+          "crowdstrike",
+          "microsoft_defender_endpoint"
+        ]
+      },
+      "alert_ids": [],
+      "case_ids": [],
+      "comment": "",
+      "endpoint_ids": [],
+      "parameters": {}
+    }
+  }
+}

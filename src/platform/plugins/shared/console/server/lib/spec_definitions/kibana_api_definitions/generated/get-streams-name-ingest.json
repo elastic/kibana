@@ -1,0 +1,11 @@
+{
+  "get-streams-name-ingest": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams/{name}/_ingest"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-name-ingest"
+  }
+}

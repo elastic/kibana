@@ -1,0 +1,11 @@
+{
+  "DeletePrivMonUser": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeletePrivMonUser"
+  }
+}

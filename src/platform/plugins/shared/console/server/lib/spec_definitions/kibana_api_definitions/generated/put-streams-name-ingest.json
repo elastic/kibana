@@ -1,0 +1,50 @@
+{
+  "put-streams-name-ingest": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{name}/_ingest"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-name-ingest",
+    "data_autocomplete_rules": {
+      "ingest": {
+        "classic": {
+          "field_overrides": {}
+        },
+        "failure_store": {
+          "lifecycle": {},
+          "disabled": {},
+          "inherit": {}
+        },
+        "lifecycle": {
+          "inherit": {},
+          "ilm": {},
+          "dsl": {}
+        },
+        "processing": {
+          "steps": [
+            {}
+          ]
+        },
+        "settings": {
+          "index.number_of_replicas": {},
+          "index.number_of_shards": {},
+          "index.refresh_interval": {}
+        },
+        "wired": {
+          "draft": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "fields": {},
+          "routing": [
+            {}
+          ]
+        }
+      }
+    }
+  }
+}

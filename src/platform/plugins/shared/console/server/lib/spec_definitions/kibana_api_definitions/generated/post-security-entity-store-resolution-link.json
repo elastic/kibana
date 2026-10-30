@@ -1,0 +1,15 @@
+{
+  "post-security-entity-store-resolution-link": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/entity_store/resolution/link"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-entity-store-resolution-link",
+    "data_autocomplete_rules": {
+      "entity_ids": [],
+      "target_id": ""
+    }
+  }
+}

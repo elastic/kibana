@@ -1,0 +1,25 @@
+{
+  "post-fleet-epm-packages-bulk-uninstall": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk_uninstall"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-bulk-uninstall",
+    "data_autocomplete_rules": {
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "packages": [
+        {
+          "name": "",
+          "version": ""
+        }
+      ]
+    }
+  }
+}

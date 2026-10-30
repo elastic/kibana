@@ -1,0 +1,16 @@
+{
+  "post-tags": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/tags"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-tags",
+    "data_autocomplete_rules": {
+      "color": "",
+      "description": "",
+      "name": ""
+    }
+  }
+}

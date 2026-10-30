@@ -1,0 +1,11 @@
+{
+  "search-dashboards": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/dashboards"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-search-dashboards"
+  }
+}

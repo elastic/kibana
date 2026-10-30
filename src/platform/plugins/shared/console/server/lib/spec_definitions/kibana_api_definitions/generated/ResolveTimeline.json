@@ -1,0 +1,15 @@
+{
+  "ResolveTimeline": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timeline/resolve"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ResolveTimeline",
+    "url_params": {
+      "template_timeline_id": [],
+      "id": []
+    }
+  }
+}

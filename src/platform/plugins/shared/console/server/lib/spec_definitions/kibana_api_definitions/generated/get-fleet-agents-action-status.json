@@ -1,0 +1,19 @@
+{
+  "get-fleet-agents-action-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/action_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-agents-action-status",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "date": [],
+      "latest": [],
+      "scheduledOnly": "__flag__",
+      "errorSize": []
+    }
+  }
+}

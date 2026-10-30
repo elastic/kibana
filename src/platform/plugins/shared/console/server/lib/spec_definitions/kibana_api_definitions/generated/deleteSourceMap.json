@@ -1,0 +1,11 @@
+{
+  "deleteSourceMap": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/apm/sourcemaps/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteSourceMap"
+  }
+}

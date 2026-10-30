@@ -1,0 +1,48 @@
+{
+  "put-fleet-settings": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/settings"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-fleet-settings",
+    "data_autocomplete_rules": {
+      "additional_yaml_config": "",
+      "delete_unenrolled_agents": {
+        "enabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "is_preconfigured": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "has_seen_add_data_notice": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "integration_knowledge_enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "kibana_ca_sha256": "",
+      "kibana_urls": [],
+      "prerelease_integrations_enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

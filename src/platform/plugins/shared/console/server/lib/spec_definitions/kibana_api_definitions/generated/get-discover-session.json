@@ -1,0 +1,11 @@
+{
+  "get-discover-session": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/discover_sessions/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-discover-session"
+  }
+}

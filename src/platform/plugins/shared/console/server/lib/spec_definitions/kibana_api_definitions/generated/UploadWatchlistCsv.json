@@ -1,0 +1,11 @@
+{
+  "UploadWatchlistCsv": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{watchlist_id}/csv_upload"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-UploadWatchlistCsv"
+  }
+}

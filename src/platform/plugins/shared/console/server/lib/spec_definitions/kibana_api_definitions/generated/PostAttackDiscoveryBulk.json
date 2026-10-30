@@ -1,0 +1,41 @@
+{
+  "PostAttackDiscoveryBulk": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/_bulk"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PostAttackDiscoveryBulk",
+    "data_autocomplete_rules": {
+      "update": {
+        "enable_field_rendering": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "ids": [],
+        "kibana_alert_workflow_status": {
+          "__one_of": [
+            "open",
+            "acknowledged",
+            "closed"
+          ]
+        },
+        "visibility": {
+          "__one_of": [
+            "not_shared",
+            "shared"
+          ]
+        },
+        "with_replacements": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      }
+    }
+  }
+}

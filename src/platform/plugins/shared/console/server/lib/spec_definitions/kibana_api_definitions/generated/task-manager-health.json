@@ -1,0 +1,11 @@
+{
+  "task-manager-health": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/task_manager/_health"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-task-manager-health"
+  }
+}

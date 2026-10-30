@@ -1,0 +1,24 @@
+{
+  "post-markdowns": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/markdowns"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-markdowns",
+    "data_autocomplete_rules": {
+      "content": "",
+      "description": "",
+      "settings": {
+        "open_links_in_new_tab": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "title": ""
+    }
+  }
+}

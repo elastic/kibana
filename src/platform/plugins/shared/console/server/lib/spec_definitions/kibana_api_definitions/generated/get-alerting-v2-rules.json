@@ -1,0 +1,26 @@
+{
+  "get-alerting-v2-rules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-v2-rules",
+    "url_params": {
+      "page": [],
+      "per_page": [],
+      "filter": [],
+      "sort_field": [
+        "kind",
+        "enabled",
+        "name"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "search": []
+    }
+  }
+}

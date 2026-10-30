@@ -1,0 +1,29 @@
+{
+  "FindAnonymizationFields": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/anonymization_fields/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindAnonymizationFields",
+    "url_params": {
+      "fields": [],
+      "filter": [],
+      "sort_field": [
+        "created_at",
+        "anonymized",
+        "allowed",
+        "field",
+        "updated_at"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "per_page": [],
+      "all_data": "__flag__"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "get-security-entity-store-entities": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-security-entity-store-entities",
+    "url_params": {
+      "filter": [],
+      "size": [],
+      "searchAfter": [],
+      "source": [],
+      "fields": [],
+      "sort_field": [],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "per_page": [],
+      "filterQuery": [],
+      "entity_types": [
+        "user",
+        "host",
+        "service",
+        "generic"
+      ]
+    }
+  }
+}

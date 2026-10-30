@@ -1,0 +1,25 @@
+{
+  "post-fleet-agents-agentid-unenroll": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/unenroll"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-unenroll",
+    "data_autocomplete_rules": {
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "revoke": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

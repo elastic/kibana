@@ -1,0 +1,88 @@
+{
+  "post-alerting-v2-rules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules",
+    "data_autocomplete_rules": {
+      "artifacts": [
+        {
+          "data": {},
+          "id": "",
+          "type": ""
+        }
+      ],
+      "grouping": {
+        "fields": []
+      },
+      "kind": {
+        "__one_of": [
+          "alert",
+          "signal"
+        ]
+      },
+      "metadata": {
+        "builder": {
+          "type": ""
+        },
+        "description": "",
+        "name": "",
+        "routing_tags": [],
+        "tags": []
+      },
+      "no_data": {
+        "query": "",
+        "strategy": {
+          "__one_of": [
+            "ignore"
+          ]
+        }
+      },
+      "query": {
+        "base": "",
+        "breach": {
+          "segment": ""
+        }
+      },
+      "recovery": {
+        "strategy": {
+          "__one_of": [
+            "no_breach"
+          ]
+        },
+        "query": "",
+        "segment": ""
+      },
+      "schedule": {
+        "every": "",
+        "lookback": ""
+      },
+      "state_transition": {
+        "pending": {
+          "count": "",
+          "operator": {
+            "__one_of": [
+              "and",
+              "or"
+            ]
+          },
+          "timeframe": ""
+        },
+        "recovering": {
+          "count": "",
+          "operator": {
+            "__one_of": [
+              "and",
+              "or"
+            ]
+          },
+          "timeframe": ""
+        }
+      },
+      "time_field": ""
+    }
+  }
+}

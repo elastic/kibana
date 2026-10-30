@@ -1,0 +1,11 @@
+{
+  "CleanUpRiskEngine": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/risk_score/engine/dangerously_delete_data"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CleanUpRiskEngine"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "CreateKnowledgeBase": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/{resource}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateKnowledgeBase",
+    "url_params": {
+      "modelId": [],
+      "ignoreSecurityLabs": "__flag__"
+    }
+  }
+}

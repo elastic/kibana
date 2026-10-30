@@ -1,0 +1,11 @@
+{
+  "get-context-engine-ai-index-aiindexid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/{aiIndexId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-context-engine-ai-index-aiindexid"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "post-fleet-agents-agentid-migrate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/migrate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-migrate",
+    "data_autocomplete_rules": {
+      "enrollment_token": "",
+      "settings": {
+        "ca_sha256": "",
+        "certificate_authorities": "",
+        "elastic_agent_cert": "",
+        "elastic_agent_cert_key": "",
+        "elastic_agent_cert_key_passphrase": "",
+        "headers": {},
+        "insecure": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "proxy_disabled": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "proxy_headers": {},
+        "proxy_url": "",
+        "replace_token": "",
+        "staging": "",
+        "tags": []
+      },
+      "uri": ""
+    }
+  }
+}

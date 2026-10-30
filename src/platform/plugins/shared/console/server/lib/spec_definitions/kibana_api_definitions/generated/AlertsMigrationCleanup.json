@@ -1,0 +1,14 @@
+{
+  "AlertsMigrationCleanup": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/migration"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-AlertsMigrationCleanup",
+    "data_autocomplete_rules": {
+      "migration_ids": []
+    }
+  }
+}

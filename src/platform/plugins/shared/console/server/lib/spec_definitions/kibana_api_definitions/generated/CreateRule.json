@@ -1,0 +1,303 @@
+{
+  "CreateRule": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/rules"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateRule",
+    "data_autocomplete_rules": {
+      "language": {
+        "__one_of": [
+          "eql"
+        ]
+      },
+      "query": "",
+      "type": {
+        "__one_of": [
+          "eql"
+        ]
+      },
+      "alert_suppression": {
+        "duration": {
+          "unit": {
+            "__one_of": [
+              "s",
+              "m",
+              "h"
+            ]
+          },
+          "value": ""
+        },
+        "group_by": [],
+        "missing_fields_strategy": {
+          "__one_of": [
+            "doNotSuppress",
+            "suppress"
+          ]
+        }
+      },
+      "actions": [
+        {
+          "action_type_id": "",
+          "alerts_filter": {},
+          "frequency": {
+            "notifyWhen": {
+              "__one_of": [
+                "onActiveAlert",
+                "onThrottleInterval",
+                "onActionGroupChange"
+              ]
+            },
+            "summary": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "throttle": {
+              "__one_of": [
+                "no_actions",
+                "rule"
+              ]
+            }
+          },
+          "group": "",
+          "id": "",
+          "params": {},
+          "uuid": ""
+        }
+      ],
+      "alias_purpose": {
+        "__one_of": [
+          "savedObjectConversion",
+          "savedObjectImport"
+        ]
+      },
+      "alias_target_id": "",
+      "author": [],
+      "building_block_type": "",
+      "description": "",
+      "enabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "exceptions_list": [
+        {
+          "id": "",
+          "list_id": "",
+          "namespace_type": {
+            "__one_of": [
+              "agnostic",
+              "single"
+            ]
+          },
+          "type": {
+            "__one_of": [
+              "detection",
+              "rule_default",
+              "endpoint",
+              "endpoint_trusted_apps",
+              "endpoint_trusted_devices",
+              "endpoint_events",
+              "endpoint_host_isolation_exceptions",
+              "endpoint_blocklists",
+              "endpoint_custom_yara_signatures"
+            ]
+          }
+        }
+      ],
+      "false_positives": [],
+      "from": "",
+      "interval": "",
+      "investigation_fields": {
+        "field_names": []
+      },
+      "license": "",
+      "max_signals": "",
+      "meta": {},
+      "name": "",
+      "namespace": "",
+      "note": "",
+      "outcome": {
+        "__one_of": [
+          "exactMatch",
+          "aliasMatch",
+          "conflict"
+        ]
+      },
+      "output_index": "",
+      "references": [],
+      "related_integrations": [
+        {
+          "integration": "",
+          "package": "",
+          "version": ""
+        }
+      ],
+      "required_fields": [
+        {
+          "name": "",
+          "type": ""
+        }
+      ],
+      "response_actions": [
+        {
+          "action_type_id": {
+            "__one_of": [
+              ".osquery"
+            ]
+          },
+          "params": {
+            "ecs_mapping": {},
+            "pack_id": "",
+            "queries": [
+              {}
+            ],
+            "query": "",
+            "saved_query_id": "",
+            "timeout": ""
+          }
+        }
+      ],
+      "risk_score": "",
+      "risk_score_mapping": [
+        {
+          "field": "",
+          "operator": {
+            "__one_of": [
+              "equals"
+            ]
+          },
+          "risk_score": "",
+          "value": ""
+        }
+      ],
+      "rule_id": "",
+      "rule_name_override": "",
+      "setup": "",
+      "severity": {
+        "__one_of": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ]
+      },
+      "severity_mapping": [
+        {
+          "field": "",
+          "operator": {
+            "__one_of": [
+              "equals"
+            ]
+          },
+          "severity": {
+            "__one_of": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "value": ""
+        }
+      ],
+      "tags": [],
+      "threat": [
+        {
+          "framework": "",
+          "tactic": {
+            "id": "",
+            "name": "",
+            "reference": ""
+          },
+          "technique": [
+            {
+              "id": "",
+              "name": "",
+              "reference": "",
+              "subtechnique": [
+                {}
+              ]
+            }
+          ]
+        }
+      ],
+      "throttle": {
+        "__one_of": [
+          "no_actions",
+          "rule"
+        ]
+      },
+      "timeline_id": "",
+      "timeline_title": "",
+      "timestamp_override": "",
+      "timestamp_override_fallback_disabled": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "to": "",
+      "version": "",
+      "data_view_id": "",
+      "filters": [],
+      "index": [],
+      "history_window_start": "",
+      "new_terms_fields": [],
+      "anomaly_threshold": "",
+      "machine_learning_job_id": "",
+      "concurrent_searches": "",
+      "items_per_search": "",
+      "saved_id": "",
+      "threat_filters": [],
+      "threat_indicator_path": "",
+      "threat_language": {
+        "__one_of": [
+          "kuery",
+          "lucene"
+        ]
+      },
+      "threat_index": [],
+      "threat_mapping": [
+        {
+          "entries": [
+            {
+              "field": "",
+              "negate": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "type": {
+                "__one_of": [
+                  "mapping"
+                ]
+              },
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "threat_query": "",
+      "threshold": {
+        "cardinality": [
+          {
+            "field": "",
+            "value": ""
+          }
+        ],
+        "field": "",
+        "value": ""
+      },
+      "event_category_override": "",
+      "tiebreaker_field": "",
+      "timestamp_field": ""
+    }
+  }
+}

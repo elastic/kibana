@@ -1,0 +1,11 @@
+{
+  "getCaseAlertsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/alerts"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseAlertsDefaultSpace"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "findCaseConnectorsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/configure/connectors/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-findCaseConnectorsDefaultSpace"
+  }
+}

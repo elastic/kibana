@@ -1,0 +1,17 @@
+{
+  "get-fleet-package-policies-packagepolicyid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/{packagePolicyId}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-package-policies-packagepolicyid",
+    "url_params": {
+      "format": [
+        "simplified",
+        "legacy"
+      ]
+    }
+  }
+}

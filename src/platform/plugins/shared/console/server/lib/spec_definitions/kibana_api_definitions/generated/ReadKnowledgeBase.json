@@ -1,0 +1,11 @@
+{
+  "ReadKnowledgeBase": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/{resource}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadKnowledgeBase"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "get-fleet-cloud-connectors-cloudconnectorid-usage": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors/{cloudConnectorId}/usage"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-cloud-connectors-cloudconnectorid-usage",
+    "url_params": {
+      "page": [],
+      "perPage": []
+    }
+  }
+}

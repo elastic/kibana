@@ -1,0 +1,15 @@
+{
+  "DeleteNote": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/note"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteNote",
+    "data_autocomplete_rules": {
+      "noteIds": [],
+      "noteId": ""
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "PostKnowledgeBase": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PostKnowledgeBase",
+    "url_params": {
+      "modelId": [],
+      "ignoreSecurityLabs": "__flag__"
+    }
+  }
+}

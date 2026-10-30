@@ -1,0 +1,11 @@
+{
+  "ScheduleMonitoringEngine": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/schedule_now"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ScheduleMonitoringEngine"
+  }
+}

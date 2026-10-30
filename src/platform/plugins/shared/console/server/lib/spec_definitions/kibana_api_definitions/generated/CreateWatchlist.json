@@ -1,0 +1,62 @@
+{
+  "CreateWatchlist": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateWatchlist",
+    "data_autocomplete_rules": {
+      "description": "",
+      "entitySources": [
+        {
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "filter": {
+            "kuery": ""
+          },
+          "identifierField": "",
+          "indexPattern": "",
+          "integrationName": "",
+          "matchers": [
+            {
+              "fields": [],
+              "values": {
+                "__one_of": [
+                  "true",
+                  "false"
+                ]
+              }
+            }
+          ],
+          "name": "",
+          "queryRule": "",
+          "range": {
+            "end": "",
+            "start": ""
+          },
+          "type": {
+            "__one_of": [
+              "index",
+              "entity_analytics_integration",
+              "store"
+            ]
+          }
+        }
+      ],
+      "managed": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "riskModifier": ""
+    }
+  }
+}

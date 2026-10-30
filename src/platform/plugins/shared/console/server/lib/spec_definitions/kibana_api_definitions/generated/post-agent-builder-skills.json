@@ -1,0 +1,25 @@
+{
+  "post-agent-builder-skills": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/skills"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-skills",
+    "data_autocomplete_rules": {
+      "content": "",
+      "description": "",
+      "id": "",
+      "name": "",
+      "referenced_content": [
+        {
+          "content": "",
+          "name": "",
+          "relativePath": ""
+        }
+      ],
+      "tool_ids": []
+    }
+  }
+}

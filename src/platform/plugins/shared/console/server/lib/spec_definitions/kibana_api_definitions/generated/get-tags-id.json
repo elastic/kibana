@@ -1,0 +1,11 @@
+{
+  "get-tags-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/tags/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-tags-id"
+  }
+}

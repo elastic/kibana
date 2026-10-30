@@ -1,0 +1,15 @@
+{
+  "ImportExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exception_lists/_import"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ImportExceptionList",
+    "url_params": {
+      "overwrite": "__flag__",
+      "as_new_list": "__flag__"
+    }
+  }
+}

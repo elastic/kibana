@@ -1,0 +1,56 @@
+{
+  "get-synthetic-monitors": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/synthetics/monitors"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-synthetic-monitors",
+    "url_params": {
+      "query": [],
+      "filter": [],
+      "tags": [],
+      "monitorTypes": [],
+      "locations": [],
+      "projects": [],
+      "schedules": [],
+      "remoteNames": [],
+      "status": [],
+      "monitorQueryIds": [],
+      "configIds": [],
+      "showFromAllSpaces": [
+        "true",
+        "false",
+        "true",
+        "false"
+      ],
+      "useLogicalAndFor": [
+        "tags",
+        "locations"
+      ],
+      "dateRangeStart": [],
+      "dateRangeEnd": [],
+      "page": [],
+      "perPage": [],
+      "sortField": [
+        "enabled",
+        "status",
+        "updated_at",
+        "created_at",
+        "urls",
+        "name",
+        "tags",
+        "project_id",
+        "type",
+        "schedule",
+        "journey_id"
+      ],
+      "sortOrder": [
+        "desc",
+        "asc"
+      ],
+      "searchAfter": []
+    }
+  }
+}

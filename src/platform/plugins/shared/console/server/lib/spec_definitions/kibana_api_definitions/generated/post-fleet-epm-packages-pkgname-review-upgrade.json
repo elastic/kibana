@@ -1,0 +1,21 @@
+{
+  "post-fleet-epm-packages-pkgname-review-upgrade": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/review_upgrade"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-pkgname-review-upgrade",
+    "data_autocomplete_rules": {
+      "action": {
+        "__one_of": [
+          "accept",
+          "decline",
+          "pending"
+        ]
+      },
+      "target_version": ""
+    }
+  }
+}

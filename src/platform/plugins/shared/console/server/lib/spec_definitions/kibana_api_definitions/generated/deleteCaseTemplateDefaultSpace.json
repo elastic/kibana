@@ -1,0 +1,11 @@
+{
+  "deleteCaseTemplateDefaultSpace": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/cases/templates/{template_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteCaseTemplateDefaultSpace"
+  }
+}

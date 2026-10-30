@@ -1,0 +1,11 @@
+{
+  "delete-security-role-name": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/security/role/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-security-role-name"
+  }
+}

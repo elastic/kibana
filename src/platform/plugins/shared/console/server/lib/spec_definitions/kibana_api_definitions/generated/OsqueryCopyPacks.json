@@ -1,0 +1,11 @@
+{
+  "OsqueryCopyPacks": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/packs/{id}/copy"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryCopyPacks"
+  }
+}

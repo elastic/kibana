@@ -1,0 +1,23 @@
+{
+  "FindListItems": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/items/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindListItems",
+    "url_params": {
+      "list_id": [],
+      "page": [],
+      "per_page": [],
+      "sort_field": [],
+      "sort_order": [
+        "desc",
+        "asc"
+      ],
+      "cursor": [],
+      "filter": []
+    }
+  }
+}

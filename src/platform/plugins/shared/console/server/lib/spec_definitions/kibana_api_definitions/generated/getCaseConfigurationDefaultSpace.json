@@ -1,0 +1,21 @@
+{
+  "getCaseConfigurationDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/configure"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseConfigurationDefaultSpace",
+    "url_params": {
+      "owner": [
+        "cases",
+        "observability",
+        "securitySolution",
+        "cases",
+        "observability",
+        "securitySolution"
+      ]
+    }
+  }
+}

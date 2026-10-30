@@ -1,0 +1,11 @@
+{
+  "EndpointScriptLibraryDownloadScript": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/scripts_library/{script_id}/download"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointScriptLibraryDownloadScript"
+  }
+}

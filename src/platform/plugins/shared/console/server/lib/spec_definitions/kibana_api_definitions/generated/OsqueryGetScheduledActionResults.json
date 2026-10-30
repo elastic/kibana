@@ -1,0 +1,21 @@
+{
+  "OsqueryGetScheduledActionResults": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/scheduled_results/{scheduleId}/{executionCount}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryGetScheduledActionResults",
+    "url_params": {
+      "kuery": [],
+      "page": [],
+      "pageSize": [],
+      "sort": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

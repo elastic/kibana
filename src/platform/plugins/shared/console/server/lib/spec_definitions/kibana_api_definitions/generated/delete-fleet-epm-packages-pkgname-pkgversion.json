@@ -1,0 +1,14 @@
+{
+  "delete-fleet-epm-packages-pkgname-pkgversion": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-epm-packages-pkgname-pkgversion",
+    "url_params": {
+      "force": "__flag__"
+    }
+  }
+}

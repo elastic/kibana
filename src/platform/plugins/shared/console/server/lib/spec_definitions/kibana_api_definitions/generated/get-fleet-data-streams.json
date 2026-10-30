@@ -1,0 +1,11 @@
+{
+  "get-fleet-data-streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/data_streams"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-data-streams"
+  }
+}

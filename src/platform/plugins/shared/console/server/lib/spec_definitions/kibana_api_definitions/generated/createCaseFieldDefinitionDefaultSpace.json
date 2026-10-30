@@ -1,0 +1,26 @@
+{
+  "createCaseFieldDefinitionDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/field_definitions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-createCaseFieldDefinitionDefaultSpace",
+    "url_params": {
+      "dry_run": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "definition": "",
+      "description": "",
+      "isGlobal": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "owner": ""
+    }
+  }
+}

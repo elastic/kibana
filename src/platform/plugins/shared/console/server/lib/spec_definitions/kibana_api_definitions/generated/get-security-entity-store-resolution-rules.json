@@ -1,0 +1,11 @@
+{
+  "get-security-entity-store-resolution-rules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security/entity_store/resolution/rules"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-security-entity-store-resolution-rules"
+  }
+}

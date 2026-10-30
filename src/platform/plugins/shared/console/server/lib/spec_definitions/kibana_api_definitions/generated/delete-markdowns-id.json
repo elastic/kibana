@@ -1,0 +1,11 @@
+{
+  "delete-markdowns-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/markdowns/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-markdowns-id"
+  }
+}

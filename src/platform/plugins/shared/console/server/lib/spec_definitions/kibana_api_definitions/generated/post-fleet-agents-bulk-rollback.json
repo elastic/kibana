@@ -1,0 +1,27 @@
+{
+  "post-fleet-agents-bulk-rollback": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_rollback"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-rollback",
+    "data_autocomplete_rules": {
+      "agents": "",
+      "batchSize": "",
+      "dryRun": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "includeInactive": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

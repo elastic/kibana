@@ -1,0 +1,11 @@
+{
+  "getCaseApplicableFieldsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/fields"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseApplicableFieldsDefaultSpace"
+  }
+}

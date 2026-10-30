@@ -1,0 +1,11 @@
+{
+  "deleteCaseCommentsDefaultSpace": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-deleteCaseCommentsDefaultSpace"
+  }
+}

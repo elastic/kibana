@@ -1,0 +1,17 @@
+{
+  "ExportTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_export"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ExportTimelines",
+    "url_params": {
+      "file_name": []
+    },
+    "data_autocomplete_rules": {
+      "ids": []
+    }
+  }
+}

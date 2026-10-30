@@ -1,0 +1,14 @@
+{
+  "ReadAlertsMigrationStatus": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/migration_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadAlertsMigrationStatus",
+    "url_params": {
+      "from": []
+    }
+  }
+}

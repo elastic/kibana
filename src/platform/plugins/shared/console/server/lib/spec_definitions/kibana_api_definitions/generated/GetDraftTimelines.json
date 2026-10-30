@@ -1,0 +1,17 @@
+{
+  "GetDraftTimelines": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timeline/_draft"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetDraftTimelines",
+    "url_params": {
+      "timelineType": [
+        "default",
+        "template"
+      ]
+    }
+  }
+}

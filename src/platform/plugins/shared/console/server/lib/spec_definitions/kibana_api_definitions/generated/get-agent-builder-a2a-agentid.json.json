@@ -1,0 +1,11 @@
+{
+  "get-agent-builder-a2a-agentid.json": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/a2a/{agentId}.json"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-agent-builder-a2a-agentid.json"
+  }
+}

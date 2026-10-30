@@ -1,0 +1,11 @@
+{
+  "delete-maintenance-window-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-maintenance-window-id"
+  }
+}
