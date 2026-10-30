@@ -1280,10 +1280,15 @@ export class DataViewsService {
 
     if (dupe) {
       if (overwrite) {
-        const filteredNamespaces = dupe.namespaces?.filter(
-          (namespace) => namespace !== UNKNOWN_SPACE
-        );
-        await this.delete(dupe.id, filteredNamespaces);
+        // Only delete from a space the caller is creating the data view in, since that is the
+        // one they are known to be able to write to. Empty means the current space.
+        const { namespaces: requestedNamespaces } = dataView;
+        const deleteNamespaces = requestedNamespaces.length
+          ? dupe.namespaces?.filter(
+              (namespace) => namespace !== UNKNOWN_SPACE && requestedNamespaces.includes(namespace)
+            )
+          : undefined;
+        await this.delete(dupe.id, deleteNamespaces);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }

@@ -582,6 +582,37 @@ describe('IndexPatterns', () => {
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', namespaces);
   });
 
+  test('createSavedObject with overwrite deletes a shared duplicate from the requested namespace only', async () => {
+    const dataView = await indexPatterns.create(
+      { title: 'kibana-*', name: 'test', namespaces: ['b'] },
+      true
+    );
+
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ ...savedObject, id: 'dupe-id', namespaces: ['a', 'b'] }]);
+    savedObjectsClient.delete = jest.fn().mockResolvedValue(undefined);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({ ...savedObject, id: dataView.id });
+
+    await indexPatterns.createSavedObject(dataView, true);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', ['b']);
+  });
+
+  test('createSavedObject with overwrite deletes from the current space when no namespaces are requested', async () => {
+    const dataView = await indexPatterns.create({ title: 'kibana-*', name: 'test' }, true);
+
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ ...savedObject, id: 'dupe-id', namespaces: ['a', 'b'] }]);
+    savedObjectsClient.delete = jest.fn().mockResolvedValue(undefined);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({ ...savedObject, id: dataView.id });
+
+    await indexPatterns.createSavedObject(dataView, true);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', undefined);
+  });
+
   test('find', async () => {
     const search = 'kibana*';
     const size = 10;
