@@ -14,8 +14,14 @@ tags:
   - alertzero
   - alert-triage
 
+# No concurrency setting. Overlapping runs revise the same head, and the step retries with a
+# jittered backoff until each one wins (up to 10 attempts). A `queue` strategy would serialize them,
+# but a burst of trigger events creates all its runs at once, each sees the others pending and
+# queues itself, and none is ever started.
+#
 # The filter keeps most tag changes out, such as the sweep's `az:false_positive` and its key tags.
-# It still lets through the re-tags of a dismissed or expired proposal and the re-tags this
+# It still lets through the batch's `az:true_positive` and `az:inconclusive` verdict tags (the event
+# does not say who tagged), the re-tags of a dismissed or expired proposal, and the re-tags this
 # workflow makes. Those start a run that does nothing: the first step ignores every alert that is
 # not in a pending proposal.
 triggers:

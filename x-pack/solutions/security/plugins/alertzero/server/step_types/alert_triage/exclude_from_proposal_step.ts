@@ -18,7 +18,7 @@ import {
 } from '../../alert_triage/exclude_from_proposal';
 import { buildProposalText } from '../../alert_triage/proposal_text';
 import { loadAlertsByIds } from './ports';
-import { MAX_HEADS, toHead } from './group_proposals_step';
+import { toHead } from './group_proposals_step';
 
 export interface ExcludeFromProposalStepDependencies {
   getProposals: () => ProposalsPluginStart;
@@ -77,24 +77,10 @@ export const getTriageExcludeFromProposalStepDefinition = (
 
         const result = await excludeFromProposals(groups, {
           listHeads: async (rootIds) => {
-            const { proposals, total } = await service.list(
-              {
-                rootProposalIds: rootIds,
-                origin: ALERTZERO_PROPOSAL_ORIGIN,
-                excludeSuperseded: true,
-                excludeExpired: false,
-                size: MAX_HEADS,
-                from: 0,
-              },
-              spaceId,
-              request
-            );
-            if (total > proposals.length) {
-              throw new Error(
-                `The proposal lookup matched ${total} and returned ${proposals.length}`
-              );
-            }
-            return proposals.map(
+            const heads = await service.getLatestRevisions(rootIds, spaceId, {
+              origin: ALERTZERO_PROPOSAL_ORIGIN,
+            });
+            return [...heads.values()].map(
               (proposal): ExclusionHead => ({ ...toHead(proposal), comment: proposal.comment })
             );
           },

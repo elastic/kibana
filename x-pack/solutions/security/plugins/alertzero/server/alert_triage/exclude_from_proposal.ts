@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProposalConflictError } from '@kbn/proposals-plugin/server';
+import { ProposalConflictError, ProposalNotFoundError } from '@kbn/proposals-plugin/server';
 import type { GroupingHead } from './group_proposals';
 
 export const PROPOSAL_TAG_PREFIX = 'az:proposal:';
@@ -38,6 +38,7 @@ export interface ExclusionResult {
 }
 
 export interface ExclusionDeps {
+  /** The live revision of each chain, at most one per root. */
   listHeads: (rootIds: string[]) => Promise<ExclusionHead[]>;
   revise: (
     head: ExclusionHead,
@@ -45,7 +46,26 @@ export interface ExclusionDeps {
     excluded: { count: number; truePositiveCount: number }
   ) => Promise<{ proposalId: string; revision: number }>;
   onError?: (message: string) => void;
+  /** Waits between attempts. Injected so tests do not wait. */
+  sleep?: (ms: number) => Promise<void>;
 }
+
+/**
+ * Attempts per proposal. Every overlapping writer (another exclusion run, a join, a chat revise) can
+ * win one attempt, and a burst of re-tags starts one run per tag call, so this covers ten at once.
+ */
+export const MAX_REVISE_ATTEMPTS = 10;
+const RETRY_DELAY_MS = 200;
+
+const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const headOf = (heads: readonly ExclusionHead[], rootProposalId: string) =>
+  heads.find((candidate) => candidate.rootProposalId === rootProposalId);
+
+// A conflict means another writer revised first. Not found means the head read was a losing
+// writer's new revision, which `revise()` deletes again: between its two writes it reads as live.
+const isRetryable = (error: unknown) =>
+  error instanceof ProposalConflictError || error instanceof ProposalNotFoundError;
 
 /**
  * The alerts an analyst excluded, by proposal. An alert in a proposal is excluded when it carries
@@ -77,17 +97,30 @@ export const groupExcludedAlerts = (
 };
 
 /**
- * Takes the excluded alerts out of one proposal, revising exactly the head it read. One retry: a
- * conflict means a join or a decision got there first, so the second attempt reads the head again,
- * keeps what the join added, and gives up if the proposal is no longer pending.
+ * Takes the excluded alerts out of one proposal, revising exactly the head it read. A retryable
+ * failure means another writer got there first, so the next attempt reads the head again, keeps
+ * what that writer changed, and stops if the proposal is no longer pending. Once the proposal has
+ * held the alerts, every way out reports them, so a lost exclusion is never silent.
  */
 const excludeFromHead = async (
   group: ExcludedGroup,
-  head: ExclusionHead,
+  firstHeads: readonly ExclusionHead[],
   deps: ExclusionDeps
 ): Promise<ExclusionResult | undefined> => {
-  let current: ExclusionHead | undefined = head;
-  for (let attempt = 0; attempt < 2 && current; attempt++) {
+  const { rootProposalId } = group;
+  const sleep = deps.sleep ?? defaultSleep;
+  let heads = firstHeads;
+  let unrevised: ExclusionResult | undefined;
+  let lastError = '';
+  for (let attempt = 0; attempt < MAX_REVISE_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      // Jitter, so runs that started together do not keep colliding.
+      await sleep(RETRY_DELAY_MS * attempt * (0.5 + Math.random()));
+      heads = await deps.listHeads([rootProposalId]);
+    }
+    const current = headOf(heads, rootProposalId);
+    // The chain has no live revision any more, for example it was cleaned up.
+    if (!current) break;
     if (current.status !== 'pending' || current.decision !== undefined) return undefined;
     const held = new Set(current.alertIds);
     const excludedIds = group.alertIds.filter((id) => held.has(id));
@@ -95,36 +128,29 @@ const excludeFromHead = async (
     if (excludedIds.length === 0) return undefined;
     const truePositiveCount = group.truePositiveIds.filter((id) => held.has(id)).length;
     const remaining = current.alertIds.filter((id) => !excludedIds.includes(id));
-    const base = {
+    unrevised = {
       rootProposalId: current.rootProposalId,
       conversationId: current.conversationId,
       excludedIds,
       truePositiveCount,
+      revision: current.revision,
+      remainingCount: current.alertIds.length,
+      revised: false,
     };
     try {
       const { revision } = await deps.revise(current, remaining, {
         count: excludedIds.length,
         truePositiveCount,
       });
-      return { ...base, revision, remainingCount: remaining.length, revised: true };
+      return { ...unrevised, revision, remainingCount: remaining.length, revised: true };
     } catch (error) {
-      if (error instanceof ProposalConflictError && attempt === 0) {
-        [current] = await deps.listHeads([current.rootProposalId]);
-        continue;
-      }
-      // Not a conflict, or a second one: for example the caller may not revise proposals. The alerts
-      // stay listed.
-      deps.onError?.(`Could not revise ${current.proposalId}: ${(error as Error).message}`);
-      return {
-        ...base,
-        revision: current.revision,
-        remainingCount: current.alertIds.length,
-        revised: false,
-      };
+      lastError = `Could not revise ${current.proposalId}: ${(error as Error).message}`;
+      // For example the caller may not revise proposals: another attempt cannot help.
+      if (!isRetryable(error)) break;
     }
   }
-  // The head is gone after a conflict.
-  return undefined;
+  if (unrevised) deps.onError?.(lastError || `${rootProposalId} has no live revision any more`);
+  return unrevised;
 };
 
 /** Excludes the alerts of every group from the pending proposal that holds them. */
@@ -136,9 +162,9 @@ export const excludeFromProposals = async (
   const heads = await deps.listHeads(groups.map(({ rootProposalId }) => rootProposalId));
   const results: ExclusionResult[] = [];
   for (const group of groups) {
-    const head = heads.find(({ rootProposalId }) => rootProposalId === group.rootProposalId);
-    if (!head) continue;
-    const result = await excludeFromHead(group, head, deps);
+    // A proposal that was never created, for example after a dispatch failure.
+    if (!headOf(heads, group.rootProposalId)) continue;
+    const result = await excludeFromHead(group, heads, deps);
     if (result) results.push(result);
   }
   return results;

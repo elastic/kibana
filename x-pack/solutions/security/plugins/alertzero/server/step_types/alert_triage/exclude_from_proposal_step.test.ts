@@ -37,7 +37,9 @@ const setup = ({
   canRead?: boolean;
 }) => {
   const service = {
-    list: jest.fn().mockResolvedValue({ proposals: heads, total: heads.length }),
+    getLatestRevisions: jest
+      .fn()
+      .mockResolvedValue(new Map(heads.map((proposal) => [proposal.rootProposalId, proposal]))),
     revise: jest.fn().mockResolvedValue({ proposalId: 'revision-2', revision: 2 }),
   };
   const privileges = {
@@ -139,7 +141,7 @@ describe('triage exclude from proposal step', () => {
       excluded_alert_ids: [],
       needs_verdict_alert_ids: [],
     });
-    expect(service.list).not.toHaveBeenCalled();
+    expect(service.getLatestRevisions).not.toHaveBeenCalled();
   });
 
   it('leaves a settled proposal and its alerts alone', async () => {
@@ -159,6 +161,6 @@ describe('triage exclude from proposal step', () => {
     });
 
     expect(await run(['b'])).toEqual(expect.objectContaining({ excluded_alert_ids: [] }));
-    expect(service.list).not.toHaveBeenCalled();
+    expect(service.getLatestRevisions).not.toHaveBeenCalled();
   });
 });

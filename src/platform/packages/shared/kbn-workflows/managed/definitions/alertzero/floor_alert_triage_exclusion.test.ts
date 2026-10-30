@@ -20,6 +20,7 @@ interface ParsedStep {
 }
 
 const workflow = parse(FLOOR_ALERT_TRIAGE_EXCLUSION_YAML) as {
+  settings?: { concurrency?: Record<string, unknown> };
   triggers: Array<{ type: string; on?: { condition?: string } }>;
   consts: Record<string, string>;
   steps: ParsedStep[];
@@ -35,6 +36,12 @@ describe('floor_alert_triage_exclusion', () => {
     expect(workflow.triggers[0].on?.condition).toContain('event.tagsAdded: "az:true_positive"');
     expect(workflow.triggers[0].on?.condition).toContain('event.tagsAdded: "az:inconclusive"');
     expect(workflow.triggers[0].on?.condition).toContain('event.tagsRemoved: "az:false_positive"');
+  });
+
+  // A burst of trigger events creates its runs at once, and with `queue` every one of them saw the
+  // others pending and queued itself, so none ever started. The step's retries handle the overlap.
+  it('does not queue its runs, so a burst of exclusions cannot strand them', () => {
+    expect(workflow.settings?.concurrency).toBeUndefined();
   });
 
   it('revises the proposals first, then re-tags, so the re-tag events find nothing to do', () => {
