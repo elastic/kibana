@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import type {
-  ApiClientFixture,
-  EsClient,
-  KbnClient,
-  KibanaUrl,
-  SamlAuth,
-  ScoutLogger,
-} from '@kbn/scout-oblt';
+import type { ApiClientFixture, EsClient, KibanaUrl, SamlAuth, ScoutLogger } from '@kbn/scout-oblt';
 import {
   createHttpServiceAccountsApi,
-  getSecurityRoleUrl,
-  SECURITY_ROLE_API_VERSION,
   ensureNightshiftServiceAccountRoles,
   ensureNightshiftServiceAccounts,
   type InvestigatorServiceAccountStatus,
@@ -89,37 +80,20 @@ const createAdminRequester =
   };
 
 /**
- * Finds or creates the deployment's Nightshift service accounts, as the app's setup step does.
- *
- * The accounts are created as the admin, but the roles are read as the deployment's superuser:
- * Serverless hides the `_`-prefixed predefined roles from everyone else, so the admin's lookup
- * would report the role missing and refuse to create the account.
+ * Finds or creates the deployment's Nightshift service accounts as the admin, exactly as the app's
+ * setup step does, role lookup included.
  */
 const ensureServiceAccounts = (
   request: ReturnType<typeof createAdminRequester>,
-  kbnClient: KbnClient,
   { isServerless }: { isServerless: boolean }
-): Promise<NightshiftServiceAccountIds> => {
-  const api = createHttpServiceAccountsApi({
-    request,
-    getStatus: (error) => (error as { status?: number })?.status,
-  });
-  return ensureNightshiftServiceAccounts(
-    {
-      ...api,
-      roleExists: async (roleName) => {
-        const { status } = await kbnClient.request({
-          path: getSecurityRoleUrl(roleName),
-          method: 'GET',
-          headers: { ...COMMON_HEADERS, 'elastic-api-version': SECURITY_ROLE_API_VERSION },
-          ignoreErrors: [404],
-        });
-        return status !== 404;
-      },
-    },
+): Promise<NightshiftServiceAccountIds> =>
+  ensureNightshiftServiceAccounts(
+    createHttpServiceAccountsApi({
+      request,
+      getStatus: (error) => (error as { status?: number })?.status,
+    }),
     { isServerless }
   );
-};
 
 /** Reads whether the space is set up, as the Nightshift app does. */
 export const getNightshiftServiceAccountStatus = async (
@@ -172,14 +146,12 @@ const enableNightshiftServiceAccount = async (
  */
 export const setUpNightshiftServiceAccount = async ({
   kbnUrl,
-  kbnClient,
   esClient,
   samlAuth,
   isServerless,
   log,
 }: {
   kbnUrl: KibanaUrl;
-  kbnClient: KbnClient;
   esClient: EsClient;
   samlAuth: SamlAuth;
   isServerless: boolean;
@@ -188,7 +160,7 @@ export const setUpNightshiftServiceAccount = async ({
   await ensureNightshiftServiceAccountRoles(esClient, { isServerless });
   const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
   const request = createAdminRequester(kbnUrl, cookieHeader);
-  const serviceAccountIds = await ensureServiceAccounts(request, kbnClient, { isServerless });
+  const serviceAccountIds = await ensureServiceAccounts(request, { isServerless });
   const status = await enableNightshiftServiceAccount(request, serviceAccountIds, log);
   log.info(`Nightshift runs as [${status.serviceAccountId}] in the default space`);
   return status;
