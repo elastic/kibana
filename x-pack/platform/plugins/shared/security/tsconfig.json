@@ -19,6 +19,7 @@
     "__mocks__/**/*"
   ],
   "kbn_references": [
+    "@kbn/access-control",
     "@kbn/app-header",
     "@kbn/cloud-plugin",
     "@kbn/cps",

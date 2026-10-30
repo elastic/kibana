@@ -29,6 +29,7 @@ import {
   toRawActionIdentityAttributes,
 } from '../../../../inbound/event_identity';
 import { deleteIngressCredentialForConnector } from '../../../../inbound/ingress_credential';
+import { ensureConnectorOperation } from '../../../../lib/connector_access';
 import {
   assertInboundEventsToggleAllowed,
   resolveInboundEventsEnabled,
@@ -82,8 +83,11 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     );
     throw error;
   }
-  const { attributes, references, version } =
+  const { attributes, references, version, acl } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
+  // Reading the connector already required view access. Editing needs more, and is checked before
+  // the pre-save hook or any audit event of the update itself.
+  await ensureConnectorOperation(context, { id, acl, operation: 'edit' });
   const { actionTypeId, authMode } = attributes;
   const { name, config, secrets, isInboundEventsEnabled: requestedInboundEventsEnabled } = action;
 

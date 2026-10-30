@@ -71,6 +71,12 @@ export interface ServiceAccountsBackend {
   getSummary(id: string): Promise<ServiceAccountSummary | null>;
 
   /**
+   * Whether Kibana manages a service account with the given id. Authorizes no caller and reads no
+   * credential: object-level security uses it to check that a grant names an existing account.
+   */
+  exists(id: string): Promise<boolean>;
+
+  /**
    * Deletes one service account, rejecting with a 404 when there is no such account. Requires the
    * same privilege as {@link create}. Resolves with warnings about anything the delete could not
    * clean up.
