@@ -27,6 +27,7 @@ import {
 } from '../../../../../../common/utils/agent_mw_support';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
 import type { MonitorLocationAssignment } from '../../../../../../common/types';
+import { BrowserCompleteAgentCallout } from './browser_complete_agent_callout';
 
 /**
  * Agents that run this monitor at each private location. Classic locations
@@ -36,11 +37,14 @@ export const MonitorAssignedAgents = ({
   configId,
   monitorLocations,
   hasMaintenanceWindows = false,
+  isBrowserMonitor = false,
 }: {
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
   /** Whether the monitor has a maintenance window assigned, to gate the agent-version warning below. */
   hasMaintenanceWindows?: boolean;
+  /** Browser monitors run only where an elastic-agent-complete agent is enrolled. */
+  isBrowserMonitor?: boolean;
 }) => {
   const privateLocations = (monitorLocations ?? []).filter((loc) => !loc.isServiceManaged);
   const { assignments, loading, error } = useMonitorAgentAssignments(
@@ -57,12 +61,13 @@ export const MonitorAssignedAgents = ({
   const privateLocationIds = new Set(privateLocations.map((loc) => loc.id));
   const entries = assignments.filter(
     (entry) =>
-      privateLocationIds.has(entry.locationId) && (entry.isAgentSharding || entry.agents.length > 0)
+      privateLocationIds.has(entry.locationId) &&
+      (entry.isShardingActive || entry.agents.length > 0)
   );
 
   const allSharded =
     entries.length > 0
-      ? entries.every((entry) => entry.isAgentSharding)
+      ? entries.every((entry) => entry.isShardingActive)
       : hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const title = (
@@ -103,11 +108,18 @@ export const MonitorAssignedAgents = ({
   }
 
   const showLocationLabel = entries.length > 1;
+  const locationsMissingCompleteAgent = isBrowserMonitor
+    ? entries.filter((entry) => !entry.hasCompleteAgent).map((entry) => entry.locationLabel)
+    : [];
 
   return (
     <>
       {title}
       <EuiDescriptionListDescription>
+        <BrowserCompleteAgentCallout
+          locationLabels={locationsMissingCompleteAgent}
+          scope="monitor"
+        />
         {entries.map((stats) => (
           <AssignmentEntry
             key={stats.locationId}

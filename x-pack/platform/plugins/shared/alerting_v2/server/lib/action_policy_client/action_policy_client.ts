@@ -22,6 +22,8 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
@@ -39,6 +41,8 @@ import {
   getInvalidActionPolicyDataMessage,
 } from '../errors/action_policy_error_messages';
 import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
+import { EventOriginActorToken } from '../event_origin/token';
+import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { PolicyMatcher } from '../dispatcher/state';
 import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_policy_saved_object_service/tokens';
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
@@ -50,7 +54,16 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import {
+  ActionPolicyEventPublisher,
+  type ActionPolicyEventPublisherContract,
+  type EventActionPolicy,
+} from '../events/action_policy_event_publisher/action_policy_event_publisher';
+import type { AlertingPublisherContext } from '../events/domain_events';
+import { toEventOrigin } from '../event_origin/event_origin';
 import { buildSoSearch } from '../build_so_search';
+import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
+import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import { groupRoutingTags } from './group_routing_tags';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -72,6 +85,7 @@ import {
   buildCreateActionPolicyAttributes,
   buildUpdateActionPolicyAttributes,
   toApiKeyAttributes,
+  toPatchableActionPolicyData,
   transformActionPolicySoAttributesToApiResponse,
   validateDateString,
 } from './utils';
@@ -143,6 +157,8 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 @injectable()
 export class ActionPolicyClient {
   private readonly logger: LoggerServiceContract;
+  private readonly eventContext: AlertingPublisherContext;
+  private readonly spaceId: string;
 
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
@@ -154,9 +170,43 @@ export class ActionPolicyClient {
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
+    @inject(Request) request: KibanaRequest,
+    @inject(EventOriginActorToken) actor: EventOriginActor,
+    @inject(ActionPolicyEventPublisher)
+    private readonly eventPublisher: ActionPolicyEventPublisherContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
+    this.eventContext = { request, origin: toEventOrigin(actor, request) };
+    this.spaceId = savedObjectNamespacesToSpaceId(namespace ? [namespace] : undefined);
+  }
+
+  private toEventPolicy(actionPolicyId: string, policy?: ActionPolicyResponse): EventActionPolicy {
+    return { actionPolicyId, spaceId: this.spaceId, ...(policy ? { policy } : {}) };
+  }
+
+  /**
+   * Reads the policies a bulk operation publishes events for, keeping one entry per id. A failed
+   * read is logged and yields id-only entries, because the write itself is not affected.
+   */
+  private async readEventPolicies(ids: string[]): Promise<EventActionPolicy[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    try {
+      const policiesById = new Map(
+        (await this.getActionPolicies({ ids })).map((policy) => [policy.id, policy])
+      );
+      return ids.map((id) => this.toEventPolicy(id, policiesById.get(id)));
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to read action policies for their domain events',
+        code: ALERTING_LOG_CODES.EVENTS_ACTION_POLICY_READ_FAILED,
+        error,
+      });
+      return ids.map((id) => this.toEventPolicy(id));
+    }
   }
 
   /**
@@ -217,11 +267,33 @@ export class ActionPolicyClient {
     version,
   }: {
     id: string;
-    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    attrs: ActionPolicySavedObjectAttributes;
     version?: string;
   }): Promise<{ id: string; version?: string }> {
+    return this.mapVersionConflict(id, () =>
+      this.actionPolicySavedObjectService.update({ id, attrs, version })
+    );
+  }
+
+  /**
+   * Writes server-owned fields onto a stored policy without rebuilding the whole document. Only for
+   * flat fields the caller owns; anything nested belongs in {@link writeActionPolicyAttrs}.
+   */
+  private async patchActionPolicyFields({
+    id,
+    attrs,
+  }: {
+    id: string;
+    attrs: PartiallyUpdateableActionPolicyAttributes;
+  }): Promise<{ id: string; version?: string }> {
+    return this.mapVersionConflict(id, () =>
+      this.actionPolicySavedObjectService.patchFields({ id, attrs })
+    );
+  }
+
+  private async mapVersionConflict<T>(id: string, write: () => Promise<T>): Promise<T> {
     try {
-      return await this.actionPolicySavedObjectService.update({ id, attrs, version });
+      return await write();
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
@@ -244,7 +316,6 @@ export class ActionPolicyClient {
 
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
-      enabled: params.options?.enabled ?? true,
       auth: apiKeyAttrs,
       createdBy: actor,
       createdAt: now,
@@ -252,16 +323,12 @@ export class ActionPolicyClient {
       updatedAt: now,
     });
 
+    let id: string;
     try {
-      const { id } = await this.actionPolicySavedObjectService.create({
+      ({ id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
         id: params.options?.id,
-      });
-
-      return transformActionPolicySoAttributesToApiResponse({
-        id,
-        attributes,
-      });
+      }));
     } catch (e) {
       this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
@@ -273,6 +340,12 @@ export class ActionPolicyClient {
       }
       throw e;
     }
+
+    const policy = transformActionPolicySoAttributesToApiResponse({ id, attributes });
+    this.eventPublisher.emitActionPolicyCreated(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
+    return policy;
   }
 
   public async getActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -329,12 +402,18 @@ export class ActionPolicyClient {
 
     const oldAuth = await this.getDecryptedAuth(params.options.id);
 
-    const policyName = parsed.name ?? existingPolicy.name;
-    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(policyName));
+    const merged = applyPatch(
+      createActionPolicyDataSchema,
+      toPatchableActionPolicyData(existingPolicy),
+      parsed
+    );
+    const mergedData = this.parseActionPolicyData(createActionPolicyDataSchema, merged, 'update');
+
+    const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(mergedData.name));
 
     const nextAttrs = buildUpdateActionPolicyAttributes({
       existing: existingPolicy,
-      update: parsed,
+      data: mergedData,
       auth: apiKeyAttrs,
       updatedBy: actor,
       updatedAt: now,
@@ -353,10 +432,14 @@ export class ActionPolicyClient {
 
     this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
-    return transformActionPolicySoAttributesToApiResponse({
+    const policy = transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
       attributes: nextAttrs,
     });
+    this.eventPublisher.emitActionPolicyUpdated(this.eventContext, [
+      this.toEventPolicy(policy.id, policy),
+    ]);
+    return policy;
   }
 
   public async findActionPolicies(
@@ -442,11 +525,19 @@ export class ActionPolicyClient {
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
     await this.licenseService.assertActionPoliciesLicense();
-    return this.updatePolicyState(id, { enabled: true });
+    const policy = await this.updatePolicyState(id, { enabled: true });
+    this.eventPublisher.emitActionPolicyEnabled(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
+    return policy;
   }
 
   public async disableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
-    return this.updatePolicyState(id, { enabled: false });
+    const policy = await this.updatePolicyState(id, { enabled: false });
+    this.eventPublisher.emitActionPolicyDisabled(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
+    return policy;
   }
 
   public async snoozeActionPolicy({
@@ -468,8 +559,12 @@ export class ActionPolicyClient {
     return this.getActionPolicy({ id });
   }
 
+  /**
+   * The new key and the AAD it is bound to have to land in one write, so this goes through the
+   * whole-document path: a partial update of either leaves the stored key undecryptable.
+   */
   private async rotateApiKey(id: string): Promise<void> {
-    const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
+    const { attrs: existingPolicy, version } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
     const actor = await this.userService.getCurrentActor();
@@ -482,10 +577,12 @@ export class ActionPolicyClient {
       await this.writeActionPolicyAttrs({
         id,
         attrs: {
+          ...existingPolicy,
           ...toApiKeyAttributes(apiKeyAttrs),
           updatedBy: actor,
           updatedAt: now,
         },
+        version,
       });
     } catch (e) {
       this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
@@ -499,13 +596,21 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     await this.licenseService.assertActionPoliciesLicense();
-    return this.executeBulkUpdate(ids, { enabled: true });
+    const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: true });
+    void this.readEventPolicies(succeededIds).then((policies) =>
+      this.eventPublisher.emitActionPolicyEnabled(this.eventContext, policies)
+    );
+    return response;
   }
 
   public async bulkDisableActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
-    return this.executeBulkUpdate(ids, { enabled: false });
+    const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: false });
+    void this.readEventPolicies(succeededIds).then((policies) =>
+      this.eventPublisher.emitActionPolicyDisabled(this.eventContext, policies)
+    );
+    return response;
   }
 
   public async bulkSnoozeActionPolicies({
@@ -513,13 +618,15 @@ export class ActionPolicyClient {
     snoozedUntil,
   }: BulkSnoozeActionPoliciesParams): Promise<BulkResponse> {
     validateDateString(snoozedUntil);
-    return this.executeBulkUpdate(ids, { snoozedUntil });
+    const { response } = await this.executeBulkUpdate(ids, { snoozedUntil });
+    return response;
   }
 
   public async bulkUnsnoozeActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
-    return this.executeBulkUpdate(ids, { snoozedUntil: null });
+    const { response } = await this.executeBulkUpdate(ids, { snoozedUntil: null });
+    return response;
   }
 
   /**
@@ -548,6 +655,7 @@ export class ActionPolicyClient {
     const blockedIds = new Set(invalidationErrors.map(({ id }) => id));
 
     const idsToDelete = ids.filter((id) => !blockedIds.has(id));
+    const policiesToDelete = await this.readEventPolicies(idsToDelete);
     const deleteResults =
       idsToDelete.length > 0
         ? await this.actionPolicySavedObjectService.bulkDelete({ ids: idsToDelete })
@@ -555,6 +663,7 @@ export class ActionPolicyClient {
 
     let affectedCount = 0;
     const divergedIds: string[] = [];
+    const deletedIds = new Set<string>();
 
     for (const result of deleteResults) {
       if ('error' in result) {
@@ -565,11 +674,17 @@ export class ActionPolicyClient {
         continue;
       }
       affectedCount += 1;
+      deletedIds.add(result.id);
     }
 
     if (divergedIds.length > 0) {
       this.logDivergedApiKeyInvalidation(divergedIds);
     }
+
+    this.eventPublisher.emitActionPolicyDeleted(
+      this.eventContext,
+      policiesToDelete.filter(({ actionPolicyId }) => deletedIds.has(actionPolicyId))
+    );
 
     return { affected_count: affectedCount, errors };
   }
@@ -606,14 +721,15 @@ export class ActionPolicyClient {
    * Shared executor for the state-mutating by-ID bulk endpoints (enable /
    * disable / snooze / unsnooze). Applies the same `stateUpdate` to every
    * targeted policy in a single SO `bulkUpdate`, stamps audit metadata, and
-   * maps per-object SO failures to the canonical bulk-error shape.
+   * maps per-object SO failures to the canonical bulk-error shape. `succeededIds` lists the
+   * policies that were written, for callers that publish their events.
    */
   private async executeBulkUpdate(
     ids: string[],
     stateUpdate: PartiallyUpdateableActionPolicyAttributes
-  ): Promise<BulkResponse> {
+  ): Promise<{ response: BulkResponse; succeededIds: string[] }> {
     if (ids.length === 0) {
-      return { affected_count: 0, errors: [] };
+      return { response: { affected_count: 0, errors: [] }, succeededIds: [] };
     }
 
     const actor = await this.userService.getCurrentActor();
@@ -631,17 +747,20 @@ export class ActionPolicyClient {
     const updateResults = await this.actionPolicySavedObjectService.bulkUpdate({ objects });
 
     const errors: ActionPolicyBulkError[] = [];
-    let affectedCount = 0;
+    const succeededIds: string[] = [];
 
     for (const result of updateResults) {
       if ('error' in result) {
         errors.push(toActionPolicyBulkError(result.id, result.error));
         continue;
       }
-      affectedCount += 1;
+      succeededIds.push(result.id);
     }
 
-    return { affected_count: affectedCount, errors };
+    return {
+      response: { affected_count: succeededIds.length, errors },
+      succeededIds,
+    };
   }
 
   private mapSortField(sortField?: string): string | undefined {
@@ -664,12 +783,7 @@ export class ActionPolicyClient {
    * failure, the delete is abandoned rather than orphaning a live credential.
    */
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
-    if (!(await this.actionPolicyExists({ id }))) {
-      throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
-        details: { action_policy_id: id },
-      });
-    }
+    const { attrs } = await this.getExistingActionPolicy(id);
 
     const auth = await this.getDecryptedAuth(id);
     const { invalidatedIds, errors } = await this.queueApiKeysForInvalidation([{ id, auth }]);
@@ -690,6 +804,13 @@ export class ActionPolicyClient {
       }
       throw e;
     }
+
+    this.eventPublisher.emitActionPolicyDeleted(this.eventContext, [
+      this.toEventPolicy(
+        id,
+        transformActionPolicySoAttributesToApiResponse({ id, attributes: attrs })
+      ),
+    ]);
   }
 
   /**
@@ -864,7 +985,7 @@ export class ActionPolicyClient {
     const now = new Date().toISOString();
 
     try {
-      await this.writeActionPolicyAttrs({
+      await this.patchActionPolicyFields({
         id,
         attrs: {
           ...stateUpdate,
@@ -900,8 +1021,7 @@ export class ActionPolicyClient {
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const policy = await this.createActionPolicy({ data: createData, options: { id, enabled } });
+      const policy = await this.createActionPolicy({ data: parsed, options: { id } });
       return { policy, created: true };
     }
 
@@ -918,28 +1038,13 @@ export class ActionPolicyClient {
     const oldAuth = await this.getDecryptedAuth(id);
     const apiKeyAttrs = await this.apiKeyService.create(getActionPolicyApiKeyName(parsed.name));
 
-    // PUT replaces every field accepted by createActionPolicyDataSchema, plus
-    // the optional `enabled`: omitted preserves the existing stored value,
-    // otherwise it becomes the new value. Audit metadata (createdBy/createdAt)
-    // and other operational state (snoozedUntil) are not part of the create
-    // schema and are preserved here. Tags are also preserved: they are no
-    // longer part of the API contract but remain in the saved object so they
-    // can be re-exposed later.
-    const nextEnabled = parsed.enabled ?? existingAttrs.enabled;
-    const replacementAttrs: ActionPolicySavedObjectAttributes = {
-      ...buildCreateActionPolicyAttributes({
-        data: parsed,
-        enabled: nextEnabled,
-        auth: apiKeyAttrs,
-        createdBy: existingAttrs.createdBy,
-        createdAt: existingAttrs.createdAt,
-        updatedBy: actor,
-        updatedAt: now,
-      }),
-      enabled: nextEnabled,
-      snoozedUntil: existingAttrs.snoozedUntil,
-      tags: existingAttrs.tags,
-    };
+    const replacementAttrs = buildUpdateActionPolicyAttributes({
+      existing: existingAttrs,
+      data: parsed,
+      auth: apiKeyAttrs,
+      updatedBy: actor,
+      updatedAt: now,
+    });
 
     try {
       await this.writeActionPolicyAttrs({
@@ -954,12 +1059,14 @@ export class ActionPolicyClient {
 
     this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
-    return {
-      policy: transformActionPolicySoAttributesToApiResponse({
-        id,
-        attributes: replacementAttrs,
-      }),
-      created: false,
-    };
+    const policy = transformActionPolicySoAttributesToApiResponse({
+      id,
+      attributes: replacementAttrs,
+    });
+    this.eventPublisher.emitActionPolicyUpdated(this.eventContext, [
+      this.toEventPolicy(id, policy),
+    ]);
+
+    return { policy, created: false };
   }
 }

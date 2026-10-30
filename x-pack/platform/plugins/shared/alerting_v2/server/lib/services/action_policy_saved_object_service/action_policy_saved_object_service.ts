@@ -11,7 +11,10 @@ import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
+import type {
+  ActionPolicySavedObjectAttributes,
+  PartiallyUpdateableActionPolicyAttributes,
+} from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
@@ -89,25 +92,49 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     version,
   }: {
     id: string;
-    attrs: Partial<ActionPolicySavedObjectAttributes>;
+    attrs: ActionPolicySavedObjectAttributes;
     version?: string;
   }): Promise<{ id: string; version?: string }> {
     const result = await this.client.update<ActionPolicySavedObjectAttributes>(
       ACTION_POLICY_SAVED_OBJECT_TYPE,
       id,
       attrs,
-      version ? { version } : undefined
+      { ...(version ? { version } : {}), mergeAttributes: false }
     );
 
     return { id: result.id, version: result.version };
   }
 
+  /**
+   * Writes server-owned fields onto the stored document, leaving the rest untouched. Restricted to
+   * flat fields the caller owns entirely, so the saved object's deep merge has nothing to resurrect.
+   */
+  public async patchFields({
+    id,
+    attrs,
+  }: {
+    id: string;
+    attrs: PartiallyUpdateableActionPolicyAttributes;
+  }): Promise<{ id: string; version?: string }> {
+    const result = await this.client.update<ActionPolicySavedObjectAttributes>(
+      ACTION_POLICY_SAVED_OBJECT_TYPE,
+      id,
+      attrs
+    );
+
+    return { id: result.id, version: result.version };
+  }
+
+  /**
+   * Writes server-owned fields across many policies. These are flat fields the caller owns, so the
+   * saved object's deep merge is what preserves everything else; it must stay enabled here.
+   */
   public async bulkUpdate({
     objects,
   }: {
     objects: Array<{
       id: string;
-      attrs: Partial<ActionPolicySavedObjectAttributes>;
+      attrs: PartiallyUpdateableActionPolicyAttributes;
     }>;
   }): Promise<ActionPolicySavedObjectBulkUpdateItem[]> {
     if (objects.length === 0) {
@@ -159,7 +186,12 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
 
   public async findAllDecrypted(params?: {
     filter?: { enabled: boolean };
+    spaceIds?: readonly string[];
   }): Promise<ActionPolicySavedObjectBulkGetItem[]> {
+    if (params?.spaceIds?.length === 0) {
+      return [];
+    }
+
     const kqlFilter =
       params?.filter?.enabled !== undefined
         ? `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: ${params.filter.enabled}`
@@ -169,7 +201,8 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<ActionPolicySavedObjectAttributes>(
         {
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-          namespaces: ['*'],
+          // A space id is already its SO namespace string, `default` included.
+          namespaces: params?.spaceIds ? [...params.spaceIds] : ['*'],
           perPage: 1000,
           ...(kqlFilter ? { filter: kqlFilter } : {}),
         }

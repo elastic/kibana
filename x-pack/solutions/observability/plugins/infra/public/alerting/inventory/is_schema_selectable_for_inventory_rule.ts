@@ -11,13 +11,11 @@ import { isSchemaAwareNodeType } from '../../../common/inventory/schema_aware_no
 /**
  * Whether a node type offers the Schema control on the Inventory rule flyout.
  *
- * Matches the Inventory toolbar: Hosts always, Pods only while the temporary pod
- * schema selector flag is on, everything else never.
+ * Rule-UI alias for `isSchemaAwareNodeType` plus an undefined guard so the
+ * flyout can pass `ruleParams.nodeType` before it is set. Keep this name at
+ * the expression boundary so Inventory toolbar and rule flyout share one
+ * policy without the flyout importing inventory view helpers.
  */
 export const isSchemaSelectableForInventoryRule = (
-  nodeType: InventoryItemType | undefined,
-  isPodSchemaSelectorEnabled: boolean
-): boolean =>
-  !!nodeType &&
-  isSchemaAwareNodeType(nodeType) &&
-  (nodeType !== 'pod' || isPodSchemaSelectorEnabled);
+  nodeType: InventoryItemType | undefined
+): boolean => !!nodeType && isSchemaAwareNodeType(nodeType);

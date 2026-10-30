@@ -29,6 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ListEvaluatorsResponse } from '@kbn/evals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
 import { useEvaluators } from '../../hooks/use_evaluators_api';
@@ -37,6 +38,10 @@ import { buildOnlineEvalWorkflowYaml } from '../../../common/online_evals/workfl
 import { ConnectorSelector, type ConnectorSelectorOption } from '../shared/connector_selector';
 import { EvaluatorSelector, type SelectedEvaluator } from '../shared/evaluator_selector';
 import { WorkflowYamlPreview } from '../workflow_yaml_preview';
+
+/** Online evaluations grade live traces, so nothing can supply an example's reference data. */
+const requiresReferenceData = (evaluator: ListEvaluatorsResponse['evaluators'][number]): boolean =>
+  Boolean(evaluator.reference_data_schema?.required);
 
 export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => {
   const { services } = useKibana();
@@ -341,21 +346,28 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
                 ? `${evaluator.name}@${evaluator.version} (${evaluator.kind})`
                 : `${evaluator.name} (${evaluator.kind})`
             }
-            evaluatorOptionMeta={(evaluator) => {
-              const requiresReferenceData = Boolean(evaluator.reference_data_schema?.required);
-              return {
-                disabled: requiresReferenceData,
-                toolTipContent: requiresReferenceData
-                  ? i18n.translate(
-                      'xpack.evals.onlineEvaluations.createFlyout.evaluatorReferenceDataRequiredTooltip',
-                      {
-                        defaultMessage:
-                          'This evaluator requires reference data and is not supported in online evaluations yet.',
-                      }
-                    )
-                  : undefined,
-              };
-            }}
+            helpText={
+              (evaluatorsData?.evaluators ?? []).some(requiresReferenceData)
+                ? i18n.translate(
+                    'xpack.evals.onlineEvaluations.createFlyout.evaluatorReferenceDataRequiredHelpText',
+                    {
+                      defaultMessage:
+                        'Evaluators that require reference data are unavailable here. Online evaluations grade live traces, which have no expected output to compare against yet.',
+                    }
+                  )
+                : undefined
+            }
+            evaluatorOptionMeta={(evaluator) =>
+              requiresReferenceData(evaluator)
+                ? {
+                    disabled: true,
+                    disabledReason: i18n.translate(
+                      'xpack.evals.onlineEvaluations.createFlyout.evaluatorReferenceDataRequiredReason',
+                      { defaultMessage: 'Requires reference data' }
+                    ),
+                  }
+                : {}
+            }
             evaluatorsDataTestSubj="onlineEvalCreateEvaluatorsCombo"
             judgeConnectorDataTestSubjPrefix="onlineEvalCreateUnusedJudgeConnector"
           />

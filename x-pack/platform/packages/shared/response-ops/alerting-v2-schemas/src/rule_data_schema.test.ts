@@ -7,10 +7,11 @@
 
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
+  putRuleDataSchema,
   isLifecycleConfigAllowedForKind,
   isAbsenceDistinguishableFromBreach,
   isRecoveryConditionUsableWithBreach,
@@ -28,6 +29,7 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   ruleTagsParamsSchema,
+  ruleResponseSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
@@ -81,6 +83,15 @@ describe('createRuleDataSchema', () => {
         recovery: { strategy: 'no_breach' },
         no_data: { strategy: 'ignore' },
       });
+    });
+
+    it('accepts builder metadata', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder: { type: 'threshold' } },
+      });
+
+      expect(result.metadata.builder).toEqual({ type: 'threshold' });
     });
 
     it('accepts a full payload with all optional fields', () => {
@@ -202,6 +213,66 @@ describe('createRuleDataSchema', () => {
 
       expect(result.metadata.description).toHaveLength(1024);
     });
+
+    it('rejects an empty or blank description on create and replace', () => {
+      const metadata = { name: 'test rule' };
+
+      expect(
+        createRuleDataSchema.safeParse({
+          ...validCreateData,
+          metadata: { ...metadata, description: '' },
+        }).success
+      ).toBe(false);
+      expect(
+        createRuleDataSchema.safeParse({
+          ...validCreateData,
+          metadata: { ...metadata, description: '   ' },
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects an empty description in a bulk-create item', () => {
+      const result = bulkCreateRulesRequestSchema.safeParse({
+        items: [{ ...validCreateData, metadata: { name: 'test rule', description: '' } }],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects null on create and replace, where an absent key already means no description', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: null },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('trims the stored description', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', description: '  A useful description  ' },
+      });
+
+      expect(result.metadata.description).toBe('A useful description');
+    });
+  });
+
+  describe('metadata.builder.type', () => {
+    const parseWithBuilderType = (type: unknown) =>
+      createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', builder: { type } },
+      });
+
+    it('rejects an empty or blank type on create and replace', () => {
+      expect(parseWithBuilderType('').success).toBe(false);
+      expect(parseWithBuilderType('   ').success).toBe(false);
+    });
+
+    it('accepts a non-empty type', () => {
+      expect(parseWithBuilderType('threshold').success).toBe(true);
+    });
   });
 
   describe('metadata.tags', () => {
@@ -298,6 +369,17 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('metadata.template', () => {
+    it('is not accepted in a request body', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', template: { id: 'template-1' } },
       });
 
       expect(result.success).toBe(false);
@@ -738,6 +820,21 @@ describe('createRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+
+    it('rejects an empty array on create, where a rule groups by nothing by omitting grouping', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        grouping: { fields: [] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty array on patch', () => {
+      const result = updateRuleDataSchema.safeParse({ grouping: { fields: [] } });
+
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('state_transition', () => {
@@ -750,13 +847,13 @@ describe('createRuleDataSchema', () => {
       expect(result.state_transition).toEqual({});
     });
 
-    it('accepts state_transition set to null', () => {
-      const result = createRuleDataSchema.parse({
+    it('rejects state_transition set to null', () => {
+      const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         state_transition: null,
       });
 
-      expect(result.state_transition).toBeNull();
+      expect(result.success).toBe(false);
     });
 
     it('accepts state_transition with only a pending phase', () => {
@@ -1012,6 +1109,47 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('artifacts empty-array rejection', () => {
+    const artifact = { id: 'artifact-1', type: 'host', data: { value: 'host-a' } };
+
+    it('rejects an empty array on create and replace', () => {
+      const result = createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [] });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty array in a bulk-create item', () => {
+      const result = bulkCreateRulesRequestSchema.safeParse({
+        items: [{ ...validCreateData, artifacts: [] }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty array on patch', () => {
+      expect(updateRuleDataSchema.safeParse({ artifacts: [] }).success).toBe(false);
+    });
+
+    it('rejects null on create and replace, where an absent key already means no artifacts', () => {
+      const result = createRuleDataSchema.safeParse({ ...validCreateData, artifacts: null });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts null on patch, the only way to clear', () => {
+      expect(updateRuleDataSchema.safeParse({ artifacts: null }).success).toBe(true);
+    });
+
+    it('accepts a one-item array everywhere', () => {
+      expect(
+        createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] }).success
+      ).toBe(true);
+      expect(updateRuleDataSchema.safeParse({ artifacts: [artifact] }).success).toBe(true);
+      expect(
+        bulkCreateRulesRequestSchema.safeParse({
+          items: [{ ...validCreateData, artifacts: [artifact] }],
+        }).success
+      ).toBe(true);
+    });
+  });
+
   describe('artifacts envelope', () => {
     const parseWithArtifact = (artifact: Record<string, unknown>) =>
       createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
@@ -1191,6 +1329,33 @@ describe('createRuleDataSchema', () => {
   });
 });
 
+describe('putRuleDataSchema', () => {
+  it('leaves enabled undefined when omitted', () => {
+    const result = putRuleDataSchema.parse(validCreateData);
+    expect(result.enabled).toBeUndefined();
+  });
+
+  it('accepts an explicit enabled: true', () => {
+    const result = putRuleDataSchema.parse({ ...validCreateData, enabled: true });
+    expect(result.enabled).toBe(true);
+  });
+
+  it('accepts an explicit enabled: false', () => {
+    const result = putRuleDataSchema.parse({ ...validCreateData, enabled: false });
+    expect(result.enabled).toBe(false);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    const result = putRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' });
+    expect(result.success).toBe(false);
+  });
+
+  it('does not add enabled to createRuleDataSchema', () => {
+    const result = createRuleDataSchema.safeParse({ ...validCreateData, enabled: true });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe('updateRuleDataSchema', () => {
   it('accepts an empty payload', () => {
     const result = updateRuleDataSchema.parse({});
@@ -1240,6 +1405,11 @@ describe('updateRuleDataSchema', () => {
 
   it('rejects metadata.routing_tags as an empty array (use null to clear)', () => {
     const result = updateRuleDataSchema.safeParse({ metadata: { routing_tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects metadata.template', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { template: { id: 'template-1' } } });
     expect(result.success).toBe(false);
   });
 
@@ -1317,14 +1487,16 @@ describe('updateRuleDataSchema', () => {
     ]);
   });
 
-  it('rejects recovery set to null (alert rules always store one)', () => {
-    const result = updateRuleDataSchema.safeParse({ recovery: null });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects no_data set to null (alert rules always store one)', () => {
-    const result = updateRuleDataSchema.safeParse({ no_data: null });
-    expect(result.success).toBe(false);
+  /**
+   * A PATCH body is a sparse delta, so whether clearing `recovery` or `no_data` is legal depends on
+   * the stored `kind`. These bodies are accepted here and validated after the merge, by
+   * `RulesClient`.
+   */
+  it.each([
+    ['recovery set to null', { recovery: null }],
+    ['no_data set to null', { no_data: null }],
+  ])('defers %s to the merged document', (_label, body) => {
+    expect(updateRuleDataSchema.safeParse(body).success).toBe(true);
   });
 
   it('rejects unknown top-level fields (strict)', () => {
@@ -1363,6 +1535,28 @@ describe('updateRuleDataSchema', () => {
         metadata: { description: 'a'.repeat(1025) },
       });
       expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty or blank description, which names no new value', () => {
+      expect(updateRuleDataSchema.safeParse({ metadata: { description: '' } }).success).toBe(false);
+      expect(updateRuleDataSchema.safeParse({ metadata: { description: '   ' } }).success).toBe(
+        false
+      );
+    });
+
+    it('accepts a null description, the only way to clear it', () => {
+      expect(updateRuleDataSchema.parse({ metadata: { description: null } })).toEqual({
+        metadata: { description: null },
+      });
+    });
+
+    it('rejects an empty builder type, while null clears the whole builder', () => {
+      expect(updateRuleDataSchema.safeParse({ metadata: { builder: { type: '' } } }).success).toBe(
+        false
+      );
+      expect(updateRuleDataSchema.parse({ metadata: { builder: null } })).toEqual({
+        metadata: { builder: null },
+      });
     });
 
     it('rejects an invalid schedule duration', () => {
@@ -1466,12 +1660,12 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects a pending.operator without both count and timeframe', () => {
+    it('defers a pending.operator without both count and timeframe to the merged document', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending: { operator: 'and', count: 2 } },
       });
 
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
 
     it('rejects a non-integer pending.count', () => {
@@ -1537,6 +1731,21 @@ describe('updateRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('ruleResponseSchema metadata', () => {
+  it('does not carry metadata.template: the strict response block omits it', () => {
+    const result = ruleResponseSchema.shape.metadata.safeParse({
+      name: 'test rule',
+      template: { id: 'template-1' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts metadata without a template', () => {
+    expect(ruleResponseSchema.shape.metadata.safeParse({ name: 'test rule' }).success).toBe(true);
   });
 });
 
@@ -1646,10 +1855,9 @@ describe('getRootEsqlQuery', () => {
 
 describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleDataSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-    }) as {
+    const json = inlineRootJsonSchemaRef(
+      z.toJSONSchema(updateRuleDataSchema, { target: 'draft-7', unrepresentable: 'any' })
+    ) as {
       properties?: Record<string, { description?: string }>;
       definitions?: Record<string, { description?: string }>;
     };
@@ -1662,7 +1870,7 @@ describe('updateRuleDataSchema OpenAPI descriptions', () => {
       Object {
         "no_data": "What the rule does when a group has no data. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`. Any strategy other than \`ignore\` requires either \`query.breach\` or \`no_data.query\`, so that a group with no data can be told apart from one that stopped breaching.",
         "recovery": "When an alert recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
-        "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`. If omitted, the existing value is kept.",
+        "time_field": "Document field Kibana uses with \`schedule.lookback\` to time-filter \`query.base\`.",
       }
     `);
   });
@@ -1864,19 +2072,41 @@ describe('bulkGetRulesResponseSchema', () => {
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
-  it('accepts an empty items array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ items: [] });
-    expect(result).toEqual({ items: [] });
+  it('accepts empty items and errors arrays', () => {
+    const result = bulkGetRulesResponseSchema.parse({ items: [], errors: [] });
+    expect(result).toEqual({ items: [], errors: [] });
   });
 
   it('accepts a populated items array', () => {
-    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule] });
+    const result = bulkGetRulesResponseSchema.parse({ items: [sampleRule], errors: [] });
     expect(result.items).toHaveLength(1);
     expect(result.items[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
   });
 
+  it('accepts a per-item RULE_NOT_FOUND error beside found rules', () => {
+    const result = bulkGetRulesResponseSchema.parse({
+      items: [sampleRule],
+      errors: [
+        {
+          id: 'rule-missing',
+          error: {
+            code: 'RULE_NOT_FOUND',
+            message: 'Rule with id "rule-missing" not found',
+            details: { rule_id: 'rule-missing' },
+          },
+        },
+      ],
+    });
+
+    expect(result.errors).toEqual([expect.objectContaining({ id: 'rule-missing' })]);
+  });
+
   it('rejects a missing items field', () => {
-    expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+    expect(() => bulkGetRulesResponseSchema.parse({ errors: [] })).toThrow();
+  });
+
+  it('rejects a missing errors field', () => {
+    expect(() => bulkGetRulesResponseSchema.parse({ items: [] })).toThrow();
   });
 });
 
@@ -1973,6 +2203,7 @@ describe('bulkCreateRulesResponseSchema', () => {
       items: [],
       errors: [
         {
+          index: 0,
           id: 'rule-1',
           error: { code: 'RULE_ALREADY_EXISTS', message: 'already exists' },
         },
@@ -1980,6 +2211,26 @@ describe('bulkCreateRulesResponseSchema', () => {
     });
     expect(result.items).toEqual([]);
     expect(result.errors).toHaveLength(1);
+  });
+
+  it('accepts an error for an item that had no id, addressed by index only', () => {
+    const result = bulkCreateRulesResponseSchema.parse({
+      items: [],
+      errors: [{ index: 2, error: { code: 'INVALID_RULE_DATA', message: 'bad schedule' } }],
+    });
+    expect(result.errors[0]).toEqual({
+      index: 2,
+      error: { code: 'INVALID_RULE_DATA', message: 'bad schedule' },
+    });
+  });
+
+  it('rejects an error without an index', () => {
+    expect(() =>
+      bulkCreateRulesResponseSchema.parse({
+        items: [],
+        errors: [{ id: 'rule-1', error: { code: 'RULE_ALREADY_EXISTS', message: 'x' } }],
+      })
+    ).toThrow();
   });
 
   it('rejects a missing items field', () => {
@@ -2245,5 +2496,16 @@ describe('isRecoveryTransitionConsistentWithStrategy', () => {
         state_transition: { recovering: { timeframe: '5m' } },
       })
     ).toBe(false);
+  });
+});
+
+describe('findRulesRequestSchema filter', () => {
+  it('trims the filter', () => {
+    expect(findRulesRequestSchema.parse({ filter: ' kind: alert ' }).filter).toBe('kind: alert');
+  });
+
+  it('rejects a blank filter', () => {
+    expect(findRulesRequestSchema.safeParse({ filter: '' }).success).toBe(false);
+    expect(findRulesRequestSchema.safeParse({ filter: '   ' }).success).toBe(false);
   });
 });

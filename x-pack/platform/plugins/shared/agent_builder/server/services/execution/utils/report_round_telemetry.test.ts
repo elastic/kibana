@@ -17,6 +17,7 @@ import {
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import { attachmentEventFixture } from '../../../test_utils/timeline';
 import { mergeModelUsage } from '../../conversation/client/merge_rounds';
 import { buildExecutionTelemetry, reportRoundTelemetry } from './report_round_telemetry';
 
@@ -279,6 +280,63 @@ describe('buildExecutionTelemetry', () => {
   });
 });
 
+describe('reportRoundTelemetry', () => {
+  it("passes the round's stored and new attachment events as input attachment events", () => {
+    const analyticsService = {
+      reportRoundComplete: jest.fn(),
+      reportExecutionComplete: jest.fn(),
+    };
+    const storedForRound = attachmentEventFixture({
+      id: 'stored-img',
+      source: 'chat_input',
+      attachmentType: 'image',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+    });
+    const storedForOtherRound = attachmentEventFixture({
+      id: 'other-img',
+      source: 'chat_input',
+      attachmentType: 'image',
+      executionId: 'r0::execution',
+      triggerEventId: 'r0::user_message',
+    });
+    const produced = attachmentEventFixture({
+      id: 'new-img',
+      source: 'chat_input',
+      attachmentType: 'image',
+    });
+
+    reportRoundTelemetry({
+      event: completeEvent({
+        resumed: true,
+        resume_execution: { follow_up_round: round() },
+        attachment_events: [produced],
+      }),
+      conversation: conversation({
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        rounds: [round()],
+        events: [
+          storedForOtherRound,
+          pauseTerminatedEvent('2026-01-01T00:00:00.000Z'),
+          storedForRound,
+        ],
+      }),
+      agentId: 'agent-1',
+      executionId: 'execution-1',
+      modelProvider: 'OpenAI' as never,
+      meteringService: { reportExecution: jest.fn().mockResolvedValue(undefined) } as never,
+      analyticsService: analyticsService as never,
+      logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as never,
+    });
+
+    const expected = expect.objectContaining({
+      inputAttachmentEvents: [storedForRound, produced],
+    });
+    expect(analyticsService.reportExecutionComplete).toHaveBeenCalledWith(expected);
+    expect(analyticsService.reportRoundComplete).toHaveBeenCalledWith(expected);
+  });
+});
+
 /**
  * The billed unit, per https://github.com/elastic/search-team/issues/13010: one conversational
  * turn, one unit per 50k input tokens in that turn, and nothing at all if the turn never produced
@@ -354,5 +412,51 @@ describe('billing unit', () => {
 
   it('does not bill a pause that was never resumed', () => {
     expect(drive([{ own: usage(10_000), folded: usage(10_000), paused: true }])).toEqual([]);
+  });
+});
+
+describe('round attribution', () => {
+  const report = (
+    attribution: { workflowExecutionId?: string },
+    roundParts: Partial<ConversationRound> = {}
+  ) => {
+    const analyticsService = {
+      reportExecutionComplete: jest.fn(),
+      reportRoundComplete: jest.fn(),
+    };
+    reportRoundTelemetry({
+      event: completeEvent({ round: round(roundParts) }),
+      conversation: conversation({ schema_version: CONVERSATION_SCHEMA_VERSION }),
+      agentId: 'agent-1',
+      executionId: 'execution-0',
+      ...attribution,
+      modelProvider: 'OpenAI' as never,
+      meteringService: { reportExecution: jest.fn().mockResolvedValue(undefined) } as never,
+      analyticsService: analyticsService as never,
+      logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as never,
+    });
+    return analyticsService;
+  };
+
+  it('passes the workflow execution id through to the round event', () => {
+    expect(
+      report({ workflowExecutionId: 'workflow-run-1' }).reportRoundComplete
+    ).toHaveBeenCalledWith(expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }));
+  });
+
+  it('keeps the workflow execution id off the execution event', () => {
+    const [[call]] = report({ workflowExecutionId: 'workflow-run-1' }).reportExecutionComplete.mock
+      .calls;
+
+    expect(call).not.toHaveProperty('workflowExecutionId');
+  });
+
+  it('sends no round event, and so no id, for a paused round', () => {
+    const analyticsService = report(
+      { workflowExecutionId: 'workflow-run-1' },
+      { status: ConversationRoundStatus.awaitingPrompt, response: { message: '' } }
+    );
+
+    expect(analyticsService.reportRoundComplete).not.toHaveBeenCalled();
   });
 });

@@ -124,7 +124,7 @@ describe('useTotalHits', () => {
     });
   });
 
-  it('should not fetch total hits if isPlainRecord is true', async () => {
+  it('should not fetch total hits for an ES|QL data source', async () => {
     const onTotalHitsChange = jest.fn();
     EsqlSource.clearCache();
     const fetchParams = getFetchParamsMock({

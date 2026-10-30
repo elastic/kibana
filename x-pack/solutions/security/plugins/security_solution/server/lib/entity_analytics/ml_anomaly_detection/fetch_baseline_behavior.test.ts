@@ -19,6 +19,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
         .mockReturnValue({ bool: { filter: [{ term: { 'user.name': 'alice' } }] } }),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
@@ -55,9 +57,9 @@ describe('fetchBaselineBehavior', () => {
   });
 
   const defaultOpts = {
-    entityId: 'user:alice',
+    entityIds: ['user:alice'],
     entityType: 'user' as const,
-    entityRecord: mockEntityRecord,
+    entityRecords: [mockEntityRecord],
     jobId: 'test-job',
     jobConfig: makeJobConfig(),
   };
@@ -411,6 +413,38 @@ describe('fetchBaselineBehavior', () => {
 
       expect(result).toEqual({ ...anomaly, anomalousValue: 100, baselineValues: [10] });
     });
+
+    it('omits anomalousValue and baselineValues when the record has no actual/typical', async () => {
+      const anomaly = makeAnomaly({ actual: undefined, typical: undefined });
+
+      const result = await fetchBaselineBehavior({
+        ...defaultOpts,
+        jobConfig: metricConfig,
+        anomaly,
+        esClient,
+        logger,
+      });
+
+      expect(result).toEqual(anomaly);
+      expect(result).not.toHaveProperty('anomalousValue');
+      expect(result).not.toHaveProperty('baselineValues');
+    });
+  });
+
+  it('skips the time-bucket search when a time_ detector record has no actual', async () => {
+    const timeOfDayConfig = makeJobConfig({ detectors: [{ function: 'time_of_day' }] });
+    const anomaly = makeAnomaly({ actual: undefined, typical: 36000 });
+
+    const result = await fetchBaselineBehavior({
+      ...defaultOpts,
+      jobConfig: timeOfDayConfig,
+      anomaly,
+      esClient,
+      logger,
+    });
+
+    expect(mockEsSearch).not.toHaveBeenCalled();
+    expect(result).toEqual({ ...anomaly, baselineValues: [36000] });
   });
 
   it('dispatches to the correct handler based on anomaly.detectorIndex', async () => {

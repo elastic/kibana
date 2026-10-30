@@ -36,14 +36,15 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
-import type { AlertingV2HostApp } from '../locators';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import type { AlertingV2HostApp } from '../../common/locators';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';
+import type { EpisodeDetailsPageProps } from '../pages/episode_details_page/episode_details_page';
 
-import { CLASSIC_EPISODES_DATA_SOURCE } from '../episode_sources';
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
-export interface AlertingV2PageProps {
+export interface AlertingV2PageProps extends EpisodeDetailsPageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   hostApp: AlertingV2HostApp;
@@ -170,6 +171,7 @@ export const AlertingV2EpisodesPage = ({
   hostApp,
   privilegeCheck,
   createActions,
+  useAdditionalEpisodeDetailsHeaderMenuItems,
   manageRulesHref,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -182,14 +184,14 @@ export const AlertingV2EpisodesPage = ({
     () =>
       createActions
         ? {
-            ...CLASSIC_EPISODES_DATA_SOURCE,
+            ...CLASSIC_ALERTS_DATA_SOURCE,
             createActions,
           }
-        : CLASSIC_EPISODES_DATA_SOURCE,
+        : CLASSIC_ALERTS_DATA_SOURCE,
     [createActions]
   );
 
-  const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
+  const kibanaReactServices: AlertsKibanaServices = useMemo(
     () => ({
       ...coreStart,
       share: container.get(PluginStart('share')) as SharePluginStart,
@@ -217,7 +219,12 @@ export const AlertingV2EpisodesPage = ({
               <PrivilegeCheckProvider value={privilegeCheck}>
                 <ManageRulesHrefProvider value={manageRulesHref}>
                   <I18nProvider>
-                    <EpisodesApp dataSource={dataSource} />
+                    <EpisodesApp
+                      dataSource={dataSource}
+                      useAdditionalEpisodeDetailsHeaderMenuItems={
+                        useAdditionalEpisodeDetailsHeaderMenuItems
+                      }
+                    />
                   </I18nProvider>
                 </ManageRulesHrefProvider>
               </PrivilegeCheckProvider>

@@ -15,15 +15,19 @@ import {
   filter,
   type Observable,
 } from 'rxjs';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import {
+  AgentExecutionMode,
   isExecutionStartedEvent,
   isExecutionTerminalEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
+  type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type { SurfacesService } from '../../surfaces';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
@@ -34,19 +38,30 @@ import type { CallbackDeliveryService } from './callback_delivery_service';
  * The terminal round_complete event is deferred until the stream completes, so it is only
  * delivered after the conversation has been persisted. If the stream errors first (e.g. the
  * persistence write failed), round_complete is skipped and a failure callback is sent instead.
+ * round_complete carries the response message ready to post on the round's surface, which is
+ * never stored.
  */
 export const deliverCallbackEvents = ({
   execution,
   events$,
+  request,
   callbackDeliveryService,
+  surfacesService,
   logger,
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
+  request: KibanaRequest;
   callbackDeliveryService: CallbackDeliveryService;
+  surfacesService: SurfacesService;
   logger: Logger;
 }): Promise<void> => {
-  const callbackUrl = callbackDeliveryService.getCallbackUrl(execution);
+  // Only conversation executions have callbacks.
+  if (execution.executionMode !== AgentExecutionMode.conversation) {
+    return Promise.resolve();
+  }
+
+  const callbackUrl = execution.agentParams.callback?.url;
 
   if (!callbackUrl) {
     return Promise.resolve();
@@ -62,8 +77,6 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const transport = callbackDeliveryService.createTransport(callbackUrl);
-
   const deliverEvent = (event: ChatEvent) => {
     const isTerminal = isRoundCompleteEvent(event);
     const delivery = callbackDeliveryService.makeCallbackRequest({
@@ -72,7 +85,7 @@ export const deliverCallbackEvents = ({
         event,
         ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
       },
-      transport,
+      callbackUrl,
       retry: isTerminal,
     });
 
@@ -88,7 +101,7 @@ export const deliverCallbackEvents = ({
   };
 
   return new Promise<void>((resolve) => {
-    let roundCompleteEvent: ChatEvent | undefined;
+    let roundCompleteEvent: RoundCompleteEvent | undefined;
 
     events$
       .pipe(
@@ -113,7 +126,26 @@ export const deliverCallbackEvents = ({
         }),
         // Deliver the buffered round_complete last, only on successful completion. On a stream
         // error concatWith propagates it to catchError below, skipping this delivery.
-        concatWith(defer(() => (roundCompleteEvent ? deliverEvent(roundCompleteEvent) : EMPTY))),
+        concatWith(
+          defer(() => {
+            if (!roundCompleteEvent) {
+              return EMPTY;
+            }
+
+            const completedEvent: RoundCompleteEvent = roundCompleteEvent;
+
+            // The response message ready to post on the round's surface, such as Slack.
+            const surfacePayload = surfacesService.renderPayload(completedEvent, {
+              originType: execution.agentParams.origin?.type,
+              request,
+              spaceId: execution.spaceId,
+            });
+
+            return from(surfacePayload).pipe(
+              concatMap((payload) => deliverEvent({ ...completedEvent, surface_payload: payload }))
+            );
+          })
+        ),
         catchError((error) => {
           const failureDelivery = callbackDeliveryService.makeCallbackRequest({
             payload: {
@@ -121,7 +153,7 @@ export const deliverCallbackEvents = ({
               error: serializeExecutionError(error),
               idempotency_key: execution.executionId,
             },
-            transport,
+            callbackUrl,
             retry: true,
           });
 

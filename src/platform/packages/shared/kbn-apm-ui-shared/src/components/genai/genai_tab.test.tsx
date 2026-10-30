@@ -10,8 +10,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { GenAiFields } from '@kbn/genai-common';
 import { GenAiTab } from './genai_tab';
-import type { GenAiFields } from './get_genai_fields';
 
 jest.mock('@kbn/shared-ux-markdown', () => ({
   Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,

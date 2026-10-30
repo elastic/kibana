@@ -8,6 +8,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  installHostMetricsDataStream,
+  removeHostMetricsDataStream,
+  type HostMetricsDataStream,
+} from './data_stream_data';
 import { createEvaluateDataset } from './evaluate_dataset';
 import type { EvaluateDataset } from './types';
 import {
@@ -16,6 +23,18 @@ import {
   installFullStackDataForge,
   removeFullStackDataForge,
 } from './full_stack_data';
+
+const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json',
+};
+
+/** A saved entity seeded before the test, so the agent has something to discover and edit. */
+export interface SeededEntity {
+  id: string;
+  name: string;
+}
 
 export const evaluate = evalsBase.extend<{
   evaluateDataset: EvaluateDataset;
@@ -35,8 +54,15 @@ export const evaluate = evalsBase.extend<{
    * Resolves to the seeded admin-console index pattern
    */
   adminConsoleIndex: string;
+  /**
+   * Seeds a real host-metrics data stream and resolves its name and current
+   * backing index. Opt-in: only the concrete-index evals pay for it.
+   */
+  hostMetricsDataStream: HostMetricsDataStream;
   /** Creates a test `.email` connector */
   emailConnectorId: string;
+  /** Saves a rule with a unique name before the test and deletes it afterwards. */
+  existingRule: SeededEntity;
 }>({
   evaluateDataset: [
     ({ agentBuilderClient, evaluators, executorClient, log }, use, testInfo) => {
@@ -76,6 +102,16 @@ export const evaluate = evalsBase.extend<{
     },
     { scope: 'test' },
   ],
+  hostMetricsDataStream: [
+    async ({ esClient, log }, use) => {
+      try {
+        await use(await installHostMetricsDataStream(esClient, log));
+      } finally {
+        await removeHostMetricsDataStream(esClient, log);
+      }
+    },
+    { scope: 'test' },
+  ],
   emailConnectorId: [
     async ({ kbnClient, log }, use) => {
       const connectorName = `email-connector-eval-${uuidv4()}`;
@@ -104,6 +140,43 @@ export const evaluate = evalsBase.extend<{
           path: `/api/actions/connector/${data.id}`,
         });
         log.info(`Deleted eval email connector ${data.id}`);
+      }
+    },
+    { scope: 'test' },
+  ],
+  existingRule: [
+    async ({ kbnClient, log }, use) => {
+      const name = `Eval existing rule ${uuidv4().slice(0, 8)}`;
+      const ruleData: CreateRuleData = {
+        kind: 'alert',
+        metadata: { name },
+        schedule: { every: '5m', lookback: '5m' },
+        recovery: { strategy: 'no_breach' },
+        no_data: { strategy: 'ignore' },
+        query: {
+          base: 'FROM logs-* | STATS error_count = COUNT(*) BY host.name | WHERE error_count > 100',
+        },
+        time_field: '@timestamp',
+        grouping: { fields: ['host.name'] },
+        state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
+      };
+      const { data } = await kbnClient.request<RuleResponse>({
+        method: 'POST',
+        path: ALERTING_V2_RULE_API_PATH,
+        headers: COMMON_HEADERS,
+        body: ruleData,
+      });
+      log.info(`Created eval rule ${data.id} (${name})`);
+      try {
+        await use({ id: data.id, name });
+      } finally {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(data.id)}`,
+          headers: COMMON_HEADERS,
+          ignoreErrors: [404],
+        });
+        log.info(`Deleted eval rule ${data.id}`);
       }
     },
     { scope: 'test' },

@@ -19,7 +19,10 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
+import { VisorMode } from './visor_mode';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
+import { clearInferenceConnectorCache } from './use_nl_generation';
+import { clearNlToEsqlLicenseCache } from '../hooks/use_nl_to_esql_check';
 
 jest.mock('@kbn/data-source', () => ({
   ...jest.requireActual('@kbn/data-source'),
@@ -56,6 +59,8 @@ describe('Quick search visor', () => {
 
   let props: QuickSearchVisorProps;
   beforeEach(() => {
+    clearNlToEsqlLicenseCache();
+    clearInferenceConnectorCache();
     window.localStorage.clear();
     (corePluginMock.http.get as jest.Mock).mockImplementation((url: string) => {
       if (url.includes('/internal/esql/autocomplete/sources/')) {
@@ -275,6 +280,30 @@ describe('Quick search visor', () => {
     expect(queryByTestId('esqlVisorKQLSubmit')).not.toBeInTheDocument();
   });
 
+  it('should disable the input when the editor has no source and AI is unavailable', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: '' }));
+    await waitFor(() => {
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isDisabled: true,
+          placeholder: 'Add a source with FROM to start searching',
+        }),
+        expect.anything()
+      );
+    });
+    expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
+  });
+
+  it('should keep the input enabled when the editor has a source and AI is unavailable', async () => {
+    renderWithI18n(renderESQLVisor({ ...props }));
+    await waitFor(() => {
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isDisabled: false }),
+        expect.anything()
+      );
+    });
+  });
+
   it('should not show a mode selector', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     await act(async () => {});
@@ -307,30 +336,56 @@ describe('Quick search visor', () => {
       );
     }
 
-    it('should show the mode buttons when license is enterprise and connector exists', async () => {
-      const { getByTestId, getByText } = renderWithI18n(renderWithEnterprise({ ...props }));
+    it('should show icon-only mode buttons and start in natural language when AI is available', async () => {
+      const { getByTestId, queryByText } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-        expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
-        expect(getByText('Query with AI')).toBeInTheDocument();
+        expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
+      });
+      expect(queryByText('Query with AI')).not.toBeInTheDocument();
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
+      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-label', 'Filter your data');
+    });
+
+    it('should switch to filter mode and back to natural language', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
+      });
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorModeKql'));
       });
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    it('should switch to NL mode when Ask AI is clicked', async () => {
-      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
-      await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-      });
       await act(async () => {
         await userEvent.click(getByTestId('esqlVisorAskAiButton'));
       });
       expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
-      expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-      expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('restores a KQL mode once AI is available and reports user changes', async () => {
+      const onInitialStateChange = jest.fn();
+      const { getByTestId, queryByTestId } = renderWithI18n(
+        renderWithEnterprise({
+          ...props,
+          initialState: { visorMode: VisorMode.KQL },
+          onInitialStateChange,
+        })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
+      expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
+      expect(onInitialStateChange).not.toHaveBeenCalled();
+
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+
+      expect(onInitialStateChange).toHaveBeenCalledWith({ visorMode: VisorMode.NaturalLanguage });
     });
 
     it('keeps the visor one row and overlays the focused NL textarea', () => {
@@ -411,7 +466,32 @@ describe('Quick search visor', () => {
           })
         );
       });
-      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+      await waitFor(() =>
+        expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', {
+          onAccept: expect.any(Function),
+          onReject: expect.any(Function),
+        })
+      );
+    });
+
+    it('focuses the input again when the generated query is undone', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, onNlResult }));
+
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+      await waitFor(() => expect(onNlResult).toHaveBeenCalled());
+      act(() => getByTestId('esqlVisorNLQueryInput').blur());
+
+      act(() => onNlResult.mock.calls[0][1].onReject());
+
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('show me logs');
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus();
     });
 
     it.each([
@@ -455,15 +535,25 @@ describe('Quick search visor', () => {
       expect(getByRole('button', { name: 'Stop' })).toBe(getByTestId('esqlVisorStopGeneration'));
     });
 
+    it('should disable the KQL mode button when the editor has no source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeDisabled();
+      });
+    });
+
+    it('should enable the KQL mode button once the editor has a source', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      await waitFor(() => {
+        expect(getByTestId('esqlVisorModeKql')).toBeEnabled();
+      });
+    });
+
     it('should return to KQL mode when the KQL mode button is clicked', async () => {
       const { getByTestId, queryByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
+        expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
       });
-      await act(async () => {
-        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
-      });
-      expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
       await act(async () => {
         await userEvent.click(getByTestId('esqlVisorModeKql'));
       });

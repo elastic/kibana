@@ -10,6 +10,11 @@ export { createTracedLogger } from './impl/lib/create_traced_logger';
 export { AttackDiscoveryError, InvalidDefendInsightTypeError } from './impl/lib/errors';
 export { getLlmType } from './impl/lib/helpers/get_llm_type';
 export {
+  extractJson,
+  getFormatInstructionsFromZodV4Schema,
+  getStructuredGenerationPrompt,
+} from './impl/lib/langchain';
+export {
   getGenerateNode,
   getGenerateOrEndEdge,
   getGenerateOrRefineOrEndEdge,
@@ -75,14 +80,28 @@ export {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
   getAnonymizedAlerts,
+  getAttackDiscoveriesGenerationSchema,
+  getCombinedAttackDiscoveryPrompt,
   getDefaultAttackDiscoveryGraph,
 } from './impl/attack_discovery/graphs';
 export type {
   AttackDiscoveryPrompts,
+  AttackDiscoveryTemplateCompletion,
+  AttackDiscoveryTemplatePhase,
+  AttackDiscoveryTemplateRequest,
   CombinedPrompts,
   DefaultAttackDiscoveryGraph,
   GenerationPrompts,
   GetDefaultAttackDiscoveryGraphParams,
+} from './impl/attack_discovery/graphs';
+export {
+  ATTACK_DISCOVERY_TEMPLATE_ID,
+  ATTACK_DISCOVERY_TEMPLATE_VERSION,
+  attackDiscoveryRefineTemplateRequest,
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  createAttackDiscoveryTemplateCompletion,
+  resolveAttackDiscoveryTemplateCompletion,
 } from './impl/attack_discovery/graphs';
 export {
   filterHallucinatedAlerts,
@@ -111,6 +130,8 @@ export {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
   ATTACK_DISCOVERY_EVENT_PROVIDER,
+  ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG,
+  getAttackDiscoveryEventOwnerFilter,
   writeAttackDiscoveryEvent,
 } from './impl/attack_discovery/persistence/event_logging';
 export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';

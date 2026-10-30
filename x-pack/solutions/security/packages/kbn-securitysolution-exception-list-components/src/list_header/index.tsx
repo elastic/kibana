@@ -26,6 +26,8 @@ import type { ListDetails, Rule } from '../types';
 import { useExceptionListHeader } from './use_list_header';
 import { textWithEditContainerCss } from '../text_with_edit/text_with_edit.styles';
 
+export { EditModal };
+
 interface ExceptionListHeaderComponentProps {
   name: string;
   description?: string;

@@ -901,6 +901,47 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
     });
   });
 
+  describe('Zod 4.6 JSON Schema compatibility', () => {
+    it('round-trips z.toJSONSchema output with type arrays through the converter', () => {
+      const original = z.object({
+        a: z.string().nullable(),
+        b: z.union([z.string(), z.number()]),
+        c: z.boolean().nullable().optional(),
+      });
+
+      const jsonSchema = z.toJSONSchema(original);
+      expect(jsonSchema.properties!.a).toMatchObject({ type: ['string', 'null'] });
+
+      const restored = fromJSONSchema(jsonSchema);
+      expect(restored).toBeDefined();
+
+      expect(() => restored!.parse({ a: 'ok', b: 42, c: null })).not.toThrow();
+      expect(() => restored!.parse({ a: null, b: 'text', c: true })).not.toThrow();
+      expect(() => restored!.parse({ a: 123, b: 'text' })).toThrow();
+      expect(() => restored!.parse({ a: 'ok', b: true })).toThrow();
+      expect(() => restored!.parse({ a: 'ok', b: 'text', c: 'x' })).toThrow();
+    });
+
+    it('round-trips a root schema with meta id and root $ref', () => {
+      const original = z
+        .object({
+          name: z.string(),
+          count: z.number().optional(),
+        })
+        .meta({ id: 'NamedCounts' });
+
+      const jsonSchema = z.toJSONSchema(original);
+      expect(jsonSchema).toHaveProperty('$ref', '#/$defs/NamedCounts');
+
+      const restored = fromJSONSchema(jsonSchema);
+      expect(restored).toBeDefined();
+
+      expect(() => restored!.parse({ name: 'alpha' })).not.toThrow();
+      expect(() => restored!.parse({ name: 'alpha', count: 3 })).not.toThrow();
+      expect(() => restored!.parse({ count: 3 })).toThrow();
+    });
+  });
+
   describe('Edge cases', () => {
     it('returns undefined for invalid schema', () => {
       const result = fromJSONSchema({ invalid: 'schema' });

@@ -10,11 +10,9 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elast
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
-import { DataViewSource } from '@kbn/data-source';
+import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
-import { getTracesBreakdownField } from './get_traces_breakdown_field';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
@@ -39,8 +37,7 @@ function TraceMetricsGrid({
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
-  const { query, dataSource, columns, isESQLQuery } = fetchParams;
-  const dataView = dataSource instanceof DataViewSource ? dataSource.getDataView() : undefined;
+  const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -65,13 +62,12 @@ function TraceMetricsGrid({
 
   const breakdownDataViewField = useMemo(
     () =>
-      getTracesBreakdownField({
+      resolveBreakdownField({
         breakdownField,
-        isESQLQuery,
+        dataSource,
         columns,
-        dataView,
       }),
-    [breakdownField, isESQLQuery, columns, dataView]
+    [breakdownField, dataSource, columns]
   );
 
   const handleBreakdownFieldChange = useCallback(

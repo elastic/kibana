@@ -72,10 +72,17 @@ export class VisualizationListingPlugin
         }),
         visibleIn: ['globalSearch'],
       },
-      createAction: async () => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        const { showNewVisModalFromDashboard } = await import('./get_table_list');
-        showNewVisModalFromDashboard(coreStart, pluginsStart, tabTitle);
+      createAction: {
+        order: 1,
+        label: i18n.translate('visualizationListing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create visualization',
+        }),
+        iconType: 'chartBarVertical',
+        create: async (path: string) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const { showNewVisModalFromDashboard } = await import('./get_table_list');
+          showNewVisModalFromDashboard(coreStart, pluginsStart, tabTitle, path);
+        },
       },
     };
 

@@ -25,7 +25,7 @@ export type IndexScopeStatusEnum = typeof IndexScopeStatus.enum;
 export const IndexScopeStatusEnum = IndexScopeStatus.enum;
 
 /**
- * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Seven are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted.
+ * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Nine are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, `extraction_pending` (the report's enrichment has not finished, so a later sweep will have terms this one did not), `catalog_unavailable` (the managed ATT&CK data was unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `collapsed` is the generation budget's gap for a technique whose evidence names the same report artifacts as another technique's: the other one generated first, its query was seen to filter on those artifacts, and the budget ran out before this one got a query of its own. The artifacts were searched; this technique's own behavior was not. The same report and quotes reproduce it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted.
  */
 export const HuntIncompleteReason = lazySchema(() =>
   z.enum([
@@ -34,14 +34,17 @@ export const HuntIncompleteReason = lazySchema(() =>
     'generation_failed',
     'execute_failed',
     'generation_budget',
+    'collapsed',
     'query_out_of_scope',
     'query_ungrounded',
     'quote_ungrounded',
     'unknown_technique_id',
+    'catalog_unavailable',
     'rows_unclassifiable',
     'refs_unavailable',
     'nothing_searched',
     'input_truncated',
+    'extraction_pending',
   ])
 );
 export type HuntIncompleteReason = z.infer<typeof HuntIncompleteReason>;
@@ -176,9 +179,37 @@ export const AffectedAsset = lazySchema(() =>
   z.object({
     name: z.string(),
     hit_count: z.number().int(),
+    /**
+     * Whether any hit for this asset came from a local index. Absent when the source indices are unknown (for example, the per-asset index breakdown was cut off before any local index was seen).
+     */
+    local: z
+      .boolean()
+      .optional()
+      .describe(
+        'Whether any hit for this asset came from a local index. Absent when the source indices are unknown (for example, the per-asset index breakdown was cut off before any local index was seen).'
+      ),
+    /**
+     * Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`) this asset was seen on. Present whenever `local` is.
+     */
+    remote_clusters: z
+      .array(z.string().max(255))
+      .max(20)
+      .optional()
+      .describe(
+        "Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`) this asset was seen on. Present whenever `local` is."
+      ),
   })
 );
 export type AffectedAsset = z.infer<typeof AffectedAsset>;
+
+export const HostOrigin = lazySchema(() =>
+  z.object({
+    name: z.string().max(512),
+    local: z.boolean(),
+    remote_clusters: z.array(z.string().max(255)).max(20),
+  })
+);
+export type HostOrigin = z.infer<typeof HostOrigin>;
 
 export const HuntForThreatHit = lazySchema(() =>
   z

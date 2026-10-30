@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { buildMatchesRequired } from './matches_required';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
-import { resolveTier2Targets } from './resolve_tier2_targets';
+import { needsModelDatasetMatch, resolveTier2Targets } from './resolve_tier2_targets';
 import { MAX_SCOPE_TARGETS } from './scope_bounds';
 
 jest.mock('./match_hunt_datasets', () => ({
@@ -42,6 +42,32 @@ const hits = (...indices: string[]) => ({
   per_index: indices.map((index) => ({ index, hit_count: 1, required: true })),
 });
 
+describe('needsModelDatasetMatch', () => {
+  it('is true only when nothing else points at a dataset and there is text to read', () => {
+    expect(
+      needsModelDatasetMatch({
+        scope: emptyScope,
+        tier1: hits(),
+        report: { text: 'Okta session hijack' },
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    [
+      'the report matched a dataset',
+      { ...emptyScope, report_matches: ['logs-okta.system-*'] },
+      hits(),
+      { text: 'x' },
+    ],
+    ['Tier 1 hit an index', emptyScope, hits('logs-okta.system-default'), { text: 'x' }],
+    ['the report has no text', emptyScope, hits(), { vendor: 'Okta' }],
+    ['there is no report', emptyScope, hits(), undefined],
+  ])('is false when %s', (_label, scope, tier1, report) => {
+    expect(needsModelDatasetMatch({ scope, tier1, report })).toBe(false);
+  });
+});
+
 describe('resolveTier2Targets', () => {
   const logger = loggerMock.create();
 
@@ -68,6 +94,7 @@ describe('resolveTier2Targets', () => {
         'logs-endpoint.events.process-default*',
       ],
       tier2_target_sources: ['report_match', 'tier1_hits', 'actionable'],
+      report_intent_targets: ['logs-okta.system-*'],
       degraded: false,
     });
   });
@@ -128,6 +155,7 @@ describe('resolveTier2Targets', () => {
       expect(result).toEqual({
         tier2_targets: ['logs-okta.system-*', 'logs-endpoint.events.process-default*'],
         tier2_target_sources: ['model', 'actionable'],
+        report_intent_targets: ['logs-okta.system-*'],
         degraded: true,
       });
     });
@@ -182,7 +210,12 @@ describe('resolveTier2Targets', () => {
       });
 
       expect(matchDatasetsWithModelMock).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ tier2_targets: [], tier2_target_sources: [], degraded: false });
+      expect(result).toEqual({
+        tier2_targets: [],
+        tier2_target_sources: [],
+        report_intent_targets: [],
+        degraded: false,
+      });
     });
   });
 
@@ -220,7 +253,9 @@ describe('resolveTier2Targets', () => {
         logger,
       });
 
-      expect(result).toEqual({ tier2_targets: [], tier2_target_sources: [], degraded: true });
+      expect(result).toEqual(
+        expect.objectContaining({ tier2_targets: [], tier2_target_sources: [], degraded: true })
+      );
     });
   });
 
@@ -347,6 +382,89 @@ describe('resolveTier2Targets', () => {
     });
   });
 
+  describe('constraining cross-cluster targets against the universe', () => {
+    const remoteCloudtrail: DiscoveredDataset = {
+      index_pattern: 'infosec_zocalo:logs-aws.cloudtrail-*',
+      dataset: 'aws.cloudtrail',
+      vendor: 'aws',
+      data_streams: ['infosec_zocalo:logs-aws.cloudtrail-default'],
+      search_patterns: ['infosec_zocalo:logs-aws.cloudtrail-*'],
+    };
+    const remoteScope = (indexPatterns: string[]) => ({
+      ...emptyScope,
+      discovered: [remoteCloudtrail],
+      report_matches: ['infosec_zocalo:logs-aws.cloudtrail-*'],
+      index_patterns: indexPatterns,
+    });
+
+    it.each([
+      ['a wildcard cluster', ['*:logs-*']],
+      ['a wildcard cluster prefix', ['infosec_*:logs-*']],
+      ['the named cluster', ['infosec_zocalo:logs-*']],
+    ])('keeps a remote report match under %s', async (_label, indexPatterns) => {
+      const result = await resolveTier2Targets({
+        scope: remoteScope(indexPatterns),
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['infosec_zocalo:logs-aws.cloudtrail-*']);
+      expect(result.degraded).toBe(false);
+    });
+
+    it.each([
+      ['a local-only universe', ['logs-*']],
+      ['another cluster', ['other:logs-*']],
+      ['a whole-cluster exclusion', ['*:logs-*', '-infosec_zocalo:*']],
+    ])('drops a remote report match under %s', async (_label, indexPatterns) => {
+      const result = await resolveTier2Targets({
+        scope: remoteScope(indexPatterns),
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual([]);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('narrows a remote report match past a remote index exclusion', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...remoteScope(['*:logs-*', 'infosec_zocalo:-logs-aws.cloudtrail-prod*']),
+          discovered: [
+            {
+              ...remoteCloudtrail,
+              data_streams: [
+                'infosec_zocalo:logs-aws.cloudtrail-default',
+                'infosec_zocalo:logs-aws.cloudtrail-prod',
+              ],
+            },
+          ],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['infosec_zocalo:logs-aws.cloudtrail-default*']);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('rejects a local report match under a remote-only universe', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          index_patterns: ['*:logs-*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual([]);
+      expect(result.degraded).toBe(true);
+    });
+  });
+
   describe('re-checking after the request-path bound', () => {
     it('narrows a dataset-collapsed pattern that the bound re-widened past an exclusion', async () => {
       const vendorDatasetCount = MAX_SCOPE_TARGETS / 2;
@@ -418,7 +536,42 @@ describe('resolveTier2Targets', () => {
       // 32 vendor patterns plus 40 re-expanded okta streams is 72 — over
       // MAX_SCOPE_TARGETS — so the whole run gets no target rather than a partially
       // bounded one.
-      expect(result).toEqual({ tier2_targets: [], tier2_target_sources: [], degraded: true });
+      expect(result).toEqual(
+        expect.objectContaining({ tier2_targets: [], tier2_target_sources: [], degraded: true })
+      );
+    });
+
+    it('drops the report-intent targets too when the same re-expansion grows past the request-path limit', async () => {
+      const vendorDatasetCount = MAX_SCOPE_TARGETS / 2;
+      const vendorMatches = Array.from({ length: vendorDatasetCount }, (_, index) => [
+        `logs-vendor${index}.stream-default*`,
+        `logs-vendor${index}.stream-prod*`,
+        `logs-vendor${index}.stream-staging*`,
+      ]).flat();
+
+      // Discovery found 40 namespaces for this dataset — none of them 'prod' — so
+      // narrowing back out of the dataset-wide collapse re-expands to all 40.
+      const manyStreams = Array.from({ length: 40 }, (_, index) => `logs-okta.system-ns${index}`);
+      const oktaManyStreams: DiscoveredDataset = {
+        index_pattern: 'logs-okta.system-*',
+        dataset: 'okta.system',
+        vendor: 'okta',
+        data_streams: manyStreams,
+        search_patterns: manyStreams.map((stream) => `${stream}*`),
+      };
+
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: [...vendorMatches, 'logs-okta.system-ns0*'],
+          discovered: [oktaManyStreams],
+          index_patterns: ['logs-*', '-logs-okta.system-prod*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.report_intent_targets).toEqual([]);
     });
   });
 
@@ -426,7 +579,52 @@ describe('resolveTier2Targets', () => {
     expect(await resolveTier2Targets({ scope: emptyScope, tier1: hits(), logger })).toEqual({
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       degraded: false,
+    });
+  });
+
+  describe('report_intent_targets', () => {
+    it('is only the report match and the model match, never Tier 1 hits or actionable indices', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-aws.cloudtrail-*'],
+          actionable_indices: ['logs-endpoint.events.process-default*'],
+        },
+        tier1: hits('.ds-logs-okta.system-default-2026.09.30-000001'),
+        logger,
+      });
+
+      expect(result.report_intent_targets).toEqual(['logs-aws.cloudtrail-*']);
+    });
+
+    it('is empty when only Tier 1 hits and actionable indices named targets', async () => {
+      const result = await resolveTier2Targets({
+        scope: { ...emptyScope, actionable_indices: ['logs-endpoint.events.process-default*'] },
+        tier1: hits('.ds-logs-okta.system-default-2026.09.30-000001'),
+        logger,
+      });
+
+      expect(result.report_intent_targets).toEqual([]);
+    });
+
+    it('is still returned when the full allowlist is dropped for not fitting', async () => {
+      const actionable = Array.from({ length: 80 }, (_, i) => `logs-actor${i}.stream-default*`);
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-aws.cloudtrail-*'],
+          actionable_indices: actionable,
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect([result.tier2_targets, result.report_intent_targets]).toEqual([
+        [],
+        ['logs-aws.cloudtrail-*'],
+      ]);
     });
   });
 });

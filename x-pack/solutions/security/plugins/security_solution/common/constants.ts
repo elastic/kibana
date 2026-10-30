@@ -14,7 +14,6 @@ import * as i18n from './translations';
 
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
@@ -523,6 +522,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
   ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
     'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
+  ENTITY_ANALYTICS_HOME_PAGE_BANNER:
+    'securitySolution.entityAnalyticsHomePage.productTourBannerDismissed.v9.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -752,12 +753,14 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
+  entityAnalyticsAiBrief = 'security.entity_analytics_ai_brief',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
   exception = 'security.exception',
   investigationIocs = 'security.investigation.iocs',
   investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
+  ruleMigrationItems = 'security.siem_migration.rule_migration_items',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

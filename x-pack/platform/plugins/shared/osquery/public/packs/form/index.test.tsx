@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
@@ -85,6 +85,23 @@ jest.mock('../use_create_pack', () => ({
 jest.mock('../use_update_pack', () => ({
   useUpdatePack: () => ({
     mutateAsync: (...args: unknown[]) => mockUpdateAsync(...args),
+  }),
+}));
+
+// Mock the version options hook so tests don't need a live schema endpoint.
+const MOCK_PACK_VERSION_OPTIONS = [
+  { label: '5.23.1' },
+  { label: '5.23.0' },
+  { label: '5.0.1' },
+  { label: '5.0.0' },
+];
+jest.mock('../queries/use_osquery_version_options', () => ({
+  useOsqueryVersionOptions: () => ({
+    options: MOCK_PACK_VERSION_OPTIONS,
+    osqueryVersion: '5.23.1',
+    pkgVersion: undefined,
+    helpText:
+      'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.0: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.',
   }),
 }));
 
@@ -1371,6 +1388,60 @@ describe('PackForm', () => {
       } finally {
         getItemSpy.mockRestore();
       }
+    });
+
+    it('version picker shows options from the mocked schema version (5.23.1 at top)', async () => {
+      const { getByTestId } = renderWithContext(<PackForm editMode={false} />);
+
+      fireEvent.click(within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput'));
+
+      // First option is the live version from the mock
+      const list = getByTestId('comboBoxOptionsList pack-version-field-optionsList');
+      expect(within(list).getByText('5.23.1')).toBeInTheDocument();
+    });
+
+    it('typing an invalid version in pack version field shows an error', async () => {
+      const { getByTestId, getByText } = renderWithContext(<PackForm editMode={false} />);
+
+      const comboBox = within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: 'latest' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+
+      await waitFor(() => {
+        expect(getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+    });
+
+    it('blocks save while a rejected typed version is shown', async () => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'v5-pack' } });
+      const { getByTestId, getByText, container } = renderWithContext(
+        <PackForm editMode={false} />
+      );
+
+      const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+      fireEvent.change(nameInput, { target: { value: 'v5-pack' } });
+
+      const comboBox = within(getByTestId('pack-version-field')).getByTestId('comboBoxSearchInput');
+      fireEvent.change(comboBox, { target: { value: '5.x' } });
+      fireEvent.keyDown(comboBox, { key: 'Enter', code: 'Enter' });
+      await waitFor(() => {
+        expect(getByText(/Version must be a numeric string/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('save-pack-button'));
+      // Let the submit's async validation settle before asserting it was blocked.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(mockCreateAsync).not.toHaveBeenCalled();
+    });
+
+    it('shows help text with the osquery version known to the package', () => {
+      const { getByText } = renderWithContext(<PackForm editMode={false} />);
+
+      expect(
+        getByText(
+          'osquery agent version, not the integration version. Latest osquery known to Osquery Manager 1.35.0: 5.23.1. Agents run the osquery bundled with their Elastic Agent version.'
+        )
+      ).toBeInTheDocument();
     });
   });
 

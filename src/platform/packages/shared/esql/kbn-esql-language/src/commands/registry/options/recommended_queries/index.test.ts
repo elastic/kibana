@@ -37,4 +37,36 @@ describe('getRecommendedQueriesTemplates', () => {
       expect(templates.find((q) => q.label === 'Detect change points')).toBeUndefined();
     });
   });
+
+  describe('field names', () => {
+    const queryStrings = (params: { timeField?: string; categorizationField?: string }) =>
+      getRecommendedQueriesTemplates({ fromCommand: 'FROM x', ...params }).map(
+        ({ queryString }) => queryString
+      );
+
+    it('keeps @timestamp unquoted', () => {
+      const queries = queryStrings({ timeField: '@timestamp' });
+
+      expect(queries.some((query) => query.includes('SORT @timestamp'))).toBe(true);
+      expect(queries.some((query) => query.includes('TBUCKET(50)'))).toBe(true);
+      expect(queries.some((query) => query.includes('`@timestamp`'))).toBe(false);
+    });
+
+    it('quotes a time field that is not a valid unquoted identifier', () => {
+      const queries = queryStrings({ timeField: 'event-time' });
+
+      expect(queries.some((query) => query.includes('SORT `event-time`'))).toBe(true);
+      expect(queries.some((query) => /BUCKET\(\s*`event-time`, 50/.test(query))).toBe(true);
+      expect(queries.filter((query) => /(?<!`)event-time(?!`)/.test(query))).toEqual([]);
+    });
+
+    it('quotes a categorization field that is not a valid unquoted identifier', () => {
+      const queries = queryStrings({
+        timeField: '@timestamp',
+        categorizationField: 'error-message',
+      });
+
+      expect(queries.some((query) => query.includes('CATEGORIZE(`error-message`)'))).toBe(true);
+    });
+  });
 });

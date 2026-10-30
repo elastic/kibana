@@ -26,8 +26,14 @@ export const AutomationFilter = ({
   onChange,
   testSubject,
   searchPlaceholder,
+  ariaLabel,
+  emptyMessage,
+  popoverWidth = 240,
 }: {
   label: string;
+  ariaLabel: string;
+  emptyMessage?: string;
+  popoverWidth?: number;
   options: Array<FilterOption & { prepend?: React.ReactNode }>;
   selected: string[];
   onChange: (next: string[]) => void;
@@ -54,7 +60,7 @@ export const AutomationFilter = ({
       nextOptions.filter(({ checked }) => checked === 'on').map(({ label: value }) => value)
     );
   const renderContent = (list: React.ReactNode, search?: React.ReactNode) => (
-    <div css={{ width: 300 }}>
+    <div css={{ width: popoverWidth }}>
       {search && <div css={{ padding: euiTheme.size.s }}>{search}</div>}
       {list}
       {selected.length > 0 && (
@@ -74,7 +80,7 @@ export const AutomationFilter = ({
 
   return (
     <EuiPopover
-      aria-label={label}
+      aria-label={ariaLabel}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
@@ -87,6 +93,7 @@ export const AutomationFilter = ({
           hasActiveFilters={selected.length > 0}
           numActiveFilters={selected.length || undefined}
           numFilters={options.length}
+          isDisabled={options.length === 0}
           data-test-subj={testSubject}
         >
           {label}
@@ -95,9 +102,10 @@ export const AutomationFilter = ({
     >
       {searchPlaceholder ? (
         <EuiSelectable
-          aria-label={label}
+          aria-label={ariaLabel}
           searchable
           searchProps={{ placeholder: searchPlaceholder }}
+          emptyMessage={emptyMessage}
           options={selectableOptions}
           onChange={handleChange}
           listProps={{ bordered: false }}
@@ -106,7 +114,8 @@ export const AutomationFilter = ({
         </EuiSelectable>
       ) : (
         <EuiSelectable
-          aria-label={label}
+          aria-label={ariaLabel}
+          emptyMessage={emptyMessage}
           options={selectableOptions}
           onChange={handleChange}
           listProps={{ bordered: false }}

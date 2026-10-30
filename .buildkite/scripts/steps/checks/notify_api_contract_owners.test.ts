@@ -12,10 +12,18 @@ jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
 }));
 
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { upsertComment } from '#pipeline-utils';
 import {
   buildCommentBody,
+  dedupeByChange,
   GITHUB_COMMENT_MAX_LENGTH,
+  notifyApiContractOwners,
   postedCommentLength,
+  readImpactReports,
+  RESOLVED_COMMENT_BODY,
   type ImpactEntry,
 } from './notify_api_contract_owners.ts';
 
@@ -169,6 +177,8 @@ describe('buildCommentBody', () => {
       '   - add release note text to the PR description, see the Release note section below.';
     const README_LINK = 'See the [`@kbn/api-contracts` README]';
     const OPTIONAL_PROMPT = 'Optional: release note describing the change in the PR description';
+    const BREAKING_CONTEXT =
+      'Add `## Impact` and `## Action` sections to the PR description so API users know who and what the change affects, and the steps or workarounds they need to adapt.';
 
     it.each([
       ['stable', entry()],
@@ -177,6 +187,7 @@ describe('buildCommentBody', () => {
       const body = buildCommentBody([gatingEntry]);
 
       expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+      expect(body).toContain(BREAKING_CONTEXT);
     });
 
     it('groups the allowlist, label and release note under one If intentional step', () => {
@@ -228,6 +239,7 @@ describe('buildCommentBody', () => {
 
       expect(body).not.toContain('### Release note');
       expect(body).not.toContain('release_note:breaking');
+      expect(body).not.toContain('## Impact');
     });
 
     it.each([
@@ -240,6 +252,7 @@ describe('buildCommentBody', () => {
       expect(body.match(/release note/gi)).toHaveLength(1);
       expect(body).not.toContain('### Release note');
       expect(body).not.toContain('release_note:breaking');
+      expect(body).not.toContain('## Impact');
     });
 
     it('leaves the optional prompt out of a gating comment', () => {
@@ -262,6 +275,7 @@ describe('buildCommentBody', () => {
         `### What to do\n\nNothing here blocks merge. ${OPTIONAL_PROMPT}\n\nSee the [\`@kbn/api-contracts\` README]`
       );
       expect(body).toContain('for tier definitions and the rule policy.');
+      expect(body).not.toContain('## Impact');
       expect(body).not.toContain('**If intentional**');
     });
 
@@ -270,6 +284,10 @@ describe('buildCommentBody', () => {
 
       it.each([
         ['alone', [approved]],
+        [
+          'a tech_preview change',
+          [entry({ path: '/api/approved', tier: 'tech_preview', allowlisted: true })],
+        ],
         [
           'with a report-only change',
           [approved, entry({ reportOnly: true, policyReason: 'Additive response variant.' })],
@@ -289,6 +307,7 @@ describe('buildCommentBody', () => {
         expect(body).toContain(LABEL_BULLET.trimStart());
         expect(body).toContain(RELEASE_NOTE_BULLET.trimStart());
         expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+        expect(body).toContain(BREAKING_CONTEXT);
         expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
         expect(body).not.toContain(OPTIONAL_PROMPT);
         expect(body).not.toContain('**If intentional**');
@@ -370,6 +389,118 @@ describe('buildCommentBody', () => {
       expect(body).toContain('The approved breaking change(s) still ship with this PR');
       expect(body).not.toContain('**Fix the breaking change**');
       expect(body).not.toContain('/api/approved-huge');
+    });
+  });
+});
+
+describe('dedupeByChange', () => {
+  it('collapses the same change from the stack and serverless reports into one row', () => {
+    const change = entry({ oasdiffId: 'request-parameter-removed', reason: "deleted 'simulate'" });
+
+    expect(dedupeByChange([change, { ...change }])).toEqual([change]);
+  });
+
+  it('keeps distinct changes to the same endpoint under the same rule', () => {
+    const first = entry({ oasdiffId: 'request-property-removed', reason: "removed 'name'" });
+    const second = entry({ oasdiffId: 'request-property-removed', reason: "removed 'type'" });
+
+    expect(dedupeByChange([first, second])).toEqual([first, second]);
+  });
+
+  it('keeps kbn: rule changes at different source locations apart', () => {
+    const tightening = entry({
+      oasdiffId: 'kbn:request-additional-properties-tightened',
+      reason: 'Request body schema disallows extra fields',
+    });
+
+    expect(
+      dedupeByChange([
+        { ...tightening, source: '/components/schemas/A' },
+        { ...tightening, source: '/components/schemas/B' },
+      ])
+    ).toHaveLength(2);
+  });
+});
+
+describe('reading reports and posting', () => {
+  let dir: string;
+  const report = (name: string, contents: string): string => {
+    const reportPath = join(dir, name);
+    writeFileSync(reportPath, contents);
+    return reportPath;
+  };
+  const emptyReport = (name: string) => report(name, JSON.stringify({ entries: [] }));
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'api-contracts-notifier-'));
+    jest.mocked(upsertComment).mockClear();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+    jest.restoreAllMocks();
+  });
+
+  describe('readImpactReports', () => {
+    it('merges the entries of every report and marks the read complete', () => {
+      const stack = report('stack.json', JSON.stringify({ entries: [entry()] }));
+      const serverless = report(
+        'serverless.json',
+        JSON.stringify({ entries: [entry({ path: '/api/two' })] })
+      );
+
+      expect(readImpactReports([stack, serverless])).toEqual({
+        entries: [entry(), entry({ path: '/api/two' })],
+        complete: true,
+      });
+    });
+
+    it.each([
+      ['missing', () => join(dir, 'missing.json')],
+      ['unparseable', () => report('bad.json', '{ not json')],
+      ['unrecognized', () => report('odd.json', JSON.stringify({ changes: [] }))],
+    ])('marks the read incomplete when a report is %s', (_kind, makePath) => {
+      const result = readImpactReports([emptyReport('stack.json'), makePath()]);
+
+      expect(result).toEqual({ entries: [], complete: false });
+    });
+
+    it('treats no report paths as incomplete', () => {
+      expect(readImpactReports([])).toEqual({ entries: [], complete: false });
+    });
+  });
+
+  describe('notifyApiContractOwners', () => {
+    it('replaces the comment with the full report when there are changes', async () => {
+      await notifyApiContractOwners([
+        report('stack.json', JSON.stringify({ entries: [entry()] })),
+        report('serverless.json', JSON.stringify({ entries: [entry()] })),
+      ]);
+
+      expect(upsertComment).toHaveBeenCalledWith({
+        commentBody: buildCommentBody([entry()]),
+        commentContext: 'api-contracts-breaking',
+        clearPrevious: true,
+      });
+    });
+
+    it('only updates an earlier comment when every check ran clean', async () => {
+      await notifyApiContractOwners([emptyReport('stack.json'), emptyReport('serverless.json')]);
+
+      expect(upsertComment).toHaveBeenCalledWith({
+        commentBody: RESOLVED_COMMENT_BODY,
+        commentContext: 'api-contracts-breaking',
+        clearPrevious: false,
+        createIfMissing: false,
+      });
+    });
+
+    it('leaves the comment alone when a check did not write its report', async () => {
+      await notifyApiContractOwners([emptyReport('stack.json'), join(dir, 'missing.json')]);
+
+      expect(upsertComment).not.toHaveBeenCalled();
     });
   });
 });

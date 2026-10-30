@@ -8,14 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONVERSATION_CARD_LABELS = Object.freeze({
-  templateTypes: {
-    investigation: i18n.translate('xpack.alertzero.conversationCard.templateTypes.investigation', {
-      defaultMessage: 'Investigation',
-    }),
-    incident: i18n.translate('xpack.alertzero.conversationCard.templateTypes.incident', {
-      defaultMessage: 'Incident',
-    }),
-  },
   watchedBy: i18n.translate('xpack.alertzero.conversationCard.watchedBy', {
     defaultMessage: 'Watched by',
   }),
@@ -27,15 +19,6 @@ export const CONVERSATION_CARD_LABELS = Object.freeze({
       defaultMessage: '{count, plural, one {# pending proposal} other {# pending proposals}}',
       values: { count },
     }),
-});
-
-export const CONVERSATION_CARD_ACTIONS = Object.freeze({
-  default: i18n.translate('xpack.alertzero.conversationCard.defaultAction', {
-    defaultMessage: 'Review',
-  }),
-  viewDetails: i18n.translate('xpack.alertzero.conversationCard.viewDetails', {
-    defaultMessage: 'View details',
-  }),
 });
 
 export const WATCH_TIER_LABELS = Object.freeze({

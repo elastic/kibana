@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import {
+  DATE_TIME_FORMAT,
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
@@ -32,14 +34,22 @@ describe('getProposalTone', () => {
 
   it('shows a revised impact rather than the action metadata it replaced', () => {
     expect(
-      getProposalTone(proposal({ impact: 'high', action: { name: 'Isolate host', impact: 'low' } }))
+      getProposalTone(
+        proposal({
+          impact: 'high',
+          action: { name: 'Isolate host', impact: 'low', approvalPolicy: 'always-gate' },
+        })
+      )
     ).toBe('danger');
   });
 
   it("falls back to the action's impact when the proposal sets none", () => {
     expect(
       getProposalTone(
-        proposal({ impact: undefined, action: { name: 'Isolate host', impact: 'critical' } })
+        proposal({
+          impact: undefined,
+          action: { name: 'Isolate host', impact: 'critical', approvalPolicy: 'always-gate' },
+        })
       )
     ).toBe('danger');
   });
@@ -53,7 +63,10 @@ describe('getProposalCaption', () => {
   it('joins category and reversibility, capitalizing the stored-lowercase category', () => {
     expect(
       getProposalCaption(
-        proposal({ category: 'configure', action: { name: 'Isolate host', reversible: true } })
+        proposal({
+          category: 'configure',
+          action: { name: 'Isolate host', reversible: true, approvalPolicy: 'always-gate' },
+        })
       )
     ).toBe('Configure • Reversible');
   });
@@ -63,7 +76,12 @@ describe('getProposalCaption', () => {
       getProposalCaption(
         proposal({
           category: 'configure',
-          action: { name: 'Isolate host', category: 'response', reversible: false },
+          action: {
+            name: 'Isolate host',
+            category: 'response',
+            reversible: false,
+            approvalPolicy: 'always-gate',
+          },
         })
       )
     ).toBe('Response • Irreversible');
@@ -75,7 +93,11 @@ describe('getProposalCaption', () => {
 
   it('omits category when neither the proposal nor its action declares one', () => {
     expect(
-      getProposalCaption(proposal({ action: { name: 'Isolate host', reversible: true } }))
+      getProposalCaption(
+        proposal({
+          action: { name: 'Isolate host', reversible: true, approvalPolicy: 'always-gate' },
+        })
+      )
     ).toBe('Reversible');
   });
 
@@ -101,29 +123,23 @@ describe('getProposalCaption', () => {
 
   it('appends the decision deadline, formatted the same way the host renders any other date', () => {
     const expiresAt = '2999-01-05T17:00:00.000Z';
-    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
       getProposalCaption(proposal({ category: 'configure', impact: 'high', expiresAt }), {
         includeRiskDetails: true,
       })
-    ).toBe(`Configure • High impact • Expires ${formattedDeadline}`);
+    ).toBe(`Configure • High impact • Expires on ${formattedDeadline}`);
   });
 
-  it('shows Expired rather than a formatted deadline once the decision window has passed', () => {
+  it('shows the expiry date and time once the decision window has passed', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    const formattedDeadline = moment(expiresAt).format(DATE_TIME_FORMAT);
     expect(
       getProposalCaption(
-        proposal({
-          category: 'configure',
-          impact: 'high',
-          status: 'expired',
-          expiresAt: '2024-01-05T17:00:00.000Z',
-        }),
+        proposal({ category: 'configure', impact: 'high', status: 'expired', expiresAt }),
         { includeRiskDetails: true }
       )
-    ).toBe('Configure • High impact • Expired');
+    ).toBe(`Configure • High impact • Expired on ${formattedDeadline}`);
   });
 
   it('omits the deadline segment entirely when the proposal carries no expiresAt', () => {
@@ -205,6 +221,22 @@ describe('getProposalDecision', () => {
         })
       )
     ).toMatchObject({ status: 'declined' });
+  });
+
+  it("reports a failed action's error as its reason", () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'failed',
+          executionError: 'The rule was changed after this proposal was created',
+          rationale: 'Looks right',
+        })
+      )
+    ).toMatchObject({
+      status: 'failed',
+      reason: 'The rule was changed after this proposal was created',
+    });
   });
 });
 

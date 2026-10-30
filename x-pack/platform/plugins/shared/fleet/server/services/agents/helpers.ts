@@ -78,7 +78,7 @@ export function searchHitToAgent(
     // Always resolved to the base policy id, so consumers indexing base-id-keyed collections can
     // read this field directly instead of stripping the suffix off `policy_id` themselves. The
     // fallback covers documents that pre-date `policy_base_id` (agents enrolled via an older
-    // fleet-server during a mixed-version rollout, before the startup backfill catches them).
+    // fleet-server during a mixed-version rollout, before the setup backfill catches them).
     policy_base_id:
       hit._source?.policy_base_id ??
       (hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined),

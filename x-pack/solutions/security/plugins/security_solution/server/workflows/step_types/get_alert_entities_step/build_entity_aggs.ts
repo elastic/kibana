@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { AlertEntityType } from './types';
 
 /** The alert fields a display name is read from; see `nameFromFields`. */
@@ -74,7 +74,7 @@ export const buildEntityAggs = ({
   runtime_mappings: Object.fromEntries(
     entityTypes.map((entityType) => [
       runtimeFieldName(entityType),
-      euid.painless.getEuidRuntimeMapping(entityType),
+      euid.painless.getEuidRuntimeMapping(getBuiltInEntityDefinition(entityType)),
     ])
   ),
 });

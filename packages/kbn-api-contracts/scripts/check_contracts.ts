@@ -218,7 +218,18 @@ run(
 
       const allBreakingChanges = parseOasdiff([...diffEntries, ...syntheticEntries]);
 
+      // Every completed run writes a report, even an empty one, so the notifier can
+      // tell a clean run apart from a skipped or failed one and clear a stale comment.
+      const writeReport = (entries: ImpactReportEntry[]) => {
+        if (!opts.reportPath) {
+          return;
+        }
+        writeImpactReport(opts.reportPath, { distribution: opts.distribution, entries });
+        log.info(`Impact report written to ${opts.reportPath}`);
+      };
+
       if (allBreakingChanges.length === 0) {
+        writeReport([]);
         log.success('No breaking changes detected');
         return;
       }
@@ -270,13 +281,7 @@ run(
         .map((entry) => ({ ...entry, allowlisted: true }));
       const reportEntries = [...entries, ...allowlistedEntries];
 
-      if (opts.reportPath && reportEntries.length > 0) {
-        writeImpactReport(opts.reportPath, {
-          distribution: opts.distribution,
-          entries: reportEntries,
-        });
-        log.info(`Impact report written to ${opts.reportPath}`);
-      }
+      writeReport(reportEntries);
 
       if (breakingChanges.length === 0) {
         if (allowlistedEntries.length > 0) {

@@ -34,6 +34,7 @@ export const RULE_IDS = {
   MODEL_VERSION_MISSING_SCHEMAS: 'model-version/missing-schemas',
   MODEL_VERSION_MISSING_FORWARD_COMPATIBILITY: 'model-version/missing-forward-compatibility',
   MODEL_VERSION_MISSING_CREATE_SCHEMA: 'model-version/missing-create-schema',
+  MODEL_VERSION_MISSING_UPDATE_SCHEMA: 'model-version/missing-update-schema',
   MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA: 'model-version/mappings-not-in-schema',
   MODEL_VERSION_MAPPING_INDEX_FALSE: 'model-version/mapping-index-false',
   MODEL_VERSION_MAPPING_ENABLED_FALSE: 'model-version/mapping-enabled-false',

@@ -291,6 +291,21 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  dataSourceAuthenticationCalloutTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
+    {
+      defaultMessage: 'Check data source permissions',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
+    {
+      defaultMessage:
+        'Make sure the selected data source has permission to read the data you want to query. You can update its permissions in your cloud provider.',
+    }
+  ),
+
   resourceLabel: i18n.translate('xpack.dataFederation.createDatasetForm.resourceLabel', {
     defaultMessage: 'Resource',
   }),

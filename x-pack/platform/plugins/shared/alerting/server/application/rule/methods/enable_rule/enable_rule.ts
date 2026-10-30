@@ -221,6 +221,17 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
       throw e;
     }
+
+    // A rule with only a UIAM key, such as one created by a UIAM service account, gets a new key
+    // set above, so the UIAM key it held is no longer used. The key may also be a stale one that
+    // was already invalidated, and invalidating it again is harmless.
+    if (!existingApiKey && attributes.uiamApiKey && !attributes.apiKeyCreatedByUser) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: [attributes.uiamApiKey] },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
+    }
   }
 
   let scheduledTaskIdToCreate: string | null = null;

@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiTextArea, EuiSpacer } from '@elastic/eui';
 import { useFormContext, Controller } from 'react-hook-form';
 import { IndexSearchPattern } from '../../components/index_search/index_search_pattern';
+import { IncludeFrozenField } from '../../components/include_frozen_field';
 import type { IndexSearchToolFormData } from '../../types/tool_form_types';
 import { i18nMessages } from '../../i18n';
 
@@ -51,9 +52,7 @@ export const IndexSearchConfiguration = () => {
           )}
         />
       </EuiFormRow>
-
       <EuiSpacer size="m" />
-
       <EuiFormRow
         label={i18nMessages.configuration.form.indexSearch.customInstructionsLabel}
         helpText={i18nMessages.configuration.form.indexSearch.customInstructionsHelpText}
@@ -78,6 +77,8 @@ export const IndexSearchConfiguration = () => {
           )}
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <IncludeFrozenField />
     </>
   );
 };

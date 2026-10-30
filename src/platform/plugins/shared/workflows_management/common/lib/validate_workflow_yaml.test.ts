@@ -29,8 +29,8 @@ describe('validateWorkflowYaml', () => {
     ];
 
     examples.forEach(({ name, yaml }) => {
-      it(`should return valid for ${name}`, () => {
-        const result = validateWorkflowYaml(yaml, schema);
+      it(`should return valid for ${name}`, async () => {
+        const result = await validateWorkflowYaml(yaml, schema);
         expect(result.valid).toBe(true);
         expect(result.diagnostics).toEqual([]);
       });
@@ -38,16 +38,16 @@ describe('validateWorkflowYaml', () => {
   });
 
   describe('yaml syntax errors', () => {
-    it('should detect invalid YAML syntax', () => {
-      const result = validateWorkflowYaml(':\n  invalid: [unclosed', schema);
+    it('should detect invalid YAML syntax', async () => {
+      const result = await validateWorkflowYaml(':\n  invalid: [unclosed', schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics).toHaveLength(1);
       expect(result.diagnostics[0].source).toBe('yaml-syntax');
     });
 
-    it('should detect completely malformed YAML', () => {
-      const result = validateWorkflowYaml('{{{{', schema);
+    it('should detect completely malformed YAML', async () => {
+      const result = await validateWorkflowYaml('{{{{', schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.some((d) => d.source === 'yaml-syntax')).toBe(true);
@@ -55,7 +55,7 @@ describe('validateWorkflowYaml', () => {
   });
 
   describe('schema validation errors', () => {
-    it('should detect missing required name field', () => {
+    it('should detect missing required name field', async () => {
       const yaml = `
 version: '1'
 enabled: true
@@ -67,13 +67,13 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
     });
 
-    it('should provide an actionable message for an empty steps array', () => {
+    it('should provide an actionable message for an empty steps array', async () => {
       const yaml = `
 version: '1'
 name: Test
@@ -81,7 +81,7 @@ triggers:
   - type: manual
 steps: []
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics).toEqual([
@@ -94,7 +94,7 @@ steps: []
       ]);
     });
 
-    it('should detect invalid step type', () => {
+    it('should detect invalid step type', async () => {
       const yaml = `
 version: '1'
 name: Test
@@ -106,13 +106,13 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
     });
 
-    it('should provide path information in schema errors', () => {
+    it('should provide path information in schema errors', async () => {
       const yaml = `
 version: '1'
 name: Test
@@ -124,7 +124,7 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       const schemaErrors = result.diagnostics.filter((d) => d.source === 'schema');
       expect(schemaErrors.length).toBeGreaterThan(0);
@@ -132,7 +132,7 @@ steps:
   });
 
   describe('step name uniqueness', () => {
-    it('should detect duplicate step names', () => {
+    it('should detect duplicate step names', async () => {
       const yaml = `
 version: '1'
 name: Duplicate Steps Test
@@ -148,7 +148,7 @@ steps:
     with:
       message: second
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       const stepNameErrors = result.diagnostics.filter((d) => d.source === 'step-name');
@@ -156,7 +156,7 @@ steps:
       expect(stepNameErrors[0].message).toContain('my_step');
     });
 
-    it('should allow unique step names', () => {
+    it('should allow unique step names', async () => {
       const yaml = `
 version: '1'
 name: Unique Steps Test
@@ -172,7 +172,7 @@ steps:
     with:
       message: second
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'step-name')).toHaveLength(0);
@@ -180,7 +180,7 @@ steps:
   });
 
   describe('liquid template errors', () => {
-    it('should detect unclosed liquid expressions', () => {
+    it('should detect unclosed liquid expressions', async () => {
       const yaml = `
 version: '1'
 name: Liquid Error Test
@@ -192,7 +192,7 @@ steps:
     with:
       message: "{{ unclosed"
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics).toEqual(
@@ -202,7 +202,7 @@ steps:
       );
     });
 
-    it('should not flag valid liquid templates', () => {
+    it('should not flag valid liquid templates', async () => {
       const yaml = `
 version: '1'
 name: Valid Liquid Test
@@ -214,12 +214,12 @@ steps:
     with:
       message: "Hello {{ name }}"
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
     });
 
-    it('should not flag liquid expressions inside YAML comment lines', () => {
+    it('should not flag liquid expressions inside YAML comment lines', async () => {
       const yaml = `
 version: '1'
 name: Comment Liquid Test
@@ -233,13 +233,13 @@ steps:
     with:
       message: "Hello world"
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
     });
 
-    it('should not flag invalid liquid inside YAML comment lines', () => {
+    it('should not flag invalid liquid inside YAML comment lines', async () => {
       const yaml = `
 version: '1'
 name: Comment Invalid Liquid Test
@@ -252,12 +252,12 @@ steps:
     with:
       message: "Hello world"
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
     });
 
-    it('should not flag liquid expressions inside inline YAML comments', () => {
+    it('should not flag liquid expressions inside inline YAML comments', async () => {
       const yaml = `
 version: '1'
 name: Inline Comment Liquid Test
@@ -269,7 +269,7 @@ steps:
     with:
       message: "Hello world" # {{ unclosed
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'liquid')).toHaveLength(0);
@@ -289,7 +289,7 @@ steps:
       },
     ];
 
-    it('should pass when a custom trigger has a valid KQL condition', () => {
+    it('should pass when a custom trigger has a valid KQL condition', async () => {
       const yaml = `
 version: '1'
 name: Valid Trigger Condition
@@ -303,13 +303,15 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schemaWithCustomTrigger, { triggerDefinitions });
+      const result = await validateWorkflowYaml(yaml, schemaWithCustomTrigger, {
+        triggerDefinitions,
+      });
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'trigger')).toHaveLength(0);
     });
 
-    it('should detect an invalid KQL condition in a custom trigger', () => {
+    it('should detect an invalid KQL condition in a custom trigger', async () => {
       const yaml = `
 version: '1'
 name: Invalid Trigger Condition
@@ -323,7 +325,9 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schemaWithCustomTrigger, { triggerDefinitions });
+      const result = await validateWorkflowYaml(yaml, schemaWithCustomTrigger, {
+        triggerDefinitions,
+      });
 
       expect(result.valid).toBe(false);
       const triggerErrors = result.diagnostics.filter((d) => d.source === 'trigger');
@@ -333,7 +337,7 @@ steps:
       );
     });
 
-    it('should skip trigger validation when no triggerDefinitions are provided', () => {
+    it('should skip trigger validation when no triggerDefinitions are provided', async () => {
       const yaml = `
 version: '1'
 name: No Trigger Defs
@@ -347,13 +351,13 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schemaWithCustomTrigger);
+      const result = await validateWorkflowYaml(yaml, schemaWithCustomTrigger);
 
       const triggerErrors = result.diagnostics.filter((d) => d.source === 'trigger');
       expect(triggerErrors).toHaveLength(0);
     });
 
-    it('should not validate conditions on built-in trigger types', () => {
+    it('should not validate conditions on built-in trigger types', async () => {
       const yaml = `
 version: '1'
 name: Built-in Trigger
@@ -365,7 +369,7 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schema, { triggerDefinitions });
+      const result = await validateWorkflowYaml(yaml, schema, { triggerDefinitions });
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'trigger')).toHaveLength(0);
@@ -390,8 +394,8 @@ steps:
       message: hello
 `;
 
-    it('should pass when connector-id is present', () => {
-      const result = validateWorkflowYaml(
+    it('should pass when connector-id is present', async () => {
+      const result = await validateWorkflowYaml(
         workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: webhook-1`),
         schemaRequiringConnectorId
       );
@@ -399,8 +403,8 @@ steps:
       expect(result.valid).toBe(true);
     });
 
-    it('should fail when connector-id is missing', () => {
-      const result = validateWorkflowYaml(
+    it('should fail when connector-id is missing', async () => {
+      const result = await validateWorkflowYaml(
         workflowYaml(`type: ${connectorEventTriggerId}`),
         schemaRequiringConnectorId
       );
@@ -410,8 +414,8 @@ steps:
       expect(result.diagnostics.some((d) => d.message.includes('connector-id'))).toBe(true);
     });
 
-    it('should fail when connector-id is empty', () => {
-      const result = validateWorkflowYaml(
+    it('should fail when connector-id is empty', async () => {
+      const result = await validateWorkflowYaml(
         workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: ""`),
         schemaRequiringConnectorId
       );
@@ -422,7 +426,7 @@ steps:
   });
 
   describe('graph build validation', () => {
-    it('rejects nested flow-control inside a parallel branch (nested parallel)', () => {
+    it('rejects nested flow-control inside a parallel branch (nested parallel)', async () => {
       // The schema accepts this, but compiling to an execution graph fails because
       // a parallel branch body must be straight-line. Without graph validation the
       // workflow would pass as valid and crash the run task later.
@@ -446,7 +450,7 @@ steps:
             with:
               message: leaf
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       const graphErrors = result.diagnostics.filter((d) => d.source === 'graph');
@@ -454,7 +458,7 @@ steps:
       expect(graphErrors[0].message).toMatch(/parallel/i);
     });
 
-    it('rejects an if inside a parallel branch body', () => {
+    it('rejects an if inside a parallel branch body', async () => {
       const yaml = `
 version: '1'
 name: If In Branch
@@ -475,13 +479,13 @@ steps:
             with:
               message: yes
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       expect(result.diagnostics.some((d) => d.source === 'graph')).toBe(true);
     });
 
-    it('accepts a straight-line parallel branch body', () => {
+    it('accepts a straight-line parallel branch body', async () => {
       const yaml = `
 version: '1'
 name: Valid Parallel
@@ -498,7 +502,7 @@ steps:
         with:
           message: "item {{ foreach.item }}"
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.filter((d) => d.source === 'graph')).toHaveLength(0);
@@ -506,7 +510,7 @@ steps:
   });
 
   describe('multiple error sources', () => {
-    it('should collect diagnostics from multiple sources without short-circuiting', () => {
+    it('should collect diagnostics from multiple sources without short-circuiting', async () => {
       const yaml = `
 version: '1'
 name: Multi Error Test
@@ -522,7 +526,7 @@ steps:
     with:
       message: ok
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(false);
       const sources = new Set(result.diagnostics.map((d) => d.source));
@@ -531,7 +535,7 @@ steps:
   });
 
   describe('response shape', () => {
-    it('should return valid=true with empty diagnostics for valid YAML', () => {
+    it('should return valid=true with empty diagnostics for valid YAML', async () => {
       const yaml = `
 version: '1'
 name: Simple Valid
@@ -543,15 +547,15 @@ steps:
     with:
       message: hello
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics).toEqual([]);
       expect(result.parsedWorkflow).toBeDefined();
     });
 
-    it('should include severity, message, and source in each diagnostic', () => {
-      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+    it('should include severity, message, and source in each diagnostic', async () => {
+      const result = await validateWorkflowYaml('not: valid: yaml: [[[', schema);
 
       expect(result.valid).toBe(false);
       for (const diag of result.diagnostics) {
@@ -565,8 +569,8 @@ steps:
   });
 
   describe('rule IDs', () => {
-    it('tags every diagnostic with a registered rule ID', () => {
-      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+    it('tags every diagnostic with a registered rule ID', async () => {
+      const result = await validateWorkflowYaml('not: valid: yaml: [[[', schema);
 
       expect(result.diagnostics.length).toBeGreaterThan(0);
       for (const diag of result.diagnostics) {
@@ -574,14 +578,14 @@ steps:
       }
     });
 
-    it('identifies a syntax error by rule ID rather than by message', () => {
-      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+    it('identifies a syntax error by rule ID rather than by message', async () => {
+      const result = await validateWorkflowYaml('not: valid: yaml: [[[', schema);
 
       expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('yamlSyntaxError');
     });
 
-    it('identifies a schema violation by rule ID', () => {
-      const result = validateWorkflowYaml(
+    it('identifies a schema violation by rule ID', async () => {
+      const result = await validateWorkflowYaml(
         `enabled: true
 triggers:
   - type: manual
@@ -597,8 +601,8 @@ steps:
       expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('schemaViolation');
     });
 
-    it('identifies duplicate step names by rule ID', () => {
-      const result = validateWorkflowYaml(
+    it('identifies duplicate step names by rule ID', async () => {
+      const result = await validateWorkflowYaml(
         `name: duplicate-steps
 enabled: true
 triggers:
@@ -620,7 +624,7 @@ steps:
   });
 
   describe('ignored kibana fetcher setting', () => {
-    it('warns without invalidating kibana.request workflows that still set fetcher', () => {
+    it('warns without invalidating kibana.request workflows that still set fetcher', async () => {
       const yaml = `
 version: '1'
 name: kibana-fetcher
@@ -636,7 +640,7 @@ steps:
       fetcher:
         skip_ssl_verification: true
 `;
-      const result = validateWorkflowYaml(yaml, schema, { warnIgnoredKibanaFetcher: true });
+      const result = await validateWorkflowYaml(yaml, schema, { warnIgnoredKibanaFetcher: true });
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics).toEqual([
@@ -649,7 +653,7 @@ steps:
       ]);
     });
 
-    it('does not warn on generated kibana.* fetcher when the self-client flag is off', () => {
+    it('does not warn on generated kibana.* fetcher when the self-client flag is off', async () => {
       const yaml = `
 version: '1'
 name: kibana-generated-fetcher
@@ -664,14 +668,14 @@ steps:
       fetcher:
         skip_ssl_verification: true
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
         false
       );
     });
 
-    it('does not warn when the self-client path is off', () => {
+    it('does not warn when the self-client path is off', async () => {
       const yaml = `
 version: '1'
 name: kibana-fetcher
@@ -687,7 +691,7 @@ steps:
       fetcher:
         skip_ssl_verification: true
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
@@ -695,7 +699,7 @@ steps:
       );
     });
 
-    it('does not warn on http connector fetcher settings', () => {
+    it('does not warn on http connector fetcher settings', async () => {
       const yaml = `
 version: '1'
 name: http-fetcher
@@ -710,10 +714,45 @@ steps:
       fetcher:
         skip_ssl_verification: true
 `;
-      const result = validateWorkflowYaml(yaml, schema);
+      const result = await validateWorkflowYaml(yaml, schema);
       expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
         false
       );
+    });
+  });
+
+  describe('esql rules', () => {
+    const esqlYaml = (query: string) =>
+      [
+        'name: esql',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: search',
+        '    type: elasticsearch.esql.query',
+        '    with:',
+        `      query: "${query}"`,
+        '',
+      ].join('\n');
+
+    it('does not run ES|QL rules unless callbacks are passed', async () => {
+      const result = await validateWorkflowYaml(esqlYaml('FROM logs-* | WHERE'), schema);
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter(({ source }) => source === 'esql')).toEqual([]);
+    });
+
+    it('emits esql diagnostics and marks the result invalid when callbacks are passed', async () => {
+      const result = await validateWorkflowYaml(esqlYaml('FROM logs-* | WHERE'), schema, {
+        esqlCallbacks: {},
+      });
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          source: 'esql',
+          ruleId: 'esqlDiagnostic',
+          path: ['steps', 0, 'with', 'query'],
+        }),
+      ]);
     });
   });
 });

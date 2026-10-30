@@ -14,6 +14,7 @@ import {
 } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+const APP_BOOT_TIMEOUT = 45_000;
 const LISTING_TIMEOUT = 20_000;
 
 export class GraphPage {
@@ -70,8 +71,15 @@ export class GraphPage {
   private readonly styleSelectionButton: Locator;
   private readonly drilldownButton: Locator;
   private readonly inspectButton: Locator;
+  private readonly drilldownsSettingsTab: Locator;
+  private readonly addDrilldownButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    // Parallel runs scope each worker to its own space; single-thread runs use the default space.
+    private readonly spaceId?: string
+  ) {
     this.contentList = new ContentListWrapper(page);
     this.appMenu = new AppMenu(page);
     this.createGraphPromptButton = this.page.getByTestId('graphCreateGraphPromptButton');
@@ -116,6 +124,8 @@ export class GraphPage {
     this.styleSelectionButton = this.page.getByTestId('graphStyleSelection');
     this.drilldownButton = this.page.getByTestId('graphDrilldown');
     this.inspectButton = this.page.getByTestId('graphInspectButton');
+    this.drilldownsSettingsTab = this.page.getByTestId('drillDowns');
+    this.addDrilldownButton = this.page.getByTestId('graphAddNewTemplate');
     this.nodeLabelInput = this.page.getByTestId('graphNodeLabelInput');
     this.rawDocumentsDrilldown = this.page.getByTestId('graphRawDocumentsDrilldown');
     this.inspectorRequestTab = this.page.getByRole('tab', { name: 'Request', exact: true });
@@ -128,12 +138,19 @@ export class GraphPage {
     this.vennSmallTerm2 = this.page.getByTestId('graphVennSmallTerm2');
   }
 
+  // Gate on `domcontentloaded`: Kibana's bundle graph defers `load` past app mount.
+  private async gotoGraphApp(spaceId?: string) {
+    await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }), {
+      waitUntil: 'domcontentloaded',
+    });
+  }
+
   async goto() {
-    await this.page.gotoApp('graph');
+    await this.gotoGraphApp(this.spaceId);
   }
 
   async gotoInSpace(spaceId: string) {
-    await this.page.goto(this.kbnUrl.app('graph', { space: spaceId }));
+    await this.gotoGraphApp(spaceId);
   }
 
   async waitForListing() {
@@ -141,7 +158,7 @@ export class GraphPage {
     // both or Playwright strict mode fails when the empty listing is ready.
     await this.emptyState
       .or(this.contentList.searchBox)
-      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: APP_BOOT_TIMEOUT });
   }
 
   async clickCreateGraph() {
@@ -322,6 +339,35 @@ export class GraphPage {
 
   async openDrilldowns() {
     await this.drilldownButton.click();
+  }
+
+  async createDrilldown({ title, url, encoder }: { title: string; url: string; encoder: string }) {
+    await this.clickSettings();
+    await this.drilldownsSettingsTab.click();
+    await this.addDrilldownButton.click();
+
+    const newDrilldown = this.page
+      .getByTestId('graphSettingsFlyout')
+      .getByRole('group', { name: 'New drilldown' });
+    await newDrilldown.getByRole('textbox', { name: 'Title' }).fill(title);
+    await newDrilldown.getByRole('textbox', { name: 'URL', exact: true }).fill(url);
+    await this.page.components
+      .comboBox('graphDrilldownEncoder', newDrilldown)
+      .setSelectedOptions([encoder]);
+    await newDrilldown.getByRole('button', { name: 'Save drilldown' }).click();
+    await this.page.keyboard.press('Escape');
+  }
+
+  async openDrilldown(title: string) {
+    const popupPromise = this.page.waitForEvent('popup');
+    await this.page
+      .getByTestId('graphDrilldowns')
+      .getByRole('button', { name: title, exact: true })
+      .click();
+    const popup = await popupPromise;
+    await popup.waitForURL((url) => url.toString() !== 'about:blank');
+    await popup.getByTestId('discoverDocTable').waitFor({ state: 'visible' });
+    return popup;
   }
 
   async saveWorkspace() {

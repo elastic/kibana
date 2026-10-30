@@ -100,6 +100,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         http={props.services.http}
         createActionPolicyDisabledReason={props.services.createActionPolicyDisabledReason}
         CreateActionPolicyFormFlyout={props.services.createActionPolicyFormFlyout}
+        getActionPolicyEditHref={props.services.getActionPolicyEditHref}
       />
     ),
     fields: ['metadata.routingTags'],

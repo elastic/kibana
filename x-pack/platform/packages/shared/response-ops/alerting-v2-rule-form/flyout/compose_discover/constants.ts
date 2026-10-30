@@ -24,4 +24,20 @@ export const ESQL_CODE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructi
   minimap: { enabled: false },
   automaticLayout: true,
   scrollBeyondLastLine: false,
+  // Single-digit line numbers sit flush with the left edge of the controls above the editor.
+  // Two-digit numbers widen the gutter, which is rare for a query.
+  glyphMargin: false,
+  folding: false,
+  lineNumbersMinChars: 1,
+  // Slim scrollbar and no overview ruler, matching Discover's ES|QL editor.
+  hideCursorInOverviewRuler: true,
+  overviewRulerLanes: 0,
+  overviewRulerBorder: false,
+  scrollbar: {
+    horizontal: 'hidden',
+    horizontalScrollbarSize: 6,
+    vertical: 'auto',
+    verticalScrollbarSize: 6,
+    alwaysConsumeMouseWheel: false,
+  },
 };

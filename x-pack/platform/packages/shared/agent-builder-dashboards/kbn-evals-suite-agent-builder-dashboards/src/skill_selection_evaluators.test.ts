@@ -6,8 +6,9 @@
  */
 
 import type { DashboardAgentTaskOutput } from './types';
+import { dashboardRoutingEvaluator } from './evaluators/dashboard_routing';
 import {
-  dashboardSkillActivatedEvaluator,
+  dashboardSkillWithoutVisualizationEvaluator,
   dashboardSkillNotActivatedEvaluator,
   getSkillReadPaths,
   getToolIds,
@@ -21,7 +22,7 @@ const createOutput = (steps: DashboardAgentTaskOutput['steps']): DashboardAgentT
 });
 
 const evaluateOutput = async (
-  evaluator: typeof dashboardSkillActivatedEvaluator,
+  evaluator: typeof dashboardSkillWithoutVisualizationEvaluator,
   output: DashboardAgentTaskOutput
 ) =>
   evaluator.evaluate({
@@ -41,17 +42,72 @@ describe('skill selection evaluators', () => {
       },
       {
         type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/enhance.md' },
+      },
+      {
+        type: 'tool_call',
         tool_id: 'platform.dashboard.generate_dashboard',
       },
     ]);
 
-    expect(getSkillReadPaths(output)).toEqual(['skills/platform/dashboard/dashboards']);
-    expect(getToolIds(output)).toEqual(['filestore.read', 'platform.dashboard.generate_dashboard']);
+    expect(getSkillReadPaths(output)).toEqual([
+      'skills/platform/dashboard/dashboards',
+      '/skills/platform/dashboard/dashboards/enhance.md',
+    ]);
+    expect(getToolIds(output)).toEqual([
+      'filestore.read',
+      'read_file',
+      'platform.dashboard.generate_dashboard',
+    ]);
+  });
+
+  it('requires enhance examples to read the enhance file', async () => {
+    const enhance = { mode: 'appearance' as const, asksMode: false, defects: [] };
+    const skillOnly = createOutput([
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/SKILL.md' },
+      },
+    ]);
+    const withEnhanceFile = createOutput([
+      {
+        type: 'tool_call',
+        tool_id: 'read_file',
+        params: { path: '/skills/platform/dashboard/dashboards/enhance.md' },
+      },
+    ]);
+
+    const missed = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Enhance this dashboard' },
+      expected: { route: 'dashboard', enhance },
+      metadata: undefined,
+      output: skillOnly,
+    });
+    expect(missed.score).toBe(0);
+    expect(missed.explanation).toContain('dashboards/enhance.md');
+
+    const read = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Enhance this dashboard' },
+      expected: { route: 'dashboard', enhance },
+      metadata: undefined,
+      output: withEnhanceFile,
+    });
+    expect(read.score).toBe(1);
+
+    const creation = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Create a dashboard' },
+      expected: { route: 'dashboard' },
+      metadata: undefined,
+      output: skillOnly,
+    });
+    expect(creation.score).toBe(1);
   });
 
   it('passes when dashboard skill is loaded for dashboard requests', async () => {
     const result = await evaluateOutput(
-      dashboardSkillActivatedEvaluator,
+      dashboardSkillWithoutVisualizationEvaluator,
       createOutput([
         {
           type: 'tool_call',
@@ -63,6 +119,24 @@ describe('skill selection evaluators', () => {
 
     expect(result.score).toBe(1);
     expect(result.label).toBe('PASS');
+  });
+
+  it('fails dashboard routing when the visualization skill is also loaded', async () => {
+    const result = await dashboardRoutingEvaluator.evaluate({
+      input: { question: 'Create a dashboard to monitor my logs' },
+      expected: { route: 'dashboard' },
+      metadata: undefined,
+      output: createOutput([
+        { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'dashboards' } },
+        { type: 'tool_call', tool_id: 'load_skill', params: { skill: 'visualization-creation' } },
+        { type: 'tool_call', tool_id: 'platform.dashboard.generate_dashboard' },
+      ]),
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.metadata).toEqual(
+      expect.objectContaining({ dashboardSkillLoaded: true, visualizationSkillLoaded: true })
+    );
   });
 
   it('passes when visualization skill loads without the dashboards skill', async () => {

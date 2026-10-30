@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import type { Automation } from '../hooks/use_automations';
 import { getTriggerDisplay } from './trigger_display';
 
@@ -13,15 +14,15 @@ export const statusLabels = {
   enabled: i18n.translate('xpack.nightshift.automations.enabledStatus', {
     defaultMessage: 'Enabled',
   }),
-  disabled: i18n.translate('xpack.nightshift.automations.disabledStatus', {
-    defaultMessage: 'Disabled',
+  paused: i18n.translate('xpack.nightshift.automations.pausedStatus', {
+    defaultMessage: 'Paused',
   }),
   rateLimited: i18n.translate('xpack.nightshift.automations.rateLimitedStatus', {
     defaultMessage: 'Rate limited',
   }),
 };
 
-export const STATUS_ORDER = [statusLabels.enabled, statusLabels.disabled, statusLabels.rateLimited];
+export const STATUS_ORDER = [statusLabels.enabled, statusLabels.paused, statusLabels.rateLimited];
 
 const youLabel = i18n.translate('xpack.nightshift.automations.youAuthor', {
   defaultMessage: 'You',
@@ -55,15 +56,24 @@ export interface FilterOption {
   count: number;
 }
 
-export const isAutomationRateLimited = ({ runtime }: Automation, usedToday: number): boolean =>
-  runtime.dailyDispatchLimit !== undefined && usedToday >= runtime.dailyDispatchLimit;
+export const isAutomationRateLimited = (
+  { isEnabled, runtime }: Automation,
+  usedToday: number
+): boolean =>
+  isEnabled && runtime.dailyDispatchLimit !== undefined && usedToday >= runtime.dailyDispatchLimit;
+
+export const isGlobalInvestigationLimitReached = (quotas?: RunQuotasResponse): boolean =>
+  quotas !== undefined &&
+  quotas.enabled &&
+  quotas.limits.investigation > 0 &&
+  quotas.counts.investigation >= quotas.limits.investigation;
 
 export const getAutomationFacets = (
   automation: Automation,
   { isRateLimited, currentUsername }: { isRateLimited: boolean; currentUsername?: string }
 ): AutomationFacets => ({
   statuses: [
-    automation.isEnabled ? statusLabels.enabled : statusLabels.disabled,
+    automation.isEnabled ? statusLabels.enabled : statusLabels.paused,
     ...(isRateLimited ? [statusLabels.rateLimited] : []),
   ],
   tags: automation.tags ?? [],
@@ -89,14 +99,18 @@ export const countFilterValues = (
 const matchesAny = (selected: string[], values: string[]) =>
   selected.length === 0 || values.some((value) => selected.includes(value));
 
-export const hasActiveFilters = ({
-  search,
-  statuses,
-  tags,
-  authors,
-  triggers,
-}: AutomationFilters) =>
-  Boolean(search || statuses.length || tags.length || authors.length || triggers.length);
+export const hasFilterSelections = ({ statuses, tags, authors, triggers }: AutomationFilters) =>
+  Boolean(statuses.length || tags.length || authors.length || triggers.length);
+
+export const hasActiveFilters = (filters: AutomationFilters) =>
+  Boolean(filters.search || hasFilterSelections(filters));
+
+export const isOnlyRateLimitedFilter = ({ statuses, tags, authors, triggers }: AutomationFilters) =>
+  statuses.length === 1 &&
+  statuses[0] === statusLabels.rateLimited &&
+  !tags.length &&
+  !authors.length &&
+  !triggers.length;
 
 export const matchesFilters = (
   automation: Automation,

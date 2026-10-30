@@ -25,6 +25,8 @@ export interface ObservablesUtilityBarProps {
   selectedObservables: Observable[];
   /** Whether the current user may run workflows from this case. */
   canRunWorkflow: boolean;
+  /** Clears the table selection after a successful bulk action. */
+  onBulkActionSuccess?: () => void;
 }
 
 export const ObservablesUtilityBar = ({
@@ -33,9 +35,11 @@ export const ObservablesUtilityBar = ({
   onExtractObservablesChanged,
   selectedObservables,
   canRunWorkflow,
+  onBulkActionSuccess,
 }: ObservablesUtilityBarProps) => {
   const { permissions } = useCasesContext();
   const { isExtractObservablesEnabled, observablesAuthorized } = useCasesFeatures();
+  const canUseBulkActions = canRunWorkflow || permissions.update;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -47,8 +51,13 @@ export const ObservablesUtilityBar = ({
         )}
       </EuiFlexItem>
 
-      {canRunWorkflow && (
-        <ObservablesBulkActions caseData={caseData} selectedObservables={selectedObservables} />
+      {canUseBulkActions && (
+        <ObservablesBulkActions
+          caseData={caseData}
+          selectedObservables={selectedObservables}
+          canRunWorkflow={canRunWorkflow}
+          onActionSuccess={onBulkActionSuccess}
+        />
       )}
 
       {permissions.update && observablesAuthorized && isExtractObservablesEnabled ? (

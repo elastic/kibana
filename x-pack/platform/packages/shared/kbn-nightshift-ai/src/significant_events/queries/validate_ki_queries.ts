@@ -12,9 +12,11 @@ import type { Feature, QueryFeature, QueryType } from '@kbn/significant-events-s
 import {
   deriveQueryType,
   extractReferencedColumns,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
   getStatsQueryHints,
   normalizeEsqlSafe,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
   replaceFromSources,
 } from '@kbn/streams-schema';
@@ -260,7 +262,7 @@ export async function validateKIQueries({
             status: 'Failed to add',
             failureReason: 'unknown_features',
             exactDuplicate,
-            error: `feature_ids must reference at least one feature belonging to this stream. Unknown IDs: [${rawFeatureIds.join(
+            error: `feature_ids must reference at least one feature belonging to this source. Unknown IDs: [${rawFeatureIds.join(
               ', '
             )}]`,
           };
@@ -275,7 +277,20 @@ export async function validateKIQueries({
             valid: false,
             status: 'Duplicate',
             exactDuplicate,
-            error: 'This query already exists for this stream.',
+            error: 'This query already exists for this source.',
+          };
+        }
+
+        const nonColumnFullTextArguments = findNonColumnFullTextArguments(rewritten);
+        if (nonColumnFullTextArguments.length > 0) {
+          hasNonIntentFailures = true;
+          return {
+            query,
+            valid: false,
+            status: 'Failed to add',
+            failureReason: 'validation_error',
+            exactDuplicate,
+            error: renderNonColumnFullTextArgumentError(nonColumnFullTextArguments),
           };
         }
 

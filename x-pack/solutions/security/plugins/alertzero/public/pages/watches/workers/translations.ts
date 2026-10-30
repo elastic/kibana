@@ -102,32 +102,4 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
 export const workerDescription = (workerId: string): string | undefined =>
   WORKER_DESCRIPTIONS[workerId];
 
-export const WORKER_NAMES: Record<string, string> = {
-  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.floorAlertTriage.name',
-    { defaultMessage: 'Alert Triage' }
-  ),
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.floorAttackDiscovery.name',
-    { defaultMessage: 'Attack Discovery' }
-  ),
-  [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.forensicsEndpointAnalysis.name',
-    { defaultMessage: 'Endpoint Analysis' }
-  ),
-  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.huntContinuousThreatHunt.name',
-    { defaultMessage: 'Continuous Threat Hunt' }
-  ),
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.detectionRuleTuning.name',
-    { defaultMessage: 'Rule Tuning' }
-  ),
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
-    'xpack.alertzero.watches.workers.detectionRuleCoverage.name',
-    { defaultMessage: 'Rule Coverage' }
-  ),
-};
-
-export const workerName = (workerId: string, fallbackName?: string): string =>
-  WORKER_NAMES[workerId] ?? fallbackName ?? workerId;
+export { workerName } from '../../../../common/worker_names';

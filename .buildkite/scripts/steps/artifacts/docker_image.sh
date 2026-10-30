@@ -33,20 +33,23 @@ check_cdn_assets_ready() {
 echo "--- Clean up cached images"
 clean_cached_images
 
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+# node scripts/build always names the image kibana-ci/kibana-serverless, PR pipelines push it to kibana-serverless-pr
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
+KIBANA_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless)"
+export KIBANA_IMAGE="$KIBANA_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
 retag_image_with_architecture() {
-  local image="$1"
-  local artifact="$2"
+  local build_output_image="$1"
+  local target_image="$2"
+  local artifact="$3"
 
-  docker rmi "$image" || true
+  docker rmi "$build_output_image" || true
   docker load < "target/${artifact}-amd64.tar.gz"
-  docker tag "$image" "$image-amd64"
+  docker tag "$build_output_image" "$target_image-amd64"
 
-  docker rmi "$image" || true
+  docker rmi "$build_output_image" || true
   docker load < "target/${artifact}-arm64.tar.gz"
-  docker tag "$image" "$image-arm64"
+  docker tag "$build_output_image" "$target_image-arm64"
 }
 
 create_and_push_manifest() {
@@ -99,7 +102,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
@@ -110,7 +113,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-    docker buildx imagetools create -t "$KIBANA_BASE_IMAGE:latest" "$KIBANA_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_PUSH_REPOSITORY:latest" "$KIBANA_IMAGE"
   fi
 
   echo "--- Build dependencies report"

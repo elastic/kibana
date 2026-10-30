@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -14,15 +13,22 @@ import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/f
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import { useReconciledServiceSettings } from '../service_settings_step/use_reconciled_service_settings';
 import { buildDeployGroups } from './deploy_groups';
 import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
 import type { DeployGroup } from './deploy_groups';
 import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
 import { useMiDeploy } from './use_mi_deploy';
-import { buildLiveStalePolicyIds, buildEffectivePendingCleanup } from './cleanup_reconciliation';
+import {
+  buildLiveStalePolicyIds,
+  buildEffectivePendingCleanup,
+  pickSecretSourcePolicyId,
+} from './cleanup_reconciliation';
+import { fetchAgentlessSecretRefs, useExistingSecretRefs } from './secret_refs';
+
+const STATIC_KEY_FIELDS = ['access_key_id', 'secret_access_key'] as const;
+type StaticKeyField = (typeof STATIC_KEY_FIELDS)[number];
 
 export {
   getRegionFieldName,
@@ -44,6 +50,10 @@ export interface UseDeployResult {
    * button should be enabled regardless of isDeployReady.
    */
   isCleanupOnly: boolean;
+  /** Credential fields already stored as secrets on the deployed policies; kept unless replaced. */
+  storedSecretFields: StaticKeyField[];
+  /** True until the stored-secret lookup of the deployed policies has settled. */
+  isStoredSecretsLoading: boolean;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -53,6 +63,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     servicesStep,
     authenticateAndDeployStep,
     setPendingIacTemplate,
+    clearStagedStaticKeys,
     detectAndReviewStep,
     updateDetectAndReviewStep,
     removeDeployInstances,
@@ -61,10 +72,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
 
-  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
-    SERVICE_SETTINGS_SESSION_KEY,
-    { globalRegion: '', serviceVars: {} }
-  );
+  const serviceSettings = useReconciledServiceSettings();
 
   const [isDeploying, setIsDeploying] = useState(false);
   // Seeded from session storage so a partial failure survives unmounting Step 3. Without this,
@@ -88,9 +96,16 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         serviceSettings?.instances ?? [],
         selectedServiceIds,
         servicesMap ?? new Map(),
-        serviceSettings?.serviceVars ?? {}
+        serviceSettings?.serviceVars ?? {},
+        serviceSettings?.namespace
       ),
-    [serviceSettings?.instances, serviceSettings?.serviceVars, selectedServiceIds, servicesMap]
+    [
+      serviceSettings?.instances,
+      serviceSettings?.serviceVars,
+      serviceSettings?.namespace,
+      selectedServiceIds,
+      servicesMap,
+    ]
   );
 
   // The Existing Identity check renders the stack update without touching the connector; the
@@ -160,6 +175,38 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     setPendingIacTemplate,
   ]);
 
+  // The credentials of a resumed or revisited session are never in memory, but the deployed
+  // policies still hold them as secrets; the form offers to keep them. Read from a policy a
+  // pending cleanup keeps, since deleting a policy deletes its secrets. No lookup for policies
+  // that authenticate through an identity: they have no keys to keep.
+  const secretSourcePolicyId = useMemo(() => {
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    return pickSecretSourcePolicyId(
+      policyIdsByInstance,
+      buildEffectivePendingCleanup(
+        buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds),
+        detectAndReviewStep.pendingCleanupPolicyIds
+      )
+    );
+  }, [
+    deployGroups,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
+  const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
+    authenticateAndDeployStep.connectorId ? undefined : secretSourcePolicyId,
+    fetchAgentlessSecretRefs
+  );
+  const storedSecretFields = useMemo(
+    () =>
+      authenticateAndDeployStep.connectorId
+        ? []
+        : STATIC_KEY_FIELDS.filter((field) => existingSecretRefs.has(field)),
+    [authenticateAndDeployStep.connectorId, existingSecretRefs]
+  );
+  const hasStoredCredentials = storedSecretFields.length === STATIC_KEY_FIELDS.length;
+
   const isAlreadyDeployed = useMemo(() => {
     if (deployGroups.length === 0) return false;
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
@@ -174,6 +221,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     return deployGroups.every((group) =>
       group.members.every(({ instance }) => {
         const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
+        // A resumed session restores the policy ids but not the detection statuses: a mapped
+        // instance without a status was deployed in an earlier session.
+        if (status === undefined) {
+          return instance.instanceId in (detectAndReviewStep.policyIdsByInstance ?? {});
+        }
         return status === 'receiving' || status === 'detecting' || status === 'timeout';
       })
     );
@@ -188,11 +240,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     // Failed instances always need a retry deploy — credentials are required. Treat them as
     // new untracked targets so the credential gate stays on even when pending cleanup exists.
     if (failedInstances.length > 0) return false;
-    // TODO(ingest-dev#9730): once secret-ref hydration and buildPackageVars refsToPreserve land,
-    // a dirty+cleanup run can safely proceed without re-entering credentials because the policy
-    // PUT will preserve existing secret refs. Until then, require credentials whenever isDirty
-    // is true so the dirty-update PUT does not emit an empty vars block and clear AWS keys.
-    if (detectAndReviewStep.isDirty) return false;
+    // A dirty-update PUT is a full replace: without credentials in memory it only keeps the AWS
+    // keys by sending back the stored secret refs. Require them to be stored (and not swapped for
+    // an identity); otherwise the user has to re-enter credentials.
+    if (
+      detectAndReviewStep.isDirty &&
+      (!hasStoredCredentials || authenticateAndDeployStep.authMethod === 'identity_federation')
+    ) {
+      return false;
+    }
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
     const liveStalePolicyIds = buildLiveStalePolicyIds(
       detectAndReviewStep.policyIdsByInstance ?? {},
@@ -214,6 +270,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   }, [
     failedInstances,
     deployGroups,
+    hasStoredCredentials,
+    authenticateAndDeployStep.authMethod,
     detectAndReviewStep.isDirty,
     detectAndReviewStep.policyIdsByInstance,
     detectAndReviewStep.serviceStatuses,
@@ -247,6 +305,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     removeDeployInstances,
     getLatestFailedInstances,
     persistPendingIacTemplate,
+    clearStagedStaticKeys,
     setIsDeploying,
     setFailedInstances,
     createDeployment,
@@ -268,5 +327,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     isAlreadyDeployed,
     deployGroups,
     isCleanupOnly,
+    storedSecretFields,
+    isStoredSecretsLoading,
   };
 }

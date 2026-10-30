@@ -30,6 +30,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
+import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
@@ -254,6 +255,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         }
         setEditTab(EditConnectorTabs.Configuration);
         setConnectorToTest(connectorForEdit);
+        return;
+      }
+
+      if (connectorTypePublishesKeys(createdConnector.actionTypeId)) {
+        setEditTab(EditConnectorTabs.Configuration);
+        setConnectorToTest(createdConnector);
         return;
       }
 

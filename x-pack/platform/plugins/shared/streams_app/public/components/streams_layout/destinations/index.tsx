@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { useNavigateToCanvasSearch } from '../../stream_management/data_management/stream_detail_canvas/use_navigate_to_canvas_search';
 import { CreateDestinationModal } from './create_destination_modal';
-import { UnitDestinationFlyout } from './unit_destination_flyout';
+import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { getDestinationTypeLabel } from './destination_type_config';
+import type { DestinationViewModel } from './types';
 
 export const DestinationsTab = () => {
   const destinationsController = useDestinationsTable();
   const {
     destinations,
+    resolvedIndicesByDestination,
+    resolvedIndicesStatus,
+    resolvedIndicesError,
     query,
-    selectedDestination,
     isCreateModalOpen,
     isRefreshingUnit,
     isLoadingUnit,
@@ -37,18 +41,40 @@ export const DestinationsTab = () => {
     setVisibleColumnIds,
     openCreateModal,
     closeCreateModal,
-    openDestinationFlyout,
-    closeDestinationFlyout,
+    deleteDestination,
     isUnitSaving,
   } = destinationsController;
+  const navigateToCanvasSearch = useNavigateToCanvasSearch();
+  const showOnCanvas = useCallback(
+    (destination: DestinationViewModel) => navigateToCanvasSearch(destination.name),
+    [navigateToCanvasSearch]
+  );
+  const [destinationPendingDeletion, setDestinationPendingDeletion] = useState<
+    DestinationViewModel | undefined
+  >();
+  const cancelDeletion = useCallback(() => setDestinationPendingDeletion(undefined), []);
+  const confirmDeletion = useCallback(() => {
+    if (destinationPendingDeletion) {
+      deleteDestination(destinationPendingDeletion.id);
+    }
+    setDestinationPendingDeletion(undefined);
+  }, [deleteDestination, destinationPendingDeletion]);
 
-  const filteredDestinations = React.useMemo(() => {
+  const filteredDestinations = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return destinations.filter(
       (destination) =>
         (!normalizedQuery ||
-          [destination.name, destination.id, destination.index, LOCAL_ELASTICSEARCH_LABEL]
+          [
+            destination.name,
+            destination.id,
+            ...(destination.type === 'elasticsearch'
+              ? [destination.index, destination.mode]
+              : [destination.bucket]),
+            destination.signals.join(' '),
+            getDestinationTypeLabel(destination.type),
+          ]
             .join(' ')
             .toLowerCase()
             .includes(normalizedQuery)) &&
@@ -56,19 +82,30 @@ export const DestinationsTab = () => {
     );
   }, [destinations, query, selectedTypes]);
 
-  const sortedDestinations = React.useMemo(() => {
+  const sortedDestinations = useMemo(() => {
     const [sort] = sortingColumns;
     if (!sort) {
       return filteredDestinations;
     }
 
     return [...filteredDestinations].sort((a, b) => {
-      const order = getDestinationSortableValue(a, sort.id).localeCompare(
-        getDestinationSortableValue(b, sort.id)
+      const aValue = getDestinationSortableValue(
+        a,
+        sort.id,
+        resolvedIndicesByDestination[a.id]?.length ?? 0
       );
+      const bValue = getDestinationSortableValue(
+        b,
+        sort.id,
+        resolvedIndicesByDestination[b.id]?.length ?? 0
+      );
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      const order = String(aValue).localeCompare(String(bValue));
       return sort.direction === 'asc' ? order : -order;
     });
-  }, [filteredDestinations, sortingColumns]);
+  }, [filteredDestinations, resolvedIndicesByDestination, sortingColumns]);
 
   return (
     <>
@@ -104,6 +141,9 @@ export const DestinationsTab = () => {
           <DestinationsGrid
             status={isLoadingUnit ? 'loading' : isUnitUnavailable ? 'unavailable' : 'ready'}
             destinations={sortedDestinations}
+            resolvedIndicesByDestination={resolvedIndicesByDestination}
+            resolvedIndicesStatus={resolvedIndicesStatus}
+            resolvedIndicesError={resolvedIndicesError}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
             visibleColumns={visibleColumnIds}
             pagination={pagination}
@@ -111,23 +151,19 @@ export const DestinationsTab = () => {
             onVisibleColumnsChange={setVisibleColumnIds}
             onPaginationChange={setPagination}
             onSortingChange={setSortingColumns}
-            onOpenDestination={openDestinationFlyout}
+            onShowOnCanvas={showOnCanvas}
+            onRequestDelete={setDestinationPendingDeletion}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       {isCreateModalOpen && (
         <CreateDestinationModal destinations={destinationsController} onClose={closeCreateModal} />
       )}
-      {selectedDestination && (
-        <UnitDestinationFlyout
-          key={selectedDestination.id}
-          destinationName={selectedDestination.name}
-          onClose={closeDestinationFlyout}
-          isDeleteDisabled={isUnitSaving}
-          onDelete={() => {
-            destinationsController.deleteDestination(selectedDestination.id);
-            closeDestinationFlyout();
-          }}
+      {destinationPendingDeletion && (
+        <DeleteDestinationConfirmation
+          destinationName={destinationPendingDeletion.name}
+          onCancel={cancelDeletion}
+          onConfirm={confirmDeletion}
         />
       )}
     </>

@@ -57,25 +57,15 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-  const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
-  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
-    ruleTypes: context.ruleTypeRegistry.list(),
+
+  const { searchFilterWithAuth, searchFilterWithoutAuth } = await buildSearchFilters(context, {
+    kueryNodeFilter,
+    ignoreInternalRuleTypes,
   });
 
-  const kueryNodeFilterWithAuth =
-    authorizationFilter && kueryNodeFilter
-      ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
-      : kueryNodeFilter;
-
-  const finalFilter = ignoreInternalRuleTypes
-    ? combineFiltersWithInternalRuleTypeFilter({
-        filter: kueryNodeFilterWithAuth,
-        internalRuleTypeFilter,
-      })
-    : kueryNodeFilterWithAuth;
-
   const { total } = await checkAuthorizationAndGetTotal(context, {
-    filter: finalFilter,
+    filter: searchFilterWithAuth,
+    baseFilter: searchFilterWithoutAuth,
     action: 'DELETE',
   });
 
@@ -92,7 +82,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
               metadata: { bulkCount: total, ...options.changeTracking?.metadata },
             },
           }),
-        filter: finalFilter,
+        filter: searchFilterWithAuth,
       })
   );
 
@@ -152,6 +142,39 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   } else {
     return { errors, total, rules: deletedPublicRules, taskIdsFailedToBeDeleted: [] };
   }
+};
+
+const buildSearchFilters = async (
+  context: RulesClientContext,
+  {
+    kueryNodeFilter,
+    ignoreInternalRuleTypes,
+  }: {
+    kueryNodeFilter: KueryNode | null;
+    ignoreInternalRuleTypes: boolean;
+  }
+): Promise<{
+  searchFilterWithAuth: KueryNode | null;
+  searchFilterWithoutAuth: KueryNode | null;
+}> => {
+  const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
+
+  const withInternalType = (f: KueryNode | null) =>
+    ignoreInternalRuleTypes
+      ? combineFiltersWithInternalRuleTypeFilter({ filter: f, internalRuleTypeFilter })
+      : f;
+
+  return {
+    searchFilterWithAuth: withInternalType(
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter
+    ),
+    searchFilterWithoutAuth: withInternalType(kueryNodeFilter),
+  };
 };
 
 const bulkDeleteWithOCC = async (

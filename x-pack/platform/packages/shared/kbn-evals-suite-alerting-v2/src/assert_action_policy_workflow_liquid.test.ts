@@ -6,6 +6,7 @@
  */
 
 import {
+  assertActionPolicyWorkflowLinksAlertDetails,
   assertActionPolicyWorkflowLiquid,
   isActionPolicyPayloadLiquidPath,
   isActionPolicyPayloadPathInSchema,
@@ -184,6 +185,56 @@ steps:
           '(mirrors `ActionPolicyWorkflowPayload`). ' +
           'Found variables: (none).'
       )
+    );
+  });
+});
+
+describe('assertActionPolicyWorkflowLinksAlertDetails', () => {
+  const toWorkflow = (message: string, foreach?: string) =>
+    assertActionPolicyWorkflowLiquid(`
+version: '1'
+name: Notify
+triggers:
+  - type: manual
+steps:
+  - name: send_email
+    type: email
+    connector-id: conn-1
+    ${foreach ? `foreach: "${foreach}"` : ''}
+    with:
+      to:
+        - oncall@example.com
+      subject: "{{ inputs.payload.alerts | size }} alert(s)"
+      message: |
+        ${message}
+`).workflow;
+
+  it.each([
+    [
+      'a for-loop alias',
+      '{% for alert in inputs.payload.alerts %}- {{ alert.alert_url }}{% endfor %}',
+      undefined,
+    ],
+    [
+      'a whitespace-trimmed output tag',
+      '{% for alert in inputs.payload.alerts %}{{- alert.alert_url -}}{% endfor %}',
+      undefined,
+    ],
+    ['an indexed payload path', 'View: {{ inputs.payload.alerts[0].alert_url }}', undefined],
+    ['a foreach step item', 'View: {{ foreach.item.alert_url }}', '{{ inputs.payload.alerts }}'],
+  ])('accepts %s', (_label, message, foreach) => {
+    expect(() =>
+      assertActionPolicyWorkflowLinksAlertDetails(toWorkflow(message, foreach))
+    ).not.toThrow();
+  });
+
+  it.each([
+    ['no link', '{% for alert in inputs.payload.alerts %}- {{ alert.alert_status }}{% endfor %}'],
+    ['the workflow execution link', '{{ inputs.payload.policyId }} {{ execution.url }}'],
+    ['alert_url outside a Liquid output tag', '{{ inputs.payload.policyId }} see alert_url'],
+  ])('rejects %s', (_label, message) => {
+    expect(() => assertActionPolicyWorkflowLinksAlertDetails(toWorkflow(message))).toThrow(
+      /does not render an alert details link/
     );
   });
 });

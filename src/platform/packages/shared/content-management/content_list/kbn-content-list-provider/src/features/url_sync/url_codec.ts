@@ -9,38 +9,17 @@
 
 import queryString from 'query-string';
 import type { ContentListFeatures } from '../types';
-import { isSearchConfig, isSortingConfig } from '../types';
-import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS, getSortFieldDirections } from '../sorting';
+import { isSearchConfig } from '../types';
+import type { SortDirectionsByField, SortState } from '../sorting';
+import {
+  getAllowedSorts,
+  getSortKey,
+  isAllowedSort,
+  parseSortKey,
+  toSortDirectionsByField,
+} from '../sorting';
 import { encodeQueryValue } from './encode_query_value';
-import type { SortField } from '../sorting';
 import type { ParsedQuery, UrlStateSlices } from './types';
-
-/**
- * The state of a sort configuration.
- *
- * @property field - The field to sort by.
- * @property direction - The direction to sort in.
- */
-export interface SortState {
-  field: string;
-  direction: 'asc' | 'desc';
-}
-
-/**
- * The sort directions offered for each sortable field, keyed by field.
- */
-export type SortDirectionsByField = ReadonlyMap<string, ReadonlySet<SortState['direction']>>;
-
-/**
- * The configuration for a sorting URL.
- *
- * @property initialSort - The initial sort state.
- * @property sortDirectionsByField - The directions offered for each sortable field.
- */
-export interface SortingUrlConfig {
-  initialSort: SortState;
-  sortDirectionsByField: SortDirectionsByField;
-}
 
 /**
  * The separator for sort configuration keys.
@@ -48,88 +27,24 @@ export interface SortingUrlConfig {
 const SORT_CONFIG_KEY_SEPARATOR = '\u001f';
 
 /**
- * Builds the `field:direction` key that identifies an offered sort option.
- * Matches the `sort` URL param format.
- */
-const getSortOptionKey = ({ field, direction }: SortState): string => `${field}:${direction}`;
-
-const toFieldSortOptions = (fields: SortField[]): SortState[] =>
-  fields.flatMap((sortField) =>
-    getSortFieldDirections(sortField).map((direction) => ({ field: sortField.field, direction }))
-  );
-
-/**
- * Gets the `(field, direction)` pairs the sort dropdown offers for a sorting configuration.
- *
- * @param sorting - The sorting configuration.
- * @returns The offered sort options.
- */
-const getSortingOptions = (sorting: ContentListFeatures['sorting']): SortState[] => {
-  if (sorting === false) {
-    return [];
-  }
-  if (isSortingConfig(sorting)) {
-    if (sorting.fields) {
-      return toFieldSortOptions(sorting.fields);
-    }
-    if (sorting.options) {
-      return sorting.options.map(({ field, direction }) => ({ field, direction }));
-    }
-  }
-  return toFieldSortOptions(DEFAULT_SORT_FIELDS);
-};
-
-/**
- * Gets the initial sort from the sorting configuration.
- *
- * @param sorting - The sorting configuration.
- * @returns The initial sort.
- */
-const getInitialSort = (sorting: ContentListFeatures['sorting']): SortState => {
-  if (isSortingConfig(sorting) && sorting.initialSort) {
-    return sorting.initialSort;
-  }
-  return DEFAULT_INITIAL_SORT;
-};
-
-/**
  * Gets the sorting configuration key from the sorting configuration.
  *
  * @param sorting - The sorting configuration.
  * @returns The sorting configuration key.
  */
-export const getSortingConfigKey = (sorting: ContentListFeatures['sorting']): string => {
-  const initialSort = getInitialSort(sorting);
-  const options = [...new Set(getSortingOptions(sorting).map(getSortOptionKey))].sort();
-  return [initialSort.field, initialSort.direction, ...options].join(SORT_CONFIG_KEY_SEPARATOR);
-};
+export const getSortingConfigKey = (sorting: ContentListFeatures['sorting']): string =>
+  [...new Set(getAllowedSorts(sorting).map(getSortKey))].sort().join(SORT_CONFIG_KEY_SEPARATOR);
 
 /**
- * Gets the sorting URL configuration from the sorting configuration key.
+ * Gets the directions offered for each sortable field from the sorting configuration key.
  *
  * @param key - The sorting configuration key.
- * @returns The sorting URL configuration.
+ * @returns The directions offered for each sortable field.
  */
-export const getSortingUrlConfigFromKey = (key: string): SortingUrlConfig => {
-  const [
-    field = DEFAULT_INITIAL_SORT.field,
-    direction = DEFAULT_INITIAL_SORT.direction,
-    ...options
-  ] = key.split(SORT_CONFIG_KEY_SEPARATOR);
-  const validDirection = direction === 'desc' ? 'desc' : 'asc';
-  const sortDirectionsByField = new Map<string, Set<SortState['direction']>>();
-  for (const option of options) {
-    const separatorIndex = option.lastIndexOf(':');
-    const optionField = option.slice(0, separatorIndex);
-    const optionDirection = option.slice(separatorIndex + 1);
-    if (optionDirection === 'asc' || optionDirection === 'desc') {
-      const directions =
-        sortDirectionsByField.get(optionField) ?? new Set<SortState['direction']>();
-      sortDirectionsByField.set(optionField, directions.add(optionDirection));
-    }
-  }
-  return { initialSort: { field, direction: validDirection }, sortDirectionsByField };
-};
+export const getSortDirectionsByFieldFromKey = (key: string): SortDirectionsByField =>
+  toSortDirectionsByField(
+    key.split(SORT_CONFIG_KEY_SEPARATOR).flatMap((sortKey) => parseSortKey(sortKey) ?? [])
+  );
 
 /**
  * Gets the initial query text from the search configuration.
@@ -177,22 +92,18 @@ export const sortCodec = (
     if (!sort || (sort.field === initialSort.field && sort.direction === initialSort.direction)) {
       return { sort: undefined };
     }
-    return { sort: getSortOptionKey(sort) };
+    return { sort: getSortKey(sort) };
   },
   decode: (params: ParsedQuery): SortState | undefined => {
     if (typeof params.sort !== 'string') {
       return undefined;
     }
-    const [field, direction, extra] = params.sort.split(':');
-    if (extra !== undefined || !field || (direction !== 'asc' && direction !== 'desc')) {
+    const sort = parseSortKey(params.sort);
+    if (!sort || !isAllowedSort(sortDirectionsByField, sort)) {
       onUnknownValue?.(params.sort);
       return undefined;
     }
-    if (!sortDirectionsByField.get(field)?.has(direction)) {
-      onUnknownValue?.(params.sort);
-      return undefined;
-    }
-    return { field, direction };
+    return sort;
   },
 });
 

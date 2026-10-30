@@ -81,6 +81,16 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
+ * EIS prompt template. Elasticsearch forwards `id`, `version`, and `variables`
+ * unchanged. The id starts with a dot.
+ */
+export interface ChatCompleteTemplate {
+  id: string;
+  version: number;
+  variables: Record<string, unknown>;
+}
+
+/**
  * Options used to call the {@link ChatCompleteAPI}.
  *
  * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
@@ -98,9 +108,17 @@ export type ChatCompleteOptions = {
    */
   system?: string;
   /**
-   * The list of messages for the current conversation
+   * The list of messages for the current conversation.
+   *
+   * Ignored on the wire when `template` is set. A template-only endpoint rejects
+   * messages, so pass an empty list together with `template`.
    */
   messages: Message[];
+  /**
+   * When set, the inference endpoint adapter sends this template and omits
+   * `messages` and `tools`.
+   */
+  template?: ChatCompleteTemplate;
   /**
    * LLM temperature. All models support the 0-1 range (some supports more).
    * Defaults to 0;
@@ -171,6 +189,32 @@ export type ChatCompleteOptions = {
    */
   sessionId?: string;
 } & ToolOptions;
+
+/**
+ * Options used to call the {@link FeatureChatCompleteAPI}.
+ *
+ * The model, `temperature` and `reasoning` come from the feature's configured endpoints,
+ * so they cannot be passed.
+ */
+export type FeatureChatCompleteOptions = Omit<
+  ChatCompleteOptions,
+  'connectorId' | 'temperature' | 'reasoning'
+> & {
+  /**
+   * The ID of a `chat_completion` feature registered with the inference feature registry.
+   */
+  featureId: string;
+  connectorId?: never;
+  temperature?: never;
+  reasoning?: never;
+};
+
+/**
+ * Calls the {@link ChatCompleteAPI} with the top model and parameters configured for a feature.
+ */
+export type FeatureChatCompleteAPI = <TOptions extends FeatureChatCompleteOptions>(
+  options: TOptions
+) => ChatCompleteCompositeResponse<Overwrite<DefaultChatCompleteOptions, TOptions>>;
 
 /**
  * Cache-control directive for EIS prompt caching.

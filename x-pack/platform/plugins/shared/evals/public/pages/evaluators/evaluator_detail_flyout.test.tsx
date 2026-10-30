@@ -220,6 +220,69 @@ describe('EvaluatorDetailFlyout', () => {
     expect(screen.queryByTestId('evalsEvaluatorDetailPending')).not.toBeInTheDocument();
   });
 
+  it('keeps the displayed version when another fails to load, and retries in place', async () => {
+    // A failed query drops its data, so the flyout has to hold on to what it last showed.
+    const older = { ...USER_DEFINED, version: '1.0.0', description: 'The first tone judge' };
+    const olderError = new Error('Version 1.0.0 is unavailable');
+    // React Query keeps a key's last error while it refetches it, so a retry passes through a
+    // state holding both the old error and `isFetching` before the data arrives.
+    let olderState: 'failed' | 'refetching' | 'loaded' = 'failed';
+    const olderResults = {
+      failed: { data: undefined, isLoading: false, isFetching: false, error: olderError },
+      refetching: { data: undefined, isLoading: false, isFetching: true, error: olderError },
+      loaded: { data: { evaluator: older }, isLoading: false, isFetching: false, error: null },
+    };
+    mockedUseEvaluator.mockImplementation(
+      (_name?: string, version?: string) =>
+        (version === '1.0.0'
+          ? olderResults[olderState]
+          : {
+              data: { evaluator: USER_DEFINED },
+              isLoading: false,
+              isFetching: false,
+              error: null,
+            }) as unknown as ReturnType<typeof useEvaluator>
+    );
+    const flyout = () => (
+      <I18nProvider>
+        <EvaluatorDetailFlyout
+          evaluatorName="tone-judge"
+          canEdit
+          onEdit={jest.fn()}
+          onClose={jest.fn()}
+        />
+      </I18nProvider>
+    );
+    const { rerender } = render(flyout());
+
+    fireEvent.change(screen.getByTestId('evalsEvaluatorDetailVersion'), {
+      target: { value: '1.0.0' },
+    });
+
+    const failure = await screen.findByTestId('evalsEvaluatorDetailVersionError');
+    expect(failure).toHaveTextContent('Could not load version 1.0.0');
+    expect(failure).toHaveTextContent('Version 1.0.0 is unavailable');
+    expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.2.0');
+    expect(screen.getByText('Rates tone of the response')).toBeInTheDocument();
+    expect(screen.queryByTestId('evalsEvaluatorDetailError')).not.toBeInTheDocument();
+
+    olderState = 'refetching';
+    fireEvent.click(screen.getByTestId('evalsEvaluatorDetailVersionRetry'));
+
+    // The stale error must not be read as the retry failing: the selection holds while the
+    // request is in flight, with the loaded version dimmed behind it.
+    expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.0.0');
+    expect(screen.queryByTestId('evalsEvaluatorDetailVersionError')).not.toBeInTheDocument();
+    expect(screen.getByTestId('evalsEvaluatorDetailPending')).toHaveTextContent('Loading 1.0.0');
+
+    olderState = 'loaded';
+    rerender(flyout());
+
+    expect(await screen.findByText('The first tone judge')).toBeInTheDocument();
+    expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.0.0');
+    expect(screen.queryByTestId('evalsEvaluatorDetailVersionError')).not.toBeInTheDocument();
+  });
+
   it('offers no version picker when nothing has been edited yet', () => {
     renderFlyout({ evaluator: { ...USER_DEFINED, versions: ['1.0.0'], version: '1.0.0' } });
 

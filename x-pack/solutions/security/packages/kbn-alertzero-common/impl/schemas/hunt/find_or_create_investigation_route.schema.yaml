@@ -53,7 +53,7 @@ paths:
                 properties:
                   investigationConversationId:
                     type: string
-                    description: uuidv5(hunt:report:{reportId}); minted or verified existing.
+                    description: uuidv5(hunt:report:{spaceId}|{reportId}); minted or verified existing.
                   triggerAttachmentId:
                     type: string
                     description: >-

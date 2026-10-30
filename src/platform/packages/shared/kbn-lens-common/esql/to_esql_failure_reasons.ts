@@ -19,7 +19,6 @@ export type EsqlConversionFailureReason =
   | 'runtime_field_not_supported'
   | 'reduced_time_range_not_supported'
   | 'function_not_supported'
-  | 'drop_partials_not_supported'
   | 'include_empty_rows_not_supported'
   | 'terms_date_histogram_not_supported'
   | 'terms_multi_level_not_supported'
@@ -71,12 +70,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
   function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperationReason', {
     defaultMessage: 'Support for one or more functions used will be coming in an upcoming update.',
   }),
-  drop_partials_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlDropPartialsReason',
-    {
-      defaultMessage: '"Drop partial buckets" will be supported in an upcoming update.',
-    }
-  ),
   include_empty_rows_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRowsReason',
     {
@@ -84,10 +77,10 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     }
   ),
   terms_date_histogram_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTermsDateHistogramTooltip',
+    'xpack.lens.config.cannotConvertToEsqlTermsDateHistogramNestingTooltip',
     {
       defaultMessage:
-        'Top values combined with a date histogram will be supported in an upcoming update.',
+        'This arrangement of Top values and date histogram dimensions is not supported yet.',
     }
   ),
   terms_multi_level_not_supported: i18n.translate(

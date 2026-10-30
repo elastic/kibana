@@ -100,6 +100,12 @@ describe('ESQLMenu', () => {
   it('hides create view unless the host opts in', async () => {
     await renderMenu({}, { currentQuery: 'FROM logs-*' });
     expect(screen.queryByRole('button', { name: 'Create view' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ESQLEditor-create-view-dot')).not.toBeInTheDocument();
+  });
+
+  it('marks create view with a primary dot', async () => {
+    await renderMenu({ enableCreateView: true }, { currentQuery: 'FROM logs-*' });
+    expect(screen.getByTestId('ESQLEditor-create-view-dot')).toBeInTheDocument();
   });
 
   it('hides create view when the user lacks the create privilege, even if the host opts in', async () => {

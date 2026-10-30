@@ -1,0 +1,46 @@
+{
+    "attributes": {
+        "description": "",
+        "tabs": [
+            {
+                "attributes": {
+                    "breakdownField": "",
+                    "chartInterval": "auto",
+                    "columns": [],
+                    "controlGroupJson": "{}",
+                    "grid": {},
+                    "hideChart": false,
+                    "hideTable": true,
+                    "isTextBasedQuery": true,
+                    "kibanaSavedObjectMeta": {
+                        "searchSourceJSON": "{\"query\":{\"esql\":\"TS test-metrics-experience\"},\"index\":{\"id\":\"c3dccee58dd2cc4b40d6549de50abb07919d0cd7ffe15945192874c4ed35a834\",\"title\":\"test-metrics-experience\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"test-metrics-experience\",\"allowHidden\":false,\"managed\":false},\"filter\":[]}"
+                    },
+                    "sort": [],
+                    "tabTypeState": {
+                        "counterAggregation": "sum",
+                        "dimensions": [
+                            "dimension_0"
+                        ],
+                        "gaugeAggregation": "avg",
+                        "histogramPercentile": "p95",
+                        "searchTerm": "",
+                        "type": "metrics"
+                    },
+                    "timeRestore": false,
+                    "usesAdHocDataView": true
+                },
+                "id": "metrics-legacy-sort-tab",
+                "label": "Untitled"
+            }
+        ],
+        "title": "Metrics Legacy Sort Session"
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "id": "metrics-legacy-sort-session",
+    "managed": false,
+    "references": [],
+    "type": "search",
+    "typeMigrationVersion": "10.17.0",
+    "updated_at": "2025-01-01T00:00:00.000Z"
+}

@@ -16,7 +16,6 @@ import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 
 const LOGS_STREAM_NAME = 'logs';
-const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -46,7 +45,7 @@ export async function replaySignificantEventsSnapshot(
 ) {
   log.debug(`Replaying significant events data from snapshot: ${snapshotName}`);
 
-  await cleanSignificantEventsDataStreams(esClient, log, { includeRuleEvents: true });
+  await cleanSignificantEventsDataStreams(esClient, log);
   await deleteStaleSnapshotLoaderIndices(esClient, log);
   await ensureLogsIndexTemplate(esClient, log);
 
@@ -85,14 +84,12 @@ async function deleteStaleSnapshotLoaderIndices(esClient: Client, log: ToolingLo
 export interface CleanSignificantEventsDataStreamsOptions {
   /** When false, only clears Significant Events docs and leaves the replayed logs stream intact. */
   includeLogs?: boolean;
-  /** When true, also clears Significant Events series from `.rule-events`. Defaults to false. */
-  includeRuleEvents?: boolean;
 }
 
 export async function cleanSignificantEventsDataStreams(
   esClient: Client,
   log: ToolingLog,
-  { includeLogs = true, includeRuleEvents = false }: CleanSignificantEventsDataStreamsOptions = {}
+  { includeLogs = true }: CleanSignificantEventsDataStreamsOptions = {}
 ): Promise<void> {
   if (includeLogs) {
     const [deleteDataStreamResult, deleteIndexResult] = await Promise.allSettled([
@@ -122,18 +119,6 @@ export async function cleanSignificantEventsDataStreams(
     }
 
     await deleteLogsIndexTemplate(esClient, log);
-  }
-
-  await esClient
-    .deleteByQuery({
-      index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-      query: { match_all: {} },
-      refresh: true,
-    })
-    .catch(() => {});
-
-  if (!includeRuleEvents) {
-    return;
   }
 
   // Scoped to the Significant Events source so other alerting_v2 producers' series are left untouched.

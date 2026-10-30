@@ -7,7 +7,13 @@
 
 import fs from 'fs';
 import path from 'path';
-import { loadEpisode, readNdjson } from './episodes';
+import {
+  hostForEpisodeScaling,
+  loadEpisode,
+  readNdjson,
+  stampEpisodeCloudAccountIds,
+} from './episodes';
+import { HOSTS } from './entities';
 
 describe('episodes fixtures', () => {
   const createdFiles: string[] = [];
@@ -115,5 +121,59 @@ describe('episodes fixtures', () => {
     await expect(
       loadEpisode({ episodeId: 'epX', dataPath, alertsPath }, { validateFixtures: false })
     ).resolves.toMatchObject({ episodeId: 'epX' });
+  });
+});
+
+describe('hostForEpisodeScaling', () => {
+  it('returns WIN-ANALYST01 for ep1 regardless of the pool selection', () => {
+    const selected = HOSTS['DEV-BUILD03'];
+    expect(hostForEpisodeScaling('ep1', selected)).toBe(HOSTS['WIN-ANALYST01']);
+  });
+
+  it('keeps the pool selection for other episodes', () => {
+    const selected = HOSTS['DEV-BUILD03'];
+    expect(hostForEpisodeScaling('ep2', selected)).toBe(selected);
+  });
+});
+
+describe('stampEpisodeCloudAccountIds', () => {
+  it('stamps cloud.account.id onto ep1 docs without rewriting host', () => {
+    // Host pinning happens in scaleEpisodes via hostForEpisodeScaling *before* graph enrich.
+    const doc: Record<string, unknown> = { host: { name: 'other-host' }, user: { name: 'u' } };
+    stampEpisodeCloudAccountIds(doc, 'ep1');
+    expect(doc.cloud).toEqual({ account: { id: '123456789012' } });
+    expect(doc.host).toEqual({ name: 'other-host' });
+    expect(doc.user).toEqual({ name: 'u' });
+  });
+
+  it('leaves docs from other episodes untouched', () => {
+    const doc: Record<string, unknown> = { host: { name: 'h' } };
+    stampEpisodeCloudAccountIds(doc, 'ep2');
+    expect(doc.cloud).toBeUndefined();
+    expect(doc.host).toEqual({ name: 'h' });
+  });
+
+  it('preserves existing cloud fields', () => {
+    const doc: Record<string, unknown> = {
+      host: { name: 'WIN-ANALYST01' },
+      user: { name: 'dev-user' },
+      cloud: { provider: 'aws', region: 'us-east-1' },
+    };
+    stampEpisodeCloudAccountIds(doc, 'ep1');
+    expect(doc.cloud).toEqual({
+      provider: 'aws',
+      region: 'us-east-1',
+      account: { id: '123456789012' },
+    });
+    expect(doc.host).toEqual({ name: 'WIN-ANALYST01' });
+    expect(doc.user).toEqual({ name: 'dev-user' });
+  });
+
+  it('does not clobber an existing cloud.account when re-stamped', () => {
+    const doc: Record<string, unknown> = {
+      cloud: { account: { id: 'preexisting' }, provider: 'aws' },
+    };
+    stampEpisodeCloudAccountIds(doc, 'ep1');
+    expect(doc.cloud).toEqual({ provider: 'aws', account: { id: '123456789012' } });
   });
 });
