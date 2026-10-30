@@ -8,10 +8,20 @@
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
 
 type GenerateParams = Parameters<typeof generateCustomContentEsql>[0];
+
+/**
+ * Gives the values of the ES|QL controls that the queries refer to (`?name`). `anyVariable` is for a
+ * query that is not written yet, which can refer to any of them.
+ */
+export type ResolveCustomContentEsqlVariables = (
+  queries: readonly string[],
+  options?: { anyVariable?: boolean }
+) => Promise<ESQLControlVariable[] | undefined>;
 
 interface BuildCustomContentConfigParams {
   /** What to show, or what to change on an existing panel. */
@@ -30,6 +40,7 @@ interface BuildCustomContentConfigParams {
   /** The panel being edited. Absent for a new panel. */
   existing?: { esqlQuery?: string; template?: string };
   timeRange?: GenerateParams['timeRange'];
+  resolveEsqlVariables?: ResolveCustomContentEsqlVariables;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -91,22 +102,33 @@ export const buildCustomContentConfig = async ({
   regenerateESQL,
   existing,
   timeRange,
+  resolveEsqlVariables,
   modelProvider,
   logger,
   events,
   esClient,
 }: BuildCustomContentConfigParams): Promise<BuildCustomContentConfigResult> => {
+  const getEsqlVariables = (
+    queries: ReadonlyArray<string | null | undefined>,
+    options?: { anyVariable?: boolean }
+  ) =>
+    resolveEsqlVariables?.(
+      queries.filter((query): query is string => Boolean(query)),
+      options
+    );
+
   const esqlQuery = await resolveQuery({
     esql,
     hasData,
     regenerate: regenerateESQL,
     existingQuery: existing?.esqlQuery,
     isNewPanel: !existing,
-    generate: (existingQueries) =>
+    generate: async (existingQueries) =>
       generateCustomContentEsql({
         nlQuery: nlQuery ?? '',
         index,
         existingQueries,
+        esqlVariables: await getEsqlVariables([esql, ...existingQueries], { anyVariable: true }),
         modelProvider,
         events,
         logger,
@@ -126,6 +148,7 @@ export const buildCustomContentConfig = async ({
     esqlQuery: isQueryChanging ? esqlQuery : undefined,
     existingTemplate: existing?.template || undefined,
     hasExistingQuery: !isQueryChanging && Boolean(esqlQuery),
+    esqlVariables: isQueryChanging && esqlQuery ? await getEsqlVariables([esqlQuery]) : undefined,
   });
 
   return { esqlQuery, template, height };

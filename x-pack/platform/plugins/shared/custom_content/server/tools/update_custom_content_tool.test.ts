@@ -167,6 +167,23 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    it('lets the builder read the control values the panel was sent with', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show hits for the selected host' },
+        { ...existing, esql_variables: esqlVariables }
+      );
+
+      const { resolveEsqlVariables } = mockBuild.mock.calls[0][0];
+      expect(await resolveEsqlVariables(['FROM logs'])).toEqual(esqlVariables);
+    });
+
+    it('gives the builder no control values when the panel was sent with none', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
+
+      expect(mockBuild.mock.calls[0][0].resolveEsqlVariables).toBeUndefined();
+    });
+
     it('forwards esqlQuery: null, which removes the query, and stores none', async () => {
       mockBuild.mockResolvedValue({ template: '<p>static</p>', height: 200 });
 

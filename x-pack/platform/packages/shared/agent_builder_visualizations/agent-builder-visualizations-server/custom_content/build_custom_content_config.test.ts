@@ -8,6 +8,7 @@
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { Logger } from '@kbn/logging';
 import { generateCustomContentEsql } from '../shared/custom_content_esql';
 import { buildCustomContentConfig } from './build_custom_content_config';
@@ -238,6 +239,69 @@ describe('buildCustomContentConfig', () => {
       mockResolveTemplate.mockRejectedValue(new Error('Generated template was rejected'));
 
       await expect(build({ hasData: false })).rejects.toThrow('Generated template was rejected');
+    });
+  });
+  describe('control values', () => {
+    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+    const hostQuery = 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)';
+    const resolveEsqlVariables = jest.fn();
+
+    beforeEach(() => {
+      resolveEsqlVariables.mockReset();
+      resolveEsqlVariables.mockResolvedValue(esqlVariables);
+    });
+
+    it('asks for those the supplied query of a new panel uses, to sample it', async () => {
+      await build({ esql: hostQuery, hasData: true, resolveEsqlVariables });
+
+      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery], undefined);
+      expect(mockResolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('asks for any variable before generating, and for those the generated query uses', async () => {
+      mockGenerate.mockResolvedValue(hostQuery);
+
+      await build({ hasData: true, resolveEsqlVariables });
+
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [], { anyVariable: true });
+      expect(mockGenerate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery], undefined);
+      expect(mockResolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('includes the stored query when regenerating', async () => {
+      const stored = 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)';
+
+      await build({
+        regenerateESQL: true,
+        resolveEsqlVariables,
+        existing: { esqlQuery: stored, template: OLD_TEMPLATE },
+      });
+
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [stored], { anyVariable: true });
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({ existingQueries: [stored], esqlVariables })
+      );
+    });
+
+    it('asks for nothing when no query runs: a data-free panel, or an edit that keeps its query', async () => {
+      await build({ hasData: false, resolveEsqlVariables });
+      await build({
+        resolveEsqlVariables,
+        existing: { esqlQuery: hostQuery, template: OLD_TEMPLATE },
+      });
+
+      expect(resolveEsqlVariables).not.toHaveBeenCalled();
+      for (const [call] of mockResolveTemplate.mock.calls) {
+        expect(call.esqlVariables).toBeUndefined();
+      }
+    });
+
+    it('sends none when there is no resolver', async () => {
+      await build({ hasData: true });
+
+      expect(mockGenerate.mock.calls[0][0].esqlVariables).toBeUndefined();
+      expect(mockResolveTemplate.mock.calls[0][0].esqlVariables).toBeUndefined();
     });
   });
 });

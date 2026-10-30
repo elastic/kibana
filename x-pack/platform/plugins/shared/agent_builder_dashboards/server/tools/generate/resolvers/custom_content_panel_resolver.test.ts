@@ -78,6 +78,7 @@ describe('createCustomContentPanelResolver', () => {
         esql: undefined,
         hasData: true,
         regenerateESQL: undefined,
+        resolveEsqlVariables: undefined,
         existing: undefined,
         ...deps,
       });
@@ -108,6 +109,14 @@ describe('createCustomContentPanelResolver', () => {
 
       expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: 'FROM metrics-*' }));
     });
+  });
+
+  it('hands the control values resolver of the request to the builder', async () => {
+    const resolveEsqlVariables = jest.fn();
+
+    await resolve(addRequest({ hasData: true, resolveEsqlVariables }));
+
+    expect(mockedBuild).toHaveBeenCalledWith(expect.objectContaining({ resolveEsqlVariables }));
   });
 
   describe('edits', () => {

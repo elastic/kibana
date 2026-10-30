@@ -111,6 +111,9 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
         index,
         esql: esqlQuery,
         regenerateESQL: regenerateEsql,
+        resolveEsqlVariables: currentData?.esql_variables?.length
+          ? async () => currentData.esql_variables
+          : undefined,
         existing: {
           esqlQuery: currentData?.esql_query,
           template: currentData?.panel_template || undefined,
