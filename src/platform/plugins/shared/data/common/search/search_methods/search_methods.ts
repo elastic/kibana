@@ -286,12 +286,14 @@ export class SearchMethodsService implements ISearchMethods {
       searchSessionId,
     });
 
-    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
+    // Stats go first: the Inspector opens on the first tab to become available, which should be
+    // Statistics (as it is for search source requests), not Request.
     if (inspector?.getRequestStats) {
       requestResponder?.stats(inspector.getRequestStats());
     } else if (params.index && typeof params.index === 'object') {
       requestResponder?.stats(getDslRequestInspectorStats(params.index));
     }
+    requestResponder?.json((request.params?.body ?? {}) as Record<string, unknown>);
 
     try {
       const response = await this.executeSearch(request, searchOptions);

@@ -1268,6 +1268,21 @@ describe('SearchMethodsService', () => {
         expect(requestResponder.ok).toHaveBeenCalled();
       });
 
+      it('logs request stats before the request body so the Inspector opens on Statistics', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const getRequestStats = jest.fn().mockReturnValue({});
+
+        await service.dslPaginated(paginatedParams, {
+          inspector: { ...inspector, getRequestStats },
+        });
+
+        const [statsOrder] = requestResponder.stats.mock.invocationCallOrder;
+        const [jsonOrder] = requestResponder.json.mock.invocationCallOrder;
+        expect(statsOrder).toBeLessThan(jsonOrder);
+      });
+
       it('logs each page with the same adapter, without the session id after the first', async () => {
         mockTwoPages();
         const requestResponder = createMockRequestResponder();
