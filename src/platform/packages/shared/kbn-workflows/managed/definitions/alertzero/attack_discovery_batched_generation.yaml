@@ -198,6 +198,12 @@ steps:
           # batch on its own ids: the gate's additional retrieval could add alerts
           # from outside this batch, so two batches could build on the same ones.
           ground_truth_gate_enabled: false
+          # Keeps this Worker's attacks from deduplicating against an analyst's
+          # Attack Discovery run over the same alerts. The hash is otherwise the same
+          # for both whenever the same user ran the Worker, because ad hoc attacks
+          # are owned by the user. Keep in sync with
+          # ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE.
+          generation_source: watch_floor_ad_worker
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's
           # eviction threshold is dropped from in-memory state before the
