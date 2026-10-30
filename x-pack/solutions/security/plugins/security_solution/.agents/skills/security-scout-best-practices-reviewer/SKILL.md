@@ -82,6 +82,7 @@ Security Solution Scout tests use a namespace sub-directory structure. Each feat
 | Namespace | Path |
 |-----------|------|
 | `agent_builder` | `test/scout/agent_builder/ui/` |
+| `assistant` | `test/scout/assistant/ui/` |
 | `entity_analytics` | `test/scout/entity_analytics/{ui,api}/` |
 | `exceptions` | `test/scout/exceptions/ui/` |
 | `flyout` | `test/scout/flyout/ui/` |
