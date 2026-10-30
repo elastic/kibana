@@ -168,22 +168,34 @@ describe('ConnectorSelector', () => {
       expect(getByTestId('connector-selector')).toBeInTheDocument();
     });
 
-    it('should hide the control when the connector fails validation', async () => {
+    it('should hide the control when no connectors exist', async () => {
       mockUseLoadConnectors.mockReturnValue({
         data: [],
         isLoading: false,
         refetch: mockRefetch,
       });
 
-      const { getByTestId, queryByTestId } = await renderConnectorSelector();
-      expect(getByTestId('connector-selector')).toBeInTheDocument();
+      const { queryByTestId } = await renderConnectorSelector();
+      expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
+    });
+
+    it('should keep the control when the connector fails validation but connectors exist', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors.map((connector) => ({ ...connector, isMissingSecrets: true })),
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      const { getByTestId } = await renderConnectorSelector();
 
       await act(async () => {
         await testForm.validateFields(['connectorId']);
       });
 
-      expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
+      expect(testForm.getFields().connectorId.errors).toHaveLength(1);
+      expect(getByTestId('connector-selector')).toBeInTheDocument();
     });
+
     it('should show loading spinner when connectors are loading', async () => {
       mockUseLoadConnectors.mockReturnValue({
         data: mockConnectors,
@@ -193,18 +205,6 @@ describe('ConnectorSelector', () => {
 
       const { getByTestId } = await renderConnectorSelector();
       expect(getByTestId('connectorSelectorLoading')).toBeInTheDocument();
-    });
-
-    it('should render the empty selector when no connectors exist', async () => {
-      mockUseLoadConnectors.mockReturnValue({
-        data: [],
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      const { getByTestId, queryByTestId } = await renderConnectorSelector();
-      expect(getByTestId('connector-selector')).toHaveTextContent('Select a connector');
-      expect(queryByTestId('addNewConnectorButton')).not.toBeInTheDocument();
     });
 
     it('should display the first connector name on the button', async () => {
@@ -243,6 +243,52 @@ describe('ConnectorSelector', () => {
       await waitFor(() => {
         expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
       });
+    });
+
+    it('should switch to the default connector when the selected connector is removed', async () => {
+      const { getByTestId, rerender } = await renderConnectorSelector();
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-1'));
+
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors.slice(1),
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+      rerender(
+        <TestProviders>
+          <FormWrapper>
+            <ConnectorSelector />
+          </FormWrapper>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-2'));
+      expect(getByTestId('connector-selector')).toHaveTextContent('My Bedrock Connector');
+    });
+
+    it('should clear the connector when the last connector is removed', async () => {
+      const { rerender } = await renderConnectorSelector();
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-1'));
+
+      mockUseLoadConnectors.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+      rerender(
+        <TestProviders>
+          <FormWrapper>
+            <ConnectorSelector />
+          </FormWrapper>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe(''));
+      let areFieldsValid = true;
+      await act(async () => {
+        ({ areFieldsValid } = await testForm.validateFields(['connectorId']));
+      });
+      expect(areFieldsValid).toBe(false);
     });
   });
 

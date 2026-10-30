@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { useAiConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { AiConnectorRequiredCallout } from './ai_connector_required_callout';
+
+jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
+  useAiConnectors: jest.fn(),
+}));
+const mockUseAiConnectors = useAiConnectors as jest.Mock;
 
 jest.mock('../../../../common/components/add_ai_connector_button', () => ({
   AddAiConnectorButton: () => (
@@ -21,51 +24,38 @@ jest.mock('../../../../common/components/add_ai_connector_button', () => ({
   ),
 }));
 
-let testForm: FormHook;
-
-const TestForm: React.FC = () => {
-  const { form } = useForm({
-    defaultValue: { connectorId: '' },
-    schema: {
-      connectorId: {
-        validations: [{ validator: fieldValidators.emptyField('Connector required') }],
-      },
-    },
-  });
-  testForm = form;
-
-  return (
-    <Form form={form}>
-      <UseField path="connectorId">{() => null}</UseField>
-      <AiConnectorRequiredCallout />
-    </Form>
-  );
-};
-
 const renderCallout = () =>
   render(
     <I18nProvider>
-      <TestForm />
+      <AiConnectorRequiredCallout />
     </I18nProvider>
   );
 
 describe('AiConnectorRequiredCallout', () => {
   beforeEach(() => {
-    Element.prototype.scrollIntoView = jest.fn();
+    jest.clearAllMocks();
   });
 
-  it('is hidden before the connector has been validated', () => {
+  it('is hidden while connectors are loading', () => {
+    mockUseAiConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
     const { queryByTestId } = renderCallout();
 
     expect(queryByTestId('aiConnectorRequiredCallout')).not.toBeInTheDocument();
   });
 
-  it('is shown and scrolled to without taking focus when the connector fails validation', async () => {
-    const { getByTestId } = renderCallout();
+  it('is hidden when a connector exists', () => {
+    mockUseAiConnectors.mockReturnValue({ data: [{ id: 'connector-1' }], isLoading: false });
 
-    await act(async () => {
-      await testForm.validateFields(['connectorId']);
-    });
+    const { queryByTestId } = renderCallout();
+
+    expect(queryByTestId('aiConnectorRequiredCallout')).not.toBeInTheDocument();
+  });
+
+  it('is shown when no connectors exist', () => {
+    mockUseAiConnectors.mockReturnValue({ data: [], isLoading: false });
+
+    const { getByTestId } = renderCallout();
 
     const callout = getByTestId('aiConnectorRequiredCallout');
     expect(callout).toHaveTextContent('Add an AI connector');
@@ -73,37 +63,5 @@ describe('AiConnectorRequiredCallout', () => {
       'A connector is needed to analyze your log samples and build the ingest pipeline'
     );
     expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
-    expect(callout).not.toHaveFocus();
-    expect(callout.scrollIntoView).toHaveBeenCalled();
-  });
-
-  it('announces only the text content to screen readers', async () => {
-    const { getByRole, getAllByTestId } = renderCallout();
-
-    await act(async () => {
-      await testForm.validateFields(['connectorId']);
-    });
-
-    await waitFor(() =>
-      expect(getByRole('status')).toHaveTextContent(
-        'Add an AI connector. A connector is needed to analyze your log samples and build the ingest pipeline'
-      )
-    );
-    expect(getAllByTestId('addNewConnectorButton')).toHaveLength(1);
-  });
-
-  it('is hidden once a connector is selected', async () => {
-    const { getByTestId, queryByTestId } = renderCallout();
-
-    await act(async () => {
-      await testForm.validateFields(['connectorId']);
-    });
-    expect(getByTestId('aiConnectorRequiredCallout')).toBeInTheDocument();
-
-    await act(async () => {
-      testForm.setFieldValue('connectorId', 'connector-1');
-    });
-
-    expect(queryByTestId('aiConnectorRequiredCallout')).not.toBeInTheDocument();
   });
 });

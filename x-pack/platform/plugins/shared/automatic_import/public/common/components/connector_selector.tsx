@@ -122,10 +122,15 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
   const setFieldValue = field.setValue;
 
   useEffect(() => {
-    if (!selectedId && defaultConnectorId && !isLoading) {
-      setFieldValue(defaultConnectorId);
+    if (isLoading || !connectors) {
+      return;
     }
-  }, [selectedId, defaultConnectorId, isLoading, setFieldValue]);
+    const isSelectedAvailable = connectors.some(({ id }) => id === selectedId);
+    const nextId = isSelectedAvailable ? selectedId : defaultConnectorId ?? '';
+    if (nextId !== selectedId) {
+      setFieldValue(nextId);
+    }
+  }, [connectors, selectedId, defaultConnectorId, isLoading, setFieldValue]);
 
   const handleChangeConnector = useCallback(
     (connectorId: string) => {
@@ -231,7 +236,7 @@ const ConnectorField: React.FC<ConnectorFieldProps> = ({
     </EuiButton>
   );
 
-  if (field.errors.length > 0) {
+  if (!isLoading && connectors?.length === 0) {
     return null;
   }
 

@@ -27,6 +27,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook, FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
@@ -389,9 +390,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       <EuiFlyoutBody>
         {integrationErrors.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
-              color="danger"
               iconType="error"
               size="s"
               title={i18n.INTEGRATION_DETAILS_INVALID_CALLOUT_TITLE}
@@ -402,7 +402,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   <li key={`${message}-${index}`}>{message}</li>
                 ))}
               </ul>
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer size="m" />
           </>
         )}

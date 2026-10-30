@@ -91,7 +91,6 @@ test.describe(
         })
       );
       await pageObjects.integrationManagement.navigateToCreate();
-      await pageObjects.integrationManagement.getAddDataStreamButton().click();
       await expect(pageObjects.integrationManagement.getAiConnectorRequiredCallout()).toBeVisible();
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);

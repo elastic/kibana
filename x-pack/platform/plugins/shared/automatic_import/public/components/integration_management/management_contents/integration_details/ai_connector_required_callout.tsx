@@ -5,48 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLiveAnnouncer,
-  EuiSpacer,
-  useEuiFontSize,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiFontSize } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { AddAiConnectorButton } from '../../../../common/components/add_ai_connector_button';
-import { useIntegrationForm } from '../../forms/integration_form';
+import { useAiConnectors } from '../../../../common/hooks/use_ai_connectors';
 import * as i18n from './translations';
 
-const CALLOUT_ID = 'aiConnectorRequiredCallout';
-
 export const AiConnectorRequiredCallout: React.FC = () => {
-  const { form } = useIntegrationForm();
-  const isVisible = (form.getFields().connectorId?.errors.length ?? 0) > 0;
+  const { data: connectors, isLoading } = useAiConnectors();
   const contentFontSize = useEuiFontSize('s');
 
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-    document.getElementById(CALLOUT_ID)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [isVisible]);
-
-  if (!isVisible) {
+  if (isLoading || connectors?.length !== 0) {
     return null;
   }
 
   return (
     <>
-      <KbnWarningCallout
-        id={CALLOUT_ID}
-        size="s"
-        title={null}
-        data-test-subj="aiConnectorRequiredCallout"
-      >
-        <EuiLiveAnnouncer>
-          {`${i18n.AI_CONNECTOR_REQUIRED_TITLE}. ${i18n.AI_CONNECTOR_REQUIRED_DESCRIPTION}`}
-        </EuiLiveAnnouncer>
+      <KbnWarningCallout size="s" title={null} data-test-subj="aiConnectorRequiredCallout">
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"
