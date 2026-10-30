@@ -148,9 +148,10 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           throw new Error(`Round "${input.round_id}" not found in the investigation`);
         }
         roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
-        investigationEndedAt = new Date(
-          Date.parse(round.started_at) + round.time_to_last_token
-        ).toISOString();
+        const roundEndedAt = Date.parse(round.started_at) + round.time_to_last_token;
+        investigationEndedAt = Number.isFinite(roundEndedAt)
+          ? new Date(roundEndedAt).toISOString()
+          : undefined;
 
         results = await evaluate({
           request,

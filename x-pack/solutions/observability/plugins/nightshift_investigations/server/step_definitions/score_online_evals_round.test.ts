@@ -215,6 +215,21 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(reportOnlineEvalScore.mock.calls[0][0]).not.toHaveProperty('investigation_ended_at');
   });
 
+  it("still scores a round whose end time can't be worked out", async () => {
+    const evaluate = jest
+      .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+      .mockResolvedValue([okResult('conclusion_quality')]);
+    const { run, reportOnlineEvalScore } = setup({
+      evaluate,
+      rounds: [{ ...ROUND, time_to_last_token: undefined }],
+    });
+
+    await expect(run({ evaluators: [{ name: 'conclusion_quality' }] })).resolves.toEqual({
+      output: { scored: true, evaluator_count: 1, failed_count: 0, skipped_count: 0 },
+    });
+    expect(reportOnlineEvalScore.mock.calls[0][0]).not.toHaveProperty('investigation_ended_at');
+  });
+
   it('sends nothing when the kill switch is on', async () => {
     const { run, getScopedClient, evaluate, reportOnlineEvalScore } = setup({ paused: true });
 
