@@ -1096,7 +1096,10 @@ steps:
         ```
         {% when "exception" %}
         Proposed exception:
-        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
+        **{{ steps.build_exception_name.output.name }}**
+        {%- comment -%} A `for` tag cannot take a filter, so parse the entries first. {%- endcomment %}
+        {% assign exception_entries = steps.bound_exception_entries.output.entries_json | json_parse %}
+        {% for entry in exception_entries %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.

@@ -223,3 +223,63 @@ describe('rule_tuning_review exception name', () => {
     });
   });
 });
+
+/**
+ * The proposal comment is what an analyst reads in AlertZero before approving. For an
+ * exception it must name the exception and list its conditions. `bound_exception_entries`
+ * hands the entries over as a JSON string, which a Liquid `for` loop cannot parse inline.
+ */
+describe('rule_tuning_review proposal comment for an exception', () => {
+  const EXCEPTION_NAME = 'Known non-threat hosts excluded from indicator match';
+  const commentTemplate = stepByName('compose_proposal')?.with?.comment as string;
+
+  const entriesJson = JSON.stringify([
+    { field: 'user.name', operator: 'is', value: 'svc-backup' },
+    { field: 'host.name', operator: 'is_one_of', values: ['jump-box-03', 'db-host-11'] },
+    { field: 'process.parent.name', operator: 'exists' },
+  ]);
+
+  const renderComment = (): string =>
+    createWorkflowLiquidEngine().parseAndRenderSync(commentTemplate, {
+      inputs: { fp_count: 12, alert_ids: ['a', 'b'], last_fp_at: '2026-10-30T10:56:58.555Z' },
+      steps: {
+        diagnose_rule: {
+          output: {
+            structured_output: {
+              change_type: 'exception',
+              title: 'Exclude benign backup agent',
+              summary: 'A known backup service triggers this rule.',
+            },
+          },
+        },
+        compose_evidence: { output: { rule_line: 'Rule: Backup', fp_summary: '12 of 12' } },
+        fetch_rule: { output: { name: 'Backup', type: 'query' } },
+        bound_exception_entries: { output: { entries_json: entriesJson } },
+        build_exception_name: { output: { name: EXCEPTION_NAME } },
+      },
+      consts: definition.consts,
+    });
+
+  const exceptionSection = (): string => {
+    const comment = renderComment();
+    const start = comment.indexOf('Proposed exception:');
+    return start === -1 ? '' : comment.slice(start, comment.indexOf('Approve to add', start));
+  };
+
+  it('lists every condition as a bullet', () => {
+    const section = exceptionSection();
+    expect(section).toContain('- user.name is svc-backup');
+    expect(section).toContain('- host.name is_one_of jump-box-03, db-host-11');
+    expect(section).toContain('- process.parent.name exists');
+  });
+
+  it('renders no empty bullet', () => {
+    expect(exceptionSection()).not.toMatch(/^- *$/m);
+  });
+
+  it('names the exception under "Proposed exception:", before the conditions', () => {
+    const section = exceptionSection();
+    expect(section).toContain(EXCEPTION_NAME);
+    expect(section.indexOf(EXCEPTION_NAME)).toBeLessThan(section.indexOf('- user.name'));
+  });
+});
