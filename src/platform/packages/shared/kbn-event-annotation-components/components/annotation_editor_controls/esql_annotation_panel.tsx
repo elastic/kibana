@@ -48,6 +48,7 @@ export const ConfigPanelEsqlAnnotation = ({
         <EuiSwitch
           id={rangeSwitchId}
           labelProps={{ id: `${rangeSwitchId}-label` }}
+          data-test-subj="lnsXY-annotation-esql-timeRange"
           compressed
           label={i18n.translate('eventAnnotationComponents.esqlAnnotation.timeRangeToggleSwitch', {
             defaultMessage: 'Time range',
@@ -87,6 +88,7 @@ export const ConfigPanelEsqlAnnotation = ({
         columns={dateColumns}
         value={annotation.timeColumn}
         onChange={(timeColumn) => onChange({ ...annotation, timeColumn })}
+        data-test-subj="lnsXY-annotation-esql-timeColumn"
         required
       />
       {'endTimeColumn' in annotation && (
@@ -97,6 +99,7 @@ export const ConfigPanelEsqlAnnotation = ({
           columns={dateColumns}
           value={annotation.endTimeColumn}
           onChange={(endTimeColumn) => onChange({ ...annotation, endTimeColumn })}
+          data-test-subj="lnsXY-annotation-esql-endTimeColumn"
           required
         />
       )}
@@ -106,6 +109,7 @@ export const ConfigPanelEsqlAnnotation = ({
         })}
         columns={columns}
         value={annotation.textColumn ?? ''}
+        data-test-subj="lnsXY-annotation-esql-textColumn"
         onChange={(textColumn) =>
           onChange({
             ...annotation,
@@ -152,12 +156,14 @@ const ColumnPicker = ({
   value,
   onChange,
   required = false,
+  'data-test-subj': dataTestSubj,
 }: {
   label: string;
   columns: DatatableColumn[];
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  'data-test-subj': string;
 }) => {
   const id = useId();
   const missingColumn = Boolean(value && !columns.some(({ name }) => name === value));
@@ -201,6 +207,7 @@ const ColumnPicker = ({
         ]}
         isInvalid={isInvalid}
         onChange={(event) => onChange(event.target.value)}
+        data-test-subj={dataTestSubj}
       />
     </EuiFormRow>
   );

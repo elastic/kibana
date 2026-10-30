@@ -72,39 +72,42 @@ export const EsqlAnnotationControls = ({ annotation, onChange, fetchColumns }: P
       columns={columns}
       onChange={onChange}
       queryEditor={
-        <ESQLLangEditor
-          query={query}
-          onTextLangQueryChange={setQuery}
-          onTextLangQuerySubmit={async (submittedQuery, controller = new AbortController()) => {
-            if (!submittedQuery?.esql.trim()) return;
-            requestRef.current?.abort();
-            requestRef.current = controller;
-            setIsLoading(true);
-            setErrors([]);
-            try {
-              const result = await fetchColumns(submittedQuery, controller.signal);
-              if (controller.signal.aborted) return;
-              loadedResultRef.current = { query: submittedQuery.esql, fetchColumns };
-              setColumns(result.columns);
-              const current = currentPropsRef.current;
-              current.onChange({
-                ...current.annotation,
-                query: submittedQuery,
-                timeField: result.timeField,
-              });
-            } catch (error) {
-              if (controller.signal.aborted) return;
-              setErrors([error instanceof Error ? error : new Error(String(error))]);
-            } finally {
-              if (requestRef.current === controller) setIsLoading(false);
-            }
-          }}
-          errors={errors}
-          isLoading={isLoading}
-          editorIsInline
-          allowQueryCancellation
-          dataTestSubj="lnsXY-annotation-esql-editor"
-        />
+        // the editor renders its run button outside of `dataTestSubj`, so tests scope to this wrapper
+        <div data-test-subj="lnsXY-annotation-esql-query">
+          <ESQLLangEditor
+            query={query}
+            onTextLangQueryChange={setQuery}
+            onTextLangQuerySubmit={async (submittedQuery, controller = new AbortController()) => {
+              if (!submittedQuery?.esql.trim()) return;
+              requestRef.current?.abort();
+              requestRef.current = controller;
+              setIsLoading(true);
+              setErrors([]);
+              try {
+                const result = await fetchColumns(submittedQuery, controller.signal);
+                if (controller.signal.aborted) return;
+                loadedResultRef.current = { query: submittedQuery.esql, fetchColumns };
+                setColumns(result.columns);
+                const current = currentPropsRef.current;
+                current.onChange({
+                  ...current.annotation,
+                  query: submittedQuery,
+                  timeField: result.timeField,
+                });
+              } catch (error) {
+                if (controller.signal.aborted) return;
+                setErrors([error instanceof Error ? error : new Error(String(error))]);
+              } finally {
+                if (requestRef.current === controller) setIsLoading(false);
+              }
+            }}
+            errors={errors}
+            isLoading={isLoading}
+            editorIsInline
+            allowQueryCancellation
+            dataTestSubj="lnsXY-annotation-esql-editor"
+          />
+        </div>
       }
     />
   );
