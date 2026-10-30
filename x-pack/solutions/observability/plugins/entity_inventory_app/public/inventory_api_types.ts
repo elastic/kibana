@@ -7,6 +7,8 @@
 
 export interface EntityInventoryTypeAttribute {
   name: string;
+  // TODO: check if the backend returns a label, or if labels need translating client side
+  label?: string;
   dimension?: boolean;
 }
 
@@ -21,5 +23,11 @@ export interface EntityInventoryAttributeValuesParams {
   attribute: string;
   types: string[];
   filters: Record<string, string[]>;
+  selected: string[];
   timeRange: { from: string; to: string };
+}
+
+export interface EntityInventoryAttributeValuesResponse {
+  values: string[];
+  invalidSelections: string[];
 }
