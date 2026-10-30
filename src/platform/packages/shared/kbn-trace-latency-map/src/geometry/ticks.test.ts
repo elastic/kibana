@@ -8,24 +8,25 @@
  */
 
 import moment from 'moment-timezone';
-import { formatDurationUs, getDurationTicks, getTimeTicks } from './ticks';
+import { formatDuration, getDurationTicks, getTimeTicks } from './ticks';
 
-describe('formatDurationUs', () => {
+describe('formatDuration', () => {
   it.each([
-    [850, '850µs'],
-    [4200, '4.2ms'],
-    [1_500_000, '1.5s'],
-    [138_000_000, '2.3min'],
-    [1000, '1ms'],
-    [999.6, '1ms'],
-    [999_600, '1s'],
-    [59_996_000, '1min'],
-    [999, '999µs'],
-  ])('formats %s µs as %s', (us, text) => expect(formatDurationUs(us)).toBe(text));
+    [850, '850ns'],
+    [850_000, '850µs'],
+    [4_200_000, '4.2ms'],
+    [1_500_000_000, '1.5s'],
+    [138_000_000_000, '2.3min'],
+    [1_000_000, '1ms'],
+    [999_600, '1ms'],
+    [999_600_000, '1s'],
+    [59_996_000_000, '1min'],
+    [999_000, '999µs'],
+  ])('formats %s ns as %s', (ns, text) => expect(formatDuration(ns)).toBe(text));
 });
 
 describe('getDurationTicks', () => {
-  const stats = { min: 120, p90: 0, p95: 0, p99: 90_000, max: 5_000_000, spans: 1 };
+  const stats = { min: 120_000, p90: 0, p95: 0, p99: 90_000_000, max: 5_000_000_000, spans: 1 };
 
   it('ticks round durations between the fastest span and the p99, slow ones above', () => {
     const labels = getDurationTicks(stats, 0).map((tick) => tick.label);

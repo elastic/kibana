@@ -10,7 +10,7 @@
 import { addTableToGrid, createEmptyGrid, getCellKey } from './parse';
 
 const table = (values: number[][]) => ({
-  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name })),
+  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
   values,
 });
 

@@ -10,8 +10,8 @@
 import React, { useMemo, useState } from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import type { Meta, StoryFn } from '@storybook/react';
-import { LatencyMap } from '../components/latency_map';
-import type { LatencyMapProps } from '../components/latency_map';
+import { LatencyMap } from './latency_map';
+import type { LatencyMapProps } from './latency_map';
 import type { LatencyMapSelection } from '../types';
 import {
   bimodal,
@@ -19,8 +19,8 @@ import {
   failureBurst,
   movingMode,
   sparseOutliers,
-} from './fake_run_esql';
-import type { Pattern } from './fake_run_esql';
+} from './__fixtures__/fake_run_esql';
+import type { Pattern } from './__fixtures__/fake_run_esql';
 
 const SOURCE = {
   timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },

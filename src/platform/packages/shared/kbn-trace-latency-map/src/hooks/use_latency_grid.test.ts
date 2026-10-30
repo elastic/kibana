@@ -8,22 +8,23 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { EsqlTable, TraceSource } from '../types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { TraceSource } from '../types';
 import { useLatencyGrid } from './use_latency_grid';
 
 const source: TraceSource = {
   timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
 };
-const statsTable = (spans: number): EsqlTable => ({
-  columns: ['min', 'p90', 'p95', 'p99', 'max', 'spans'].map((name) => ({ name })),
-  values: [[100, 5000, 8000, 10_000, 2_000_000, spans]],
+const statsTable = (spans: number): ESQLSearchResponse => ({
+  columns: ['min', 'p90', 'p95', 'p99', 'max', 'spans'].map((name) => ({ name, type: 'long' })),
+  values: [[100_000, 5_000_000, 8_000_000, 10_000_000, 2_000_000_000, spans]],
 });
-const gridTable = (values: number[][]): EsqlTable => ({
-  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name })),
+const gridTable = (values: number[][]): ESQLSearchResponse => ({
+  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
   values,
 });
 /** A runner answering the statistics query and the grid queries with the given tables. */
-const createRunner = (stats: EsqlTable, grid: EsqlTable) =>
+const createRunner = (stats: ESQLSearchResponse, grid: ESQLSearchResponse) =>
   jest.fn(async (query: string) => (query.includes('PERCENTILE') ? stats : grid));
 
 describe('useLatencyGrid', () => {
@@ -80,13 +81,13 @@ describe('useLatencyGrid', () => {
   });
 
   it('drops the answer of a source that was replaced', async () => {
-    let releaseFirst: (table: EsqlTable) => void = () => {};
+    let releaseFirst: (table: ESQLSearchResponse) => void = () => {};
     let statsCalls = 0;
-    const runEsql = jest.fn((query: string): Promise<EsqlTable> => {
+    const runEsql = jest.fn((query: string): Promise<ESQLSearchResponse> => {
       if (!query.includes('PERCENTILE')) return Promise.resolve(gridTable([[1, 2, 7, 3]]));
       // The first source never answers until released, after it was replaced.
       return ++statsCalls === 1
-        ? new Promise<EsqlTable>((resolve) => (releaseFirst = resolve))
+        ? new Promise<ESQLSearchResponse>((resolve) => (releaseFirst = resolve))
         : Promise.resolve(statsTable(100));
     });
     const { result, rerender } = renderHook(

@@ -28,7 +28,7 @@ import type {
   RunEsql,
   TraceSource,
 } from '../types';
-import { LATENCY_MAP_INNER_ROWS, durationUsToRow, rowToDurationUs } from '../query/duration_rows';
+import { LATENCY_MAP_INNER_ROWS, durationToRow, rowToDuration } from '../query/duration_rows';
 import { getMapSource } from '../query/latency_map_query';
 import { getCellKey } from '../query/parse';
 import { clampRange, isSameRange } from '../geometry/cell_range';
@@ -37,7 +37,7 @@ import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
 import type { PlotArea, Point } from '../geometry/map_geometry';
 import { isSamePlot } from '../geometry/plot_calibration';
-import { formatDurationUs, formatTimestamp } from '../geometry/ticks';
+import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
 import { endGesture, moveGesture, startGesture } from '../selection/gesture';
@@ -212,8 +212,8 @@ export function LatencyMap({
       return {
         fromMs,
         toMs: fromMs + timeGrid!.binMs,
-        minDurationUs: rowToDurationUs(cell.yi, stats!),
-        maxDurationUs: rowToDurationUs(cell.yi + 1, stats!),
+        minDuration: rowToDuration(cell.yi, stats!),
+        maxDuration: rowToDuration(cell.yi + 1, stats!),
         // With "failed only" the map shows the failed spans alone, and so does the cell.
         spans: failedOnly ? failed : counts?.spans ?? 0,
         failed,
@@ -288,7 +288,7 @@ export function LatencyMap({
 
   const selectSlowest = (percentile: SlowestPercentile) => {
     if (!geometry || !stats) return;
-    const row = Math.floor(durationUsToRow(percentile === 99 ? stats.p99 : stats.p95, stats));
+    const row = Math.floor(durationToRow(percentile === 99 ? stats.p99 : stats.p95, stats));
     commitRange({
       x0: 0,
       x1: geometry.bins,
@@ -362,9 +362,9 @@ export function LatencyMap({
           'Latency map of {count}, from {min} to {max}, with the slowest 1% from {p99}. Time runs left to right, duration bottom to top.',
         values: {
           count: getCountText(unit, stats.spans, sampled),
-          min: formatDurationUs(stats.min),
-          max: formatDurationUs(stats.max),
-          p99: formatDurationUs(stats.p99),
+          min: formatDuration(stats.min),
+          max: formatDuration(stats.max),
+          p99: formatDuration(stats.p99),
         },
       })
     : '';
@@ -488,8 +488,8 @@ export function LatencyMap({
                     keyboardCell.toMs,
                     timeZone
                   )}`,
-                  `${formatDurationUs(keyboardCell.minDurationUs)} – ${formatDurationUs(
-                    keyboardCell.maxDurationUs
+                  `${formatDuration(keyboardCell.minDuration)} – ${formatDuration(
+                    keyboardCell.maxDuration
                   )}`,
                   getCountText(unit, keyboardCell.spans, sampled),
                 ].join(', ')

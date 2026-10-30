@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LatencyMapSelection, LatencyMapUnit } from '../types';
-import { formatDurationUs, formatTimestamp } from '../geometry/ticks';
+import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { getCountText, getFailedText } from './unit_text';
 
 /** The bounds and counts of the selection, a way to clear it, and the host's own actions. */
@@ -45,7 +45,7 @@ export function SelectionBar({
     >
       <EuiText size="xs" data-test-subj="traceLatencyMapSelectionSummary">
         <strong>
-          {formatDurationUs(selection.minDurationUs)} – {formatDurationUs(selection.maxDurationUs)}
+          {formatDuration(selection.minDuration)} – {formatDuration(selection.maxDuration)}
         </strong>
         {' · '}
         {formatTimestamp(Date.parse(selection.from), timeZone)} –{' '}

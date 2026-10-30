@@ -10,7 +10,7 @@
 import { LATENCY_MAP_INNER_ROWS, LATENCY_MAP_ROWS } from '../query/duration_rows';
 import type { TimeGrid } from '../query/time_grid';
 import type { DurationStats } from '../types';
-import { formatDurationUs, getDurationTicks, getTimeTicks } from '../geometry/ticks';
+import { formatDuration, getDurationTicks, getTimeTicks } from '../geometry/ticks';
 
 /**
  * Labels for the duration rows. The chart labels rows, not values, so a row gets the round
@@ -30,7 +30,7 @@ export function getYAxisLabels(stats: DurationStats, minRowGap: number): Map<num
   labels.forEach((_, row) => {
     if (topRow - row < minRowGap) labels.delete(row);
   });
-  labels.set(topRow, `≥${formatDurationUs(stats.p99)}`);
+  labels.set(topRow, `≥${formatDuration(stats.p99)}`);
   return labels;
 }
 

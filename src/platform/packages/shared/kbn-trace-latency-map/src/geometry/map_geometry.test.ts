@@ -72,19 +72,19 @@ describe('createMapGeometry', () => {
       const selection = geometry.rangeToSelection(range);
       expect(selection.from).toBe('2026-10-26T10:10:00.000Z');
       expect(selection.to).toBe('2026-10-26T10:13:00.000Z');
-      expect(selection.minDurationUs).toBeGreaterThan(100);
-      expect(selection.maxDurationUs).toBeGreaterThan(selection.minDurationUs);
+      expect(selection.minDuration).toBeGreaterThan(100);
+      expect(selection.maxDuration).toBeGreaterThan(selection.minDuration);
       expect(geometry.selectionToRange(selection)).toEqual(range);
     });
 
     it('reads everything faster than the first row from the bottom row', () => {
-      expect(geometry.rangeToSelection({ x0: 0, x1: 1, y0: 0, y1: 1 }).minDurationUs).toBe(0);
+      expect(geometry.rangeToSelection({ x0: 0, x1: 1, y0: 0, y1: 1 }).minDuration).toBe(0);
     });
 
     it('reads everything slower than the p99 from the top row, up to the max', () => {
       const top = geometry.rangeToSelection({ x0: 0, x1: 1, y0: 23, y1: 24 });
-      expect(top.minDurationUs).toBeCloseTo(stats.p99);
-      expect(top.maxDurationUs).toBeGreaterThan(stats.max);
+      expect(top.minDuration).toBeCloseTo(stats.p99);
+      expect(top.maxDuration).toBeGreaterThan(stats.max);
     });
 
     it('marks a selection about failures', () => {
@@ -97,8 +97,8 @@ describe('createMapGeometry', () => {
         geometry.selectionToRange({
           from: '2020-01-01T00:00:00.000Z',
           to: '2020-01-01T00:00:00.000Z',
-          minDurationUs: 1,
-          maxDurationUs: 1,
+          minDuration: 1,
+          maxDuration: 1,
         })
       ).toEqual({ x0: 0, x1: 1, y0: 0, y1: 1 });
     });

@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/charts-theme'
   - '@kbn/ui-callout'
+  - '@kbn/es-types'
 tags:
   - shared-browser
   - package

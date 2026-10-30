@@ -29,7 +29,7 @@ export function selectionToEsqlCondition(
   const conditions = [
     `@timestamp >= TO_DATETIME("${new Date(selection.from).toISOString()}")`,
     `@timestamp < TO_DATETIME("${new Date(selection.to).toISOString()}")`,
-    `(${durationRangeCondition(selection.minDurationUs, selection.maxDurationUs)})`,
+    `(${durationRangeCondition(selection.minDuration, selection.maxDuration)})`,
     ...(selection.failedOnly ? [FAILED_SPAN_CONDITION] : []),
     ...(unit === 'traces' ? [`(${ROOT_SPAN_CONDITION})`] : []),
     ...(scope ? [`(${scope})`] : []),

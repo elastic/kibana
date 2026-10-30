@@ -14,7 +14,6 @@ export { isSelectionCondition, parseSelectionCondition } from './src/selection/f
 export { TRACES_INDEX_PATTERN } from './src/query/fields';
 export type {
   DurationStats,
-  EsqlTable,
   LatencyMapCell,
   LatencyMapSelection,
   LatencyMapUnit,

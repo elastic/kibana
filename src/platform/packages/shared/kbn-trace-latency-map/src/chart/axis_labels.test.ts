@@ -10,7 +10,7 @@
 import { getTimeGrid } from '../query/time_grid';
 import { getXAxisLabels, getYAxisLabels } from './axis_labels';
 
-const stats = { min: 120, p90: 0, p95: 0, p99: 90_000, max: 5_000_000, spans: 1 };
+const stats = { min: 120_000, p90: 0, p95: 0, p99: 90_000_000, max: 5_000_000_000, spans: 1 };
 
 describe('getYAxisLabels', () => {
   it('labels the rows with the round durations inside them, and the top row from the p99', () => {

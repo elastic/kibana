@@ -36,8 +36,8 @@ const parseWrittenTimestamp = (text: string): string | undefined => {
  * Only a condition that package function wrote parses: the shape must match exactly and the
  * three duration families must agree, so a hand-edited clause, a scoped or per-trace
  * condition, or any other filter returns `undefined` and stays an ordinary filter of the
- * host's query. The bounds come back from the OTel nanoseconds, which keep the fraction of
- * a committed cell edge that the microsecond families round away.
+ * host's query. The bounds come back from the OTel nanoseconds, which are the whole numbers the
+ * writer rounded the committed cell edges up to: writing the result again gives the same condition.
  */
 export function parseSelectionCondition(condition: string): LatencyMapSelection | undefined {
   const failedOnly = condition.endsWith(FAILED_ONLY_SUFFIX);
@@ -48,7 +48,7 @@ export function parseSelectionCondition(condition: string): LatencyMapSelection 
   const [txMin, txMax, spanMin, spanMax, nsMin, nsMax] = bounds.map(Number);
   const from = parseWrittenTimestamp(fromText);
   const to = parseWrittenTimestamp(toText);
-  // The families all come from one µs range: µs bounds equal, ns bounds their refinement.
+  // The families all come from one range in nanoseconds: the microsecond bounds are those, rounded up.
   const familiesAgree =
     spanMin === txMin &&
     spanMax === txMax &&
@@ -58,8 +58,8 @@ export function parseSelectionCondition(condition: string): LatencyMapSelection 
   return {
     from,
     to,
-    minDurationUs: nsMin / 1000,
-    maxDurationUs: nsMax / 1000,
+    minDuration: nsMin,
+    maxDuration: nsMax,
     ...(failedOnly ? { failedOnly: true } : {}),
   };
 }

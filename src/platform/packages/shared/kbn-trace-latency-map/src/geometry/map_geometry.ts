@@ -8,7 +8,7 @@
  */
 
 import type { DurationStats, LatencyMapSelection } from '../types';
-import { LATENCY_MAP_ROWS, durationUsToRow, rowToDurationUs } from '../query/duration_rows';
+import { LATENCY_MAP_ROWS, durationToRow, rowToDuration } from '../query/duration_rows';
 import { timeToEdge } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
 import type { Cell, CellRange, HandleId } from './cell_range';
@@ -91,7 +91,7 @@ export function createMapGeometry({
   const edgeToX = (edge: number) => plotLeft + edge * colWidth;
   const edgeToY = (edge: number) => plotBottom - edge * rowHeight;
   const edgeOf = (timestampMs: number) => timeToEdge(timeGrid, timestampMs);
-  const durationToEdge = (durationUs: number) => clamp(durationUsToRow(durationUs, stats), 0, rows);
+  const durationToEdge = (duration: number) => clamp(durationToRow(duration, stats), 0, rows);
   const isInPlot = ({ x, y }: Point) =>
     x >= plotLeft && x <= plotRight && y >= plotTop && y <= plotBottom;
 
@@ -133,15 +133,15 @@ export function createMapGeometry({
       // Never past the range: the last column may reach beyond it, where the map read no spans.
       to: new Date(Math.min(fromMs + range.x1 * binMs, endMs)).toISOString(),
       // The bottom row reads everything below it too, as the query puts the fastest spans in it.
-      minDurationUs: range.y0 <= 0 ? 0 : rowToDurationUs(range.y0, stats),
-      maxDurationUs: rowToDurationUs(range.y1, stats),
+      minDuration: range.y0 <= 0 ? 0 : rowToDuration(range.y0, stats),
+      maxDuration: rowToDuration(range.y1, stats),
       ...(failedOnly ? { failedOnly } : {}),
     }),
     selectionToRange: (selection) => {
       const xa = clamp(Math.round(edgeOf(Date.parse(selection.from))), 0, bins);
       const xb = clamp(Math.round(edgeOf(Date.parse(selection.to))), 0, bins);
-      const ya = Math.round(durationToEdge(selection.minDurationUs));
-      const yb = Math.round(durationToEdge(selection.maxDurationUs));
+      const ya = Math.round(durationToEdge(selection.minDuration));
+      const yb = Math.round(durationToEdge(selection.maxDuration));
       const x0 = Math.min(xa, xb, bins - 1);
       const y0 = Math.min(ya, yb, rows - 1);
       return {

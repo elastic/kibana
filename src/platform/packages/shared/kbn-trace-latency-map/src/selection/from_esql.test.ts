@@ -13,8 +13,8 @@ import { selectionToEsqlCondition } from './to_esql';
 const selection = {
   from: '2026-10-26T10:00:00.000Z',
   to: '2026-10-26T10:05:00.000Z',
-  minDurationUs: 1000,
-  maxDurationUs: 5000,
+  minDuration: 1_000_000,
+  maxDuration: 5_000_000,
 };
 
 describe('parseSelectionCondition', () => {
@@ -27,10 +27,10 @@ describe('parseSelectionCondition', () => {
     expect(parseSelectionCondition(selectionToEsqlCondition(failed))).toEqual(failed);
   });
 
-  it('keeps the fraction of a committed cell edge, from the written nanoseconds', () => {
-    const condition = selectionToEsqlCondition({ ...selection, minDurationUs: 1000.2 });
+  it('keeps the nanoseconds of a committed cell edge, which no microsecond field can hold', () => {
+    const condition = selectionToEsqlCondition({ ...selection, minDuration: 2007 });
     const parsed = parseSelectionCondition(condition);
-    expect(parsed?.minDurationUs).toBeCloseTo(1000.2, 2);
+    expect(parsed?.minDuration).toBe(2007);
     // The parsed selection writes the same condition back.
     expect(selectionToEsqlCondition(parsed!)).toBe(condition);
   });

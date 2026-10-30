@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** The table of an ES|QL response: column names and row values. */
-export interface EsqlTable {
-  columns: Array<{ name: string; type?: string }>;
-  values: unknown[][];
-}
+import type { ESQLSearchResponse } from '@kbn/es-types';
 
 /** Runs an ES|QL query. Hosts decide how: search strategy, API route, test double. */
-export type RunEsql = (query: string, options?: { signal?: AbortSignal }) => Promise<EsqlTable>;
+export type RunEsql = (query: string, options?: { signal?: AbortSignal }) => Promise<ESQLSearchResponse>;
 
 /** The traces the map reads. */
 export interface TraceSource {
@@ -29,7 +25,7 @@ export interface TraceSource {
 /** Whether the map counts every span, or traces, each at its root span. */
 export type LatencyMapUnit = 'spans' | 'traces';
 
-/** Duration statistics of a time range, in microseconds. */
+/** Duration statistics of a time range, in nanoseconds. */
 export interface DurationStats {
   min: number;
   p90: number;
@@ -40,7 +36,7 @@ export interface DurationStats {
 }
 
 /**
- * A region of the map: a time window and a duration range, in microseconds. Always a
+ * A region of the map: a time window and a duration range, in nanoseconds. Always a
  * whole number of cells once committed, so what is highlighted is what the condition
  * selects.
  */
@@ -50,9 +46,9 @@ export interface LatencyMapSelection {
   /** Exclusive, ISO. */
   to: string;
   /** Inclusive. */
-  minDurationUs: number;
+  minDuration: number;
   /** Exclusive. */
-  maxDurationUs: number;
+  maxDuration: number;
   /** Only the failed spans of the region. */
   failedOnly?: boolean;
 }

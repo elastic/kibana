@@ -47,7 +47,7 @@ const CELLS = [
   { xi: 30, yi: 20, spans: 3, failed: 3 },
 ];
 const grid = addTableToGrid(createEmptyGrid(timeGrid.bins), {
-  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name })),
+  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
   values: CELLS.map(({ xi, yi, spans, failed }) => [xi, yi, spans, failed]),
 });
 

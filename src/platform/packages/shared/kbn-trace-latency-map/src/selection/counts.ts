@@ -8,7 +8,7 @@
  */
 
 import type { DurationStats, LatencyMapSelection } from '../types';
-import { LATENCY_MAP_ROWS, durationUsToRow } from '../query/duration_rows';
+import { LATENCY_MAP_ROWS, durationToRow } from '../query/duration_rows';
 import type { LatencyGrid } from '../query/parse';
 import { timeToEdge } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
@@ -51,11 +51,11 @@ export function getSelectionCounts({
   // data it has: a selection over all of it covers all of it.
   const fromEdge = timeToEdge(timeGrid, Date.parse(selection.from));
   const toEdge = timeToEdge(timeGrid, Date.parse(selection.to));
-  const rowOf = (durationUs: number) =>
-    Math.min(LATENCY_MAP_ROWS, Math.max(0, durationUsToRow(durationUs, stats)));
+  const rowOf = (duration: number) =>
+    Math.min(LATENCY_MAP_ROWS, Math.max(0, durationToRow(duration, stats)));
   // The bottom row reads everything below it too: a minimum of 0 starts at its floor.
-  const lowRow = selection.minDurationUs <= 0 ? 0 : rowOf(selection.minDurationUs);
-  const highRow = rowOf(selection.maxDurationUs);
+  const lowRow = selection.minDuration <= 0 ? 0 : rowOf(selection.minDuration);
+  const highRow = rowOf(selection.maxDuration);
 
   let spans = 0;
   let failed = 0;

@@ -23,25 +23,26 @@ export const TRACES_INDEX_PATTERN = 'traces-apm*, apm-*, traces-*.otel-*';
 export const PARENT_ID_FIELDS = ['parent.id', 'parent_span_id'];
 
 /** Columns the map queries compute, from the raw fields below. */
-export const DURATION_US_COLUMN = 'duration_us';
+export const DURATION_COLUMN = 'duration_ns';
 export const IS_FAILED_COLUMN = 'is_failed';
 
 /**
  * Normalized columns every map query reads:
- * - `duration_us`: transaction.duration.us, span.duration.us, or OTel `duration` (ns), in µs
+ * - `duration_ns`: transaction.duration.us or span.duration.us (microseconds, times 1000), or OTel
+ *   `duration` (nanoseconds), in nanoseconds
  * - `is_failed`: event.outcome == "failure", or OTel status.code == "Error"
  *
- * Durations are doubles: dividing OTel's long nanoseconds by 1000 as longs truncates, which
- * turns every span under a microsecond into 0 and drops it. Each cast and the division are their
- * own EVAL, ahead of the COALESCE: ES|QL evaluates a COALESCE row by row where its first value is
- * null, and with a division or a comparison inside it everywhere, which is several times slower
+ * Nanoseconds are the unit of OTel, and a microsecond is just a thousand of them, so nothing is
+ * lost, divided or truncated. Durations are doubles: each cast and the arithmetic are their own
+ * EVAL, ahead of the COALESCE, because ES|QL evaluates a COALESCE row by row where its first value
+ * is null, and with a division or a comparison inside it everywhere, which is several times slower
  * on large ranges.
  */
 export const NORMALIZE_COMMANDS = [
-  `EVAL otel_duration_us = TO_DOUBLE(${OTEL_DURATION}) / 1000`,
-  `EVAL transaction_duration_us = TO_DOUBLE(${TRANSACTION_DURATION_FIELD})`,
-  `EVAL span_duration_us = TO_DOUBLE(${SPAN_DURATION_FIELD})`,
-  `EVAL ${DURATION_US_COLUMN} = COALESCE(transaction_duration_us, span_duration_us, otel_duration_us)`,
+  `EVAL otel_duration_ns = TO_DOUBLE(${OTEL_DURATION})`,
+  `EVAL transaction_duration_ns = TO_DOUBLE(${TRANSACTION_DURATION_FIELD}) * 1000`,
+  `EVAL span_duration_ns = TO_DOUBLE(${SPAN_DURATION_FIELD}) * 1000`,
+  `EVAL ${DURATION_COLUMN} = COALESCE(transaction_duration_ns, span_duration_ns, otel_duration_ns)`,
   `EVAL ${IS_FAILED_COLUMN} = COALESCE((${EVENT_OUTCOME_FIELD} IS NOT NULL AND ${EVENT_OUTCOME_FIELD} == "failure") OR (${OTEL_STATUS_CODE} IS NOT NULL AND ${OTEL_STATUS_CODE} == "Error"), false)`,
 ];
 
@@ -53,32 +54,41 @@ export const ROOT_SPAN_CONDITION = PARENT_ID_FIELDS.map((field) => `${field} IS 
   ' AND '
 );
 
+/** The fields that hold a span's duration, each with how many nanoseconds one of its units is. */
 const DURATION_FAMILIES = [
-  { field: TRANSACTION_DURATION_FIELD, perUs: 1 },
-  { field: SPAN_DURATION_FIELD, perUs: 1 },
-  // OTel `duration` is in nanoseconds.
-  { field: OTEL_DURATION, perUs: 1000 },
+  { field: TRANSACTION_DURATION_FIELD, nsPerUnit: 1000 },
+  { field: SPAN_DURATION_FIELD, nsPerUnit: 1000 },
+  { field: OTEL_DURATION, nsPerUnit: 1 },
 ];
+
+/**
+ * A bound in nanoseconds as a whole number of a field's units, rounded up: for a whole number of
+ * units `value >= bound` and `value * nsPerUnit >= bound` select the same spans, and `value < bound`
+ * and `value * nsPerUnit < bound` do too. So the conditions select what the rows were binned on.
+ */
+const inUnits = (bound: number, nsPerUnit: number) => Math.ceil(bound / nsPerUnit);
 
 /** A span that did not fail, over raw fields. Null-safe: a span without outcome did not fail. */
 export const NOT_FAILED_CONDITION = `(${EVENT_OUTCOME_FIELD} IS NULL OR ${EVENT_OUTCOME_FIELD} != "failure") AND (${OTEL_STATUS_CODE} IS NULL OR ${OTEL_STATUS_CODE} != "Error")`;
 
-/** Spans lasting `us` or longer, over raw fields. A span has one family of duration fields. */
-export const durationAtLeastCondition = (us: number) =>
-  DURATION_FAMILIES.map(({ field, perUs }) => `${field} >= ${Math.ceil(us * perUs)}`).join(' OR ');
-
-/** Spans lasting less than `us`, or without a duration. The complement of the above. */
-export const durationBelowCondition = (us: number) =>
+/** Spans lasting `duration` (ns) or longer, over raw fields. A span has one family of duration fields. */
+export const durationAtLeastCondition = (duration: number) =>
   DURATION_FAMILIES.map(
-    ({ field, perUs }) => `(${field} IS NULL OR ${field} < ${Math.ceil(us * perUs)})`
+    ({ field, nsPerUnit }) => `${field} >= ${inUnits(duration, nsPerUnit)}`
+  ).join(' OR ');
+
+/** Spans lasting less than `duration` (ns), or without a duration. The complement of the above. */
+export const durationBelowCondition = (duration: number) =>
+  DURATION_FAMILIES.map(
+    ({ field, nsPerUnit }) => `(${field} IS NULL OR ${field} < ${inUnits(duration, nsPerUnit)})`
   ).join(' AND ');
 
 /**
- * Spans with a duration of at least `minUs` and below `maxUs`, over raw fields. A span has
- * the duration of one family only, so the families are alternatives.
+ * Spans with a duration of at least `minDuration` and below `maxDuration` (ns), over raw fields. A
+ * span has the duration of one family only, so the families are alternatives.
  */
-export const durationRangeCondition = (minUs: number, maxUs: number) =>
+export const durationRangeCondition = (minDuration: number, maxDuration: number) =>
   DURATION_FAMILIES.map(
-    ({ field, perUs }) =>
-      `(${field} >= ${Math.ceil(minUs * perUs)} AND ${field} < ${Math.ceil(maxUs * perUs)})`
+    ({ field, nsPerUnit }) =>
+      `(${field} >= ${inUnits(minDuration, nsPerUnit)} AND ${field} < ${inUnits(maxDuration, nsPerUnit)})`
   ).join(' OR ');

@@ -19,7 +19,7 @@ import type {
 import { EuiPanel } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { DurationStats, LatencyMapUnit } from '../types';
-import { LATENCY_MAP_ROWS, rowToDurationUs } from '../query/duration_rows';
+import { LATENCY_MAP_ROWS, rowToDuration } from '../query/duration_rows';
 import type { LatencyGrid } from '../query/parse';
 import type { TimeGrid } from '../query/time_grid';
 import { getXAxisLabels, getYAxisLabels } from '../chart/axis_labels';
@@ -170,8 +170,8 @@ export function LatencyHeatmap({
             <CellDetails
               fromMs={datum.x}
               toMs={datum.x + timeGrid.binMs}
-              minDurationUs={rowToDurationUs(datum.y, stats)}
-              maxDurationUs={rowToDurationUs(datum.y + 1, stats)}
+              minDuration={rowToDuration(datum.y, stats)}
+              maxDuration={rowToDuration(datum.y + 1, stats)}
               spans={datum.spans}
               failed={datum.failed}
               unit={unit}

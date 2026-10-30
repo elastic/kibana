@@ -8,7 +8,7 @@
  */
 
 import { getTimeGrid } from '../query/time_grid';
-import { durationUsToRow, rowToDurationUs } from '../query/duration_rows';
+import { durationToRow, rowToDuration } from '../query/duration_rows';
 import type { LatencyGrid } from '../query/parse';
 import type { DurationStats, LatencyMapSelection } from '../types';
 import { createMapGeometry } from '../geometry/map_geometry';
@@ -68,9 +68,9 @@ describe('getSelectionCounts', () => {
   it("counts a half-covered row for half its spans, in the map's own row scale", () => {
     const selection = {
       ...selectionOf(3, 5, 5, 6),
-      minDurationUs: rowToDurationUs(5.5, stats),
+      minDuration: rowToDuration(5.5, stats),
     };
-    expect(durationUsToRow(selection.minDurationUs, stats)).toBeCloseTo(5.5);
+    expect(durationToRow(selection.minDuration, stats)).toBeCloseTo(5.5);
     expect(count(selection)).toEqual({ spans: 30, failed: 5, estimated: true });
   });
 

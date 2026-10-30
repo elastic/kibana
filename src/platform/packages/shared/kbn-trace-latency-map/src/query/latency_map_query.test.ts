@@ -23,11 +23,11 @@ const source: TraceSource = {
   filters: ['service.name == "checkout" OR service.name == "cart"'],
 };
 const stats: DurationStats = {
-  min: 100,
-  p90: 5000,
-  p95: 8000,
-  p99: 10_000,
-  max: 2_000_000,
+  min: 100_000,
+  p90: 5_000_000,
+  p95: 8_000_000,
+  p99: 10_000_000,
+  max: 2_000_000_000,
   spans: 1000,
 };
 
@@ -39,7 +39,7 @@ describe('latency map queries', () => {
     expect(query).toContain('@timestamp >= TO_DATETIME("2026-10-26T10:00:00.000Z")');
     // The brackets keep the OR from escaping the time range.
     expect(query).toContain('(service.name == "checkout" OR service.name == "cart")');
-    expect(query).toContain('PERCENTILE(duration_us, 99)');
+    expect(query).toContain('PERCENTILE(duration_ns, 99)');
   });
 
   it('bins time and duration in Elasticsearch', () => {
@@ -76,7 +76,7 @@ describe('latency map queries', () => {
 
     it('samples a larger range, keeping failures and the slowest spans exact', () => {
       const sampling = getMapSampling({ ...stats, spans: MAP_SPAN_BUDGET * 4 });
-      expect(sampling).toEqual({ probability: 0.25, tailUs: 8000 });
+      expect(sampling).toEqual({ probability: 0.25, tail: 8_000_000 });
 
       const [exact, sampled] = getMapQueryParts(sampling!);
       expect(exact.probability).toBeUndefined();
@@ -91,10 +91,10 @@ describe('latency map queries', () => {
 
     it('puts SAMPLE right after the conditions, before any computed column', () => {
       const timeGrid = getTimeGrid(source.timeRange.from, source.timeRange.to, 60);
-      const [, sampled] = getMapQueryParts({ probability: 0.25, tailUs: 8000 });
+      const [, sampled] = getMapQueryParts({ probability: 0.25, tail: 8_000_000 });
       const query = buildLatencyGridQuery(source, stats, timeGrid, sampled);
       expect(query.indexOf('SAMPLE 0.25')).toBeGreaterThan(query.indexOf('WHERE'));
-      expect(query.indexOf('SAMPLE 0.25')).toBeLessThan(query.indexOf('EVAL otel_duration_us'));
+      expect(query.indexOf('SAMPLE 0.25')).toBeLessThan(query.indexOf('EVAL otel_duration_ns'));
     });
   });
 });

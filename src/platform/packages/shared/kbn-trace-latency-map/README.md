@@ -29,7 +29,9 @@ The map is controlled: keep the selection the commit gives and pass it back.
    sample, scaled up (`onStats` reports `sampled`).
 
 Duration and outcome are normalized across classic APM, legacy APM and OTel in
-`src/query/fields.ts`: the one place to change when the field matrix does.
+`src/query/fields.ts`: the one place to change when the field matrix does. Durations are in
+**nanoseconds** everywhere (`minDuration`, `maxDuration`, `DurationStats`): OTel's own unit, with
+APM microseconds converted at the edge of the query.
 
 ## Selections
 
@@ -42,5 +44,5 @@ hosts that restore a selection from the URL.
 - `src/query`, `src/selection/to_esql.ts`: React-free, so they can move to a common package.
 - `src/geometry`, `src/selection/{gesture,keyboard}.ts`: pure pixel, cell and interaction logic.
 - `src/hooks`, `src/components`: React.
-- `src/stories`: Storybook with a fake `runEsql` producing bimodal, moving, burst and outlier
+- `src/components/latency_map.stories.tsx`: Storybook with a fake `runEsql` producing bimodal, moving, burst and outlier
   patterns. `yarn storybook trace_latency_map`.

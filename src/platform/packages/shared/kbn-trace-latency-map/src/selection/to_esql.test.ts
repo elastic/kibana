@@ -12,8 +12,8 @@ import { selectionToEsqlCondition } from './to_esql';
 const selection = {
   from: '2026-10-26T10:00:00.000Z',
   to: '2026-10-26T10:05:00.000Z',
-  minDurationUs: 1000.2,
-  maxDurationUs: 5000,
+  minDuration: 1_000_200,
+  maxDuration: 5_000_000,
 };
 
 describe('selectionToEsqlCondition', () => {
@@ -29,7 +29,7 @@ describe('selectionToEsqlCondition', () => {
 
   it('keeps OTel nanoseconds exact', () => {
     expect(
-      selectionToEsqlCondition({ ...selection, minDurationUs: 2, maxDurationUs: 3 })
+      selectionToEsqlCondition({ ...selection, minDuration: 2000, maxDuration: 3000 })
     ).toContain('(duration >= 2000 AND duration < 3000)');
   });
 

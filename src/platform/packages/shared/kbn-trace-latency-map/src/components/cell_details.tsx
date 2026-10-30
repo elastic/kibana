@@ -10,14 +10,14 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import type { LatencyMapUnit } from '../types';
-import { formatDurationUs, formatTimestamp } from '../geometry/ticks';
+import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { getCountText, getFailedText } from './unit_text';
 
 export interface CellDetailsProps {
   fromMs: number;
   toMs: number;
-  minDurationUs: number;
-  maxDurationUs: number;
+  minDuration: number;
+  maxDuration: number;
   spans: number;
   failed: number;
   unit: LatencyMapUnit;
@@ -30,8 +30,8 @@ export interface CellDetailsProps {
 export function CellDetails({
   fromMs,
   toMs,
-  minDurationUs,
-  maxDurationUs,
+  minDuration,
+  maxDuration,
   spans,
   failed,
   unit,
@@ -42,7 +42,7 @@ export function CellDetails({
     <EuiText size="xs" data-test-subj="traceLatencyMapCellDetails">
       <div>
         <strong>
-          {formatDurationUs(minDurationUs)} – {formatDurationUs(maxDurationUs)}
+          {formatDuration(minDuration)} – {formatDuration(maxDuration)}
         </strong>
         {' · '}
         {getCountText(unit, spans, sampled)}

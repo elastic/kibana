@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { EsqlTable, LatencyMapSelection, TraceSource } from '../types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { LatencyMapSelection, TraceSource } from '../types';
 import { getTimeGrid } from '../query/time_grid';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
@@ -49,13 +50,20 @@ jest.mock('@kbn/charts-theme', () => ({ useElasticChartsTheme: () => ({}) }));
 const source: TraceSource = {
   timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
 };
-const stats = { min: 100, p90: 5000, p95: 8000, p99: 10_000, max: 2_000_000, spans: 100 };
-const statsTable: EsqlTable = {
-  columns: Object.keys(stats).map((name) => ({ name })),
+const stats = {
+  min: 100_000,
+  p90: 5_000_000,
+  p95: 8_000_000,
+  p99: 10_000_000,
+  max: 2_000_000_000,
+  spans: 100,
+};
+const statsTable: ESQLSearchResponse = {
+  columns: Object.keys(stats).map((name) => ({ name, type: 'long' })),
   values: [Object.values(stats)],
 };
-const gridTable = (values: number[][]): EsqlTable => ({
-  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name })),
+const gridTable = (values: number[][]): ESQLSearchResponse => ({
+  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
   values,
 });
 // A busy cell with failures, a quiet one beside it, and one far away.
@@ -106,7 +114,7 @@ beforeAll(() => {
   }
 });
 
-function renderMap(props: Partial<LatencyMapProps> = {}, table: EsqlTable = gridTable(CELLS)) {
+function renderMap(props: Partial<LatencyMapProps> = {}, table: ESQLSearchResponse = gridTable(CELLS)) {
   const runEsql = jest.fn(async (query: string) =>
     query.includes('PERCENTILE') ? statsTable : table
   );
@@ -363,11 +371,11 @@ describe('LatencyMap', () => {
       fireEvent.click(screen.getByTestId('traceLatencyMapSlowest99'));
       const [selection] = onSelectionCommit.mock.calls[0];
       expect(selection.from).toBe(source.timeRange.from);
-      expect(selection.minDurationUs).toBeCloseTo(stats.p99);
-      expect(selection.maxDurationUs).toBeGreaterThan(stats.max);
+      expect(selection.minDuration).toBeCloseTo(stats.p99);
+      expect(selection.maxDuration).toBeGreaterThan(stats.max);
 
       fireEvent.click(screen.getByTestId('traceLatencyMapSlowest95'));
-      expect(onSelectionCommit.mock.calls[1][0].minDurationUs).toBeLessThan(stats.p99);
+      expect(onSelectionCommit.mock.calls[1][0].minDuration).toBeLessThan(stats.p99);
     });
   });
 

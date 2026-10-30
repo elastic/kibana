@@ -9,10 +9,11 @@
 
 import moment from 'moment-timezone';
 import type { DurationStats } from '../types';
-import { durationUsToRow, getLogDurationBounds } from '../query/duration_rows';
+import { durationToRow, getLogDurationBounds } from '../query/duration_rows';
 
 /** Each unit, and how many of it make the next one up. */
 const DURATION_UNITS = [
+  { unit: 'ns', perNext: 1000 },
   { unit: 'µs', perNext: 1000 },
   { unit: 'ms', perNext: 1000 },
   { unit: 's', perNext: 60 },
@@ -20,11 +21,11 @@ const DURATION_UNITS = [
 ];
 
 /**
- * A duration in µs as `850µs`, `4.2ms`, `1.5s` or `2.3min`. Rounded before the unit is picked, so
- * 999.6µs reads `1ms` and not `1000µs`.
+ * A duration in nanoseconds as `850ns`, `4.2ms`, `1.5s` or `2.3min`. Rounded before the unit is
+ * picked, so 999,600ns reads `1ms` and not `1000µs`.
  */
-export function formatDurationUs(us: number): string {
-  let value = us;
+export function formatDuration(duration: number): string {
+  let value = duration;
   for (const { unit, perNext } of DURATION_UNITS) {
     const rounded = Number(value.toPrecision(3));
     if (rounded < perNext) return `${rounded}${unit}`;
@@ -34,7 +35,7 @@ export function formatDurationUs(us: number): string {
 }
 
 export interface DurationTick {
-  durationUs: number;
+  duration: number;
   /** Fractional row of the tick, for placing it. */
   row: number;
   label: string;
@@ -50,11 +51,11 @@ export function getDurationTicks(stats: DurationStats, minRowGap: number): Durat
   let lastRow = -Infinity;
   for (let exponent = Math.floor(logMin); exponent <= Math.ceil(logMax); exponent++) {
     for (const mantissa of [1, 2, 5]) {
-      const durationUs = mantissa * Math.pow(10, exponent);
-      if (durationUs < Math.pow(10, logMin) || durationUs > Math.pow(10, logMax)) continue;
-      const row = durationUsToRow(durationUs, stats);
+      const duration = mantissa * Math.pow(10, exponent);
+      if (duration < Math.pow(10, logMin) || duration > Math.pow(10, logMax)) continue;
+      const row = durationToRow(duration, stats);
       if (row - lastRow < minRowGap) continue;
-      ticks.push({ durationUs, row, label: formatDurationUs(durationUs) });
+      ticks.push({ duration, row, label: formatDuration(duration) });
       lastRow = row;
     }
   }

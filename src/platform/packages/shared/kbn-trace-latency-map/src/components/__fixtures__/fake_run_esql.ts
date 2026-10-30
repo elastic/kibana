@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsqlTable, RunEsql } from '../types';
-import { LATENCY_MAP_ROWS } from '../query/duration_rows';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { RunEsql } from '../../types';
+import { LATENCY_MAP_ROWS } from '../../query/duration_rows';
 
-const STATS = { min: 120, p90: 6000, p95: 11_000, p99: 20_000, max: 3_000_000 };
+const STATS = { min: 120_000, p90: 6_000_000, p95: 11_000_000, p99: 20_000_000, max: 3_000_000_000 };
 
 /** Cheap deterministic noise (a linear congruential generator), so a story looks the same on every load. */
 function createRandom(seed: number) {
@@ -87,9 +88,9 @@ export function createFakeRunEsql({
     if (fail) throw new Error('verification_exception: Unknown index [traces-apm*]');
     if (query.includes('PERCENTILE')) {
       return {
-        columns: [...Object.keys(STATS), 'spans'].map((name) => ({ name })),
+        columns: [...Object.keys(STATS), 'spans'].map((name) => ({ name, type: 'long' })),
         values: [[...Object.values(STATS), spans]],
-      } as EsqlTable;
+      } as ESQLSearchResponse;
     }
     const binMs = Number(/TO_LONG\(@timestamp\) - \d+\) \/ (\d+)/.exec(query)?.[1] ?? 60_000);
     const bins = Math.ceil(3_600_000 / binMs);
@@ -105,6 +106,6 @@ export function createFakeRunEsql({
           values.push([xi, yi, cellSpans, Math.min(cellSpans, Math.round(cell.failed * share))]);
       }
     }
-    return { columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name })), values };
+    return { columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })), values };
   };
 }

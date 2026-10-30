@@ -13,7 +13,7 @@ import type { DurationStats, LatencyMapUnit, TraceSource } from '../types';
 import { ESQL_MAX_ROWS, LATENCY_MAP_INNER_ROWS, getLogDurationBounds } from './duration_rows';
 import type { TimeGrid } from './time_grid';
 import {
-  DURATION_US_COLUMN,
+  DURATION_COLUMN,
   FAILED_SPAN_CONDITION,
   IS_FAILED_COLUMN,
   NORMALIZE_COMMANDS,
@@ -35,13 +35,13 @@ export const MAP_SPAN_BUDGET = 500_000;
 export interface MapSampling {
   /** Share of the other spans read. */
   probability: number;
-  /** Spans from this duration (µs) on are read exactly. */
-  tailUs: number;
+  /** Spans from this duration (ns) on are read exactly. */
+  tail: number;
 }
 
 export function getMapSampling(stats: DurationStats): MapSampling | undefined {
   if (stats.spans <= MAP_SPAN_BUDGET) return undefined;
-  return { probability: MAP_SPAN_BUDGET / stats.spans, tailUs: stats.p95 };
+  return { probability: MAP_SPAN_BUDGET / stats.spans, tail: stats.p95 };
 }
 
 /** One part of a map query: the spans it reads, and the share of them it samples. */
@@ -52,8 +52,7 @@ export interface MapQueryPart {
 }
 
 /** The exact part and the sampled part, which together cover every span once. */
-export function getMapQueryParts({ probability, tailUs }: MapSampling): MapQueryPart[] {
-  const tail = Math.floor(tailUs);
+export function getMapQueryParts({ probability, tail }: MapSampling): MapQueryPart[] {
   return [
     { condition: `(${FAILED_SPAN_CONDITION} OR ${durationAtLeastCondition(tail)})` },
     { condition: `(${NOT_FAILED_CONDITION}) AND (${durationBelowCondition(tail)})`, probability },
@@ -103,7 +102,7 @@ function buildSpans(
   query.pipe(`WHERE ${conditions.map((condition) => `(${condition})`).join(' AND ')}`);
   if (part?.probability !== undefined) query.pipe(`SAMPLE ${part.probability}`);
   NORMALIZE_COMMANDS.forEach((command) => query.pipe(command));
-  query.pipe(`WHERE ${DURATION_US_COLUMN} > 0`);
+  query.pipe(`WHERE ${DURATION_COLUMN} > 0`);
   return query;
 }
 
@@ -111,19 +110,19 @@ function buildSpans(
 export function buildDurationStatsQuery(source: TraceSource): string {
   return buildSpans(source)
     .pipe(
-      `STATS min = MIN(${DURATION_US_COLUMN}), p90 = PERCENTILE(${DURATION_US_COLUMN}, 90), p95 = PERCENTILE(${DURATION_US_COLUMN}, 95), p99 = PERCENTILE(${DURATION_US_COLUMN}, 99), max = MAX(${DURATION_US_COLUMN}), spans = COUNT(*)`
+      `STATS min = MIN(${DURATION_COLUMN}), p90 = PERCENTILE(${DURATION_COLUMN}, 90), p95 = PERCENTILE(${DURATION_COLUMN}, 95), p99 = PERCENTILE(${DURATION_COLUMN}, 99), max = MAX(${DURATION_COLUMN}), spans = COUNT(*)`
     )
     .print('pipe-multiline');
 }
 
-/** The row of each span, the same binning as `rowToDurationUs`. */
+/** The row of each span, the same binning as `rowToDuration`. */
 function buildRowExpression(stats: DurationStats) {
   const { logMin, logMax } = getLogDurationBounds(stats);
   const inner = LATENCY_MAP_INNER_ROWS;
-  const logRow = `TO_INTEGER(FLOOR((LOG10(TO_DOUBLE(${DURATION_US_COLUMN})) - ${logMin}) / ${
+  const logRow = `TO_INTEGER(FLOOR((LOG10(TO_DOUBLE(${DURATION_COLUMN})) - ${logMin}) / ${
     logMax - logMin
   } * ${inner}))`;
-  return `CASE(${DURATION_US_COLUMN} >= ${stats.p99}, ${inner}, GREATEST(0, LEAST(${
+  return `CASE(${DURATION_COLUMN} >= ${stats.p99}, ${inner}, GREATEST(0, LEAST(${
     inner - 1
   }, ${logRow})))`;
 }
