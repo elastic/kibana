@@ -6,13 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import {
-  DURATION,
-  KIND,
-  PARENT_ID,
-  SPAN_ID,
-  TRANSACTION_ID,
-} from '../../../common/es_fields/apm';
+import { DURATION, KIND, PARENT_ID, SPAN_ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
 import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 // Use a small page size so tests don't need thousands of hits
