@@ -17,7 +17,10 @@ const POLL_INTERVAL_MS = 2_000;
 /** Polling stops after this long even if the execution has not finished. */
 const POLL_TIMEOUT_MS = 5 * 60_000;
 
-/** Polls a workflow execution until it reaches a terminal status, or for at most 5 minutes. */
+/**
+ * Polls a workflow execution until it reaches a terminal status, or for at most 5 minutes. Polling
+ * stops on the first error, for example when the user cannot read workflow executions.
+ */
 export const useWorkflowExecutionStatus = (executionId: string) => {
   const workflowsApi = useService(WorkflowApi);
   const [startedAt] = useState(() => Date.now());
@@ -26,8 +29,11 @@ export const useWorkflowExecutionStatus = (executionId: string) => {
     queryKey: workflowKeys.execution(executionId),
     queryFn: () => workflowsApi.getExecution(executionId, { omitStepExecutions: true }),
     refetchOnWindowFocus: false,
-    refetchInterval: (execution) =>
-      (execution && isTerminalStatus(execution.status)) || Date.now() - startedAt > POLL_TIMEOUT_MS
+    retry: false,
+    refetchInterval: (execution, query) =>
+      query.state.status === 'error' ||
+      (execution && isTerminalStatus(execution.status)) ||
+      Date.now() - startedAt > POLL_TIMEOUT_MS
         ? false
         : POLL_INTERVAL_MS,
   });
