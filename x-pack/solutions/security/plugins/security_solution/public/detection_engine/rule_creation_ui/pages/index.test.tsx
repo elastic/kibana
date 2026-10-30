@@ -79,6 +79,21 @@ describe('RuleFormAppHeader', () => {
     expect(run).toHaveBeenCalledTimes(1);
   });
 
+  it('renders the provided tabs and reports tab clicks', async () => {
+    const onClick = jest.fn();
+    renderHeader({
+      tabs: [
+        { id: 'define', label: 'Definition', isSelected: true, 'data-test-subj': 'defineTab' },
+        { id: 'about', label: 'About', onClick, 'data-test-subj': 'aboutTab' },
+      ],
+    });
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('aboutTab'));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it('does not render "Add to chat" when not provided', () => {
     renderHeader();
 

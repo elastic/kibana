@@ -7,6 +7,7 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiLink, EuiResizableContainer, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AppHeaderTab } from '@kbn/app-header';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -48,7 +49,6 @@ import * as ruleI18n from '../../../common/translations';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
 import * as i18n from './translations';
-import { RuleEditTabs } from './rule_edit_tabs';
 import { SecurityPageName } from '../../../../app/types';
 import { ruleStepsOrder } from '../../../common/utils';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
@@ -390,6 +390,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ]
   );
 
+  const headerTabs = useMemo<AppHeaderTab[]>(
+    () =>
+      tabs.map(({ id, name, disabled, tooltip, 'data-test-subj': dataTestSubj }) => ({
+        id,
+        label: name,
+        isSelected: id === activeStep,
+        onClick: () => setActiveStep(id),
+        disabled,
+        toolTipContent: tooltip,
+        'data-test-subj': dataTestSubj,
+      })),
+    [tabs, activeStep]
+  );
+
   const { startTransaction } = useStartTransaction();
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
@@ -593,8 +607,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           isRulePreviewVisible={isRulePreviewVisible}
           onToggleRulePreview={toggleRulePreview}
           addToChatAction={addToChatAction}
+          tabs={headerTabs}
         />
-        <EuiSpacer size="l" />
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
             collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
@@ -651,12 +665,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                           />
                         </EuiCallOut>
                       )}
-
-                      <RuleEditTabs
-                        tabs={tabs}
-                        activeStep={activeStep}
-                        onTabClick={setActiveStep}
-                      />
 
                       {tabs.map((tab) => tab.content)}
 
