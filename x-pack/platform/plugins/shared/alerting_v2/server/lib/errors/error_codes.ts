@@ -525,11 +525,6 @@ export const ALERTING_LOG_CODES = {
    * caller for that destination; the other destinations still run.
    */
   ACTION_POLICY_TEST_RUN_FAILED: 'ACTION_POLICY_TEST_RUN_FAILED',
-  /**
-   * A test notification could not be written to the audit log. The workflow test runs already
-   * started; only their audit record is missing.
-   */
-  ACTION_POLICY_TEST_AUDIT_FAILED: 'ACTION_POLICY_TEST_AUDIT_FAILED',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**

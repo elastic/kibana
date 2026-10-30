@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionPolicyClient } from '../action_policy_client';
@@ -68,8 +67,6 @@ const setup = ({
   };
   const licenseService = createMockLicenseService();
   const ebtService = createMockEbtService();
-  const coreSecurity = securityServiceMock.createStart();
-  const auditLogger = coreSecurity.audit.asScoped(request);
   const privilegeChecker = { canRunWorkflows: jest.fn().mockResolvedValue(canRunWorkflows) };
   const { loggerService } = createLoggerService();
 
@@ -78,7 +75,6 @@ const setup = ({
     workflowsManagement as unknown as WorkflowsServerPluginSetup['management'],
     licenseService,
     ebtService,
-    coreSecurity,
     privilegeChecker as unknown as PrivilegeChecker,
     MOCK_KIBANA_BASE_URL,
     SPACE_ID,
@@ -93,7 +89,6 @@ const setup = ({
     workflowsManagement,
     licenseService,
     ebtService,
-    auditLogger,
   };
 };
 
@@ -292,8 +287,8 @@ describe('ActionPolicyTestService', () => {
       expect(workflowsManagement.testWorkflow).not.toHaveBeenCalled();
     });
 
-    it('audits every destination and reports one telemetry event', async () => {
-      const { service, workflowsManagement, auditLogger, ebtService } = setup();
+    it('reports one telemetry event per send', async () => {
+      const { service, workflowsManagement, ebtService } = setup();
       workflowsManagement.testWorkflow
         .mockResolvedValueOnce('execution-1')
         .mockRejectedValueOnce(new Error('boom'));
@@ -304,25 +299,6 @@ describe('ActionPolicyTestService', () => {
         destinationIds: ['workflow-1', 'workflow-2'],
       });
 
-      expect(auditLogger.log).toHaveBeenCalledTimes(2);
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({
-            action: 'alerting_v2_action_policy_test_send',
-            outcome: 'success',
-          }),
-          kibana: {
-            space_id: SPACE_ID,
-            saved_object: { type: 'alerting_action_policy', id: 'policy-1' },
-          },
-        })
-      );
-      expect(auditLogger.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({ outcome: 'failure' }),
-          error: { code: 'Error', message: 'boom' },
-        })
-      );
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
       expect(ebtService.reportEvent).toHaveBeenCalledWith(ACTION_POLICY_TEST_SENT_EBT_EVENT_TYPE, {
         action_policy_id: 'policy-1',

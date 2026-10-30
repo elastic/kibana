@@ -15,13 +15,11 @@ import {
   type ActionPolicyTestSendResponse,
   type ActionPolicyTestSendResult,
 } from '@kbn/alerting-v2-schemas';
-import { CoreStart, Request } from '@kbn/core-di-server';
+import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ActionPolicyClient } from '../action_policy_client';
 import { DEFAULT_GROUPING } from '../dispatcher/constants';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
@@ -41,8 +39,6 @@ import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { getMatcherType } from '../telemetry/action_policy_ebt_event';
 import { ACTION_POLICY_TEST_SENT_EBT_EVENT_TYPE } from '../telemetry/action_policy_test_ebt_event';
 import { buildTestScenario } from './test_scenario_builder';
-
-const TEST_SEND_AUDIT_ACTION = 'alerting_v2_action_policy_test_send';
 
 const toErrorMessage = (error: unknown): string => (isError(error) ? error.message : String(error));
 
@@ -72,7 +68,6 @@ export class ActionPolicyTestService {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract,
-    @inject(CoreStart('security')) private readonly coreSecurity: SecurityServiceStart,
     @inject(PrivilegeChecker) private readonly privilegeChecker: PrivilegeChecker,
     @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
@@ -210,7 +205,6 @@ export class ActionPolicyTestService {
         spaceId: this.spaceId,
         request: this.request,
       });
-      this.audit(policyId, workflowId, { workflowExecutionId });
       return { workflow_id: workflowId, workflow_execution_id: workflowExecutionId };
     } catch (error) {
       this.logger.warn({
@@ -219,44 +213,7 @@ export class ActionPolicyTestService {
         code: ALERTING_LOG_CODES.ACTION_POLICY_TEST_RUN_FAILED,
         labels: { policy_id: policyId, workflow_id: workflowId, space_id: this.spaceId },
       });
-      this.audit(policyId, workflowId, { error });
       return { workflow_id: workflowId, error: toErrorMessage(error) };
-    }
-  }
-
-  private audit(
-    policyId: string,
-    workflowId: string,
-    outcome: { workflowExecutionId: string } | { error: unknown }
-  ): void {
-    const target = `action policy [id=${policyId}] to workflow [id=${workflowId}]`;
-    try {
-      this.coreSecurity.audit.asScoped(this.request).log({
-        message:
-          'error' in outcome
-            ? `User failed to send a test notification of ${target}`
-            : `User sent a test notification of ${target} [executionId=${outcome.workflowExecutionId}]`,
-        event: {
-          action: TEST_SEND_AUDIT_ACTION,
-          category: ['database'],
-          type: ['change'],
-          outcome: 'error' in outcome ? 'failure' : 'success',
-        },
-        kibana: {
-          space_id: this.spaceId,
-          saved_object: { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: policyId },
-        },
-        ...('error' in outcome
-          ? { error: { code: 'Error', message: toErrorMessage(outcome.error) } }
-          : {}),
-      });
-    } catch (error) {
-      this.logger.warn({
-        message: 'Failed to write the audit record of a test notification',
-        error,
-        code: ALERTING_LOG_CODES.ACTION_POLICY_TEST_AUDIT_FAILED,
-        labels: { policy_id: policyId, workflow_id: workflowId, space_id: this.spaceId },
-      });
     }
   }
 
