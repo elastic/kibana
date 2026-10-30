@@ -58,9 +58,9 @@ export const parseYamlChangelog = (
 
 export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => {
   return changelog.reduce<BreakingChangesLog>((acc, entry) => {
-    const breakingChanges = (entry.changes ?? []).filter(
+    const breakingChanges = (Array.isArray(entry?.changes) ? entry.changes : []).filter(
       (change): change is Change<ChangeType.BreakingChange> => {
-        return change.type === ChangeType.BreakingChange;
+        return change?.type === ChangeType.BreakingChange;
       }
     );
 

@@ -142,6 +142,25 @@ describe('breaking changes', () => {
       );
     });
 
+    it('should ignore invalid changelog entries', async () => {
+      const breakingChanges = await getBreakingChangesForUpgrade({
+        pkgName: 'test',
+        fromVersion: '1.0.0',
+        toVersion: '3.0.0',
+        archiveIterator: archiveIteratorWithChangelog(
+          'test',
+          '3.0.0',
+          `${CHANGELOG}
+- version: "2.5.0"
+  changes: {}
+- foo
+`
+        ),
+      });
+
+      expect(breakingChanges.map(({ version }) => version)).toEqual(['3.0.0', '2.0.0']);
+    });
+
     it('should read the changelog from the installed package assets when no archive is provided', async () => {
       jest.mocked(getAsset).mockResolvedValue({ data_utf8: CHANGELOG } as any);
 
@@ -277,6 +296,39 @@ describe('breaking changes', () => {
           breaking_changes: [
             expect.objectContaining({ version: '3.0.0' }),
             expect.objectContaining({ version: '2.0.0' }),
+          ],
+        },
+      });
+    });
+
+    it('should keep the breaking changes of different packages with the same version', async () => {
+      jest.mocked(getAsset).mockImplementation(
+        async ({ path }) =>
+          ({
+            data_utf8: CHANGELOG.replace(
+              /Removed the foo input\./,
+              `Removed ${path.split('-')[0]}.`
+            ),
+          } as any)
+      );
+
+      const promise = assertPackagePoliciesUpgradeAcknowledged([
+        packagePolicy('policy-1', 'pkga', '2.0.0'),
+        packagePolicy('policy-2', 'pkgb', '2.0.0'),
+        packagePolicy('policy-3', 'pkgb', '2.0.0'),
+      ]);
+
+      await expect(promise).rejects.toMatchObject({
+        attributes: {
+          breaking_changes: [
+            expect.objectContaining({
+              version: '3.0.0',
+              changes: [expect.objectContaining({ description: 'Removed pkga.' })],
+            }),
+            expect.objectContaining({
+              version: '3.0.0',
+              changes: [expect.objectContaining({ description: 'Removed pkgb.' })],
+            }),
           ],
         },
       });

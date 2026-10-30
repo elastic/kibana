@@ -50,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
     expect(body.attributes.type).equal('breaking_changes_not_acknowledged');
     expect(body.attributes.breaking_changes.map((entry: any) => entry.version)).eql(['2.0.0']);
     expect(body.message).contain('Remove the test input.');
-    expect(body.message).contain('Settings tab');
+    expect(body.message).contain('acknowledge_breaking_changes');
   };
 
   describe('upgrading packages with breaking changes', () => {

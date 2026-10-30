@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { isEqual, uniqWith } from 'lodash';
 import { parse } from 'yaml';
 import semverLte from 'semver/functions/lte';
 import semverLt from 'semver/functions/lt';
@@ -15,6 +15,7 @@ import {
   getBreakingChangesInRange,
   type BreakingChangesLog,
   type Changelog,
+  type ChangelogEntry,
 } from '../../../../common/services/changelog_utils';
 import { PackageBreakingChangesNotAcknowledgedError } from '../../../errors';
 import { appContextService } from '../../app_context';
@@ -28,6 +29,25 @@ export interface PackagePolicyBreakingChanges {
   toVersion: string;
   breakingChanges: BreakingChangesLog;
 }
+
+const isValidChangelogEntry = (entry: unknown): entry is ChangelogEntry => {
+  if (typeof entry !== 'object' || entry === null) {
+    return false;
+  }
+  const { version, changes } = entry as Partial<ChangelogEntry>;
+  return (
+    typeof version === 'string' &&
+    Array.isArray(changes) &&
+    changes.every(
+      (change) =>
+        typeof change === 'object' &&
+        change !== null &&
+        typeof change.type === 'string' &&
+        typeof change.description === 'string' &&
+        typeof change.link === 'string'
+    )
+  );
+};
 
 const getChangelogPath = (pkgName: string, pkgVersion: string) =>
   `${pkgName}-${pkgVersion}/changelog.yml`;
@@ -97,7 +117,7 @@ export async function getPackageChangelog(options: {
       return [];
     }
     const changelog = parse(changelogText);
-    return Array.isArray(changelog) ? changelog : [];
+    return Array.isArray(changelog) ? changelog.filter(isValidChangelogEntry) : [];
   } catch (error) {
     appContextService
       .getLogger()
@@ -147,7 +167,7 @@ export function formatBreakingChangesMessage({
     )
     .join('\n');
 
-  return `Upgrading ${pkgName} from ${fromVersion} to ${toVersion} includes breaking changes:\n${changes}\nReview the breaking changes and confirm the upgrade from the ${pkgName} integration Settings tab, or set acknowledge_breaking_changes to true.`;
+  return `Upgrading ${pkgName} from ${fromVersion} to ${toVersion} includes breaking changes:\n${changes}\nReview the breaking changes and confirm the upgrade from the ${pkgName} integration in Kibana, or set acknowledge_breaking_changes to true.`;
 }
 
 /**
@@ -244,9 +264,11 @@ export async function assertPackagePoliciesUpgradeAcknowledged(packagePolicies: 
   if (results.length > 0) {
     throw new PackageBreakingChangesNotAcknowledgedError(
       results.map((result) => packagePolicyBreakingChangesToError(result).message).join('\n\n'),
-      uniqBy(
+      // Policies of the same package share entries; entries of different packages are kept even
+      // when they have the same version.
+      uniqWith(
         results.flatMap(({ breakingChanges }) => breakingChanges),
-        'version'
+        isEqual
       )
     );
   }

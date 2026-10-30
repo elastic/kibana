@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../../../../../../types';
 import { ExperimentalFeaturesService } from '../../../../../../services';
 import { allowedExperimentalValues } from '../../../../../../../../../common/experimental_features';
+import { useChangelog } from '../../hooks';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
@@ -26,6 +27,10 @@ jest.mock('../../../../../../hooks', () => ({
   // Stubbed so opening the confirm modal never risks a real request; the actual upgrade call +
   // refresh are covered end-to-end by the shared hook via `package_policy_actions_menu.test.tsx`.
   sendBulkUpgradeAgentlessPolicies: jest.fn(),
+}));
+
+jest.mock('../../hooks', () => ({
+  useChangelog: jest.fn(),
 }));
 
 // These renders take ~45ms, so the 5s default only ever fails to a CI wall-clock stall.
@@ -60,6 +65,12 @@ function renderCell(props: Partial<React.ComponentProps<typeof PackagePolicyUpgr
 describe('PackagePolicyUpgradeCell', () => {
   beforeEach(() => {
     ExperimentalFeaturesService.init(allowedExperimentalValues);
+    jest.mocked(useChangelog).mockReturnValue({
+      changelog: [],
+      breakingChanges: null,
+      error: null,
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -108,6 +119,8 @@ describe('PackagePolicyUpgradeCell', () => {
 
       // The shared agentless-upgrade confirm modal is shown.
       expect(utils.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+      expect(useChangelog).toHaveBeenCalledWith('nginx', '0.5.0', '0.4.0');
+      expect(utils.queryByTestId('agentlessUpgradeBreakingChangesCallout')).not.toBeInTheDocument();
     });
   });
 });
