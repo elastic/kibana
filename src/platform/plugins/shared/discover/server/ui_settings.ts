@@ -31,7 +31,7 @@ import {
   SHOW_MULTIFIELDS,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-} from '@kbn/discover-utils';
+} from '@kbn/discover-utils/src/constants';
 import {
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS,

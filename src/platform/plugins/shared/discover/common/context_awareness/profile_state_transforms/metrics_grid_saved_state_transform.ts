@@ -8,7 +8,8 @@
  */
 
 import { DiscoverTabType } from '@kbn/discover-session-constants';
-import { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils/src/data_types/metrics/metrics_grid_settings';
+import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils/src/data_types/metrics/metrics_grid_sort';
 import { createProfileSavedStateTransform } from '../profile_state';
 import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_profile_state';
 
