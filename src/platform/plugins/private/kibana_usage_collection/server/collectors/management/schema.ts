@@ -539,6 +539,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:includeFrozenByDefault': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether built-in Agent Builder tools include frozen tier data by default.',
+    },
+  },
   'workflows:ui:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },

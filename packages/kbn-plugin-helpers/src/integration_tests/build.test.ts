@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Zlib from 'zlib';
 import { loadJsonFile } from '@kbn/utils';
 
 import execa from 'execa';
@@ -108,6 +109,15 @@ describe('scripts/generate_plugin', () => {
       "kibana/fooTestPlugin/tsconfig.json",
     ]
   `);
+
+    const mainBundle = Path.resolve(
+      TMP_DIR,
+      'kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js'
+    );
+    const compressedBundle = Fs.readFileSync(`${mainBundle}.br`);
+    expect(Zlib.brotliDecompressSync(compressedBundle).toString('utf-8')).toBe(
+      Fs.readFileSync(mainBundle, 'utf-8')
+    );
 
     expect(loadJsonFile(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
       .toMatchInlineSnapshot(`

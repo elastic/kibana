@@ -27,7 +27,6 @@ node scripts/build \
   --tar-zstd \
   --docker-images \
   --docker-tag-qualifier="$GIT_COMMIT" \
-  --docker-push \
   --skip-docker-ubi \
   --skip-docker-cloud-fips \
   --skip-docker-fips \
@@ -35,7 +34,9 @@ node scripts/build \
   --skip-docker-serverless \
   --skip-docker-contexts
 
-CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+CLOUD_IMAGE="$(kibana_ci_image_repository kibana-cloud):$VERSION-$GIT_COMMIT"
+retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$CLOUD_IMAGE"
 cat <<EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image
 
   Kibana cloud image: \`$CLOUD_IMAGE\`

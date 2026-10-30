@@ -34,14 +34,7 @@ source .buildkite/scripts/common/util.sh
   esac
   export GITHUB_TOKEN
 
-  KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  function docker_login() {
-      if (command -v docker && docker version) &> /dev/null; then
-        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-      fi
-  }
-  retry 5 15 docker_login
+  retry 5 15 docker_login_for_pipeline
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build

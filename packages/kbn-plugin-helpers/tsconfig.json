@@ -21,6 +21,7 @@
     "@kbn/repo-packages",
     "@kbn/stdio-dev-helpers",
     "@kbn/utils",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",
