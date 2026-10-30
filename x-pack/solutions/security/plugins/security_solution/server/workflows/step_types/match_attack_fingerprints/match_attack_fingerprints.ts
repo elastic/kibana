@@ -983,7 +983,7 @@ const applyDecision = (
   );
   for (const member of group.slice(1)) {
     attachments.push(
-      attachmentOf(member, decision.investigationId, false, false, false, false, spaceId, now)
+      attachmentOf(member, decision.investigationId, false, false, false, false, false, spaceId, now)
     );
   }
 };
