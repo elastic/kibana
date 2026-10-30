@@ -626,14 +626,83 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## ORCA benchmark
 
-`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v2`
+`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v3`
 against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
 controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
-time and the user-facing symptom, without the incident onset or an analysis window. The cluster
-holds all six days, so an agent can still read telemetry after the stated current time; each
-example records it as `metadata.current_time`. CI runs it as its own shard under the
-`evals:nightshift-investigations` label, next to the `customer0` shard that runs the smoke and
-trace-only evals, so each Scout server's telemetry connector points at one cluster.
+time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
+its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard
+that runs the smoke and trace-only evals, so each Scout server's telemetry connector points at
+one cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
+as a benchmark result again only after its windows end at detection time.
+
+Each example records `metadata.current_time`. The eval sends `telemetry_not_after`, five minutes
+later, on the investigation. That value is stored on the conversation and is not part of the
+agent prompt. While it is set, sandbox commands that call the telemetry connector go through a
+proxy in that investigation's sandbox: a query whose `@timestamp` lower bounds are all after the
+cutoff returns no rows, and an in-window ES|QL query is forwarded with `@timestamp <=` that
+instant. Customer-0 and smoke never set the field, so their telemetry reads are unchanged. Eight
+investigations run at once and each has its own cutoff, so the bound is not a cluster setting.
+
+ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
+evaluation connector. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
+4/5. ORCA also records three scores. RCA accuracy is 1 when the report names every flag in
+`metadata.plausible_flags`. A flag named without its variant still counts, and an extra cause
+does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
+them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
+Control passes an empty report and fails when a report places an incident inside
+`metadata.quiet_window`. A control is `metadata.control`, `metadata.task_type === "control"`,
+`metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination
+stay `n/a` on a control, including when its flag set is empty. Golden drops an empty metadata
+array on write, so the ten controls keep those markers and do not store `plausible_flags: []`.
+`rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It
+does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal.
+
+`nightshift/orca-sampled50-v3` copies `plausible_flags` from the public Harbor dataset
+`orca-bench/orca-bench` (`sha256:2add497ac2f93468dba1b83977c295a784c89031754e6a35520195345ad62ada`).
+A task matches when `sha256(case_id)` truncated to 16 hex characters is that task's package name
+and the task's `user_facing_issue` appears in the question. The copied value is the set of
+`events[].root_cause` keys, with duplicate events of the same key removed. The 32 non-medium
+incident tasks match and are in the paper's Verified view (the non-medium rows of the sampled
+tasks that the ORCA build keeps on the public side: 32 incidents and 8 controls). Those 8
+controls, and the 2 medium controls, have the official empty answer set. Golden drops an empty
+metadata array, so the release omits `plausible_flags` and the judges read the control markers.
+The 10 medium tasks are not in the public 755 and are not a paper tier. The 8 medium
+incident tasks have no official answer set, so `plausible_flags` is omitted and they stay out of
+any quoted ORCA accuracy or hallucination number:
+`d6-big-cartfailure-on-02-medium_ttd60m_range30m_off+10m`,
+`d5-ic2-adfailure-on-03-medium_ttd480m_at_off+10m`,
+`d3-d2dep-paymentfailure-10-02-medium_ttd480m_period_previous-period`,
+`d4-d3dep-paymentunreachable-on-03-medium_ttd1440m_day_same-day`,
+`d3-ic1-loadgeneratorfloodhomepage-on-02-medium_ttd60m_range30m_off+10m`,
+`d1-c1-admanualgc-on-02-medium_ttd15m_at_off+10m`,
+`d1-i1-imageslowload-on-02-medium_ttd480m_period_previous-period`,
+`d2-cc1-adfailure-on-02-medium_ttd1440m_day_same-day`.
+`nightshift/orca-sampled50-v2` is unchanged.
+
+The previous run of this pinned 50 is the 28 October 2026 Sonnet 4.6 investigation
+`bk-01a184b7-e436-462e-9b4b-015d32c3ae77` on `nightshift/orca-sampled50-v2`. Its mean `goal_pass`
+was 0.515. That number is not ORCA accuracy: the release had no plausible-flag set, so the ORCA
+scores were not available. The 42-question `goal_pass` numbers are a different eval. The latest
+stored run, 21 October 2026 `bk-01a1606b-fecd-479e-b2ae-eb4eedb78385` on
+`nightshift/orca-ech-full-20261019`, has mean `goal_pass` 0.875. A flag-query split on that eval,
+where 39 of 42 investigations touched `feature_flag.key` and mean `goal_pass` was about 0.89, is
+a correlation and is not ORCA accuracy.
+
+Do not compare these scores with the paper's published rates. This agent has ES|QL and does not
+have the Astronomy Shop source. The paper's agents have that repository and Grafana (Prometheus,
+Jaeger, OpenSearch). The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
+against 30.9% for the same model with code. The 40 matched tasks above are the Verified view, so
+a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
+paper's 25.3% and 10.0% are not like-for-like.
+
+The public 755 is a periodic run, not this CI shard. The `orcabench` shard budgets 240 minutes
+for 50 tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30
+minutes. Report that periodic run per tier. The 10 medium tasks in this 50 are their own line and
+are not a paper tier. Quote the other 40 against Verified only with the task-by-task match above.
+Executing the 755 is a later issue, after this judge is stable. Flag ablation, removing flag
+documents from the same agent and scoring with RCA accuracy, is also a later issue. The headline
+run keeps flag telemetry visible.
 
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and

@@ -19,7 +19,7 @@ const example = {
   id: 'example',
   input: { question: 'Investigate the incident.' },
   output: { reference_answer: 'The cause.' },
-  metadata: { case_id: 'incident' },
+  metadata: { case_id: 'incident', current_time: '2026-04-19T16:22:00.000Z' },
 };
 const dataset = {
   id: 'dataset',
@@ -47,6 +47,16 @@ describe('pinned ORCA release', () => {
     { ...dataset, examples: [{ ...example, metadata: { case_id: 'another-incident' } }] },
   ])('rejects drift in identity, coverage, questions, labels or metadata: %j', (changed) => {
     expect(() => validateOrcaDataset(changed, release)).toThrow();
+  });
+  it('rejects an example whose current_time is not a timestamp', () => {
+    const broken = {
+      ...example,
+      metadata: { ...example.metadata, current_time: 'not-a-time' },
+    };
+    const brokenRelease = { ...release, sha256: getOrcaDatasetHash([broken]) };
+    expect(() => validateOrcaDataset({ ...dataset, examples: [broken] }, brokenRelease)).toThrow(
+      /current_time/
+    );
   });
   it('ignores object key order while retaining all payload values', () => {
     const reordered = {

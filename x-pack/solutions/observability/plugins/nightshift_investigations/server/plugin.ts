@@ -32,6 +32,7 @@ import {
   NightshiftSettingsLocatorDefinition,
 } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
+import { readTelemetryNotAfter } from './client/investigation_conversation';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
@@ -343,6 +344,14 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            readTelemetryNotAfter: async (request, conversationId) => {
+              const agentBuilderStart = this.agentBuilder;
+              if (!agentBuilderStart) return undefined;
+              const conversations = await agentBuilderStart.conversations.getScopedClient({
+                request,
+              });
+              return readTelemetryNotAfter(conversations, conversationId);
+            },
             logger: sandboxLogger,
           })
         );
