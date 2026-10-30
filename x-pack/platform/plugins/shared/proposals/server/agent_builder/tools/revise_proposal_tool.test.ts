@@ -79,7 +79,7 @@ describe('reviseProposalTool', () => {
     );
   });
 
-  it('revises the live head when the given id is an earlier link in the chain', async () => {
+  it('applies an impact change to the live head when the given id is an earlier link in the chain', async () => {
     const getLatestRevision = jest
       .fn()
       .mockResolvedValue({ proposalId: 'proposal-2', revision: 2, status: 'pending' });
@@ -99,6 +99,64 @@ describe('reviseProposalTool', () => {
       proposalId: 'proposal-3',
       supersedes: 'proposal-2',
     });
+  });
+
+  describe('when the given id is no longer the head', () => {
+    const newerHead = () =>
+      jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2, status: 'pending' });
+
+    it('refuses an actionInput built from the older revision, so a newer one is not undone', async () => {
+      const revise = jest.fn();
+      const result = await run(createDependencies({ getLatestRevision: newerHead(), revise }), {
+        proposalId: 'proposal-1',
+        actionInput: { alertIds: ['a', 'b'] },
+      });
+
+      expect(revise).not.toHaveBeenCalled();
+      const error = JSON.stringify(result.results[0]);
+      expect(error).toContain('changed since you read it');
+      expect(error).toContain('revision 2 (Proposal ID: proposal-2)');
+    });
+
+    it('refuses a comment built from the older revision', async () => {
+      const revise = jest.fn();
+      const result = await run(createDependencies({ getLatestRevision: newerHead(), revise }), {
+        proposalId: 'proposal-1',
+        comment: 'Rewritten from revision 1',
+      });
+
+      expect(revise).not.toHaveBeenCalled();
+      expect(JSON.stringify(result.results[0])).toContain('changed since you read it');
+    });
+
+    it('still applies a title, impact or confidence change to the head', async () => {
+      const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-3', revision: 3 });
+      await run(createDependencies({ getLatestRevision: newerHead(), revise }), {
+        proposalId: 'proposal-1',
+        title: 'Renamed',
+        confidence: 'low',
+      });
+
+      expect(revise).toHaveBeenCalledWith(
+        { id: 'proposal-2', title: 'Renamed', confidence: 'low' },
+        'default',
+        requestMock
+      );
+    });
+  });
+
+  it('applies an actionInput change when the given id is the head', async () => {
+    const revise = jest.fn().mockResolvedValue({ proposalId: 'proposal-2', revision: 2 });
+    await run(createDependencies({ revise }), {
+      proposalId: 'proposal-1',
+      actionInput: { alertIds: ['a'] },
+    });
+
+    expect(revise).toHaveBeenCalledWith(
+      { id: 'proposal-1', actionInput: { alertIds: ['a'] } },
+      'default',
+      requestMock
+    );
   });
 
   it('returns the new revision id, revision number, status, and the supersedes pointer', async () => {

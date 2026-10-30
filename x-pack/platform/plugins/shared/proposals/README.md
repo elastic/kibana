@@ -625,6 +625,12 @@ all unchanged parameters, and update prose and input together. Agent Builder
 automatically renders the new pending revision. The skill directs attachment
 lookup through `attachments.list` and `attachments.read`. Superseding does not
 dismiss, approve, or execute a proposal.
+The agent passes the id of the revision it read. A comment or action input change
+is refused with a conflict when that revision is no longer the latest, because the
+agent built it from the older revision, and applying it to the latest would undo
+whatever another writer (a workflow, another analyst) changed since. The agent then
+reads the latest revision and applies the request to it. Title, impact and
+confidence changes still go to the latest revision.
 Because the chat displays the revision history, comment edits must stay localized:
 copy unaffected text and Markdown verbatim, preserving title styling and layout.
 Do not add sections or rewrite existing passages unless explicitly requested.
@@ -656,7 +662,9 @@ the default Elastic AI agent without manually assigned proposal tools:
    it awaits a human decision. Any attachment verification uses `attachments.list`
    and `attachments.read` with a listed attachment ID. Repeat by referencing the
    older card: the agent should read the current revision and preserve the first
-   edit in its next one.
+   edit in its next one. If it revises the older card's id, the tool refuses with
+   "changed since you read it", and the agent should then read the latest revision
+   and retry.
 
 Also exercise a comment-only edit, a superseded chain, and a decided/expired
 proposal. The latter must not produce a new revision. This live-model evaluation

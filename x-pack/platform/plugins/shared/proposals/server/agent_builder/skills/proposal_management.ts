@@ -50,8 +50,9 @@ does not increment revision; never initiate a retry through this skill.
 2. Inspect status, decision, expired, rootProposalId, revision, supersedes, and
    supersededBy. Missing optional history fields on older records are not values
    to invent. If supersededBy is present, locate and read that proposal's attachment
-   and repeat until you reach the current revision. Do not base edits on an older
-   revision merely because the tool can resolve its ID to the latest one.
+   and repeat until you reach the current revision. The revision tool refuses a
+   comment or actionInput change based on an older revision, because another writer
+   may have changed the proposal since.
 3. Revise only a pending, undecided, unexpired proposal at the analyst's request.
    Before calling the revision tool, copy the ID value from \`Proposal ID: <id>\` in the current
    revision's read result into its \`proposalId\` argument and check the values match
@@ -82,7 +83,8 @@ does not increment revision; never initiate a retry through this skill.
 - Keep actionWorkflowId unchanged: a different action is not a revision.
 - Call platform.proposals.revise with the verified proposalId and edits.
   On a conflict or stale context, reread the current revision before proposing edits
-  again; do not blindly repeat a write whose outcome is uncertain.
+  again, and apply the analyst's request to that revision's comment and actionInput;
+  do not blindly repeat a write whose outcome is uncertain.
 
 ### Example: change an action parameter
 

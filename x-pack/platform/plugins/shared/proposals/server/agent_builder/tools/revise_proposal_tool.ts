@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -18,6 +18,7 @@ import {
   proposalImpactSchema,
 } from '@kbn/proposals-common';
 import type { ProposalsService } from '../../services/proposals_service';
+import { ProposalConflictError } from '../../services/errors';
 import type { ProposalPrivilegesChecker } from '../../services/check_proposal_privileges';
 
 interface ReviseProposalToolDependencies {
@@ -25,34 +26,36 @@ interface ReviseProposalToolDependencies {
   privileges: Pick<ProposalPrivilegesChecker, 'assertCanManage'>;
 }
 
-const reviseProposalSchema = z.object({
-  proposalId: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe(
-      'The id of the proposal being replaced. Any id in a revision chain works, not only the root — the live head is resolved before the revision is appended.'
-    ),
-  title: z
-    .string()
-    .max(MAX_TITLE_LENGTH)
-    .optional()
-    .describe("Override for the proposal's short plain-text title. Omit to keep the original."),
-  comment: z
-    .string()
-    .max(8192)
-    .optional()
-    .describe(
-      'Complete replacement Markdown for the analyst-facing proposal, not a change summary. Read the current revision first and make only localized edits required by the request. Copy unaffected text and Markdown verbatim, preserving title styling, heading levels, section order, lists, tables, and existing rationale and warnings. Do not reformat, rewrite, or add sections such as Rationale or Safety notes unless explicitly requested. All revisions remain visible in chat and should read as the same proposal with small adjustments. Pass the entire updated comment. Omit only if the existing comment remains accurate.'
-    ),
-  actionInput: boundedActionInput
-    .optional()
-    .describe(
-      "Read the current revision's actionInput, preserve unchanged fields, and send the complete updated object. Keep the comment consistent with it. The server shallow-merges these top-level keys over the original; nested objects and arrays are replaced, not deep-merged, and omitted keys are retained. Omit actionInput to keep it unchanged. The merged input is validated against the action workflow."
-    ),
-  impact: proposalImpactSchema.optional().describe('Override for the impact rating.'),
-  confidence: proposalConfidenceSchema.optional().describe('Override for the confidence rating.'),
-});
+const reviseProposalSchema = lazySchema(() =>
+  z.object({
+    proposalId: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe(
+        'The id of the revision you read, from its `Proposal ID: <id>` line. A change to comment or actionInput is refused when that revision is no longer the latest; read the latest revision and apply the change to it. Other overrides are applied to the latest revision.'
+      ),
+    title: z
+      .string()
+      .max(MAX_TITLE_LENGTH)
+      .optional()
+      .describe("Override for the proposal's short plain-text title. Omit to keep the original."),
+    comment: z
+      .string()
+      .max(8192)
+      .optional()
+      .describe(
+        'Complete replacement Markdown for the analyst-facing proposal, not a change summary. Read the current revision first and make only localized edits required by the request. Copy unaffected text and Markdown verbatim, preserving title styling, heading levels, section order, lists, tables, and existing rationale and warnings. Do not reformat, rewrite, or add sections such as Rationale or Safety notes unless explicitly requested. All revisions remain visible in chat and should read as the same proposal with small adjustments. Pass the entire updated comment. Omit only if the existing comment remains accurate.'
+      ),
+    actionInput: boundedActionInput
+      .optional()
+      .describe(
+        "Read the current revision's actionInput, preserve unchanged fields, and send the complete updated object. Keep the comment consistent with it. The server shallow-merges these top-level keys over the original; nested objects and arrays are replaced, not deep-merged, and omitted keys are retained. Omit actionInput to keep it unchanged. The merged input is validated against the action workflow."
+      ),
+    impact: proposalImpactSchema.optional().describe('Override for the impact rating.'),
+    confidence: proposalConfidenceSchema.optional().describe('Override for the confidence rating.'),
+  })
+);
 
 /**
  * Replaces a pending proposal with a modified copy at an analyst's request.
@@ -85,9 +88,20 @@ export const reviseProposalTool = ({
 
       const service = getProposalsService();
 
-      // The schema accepts any id in the chain, but `revise()` refuses a
-      // superseded one, so a model holding the original id needs the head.
-      const { proposalId: liveProposalId } = await service.getLatestRevision(proposalId, spaceId);
+      // `revise()` refuses a superseded id, so a model holding an older id needs the head.
+      const { proposalId: liveProposalId, revision: liveRevision } =
+        await service.getLatestRevision(proposalId, spaceId);
+
+      // comment and actionInput replace the head's whole document and arrays, and the model built
+      // them from the revision it read. Applied to a newer head, they would silently undo whatever
+      // another writer changed since.
+      const rebuildsContent =
+        overrides.comment !== undefined || overrides.actionInput !== undefined;
+      if (rebuildsContent && liveProposalId !== proposalId) {
+        throw new ProposalConflictError(
+          `Proposal [${proposalId}] changed since you read it: revision ${liveRevision} (Proposal ID: ${liveProposalId}) is now the latest. Read that revision and apply the requested change to it.`
+        );
+      }
 
       const { proposalId: newProposalId, revision } = await service.revise(
         { id: liveProposalId, ...overrides },
