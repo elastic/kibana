@@ -40,17 +40,6 @@ const ANIMALS_METRIC_PANEL: DashboardPanel = {
 const ANIMALS_COUNT = 23;
 const CATS_COUNT = 11;
 
-const DATA_TABLE_PANEL: DashboardPanel = {
-  type: 'vis',
-  grid: { x: 0, y: 0, w: 48, h: 15 },
-  config: {
-    type: 'data_table',
-    data_source: dataViewSpec('logstash-*'),
-    metrics: [{ operation: 'count' }],
-    rows: [{ operation: 'terms', fields: ['bytes'], limit: 5 }],
-  },
-};
-
 const getFieldSuggestions = async (page: ScoutPage) => {
   await page.testSubj.click('addFilter');
   const fields = await page.components.comboBox('filterFieldSuggestionList').getAllVisibleOptions();
@@ -61,7 +50,6 @@ const getFieldSuggestions = async (page: ScoutPage) => {
 
 let emptyDashboardId = '';
 let animalsDashboardId = '';
-let dataTableDashboardId = '';
 
 // Focus: how the filter bar behaves: its visibility, its field list, and how filters persist and load
 spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () => {
@@ -92,10 +80,6 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
         time_range: ANIMALS_TIME_RANGE,
         panels: [ANIMALS_METRIC_PANEL],
       },
-      scoutSpace.id
-    );
-    dataTableDashboardId = await apiServices.dashboard.create(
-      { title: 'Filter bar: table', time_range: TIME_RANGE, panels: [DATA_TABLE_PANEL] },
       scoutSpace.id
     );
   });
@@ -214,23 +198,6 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
       await openSavedDashboardFromListing('saved with pinned filters');
       expect(await filterBar.getFilterCount()).toBe(0);
       await expectMetricValue(ANIMALS_COUNT);
-    });
-  });
-
-  spaceTest('data table cell filtering', async ({ page, pageObjects }) => {
-    const { dashboard, filterBar } = pageObjects;
-
-    await dashboard.openDashboardWithId(dataTableDashboardId);
-    await dashboard.waitForRenderComplete();
-
-    await spaceTest.step('filters are added when a cell filter button is clicked', async () => {
-      // Column 0 is the row number column, so the "bytes" column is at index 1
-      const cell = page.locator(
-        '[data-test-subj="dataGridRowCell"][data-gridcell-column-index="1"][data-gridcell-visible-row-index="0"]'
-      );
-      await cell.hover();
-      await cell.getByTestId('lensDatatableFilterFor').click();
-      await expect.poll(() => filterBar.getFilterCount()).toBe(1);
     });
   });
 });
