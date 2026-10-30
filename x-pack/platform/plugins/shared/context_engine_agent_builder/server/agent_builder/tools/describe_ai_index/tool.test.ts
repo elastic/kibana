@@ -51,10 +51,11 @@ describe('describe_ai_index tool', () => {
     readService.describe.mockResolvedValue({ response: '# AI index: runbooks' });
 
     const result = await createDescribeAiIndexTool(deps).handler(
-      { ai_index_id: 'runbooks' },
+      { ai_index_id: 'runbooks', user_id: 'alice' },
       agentBuilderMocks.tools.createHandlerContext()
     );
 
+    expect(readService.describe).toHaveBeenCalledWith('runbooks', { userId: 'alice' });
     expect(result).toEqual({
       results: [{ type: ToolResultType.other, data: { response: '# AI index: runbooks' } }],
     });

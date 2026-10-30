@@ -163,6 +163,17 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
+    it('passes the user scope through', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndex);
+      describeAiIndexMock.mockResolvedValue(contextBlock);
+
+      await service.describe('support', { userId: 'alice' });
+
+      expect(describeAiIndexMock).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'marketing', userId: 'alice' })
+      );
+    });
+
     it('does not describe an entry the caller cannot read', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
       probeAiIndicesMock.mockResolvedValue([

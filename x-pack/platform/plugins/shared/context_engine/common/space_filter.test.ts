@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AI_INDEX_PRIVILEGES_PATH, buildAiIndexSpaceFilter } from './space_filter';
+import {
+  AI_INDEX_PRIVILEGES_PATH,
+  buildAiIndexReadFilter,
+  buildAiIndexSpaceFilter,
+  buildAiIndexUserFilter,
+} from './space_filter';
 
 describe('buildAiIndexSpaceFilter', () => {
   it('matches documents scoped to the space or to the global wildcard', () => {
@@ -40,6 +45,36 @@ describe('buildAiIndexSpaceFilter', () => {
           },
         ],
         minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('buildAiIndexUserFilter', () => {
+  it('matches documents without a user_id or with the given one', () => {
+    expect(buildAiIndexUserFilter('alice')).toEqual({
+      bool: {
+        should: [
+          { bool: { must_not: { exists: { field: 'user_id' } } } },
+          { term: { user_id: 'alice' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('buildAiIndexReadFilter', () => {
+  it('is the space filter alone without a user id', () => {
+    expect(buildAiIndexReadFilter({ spaceId: 'marketing' })).toEqual(
+      buildAiIndexSpaceFilter('marketing')
+    );
+  });
+
+  it('requires both the space and user filters with a user id', () => {
+    expect(buildAiIndexReadFilter({ spaceId: 'marketing', userId: 'alice' })).toEqual({
+      bool: {
+        filter: [buildAiIndexSpaceFilter('marketing'), buildAiIndexUserFilter('alice')],
       },
     });
   });

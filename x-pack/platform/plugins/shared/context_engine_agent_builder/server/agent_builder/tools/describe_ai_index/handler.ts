@@ -12,12 +12,14 @@ import { getAiIndexDataReadServiceForUser, type AiIndexToolDeps } from '../ai_in
 export const describeAiIndexHandler = async ({
   deps,
   aiIndexId,
+  userId,
   context: { esClient, request },
 }: {
   deps: AiIndexToolDeps;
   aiIndexId: string;
+  userId?: string;
   context: Pick<ToolHandlerContext, 'esClient' | 'request'>;
 }): Promise<DescribeAiIndexResponse> => {
   const readService = await getAiIndexDataReadServiceForUser({ deps, esClient, request });
-  return readService.describe(aiIndexId);
+  return readService.describe(aiIndexId, { userId });
 };

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
-import { MAX_AI_INDEX_ID_LENGTH, MAX_KI_CONTENT_LENGTH } from '../constants';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
+import {
+  MAX_AI_INDEX_ID_LENGTH,
+  MAX_AI_INDEX_USER_ID_LENGTH,
+  MAX_KI_CONTENT_LENGTH,
+} from '../constants';
 
 export const MAX_KI_ID_LENGTH = 512;
 export const MAX_KI_TYPE_LENGTH = 256;
@@ -103,63 +107,76 @@ export const omitNullKiAttributes = <
  * A Knowledge Indicator (KI) document. Fields mirror the base AI index
  * mappings (`ai-index@mappings`).
  */
-export const kiFieldsSchema = z.object({
-  type: z
-    .string()
-    .min(1)
-    .max(MAX_KI_TYPE_LENGTH)
-    .describe('The KI type (e.g. index_metadata, document, detection)'),
-  title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short title for the KI'),
-  description: z
-    .string()
-    .max(MAX_KI_DESCRIPTION_LENGTH)
-    .optional()
-    .describe('A one-line description of the KI'),
-  content: z
-    .string()
-    .max(MAX_KI_CONTENT_LENGTH)
-    .optional()
-    .describe('The knowledge content of the KI'),
-  tags: z
-    .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
-    .max(MAX_KI_TAGS)
-    .optional()
-    .describe('Tags used to categorize the KI'),
-  attributes: z
-    .record(
-      z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH),
-      z.union([
-        z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH),
-        z.number(),
-        z.boolean(),
-        z.array(z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH)).max(MAX_KI_ATTRIBUTE_ARRAY_VALUES),
-        // A `null` value omits the attribute, so a workflow can write `${{ value | default: nil }}`
-        // for an attribute that only sometimes applies (an `esql` list that came back empty).
-        z.null(),
-      ])
-    )
-    .refine((attrs) => Object.keys(attrs).length <= MAX_KI_ATTRIBUTES, {
-      message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
-    })
-    .transform(omitNullAttributes)
-    .optional()
-    .describe(
-      'Arbitrary key-value attributes attached to the KI. A null value omits the attribute.'
-    ),
-  references: z
-    .array(kiReferenceSchema)
-    .max(MAX_KI_REFERENCES)
-    .optional()
-    .describe('URIs this KI relates to'),
-  expires_at: isoDateTime({ offset: true })
-    .optional()
-    .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
-});
+export const kiFieldsSchema = lazySchema(() =>
+  z.object({
+    user_id: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_USER_ID_LENGTH)
+      .optional()
+      .describe('The user the KI is scoped to. Unset means shared with every user'),
+    type: z
+      .string()
+      .min(1)
+      .max(MAX_KI_TYPE_LENGTH)
+      .describe('The KI type (e.g. index_metadata, document, detection)'),
+    title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short title for the KI'),
+    description: z
+      .string()
+      .max(MAX_KI_DESCRIPTION_LENGTH)
+      .optional()
+      .describe('A one-line description of the KI'),
+    content: z
+      .string()
+      .max(MAX_KI_CONTENT_LENGTH)
+      .optional()
+      .describe('The knowledge content of the KI'),
+    tags: z
+      .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
+      .max(MAX_KI_TAGS)
+      .optional()
+      .describe('Tags used to categorize the KI'),
+    attributes: z
+      .record(
+        z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH),
+        z.union([
+          z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH),
+          z.number(),
+          z.boolean(),
+          z.array(z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH)).max(MAX_KI_ATTRIBUTE_ARRAY_VALUES),
+          // A `null` value omits the attribute, so a workflow can write `${{ value | default: nil }}`
+          // for an attribute that only sometimes applies (an `esql` list that came back empty).
+          z.null(),
+        ])
+      )
+      .refine((attrs) => Object.keys(attrs).length <= MAX_KI_ATTRIBUTES, {
+        message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
+      })
+      .transform(omitNullAttributes)
+      .optional()
+      .describe(
+        'Arbitrary key-value attributes attached to the KI. A null value omits the attribute.'
+      ),
+    references: z
+      .array(kiReferenceSchema)
+      .max(MAX_KI_REFERENCES)
+      .optional()
+      .describe('URIs this KI relates to'),
+    expires_at: isoDateTime({ offset: true })
+      .optional()
+      .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
+  })
+);
 
-/** The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry. */
-export const kiPartialFieldsSchema = kiFieldsSchema.partial().extend({
-  expires_at: kiFieldsSchema.shape.expires_at.nullable(),
-});
+/**
+ * The subset of KI fields that can be changed by an update. A null `expires_at` clears the expiry;
+ * `user_id` is fixed at creation.
+ */
+export const kiPartialFieldsSchema = lazySchema(() =>
+  kiFieldsSchema.omit({ user_id: true }).partial().extend({
+    expires_at: kiFieldsSchema.shape.expires_at.nullable(),
+  })
+);
 
 export type KiFields = z.infer<typeof kiFieldsSchema>;
 export type KiPartialFields = z.infer<typeof kiPartialFieldsSchema>;
