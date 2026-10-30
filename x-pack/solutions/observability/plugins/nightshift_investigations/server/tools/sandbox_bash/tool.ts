@@ -183,8 +183,7 @@ export const createSandboxBashTool = ({
         };
       }
       credentialEnv = resolved.env;
-      secretEnvKeys =
-        (resolved as { secretEnvKeys?: SecretEnvKey[] }).secretEnvKeys ?? [];
+      secretEnvKeys = (resolved as { secretEnvKeys?: SecretEnvKey[] }).secretEnvKeys ?? [];
       secretValues = resolved.secretValues;
     }
 

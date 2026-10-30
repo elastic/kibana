@@ -93,7 +93,9 @@ describe('SandboxAllowlistSection', () => {
   it('saves the normalized hosts and DSL rules', async () => {
     renderSection();
 
-    typeHosts('api.github.com\nUploads.GitHub.com.\n*.datadoghq.com\ndeny api.github.com POST /gists\nbücher.example');
+    typeHosts(
+      'api.github.com\nUploads.GitHub.com.\n*.datadoghq.com\ndeny api.github.com POST /gists\nbücher.example'
+    );
     fireEvent.click(screen.getByTestId('nightshiftSandboxAllowlistSave'));
 
     await waitFor(() =>

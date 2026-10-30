@@ -78,7 +78,7 @@ describe('SandboxAllowlistClient', () => {
   });
 });
 
-  describe('sandboxAllowlistUiSetting schema', () => {
+describe('sandboxAllowlistUiSetting schema', () => {
   const { schema } = sandboxAllowlistUiSetting[OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST];
 
   it('accepts a normalized list of hosts and DSL rules', () => {
