@@ -135,7 +135,7 @@ Two hard rows force those paths without touching the product:
   generator never emits. The loader drops the overflow, the coordinator records an
   `input_truncated` gap, and because that gap is deterministic (no retry can make the report
   smaller) the hunt ends `incomplete_final` and emits `retired_incomplete`: evidence is written as
-  incomplete, packaging closes the Investigation as `benign` with the retired summary, and the
+  incomplete, packaging closes the Investigation as `other` with the retired summary, and the
   narrative has to say part of the report was not searched.
   `seed_contract.test.ts` reads the bound from the Worker source so a change to it fails in Jest
   first.
@@ -259,7 +259,7 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
 
 ## Known Worker behavior pinned by the datasets
 
-- No-hit rows end `completed` with the Investigation `closed` / `close_reason: benign`, and the
+- No-hit rows end `completed` with the Investigation `closed` / `close_reason: benign` (`other` for the retired row), and the
   gate's resumed close writes `closed` / `resolved`. Both depend on the Worker's in-process
   `ai.conversation.metadata.patch` being allowed to patch a conversation the service account owns
   (Public conversation access, #297385). Before that landed the clean rows pinned `partial` at

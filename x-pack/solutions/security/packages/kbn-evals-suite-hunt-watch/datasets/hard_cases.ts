@@ -149,7 +149,7 @@ export const hardCases: HuntWatchExample[] = [
   {
     // One IOC over `MAX_HUNT_REPORT_IOCS`: the coordinator hunts the prefix and records the rest as
     // `input_truncated`, a gap no later run can close, so the hunt child emits `retired_incomplete`,
-    // packaging closes the Investigation as benign with the retired summary, the report retires
+    // packaging closes the Investigation as `other` with the retired summary, the report retires
     // with evidence marked incomplete, and the branch ends `completed`.
     id: 'hard-partial-ioc-dump',
     cohort: 'hard',

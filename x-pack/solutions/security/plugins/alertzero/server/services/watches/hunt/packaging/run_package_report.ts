@@ -149,9 +149,8 @@ const buildNoHitClosureSummary = ({
   const unsearched = gapPhrase
     ? `${gapPhrase} left part of the report unsearched`
     : 'part of the report could not be searched';
-  const cannotClose = gapPhrase === '1 gap' ? 'it' : 'them';
   const named = gapDescription ? ` Not searched: ${gapDescription}.` : '';
-  return `${found}, but ${unsearched} and a later run cannot close ${cannotClose}.${named} Closing: the report is retired without a full search.`;
+  return `${found}, but ${unsearched}.${named} Closing: the report is retired without a full search.`;
 };
 
 /**
