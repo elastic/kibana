@@ -15,7 +15,7 @@ import { getEsqlColumns } from '@kbn/esql-utils';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { FormValues } from '../../../form/types';
-import { EsqlQuerySummarySection } from './esql_query_summary_section';
+import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useComposeDiscoverTimeField } from '../use_compose_discover_time_field';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
@@ -46,11 +46,21 @@ export function AlertConditionStep({
 
   // Committed pipeline query for output-column lookup and STATS BY auto-populate.
   const committedQuery = useMemo(
-    () => getTimeFieldResolutionQuery(query, isAlert, state.queryCommitted),
-    [query, isAlert, state.queryCommitted]
+    () => getTimeFieldResolutionQuery(query, state.queryCommitted),
+    [query, state.queryCommitted]
   );
 
-  const { timeFieldOptions, isTimeFieldResolved } = useComposeDiscoverTimeField();
+  const { timeFieldOptions, isTimeFieldResolved, isResolvingTimeField } =
+    useComposeDiscoverTimeField();
+  // Resolution reports unresolved while the date fields are still loading.
+  // Showing that as a validation error flashes the time field on every remount.
+  const timeFieldInvalid = !isResolvingTimeField && !isTimeFieldResolved;
+
+  // Time field and grouping depend on a resolved query. Disable them until a
+  // non-empty query is committed (no committed query, or committed-but-empty).
+  const summaryState = getEsqlSummaryState(state.queryCommitted, query);
+  const hasUsableQuery = summaryState !== 'before_apply' && summaryState !== 'empty';
+  const queryDependentFieldsDisabled = state.childOpen || !hasUsableQuery;
 
   // When the current field isn't on the index (no date fields, or a stored
   // `@timestamp` that doesn't exist), show a blank selection + invalid state so
@@ -80,9 +90,15 @@ export function AlertConditionStep({
    * Auto-populate group fields from the STATS BY clause whenever the committed
    * query changes. Re-derives on every new Apply so switching indices updates
    * the group fields instead of leaving stale values from the previous query.
-   * Skips the first run when editing to preserve API-seeded grouping defaults.
+   * In edit mode the first non-empty query is the saved rule: seed the ref
+   * during render so that query is never treated as a change. Capturing an
+   * empty first paint (the flyout remounts before watch() has the query)
+   * would otherwise re-seed and drop the user's group fields.
    */
-  const autoPopulatedForRef = useRef<string | null>(isEditing ? committedQuery : null);
+  const autoPopulatedForRef = useRef<string | null>(null);
+  if (isEditing && autoPopulatedForRef.current === null && committedQuery) {
+    autoPopulatedForRef.current = committedQuery;
+  }
   useEffect(() => {
     if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
@@ -145,9 +161,9 @@ export function AlertConditionStep({
           defaultMessage: 'Time field',
         })}
         fullWidth
-        isInvalid={!isTimeFieldResolved}
+        isInvalid={timeFieldInvalid}
         error={
-          !isTimeFieldResolved ? (
+          timeFieldInvalid ? (
             <span data-test-subj="composeDiscoverTimeFieldError">
               {i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldError', {
                 defaultMessage:
@@ -163,9 +179,9 @@ export function AlertConditionStep({
           options={timeFieldOptions}
           value={currentTimeFieldIsOption ? timeField : ''}
           hasNoInitialSelection={!currentTimeFieldIsOption}
-          isInvalid={!isTimeFieldResolved}
+          isInvalid={timeFieldInvalid}
           onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
-          disabled={state.childOpen}
+          disabled={queryDependentFieldsDisabled}
           data-test-subj="composeDiscoverTimeField"
         />
       </EuiFormRow>
@@ -179,6 +195,7 @@ export function AlertConditionStep({
         <EuiComboBox
           compressed
           fullWidth
+          isDisabled={queryDependentFieldsDisabled}
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>

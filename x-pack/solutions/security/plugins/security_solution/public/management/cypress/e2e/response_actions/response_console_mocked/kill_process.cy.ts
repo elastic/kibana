@@ -53,11 +53,13 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         killProcessRequestResponse = responseBody;
       }, 'kill-process');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('kill-process is pending').should('exist');
       cy.wait('@kill-process').then(() => {
-        sendActionResponse(killProcessRequestResponse);
+        sendActionResponse(killProcessRequestResponse, {
+          responseCode: 'ra_kill-process_success_done',
+        });
       });
-      cy.contains('Action completed successfully', { timeout: 120000 }).should('exist');
+      cy.contains('Killed', { timeout: 120000 }).should('exist');
     });
   });
 });

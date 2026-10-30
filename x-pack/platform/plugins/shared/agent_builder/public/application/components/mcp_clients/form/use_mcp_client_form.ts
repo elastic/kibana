@@ -65,22 +65,22 @@ const remoteRedirectUriSchema = z.object({
     }),
 });
 
+const redirectUrisSchema = <TUri extends z.ZodType>(uriSchema: TUri) =>
+  z
+    .array(uriSchema)
+    .min(1, mcpClientI18nMessages.redirectUri.requiredError)
+    .max(OAUTH_REDIRECT_URIS_MAX_SIZE, {
+      error: mcpClientI18nMessages.redirectUri.tooManyError(OAUTH_REDIRECT_URIS_MAX_SIZE),
+    });
+
 const redirectSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal(RedirectUriType.LOCAL),
-    uris: z
-      .array(localRedirectUriSchema)
-      .min(1, mcpClientI18nMessages.redirectUri.requiredError)
-      .max(OAUTH_REDIRECT_URIS_MAX_SIZE, {
-        error: mcpClientI18nMessages.redirectUri.tooManyError(OAUTH_REDIRECT_URIS_MAX_SIZE),
-      }),
+    uris: redirectUrisSchema(localRedirectUriSchema),
   }),
   z.object({
     type: z.literal(RedirectUriType.REMOTE),
-    uris: z
-      .array(remoteRedirectUriSchema)
-      .min(1, mcpClientI18nMessages.redirectUri.requiredError)
-      .max(1),
+    uris: redirectUrisSchema(remoteRedirectUriSchema),
   }),
 ]);
 
@@ -115,7 +115,13 @@ export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
   clientLogo: NO_CLIENT_LOGO,
   redirect: {
     type: RedirectUriType.LOCAL,
-    uris: [{ value: 'http://localhost/callback' }, { value: 'http://localhost/oauth/callback' }],
+    uris: [
+      { value: 'http://localhost/callback' },
+      { value: 'http://localhost/oauth/callback' },
+      { value: 'http://127.0.0.1/' },
+      { value: 'http://127.0.0.1/callback' },
+      { value: 'http://127.0.0.1/oauth/callback' },
+    ],
   },
   isConfidential: false,
 };

@@ -11,12 +11,48 @@ import semverIsValid from 'semver/functions/valid';
 
 import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 
-import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
+import {
+  SO_SEARCH_LIMIT,
+  AGENTS_PREFIX,
+  AGENT_MAPPINGS,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+} from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
+
+const validateAgentsKueryField = (value: string) => {
+  const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+  if (validationObj?.error) {
+    return validationObj?.error;
+  }
+};
+
+export const AGENT_ID_MAX_LENGTH = 512;
+// The Fleet UI "select all" bulk selection excludes every managed and agentless agent by ID
+// (up to SO_SEARCH_LIMIT IDs, ~420k characters), so the limit must fit that generated query.
+export const AGENTS_KUERY_MAX_LENGTH = 500_000;
+
+const bulkAgentsSchema = ({
+  idsDescription,
+  kueryDescription,
+}: { idsDescription?: string; kueryDescription?: string } = {}) =>
+  schema.oneOf([
+    schema.arrayOf(
+      schema.string({
+        maxLength: AGENT_ID_MAX_LENGTH,
+        ...(idsDescription && { meta: { description: idsDescription } }),
+      }),
+      { maxSize: 10000 }
+    ),
+    schema.string({
+      maxLength: AGENTS_KUERY_MAX_LENGTH,
+      ...(kueryDescription && { meta: { description: kueryDescription } }),
+      validate: validateAgentsKueryField,
+    }),
+  ]);
 
 const ActionIdSchema = schema.object({
   actionId: schema.string(),
@@ -46,7 +82,8 @@ export const GetAgentsRequestSchema = {
         meta: { description: 'Number of results per page' },
       }),
       kuery: schema.maybe(
-        schema.string({
+        schema.searchFilter.warn({
+          label: 'fleet.agents.kuery',
           meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -76,7 +113,12 @@ export const GetAgentsRequestSchema = {
         defaultValue: false,
         meta: { description: 'When true, return a summary of agent statuses in the response' },
       }),
-      sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+      sortField: schema.maybe(
+        schema.querySortField.warn({
+          label: 'fleet.agents.sortField',
+          meta: { description: 'Field to sort results by' },
+        })
+      ),
       sortOrder: schema.maybe(
         schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
           meta: { description: 'Sort order, ascending or descending' },
@@ -156,7 +198,16 @@ export const MigrateOptionsSchema = {
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.displayName.warn({
+        minLength: 0,
+        maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+        label: 'fleet.agents.migrate.tags',
+      }),
+      { maxSize: 10 }
+    )
+  ),
   replace_token: schema.maybe(schema.string()),
 };
 
@@ -172,7 +223,16 @@ export const BulkMigrateOptionsSchema = {
   proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   proxy_url: schema.maybe(schema.string()),
   staging: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.displayName.warn({
+        minLength: 0,
+        maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+        label: 'fleet.agents.bulk_migrate.tags',
+      }),
+      { maxSize: 10 }
+    )
+  ),
 };
 
 export const AgentComponentStateSchema = schema.oneOf([
@@ -400,7 +460,11 @@ export const GetAgentResponseSchema = schema.object({
 
 export const GetOneAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.get_one_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   query: schema.object({
     withMetrics: schema.boolean({
@@ -412,7 +476,9 @@ export const GetOneAgentRequestSchema = {
 
 export const GetAgentEffectiveConfigRequestSchema = {
   params: schema.object({
-    agentId: schema.string({
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.get_agent_effective_config.agentId',
       meta: { description: 'The agent ID to get effective config of' },
     }),
   }),
@@ -427,7 +493,11 @@ export const PostNewAgentActionRequestSchema = {
     action: NewAgentActionSchema,
   }),
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_new_agent_action.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
 };
 
@@ -452,13 +522,23 @@ export const PostNewAgentActionResponseSchema = schema.object({
 
 export const PostCancelActionRequestSchema = {
   params: schema.object({
-    actionId: schema.string({ meta: { description: 'The ID of the action to cancel' } }),
+    actionId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_cancel_action.actionId',
+      meta: { description: 'The ID of the action to cancel' },
+    }),
   }),
 };
 
 export const PostRetrieveAgentsByActionsRequestSchema = {
   body: schema.object({
-    actionIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+    actionIds: schema.arrayOf(
+      schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agents.retrieve_agents_by_actions.actionIds',
+      }),
+      { maxSize: 1000 }
+    ),
   }),
 };
 
@@ -468,44 +548,53 @@ export const PostRetrieveAgentsByActionsResponseSchema = schema.object({
 
 export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_unenroll.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.maybe(schema.boolean()),
-      revoke: schema.maybe(schema.boolean()),
+      force: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Unenrolls the agent even if it is enrolled in a hosted agent policy or is a managed agent. Does not revoke API keys immediately. To do so, also set `revoke`.',
+          },
+        })
+      ),
+      revoke: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
+          },
+        })
+      ),
     })
   ),
 };
 
 export const PostBulkAgentUnenrollRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([
-      schema.arrayOf(
-        schema.string({
-          meta: {
-            description: 'list of agent IDs',
-          },
-        }),
-        { maxSize: 10000 }
-      ),
-      schema.string({
-        meta: {
-          description: 'KQL query string, leave empty to action all agents',
-        },
-      }),
-    ]),
+    agents: bulkAgentsSchema({
+      idsDescription: 'list of agent IDs',
+      kueryDescription: 'KQL query string, leave empty to action all agents',
+    }),
     force: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Unenrolls hosted agents too',
+          description:
+            'Also unenrolls agents that are enrolled in hosted agent policies or are managed agents. Does not revoke API keys immediately. To do so, also set `revoke`.',
         },
       })
     ),
     revoke: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Revokes API keys of agents',
+          description:
+            'Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
         },
       })
     ),
@@ -523,23 +612,20 @@ export const PostBulkAgentUnenrollRequestSchema = {
 
 export const PostRemoveCollectorRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The collector agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_remove_collector.agentId',
+      meta: { description: 'The collector agent ID' },
+    }),
   }),
 };
 
 export const PostBulkRemoveCollectorsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([
-      schema.arrayOf(
-        schema.string({
-          meta: { description: 'List of collector agent IDs' },
-        }),
-        { maxSize: 10000 }
-      ),
-      schema.string({
-        meta: { description: 'KQL query string. Leave empty to target all collectors' },
-      }),
-    ]),
+    agents: bulkAgentsSchema({
+      idsDescription: 'List of collector agent IDs',
+      kueryDescription: 'KQL query string. Leave empty to target all collectors',
+    }),
     includeInactive: schema.maybe(
       schema.boolean({
         meta: {
@@ -559,7 +645,11 @@ function validateVersion(s: string) {
 
 export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_upgrade.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
     source_uri: schema.maybe(schema.string()),
@@ -573,7 +663,7 @@ export const PostAgentUpgradeRequestSchema = {
 
 export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
@@ -596,16 +686,27 @@ export const PostBulkAgentUpgradeRequestSchema = {
 
 export const PostAgentReassignRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_reassign.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
-    policy_id: schema.string(),
+    policy_id: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_reassign.policy_id',
+    }),
   }),
 };
 
 export const PostRequestDiagnosticsActionRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_request_diagnostics_action.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -620,7 +721,7 @@ export const PostRequestDiagnosticsActionRequestSchema = {
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]), {
@@ -633,7 +734,11 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
 
 export const ListAgentUploadsRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.list_agent_uploads.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
 };
 
@@ -661,14 +766,22 @@ export const ListAgentUploadsResponseSchema = schema.object({
 
 export const GetAgentUploadFileRequestSchema = {
   params: schema.object({
-    fileId: schema.string({ meta: { description: 'The ID of the uploaded file' } }),
+    fileId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.get_agent_upload_file.fileId',
+      meta: { description: 'The ID of the uploaded file' },
+    }),
     fileName: schema.string({ meta: { description: 'The name of the uploaded file' } }),
   }),
 };
 
 export const DeleteAgentUploadFileRequestSchema = {
   params: schema.object({
-    fileId: schema.string({ meta: { description: 'The ID of the uploaded file' } }),
+    fileId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.delete_agent_upload_file.fileId',
+      meta: { description: 'The ID of the uploaded file' },
+    }),
   }),
 };
 
@@ -679,8 +792,11 @@ export const DeleteAgentUploadFileResponseSchema = schema.object({
 
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
-    policy_id: schema.string(),
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    policy_id: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_bulk_agent_reassign.policy_id',
+    }),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
@@ -689,7 +805,11 @@ export const PostBulkAgentReassignRequestSchema = {
 
 export const DeleteAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.delete_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
 };
 
@@ -699,17 +819,34 @@ export const DeleteAgentResponseSchema = schema.object({
 
 export const UpdateAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.update_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
     user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    tags: schema.maybe(
+      schema.arrayOf(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.agents.update_agent.tags',
+        }),
+        { maxSize: 10 }
+      )
+    ),
   }),
 };
 
 export const MigrateSingleAgentRequestSchema = {
   params: schema.object({
-    agentId: schema.string({ meta: { description: 'The agent ID' } }),
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.migrate_single_agent.agentId',
+      meta: { description: 'The agent ID' },
+    }),
   }),
   body: schema.object({
     uri: schema.uri(),
@@ -722,7 +859,7 @@ export const MigrateSingleAgentResponseSchema = ActionIdSchema;
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     uri: schema.uri(),
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
@@ -737,9 +874,27 @@ export const BulkMigrateAgentsResponseSchema = schema.oneOf([ActionIdSchema, Dry
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
-    tagsToAdd: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-    tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    agents: bulkAgentsSchema(),
+    tagsToAdd: schema.maybe(
+      schema.arrayOf(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.agents.bulk_update_agent_tags.tagsToAdd',
+        }),
+        { maxSize: 10 }
+      )
+    ),
+    tagsToRemove: schema.maybe(
+      schema.arrayOf(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.agents.bulk_update_agent_tags.tagsToRemove',
+        }),
+        { maxSize: 10 }
+      )
+    ),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
@@ -750,14 +905,30 @@ export const PostBulkActionResponseSchema = schema.oneOf([ActionIdSchema, DryRun
 
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
-    policyId: schema.maybe(schema.string({ meta: { description: 'Filter by agent policy ID' } })),
-    policyIds: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 1000 }), schema.string()], {
-        meta: { description: 'Filter by one or more agent policy IDs' },
+    policyId: schema.maybe(
+      schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agent_status.policyId',
+        meta: { description: 'Filter by agent policy ID' },
       })
     ),
+    policyIds: schema.maybe(
+      schema.oneOf(
+        [
+          schema.arrayOf(
+            schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_status.policyIds' }),
+            { maxSize: 1000 }
+          ),
+          schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_status.policyIds' }),
+        ],
+        {
+          meta: { description: 'Filter by one or more agent policy IDs' },
+        }
+      )
+    ),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.agent_status.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
@@ -790,13 +961,26 @@ export const GetAgentStatusResponseSchema = schema.object({
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf(
-      [schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()],
+      [
+        schema.arrayOf(
+          schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.agents.get_agent_data.agentsIds',
+          }),
+          { maxSize: 10000 }
+        ),
+        schema.string(),
+      ],
       {
         meta: { description: 'Agent IDs to check data for, as an array or comma-separated string' },
       }
     ),
     pkgName: schema.maybe(
-      schema.string({ meta: { description: 'Filter by integration package name' } })
+      schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.agents.get_agent_data.pkgName',
+        meta: { description: 'Filter by integration package name' },
+      })
     ),
     pkgVersion: schema.maybe(
       schema.string({ meta: { description: 'Filter by integration package version' } })
@@ -904,6 +1088,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
         schema.literal('ROLLBACK'),
         schema.literal('REMOVE_COLLECTOR'),
+        schema.literal('RESTART'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -977,7 +1162,9 @@ export const GetAvailableAgentVersionsResponseSchema = schema.object({
 
 export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
-    agentId: schema.string({
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.change_agent_privilege_level.agentId',
       meta: { description: 'The agent ID to change privilege level for' },
     }),
   }),
@@ -998,7 +1185,7 @@ export const ChangeAgentPrivilegeLevelResponseSchema = ActionIdOrMessageSchema;
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     user_info: schema.maybe(
       schema.object({
@@ -1018,7 +1205,9 @@ export const BulkChangeAgentsPrivilegeLevelResponseSchema = schema.oneOf([
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
-    agentId: schema.string({
+    agentId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.agents.post_agent_rollback.agentId',
       meta: { description: 'The agent ID to rollback' },
     }),
   }),
@@ -1028,10 +1217,29 @@ export const PostAgentRollbackResponseSchema = ActionIdOrMessageSchema;
 
 export const PostBulkAgentRollbackRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const PostAgentRestartRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      maxLength: 512,
+      meta: { description: 'The agent ID to restart' },
+    }),
+  }),
+};
+
+export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentRestartRequestSchema = {
+  body: schema.object({
+    agents: bulkAgentsSchema(),
+    batchSize: schema.maybe(schema.number({ min: 1 })),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -1045,8 +1253,14 @@ export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 512 }), {
+        minSize: 1,
+        maxSize: 10000,
+      }),
       schema.string({
+        // 10 000 chars matches the FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH constant that will be
+        // introduced by #288283; inlined here to satisfy CodeQL without pulling in that PR.
+        maxLength: 10000,
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FavoriteButton as FavoriteButtonView } from '@kbn/favorite-button';
+import { FavoriteButton as FavoriteButtonView } from '@kbn/ui-favorite-button';
 import { useFavorite } from '../use_favorite';
 
 export interface FavoriteButtonProps {

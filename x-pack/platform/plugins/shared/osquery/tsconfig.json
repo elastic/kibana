@@ -17,6 +17,7 @@
     "common/schemas/*/*.json"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
 
@@ -101,6 +102,8 @@
     "@kbn/core-security-server",
     "@kbn/rrule",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/app-menu"
   ]
 }

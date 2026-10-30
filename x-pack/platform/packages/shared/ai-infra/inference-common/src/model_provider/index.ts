@@ -25,6 +25,7 @@ export enum ModelFamily {
   GPT = 'GPT',
   Claude = 'Claude',
   Gemini = 'Gemini',
+  Unknown = 'Unknown',
 }
 
 export interface Model {

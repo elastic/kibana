@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { MockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
@@ -20,10 +21,10 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
   enabled: true,
+  storage: { source: 'plain_index', dataRetention: '90d' },
   eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
   maxWorkflowDepth: 10,
   logging: { console: true },
-  http: { allowedHosts: ['*'] },
   maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
   eviction: { minPayloadSize: new ByteSizeValue(10 * 1024) },
   collectQueueMetrics: false,
@@ -65,9 +66,21 @@ export interface MockWorkflowExecutionRepository {
 }
 
 export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRepository => ({
-  getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+  getWorkflowExecutionById: jest.fn().mockResolvedValue({
+    id: 'test-workflow-run-id',
+    workflowId: 'workflow',
+    spaceId: 'default',
+    status: ExecutionStatus.PENDING,
+  }),
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
+
+export const createMockStepExecutionRepository = (): jest.Mocked<StepExecutionRepository> =>
+  ({
+    bulkUpsert: jest.fn().mockResolvedValue(undefined),
+    markNonTerminalStepsFailed: jest.fn().mockResolvedValue(undefined),
+    getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
+  } as unknown as jest.Mocked<StepExecutionRepository>);
 
 export interface MockTelemetryClient {
   reportEventDrivenExecutionSuppressed: jest.Mock;
@@ -92,7 +105,7 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowLogger: {},
     nodesFactory: {},
     workflowExecutionGraph: {},
-    workflowTaskManager: {},
+    workflowTaskManager: { removeTasksForExecution: jest.fn().mockResolvedValue(undefined) },
     workflowExecutionRepository: options.workflowExecutionRepository,
     esClient: {},
     telemetryClient: options.telemetryClient ?? createMockTelemetryClient(),
@@ -111,11 +124,12 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
   workflowLogger: {},
+  eventQueue: undefined,
   nodesFactory: {},
   workflowExecutionGraph: {},
   esClient: {},
   fakeRequest: options.fakeRequest,
   coreStart: options.dependencies.coreStart,
   signal: options.signal,
-  workflowTaskManager: {},
+  workflowTaskManager: { removeTasksForExecution: expect.any(Function) },
 });

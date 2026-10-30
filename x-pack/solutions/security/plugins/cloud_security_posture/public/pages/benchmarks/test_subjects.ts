@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export const BENCHMARKS_PAGE_HEADER = 'benchmarks-page-header';
 export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'csp_benchmarks_table';
-export const ADD_INTEGRATION_TEST_SUBJ = 'csp_add_integration';
 export const BENCHMARKS_TABLE_COLUMNS = {
   CIS_NAME: 'benchmark-table-column-cis-name',
   VERSION: 'benchmark-table-column-version',

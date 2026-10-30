@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { encode } from '@kbn/rison';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -23,33 +23,37 @@ const FLYOUT_V2_PARAM = 'flyoutV2' as const;
 export const SECURITY_BUILD_REDIRECT_URL_TOOL_ID = securityTool('build_redirect_url');
 
 // Flyout panel parameters use v1 values, but the tool translates this to v2 descriptors when the new flyout is enabled
-const flyoutPanelSchema = z.object({
-  id: z.string().describe('The id of the panel to open in this slot.'),
-  params: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      "The panel's parameters. Substitute only the runtime values you were told to; omit when there are none."
-    ),
-});
+const flyoutPanelSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The id of the panel to open in this slot.'),
+    params: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        "The panel's parameters. Substitute only the runtime values you were told to; omit when there are none."
+      ),
+  })
+);
 
-export const buildRedirectUrlSchema = z.object({
-  path: z
-    .string()
-    .describe(
-      `The destination as an app-relative Kibana path, starting with a single "/" — e.g. "/app/security/entity_analytics_management/risk_score". Use a path the calling skill's instructions give you; do NOT invent or guess one. Do NOT include the deployment base path or the "/s/<space>" segment (the tool adds them), and do NOT pass an absolute URL (no "http://", "https://", or "//host"). May include its own query string; when it does and a flyout param is also provided, the flyout is appended with "&".`
-    ),
-  flyout: z
-    .object({
-      left: flyoutPanelSchema.optional(),
-      right: flyoutPanelSchema.optional(),
-      preview: z.array(flyoutPanelSchema).optional(),
-    })
-    .optional()
-    .describe(
-      "A flyout to open on the destination page, given as `left` / `right` / `preview` panels. Only include this when the calling skill's instructions provide a flyout object, and copy its panels exactly. Leave unset otherwise."
-    ),
-});
+export const buildRedirectUrlSchema = lazySchema(() =>
+  z.object({
+    path: z
+      .string()
+      .describe(
+        `The destination as an app-relative Kibana path, starting with a single "/" — e.g. "/app/security/entity_analytics_management/risk_score". Use a path the calling skill's instructions give you; do NOT invent or guess one. Do NOT include the deployment base path or the "/s/<space>" segment (the tool adds them), and do NOT pass an absolute URL (no "http://", "https://", or "//host"). May include its own query string; when it does and a flyout param is also provided, the flyout is appended with "&".`
+      ),
+    flyout: z
+      .object({
+        left: flyoutPanelSchema.optional(),
+        right: flyoutPanelSchema.optional(),
+        preview: z.array(flyoutPanelSchema).optional(),
+      })
+      .optional()
+      .describe(
+        "A flyout to open on the destination page, given as `left` / `right` / `preview` panels. Only include this when the calling skill's instructions provide a flyout object, and copy its panels exactly. Leave unset otherwise."
+      ),
+  })
+);
 
 /**
  * Serializes an expandable-flyout state object into a `flyout=<rison>` query param value.
@@ -98,6 +102,13 @@ Returns a single \`url\`. Render it in your reply as a markdown link \`[title](u
 This tool only builds a link; it performs no action.`,
   schema: buildRedirectUrlSchema,
   tags: ['security', 'navigation', 'ui'],
+  annotations: {
+    title: 'Build Redirect URL',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async ({ path, flyout }, { spaceId, logger, savedObjectsClient }) => {
     if (!path.startsWith('/') || path.startsWith('//')) {
       return {

@@ -142,6 +142,7 @@ export function createSharedServices(
       getDataViews,
       getAuditService,
       mlLicense,
+      enabledFeatures,
       serverless
     );
 
@@ -191,7 +192,14 @@ export function createSharedServices(
       ...getAnomalyDetectorsProvider(getGuards),
       ...getModulesProvider(getGuards, getDataViews, compatibleModuleType, serverless),
       ...getResultsServiceProvider(getGuards),
-      ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
+      ...getMlSystemProvider(
+        getGuards,
+        mlLicense,
+        getSpaces,
+        cloud,
+        resolveMlCapabilities,
+        serverless
+      ),
       ...getAlertingServiceProvider(getGuards),
       ...getTrainedModelsProvider(getGuards, cloud, enabledFeatures),
     },
@@ -217,12 +225,16 @@ function getRequestItemsProvider(
   getDataViews: () => DataViewsPluginStart,
   getAuditService: () => CoreAuditService | null,
   mlLicense: MlLicense,
+  enabledFeatures: MlFeatures,
   serverless: ServerlessInfo
 ) {
   return (request: KibanaRequest) => {
     let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
-      request
+      request,
+      authorization,
+      mlLicense,
+      enabledFeatures
     );
     let scopedClient: IScopedClusterClient;
     let mlClient: MlClient;

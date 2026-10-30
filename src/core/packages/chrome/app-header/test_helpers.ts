@@ -9,4 +9,4 @@
 
 // RTL interaction helpers live in the app-menu package (the overflow popover is an app-menu
 // concern); re-exported here so header tests have a single test-only entry point.
-export { openAppMenuOverflow } from '@kbn/core-chrome-app-menu-components/test_helpers';
+export { openAppMenuOverflow } from '@kbn/app-menu/test_helpers';

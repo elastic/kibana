@@ -7,14 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ForwardedRef } from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';
+import { useDocViewerFlyoutId } from './doc_viewer_flyout_id_context';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  const OriginalFlyout = actual.EuiFlyout;
+
+  return {
+    ...actual,
+    EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
+      <OriginalFlyout {...props} ref={ref}>
+        {props.flyoutMenuProps && (
+          <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
+        )}
+        {props.children}
+      </OriginalFlyout>
+    )),
+  };
+});
 
 const buildHit = ({ id, message }: { id: string; message: string }) =>
   buildDataTableRecord(
@@ -121,6 +142,48 @@ describe('UnifiedDocViewerFlyout', () => {
       'stale message'
     );
     expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+  });
+
+  it('renders trailing actions in the flyout menu', async () => {
+    const user = userEvent.setup();
+    const onClick = jest.fn();
+    const trailingAction = {
+      iconType: 'share' as const,
+      'aria-label': 'Copy link to this document',
+      toolTipContent: 'Copy link to this document',
+      onClick,
+    };
+
+    render(
+      <UnifiedDocViewerFlyout
+        {...buildProps({
+          flyoutMenuTrailingActions: [trailingAction],
+        })}
+      />
+    );
+
+    const shareButton = await screen.findByRole('button', {
+      name: 'Copy link to this document',
+    });
+
+    await user.click(shareButton);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('provides its flyout id to the content it renders', () => {
+    const HeaderWithFlyoutId = () => (
+      <div data-test-subj="docViewerFlyoutHeaderFlyoutId" data-flyout-id={useDocViewerFlyoutId()} />
+    );
+
+    render(
+      <UnifiedDocViewerFlyout
+        {...buildProps({ renderCustomHeader: () => <HeaderWithFlyoutId /> })}
+      />
+    );
+
+    expect(
+      screen.getByTestId('docViewerFlyoutHeaderFlyoutId').getAttribute('data-flyout-id')
+    ).toMatch(/^docViewerFlyout/);
   });
 
   describe('document pinning behavior', () => {

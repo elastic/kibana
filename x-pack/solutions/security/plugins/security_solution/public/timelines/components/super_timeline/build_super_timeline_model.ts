@@ -17,24 +17,10 @@ import { timelineDefaults } from '../../store/defaults';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SUPER_TIMELINE_TITLE, SUPER_TIMELINE_QUERY_ALIAS } from './translations';
 
-export type SkippedQueryReason = 'eql' | 'esql' | 'unknown';
-
-export interface SkippedQueryTimeline {
-  id: string;
-  title: string;
-  reason: SkippedQueryReason;
-}
-
 export interface BuildSuperTimelineModelDeps {
   dataView: DataView;
   browserFields: BrowserFields;
   esQueryConfig: EsQueryConfig;
-}
-
-export interface BuildSuperTimelineModelResult {
-  model: TimelineModel;
-  /** Source timelines whose query type (EQL/ESQL) couldn't be merged. Their pins and notes still aggregate. */
-  skippedQueryTimelines: SkippedQueryTimeline[];
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -144,29 +130,16 @@ const mergeIndexNames = (timelines: TimelineModel[]): string[] => {
 
 // ── Query merging ─────────────────────────────────────────────────────────────
 
-interface TimelineSubFilterResult {
-  filter: Filter | null;
-  skipped: SkippedQueryTimeline | null;
-}
-
 const buildTimelineSubFilter = (
   timeline: TimelineModel,
   deps: BuildSuperTimelineModelDeps
-): TimelineSubFilterResult => {
+): Filter | null => {
   const { dataView, browserFields, esQueryConfig } = deps;
-  const title = timeline.title || timeline.savedObjectId || 'Untitled Timeline';
-  const id = timeline.savedObjectId ?? '';
 
-  // Use persisted fields to identify the primary query mode — NOT activeTab, which
-  // is runtime-only and always resets to TimelineTabs.query after formatTimelineResponseToModel.
-  // savedSearchId is the canonical ESQL indicator; eqlOptions.query is the canonical EQL indicator.
-  const isEsqlTimeline = !!timeline.savedSearchId;
-  const isEqlTimeline = !isEsqlTimeline && !!timeline.eqlOptions?.query?.trim();
-
-  if (isEqlTimeline || isEsqlTimeline) {
-    return { filter: null, skipped: { id, title, reason: isEsqlTimeline ? 'esql' : 'eql' } };
-  }
-
+  // Always use the Query-tab state (kqlQuery + dataProviders + filters).
+  // EQL and ES|QL queries are intentionally disregarded — this is the "main timeline query".
+  // An EQL/ES|QL timeline with an empty Query tab contributes no clause (combineQueries
+  // returns null), which is the same as a plain timeline with no query.
   const kqlQuery = {
     query: timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
     language: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
@@ -183,46 +156,40 @@ const buildTimelineSubFilter = (
   });
 
   if (!combined?.filterQuery) {
-    return { filter: null, skipped: null };
+    return null;
   }
 
   const parsedQuery = parseFilterQuery(combined.filterQuery);
   if (parsedQuery === null) {
     // combineQueries produced valid JSON but not a plain object — internal serialization edge
-    // case, not a user-authored EQL/ESQL query. Use 'unknown' so the warning toast doesn't
-    // misidentify a KQL timeline as EQL.
-    return { filter: null, skipped: { id, title, reason: 'unknown' } };
+    // case that is unreachable from normal user input. Skip silently.
+    return null;
   }
 
   return {
-    filter: {
-      meta: {
-        // alias intentionally omitted — buildCombinedFilter strips sub-filter aliases via
-        // cleanUpFilter, so only the outer SUPER_TIMELINE_QUERY_ALIAS is visible.
-        type: 'custom',
-        disabled: false,
-        negate: false,
-        key: 'query',
-        index: dataView.id,
-      },
-      query: parsedQuery,
+    meta: {
+      // alias intentionally omitted — buildCombinedFilter strips sub-filter aliases via
+      // cleanUpFilter, so only the outer SUPER_TIMELINE_QUERY_ALIAS is visible.
+      type: 'custom',
+      disabled: false,
+      negate: false,
+      key: 'query',
+      index: dataView.id,
     },
-    skipped: null,
+    query: parsedQuery,
   };
 };
 
 const buildMergedFilters = (
   timelines: TimelineModel[],
   deps: BuildSuperTimelineModelDeps
-): { filters: Filter[]; skippedQueryTimelines: SkippedQueryTimeline[] } => {
-  const results = timelines.map((timeline) => buildTimelineSubFilter(timeline, deps));
-  const subFilters = results.map((r) => r.filter).filter((f): f is Filter => f !== null);
-  const skippedQueryTimelines = results
-    .map((r) => r.skipped)
-    .filter((s): s is SkippedQueryTimeline => s !== null);
+): Filter[] => {
+  const subFilters = timelines
+    .map((timeline) => buildTimelineSubFilter(timeline, deps))
+    .filter((f): f is Filter => f !== null);
 
   if (subFilters.length === 0) {
-    return { filters: [], skippedQueryTimelines };
+    return [];
   }
 
   const combinedFilter = buildCombinedFilter(
@@ -239,10 +206,7 @@ const buildMergedFilters = (
   // so validation against any single data view will produce false ": Warning" labels.
   combinedFilter.meta.isMultiIndex = true;
 
-  return {
-    filters: [combinedFilter],
-    skippedQueryTimelines,
-  };
+  return [combinedFilter];
 };
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -251,14 +215,18 @@ const buildMergedFilters = (
  * Merges N fully-resolved TimelineModels into a single transient Super Timeline model.
  * The returned model has `isSuperTimeline: true` and is NOT persisted — `convertTimelineAsInput`
  * is an allow-list and neither runtime-only field is included.
+ *
+ * EQL and ES|QL queries are intentionally disregarded; each source timeline contributes only
+ * its Query-tab state (kqlQuery + dataProviders + filters). A timeline whose Query tab is empty
+ * contributes no query clause but still supplies its pinned events, notes, date range and columns.
  */
 export const buildSuperTimelineModel = (
   timelines: TimelineModel[],
   deps: BuildSuperTimelineModelDeps
-): BuildSuperTimelineModelResult => {
+): TimelineModel => {
   const { pinnedEventIds, pinnedEventsSaveObject } = mergePinnedEvents(timelines);
   const { noteIds, eventIdToNoteIds } = mergeNotes(timelines);
-  const { filters, skippedQueryTimelines } = buildMergedFilters(timelines, deps);
+  const filters = buildMergedFilters(timelines, deps);
   const dateRange = mergeDateRange(timelines);
   const columns = mergeColumns(timelines);
   const indexNames = mergeIndexNames(timelines);
@@ -281,7 +249,7 @@ export const buildSuperTimelineModel = (
       updated: t.updated,
     }));
 
-  const model: TimelineModel = {
+  return {
     ...timelineDefaults,
     id: '',
     title: SUPER_TIMELINE_TITLE,
@@ -302,6 +270,4 @@ export const buildSuperTimelineModel = (
     superTimelineSourceTitles,
     superTimelineDescriptions,
   };
-
-  return { model, skippedQueryTimelines };
 };

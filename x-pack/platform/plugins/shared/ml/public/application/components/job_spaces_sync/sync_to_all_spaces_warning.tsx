@@ -8,7 +8,8 @@
 import React from 'react';
 import type { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useMlKibana } from '../../contexts/kibana/kibana_context';
 
 export const SyncToAllSpacesWarning: FC = () => {
@@ -19,18 +20,15 @@ export const SyncToAllSpacesWarning: FC = () => {
   } = useMlKibana();
   const docLink = links.security.kibanaPrivileges;
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       size="s"
-      iconType="question"
       title={
         <FormattedMessage
           id="xpack.ml.management.syncSavedObjectsFlyout.allSpacesWarning.title"
           defaultMessage="Sync can only add items to the current space"
         />
       }
-      color="warning"
-    >
-      <EuiText size="s">
+      text={
         <FormattedMessage
           id="xpack.ml.management.syncSavedObjectsFlyout.allSpacesWarning.description"
           defaultMessage="Without {readAndWritePrivilegesLink} for all spaces you can only add jobs and trained models to the current space when syncing."
@@ -45,7 +43,7 @@ export const SyncToAllSpacesWarning: FC = () => {
             ),
           }}
         />
-      </EuiText>
-    </EuiCallOut>
+      }
+    />
   );
 };

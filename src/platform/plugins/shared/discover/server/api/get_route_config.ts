@@ -9,6 +9,7 @@
 
 import { AuthzDisabled } from '@kbn/core-security-server';
 import {
+  DISCOVER_SESSION_API_ACCESS,
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
@@ -17,8 +18,14 @@ export const getRouteConfig = () => {
   return {
     basePath: DISCOVER_SESSION_API_BASE_PATH,
     routeConfig: {
-      access: 'internal',
-      enableQueryVersion: true,
+      access: DISCOVER_SESSION_API_ACCESS,
+      options: {
+        tags: ['oas-tag:Discover sessions'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: AuthzDisabled.delegateToSOClient,
       },

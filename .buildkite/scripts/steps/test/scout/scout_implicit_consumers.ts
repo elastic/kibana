@@ -21,8 +21,10 @@
  * files change.
  */
 
-import minimatch from 'minimatch';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { minimatch } from 'minimatch';
+import { filterIgnoredFiles } from '../../../../pipeline-utils/affected-packages/utils.ts';
+import type { ScoutLog } from './scout_log.ts';
+import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 
 interface ImplicitConsumerRule {
   reason: string;
@@ -49,22 +51,42 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
       '@kbn/lens-plugin',
     ],
   },
+  {
+    reason:
+      'Workflow triggers are registered into workflows_extensions at runtime. Changes to these files would not select the trigger-approval tests by default.',
+    patterns: [
+      '**/common/triggers/**/*.{ts,tsx}',
+      '**/common/workflows/triggers/**/*.{ts,tsx}',
+      '**/common/workflow/triggers/**/*.{ts,tsx}',
+      '**/server/triggers/**/*.{ts,tsx}',
+      '**/server/workflows/triggers/**/*.{ts,tsx}',
+      '**/server/workflow/triggers/**/*.{ts,tsx}',
+      '**/public/triggers/**/*.{ts,tsx}',
+      '**/public/workflows/triggers/**/*.{ts,tsx}',
+      '**/public/workflow/triggers/**/*.{ts,tsx}',
+      '**/workflow_extensions/**/*.{ts,tsx}',
+      '**/register_trigger_definitions.ts',
+    ],
+    consumers: ['@kbn/workflows-extensions'],
+  },
 ];
 
 /**
  * Augment an affected-modules set with consumer @kbn/ IDs whose registries are
- * touched by `changedFiles`. Returns a new Set; never removes entries and
+ * touched by `changedFiles`. Files in SCOUT_MODULE_GRAPH_IGNORE (docs, Jest
+ * tests) never trigger consumers. Returns a new Set; never removes entries and
  * never disables selective testing.
  */
 export function expandWithImplicitConsumers(
   affected: ReadonlySet<string>,
   changedFiles: readonly string[],
-  log: ToolingLog
+  log: ScoutLog
 ): Set<string> {
   const expanded = new Set(affected);
+  const relevantFiles = filterIgnoredFiles([...changedFiles], SCOUT_MODULE_GRAPH_IGNORE);
 
   for (const rule of IMPLICIT_REGISTRY_CONSUMERS) {
-    const trigger = changedFiles.find((file) =>
+    const trigger = relevantFiles.find((file) =>
       rule.patterns.some((pattern) => minimatch(file, pattern, { dot: true }))
     );
     if (!trigger) continue;

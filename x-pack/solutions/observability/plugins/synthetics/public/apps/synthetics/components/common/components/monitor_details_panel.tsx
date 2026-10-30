@@ -32,11 +32,17 @@ import type {
   SelectedSyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
-import { ConfigKey, isExternalSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  isExternalSyntheticsMonitor,
+  isHeartbeatSyntheticsMonitor,
+  MonitorTypeEnum,
+} from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { MonitorMaintenanceWindows } from './monitor_maintenance_windows';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useGetUrlParams } from '../../../hooks';
+import { CREATED_COLUMN_LABEL, LAST_MODIFIED_COLUMN_LABEL } from './monitor_timestamp';
 
 export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
@@ -66,7 +72,7 @@ export const MonitorDetailsPanel = ({
   }
 
   // External monitors (remote CCS + Heartbeat/Agent) are read-only projections
-  // with no saved object, so SO-only fields (labels/updated_at/project_id/
+  // with no saved object, so SO-only fields (labels/created_at/updated_at/project_id/
   // enabled toggle) are unavailable and must be hidden from the panel.
   const isExternal = isExternalSyntheticsMonitor(monitor as SelectedSyntheticsMonitor);
   const savedMonitor = isExternal
@@ -143,7 +149,11 @@ export const MonitorDetailsPanel = ({
         </EuiDescriptionListDescription>
         {savedMonitor && (
           <>
-            <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListTitle>{CREATED_COLUMN_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <Time timestamp={savedMonitor.created_at} />
+            </EuiDescriptionListDescription>
+            <EuiDescriptionListTitle>{LAST_MODIFIED_COLUMN_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <Time timestamp={savedMonitor.updated_at} />
             </EuiDescriptionListDescription>
@@ -178,12 +188,21 @@ export const MonitorDetailsPanel = ({
                 configId={configId}
                 monitorLocations={monitor.locations}
                 spaces={savedMonitor?.[ConfigKey.KIBANA_SPACES]}
+                origin={isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined}
               />
             </EuiDescriptionListDescription>
           </>
         )}
 
-        {!hideLocations && <MonitorAssignedAgents monitorLocations={monitor.locations} />}
+        {!hideLocations && (
+          <MonitorAssignedAgents
+            key={configId}
+            configId={configId}
+            monitorLocations={monitor.locations}
+            hasMaintenanceWindows={!isEmpty(maintenanceWindows)}
+            isBrowserMonitor={monitor.type === MonitorTypeEnum.BROWSER}
+          />
+        )}
 
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
@@ -345,10 +364,6 @@ const MONITOR_TYPE_LABEL = i18n.translate(
 
 const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails', {
   defaultMessage: 'Monitor details',
-});
-
-const LAST_MODIFIED_LABEL = i18n.translate('xpack.synthetics.monitorList.lastModified', {
-  defaultMessage: 'Last modified',
 });
 
 const LAST_RUN_LABEL = i18n.translate('xpack.synthetics.monitorList.lastRunHeaderText', {

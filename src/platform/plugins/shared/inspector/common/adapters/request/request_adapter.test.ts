@@ -49,15 +49,15 @@ describe('RequestAdapter', () => {
     it('should emit it when starting a new request', () => {
       const spy = jest.fn();
       adapter.once('change', spy);
-      expect(spy).not.toBeCalled();
+      expect(spy).not.toHaveBeenCalled();
       adapter.start('request');
-      expect(spy).toBeCalled();
+      expect(spy).toHaveBeenCalled();
     });
 
     it('should emit it when updating the request', () => {
       const spy = jest.fn();
       adapter.on('change', spy);
-      expect(spy).not.toBeCalled();
+      expect(spy).not.toHaveBeenCalled();
       const req = adapter.start('request');
       expect(spy).toHaveBeenCalledTimes(1);
       req.json({ my: 'request' });

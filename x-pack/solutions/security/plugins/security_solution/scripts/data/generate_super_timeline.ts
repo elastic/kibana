@@ -8,9 +8,9 @@
 /**
  * Seed script for the Super Timeline feature (epic elastic/security-team#14357).
  *
- * Creates 3 timelines with distinct KQL queries, pinned events, and notes — enough
- * to test the "View Super Timeline" batch action on both the Timelines list page and
- * the Cases tab. Also creates a Case with all 3 timelines attached.
+ * Creates 4 timelines (3 KQL + 1 EQL) with pinned events and notes — enough to test
+ * the "View Super Timeline" batch action on both the Timelines list page and the Cases
+ * tab, including the mixed KQL+EQL selection. Also creates a Case with all timelines attached.
  *
  * Usage:
  *   node scripts/data/generate_super_timeline_cli.js [options]
@@ -78,6 +78,20 @@ const TIMELINE_SEEDS = [
       'Outbound traffic to geo-blocked region. Consistent with C2 beacon — 60s interval.',
     eventNote: 'First beacon observed here. Destination IP appears in threat intel feed.',
   },
+  {
+    title: '[Super Timeline seed] EQL Correlation — Process Anomaly',
+    description:
+      'Analyst 4 scope: EQL correlation rule for suspicious process execution. ' +
+      'This timeline uses EQL — its EQL query is not merged into the Super Timeline; ' +
+      'only its Query-tab query (below) and its pinned events/notes are included. ' +
+      'Created by generate_super_timeline.',
+    kqlQuery: 'event.category: "process"',
+    eqlQuery: 'process where process.name == "cmd.exe"',
+    timelineNote:
+      'EQL correlation flagged this process chain. ' +
+      'Select this timeline together with any KQL timeline to test the mixed Super Timeline flow.',
+    eventNote: 'EQL-flagged event — correlate with authentication events from the same host.',
+  },
 ];
 
 // ── Timeline API helpers ───────────────────────────────────────────────────────
@@ -130,6 +144,18 @@ const createTimeline = async ({
           { id: 'event.action' },
           { id: 'host.name' },
         ],
+        // Spread eqlOptions when this seed represents an EQL timeline.
+        // The Query-tab KQL query above is still used as the main merged query.
+        ...('eqlQuery' in seed && seed.eqlQuery
+          ? {
+              eqlOptions: {
+                eventCategoryField: 'event.category',
+                timestampField: '@timestamp',
+                query: seed.eqlQuery,
+                size: 100,
+              },
+            }
+          : {}),
       },
     },
   });
@@ -402,8 +428,8 @@ export const cli = () => {
       }
 
       // ── Step 1: Fetch alert IDs for pinning ─────────────────────────────────
-      // Each timeline pins 3 alerts; timelines 0+1 share alert[1], timelines 1+2 share alert[4].
-      // This creates intentional overlap to exercise the deduplication path in Super Timeline.
+      // Each timeline pins 3 alerts; timelines 0+1 share alert[1], timelines 1+2+3 share
+      // alert[6]. This creates intentional overlap to exercise the deduplication path.
       log.info('Fetching alert IDs for event pinning…');
       const initialAlertIds = await fetchAlertIds({
         esClient,
@@ -443,15 +469,19 @@ export const cli = () => {
         // Timeline 0: [0, 1, 2]   (1 is shared with timeline 1)
         // Timeline 1: [1, 3, 4]   (1 shared with 0, 4 shared with 2)
         // Timeline 2: [4, 5, 6]   (4 shared with 1)
+        // Timeline 3 (EQL): [6, 7, 8]  (6 shared with timeline 2)
         const slots: number[][] = [
           [0, 1, 2],
           [1, 3, 4],
           [4, 5, 6],
+          [6, 7, 8],
         ];
-        return slots[idx].map((i) => alertIds[i % alertIds.length]);
+        const slot = slots[idx];
+        if (!slot) return [];
+        return slot.map((i) => alertIds[i % alertIds.length]);
       };
 
-      // ── Step 2: Create the 3 timelines ──────────────────────────────────────
+      // ── Step 2: Create the 4 timelines ──────────────────────────────────────
       log.info('Creating seed timelines…');
       const timelines: Array<{ id: string; title: string }> = [];
 
@@ -488,7 +518,7 @@ export const cli = () => {
 
       // ── Step 3: Create a Case and attach all 3 timelines ────────────────────
       if (!skipCase) {
-        log.info('Creating seed case with all 3 timelines attached…');
+        log.info('Creating seed case with all 4 timelines attached…');
         const caseTitle = `${CASE_TITLE_PREFIX} Multi-Analyst Incident Investigation`;
         try {
           const caseId = await createCase({ kbnClient, log, title: caseTitle });

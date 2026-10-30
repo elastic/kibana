@@ -35,11 +35,26 @@ jest.mock('../../../../shared/components/tools_flyout_header', () => ({
 }));
 
 jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => ({
-  AnomaliesTab: ({ entityId, entityType }: { entityId: string; entityType: string }) => (
+  AnomaliesTab: ({
+    entityId,
+    entityName,
+    entityType,
+    mode,
+    scopeId,
+  }: {
+    entityId: string;
+    entityName: string;
+    entityType: string;
+    mode?: string;
+    scopeId?: string;
+  }) => (
     <div
       data-test-subj="mockAnomaliesTab"
       data-entity-id={entityId}
+      data-entity-name={entityName}
       data-entity-type={entityType}
+      data-mode={mode ?? ''}
+      data-scope-id={scopeId ?? ''}
     />
   ),
 }));
@@ -68,13 +83,15 @@ describe('<AnomalyInsights /> host', () => {
     expect(body).toContainElement(getByTestId('mockAnomaliesTab'));
   });
 
-  it('forwards the entity id and entity type to the anomalies tab', () => {
+  it('forwards the entity id, name, and type to the anomalies tab', () => {
     const { getByTestId } = render(
       <AnomalyInsights entityType={EntityType.host} value="my-host" entityId="euid-123" />
     );
     const tab = getByTestId('mockAnomaliesTab');
     expect(tab).toHaveAttribute('data-entity-id', 'euid-123');
+    expect(tab).toHaveAttribute('data-entity-name', 'my-host');
     expect(tab).toHaveAttribute('data-entity-type', 'host');
+    expect(tab).toHaveAttribute('data-mode', '');
   });
 
   it('passes an empty entity id to the tab when none is provided', () => {
@@ -82,6 +99,32 @@ describe('<AnomalyInsights /> host', () => {
       <AnomalyInsights entityType={EntityType.host} value="my-host" />
     );
     expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-entity-id', '');
+  });
+
+  it('forwards the resolved mode to the tab so it covers the resolution group', () => {
+    const { getByTestId } = render(
+      <AnomalyInsights
+        entityType={EntityType.host}
+        value="my-host"
+        entityId="euid-123"
+        mode="resolved"
+      />
+    );
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-mode', 'resolved');
+  });
+
+  it('forwards the scope it was opened from to the tab', () => {
+    const { getByTestId } = render(
+      <AnomalyInsights
+        entityType={EntityType.host}
+        value="my-host"
+        scopeId="entity-analytics-new-entities-table-7d"
+      />
+    );
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute(
+      'data-scope-id',
+      'entity-analytics-new-entities-table-7d'
+    );
   });
 
   it('forwards onOpenEntity to the header click handler', () => {

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { get, keyBy } from 'lodash';
+import { cloneDeep, get, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type {
@@ -14,7 +14,6 @@ import type {
   SOSecretPath,
   DeletedSecretResponse,
   DeletedSecretReference,
-  BaseSettings,
 } from '../../../common/types';
 import type { SecretReference } from '../../types';
 import { FleetError } from '../../errors';
@@ -22,17 +21,10 @@ import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 import { auditLoggingService } from '../audit_logging';
 import { appContextService } from '../app_context';
-import { settingsService } from '..';
-import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
+import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
+import type { FleetServerRequirementSettingsKey } from '../fleet_server/version_requirements';
 
-type SecretStorageSettingsKey = Extract<
-  keyof BaseSettings,
-  | 'secret_storage_requirements_met'
-  | 'output_secret_storage_requirements_met'
-  | 'action_secret_storage_requirements_met'
-  | 'ssl_secret_storage_requirements_met'
-  | 'download_source_auth_secret_storage_requirements_met'
->;
+type SecretStorageSettingsKey = FleetServerRequirementSettingsKey;
 
 export interface SecretStorageCheckOptions {
   esClient: ElasticsearchClient;
@@ -65,51 +57,13 @@ export async function isSecretStorageEnabledForFeature(
     settingKey = 'secret_storage_requirements_met',
   } = opts;
 
-  const logger = appContextService.getLogger();
-
-  // if serverless then secrets will always be supported
-  const isFleetServerStandalone =
-    appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
-
-  if (isFleetServerStandalone) {
-    logger.trace(`${featureName} storage is enabled as fleet server is standalone`);
-    return true;
-  }
-
-  // now check the flag in settings to see if the fleet server requirement has already been met
-  // once the requirement has been met, secrets are always on
-  const settings = await settingsService.getSettingsOrUndefined(soClient);
-
-  if (settings && settings[settingKey]) {
-    logger.debug(`${featureName} storage requirements already met, turned on in settings`);
-    return true;
-  }
-
-  const areAllFleetServersOnProperVersion = await checkFleetServerVersionsForSecretsStorage(
+  return isFleetServerVersionRequirementMet({
     esClient,
     soClient,
-    minimumFleetServerVersion
-  );
-
-  // otherwise check if we have the minimum fleet server version and enable secrets if so
-  if (areAllFleetServersOnProperVersion) {
-    logger.debug(`Enabling ${featureName} storage as minimum fleet server version has been met`);
-    try {
-      await settingsService.saveSettings(soClient, {
-        [settingKey]: true,
-      });
-    } catch (err) {
-      // we can suppress this error as it will be retried on the next function call
-      logger.warn(`Failed to save settings after enabling ${featureName} storage: ${err.message}`);
-    }
-
-    return true;
-  }
-
-  logger.info(
-    `${featureName} storage is disabled as minimum fleet server version has not been met`
-  );
-  return false;
+    featureName: `${featureName} storage`,
+    minimumFleetServerVersion,
+    settingKey,
+  });
 }
 
 export async function isSecretStorageEnabled(
@@ -232,6 +186,35 @@ export function toCompiledSecretRef(id: string) {
 }
 
 /**
+ * Inverse of {@link toCompiledSecretRef}: scans an already-compiled policy fragment for inline
+ * `$co.elastic.secret{<id>}` placeholders and returns the set of ids found.
+ *
+ * Pass the compiled `inputs` and `otelcolConfig` — "appears in the JSON" is exactly the criterion
+ * Fleet Server uses when performing placeholder substitution. Never pass an object that carries
+ * `secret_references` itself, or every id will trivially match.
+ *
+ * Returns `undefined` if the fragment cannot be serialized so callers can fail open (keep the
+ * unpruned array) rather than silently dropping valid references.
+ */
+export function collectCompiledSecretRefIds(compiled: unknown): Set<string> | undefined {
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(compiled ?? null);
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn(`Unable to scan compiled policy fragment for secret references: ${err}`);
+    return undefined;
+  }
+  const ids = new Set<string>();
+  // Regex is constructed per call: a shared /g regex carries lastIndex state across calls.
+  for (const [, id] of serialized.matchAll(/\$co\.elastic\.secret\{([^}]+)\}/g)) {
+    ids.add(id);
+  }
+  return ids;
+}
+
+/**
  * Given an array of secret paths, deletes the corresponding secrets
  */
 export async function deleteSOSecrets(
@@ -296,6 +279,32 @@ export async function extractAndWriteSOSecrets<T>(opts: {
   };
 }
 
+/** A secret an update removes, with the path of the reference to it in the object. */
+export interface DeletedSOSecret extends SecretReference {
+  path: string;
+}
+
+/**
+ * The saved object update merges objects: deleting a secret leaves the object pointing at a secret
+ * that no longer exists, unless the reference is explicitly set to `null`. Returns the object with
+ * a `null` at the path of every deleted secret, but those the update replaces with a new one.
+ */
+export function withClearedSecretReferences<T>(
+  soObject: Partial<T>,
+  secretsToDelete: DeletedSOSecret[]
+): Partial<T> {
+  const removed = secretsToDelete.filter(({ path }) => get(soObject, path) === undefined);
+
+  if (!removed.length) {
+    return soObject;
+  }
+
+  const result = cloneDeep(soObject);
+  removed.forEach(({ path }) => set(result, path, null));
+
+  return result;
+}
+
 /**
  * Takes a generic object T to update and its old and new secret paths
  * Updates secrets and returns the references
@@ -309,7 +318,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
 }): Promise<{
   updatedSoObject: Partial<T>;
   secretReferences: SecretReference[];
-  secretsToDelete: SecretReference[];
+  secretsToDelete: DeletedSOSecret[];
 }> {
   const { updatedSoObject, oldSecretPaths, updatedSecretPaths, esClient, secretHashes } = opts;
 
@@ -360,6 +369,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
     secretReferences,
     secretsToDelete: toDelete.map((secretPath) => ({
       id: (secretPath.value as { id: string }).id,
+      path: secretPath.path,
     })),
   };
 }

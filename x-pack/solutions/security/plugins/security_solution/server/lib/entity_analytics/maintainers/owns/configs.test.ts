@@ -62,10 +62,16 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it('entityanalytics_okta: indexPattern points to the entity index', () => {
-    expect(oktaConfig.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
-    expect(oktaConfig.indexPattern('default')).not.toContain('myns');
-  });
+  // Entra ID is log-based (see entityanalytics_entra_id describe below); only
+  // entity-index sources must resolve to the `entities-latest-{ns}` alias (it
+  // covers both legacy `security_{ns}` and neutral concrete indices).
+  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.filter((c) => c.id === OKTA_ID))(
+    '$id: indexPattern points to the entity index (not a log index)',
+    (config) => {
+      expect(config.indexPattern('myns')).toBe('entities-latest-myns');
+      expect(config.indexPattern('default')).not.toContain('myns');
+    }
+  );
 
   it('entityanalytics_okta: override query expands raw host.id before CONCAT (CONCAT is null on multi-valued input)', () => {
     const query = buildTargetsPerActorQuery(oktaConfig, 'default');
@@ -226,7 +232,7 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       // The index pattern targets the device data stream directly, so no
       // data_stream.dataset filter is needed to separate device from user docs.
       expect(entraConfig().indexPattern('myns')).not.toContain('.entity-');
-      expect(entraConfig().indexPattern('default')).not.toContain('.entities.v2.latest');
+      expect(entraConfig().indexPattern('default')).not.toContain('entities-latest');
     });
 
     it('does NOT disable the lookback window (log index uses the engine 30d @timestamp filter)', () => {

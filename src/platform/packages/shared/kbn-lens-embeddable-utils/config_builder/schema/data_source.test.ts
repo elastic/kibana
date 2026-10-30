@@ -63,7 +63,7 @@ describe('DataSource Schema', () => {
         field_settings: {
           my_runtime_field: {
             type: 'keyword',
-            format: { type: 'string', params: { id: 'string' } },
+            format: { type: 'string' },
           },
           another_field: {
             type: 'long',

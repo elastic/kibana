@@ -23,10 +23,12 @@ import type { Dictionary } from '@kbn/ml-common-types/common';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CriteriaField } from '@kbn/ml-common-types/results';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import type { MlApi } from '../ml_api_service';
+import { getIsMlCpsEnabled } from '../ml_server_info';
 
 export interface ResultResponse {
   success: boolean;
@@ -81,9 +83,10 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
       intervalMs: number,
       datafeedConfig?: Datafeed
     ): Observable<MetricData> {
+      const isMlCpsEnabled = getIsMlCpsEnabled();
       const scriptFields = datafeedConfig?.script_fields;
       const aggFields = getDatafeedAggregations(datafeedConfig);
-      const projectRouting = datafeedConfig?.project_routing;
+      const projectRouting = datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
@@ -155,7 +158,7 @@ export function resultsServiceRxProvider(mlApi: MlApi) {
         ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
           ? { runtime_mappings: datafeedConfig?.runtime_mappings }
           : {}),
-        ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
+        ...(isMlCpsEnabled && projectRouting !== null ? { project_routing: projectRouting } : {}),
       };
 
       if (shouldCriteria.length > 0) {

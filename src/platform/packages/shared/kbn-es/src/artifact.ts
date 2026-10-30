@@ -20,14 +20,30 @@ import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { cache } from './utils/cache';
+import { createDownloadProgressBar } from './utils/download_progress';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';
 import { createCliError, isCliError } from './errors';
 import { shouldPreferCachedSnapshot } from './utils/find_local_cached_snapshot';
 
 const asyncPipeline = promisify(pipeline);
-const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
-const PERMANENT_SNAPSHOTS_BASE_URL =
-  'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+const GCS_BASE_URL = 'https://storage.googleapis.com';
+const DAILY_SNAPSHOTS_BASE_URL = `${GCS_BASE_URL}/kibana-ci-es-snapshots-daily`;
+const PERMANENT_SNAPSHOTS_BASE_URL = `${GCS_BASE_URL}/kibana-ci-es-snapshots-permanent`;
+const ALLOWED_SNAPSHOT_URL_PREFIXES = [
+  `${DAILY_SNAPSHOTS_BASE_URL}/`,
+  `${PERMANENT_SNAPSHOTS_BASE_URL}/`,
+];
+
+/**
+ * Whether a snapshot manifest or archive URL points into the Kibana CI snapshot buckets.
+ */
+export function isAllowedSnapshotUrl(url: string): boolean {
+  if (!URL.canParse(url)) {
+    return false;
+  }
+  const { href } = new URL(url);
+  return ALLOWED_SNAPSHOT_URL_PREFIXES.some((prefix) => href.startsWith(prefix));
+}
 
 type ChecksumType = 'sha512';
 export type ArtifactLicense = 'basic' | 'trial';
@@ -125,7 +141,7 @@ async function fetchSnapshotManifest(url: string, log: ToolingLog) {
 
   const abc = new AbortController();
   const resp = await retry(log, async () => {
-    const response = await fetch(url, { signal: abc.signal });
+    const response = await fetch(url, { signal: abc.signal, redirect: 'error' });
     // node-fetch resolves (does not reject) on 5xx, so a transient server error
     // (e.g. a GCS 500 on the snapshot bucket) would otherwise escape retry and
     // fail immediately. Throw here so retry() catches it and backs off.
@@ -152,6 +168,14 @@ async function getArtifactSpecForSnapshot(
     shouldUseUnverifiedSnapshot() ? '' : '-verified'
   }.json`;
   const secondaryManifestUrl = `${PERMANENT_SNAPSHOTS_BASE_URL}/${desiredVersion}/manifest.json`;
+
+  if (customManifestUrl && !isAllowedSnapshotUrl(customManifestUrl)) {
+    throw createCliError(
+      `ES_SNAPSHOT_MANIFEST must start with ${ALLOWED_SNAPSHOT_URL_PREFIXES.join(
+        ' or '
+      )}, got ${customManifestUrl}. Use KBN_ES_SNAPSHOT_URL to run a custom Elasticsearch build.`
+    );
+  }
 
   let { abc, resp, json } = await fetchSnapshotManifest(
     customManifestUrl || primaryManifestUrl,
@@ -185,6 +209,10 @@ async function getArtifactSpecForSnapshot(
     throw createCliError(
       `Snapshots are available, but couldn't find an artifact in the manifest for [${desiredLicense}, ${platform}, ${arch}]`
     );
+  }
+
+  if (!isAllowedSnapshotUrl(archive.url)) {
+    throw createCliError(`Snapshot manifest points to an unexpected archive url: ${archive.url}`);
   }
 
   if (archive.version !== desiredVersion) {
@@ -384,31 +412,44 @@ export class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
-    await asyncPipeline(
-      resp.body,
-      new Transform({
-        transform(chunk, encoding, cb) {
-          contentLength += Buffer.byteLength(chunk);
+    // content-length reflects the on-the-wire byte count; when the response is
+    // content-encoded (compressed) node-fetch inflates the body as it streams,
+    // so chunk sizes wouldn't add up to the header value — fall back to a
+    // size-less progress bar in that case rather than showing a wrong total.
+    const expectedContentLength = resp.headers.get('content-length');
+    const contentEncoding = resp.headers.get('content-encoding');
+    const progressTotal =
+      !contentEncoding && expectedContentLength ? parseInt(expectedContentLength, 10) : undefined;
+    const progress = createDownloadProgressBar(progressTotal, (msg) => this.log.info(msg));
 
-          if (first500Bytes.length < 500) {
-            first500Bytes = Buffer.concat(
-              [first500Bytes, chunk],
-              first500Bytes.length + chunk.length
-            ).slice(0, 500);
-          }
+    try {
+      await asyncPipeline(
+        resp.body,
+        progress.meter,
+        new Transform({
+          transform(chunk, encoding, cb) {
+            contentLength += Buffer.byteLength(chunk);
 
-          hash.update(chunk, encoding);
-          cb(null, chunk);
-        },
-      }),
-      fs.createWriteStream(tmpPath)
-    );
+            if (first500Bytes.length < 500) {
+              first500Bytes = Buffer.concat(
+                [first500Bytes, chunk],
+                first500Bytes.length + chunk.length
+              ).slice(0, 500);
+            }
+
+            hash.update(chunk, encoding);
+            cb(null, chunk);
+          },
+        }),
+        fs.createWriteStream(tmpPath)
+      );
+    } finally {
+      progress.stop();
+    }
 
     // Detect truncated downloads that closed cleanly (e.g. the server reset
     // the connection after sending partial data). The checksum would also catch
     // this, but failing here gives a clearer error message.
-    const expectedContentLength = resp.headers.get('content-length');
-    const contentEncoding = resp.headers.get('content-encoding');
     if (
       !contentEncoding &&
       expectedContentLength &&

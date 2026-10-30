@@ -80,6 +80,45 @@ describe('AlertDetails', () => {
     expect(getAuthorizationFilter).toHaveBeenCalled();
   });
 
+  it('excludes linked-project alert indices from executeAggregations', async () => {
+    const linkedIndex = 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default';
+    const originAlert = {
+      id: 'alert-origin',
+      index: '.alerts-security.alerts-default',
+      attached_at: '2020-01-01T00:00:00.000Z',
+    };
+    client.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+      originAlert,
+      { id: 'alert-linked', index: linkedIndex, attached_at: '2020-01-01T00:00:00.000Z' },
+    ]);
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+    await handler.compute();
+
+    expect(mockServices.services.alertsService.executeAggregations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alerts: [originAlert],
+      })
+    );
+  });
+
+  it('skips executeAggregations when every attached alert is a linked-project index', async () => {
+    client.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+      {
+        id: 'alert-linked',
+        index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+        attached_at: '2020-01-01T00:00:00.000Z',
+      },
+    ]);
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+    await handler.compute();
+
+    expect(mockServices.services.alertsService.executeAggregations).not.toHaveBeenCalled();
+  });
+
   it('fetches alerts and entity attachments concurrently rather than sequentially', async () => {
     let resolveAlerts: (
       value: Array<{ id: string; index: string; attached_at: string }>

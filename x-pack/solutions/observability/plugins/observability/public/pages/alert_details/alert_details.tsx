@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,6 +41,13 @@ import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
+import {
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -94,6 +101,8 @@ export function AlertDetails() {
   const { services } = useKibana();
   const {
     http,
+    application,
+    cps,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
     agentBuilder,
@@ -102,12 +111,19 @@ export function AlertDetails() {
     observabilityAgentBuilder,
   } = services;
 
-  const AlertAiInsight = observabilityAgentBuilder?.getAlertAIInsight();
+  const AlertAskAiAgentButtonRef = useRef(observabilityAgentBuilder?.getAlertAskAiAgentButton());
+  const AlertAskAiAgentButton = AlertAskAiAgentButtonRef.current;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const { getUrlTabId, setUrlTabId } = useTabId();
   const urlTabId = getUrlTabId();
+
+  // Without this, the observability app has no CPS resolver, access resolves to DISABLED, and
+  // APM chart / service-map requests go out without `x-project-routing` — Core then fills in
+  // `_alias:_origin`, making data in linked projects invisible. READONLY pins routing to the
+  // space NPRE, which is the same scope the alerting framework uses when the rule fires.
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
@@ -242,14 +258,25 @@ export function AlertDetails() {
     };
   }, [agentBuilder, alertDetail, ruleTypeBreached]);
 
+  const alertsListBreadcrumb = shouldShowV1ObservabilityAlertsTable(services)
+    ? {
+        href: http.basePath.prepend(paths.observability.alerts),
+        deepLinkId: 'observability-overview:alerts' as const,
+      }
+    : {
+        href: http.basePath.prepend(
+          `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}`
+        ),
+        deepLinkId: `${OBSERVABILITY_ALERTING_APP_ID}:alerts` as const,
+      };
+
   useBreadcrumbs(
     [
       {
-        href: http.basePath.prepend(paths.observability.alerts),
+        ...alertsListBreadcrumb,
         text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
           defaultMessage: 'Alerts',
         }),
-        deepLinkId: 'observability-overview:alerts',
       },
       {
         text: ruleTypeBreached ?? defaultBreadcrumb,
@@ -343,12 +370,6 @@ export function AlertDetails() {
           />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
-          {AlertAiInsight && (
-            <AlertAiInsight
-              alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-              alertTitle={ruleTypeBreached}
-            />
-          )}
           {rule && alertDetail.formatted && (
             <>
               <AlertDetailsAppSection
@@ -366,7 +387,12 @@ export function AlertDetails() {
         </EuiFlexGroup>
       </>
     ) : (
-      <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+      <EuiPanel
+        hasShadow={false}
+        hasBorder={false}
+        data-test-subj="overviewTabPanel"
+        paddingSize="none"
+      >
         <EuiSpacer size="l" />
         <ProximalAlertsCallout
           alertDetail={alertDetail}
@@ -374,12 +400,6 @@ export function AlertDetails() {
         />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
-        {AlertAiInsight && (
-          <AlertAiInsight
-            alertId={alertDetail.formatted.fields['kibana.alert.uuid']}
-            alertTitle={ruleTypeBreached}
-          />
-        )}
         <EuiSpacer size="l" />
         <AlertOverview
           alert={alertDetail.formatted}
@@ -393,7 +413,12 @@ export function AlertDetails() {
   );
 
   const metadataTab = alertDetail?.raw && (
-    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel" paddingSize="none">
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      data-test-subj="metadataTabPanel"
+      paddingSize="none"
+    >
       <EuiSpacer size="l" />
       <AlertFieldsTable alert={alertDetail.raw} />
     </EuiPanel>
@@ -534,6 +559,14 @@ export function AlertDetails() {
             onUpdate={onUpdate}
             rule={rule}
             refetch={refetch}
+            addToChatButton={
+              AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid'] ? (
+                <AlertAskAiAgentButton
+                  alertId={alertDetail.formatted.fields['kibana.alert.uuid'] as string}
+                  alertTitle={ruleTypeBreached}
+                />
+              ) : null
+            }
           />,
         ],
         bottomBorder: false,

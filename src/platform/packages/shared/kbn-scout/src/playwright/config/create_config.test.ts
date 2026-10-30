@@ -39,25 +39,35 @@ describe('createPlaywrightConfig', () => {
 
   const originalCI = process.env.CI;
   const originalRetries = process.env.SCOUT_TEST_RETRIES;
+  const originalBuildkiteRetryCount = process.env.BUILDKITE_RETRY_COUNT;
+  const originalUseCitadelProxy = process.env.USE_CITADEL_PROXY;
+  const originalIpv6Only = process.env.KIBANA_TEST_IPV6_ONLY;
+
+  const restoreEnvVar = (name: string, value: string | undefined) => {
+    if (value === undefined) {
+      delete process.env[name];
+    } else {
+      process.env[name] = value;
+    }
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.TEST_RUN_ID;
     delete process.env.CI;
     delete process.env.SCOUT_TEST_RETRIES;
+    delete process.env.BUILDKITE_RETRY_COUNT;
+    // Set on CI builds that opt in to the Citadel proxy, including this test's own job.
+    delete process.env.USE_CITADEL_PROXY;
+    delete process.env.KIBANA_TEST_IPV6_ONLY;
   });
 
   afterAll(() => {
-    if (originalCI === undefined) {
-      delete process.env.CI;
-    } else {
-      process.env.CI = originalCI;
-    }
-    if (originalRetries === undefined) {
-      delete process.env.SCOUT_TEST_RETRIES;
-    } else {
-      process.env.SCOUT_TEST_RETRIES = originalRetries;
-    }
+    restoreEnvVar('CI', originalCI);
+    restoreEnvVar('SCOUT_TEST_RETRIES', originalRetries);
+    restoreEnvVar('BUILDKITE_RETRY_COUNT', originalBuildkiteRetryCount);
+    restoreEnvVar('USE_CITADEL_PROXY', originalUseCitadelProxy);
+    restoreEnvVar('KIBANA_TEST_IPV6_ONLY', originalIpv6Only);
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -153,6 +163,30 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('mki');
   });
 
+  it('mki project has a higher per-project timeout than the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const mki = config.projects!.find((p) => p.name === 'mki');
+    const ech = config.projects!.find((p) => p.name === 'ech');
+    const local = config.projects!.find((p) => p.name === 'local');
+
+    // Cloud projects (ech/mki) need extra time: cloud SAML auth hits a real service and is slower than the local mock.
+    expect(mki).toHaveProperty('timeout', 90_000);
+    expect(ech).toHaveProperty('timeout', 90_000);
+    // local falls back to the global 60 s default (no per-project override)
+    expect(local).not.toHaveProperty('timeout');
+  });
+
+  it('cloud projects raise the navigation timeout above the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const byName = (name: string) => config.projects!.find((p) => p.name === name)!.use;
+
+    // Every test gets a fresh browser context, so a cloud navigation is a cold, remote
+    // Kibana bootstrap and cannot reliably settle within the global 20 s cap.
+    expect(byName('ech')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('mki')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('local')).not.toHaveProperty('navigationTimeout');
+  });
+
   it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
     const testDir = './my_tests';
     const defaultGlobalHookTimeout = 180000;
@@ -191,7 +225,11 @@ describe('createPlaywrightConfig', () => {
 
       expect(main).toBeDefined();
       expect(main).toHaveProperty('dependencies', [`setup-${projectName}`]);
-      expect(main).not.toHaveProperty('timeout');
+      if (projectName === 'mki' || projectName === 'ech') {
+        expect(main).toHaveProperty('timeout', 90_000);
+      } else {
+        expect(main).not.toHaveProperty('timeout');
+      }
 
       expect(teardown).toBeDefined();
       // The teardown project is always emitted; if a plugin doesn't ship `global.teardown.ts`,
@@ -208,10 +246,48 @@ describe('createPlaywrightConfig', () => {
       expect(config.retries).toBe(0);
     });
 
-    it('is 1 on CI', () => {
+    it('is 1 on the first CI attempt of a step', () => {
       process.env.CI = 'true';
       const config = createPlaywrightConfig({ testDir: './my_tests' });
       expect(config.retries).toBe(1);
+    });
+
+    it('is 1 when BUILDKITE_RETRY_COUNT reports the first attempt', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '0';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('is 0 when the Buildkite step is retried', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '1';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(0);
+    });
+
+    it('is 1 on CI when BUILDKITE_RETRY_COUNT is not a number', () => {
+      process.env.CI = 'true';
+      process.env.BUILDKITE_RETRY_COUNT = '';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.retries).toBe(1);
+    });
+
+    it('SCOUT_TEST_RETRIES wins over the step attempt count in both directions', () => {
+      process.env.CI = 'true';
+
+      // flaky runner: stays at 0 even on the first attempt
+      process.env.SCOUT_TEST_RETRIES = '0';
+      process.env.BUILDKITE_RETRY_COUNT = '0';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(0);
+
+      // flaky runner: stays at 0 when its step is retried
+      process.env.BUILDKITE_RETRY_COUNT = '2';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(0);
+
+      // an explicit opt-in still applies on a retried step
+      process.env.SCOUT_TEST_RETRIES = '1';
+      expect(createPlaywrightConfig({ testDir: './my_tests' }).retries).toBe(1);
     });
 
     it('SCOUT_TEST_RETRIES=0 overrides CI=true — the flaky-runner guard', () => {
@@ -239,6 +315,34 @@ describe('createPlaywrightConfig', () => {
       expect(() => createPlaywrightConfig({ testDir: './my_tests' })).toThrow(
         /SCOUT_TEST_RETRIES must be a non-negative integer/
       );
+    });
+  });
+
+  describe('chromium launch args', () => {
+    it('sets no launch options by default', () => {
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use).not.toHaveProperty('launchOptions');
+    });
+
+    it('keeps the browser off the proxy when USE_CITADEL_PROXY is true', () => {
+      process.env.USE_CITADEL_PROXY = 'true';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use?.launchOptions).toEqual({ args: ['--no-proxy-server'] });
+    });
+
+    it('ignores USE_CITADEL_PROXY values other than true', () => {
+      process.env.USE_CITADEL_PROXY = 'false';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use).not.toHaveProperty('launchOptions');
+    });
+
+    it('combines the IPv6-only and Citadel args', () => {
+      process.env.KIBANA_TEST_IPV6_ONLY = 'true';
+      process.env.USE_CITADEL_PROXY = 'true';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use?.launchOptions).toEqual({
+        args: ['--host-resolver-rules=MAP localhost [::1]', '--no-proxy-server'],
+      });
     });
   });
 

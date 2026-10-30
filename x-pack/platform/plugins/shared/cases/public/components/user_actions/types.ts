@@ -7,6 +7,7 @@
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { CasesPermissions } from '../../../common/ui/types';
 import type { UserActionTypes } from '../../../common/types/domain';
 import type {
   CaseUI,
@@ -19,6 +20,7 @@ import type {
 import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
+import type { RelatedRemovalOptions } from '../../client/attachment_framework/types';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -48,6 +50,7 @@ export interface UserActionBuilderArgs {
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  permissions: CasesPermissions;
   caseConnectors: CaseConnectors;
   userAction: UserActionUI;
   attachments: AttachmentUIV2[];
@@ -56,7 +59,11 @@ export interface UserActionBuilderArgs {
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
   handleOutlineComment: (id: string) => void;
-  handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleDeleteComment: (
+    id: string,
+    successToasterTitle: string,
+    options?: RelatedRemovalOptions
+  ) => void;
   euiTheme: EuiThemeComputed<{}>;
 }
 

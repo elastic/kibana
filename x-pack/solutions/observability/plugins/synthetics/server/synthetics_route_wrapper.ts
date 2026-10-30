@@ -8,12 +8,15 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
+import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
 import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { syntheticsSecretConnectionType } from '../common/types/saved_objects';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { resolveHeartbeatIndices } from './services/resolve_heartbeat_indices';
+import { wrapZodRequestValidation } from './routes/zod_query';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -22,6 +25,8 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsMonitorClient
 ) => ({
   ...syntheticsRoute,
+  validate: wrapZodRequestValidation(syntheticsRoute.validate),
+  validation: wrapZodRequestValidation(syntheticsRoute.validation),
   options: {
     ...(syntheticsRoute.options ?? {}),
   },
@@ -31,6 +36,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         'uptime-read',
         ...(syntheticsRoute.requiredPrivileges ?? []),
         ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
+        // OR-set: at least one of these privileges must be satisfied. Used to allow a
+        // route for either a full-write user or a more granular privilege holder.
+        ...(syntheticsRoute.anyRequiredPrivileges?.length
+          ? [{ anyRequired: syntheticsRoute.anyRequiredPrivileges }]
+          : []),
       ],
     },
   },
@@ -40,7 +50,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const { client: esClient } = elasticsearch;
       const savedObjectsClient = savedObjects.getClient({
-        includedHiddenTypes: [syntheticsServiceApiKey.name],
+        includedHiddenTypes: [syntheticsServiceApiKey.name, syntheticsSecretConnectionType],
       });
 
       // specifically needed for the synthetics service api key generation
@@ -63,6 +73,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
           heartbeatIndices,
+          // CRUD / settings stay origin-only even if a client sends the header.
+          projectRouting:
+            !syntheticsRoute.writeAccess && server.isCpsEnabled
+              ? getProjectRoutingFromRequest(request)
+              : undefined,
         }
       );
 

@@ -63,7 +63,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ requestAuth, infraSynthtraceEsClient }) => {
       const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
       headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
-      range = testData.getRecentTimerange(10);
+      range = testData.getRecentTimerange(10, 45);
 
       await infraSynthtraceEsClient.clean();
       await infraSynthtraceEsClient.index(generateMetricsData(range));
@@ -177,9 +177,16 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const body = response.body as { hasData?: boolean };
+      const body = response.body as {
+        hasData?: boolean;
+        configuration?: { metricAlias?: string };
+      };
       expect(body.hasData).toBeDefined();
       expect(body.hasData).toBe(true);
+      // `createMetricsHasData` reads `configuration.metricAlias` off this payload
+      // to populate the Observability Overview's `indices` field, so the shape is
+      // part of the contract, not just the boolean.
+      expect(body.configuration?.metricAlias).toBe(DEFAULT_METRIC_ALIAS);
     });
 
     // The FTR suite queried `?modules=system|nginx`, which the route's query codec no longer

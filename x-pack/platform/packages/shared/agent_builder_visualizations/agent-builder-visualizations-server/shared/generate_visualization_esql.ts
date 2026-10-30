@@ -9,26 +9,28 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlAdditionalInstructions } from './esql_instructions';
 import { validateQueryTarget } from './validate_query_target';
+import { findMissingTimeFilterError } from './validate_time_filter';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
-export interface GeneratedVisualizationEsql {
+interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
   /**
-   * Result columns from the validation run, when `generateEsql` executed the
-   * query and returned rows. Callers that author around the result schema (Vega)
-   * can reuse these instead of executing the query again.
+   * Result columns from the `schema` validation run. Present when generation
+   * succeeded, including when the probe matched no rows. Callers that author
+   * around the result schema (Vega) can reuse these instead of executing again.
    */
   columns?: EsqlEsqlColumnInfo[];
   /** Populated when no usable query could be resolved. */
   error?: string;
 }
 
-export interface GenerateVisualizationEsqlParams {
+interface GenerateVisualizationEsqlParams {
   nlQuery: string;
   index: string | undefined;
   /**
@@ -47,9 +49,11 @@ export interface GenerateVisualizationEsqlParams {
    * only affects the validation run. Defaults to the last 24 hours.
    */
   timeRange?: TimeRange;
+  /** The values of the dashboard controls the query may refer to (`?name`), bound when a candidate is executed. */
+  esqlVariables?: ESQLControlVariable[];
   /**
    * Renderer-specific guidance appended to the shared ES|QL instructions, e.g.
-   * Vega's stricter time-range-filtering requirements.
+   * Vega's dotless column names.
    */
   extraInstructions?: string;
 }
@@ -119,6 +123,7 @@ export const generateVisualizationEsql = async ({
   logger,
   esClient,
   timeRange,
+  esqlVariables,
   extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
   const instructions = buildEsqlAdditionalInstructions(index);
@@ -128,14 +133,23 @@ export const generateVisualizationEsql = async ({
     events,
     logger,
     esClient: esClient.asCurrentUser,
+    internalEsClient: esClient.asInternalUser,
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,
+    execute: 'schema' as const,
     ...(timeRange ? { timeRange } : {}),
+    ...(esqlVariables?.length ? { esqlVariables } : {}),
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
-  const responseError = response.error ?? findTargetError(response.query, index);
+  const blockingError = response.error ?? findTargetError(response.query, index);
+  // The time filter check runs on the first pass only: the fallback gets one chance to fix
+  // it, and a chart that ignores the time picker beats no chart at all.
+  const timeFilterError = blockingError
+    ? undefined
+    : await findMissingTimeFilterError(esClient.asCurrentUser, response.query);
+  const responseError = blockingError ?? timeFilterError;
 
   if (response.query && !responseError) {
     return { query: response.query, columns: response.results?.columns };
@@ -157,6 +171,9 @@ export const generateVisualizationEsql = async ({
   const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
 
   if (!fallbackResponse.query || fallbackError) {
+    if (response.query && timeFilterError) {
+      return { query: response.query, columns: response.results?.columns };
+    }
     return { error: fallbackError ?? 'No queries generated' };
   }
 

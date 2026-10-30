@@ -15,8 +15,13 @@ import {
   alertEventStatus,
   alertEpisodeStatus,
   alertEventType,
-  type AlertEvent,
+  ALERT_EVENTS_RESOURCE_KEY,
+  type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
+import {
+  ResourceManager,
+  type ResourceManagerContract,
+} from '../services/resource_service/resource_manager';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
@@ -27,10 +32,7 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-/**
- * Dotted path lookup within an object (e.g. nested keys under `data`).
- * Examples on `data`: `monitor_id`, `labels.env`.
- */
+/** Path format: dotted keys, e.g. `monitor_id`, `labels.env`. */
 export function getValueByDottedPath(obj: unknown, path: string): unknown {
   if (!path) return undefined;
   let cur: unknown = obj;
@@ -44,13 +46,12 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
 }
 
 /**
- * Computes `group_hash` in a single sha256, in priority order:
+ * Computes `group_hash` in priority order:
  *   1. Explicit `fingerprint`
  *   2. `fingerprint_fields` — keys/paths resolved only under `data` (missing → "")
  *   3. `rule_id` (schema guarantees one of the three)
  *
- * Always includes `spaceId` and `source` so series keys cannot collide across
- * spaces or vendors.
+ * Always includes `spaceId` and `source` so series keys cannot collide across spaces or sources.
  */
 export function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
   const { source } = event;
@@ -79,22 +80,19 @@ export class AlertEventsClient {
   constructor(
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
   ) {}
 
-  /**
-   * Ingests an external alert event into `.rule-events` (no backing rule SO).
-   * Shared by POST /api/alerting/v2/alerts and POST /api/alerting/v2/alerts/:source.
-   * Callers must pass a normalized payload with `source` already set.
-   */
-  public async ingestAlertEvent(event: CreateAlertEventData): Promise<CreateAlertEventResponse> {
+  public async createAlertEvent(
+    event: CreateAlertEventData,
+    { abortSignal }: { abortSignal?: AbortSignal } = {}
+  ): Promise<CreateAlertEventResponse> {
     const { source } = event;
     const groupHash = getGroupHash(event, this.spaceId);
 
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
-    const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus);
-
-    const atTimestamp = event.timestamp ?? new Date().toISOString();
+    const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus, abortSignal);
 
     const status =
       episodeStatus === alertEpisodeStatus.inactive ||
@@ -108,17 +106,17 @@ export class AlertEventsClient {
         ? 1
         : undefined;
 
-    // No `rule` object — external alerts have no saved object. Display name /
-    // backlink live in data.rule_name / data.alert_url when the caller provides them.
-    const doc: AlertEvent = {
-      '@timestamp': atTimestamp,
-      scheduled_timestamp: atTimestamp,
+    // No `rule` object — no backing rule saved object. A caller-supplied timestamp is
+    // honored as `@timestamp`; otherwise ES sets it at ingest.
+    const doc: AlertEventDocument = {
+      ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
+      scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
       group_hash: groupHash,
       data: event.data ?? {},
       status,
       source,
       type: alertEventType.alert,
-      episode: {
+      alert: {
         id: episodeId,
         status: episodeStatus,
         ...(statusCount != null ? { status_count: statusCount } : {}),
@@ -126,6 +124,9 @@ export class AlertEventsClient {
       space_id: this.spaceId,
       ...(event.severity != null ? { severity: event.severity } : {}),
     };
+
+    // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
+    await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
 
     // `refresh: 'wait_for'` ensures the written doc is visible to the next
     // resolveEpisodeId query when events for the same series arrive back-to-back.
@@ -145,22 +146,27 @@ export class AlertEventsClient {
 
     return {
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
     };
   }
 
-  private async resolveEpisodeId(groupHash: string, nextStatus: string): Promise<string> {
+  private async resolveEpisodeId(
+    groupHash: string,
+    nextStatus: string,
+    abortSignal?: AbortSignal
+  ): Promise<string> {
     const rows = await this.queryService.executeQueryRows<{
       last_episode_id: string;
       last_episode_status: string;
     }>({
       query: `FROM ${ALERT_EVENTS_DATA_STREAM}
-          | WHERE type == "alert" AND group_hash == "${groupHash}" AND episode.status IS NOT NULL
-          | STATS last_episode_id = LAST(episode.id, @timestamp),
-                  last_episode_status = LAST(episode.status, @timestamp)
+          | WHERE type == "alert" AND group_hash == "${groupHash}" AND alert.status IS NOT NULL
+          | STATS last_episode_id = LAST(alert.id, @timestamp),
+                  last_episode_status = LAST(alert.status, @timestamp)
             BY group_hash
           | KEEP last_episode_id, last_episode_status
           | LIMIT 1`,
+      abortSignal,
     });
 
     if (rows.length === 0 || !rows[0].last_episode_id) {

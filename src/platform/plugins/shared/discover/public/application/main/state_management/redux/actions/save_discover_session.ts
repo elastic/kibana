@@ -20,9 +20,14 @@ import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
-import { selectTabRuntimeState } from '../runtime_state';
+import {
+  getTabDataView,
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+} from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
+import { rememberDiscoverSession } from '../../../../../services/discover_recently_accessed_service';
 import { resetDiscoverSession } from './reset_discover_session';
 import { TabInitializationStatus } from '../types';
 
@@ -46,7 +51,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newDescription,
       newTags,
     }: SaveDiscoverSessionThunkParams,
-    { dispatch, getState, extra: { services, runtimeStateManager } }
+    { dispatch, getState, extra: { services, runtimeStateManager, customizationContext } }
   ) => {
     const state = getState();
     const currentTabs = selectAllTabs(state);
@@ -65,7 +70,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+        const currentDataView = getTabDataView(tabRuntimeState);
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
         const updatedTab = cloneDeep(
@@ -74,6 +79,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             overridenTimeRestore: newTimeRestore,
             currentDataView,
             services,
+            tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState: tab }),
           })
         );
 
@@ -204,9 +210,12 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       copyOnSave: newCopyOnSave,
     };
 
-    const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
+    const discoverSession = await services.discoverSessionService.save(saveParams, saveOptions);
 
     if (discoverSession) {
+      if (customizationContext.displayMode === 'standalone' && discoverSession.id) {
+        rememberDiscoverSession(services.core.http, services.chrome, discoverSession);
+      }
       await dispatch(
         resetDiscoverSession({ updatedDiscoverSession: discoverSession, nextSelectedTabId })
       ).unwrap();

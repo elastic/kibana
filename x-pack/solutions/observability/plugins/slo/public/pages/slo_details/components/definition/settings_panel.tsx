@@ -19,20 +19,16 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import {
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowTypeSchema,
-  type SLOWithSummaryResponse,
-} from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
   toDurationAdverbLabel,
   toDurationLabel,
 } from '../../../../utils/slo/labels';
+import { ProjectScopeRow } from './project_scope_row';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -40,7 +36,6 @@ export interface Props {
 
 export function SettingsPanel({ slo }: Props) {
   const { uiSettings } = useKibana().services;
-  const { isServerless } = usePluginContext();
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const hasTags = slo.tags && slo.tags.length > 0;
 
@@ -79,7 +74,7 @@ export function SettingsPanel({ slo }: Props) {
           })}
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          {occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) ? (
+          {slo.budgetingMethod === 'occurrences' ? (
             <EuiText size="s">{BUDGETING_METHOD_OCCURRENCES}</EuiText>
           ) : (
             <EuiText size="s">
@@ -155,26 +150,7 @@ export function SettingsPanel({ slo }: Props) {
           </EuiText>
         </EuiDescriptionListDescription>
 
-        {isServerless && (
-          <>
-            <EuiDescriptionListTitle>
-              {i18n.translate('xpack.slo.sloDetails.definition.preventCrossProjectSearchTitle', {
-                defaultMessage: 'Restrict data collection to this project',
-              })}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiText size="s">
-                {slo.settings.preventCrossProjectSearch
-                  ? i18n.translate('xpack.slo.sloDetails.definition.yes', {
-                      defaultMessage: 'Yes',
-                    })
-                  : i18n.translate('xpack.slo.sloDetails.definition.no', {
-                      defaultMessage: 'No',
-                    })}
-              </EuiText>
-            </EuiDescriptionListDescription>
-          </>
-        )}
+        <ProjectScopeRow slo={slo} />
 
         {hasTags && (
           <>
@@ -200,7 +176,7 @@ export function SettingsPanel({ slo }: Props) {
 }
 
 function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
-  if (rollingTimeWindowTypeSchema.is(timeWindow.type)) {
+  if (timeWindow.type === 'rolling') {
     return i18n.translate('xpack.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {

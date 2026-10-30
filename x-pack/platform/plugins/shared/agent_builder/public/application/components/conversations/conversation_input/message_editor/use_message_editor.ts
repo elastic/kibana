@@ -9,8 +9,17 @@ import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
-import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
+import {
+  CommandBadgeSerializationError,
+  createCommandBadgeElement,
+  deserializeInputSegments,
+} from './command_badge';
 import { serializeEditorContent } from './serialize';
+import {
+  createImagePlaceholderElement,
+  getPlaceholderNamesFromElement,
+  removePlaceholderByName as removePlaceholderByNameFromDom,
+} from './image_placeholder';
 import {
   createCommandRange,
   createTextFragment,
@@ -40,7 +49,23 @@ export interface MessageEditorController {
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
+  getPlaceholderNames: () => string[];
+  removePlaceholderByName: (name: string) => void;
 }
+
+// The limit applies to what is sent, and image placeholders and command badges serialize to
+// markdown links longer than the text they display. Falls back to the displayed length for a
+// badge that cannot be serialized, which submit reports on its own.
+const getSerializedLength = (element: HTMLElement, displayedLength: number): number => {
+  try {
+    return serializeEditorContent(element).length;
+  } catch (error) {
+    if (error instanceof CommandBadgeSerializationError) {
+      return displayedLength;
+    }
+    throw error;
+  }
+};
 
 /**
  * Reactive bindings for the MessageEditor component.
@@ -53,10 +78,12 @@ const useMessageEditorInstance = ({
   ref,
   syncIsEmpty,
   onEditorFocus,
+  onContentChange,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   onEditorFocus?: () => void;
+  onContentChange?: () => void;
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
@@ -72,6 +99,7 @@ const useMessageEditorInstance = ({
       // Sync empty state, maintain caret targets, and re-evaluate command menu on every input change
       onChange: () => {
         syncIsEmpty();
+        onContentChange?.();
         if (ref.current) {
           if (ensureCaretTargetBeforeFirstBadge(ref.current)) {
             const sel = window.getSelection();
@@ -120,11 +148,13 @@ const useMessageEditorInstance = ({
 
         syncIsEmpty();
         dismissCommandMenu();
+        onContentChange?.();
       },
     }),
     [
       ref,
       syncIsEmpty,
+      onContentChange,
       checkInputForCommand,
       prefetchCommandMenus,
       commandMatch,
@@ -148,12 +178,10 @@ const useMessageEditorController = ({
   ref,
   syncIsEmpty,
   isEmpty,
-  setIsEmpty,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   isEmpty: boolean;
-  setIsEmpty: (next: boolean) => void;
 }): MessageEditorController => {
   const controller = useMemo(
     () => ({
@@ -170,7 +198,7 @@ const useMessageEditorController = ({
         if (!ref.current) {
           return;
         }
-        const segments = deserializeCommandBadge(text);
+        const segments = deserializeInputSegments(text);
         ref.current.innerHTML = '';
 
         for (const segment of segments) {
@@ -178,6 +206,8 @@ const useMessageEditorController = ({
             ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
+          } else if (segment.type === 'image') {
+            ref.current.appendChild(createImagePlaceholderElement(segment.name));
           }
         }
 
@@ -188,12 +218,19 @@ const useMessageEditorController = ({
       clear: () => {
         if (ref.current) {
           ref.current.innerHTML = '';
-          setIsEmpty(true);
+          syncIsEmpty();
+        }
+      },
+      getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
+      removePlaceholderByName: (name: string) => {
+        if (ref.current) {
+          removePlaceholderByNameFromDom(ref.current, name);
+          syncIsEmpty();
         }
       },
       isEmpty,
     }),
-    [ref, isEmpty, setIsEmpty, syncIsEmpty]
+    [ref, isEmpty, syncIsEmpty]
   );
   return controller;
 };
@@ -215,20 +252,24 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void } = {}
+  options: { onEditorFocus?: () => void; onContentChange?: () => void; maxLength?: number } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
+  overLimitCharacterCount: number;
 } => {
-  const { onEditorFocus } = options;
+  const { onEditorFocus, onContentChange, maxLength = Infinity } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [overLimitCharacterCount, setOverLimitCharacterCount] = useState(0);
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
       return;
     }
     const textContent = stripZeroWidthSpaces(ref.current.textContent ?? '');
+    const contentLength = getSerializedLength(ref.current, textContent.length);
+    setOverLimitCharacterCount(contentLength > maxLength ? contentLength : 0);
     const nextIsEmpty = !textContent || textContent.trim() === '';
     if (nextIsEmpty) {
       // If current text content is empty clear innerHTML
@@ -236,16 +277,17 @@ export const useMessageEditor = (
       ref.current.innerHTML = '';
     }
     setIsEmpty(nextIsEmpty);
-  }, []);
+  }, [maxLength]);
 
-  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus });
-  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
+  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty });
   const messageEditor = useMemo(
     () => ({
       messageEditor: instance,
       controller,
+      overLimitCharacterCount,
     }),
-    [instance, controller]
+    [instance, controller, overLimitCharacterCount]
   );
 
   return messageEditor;

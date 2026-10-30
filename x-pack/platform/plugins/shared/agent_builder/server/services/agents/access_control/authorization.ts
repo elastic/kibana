@@ -12,6 +12,7 @@ import {
   accessControlRoleMeets,
   maxAccessControlRole,
   type AgentAccessControl,
+  type AgentAccessControlEntry,
   type CurrentUser,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
@@ -22,7 +23,6 @@ export interface AgentAuthzArgs {
   accessControl?: AgentAccessControl;
   owner?: UserIdAndName;
   currentUser?: CurrentUser | null;
-  isAdmin: boolean;
 }
 
 /**
@@ -81,6 +81,23 @@ const accessControlModeRole = (
 };
 
 /**
+ * Matches an access-control entry against the current user: by stable `id` when the entry has one,
+ * otherwise by username for legacy name-only entries.
+ */
+export const matchesAccessControlEntry = (
+  entry: AgentAccessControlEntry,
+  user: UserIdAndName
+): boolean => {
+  if (entry.type !== 'user') {
+    return false;
+  }
+  if (entry.id !== undefined) {
+    return user.id !== undefined && entry.id === user.id;
+  }
+  return entry.name !== undefined && user.username !== undefined && entry.name === user.username;
+};
+
+/**
  * Returns the strongest explicit access-control entry that applies to the current user.
  */
 const accessControlRoleForUser = (
@@ -93,7 +110,7 @@ const accessControlRoleForUser = (
   // V1: only user-type entries. Role-type grants land in V2.
   let best: AgentAccessControlRole | undefined;
   for (const entry of accessControl.entries) {
-    if (entry.type === 'user' && currentUser.username && entry.name === currentUser.username) {
+    if (matchesAccessControlEntry(entry, currentUser)) {
       best = maxAccessControlRole(best, entry.role);
     }
   }
@@ -110,9 +127,8 @@ export const getEffectiveAgentRole = ({
   accessControl,
   owner,
   currentUser,
-  isAdmin,
 }: AgentAuthzArgs): EffectiveAgentRole | undefined => {
-  if (isAdmin) {
+  if (currentUser?.isAdmin) {
     return 'admin';
   }
   if (isAgentOwner({ owner, currentUser })) {
@@ -155,6 +171,49 @@ export const canChangeAgentAccessControl = (
   const role = getEffectiveAgentRole(args);
   return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
 };
+
+/**
+ * Checks whether the caller can change the agent's auto-approved APIs.
+ *
+ * This requires admin, owner, or Manager access. Only admins can change them on the default agent.
+ */
+export const canConfigureAgentApprovals = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean => {
+  const role = getEffectiveAgentRole(args);
+  if (args.agentId === agentBuilderDefaultAgentId) {
+    return role === 'admin';
+  }
+  return role === 'admin' || role === 'owner' || role === AgentAccessControlRole.Manager;
+};
+
+/**
+ * Checks whether the caller can bind, replace or remove the agent's service account.
+ *
+ * Core refuses a binding without the `manage_security` cluster privilege, so the same bar applies
+ * here on top of agent write access. The default agent cannot be bound.
+ */
+export const canConfigureAgentExecutionIdentity = (
+  args: AgentAuthzArgs & { agentId?: string }
+): boolean =>
+  args.agentId !== agentBuilderDefaultAgentId &&
+  hasAgentWriteAccess(args) &&
+  args.currentUser?.canManageSecurity === true;
+
+/**
+ * Checks whether the agent's binding allows the caller to edit it at all.
+ *
+ * Every edit of a bound agent directs its service account, so editing one requires the same
+ * `manage_security` privilege as the binding. Unbound agents are unaffected.
+ */
+export const canEditBoundAgent = ({
+  boundServiceAccountId,
+  currentUser,
+}: {
+  /** Service account the agent runs as, when it is bound to one. */
+  boundServiceAccountId?: string;
+  currentUser?: CurrentUser | null;
+}): boolean => boundServiceAccountId === undefined || currentUser?.canManageSecurity === true;
 
 /**
  * Checks whether the caller can read and list the agent.

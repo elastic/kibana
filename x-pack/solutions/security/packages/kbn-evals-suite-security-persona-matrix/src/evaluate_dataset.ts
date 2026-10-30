@@ -74,6 +74,7 @@ export const toDatasetExample = (ex: PersonaMatrixExample): PersonaMatrixDataset
 export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected, metadata }) => {
     // Try tool_sequence from expected output first, then expectedTools from metadata
     const toolSequence = (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence;
@@ -161,6 +162,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
 }): Evaluator => ({
   name: 'SkillInvoked',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
     const meta = metadata as { expectedSkill?: string; allowSkills?: string[] } | undefined;
     const acceptedSkills = [meta?.expectedSkill, ...(meta?.allowSkills ?? [])].filter(
@@ -194,7 +196,12 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
     }
 
     const skillPredicate = acceptedSkills
-      .map((skillName) => `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`)
+      .flatMap((skillName) => [
+        // Current `load_skill` args: {"skill":"<id>"} (some models pass the bare id).
+        `attributes.gen_ai.tool.call.arguments LIKE "*\\"${skillName}\\"*"`,
+        // Legacy / path-style args: {"skill":"/skills/<category>/<id>/SKILL.md"}.
+        `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`,
+      ])
       .join(' OR ');
 
     const query = `FROM traces-*

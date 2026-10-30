@@ -167,6 +167,32 @@ describe('ViewResultsInDiscoverAction', () => {
       });
     });
 
+    it('should forward mode: relative with an open now end for live windows', async () => {
+      render(
+        <TestProvidersWithServices>
+          <ViewResultsInDiscoverAction
+            actionId="test-action-123"
+            buttonType={ViewResultsActionButtonType.button}
+            startDate="2025-06-15T10:00:00.000Z"
+            endDate="now"
+            mode="relative"
+          />
+        </TestProvidersWithServices>
+      );
+
+      await waitFor(() => {
+        expect(mockGetUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            timeRange: {
+              from: '2025-06-15T10:00:00.000Z',
+              to: 'now',
+              mode: 'relative',
+            },
+          })
+        );
+      });
+    });
+
     it('should call locator with schedule_id and execution_count filters for scheduled queries', async () => {
       render(
         <TestProvidersWithServices>

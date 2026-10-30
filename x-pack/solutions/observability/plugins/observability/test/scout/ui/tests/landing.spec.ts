@@ -19,9 +19,10 @@ import { BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../fixtures/constants';
 // Runs in the serial `tests/` suite (single worker): the landing redirect checks for
 // logs/APM data cluster-wide, so a sibling spec generating data on a second worker would
 // leak into this suite's "no data" assertions. See https://github.com/elastic/kibana/issues/267146
+// Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/267146
 test.describe(
   'Observability Landing Page',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
       await browserAuth.loginAsAdmin();

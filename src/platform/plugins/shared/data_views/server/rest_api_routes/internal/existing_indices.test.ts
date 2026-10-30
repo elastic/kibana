@@ -32,7 +32,7 @@ describe('parseIndices', () => {
     const indices = '["index1", "index2"';
     expect(() => {
       parseIndices(indices);
-    }).toThrowError(
+    }).toThrow(
       'indices should be an array of index aliases, a JSON-stringified array of index aliases, or a single index alias'
     );
   });
@@ -41,7 +41,7 @@ describe('parseIndices', () => {
     const indices = 'index1,index2';
     expect(() => {
       parseIndices(indices);
-    }).toThrowError(
+    }).toThrow(
       'indices should be an array of index aliases, a JSON-stringified array of index aliases, or a single index alias'
     );
   });

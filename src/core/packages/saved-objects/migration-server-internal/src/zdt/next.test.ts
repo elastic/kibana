@@ -13,13 +13,13 @@ import {
   setMetaDocMigrationCompleteMock,
   setMetaMappingMigrationCompleteMock,
 } from './next.test.mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { nextActionMap, type ActionMap } from './next';
 import {
   createContextMock,
   type MockedMigratorContext,
   createPostInitState,
   createPostDocInitState,
+  createOutdatedDocumentSearchState,
 } from './test_helpers';
 import type {
   SetDocMigrationStartedState,
@@ -27,6 +27,7 @@ import type {
   UpdateDocumentModelVersionsState,
   UpdateIndexMappingsState,
   CreateTargetIndexState,
+  OutdatedDocumentsSearchReadState,
 } from './state';
 
 describe('actions', () => {
@@ -37,7 +38,7 @@ describe('actions', () => {
     jest.clearAllMocks();
 
     context = createContextMock();
-    actionMap = nextActionMap(context, loggerMock.create());
+    actionMap = nextActionMap(context);
   });
 
   describe('SET_DOC_MIGRATION_STARTED', () => {
@@ -208,6 +209,29 @@ describe('actions', () => {
             should: [{ term: { type: 'someToken' } }],
           },
         },
+      });
+    });
+  });
+
+  describe('OUTDATED_DOCUMENTS_SEARCH_READ', () => {
+    it('calls readWithPit with the batch size from state, not the migration config', () => {
+      const state: OutdatedDocumentsSearchReadState = {
+        ...createOutdatedDocumentSearchState(),
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+        batchSize: 125,
+      };
+      const action = actionMap.OUTDATED_DOCUMENTS_SEARCH_READ;
+
+      action(state);
+
+      expect(ActionMocks.readWithPit).toHaveBeenCalledTimes(1);
+      expect(ActionMocks.readWithPit).toHaveBeenCalledWith({
+        client: context.elasticsearchClient,
+        pitId: state.pitId,
+        searchAfter: state.lastHitSortValue,
+        batchSize: 125,
+        query: state.outdatedDocumentsQuery,
+        seqNoPrimaryTerm: true,
       });
     });
   });

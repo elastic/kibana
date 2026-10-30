@@ -7,6 +7,7 @@
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
+  ChatCompletionReasoning,
   InferenceConnector,
   EisInferenceEndpointMetadata,
   CspRegion,
@@ -40,6 +41,9 @@ export interface SearchInferenceEndpointsConfigType {
 
 export interface InferenceEndpointSetting {
   id: string;
+  parameters?: {
+    reasoning?: Pick<ChatCompletionReasoning, 'effort'>;
+  };
 }
 
 export interface InferenceFeatureSetting {
@@ -76,6 +80,8 @@ export interface InferenceFeatureResponse {
   isBeta?: boolean;
   isTechPreview?: boolean;
   ignoreGlobalDefault?: boolean;
+  /** When true, Add model lists only endpoints that accept a prompt template. */
+  allowTemplateRequiredModels?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
@@ -120,6 +126,14 @@ export interface RegionPolicyResponse {
   created_by?: string;
   updated_at?: string;
   updated_by?: string;
+}
+
+export type RegionPolicyConflictRef = string | string[];
+
+export interface RegionPolicyConflictAttributes {
+  denied_endpoint_ids: RegionPolicyConflictRef;
+  referencing_pipelines?: RegionPolicyConflictRef;
+  referencing_indexes?: RegionPolicyConflictRef;
 }
 
 export type ReasoningEffortLevel = 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';

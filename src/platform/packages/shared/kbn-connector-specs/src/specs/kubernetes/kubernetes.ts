@@ -325,7 +325,7 @@ export const KubernetesConnector: ConnectorSpec = {
   metadata: {
     id: '.kubernetes',
     displayName: 'Kubernetes',
-    description: i18n.translate('core.kibanaConnectorSpecs.kubernetes.metadata.description', {
+    description: i18n.translate('connectorSpecs.kubernetes.metadata.description', {
       defaultMessage: 'Read and modify resources in a Kubernetes cluster via its REST API',
     }),
     minimumLicense: 'enterprise',
@@ -340,17 +340,16 @@ export const KubernetesConnector: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.label', {
+          label: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.label', {
             defaultMessage: 'Service account token',
           }),
           meta: {
             token: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.tokenLabel',
-                { defaultMessage: 'Token' }
-              ),
+              label: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.tokenLabel', {
+                defaultMessage: 'Token',
+              }),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.tokenHelpText',
+                'connectorSpecs.kubernetes.auth.bearerWithTls.tokenHelpText',
                 {
                   defaultMessage:
                     'A Kubernetes service account bearer token. Prefer a least-privilege service account scoped to the namespaces and verbs the connector needs.',
@@ -358,21 +357,17 @@ export const KubernetesConnector: ConnectorSpec = {
               ),
             },
             caCert: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.caLabel',
-                { defaultMessage: 'Cluster CA certificate (PEM)' }
-              ),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.caHelpText',
-                {
-                  defaultMessage:
-                    'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.caLabel', {
+                defaultMessage: 'Cluster CA certificate (PEM)',
+              }),
+              helpText: i18n.translate('connectorSpecs.kubernetes.auth.bearerWithTls.caHelpText', {
+                defaultMessage:
+                  'Paste the PEM-encoded certificate authority used to verify the API server. Leave empty to rely on the system trust store or to disable verification.',
+              }),
             },
             verificationMode: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.kubernetes.auth.bearerWithTls.verificationModeHelpText',
+                'connectorSpecs.kubernetes.auth.bearerWithTls.verificationModeHelpText',
                 {
                   defaultMessage:
                     'How to verify the API server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
@@ -404,7 +399,7 @@ export const KubernetesConnector: ConnectorSpec = {
         .url()
         .describe('Kubernetes API server URL (e.g., https://my-cluster.example.com:6443)')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.kubernetes.config.apiUrl.label', {
+          label: i18n.translate('connectorSpecs.kubernetes.config.apiUrl.label', {
             defaultMessage: 'API server URL',
           }),
           widget: 'text',
@@ -417,6 +412,7 @@ export const KubernetesConnector: ConnectorSpec = {
   actions: {
     request: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Make an authenticated request to any Kubernetes API path. This is the flexible escape hatch — ' +
         'prefer the typed actions (listResources, getResource, createResource, applyResource, patchResource, ' +
@@ -438,6 +434,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     listResources: {
       isTool: true,
+      scope: 'read',
       description:
         'List resources of a given type, optionally filtered by namespace and label/field selectors. ' +
         'Returns a compact summary (name, namespace, labels, creation time, status highlights) per item. ' +
@@ -465,6 +462,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     getResource: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full manifest of a single resource by name. Server-managed metadata ' +
         '(managedFields) is stripped to reduce noise.',
@@ -485,6 +483,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     listNamespaces: {
       isTool: true,
+      scope: 'read',
       description: 'List all namespaces in the cluster.',
       input: ListNamespacesInputSchema,
       handler: async (ctx, input: ListNamespacesInput) => {
@@ -501,6 +500,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     getPodLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve logs for a pod (optionally a specific container). Output is capped to the last ' +
         `${MAX_LOG_CHARS} characters to stay within context limits.`,
@@ -541,6 +541,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     listEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List recent cluster events, optionally scoped to a namespace and filtered by label/field ' +
         'selectors. Useful for diagnosing why a resource is failing to schedule, start, or become ready. ' +
@@ -581,6 +582,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     createResource: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new resource from a manifest (POST to the collection). Use applyResource instead if ' +
         'the resource may already exist and you want create-or-update semantics.',
@@ -602,6 +604,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     applyResource: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Create or update a resource using server-side apply (PATCH with apply-patch semantics). ' +
         'This is the idempotent, declarative way to reconcile a resource to a desired manifest.',
@@ -629,6 +632,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     patchResource: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Apply a partial update to an existing resource. Supports strategic-merge (default), merge, ' +
         'and JSON Patch strategies.',
@@ -657,6 +661,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     deleteResource: {
       isTool: true,
+      scope: 'destroy',
       description: 'Delete a resource by name.',
       input: DeleteResourceInputSchema,
       handler: async (ctx, input: DeleteResourceInput) => {
@@ -675,6 +680,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     scaleWorkload: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Scale a Deployment, StatefulSet, or ReplicaSet to a desired number of replicas via the ' +
         'scale subresource.',
@@ -727,7 +733,7 @@ export const KubernetesConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.kubernetes.test.description', {
+    description: i18n.translate('connectorSpecs.kubernetes.test.description', {
       defaultMessage: 'Verifies connectivity by requesting the Kubernetes API server version',
     }),
     handler: async (ctx) => {

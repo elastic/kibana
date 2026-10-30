@@ -7,6 +7,14 @@
 
 export { buildLensConfig } from './lens/build_lens_config';
 export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
+export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
+export { dataDiscoveryAgentGuidance } from './shared/data_discovery_prompt';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
+export { selectDefaultTimeRange } from './time_range/select_default_time_range';
 export { buildVegaConfig } from './vega';
+export { generateVisualizationEsql } from './shared/generate_visualization_esql';
+export {
+  CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+  generateCustomContentEsql,
+} from './shared/custom_content_esql';

@@ -14,6 +14,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
+import { AgentRouteGuard } from './components/redirects/agent_route_guard';
 import { getEnabledRoutes, getViewIdForPathname } from './route_config';
 import { useRouteAccessConfig } from './hooks/use_route_access_config';
 import { useKibana } from './hooks/use_kibana';
@@ -36,28 +37,32 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
 
   return (
     <AppLayout>
-      <Routes>
-        {enabledRoutes.map((route) => (
-          <Route key={route.path} path={route.path} exact>
-            <TrackApplicationView viewId={route.viewId}>{route.element}</TrackApplicationView>
+      {/* Redirects restricted users off any agent that isn't their space
+          default. No-op for admins, unconfigured spaces, and non-agent routes. */}
+      <AgentRouteGuard>
+        <Routes>
+          {enabledRoutes.map((route) => (
+            <Route key={route.path} path={route.path} exact>
+              <TrackApplicationView viewId={route.viewId}>{route.element}</TrackApplicationView>
+            </Route>
+          ))}
+
+          {/* Legacy routes - redirect to new structure */}
+          <Route path="/conversations/:conversationId">
+            <LegacyConversationRedirect />
           </Route>
-        ))}
 
-        {/* Legacy routes - redirect to new structure */}
-        <Route path="/conversations/:conversationId">
-          <LegacyConversationRedirect />
-        </Route>
+          {/* Redirect /agents to /agents/:lastAgentId */}
+          <Route path="/agents" exact>
+            <RootRedirect />
+          </Route>
 
-        {/* Redirect /agents to /agents/:lastAgentId */}
-        <Route path="/agents" exact>
-          <RootRedirect />
-        </Route>
-
-        {/* Root route - redirect to last used agent */}
-        <Route path="/" exact>
-          <RootRedirect />
-        </Route>
-      </Routes>
+          {/* Root route - redirect to last used agent */}
+          <Route path="/" exact>
+            <RootRedirect />
+          </Route>
+        </Routes>
+      </AgentRouteGuard>
     </AppLayout>
   );
 };

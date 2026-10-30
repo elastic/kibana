@@ -282,5 +282,12 @@ export const pciFieldMapperTool = (
       };
     },
     tags: ['security', 'compliance', 'pci', 'field-mapping'],
+    annotations: {
+      title: 'Suggest ECS mappings for PCI compliance queries',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

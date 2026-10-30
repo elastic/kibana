@@ -14,6 +14,9 @@ import {
   rawRuleTemplateSchemaV2,
   rawRuleTemplateSchemaV3,
   rawRuleTemplateSchemaV4,
+  alertingV1RawRuleTemplateSchemaV5,
+  alertingV2RawRuleTemplateSchemaV5,
+  rawRuleTemplateSchemaV5,
 } from '../schemas/raw_rule_template';
 
 export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
@@ -84,6 +87,51 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
         alertingV2RawRuleTemplateSchemaV4.extends({}, { unknowns: 'ignore' }),
       ]) as unknown as ObjectType,
       create: rawRuleTemplateSchemaV4 as unknown as ObjectType,
+    },
+  },
+  /**
+   * Indexes the alerting v2 template fields nested under `rule` that the v2 read
+   * APIs search, tag-filter, sort, and aggregate on. Attributes are unchanged and no
+   * backfill is needed.
+   */
+  '5': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          rule: {
+            properties: {
+              metadata: {
+                properties: {
+                  name: {
+                    type: 'text',
+                    fields: {
+                      keyword: {
+                        type: 'keyword',
+                        ignore_above: 256,
+                      },
+                    },
+                  },
+                  description: {
+                    type: 'text',
+                  },
+                  tags: {
+                    type: 'keyword',
+                    ignore_above: 128,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: schema.oneOf([
+        alertingV1RawRuleTemplateSchemaV5.extends({}, { unknowns: 'ignore' }),
+        alertingV2RawRuleTemplateSchemaV5.extends({}, { unknowns: 'ignore' }),
+      ]) as unknown as ObjectType,
+      create: rawRuleTemplateSchemaV5 as unknown as ObjectType,
     },
   },
 };

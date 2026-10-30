@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
+import { resolveHistorySnapshotIndexPatterns } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
@@ -27,7 +27,7 @@ import type {
 } from '../../../plugin_contract';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import {
   buildSingleEntityAttachmentId,
   ensureEntityAttachment,
@@ -45,39 +45,41 @@ import {
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity id (EUID), canonical entity.name, or user.full_name to fetch. ' +
-        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
-        '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name).'
-    ),
-  interval: z
-    .string()
-    .regex(
-      /^\d+[smhdwM]$/,
-      `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
-    )
-    .describe(
-      `The time interval to get entity profile snapshot history (e.g. '30d', '24h', '1w'). Intervals should be in format {value}{unit} where value is a number and unit is one of 's' (second), 'm' (minute), 'h' (hour), 'd' (day), 'w' (week), or 'M' (month)`
-    )
-    .optional(),
-  date: z
-    .string()
-    .regex(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
-      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
-    )
-    .describe(
-      `Get the entity's profile on a certain date. Date must be in ISO 8601 datetime format. When specified, both the current profile and the profile snapshot will be fetched.`
-    )
-    .optional(),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity id (EUID), canonical entity.name, or user.full_name to fetch. ' +
+          'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
+          '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name).'
+      ),
+    interval: z
+      .string()
+      .regex(
+        /^\d+[smhdwM]$/,
+        `Intervals should follow {value}{unit} where unit is one of s,m,h,d,w,M`
+      )
+      .describe(
+        `The time interval to get entity profile snapshot history (e.g. '30d', '24h', '1w'). Intervals should be in format {value}{unit} where value is a number and unit is one of 's' (second), 'm' (minute), 'h' (hour), 'd' (day), 'w' (week), or 'M' (month)`
+      )
+      .optional(),
+    date: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+        'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+      )
+      .describe(
+        `Get the entity's profile on a certain date. Date must be in ISO 8601 datetime format. When specified, both the current profile and the profile snapshot will be fetched.`
+      )
+      .optional(),
+  })
+);
 
 export const SECURITY_GET_ENTITY_TOOL_ID = securityTool('get_entity');
 
@@ -384,8 +386,9 @@ const enrichEntityResult = async ({
   // date takes full priority: skip risk inputs and return the profile for the matching calendar day
   if (date != null) {
     const { start, end } = dateToUtcDayRange(date);
-    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-      spaceId
+    const historyPatterns = await resolveHistorySnapshotIndexPatterns(esClient, spaceId);
+    const snapshotQuery = `FROM ${historyPatterns.join(
+      ','
     )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= "${start}" AND @timestamp <= "${end}" | LIMIT 1`;
     const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient });
     const profileHistory = snapshotResponse.values.map((r) =>
@@ -447,8 +450,9 @@ const enrichEntityResult = async ({
   }
 
   if (interval) {
-    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-      spaceId
+    const historyPatterns = await resolveHistorySnapshotIndexPatterns(esClient, spaceId);
+    const snapshotQuery = `FROM ${historyPatterns.join(
+      ','
     )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= ${intervalToEsql(
       interval
     )} | SORT @timestamp DESC | LIMIT 100`;
@@ -481,10 +485,23 @@ export const getEntityTool = (
 When exactly one entity is resolved, this tool also stores a \`security.entity\` attachment (creating new or updating existing) and its \`other\` result includes a pre-formatted \`renderTag\` string. To show the rich entity card inline, copy that \`renderTag\` string verbatim onto its own line in your reply BEFORE your prose summary. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT substitute the id with anything derived from the user's prompt. When the query resolves multiple candidates (fallback match) no attachment is stored, no \`renderTag\` is returned, and you must not emit a render tag in that case.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics'],
+    annotations: {
+      title: 'Get Entity',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
-        getEntityStoreV2ToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
+        getEntityAnalyticsToolAvailability({
+          core,
+          request,
+          spaceId,
+          experimentalFeatures,
+          logger,
+        }),
     },
     handler: async (params, { spaceId, esClient, savedObjectsClient, attachments }) => {
       logger.debug(
@@ -503,7 +520,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
       try {
         const { entityType, entityId, interval, date } = params;
 
-        const [coreStart, { entityStore }] = await core.getStartServices();
+        const [coreStart, { entityStore, mitreAttack }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const normalizedEntityId = normalizeEntityId(entityId, entityType);
         const entityStoreClient = entityStore.createCRUDClient(client, spaceId);
@@ -513,6 +530,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           esClient: client,
           experimentalFeatures,
           logger,
+          mitreDataClient: mitreAttack?.getMitreDataClient?.(),
           ml,
           // this is a workaround for a bug in the ML providers where Kibana privileges not read correctly from fake requests
           // (which is what the tool receives from the agent builder context when running as a background task)
@@ -534,12 +552,14 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         const groundingResult = grounding ? [grounding] : [];
 
         if (resolved.status === 'not_found') {
+          const errorMessage = `No entity found for id: ${normalizedEntityId}`;
+          telemetryTracker.recordFailure(errorMessage);
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
-                data: { message: `No entity found for id: ${normalizedEntityId}` },
+                data: { message: errorMessage },
               },
               ...groundingResult,
             ],

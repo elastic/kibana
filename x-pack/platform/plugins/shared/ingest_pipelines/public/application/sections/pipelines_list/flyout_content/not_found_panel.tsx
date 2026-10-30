@@ -8,14 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiButton,
-  useGeneratedHtmlId,
-  EuiSpacer,
-  EuiSplitPanel,
-} from '@elastic/eui';
+import { EuiCode, useGeneratedHtmlId, EuiSpacer, EuiSplitPanel } from '@elastic/eui';
+import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { EuiTitle } from '@elastic/eui';
 import type { Error } from '../../../../shared_imports';
 import { getErrorText, isIntegrationsPipeline } from '../../utils';
@@ -37,7 +31,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
     const isCustom = isIntegrationsPipeline(pipelineName);
     if (displayWarning || (error.statusCode === 404 && isCustom)) {
       return (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
           title={
             isCustom ? (
@@ -55,37 +49,33 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
               />
             )
           }
-          color="warning"
-          iconType="warning"
           data-test-subj="missingCustomPipeline"
-        >
-          <EuiButton
-            color="warning"
-            onClick={onCreatePipeline}
-            data-test-subj="createCustomPipeline"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.list.missingCustomPipeline.button"
-              defaultMessage="Create pipeline"
-            />
-          </EuiButton>
-        </EuiCallOut>
+          actionProps={{
+            primary: {
+              onClick: onCreatePipeline,
+              'data-test-subj': 'createCustomPipeline',
+              children: (
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.missingCustomPipeline.button"
+                  defaultMessage="Create pipeline"
+                />
+              ),
+            },
+          }}
+        />
       );
     }
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.ingestPipelines.list.loadingError"
             defaultMessage="Error loading pipeline"
           />
         }
-        color="danger"
-        iconType="warning"
         data-test-subj="pipelineError"
-      >
-        <p data-test-subj="cause">{getErrorText(error)}</p>
-      </EuiCallOut>
+        text={<p data-test-subj="cause">{getErrorText(error)}</p>}
+      />
     );
   };
   const pipelineErrorTitleId = useGeneratedHtmlId();

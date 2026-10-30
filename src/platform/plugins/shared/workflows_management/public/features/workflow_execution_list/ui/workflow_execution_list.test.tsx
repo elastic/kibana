@@ -14,35 +14,6 @@ import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workfl
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
-jest.mock('./workflow_execution_list_item', () => ({
-  WorkflowExecutionListItem: ({
-    status,
-    startedAt,
-    executedByLabel,
-    onClick,
-    selected,
-  }: {
-    status: string;
-    startedAt: Date | null;
-    executedByLabel?: string;
-    onClick: () => void;
-    selected: boolean;
-  }) => (
-    <div
-      data-test-subj="workflowExecutionListItem"
-      data-selected={selected}
-      data-started-at={startedAt ? startedAt.toISOString() : 'null'}
-      data-executed-by-label={executedByLabel}
-      onClick={onClick}
-      role="button"
-      onKeyDown={() => {}}
-      tabIndex={0}
-    >
-      {status}
-    </div>
-  ),
-}));
-
 jest.mock('./workflow_execution_list_filters', () => ({
   ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
 }));
@@ -99,18 +70,18 @@ describe('WorkflowExecutionList', () => {
     error: null,
     onExecutionClick: jest.fn(),
     selectedId: null,
+    lastViewedId: null,
     setPaginationObserver: jest.fn(),
     canCancel: true,
     isCancelInProgress: false,
     onConfirmCancel: jest.fn().mockResolvedValue(undefined),
+    hasNextPage: false,
   };
 
   const renderComponent = (
     overrides: Partial<WorkflowExecutionListProps> = {},
     services: StartServicesMock = createStartServicesMock()
   ) => {
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
     return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
       wrapper: getTestProvider({ services }),
     });
@@ -166,13 +137,18 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('with execution data', () => {
-    it('renders all execution items', () => {
+    it('renders a non-responsive four-column table of execution rows', () => {
       renderComponent();
-      const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items).toHaveLength(2);
+      const table = screen.getByTestId('workflowExecutionListTable');
+      expect(table).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Started')).toBeInTheDocument();
+      expect(screen.getByText('Triggered by')).toBeInTheDocument();
+      expect(screen.getByText('Duration')).toBeInTheDocument();
+      expect(screen.getAllByTestId('workflowExecutionListItem')).toHaveLength(2);
     });
 
-    it('calls onExecutionClick when an execution item is clicked', () => {
+    it('calls onExecutionClick when an execution row is clicked', () => {
       const onExecutionClick = jest.fn();
       renderComponent({ onExecutionClick });
       const items = screen.getAllByTestId('workflowExecutionListItem');
@@ -200,16 +176,92 @@ describe('WorkflowExecutionList', () => {
       );
     });
 
-    it('hides unresolved executor labels on Serverless', () => {
+    it('shows the executor name resolved by the server without a client profile lookup', () => {
+      const services = createStartServicesMock();
+      const [first, second] = mockExecutions.results;
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              {
+                ...first,
+                executedByProfile: {
+                  uid: 'user1',
+                  enabled: true,
+                  user: { username: 'jdoe', full_name: 'Jane Doe' },
+                  data: {},
+                },
+              },
+              second,
+            ],
+          },
+        },
+        services
+      );
+
+      expect(
+        within(screen.getAllByTestId('workflowExecutionListItem')[0]).getByText('Jane Doe')
+      ).toBeInTheDocument();
+      expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
+    });
+
+    it('hides unresolved profile UIDs on Serverless', () => {
       const services = createStartServicesMock();
       services.cloud.isCloudEnabled = true;
       services.cloud.isServerlessEnabled = true;
+      const profileUid = 'u_mGBROF_q5bm_A5E_0';
 
-      renderComponent({ showExecutor: true }, services);
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              { ...mockExecutions.results[0], executedBy: profileUid },
+              mockExecutions.results[1],
+            ],
+          },
+        },
+        services
+      );
 
       expect(screen.getAllByTestId('workflowExecutionListItem')[0]).not.toHaveAttribute(
         'data-executed-by-label'
       );
+    });
+
+    it('shows a service account id on Serverless', () => {
+      const services = createStartServicesMock();
+      services.cloud.isCloudEnabled = true;
+      services.cloud.isServerlessEnabled = true;
+      const serviceAccountId = 'sa-nightshift-relay';
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              { ...mockExecutions.results[0], executedBy: serviceAccountId },
+              mockExecutions.results[1],
+            ],
+          },
+        },
+        services
+      );
+
+      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).toHaveAttribute(
+        'data-executed-by-label',
+        serviceAccountId
+      );
+    });
+
+    it('shows a test-run flask on test executions', () => {
+      renderComponent();
+      expect(screen.getByLabelText('Test run')).toBeInTheDocument();
     });
   });
 
@@ -244,10 +296,10 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('startedAt date handling', () => {
-    it('passes a valid Date when startedAt is a valid ISO string', () => {
+    it('passes through a valid ISO startedAt string', () => {
       renderComponent();
       const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00.000Z');
+      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00Z');
     });
 
     it('passes null when startedAt is an empty string', () => {

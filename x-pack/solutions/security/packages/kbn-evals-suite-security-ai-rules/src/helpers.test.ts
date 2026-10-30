@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  validateEsqlSyntax,
-  hasRequiredFields,
-  calculateSetMetrics,
-  extractMitreTechniques,
-} from './helpers';
+import { validateEsqlSyntax, hasRequiredFields, extractMitreTechniques } from './helpers';
 
 import type { ReferenceRule } from '../datasets/sample_rules';
 
@@ -93,35 +88,6 @@ describe('helpers', () => {
       expect(result.missing).toContain('description');
       expect(result.missing).toContain('severity');
       expect(result.missing).toContain('tags');
-    });
-  });
-
-  describe('calculateSetMetrics', () => {
-    it('should calculate perfect match', () => {
-      const predicted = new Set(['A', 'B', 'C']);
-      const expected = new Set(['A', 'B', 'C']);
-      const result = calculateSetMetrics(predicted, expected);
-      expect(result.precision).toBe(1.0);
-      expect(result.recall).toBe(1.0);
-      expect(result.f1).toBe(1.0);
-    });
-
-    it('should calculate partial match', () => {
-      const predicted = new Set(['A', 'B', 'D']);
-      const expected = new Set(['A', 'B', 'C']);
-      const result = calculateSetMetrics(predicted, expected);
-      expect(result.precision).toBeCloseTo(2 / 3, 2);
-      expect(result.recall).toBeCloseTo(2 / 3, 2);
-      expect(result.f1).toBeCloseTo(2 / 3, 2);
-    });
-
-    it('should handle empty sets', () => {
-      const predicted = new Set<string>();
-      const expected = new Set<string>();
-      const result = calculateSetMetrics(predicted, expected);
-      expect(result.precision).toBe(1.0);
-      expect(result.recall).toBe(1.0);
-      expect(result.f1).toBe(1.0);
     });
   });
 

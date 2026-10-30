@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/ui-chrome-layout-utils",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "private"
-}

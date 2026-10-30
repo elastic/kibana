@@ -33,6 +33,7 @@ const createDefaultParams = () => {
   const esqlFieldsCache = createMapCache();
   const dataSourcesCache = createMapCache();
   const historyStarredItemsCache = createMapCache();
+  const timeseriesIndicesCache = createMapCache();
 
   // memoizedFieldsFromESQL never resolves so getColumnsFor stays pending,
   // letting us assert on the AbortSignal that was passed in.
@@ -80,6 +81,11 @@ const createDefaultParams = () => {
     memoizedFieldsFromESQL,
     historyStarredItemsCache,
     memoizedHistoryStarredItems,
+    timeseriesIndicesCache,
+    memoizedTimeseriesIndices: jest.fn().mockReturnValue({
+      timestamp: Date.now(),
+      result: Promise.resolve({ indices: [] }),
+    }) as unknown as Parameters<typeof useEsqlCallbacks>[0]['memoizedTimeseriesIndices'],
     favoritesClient: {} as FavoritesClient<StarredQueryMetadata>,
     getJoinIndicesCallback: jest.fn(),
     enableResourceBrowser: false,
@@ -153,6 +159,28 @@ describe('useEsqlCallbacks', () => {
 
       expect(capturedSignal!.aborted).toBe(true);
     });
+
+    it('keeps sources requests alive when the fields cache is replaced', async () => {
+      const params = createDefaultParams();
+
+      let capturedSignal: AbortSignal | undefined;
+      (params.memoizedSources as unknown as jest.Mock).mockImplementation(
+        (_core: unknown, _getLicense: unknown, _enrichSources: unknown, signal?: AbortSignal) => {
+          capturedSignal = signal;
+          return { timestamp: Date.now(), result: new Promise(() => {}) };
+        }
+      );
+
+      const { result, rerender } = renderHook((props) => useEsqlCallbacks(props), {
+        initialProps: params,
+      });
+      // A project routing change recreates the fields cache.
+      rerender({ ...params, esqlFieldsCache: createMapCache() });
+
+      void result.current.getSources!();
+
+      expect(capturedSignal!.aborted).toBe(false);
+    });
   });
 
   describe('getColumnsFor', () => {
@@ -190,6 +218,25 @@ describe('useEsqlCallbacks', () => {
       expect(firstSignal.aborted).toBe(true);
       expect(secondSignal.aborted).toBe(false);
       expect(params.esqlFieldsCache.delete).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    });
+
+    it('restarts the columns request when the fields cache is replaced', async () => {
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook((props) => useEsqlCallbacks(props), {
+        initialProps: params,
+      });
+
+      void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
+      const memoized = params.memoizedFieldsFromESQL as unknown as jest.Mock;
+      const firstSignal = memoized.mock.calls[0][0].signal as AbortSignal;
+
+      // A project routing change recreates the fields cache.
+      rerender({ ...params, esqlFieldsCache: createMapCache() });
+      void result.current.getColumnsFor!({ query: 'FROM logs | LIMIT 10' });
+      const secondSignal = memoized.mock.calls[1][0].signal as AbortSignal;
+
+      expect(firstSignal.aborted).toBe(true);
+      expect(secondSignal.aborted).toBe(false);
     });
 
     it('does not abort when the same query is requested again', async () => {

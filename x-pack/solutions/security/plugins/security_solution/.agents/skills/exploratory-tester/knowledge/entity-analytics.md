@@ -47,7 +47,7 @@ sections.
 ### Privilege requirements for EA entity flyout
 Both entity analytics Kibana features AND Elasticsearch index privileges are required. Kibana-only roles (`siem:*`, `securitySolutionCases:*`) will see "Privileges required" empty state on EA home even with full cases access. Required ES index read privileges:
 - `risk-score.risk-score-*`
-- `.entities.v2.latest.security_default-*`
-- `.entities.v2.metadata.security_default-*`
+- `.entities.v2.latest.default-*`
+- `.entities.v2.metadata.default-*`
 - `entities-latest-default`
 - `entities-metadata-default`

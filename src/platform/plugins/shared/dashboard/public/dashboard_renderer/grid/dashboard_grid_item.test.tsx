@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { buildMockDashboardApi } from '../../mocks';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
-import { Item } from './dashboard_grid_item';
+import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { act, render } from '@testing-library/react';
@@ -83,7 +83,7 @@ const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const component = render(
     <DashboardContext.Provider value={api}>
       <DashboardInternalContext.Provider value={internalApi}>
-        <Item {...props} />
+        <DashboardGridItem {...props} />
       </DashboardInternalContext.Provider>
     </DashboardContext.Provider>
   );

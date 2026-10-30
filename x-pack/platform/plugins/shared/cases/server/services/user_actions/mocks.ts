@@ -1040,6 +1040,59 @@ export const patchUpdateExtendedFieldsCasesRequest: PatchCasesArgs = {
   ],
 };
 
+// A case with a linked pair: v1 `priority` ⇄ v2 `priority_as_keyword`.
+const originalCasesWithPairedFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
+        extended_fields: { priority_as_keyword: 'low' },
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+/**
+ * One paired edit: both representations of the linked field change, and the
+ * pairing adapter recorded the link. The extended_fields user action is
+ * canonical; the duplicate customFields action is suppressed (#282474).
+ */
+export const patchPairedFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' }],
+        extended_fields: { priority_as_keyword: 'high' },
+      },
+      originalCase: originalCasesWithPairedFields[0],
+      pairedCustomFieldStorageKeys: { priority: 'priority_as_keyword' },
+    },
+  ],
+};
+
+/**
+ * A paired clear: the storage key is deleted from extended_fields, which the
+ * extended_fields activity does not record — the customFields action stays the
+ * only record of the edit and must not be suppressed.
+ */
+export const patchPairedClearCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }],
+        extended_fields: {},
+      },
+      originalCase: originalCasesWithPairedFields[0],
+      pairedCustomFieldStorageKeys: { priority: 'priority_as_keyword' },
+    },
+  ],
+};
+
 export const getExtendedFieldsUserActions = ({
   isMock,
   payload,

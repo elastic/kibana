@@ -50,7 +50,11 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
           });
 
           if (!result) {
-            throw new Error('Unable to get risk engine configuration');
+            return siemResponse.error({
+              statusCode: 404,
+              body: { message: 'Risk score configuration is not initialized' },
+              bypassErrorFormat: true,
+            });
           }
           return response.ok({
             body: {

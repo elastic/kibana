@@ -18,7 +18,34 @@ export const transformMaintenanceWindowResponse = (
     events: response.events,
     rRule: response.r_rule,
     ...(response.category_ids !== undefined ? { categoryIds: response.category_ids } : {}),
-    ...(response.scoped_query !== undefined ? { scopedQuery: response.scoped_query } : {}),
+    ...(response.scoped_query != null
+      ? {
+          // `enabled` is not in the domain AlertsFilterQueryAttributes — it is a route-layer
+          // convenience that we drop here. The UI reads enabled from scope.alerting.enabled.
+          scopedQuery: {
+            kql: response.scoped_query.kql ?? '',
+            filters: response.scoped_query.filters ?? [],
+            dsl: response.scoped_query.dsl,
+          },
+        }
+      : {}),
+    ...(response.scope !== undefined
+      ? {
+          scope: {
+            ...(response.scope.alerting !== undefined
+              ? {
+                  alerting: {
+                    ...response.scope.alerting,
+                    enabled: response.scope.alerting.enabled ?? true,
+                  },
+                }
+              : {}),
+            ...(response.scope.alerting_v2 !== undefined
+              ? { alertingV2: response.scope.alerting_v2 }
+              : {}),
+          },
+        }
+      : {}),
     createdBy: response.created_by,
     updatedBy: response.updated_by,
     createdAt: response.created_at,

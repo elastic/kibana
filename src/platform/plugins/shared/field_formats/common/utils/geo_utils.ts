@@ -13,8 +13,9 @@ import { i18n } from '@kbn/i18n';
 export const converter = new usng.Converter();
 
 export function withinRange(value: string | number, min: number, max: number) {
-  // @ts-expect-error upgrade typescript v5.1.6
-  const isInvalid = value === '' || value > max || value < min;
+  const numericValue = Number(value);
+  const isInvalid =
+    value === '' || !Number.isFinite(numericValue) || numericValue > max || numericValue < min;
   const error = isInvalid
     ? i18n.translate('fieldFormats.geoUtils.outOfRangeErrorMsg', {
         defaultMessage: `Must be between {min} and {max}`,

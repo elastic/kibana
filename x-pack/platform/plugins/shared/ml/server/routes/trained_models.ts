@@ -571,7 +571,7 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
         try {
           const { pipeline, docs } = request.body;
-          const body = await client.asInternalUser.ingest.simulate({
+          const body = await client.asCurrentUser.ingest.simulate({
             pipeline,
             docs,
           });

@@ -8,40 +8,53 @@
  */
 
 import type { RequestTiming } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
-import type { DashboardState } from '../types';
+import type { DashboardRequestServices } from '../types';
 import type { DashboardCreateResponseBody } from './types';
-import { getUseGASchemas } from '../get_use_ga_schemas';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequence,
+  INITIAL_HISTORY_SEQUENCE,
+} from '../../change_history/utils';
+
+export interface CreateOptions {
+  id?: string;
+  serverTiming?: RequestTiming;
+  spaceId?: string;
+  isDashboardAppRequest?: boolean;
+}
 
 export async function create(
-  requestCtx: RequestHandlerContext,
+  services: DashboardRequestServices,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardState,
-  serverTiming?: RequestTiming,
-  isDashboardAppRequest: boolean = false,
-  id?: string
+  { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
-  const { core } = await requestCtx.resolve(['core']);
-  const useGASchemas = await getUseGASchemas(core);
   const { access_control: accessControl, ...restOfData } = createBody;
 
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfData,
     isDashboardAppRequest,
-    serverTiming,
-    useGASchemas
+    serverTiming
   );
 
-  const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
+  const supportsAccessControl = services.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
-  const savedObject = await core.savedObjects.client.create(
+
+  // a recreated ID may still have history from a deleted dashboard, so continue from it
+  const historySequence = id
+    ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence: undefined })
+    : INITIAL_HISTORY_SEQUENCE;
+
+  const savedObject = await services.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
-    soAttributes,
+    { ...soAttributes, historySequence },
     {
       ...(id !== undefined && { id }),
       references: soReferences,
@@ -53,13 +66,31 @@ export async function create(
         }),
     }
   );
+  // Rebuilt from stored attributes, not createBody: restore replays snapshots in dashboard-app format,
+  // and panel IDs are only generated on the way in.
+  const snapshot = getHistorySnapshot({
+    dashboardId: savedObject.id,
+    attributes: soAttributes,
+    references: soReferences,
+    strictValidationSchema,
+  });
+  if (snapshot) {
+    await addToHistory({
+      user: services.security.authc.getCurrentUser(),
+      dashboardId: savedObject.id,
+      snapshot,
+      spaceId,
+      sequence: historySequence,
+      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      type: 'create',
+    });
+  }
 
   return getDashboardCRUResponseBody(
     savedObject,
     'create',
     strictValidationSchema,
     isDashboardAppRequest,
-    serverTiming,
-    useGASchemas
+    serverTiming
   );
 }

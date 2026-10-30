@@ -20,15 +20,30 @@ const createMockNavLink = (
   ...partial,
 });
 
-const setWindowLocation = (pathname: string) => {
+const setWindowLocation = (pathname: string, hash = '') => {
   Object.defineProperty(window, 'location', {
     value: {
       pathname,
       origin: 'http://localhost:5601',
+      href: `http://localhost:5601${pathname}${hash}`,
+      hash,
     },
     writable: true,
   });
 };
+
+const discoverNavLink = (overrides: Partial<ChromeNavLink> = {}): ChromeNavLink =>
+  createMockNavLink({
+    id: 'discover',
+    title: 'Discover',
+    url: '/app/discover',
+    category: {
+      id: 'analytics',
+      label: 'Analytics',
+      order: 1000,
+    },
+    ...overrides,
+  });
 
 describe('getAppDetails', () => {
   beforeEach(() => {
@@ -212,6 +227,68 @@ describe('getAppDetails', () => {
       title: 'SLOs Welcome',
       id: 'slos-welcome',
       url: '/app/slos/welcome',
+    });
+  });
+
+  it('should use titleOverride as a full title replacement', () => {
+    setWindowLocation('/app/discover');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
+
+    const result = getAppDetails(coreStartMock, { isEsql: true }, 'Analytics - Discover ES|QL');
+
+    expect(result).toEqual({
+      title: 'Analytics - Discover ES|QL',
+      id: 'discover',
+      url: '/app/discover',
+      context: { isEsql: true },
+    });
+  });
+
+  it('should omit empty context from the result', () => {
+    setWindowLocation('/app/discover');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
+
+    expect(getAppDetails(coreStartMock, {})).toEqual({
+      title: 'Analytics - Discover',
+      id: 'discover',
+      url: '/app/discover',
+    });
+  });
+
+  it('should keep the derived title when no title override is provided', () => {
+    setWindowLocation('/app/dashboard');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([
+      createMockNavLink({
+        id: 'dashboard',
+        title: 'Dashboard',
+        url: '/app/dashboard',
+        category: {
+          id: 'analytics',
+          label: 'Analytics',
+          order: 1000,
+        },
+      }),
+    ]);
+
+    const result = getAppDetails(coreStartMock, { isEsql: true });
+
+    expect(result).toEqual({
+      title: 'Analytics - Dashboard',
+      id: 'dashboard',
+      url: '/app/dashboard',
+      context: { isEsql: true },
+    });
+  });
+
+  it('should ignore an empty title override', () => {
+    setWindowLocation('/app/discover');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
+
+    expect(getAppDetails(coreStartMock, { isEsql: true }, '')).toEqual({
+      title: 'Analytics - Discover',
+      id: 'discover',
+      url: '/app/discover',
+      context: { isEsql: true },
     });
   });
 });

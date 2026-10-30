@@ -20,12 +20,15 @@ import {
   type QueryESQLControl,
   type StaticESQLControl,
 } from '@kbn/esql-types';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasPinnedPanels,
   apiPublishesChildren,
-  apiPublishesESQLQuery,
+  getViewModeSubject,
+  apiPublishesEsql,
   initializeRelatedPanels,
   initializeStateApi,
+  useStateFromPublishingSubject,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -57,6 +60,8 @@ export const getESQLControlFactory = <
     layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
+
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
@@ -235,6 +240,8 @@ export const getESQLControlFactory = <
       return {
         api,
         Component: () => {
+          const viewMode = useStateFromPublishingSubject(viewMode$);
+
           useEffect(() => {
             return () => {
               selections.cleanup();
@@ -253,6 +260,7 @@ export const getESQLControlFactory = <
                   hide_exists: true,
                   hide_sort: true,
                   placeholder: VariableControlsStrings.emptySelectionPlaceholder,
+                  isInteractive: viewMode !== 'non-interactive',
                 },
                 customStrings: {
                   invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
@@ -289,8 +297,11 @@ function getRelatedStaticQuery(
    * For static ??field controls, we need to know which query to pull suggestions from
    */
   const getRelatedQuery = (_api: unknown) => {
-    const query = apiPublishesESQLQuery(_api) ? _api.query$.getValue().esql : undefined;
-    return query && getESQLQueryVariables(query).includes(variableKey) ? query : undefined;
+    if (!apiPublishesEsql(_api)) return undefined;
+    const match = _api.esql$
+      .getValue()
+      .find((q) => getESQLQueryVariables(q.esql).includes(variableKey));
+    return match?.esql;
   };
 
   const parentQuery = getRelatedQuery(parentApi); // check if parent API publishes a related query

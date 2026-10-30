@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
+  EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -53,21 +54,31 @@ const overflowPopoverStyle = css`
   overflow: auto;
 `;
 
+const workflowNameFlexItemCss = css`
+  min-width: 0;
+  overflow: hidden;
+`;
+
+const workflowLinkCss = css`
+  display: block;
+  width: 100%;
+  min-width: 0;
+`;
+
+const durationCellCss = css`
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+  text-align: right;
+`;
+
 export const getWorkflowExecutionActionContextFromDto = (
   execution: WorkflowExecutionListItemDto
 ) => ({
   executionId: execution.id,
   workflowId: execution.workflowId,
   context: execution.context,
+  isTestRun: execution.isTestRun,
 });
-
-const workflowLinkCss = css`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-  max-width: 100%;
-`;
 
 export const WorkflowExecutionWorkflowCell = ({
   execution,
@@ -102,28 +113,36 @@ export const WorkflowExecutionWorkflowCell = ({
       {execution.status ? (
         <EuiFlexItem grow={false}>{getExecutionStatusIcon(euiTheme, execution.status)}</EuiFlexItem>
       ) : null}
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          min-width: 0;
-          overflow: hidden;
-        `}
-      >
+      <EuiFlexItem grow css={workflowNameFlexItemCss}>
         <EuiLink
           onClick={handleClick}
           data-test-subj="workflowExecutionWorkflowLink"
           css={workflowLinkCss}
-          title={name}
           aria-label={name}
           href="#"
         >
-          {name}
+          <EuiTextTruncate
+            text={name}
+            truncation="middle"
+            data-test-subj="executionsTableWorkflowName"
+          >
+            {(truncatedText) => {
+              const content = <span>{truncatedText}</span>;
+              return truncatedText !== name ? (
+                <EuiToolTip content={name} anchorProps={{ style: { width: '100%' } }}>
+                  {content}
+                </EuiToolTip>
+              ) : (
+                content
+              );
+            }}
+          </EuiTextTruncate>
         </EuiLink>
       </EuiFlexItem>
       {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
         <EuiFlexItem grow={false}>
           <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
-            {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+            {i18n.translate('workflows.executionListItem.actionRequiredBadge', {
               defaultMessage: 'Action is required',
             })}
           </EuiBadge>
@@ -142,6 +161,14 @@ export const WorkflowExecutionTagsCell = ({
     <WorkflowExecutionTagsContent tags={execution.tags} isManaged={execution.managed === true} />
   );
 };
+
+const TruncatedTagBadge = ({ tag }: { tag: string }) => (
+  <EuiToolTip content={tag}>
+    <EuiBadge color="hollow" css={visibleTagStyle} title={tag} tabIndex={0}>
+      {tag}
+    </EuiBadge>
+  </EuiToolTip>
+);
 
 const WorkflowExecutionTagsContent = ({
   tags,
@@ -163,7 +190,7 @@ const WorkflowExecutionTagsContent = ({
     0,
     isManaged ? MAX_VISIBLE_TAGS - 1 : MAX_VISIBLE_TAGS
   );
-  const hidden = workflowTags.slice(visibleWorkflowTags.length);
+  const hiddenCount = workflowTags.length - visibleWorkflowTags.length;
 
   return (
     <EuiFlexGroup
@@ -179,44 +206,45 @@ const WorkflowExecutionTagsContent = ({
         </EuiFlexItem>
       ) : null}
       {visibleWorkflowTags.map((tag) => (
-        <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
-          <EuiBadge color="hollow" title={tag}>
-            {tag}
-          </EuiBadge>
+        <EuiFlexItem key={tag} grow={false}>
+          <TruncatedTagBadge tag={tag} />
         </EuiFlexItem>
       ))}
-      {hidden.length > 0 && (
+      {hiddenCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             ownFocus
             isOpen={isOpen}
             closePopover={close}
-            aria-label={i18n.translate('workflowsManagement.executionsPage.tags.popoverTitle', {
-              defaultMessage: 'Tags',
+            anchorPosition="downLeft"
+            panelPaddingSize="s"
+            aria-label={i18n.translate('workflows.executionsPage.table.tagsPopoverTitle', {
+              defaultMessage: 'All tags',
             })}
             button={
               <EuiBadge
                 color="hollow"
                 onClick={toggle}
                 onClickAriaLabel={i18n.translate(
-                  'workflowsManagement.executionsPage.tags.moreAriaLabel',
+                  'workflows.executionsPage.table.showAllTagsAriaLabel',
                   {
-                    defaultMessage: 'View more tags',
+                    defaultMessage: 'Show all {count} tags',
+                    values: { count: workflowTags.length },
                   }
                 )}
-                data-test-subj="workflowExecutionTagsOverflowBadge"
+                data-test-subj="executionsTableTagsOverflow"
               >
-                {`+${hidden.length}`}
+                {`+${hiddenCount}`}
               </EuiBadge>
             }
           >
             <EuiPopoverTitle>
-              {i18n.translate('workflowsManagement.executionsPage.tags.popoverTitle', {
-                defaultMessage: 'Tags',
+              {i18n.translate('workflows.executionsPage.table.tagsPopoverTitle', {
+                defaultMessage: 'All tags',
               })}
             </EuiPopoverTitle>
             <EuiBadgeGroup gutterSize="xs" css={overflowPopoverStyle}>
-              {hidden.map((tag) => (
+              {workflowTags.map((tag) => (
                 <EuiBadge key={tag} color="hollow">
                   {tag}
                 </EuiBadge>
@@ -279,7 +307,11 @@ export const WorkflowExecutionDurationCell = ({
   const duration = execution.duration;
 
   if (duration != null) {
-    return <span data-test-subj="workflowExecutionDurationCell">{formatDuration(duration)}</span>;
+    return (
+      <span data-test-subj="workflowExecutionDurationCell" css={durationCellCss}>
+        {formatDuration(duration)}
+      </span>
+    );
   }
 
   if (execution.status && !isTerminalStatus(execution.status)) {
@@ -287,7 +319,7 @@ export const WorkflowExecutionDurationCell = ({
       <EuiLoadingSpinner
         size="m"
         data-test-subj="workflowExecutionDurationInProgress"
-        aria-label={i18n.translate('workflowsManagement.executionsPage.duration.inProgress', {
+        aria-label={i18n.translate('workflows.executionsPage.duration.inProgress', {
           defaultMessage: 'In progress',
         })}
       />

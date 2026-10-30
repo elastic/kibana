@@ -44,20 +44,15 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useLicense } from '../../common/use_license';
 import { useGetCategories } from '../../containers/use_get_categories';
 import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import {
-  CaseSeverity,
-  AttachmentType,
-  ConnectorTypes,
-  CustomFieldTypes,
-} from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CreateCaseFormFieldsProps } from './form_fields';
 import { CreateCaseFormFields } from './form_fields';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { renderWithTestingProviders } from '../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { DEFAULT_FEATURES } from '../../../common/constants';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 import { useSubmitCase } from './use_submit_case';
@@ -321,7 +316,9 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
+      expect(postCase).toHaveBeenCalledWith({
+        request: { ...sampleDataWithoutTags, tags: sampleTags },
+      });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -355,7 +352,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           severity: CaseSeverity.HIGH,
@@ -408,7 +405,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
+      expect(postCase).toHaveBeenCalledWith({ request: { ...sampleData, category: 'First' } });
     });
 
     it('should toggle sync settings', async () => {
@@ -437,15 +434,15 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false, extractObservables: false },
+          settings: { syncAlerts: false, extractObservables: true },
         },
       });
     });
 
-    it('should set sync alerts to false when the sync feature setting is false', async () => {
+    it('should set sync alerts to false for a non-Security owner', async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         data: connectorsMock,
@@ -453,7 +450,7 @@ describe('Create case', () => {
 
       renderWithTestingProviders(
         <TestComponent
-          selectedOwner={SECURITY_SOLUTION_OWNER}
+          selectedOwner={OBSERVABILITY_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -461,7 +458,7 @@ describe('Create case', () => {
         </TestComponent>,
         {
           wrapperProps: {
-            features: { alerts: { sync: false, enabled: true } },
+            owner: [OBSERVABILITY_OWNER],
           },
         }
       );
@@ -473,11 +470,45 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
+          owner: OBSERVABILITY_OWNER,
           settings: { syncAlerts: false, extractObservables: false },
         },
+      });
+    });
+
+    it('inherits extractObservables from the space configuration when creating a case', async () => {
+      useGetConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        data: connectorsMock,
+      });
+
+      renderWithTestingProviders(
+        <TestComponent
+          selectedOwner={SECURITY_SOLUTION_OWNER}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={{ ...currentConfiguration, extractObservables: false }}
+        >
+          <CreateCaseFormFields
+            {...defaultCreateCaseForm}
+            configuration={{ ...currentConfiguration, extractObservables: false }}
+          />
+        </TestComponent>
+      );
+
+      await waitForFormToRender();
+      await fillFormReactTestingLib({ user });
+
+      await user.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => expect(postCase).toHaveBeenCalled());
+
+      expect(postCase).toHaveBeenCalledWith({
+        request: expect.objectContaining({
+          settings: { syncAlerts: true, extractObservables: false },
+        }),
       });
     });
 
@@ -559,7 +590,7 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           customFields: [
@@ -621,7 +652,7 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           connector: {
@@ -682,11 +713,11 @@ describe('Create case', () => {
       await user.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalled();
+        expect(postCase).toHaveBeenCalled();
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
-      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
+      expect(postCase).toHaveBeenCalledWith({ request: sampleDataWithoutTags });
     });
 
     it('should set the category correctly', async () => {
@@ -720,7 +751,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, category } });
+      expect(postCase).toHaveBeenCalledWith({ request: { ...sampleDataWithoutTags, category } });
     });
   });
 
@@ -768,7 +799,7 @@ describe('Create case', () => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
       expect(onFormSubmitSuccess).toHaveBeenCalled();
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           connector: {
@@ -906,26 +937,18 @@ describe('Create case', () => {
       data: connectorsMock,
     });
 
-    const attachments = [
+    const attachments: CaseAttachments = [
       {
-        alertId: '1234',
-        index: '',
-        rule: {
-          id: '45321',
-          name: 'my rule',
-        },
+        attachmentId: '1234',
+        metadata: { index: '', rule: { id: '45321', name: 'my rule' } },
         owner: 'owner',
-        type: AttachmentType.alert as const,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
       },
       {
-        alertId: '7896',
-        index: '',
-        rule: {
-          id: '445324',
-          name: 'my rule',
-        },
+        attachmentId: '7896',
+        metadata: { index: '', rule: { id: '445324', name: 'my rule' } },
         owner: 'second-owner',
-        type: AttachmentType.alert as const,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
       },
     ];
 
@@ -993,16 +1016,12 @@ describe('Create case', () => {
       ...sampleConnectorData,
       data: connectorsMock,
     });
-    const attachments = [
+    const attachments: CaseAttachments = [
       {
-        alertId: '1234',
-        index: '',
-        rule: {
-          id: '45321',
-          name: 'my rule',
-        },
+        attachmentId: '1234',
+        metadata: { index: '', rule: { id: '45321', name: 'my rule' } },
         owner: 'owner',
-        type: AttachmentType.alert as const,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
       },
     ];
 
@@ -1019,10 +1038,6 @@ describe('Create case', () => {
       {
         wrapperProps: {
           license,
-          features: {
-            ...DEFAULT_FEATURES,
-            observables: { enabled: true, autoExtract: true },
-          },
         },
       }
     );
@@ -1168,7 +1183,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           assignees: [{ uid: userProfiles[0].uid }],

@@ -443,7 +443,7 @@ describe('utils', () => {
         stream: ndJsonStream,
         objectLimit: 1000,
       });
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -465,7 +465,7 @@ describe('utils', () => {
         objectLimit: 1000,
       });
 
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules);
 
       expect(output.length).toEqual(1);
       expect(errors).toEqual([
@@ -496,14 +496,14 @@ describe('utils', () => {
         objectLimit: 1000,
       });
 
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
       expect(errors).toEqual([]);
     });
 
-    test('returns tuple of empty duplicate errors array and single rule when rules with matching rule-ids passed in and `overwrite` is true', async () => {
+    test('returns tuple of duplicate conflict error and single rule when rules with matching rule-ids passed in and `overwrite` is true', async () => {
       const rule = getCreateRulesSchemaMock('rule-1');
       const rule2 = getCreateRulesSchemaMock('rule-1');
       const ndJsonStream = new Readable({
@@ -518,10 +518,18 @@ describe('utils', () => {
         objectLimit: 1000,
       });
 
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, true);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules);
 
       expect(output.length).toEqual(1);
-      expect(errors.length).toEqual(0);
+      expect(errors).toEqual([
+        {
+          error: {
+            message: 'More than one rule with rule-id: "rule-1" found',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
     });
 
     test('returns tuple of empty duplicate errors array and single rule when rules without a rule-id is passed in', async () => {
@@ -539,7 +547,7 @@ describe('utils', () => {
         objectLimit: 1000,
       });
 
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);

@@ -28,7 +28,6 @@ import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { gapFillStatus, gapStatus } from '../../../../../common';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
 jest.mock('../../auto_fill_scheduler/methods/utils', () => ({
@@ -78,6 +77,7 @@ describe('getRuleIdsWithGaps', () => {
       spaceId: 'default',
       namespace: 'default',
       getUserName: jest.fn(),
+      getProfileUid: jest.fn(),
       createAPIKey: jest.fn(),
       cloneAPIKey: jest.fn(),
       logger,
@@ -98,7 +98,6 @@ describe('getRuleIdsWithGaps', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
-      featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
     } as jest.Mocked<ConstructorOptions>;
 

@@ -9,11 +9,15 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
@@ -21,17 +25,21 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { stringify } from 'yaml';
+import type { AppHeaderBack } from '@kbn/app-header';
+import { useChromeAppHeaderRegistration } from '@kbn/app-header';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStepByNameFromNestedSteps,
+  getTriggerName,
   transformWorkflowToGraph,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { renderTemplate } from '@kbn/workflows-library';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { CatalogTemplateIcons } from './catalog_template_icons';
-import { TemplateInstallSection } from './install_form';
+import { TemplateInstallSection, type TemplateInstallStep } from './install_form';
 import { WorkflowYamlPreview } from './template_yaml_preview';
 import {
   ReactFlowProvider,
@@ -43,6 +51,7 @@ import {
   WorkflowVisualEditorFlyout,
   type WorkflowVisualEditorFlyoutTarget,
 } from '../../components';
+import { useWorkflowsUiServices } from '../../context';
 import { useTemplate } from '../hooks/use_template';
 import { getCategoryLabel } from '../lib/category_labels';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
@@ -59,11 +68,10 @@ export interface TemplateDetailProps {
   /** Called once the template body has loaded — e.g. to set breadcrumbs. */
   onLoaded?: (template: TemplateBody) => void;
   /**
-   * Rendered at the top of the left column (e.g. a "Back to library" link). Kept
-   * as a slot so navigation stays in the host app while this component owns the
-   * full two-column layout (letting the preview panel reach the top of the page).
+   * Where back leads from the details step (e.g. the library). Registered in the
+   * Chrome header in project chrome, rendered atop the left column in classic chrome.
    */
-  backButton?: React.ReactNode;
+  back?: AppHeaderBack;
   /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
   showGraphPreview?: boolean;
   /**
@@ -80,12 +88,6 @@ const SOLUTION_ICONS: Record<string, IconType> = {
   search: 'logoElasticsearch',
 };
 
-const TRIGGER_LABEL: Record<string, string> = {
-  manual: 'Manual',
-  alert: 'Alert',
-  scheduled: 'Scheduled',
-};
-
 const capitalize = (value: string): string =>
   value.length > 0 ? value[0].toUpperCase() + value.slice(1) : value;
 
@@ -98,7 +100,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   slug,
   template,
   onLoaded,
-  backButton,
+  back,
   showGraphPreview = false,
   installMode = 'catalog',
 }) {
@@ -119,21 +121,55 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   // the form defaults / `<name>` placeholders inside `renderTemplate`.
   const [previewValues, setPreviewValues] = useState<Record<string, unknown>>({});
 
-  // Values belong to a single template; drop them when the source changes
-  // (catalog slug or the identity of a pre-loaded/custom template).
+  // Which half of the left column is showing: the template summary or the
+  // install form. `TemplateInstallSection` stays mounted across both so the
+  // form values survive stepping back and forth.
+  const [activeStep, setActiveStep] = useState<TemplateInstallStep>('details');
+
+  // Values and the step belong to a single template; reset them when the source
+  // changes (catalog slug or the identity of a pre-loaded/custom template).
   const resetKey = slug ?? template?.metadata.slug;
   useEffect(() => {
     setPreviewValues({});
+    setActiveStep('details');
   }, [resetKey]);
+
+  // The setup step's back returns to the template summary; only the details
+  // step leaves the view, through the host's `back`.
+  const templateName = data?.metadata.name;
+  const activeBack = useMemo<AppHeaderBack | undefined>(() => {
+    if (activeStep !== 'setup' || !templateName) {
+      return back;
+    }
+    return {
+      // The summary step has no URL of its own.
+      href: window.location.pathname,
+      label: templateName,
+      onClick: (event) => {
+        event.preventDefault();
+        setActiveStep('details');
+      },
+    };
+  }, [activeStep, back, templateName]);
+
+  const isClassicChrome = useChromeStyle() === 'classic';
+  const headerConfig = useMemo(() => ({ back: activeBack }), [activeBack]);
+  useChromeAppHeaderRegistration(headerConfig);
 
   const previewYaml = useMemo(
     () => (data ? renderTemplate({ template: data, values: previewValues }) : ''),
     [data, previewValues]
   );
+  const { workflowsExtensions } = useWorkflowsUiServices();
+  const getTriggerLabel = useCallback(
+    (triggerType: string) =>
+      getTriggerName(triggerType, workflowsExtensions.getTriggerDefinition(triggerType)?.title),
+    [workflowsExtensions]
+  );
   const workflow = useMemo(() => data?.body as WorkflowYaml | undefined, [data]);
   const transformed = useMemo(
-    () => (workflow ? transformWorkflowToGraph(workflow) : undefined),
-    [workflow]
+    () => (workflow ? transformWorkflowToGraph(workflow, getTriggerLabel) : undefined),
+    [workflow, getTriggerLabel]
   );
   const { stepTypes, triggerTypes } = useMemo(
     () => (data ? getWorkflowTypes(data.body) : { stepTypes: [], triggerTypes: [] }),
@@ -159,7 +195,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       return {
         kind: 'trigger',
         triggerType: ref.triggerType,
-        triggerLabel: TRIGGER_LABEL[ref.triggerType] ?? ref.triggerType,
+        triggerLabel: getTriggerLabel(ref.triggerType),
         yamlSnippet: stringify({ triggers: [trigger] }).trimEnd(),
       };
     }
@@ -175,7 +211,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       stepType: step.type,
       yamlSnippet: stringify([step]).trimEnd(),
     };
-  }, [selectedGraphStepId, transformed, workflow]);
+  }, [getTriggerLabel, selectedGraphStepId, transformed, workflow]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(({ stepType, isTrigger, size, color }) => {
     return (
@@ -218,7 +254,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     return (
       <KbnDangerCallout
         data-test-subj="workflowLibraryTemplateDetail-error"
-        title={i18n.translate('workflows.library.templateDetail.errorTitle', {
+        title={i18n.translate('workflowsUi.library.templateDetail.errorTitle', {
           defaultMessage: 'Unable to load this template',
         })}
       />
@@ -226,6 +262,19 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   }
 
   const { metadata } = data;
+  const sourcePath = `library/workflows/${metadata.slug}/${metadata.slug}.yaml`;
+  const reportIssueUrl = new URL('https://github.com/elastic/workflows/issues/new');
+  reportIssueUrl.search = new URLSearchParams({
+    template: 'template_issue.yml',
+    title: `[Template issue]: ${metadata.name}`,
+    template_details: [
+      `Name: ${metadata.name}`,
+      `Slug: ${metadata.slug}`,
+      `Version: ${metadata.version}`,
+      `Availability: ${metadata.availability}`,
+      `Source: https://github.com/elastic/workflows/blob/main/${sourcePath}`,
+    ].join('\n'),
+  }).toString();
   // No specific solutions listed means all solutions are supported
   const solutions = metadata.solutions?.length ? metadata.solutions : Object.keys(SOLUTION_ICONS);
 
@@ -270,13 +319,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     }),
     // 16px between the info card and the description (Figma "Details" gap).
     details: css({ gap: euiTheme.size.base }),
-    // Bordered, rounded metadata card: 12px/16px padding, 16px between columns.
+    // Bordered, rounded metadata card: 16px padding, 16px between columns.
     infoCard: css({
       display: 'flex',
       gap: euiTheme.size.base,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base}`,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      borderRadius: euiTheme.border.radius.medium,
+      borderRadius: euiTheme.border.radius.control,
     }),
     infoBlock: css({
       display: 'flex',
@@ -328,7 +375,9 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     panel: css({
       position: 'relative',
       minHeight: 0,
+      overflow: 'hidden',
       border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      borderRadius: euiTheme.border.radius.control,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     }),
     // "Preview" pill floats centered over the top of the editor (16px down).
@@ -363,12 +412,25 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
           gutterSize="none"
           css={[styles.leftOuter, { height: '100%' }]}
         >
-          {backButton ? (
+          {/* Project chrome renders `activeBack` in its header instead. */}
+          {isClassicChrome && activeBack ? (
             // Always visible, outside the scrollable content below. Shrink-wrap
             // + align left so the button's label isn't centered by the
             // full-width column (EuiButtonEmpty centers its content otherwise).
             <EuiFlexItem grow={false} css={{ alignItems: 'flex-start' }}>
-              {backButton}
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="chevronSingleLeft"
+                href={activeBack.href}
+                onClick={activeBack.onClick}
+                data-test-subj="workflowLibraryTemplateDetailBackButton"
+              >
+                {i18n.translate('workflowsUi.library.templateDetail.backTo', {
+                  defaultMessage: 'Back to {destination}',
+                  values: { destination: activeBack.label },
+                })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           ) : null}
 
@@ -378,110 +440,183 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
               gutterSize="none"
               css={[styles.leftStack, { height: '100%' }]}
             >
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="none" css={styles.header}>
-                  {/* Title block: icons, then title + version, then tags (Figma order). */}
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="column" gutterSize="none" css={styles.titleBlock}>
-                      <EuiFlexItem grow={false}>
-                        <CatalogTemplateIcons stepTypes={stepTypes} triggerTypes={triggerTypes} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup
-                          direction="column"
-                          gutterSize="none"
-                          css={styles.titleAndTags}
-                        >
-                          <EuiFlexItem grow={false}>
-                            <h1 css={styles.title}>{metadata.name}</h1>
-                          </EuiFlexItem>
-
-                          {metadata.categories.length > 0 ? (
+              {activeStep === 'setup' ? (
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj="workflowLibraryTemplateDetail-setupHeader"
+                >
+                  <EuiTitle size="m">
+                    <h1>
+                      {i18n.translate('workflowsUi.library.templateDetail.setupTitle', {
+                        defaultMessage: 'Setup workflow',
+                      })}
+                    </h1>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate('workflowsUi.library.templateDetail.setupSubtitle', {
+                      defaultMessage: 'For {name}',
+                      values: { name: metadata.name },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="column" gutterSize="none" css={styles.header}>
+                    {/* Title block: icons, then title + version, then tags (Figma order). */}
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup direction="column" gutterSize="none" css={styles.titleBlock}>
+                        <EuiFlexItem grow={false}>
+                          <CatalogTemplateIcons stepTypes={stepTypes} triggerTypes={triggerTypes} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiFlexGroup
+                            direction="column"
+                            gutterSize="none"
+                            css={styles.titleAndTags}
+                          >
                             <EuiFlexItem grow={false}>
-                              <div
-                                css={styles.badgeRow}
-                                data-test-subj="workflowLibraryTemplateDetail-tags"
-                              >
-                                {metadata.categories.map((category) => (
-                                  <EuiBadge key={`tag-${category}`} color="hollow">
-                                    {getCategoryLabel(category)}
-                                  </EuiBadge>
-                                ))}
-                              </div>
+                              <h1 css={styles.title}>{metadata.name}</h1>
                             </EuiFlexItem>
-                          ) : null}
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
 
-                  {/* Details block: solutions info card, then description. */}
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="column" gutterSize="none" css={styles.details}>
-                      <EuiFlexItem grow={false}>
-                        <div css={styles.infoCard}>
-                          <div
-                            css={styles.infoBlock}
-                            data-test-subj="workflowLibraryTemplateDetail-solutions"
+                            {metadata.categories.length > 0 ? (
+                              <EuiFlexItem grow={false}>
+                                <div
+                                  css={styles.badgeRow}
+                                  data-test-subj="workflowLibraryTemplateDetail-tags"
+                                >
+                                  {metadata.categories.map((category) => (
+                                    <EuiBadge key={`tag-${category}`} color="hollow">
+                                      {getCategoryLabel(category)}
+                                    </EuiBadge>
+                                  ))}
+                                </div>
+                              </EuiFlexItem>
+                            ) : null}
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+
+                    {/* Details block: solutions info card, then description. */}
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup direction="column" gutterSize="none" css={styles.details}>
+                        <EuiFlexItem grow={false}>
+                          <EuiPanel
+                            hasBorder
+                            hasShadow={false}
+                            paddingSize="m"
+                            css={styles.infoCard}
                           >
-                            <span css={styles.infoLabel}>
-                              {i18n.translate('workflows.library.templateDetail.solutionsLabel', {
-                                defaultMessage: 'Solutions',
-                              })}
-                            </span>
-                            <div css={styles.solutionRow}>
-                              {solutions.map((solution) => {
-                                const label = capitalize(solution);
-                                const icon = SOLUTION_ICONS[solution];
-                                return icon ? (
-                                  <EuiIconTip
-                                    key={`solution-${solution}`}
-                                    type={icon}
-                                    size="m"
-                                    content={label}
-                                    aria-label={label}
-                                    iconProps={{
-                                      'data-test-subj': `workflowLibraryTemplateDetail-solution-${solution}`,
-                                    }}
-                                  />
-                                ) : (
-                                  <EuiBadge key={`solution-${solution}`} color="hollow">
-                                    {label}
-                                  </EuiBadge>
-                                );
-                              })}
+                            <div
+                              css={styles.infoBlock}
+                              data-test-subj="workflowLibraryTemplateDetail-solutions"
+                            >
+                              <span css={styles.infoLabel}>
+                                {i18n.translate(
+                                  'workflowsUi.library.templateDetail.solutionsLabel',
+                                  {
+                                    defaultMessage: 'Solutions',
+                                  }
+                                )}
+                              </span>
+                              <div css={styles.solutionRow}>
+                                {solutions.map((solution) => {
+                                  const label = capitalize(solution);
+                                  const icon = SOLUTION_ICONS[solution];
+                                  return icon ? (
+                                    <EuiIconTip
+                                      key={`solution-${solution}`}
+                                      type={icon}
+                                      size="m"
+                                      content={label}
+                                      aria-label={label}
+                                      iconProps={{
+                                        'data-test-subj': `workflowLibraryTemplateDetail-solution-${solution}`,
+                                      }}
+                                    />
+                                  ) : (
+                                    <EuiBadge key={`solution-${solution}`} color="hollow">
+                                      {label}
+                                    </EuiBadge>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
 
-                          <div css={styles.divider} />
+                            <div css={styles.divider} />
 
-                          <div
-                            css={styles.infoBlock}
-                            data-test-subj="workflowLibraryTemplateDetail-version"
-                          >
-                            <span css={styles.infoLabel}>
-                              {i18n.translate('workflows.library.templateDetail.versionLabel', {
-                                defaultMessage: 'Version',
-                              })}
-                            </span>
-                            <span css={styles.infoValue}>{metadata.version}</span>
-                          </div>
-                        </div>
-                      </EuiFlexItem>
+                            <div
+                              css={styles.infoBlock}
+                              data-test-subj="workflowLibraryTemplateDetail-version"
+                            >
+                              <span css={styles.infoLabel}>
+                                {i18n.translate('workflowsUi.library.templateDetail.versionLabel', {
+                                  defaultMessage: 'Version',
+                                })}
+                              </span>
+                              <span css={styles.infoValue}>{metadata.version}</span>
+                            </div>
+                          </EuiPanel>
+                        </EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <p css={styles.description}>{metadata.description}</p>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <p css={styles.description}>{metadata.description}</p>
+                        </EuiFlexItem>
+                        {installMode === 'catalog' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  size="s"
+                                  flush="left"
+                                  iconType="logoGithub"
+                                  href={reportIssueUrl.toString()}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  data-test-subj="workflowLibraryTemplateReportIssueLink"
+                                >
+                                  {i18n.translate(
+                                    'workflowsUi.library.templateDetail.reportIssueButtonLabel',
+                                    {
+                                      defaultMessage: 'Report an issue with this template',
+                                    }
+                                  )}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  size="s"
+                                  flush="left"
+                                  iconType="pencil"
+                                  href={`https://github.com/elastic/workflows/edit/main/${sourcePath}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  data-test-subj="workflowLibraryTemplateEditLink"
+                                >
+                                  {i18n.translate(
+                                    'workflowsUi.library.templateDetail.editTemplateButtonLabel',
+                                    {
+                                      defaultMessage: 'Edit this template',
+                                    }
+                                  )}
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        ) : null}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
 
               <TemplateInstallSection
                 // Remount on template change so form/touched state never leaks
                 // from one template into another.
                 key={metadata.slug}
                 template={data}
+                step={activeStep}
+                onStepChange={setActiveStep}
                 onPreviewValuesChange={setPreviewValues}
                 previewYaml={previewYaml}
                 installMode={installMode}
@@ -499,7 +634,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
             css={css(previewShadow)}
             style={{ padding: `0 ${euiTheme.size.l}` }}
           >
-            {i18n.translate('workflows.library.templateDetail.previewTitle', {
+            {i18n.translate('workflowsUi.library.templateDetail.previewTitle', {
               defaultMessage: 'Preview',
             })}
           </EuiBadge>

@@ -11,7 +11,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import {
   createTemplateLinkFromSettings,
-  deleteCustomLinkIfExists,
+  deleteCustomLinksByLabel,
   getExpectedTemplateUrl,
   TEMPLATE_URL,
 } from '../../fixtures/custom_links_helpers';
@@ -31,10 +31,8 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    test.afterEach(async ({ page, pageObjects: { customLinksPage } }) => {
-      for (const label of createdLabels) {
-        await deleteCustomLinkIfExists(customLinksPage, page, label);
-      }
+    test.afterEach(async ({ kbnClient }) => {
+      await deleteCustomLinksByLabel(kbnClient, [...createdLabels]);
       createdLabels.clear();
     });
 
@@ -123,9 +121,8 @@ test.describe(
       await customLinksPage.clickSave();
 
       await transactionDetailsPage.openActionMenu();
-      await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
+      const defaultLink = await transactionDetailsPage.revealCustomLink(defaultLabel);
+      await expect(defaultLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       expect(await transactionDetailsPage.getCustomLinkHref(defaultLabel)).toBe(expectedUrl);
     });
   }

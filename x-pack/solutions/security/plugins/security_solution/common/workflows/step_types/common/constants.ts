@@ -13,6 +13,13 @@
 export const MAX_ALERT_ID_LENGTH = 256;
 
 /**
+ * Maximum number of alert IDs a single step call may reference.
+ * Matches the 1000-alert ceiling the Attack Discovery Worker already works within, and
+ * prevents unbounded array input (DoS).
+ */
+export const MAX_ALERT_IDS = 1000;
+
+/**
  * Maximum length for workflow message strings.
  * Workflow messages are typically short text strings (~1000 characters).
  * We use 1000 here to safely accommodate them while preventing unbounded string input (DoS).
@@ -32,3 +39,24 @@ export const MAX_USER_ID_LENGTH = 256;
  * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
  */
 export const MAX_ATTACK_ID_LENGTH = 256;
+
+/**
+ * Maximum length for a note's text content.
+ * Notes support markdown and can be reasonably long, but we cap the length here to
+ * prevent unbounded string input (DoS).
+ */
+export const MAX_NOTE_TEXT_LENGTH = 60000;
+
+/**
+ * Maximum length for note IDs.
+ * Note IDs are `savedObjectId` values (typically UUIDs, ~36 characters).
+ * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
+ */
+export const MAX_NOTE_ID_LENGTH = 256;
+
+/**
+ * Maximum length for document IDs.
+ * Document IDs are Elasticsearch `_id` values (typically UUIDs, ~36 characters).
+ * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
+ */
+export const MAX_DOCUMENT_ID_LENGTH = 256;

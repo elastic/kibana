@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -21,7 +21,7 @@ import {
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_QUALITY_TOOL_ID } from './tool_ids';
 
-const schema = z.object({});
+const schema = lazySchema(() => z.object({}));
 
 export const getQualityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -33,6 +33,13 @@ export const getQualityTool = (
     'Retrieves SIEM data quality health based on ECS (Elastic Common Schema) compatibility check results. Returns indices with incompatible field mappings including field-level details — filtered to categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings. Note: results are only available after running a data quality check from the Security > Data Quality dashboard. Each actionable finding includes blast radius data. When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'quality'],
+  annotations: {
+    title: 'Get SIEM Quality',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'space',
     handler: async ({ request }) => {

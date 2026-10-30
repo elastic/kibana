@@ -9,19 +9,14 @@ import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
-import { LensEmbeddable } from './lens_embeddable';
+import { getInspectAdHocIndexPatterns, LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
 import { useVisualizationResponse } from './use_visualization_response';
 import type { UseVisualizationResponseMock } from './use_visualization_response.mock';
 import { useVisualizationResponseMock } from './use_visualization_response.mock';
 
-const mockActions = [
-  { id: 'inspect' },
-  { id: 'openInLens' },
-  { id: 'addToNewCase' },
-  { id: 'addToExistingCase' },
-];
+const mockActions = [{ id: 'inspect' }, { id: 'openInLens' }, { id: 'addToCase' }];
 
 jest.mock('react-redux-v7', () => {
   const actual = jest.requireActual('react-redux-v7');
@@ -55,6 +50,13 @@ jest.mock('./use_actions', () => {
     useActions: jest.fn(),
   };
 });
+
+jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({
+    dataView: { id: undefined },
+    status: 'ready',
+  })),
+}));
 
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
@@ -139,5 +141,63 @@ describe('LensEmbeddable', () => {
       );
       expect(container).toBeEmptyDOMElement();
     });
+  });
+});
+
+describe('getInspectAdHocIndexPatterns', () => {
+  const scopeId = 'explore-data-view-default';
+
+  it('returns null when the chart has no ad hoc data views', () => {
+    expect(getInspectAdHocIndexPatterns(undefined, scopeId)).toBeNull();
+  });
+
+  it('skips the injected scope data view so Inspect uses the request index', () => {
+    expect(
+      getInspectAdHocIndexPatterns(
+        {
+          [scopeId]: {
+            id: scopeId,
+            title: 'logs-*,filebeat-*',
+            name: 'Security solution explore',
+          },
+        },
+        scopeId
+      )
+    ).toBeNull();
+  });
+
+  it('keeps a chart-owned ad hoc data view title', () => {
+    expect(
+      getInspectAdHocIndexPatterns(
+        {
+          'entity-store-hosts': {
+            id: 'entity-store-hosts',
+            title: '.entities.v2.latest.security_default',
+            name: 'Security solution explore',
+          },
+        },
+        scopeId
+      )
+    ).toEqual(['.entities.v2.latest.security_default']);
+  });
+
+  it('keeps chart-owned patterns when the scope data view is also attached', () => {
+    expect(
+      getInspectAdHocIndexPatterns(
+        {
+          [scopeId]: {
+            id: scopeId,
+            title: 'logs-*',
+            name: 'Security solution explore',
+          },
+          'risk-score': {
+            id: 'risk-score',
+            title: 'ea_host_risk_score_latest_default',
+            name: 'ea_host_risk_score_latest_default_no_timestamp',
+          },
+        },
+        scopeId
+      )
+    ).toEqual(['ea_host_risk_score_latest_default']);
   });
 });

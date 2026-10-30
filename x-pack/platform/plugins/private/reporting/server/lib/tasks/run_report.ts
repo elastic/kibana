@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import moment from 'moment';
+import { withTimeout } from '@kbn/std';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
@@ -18,6 +21,7 @@ import {
   MissingAuthenticationError,
   numberToDuration,
   QueueTimeoutError,
+  RenderRetryAction,
 } from '@kbn/reporting-common';
 import type {
   ExecutionError,
@@ -30,6 +34,7 @@ import type {
 import { ScheduleType, decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import {
   throwRetryableError,
+  throwUnrecoverableError,
   TaskErrorSource,
   createTaskRunError,
   type ConcreteTaskInstance,
@@ -56,6 +61,9 @@ import { finishedWithNoPendingCallbacks, getContentStream } from '../content_str
 import type { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import type { ScheduledReportType } from '../../types';
 import { retryOnError } from '../retry_on_error';
+import type { RenderRetryState } from './render_retry';
+import { attemptsMade, decideRenderRetry } from './render_retry';
+import { reportingTelemetry } from './reporting_telemetry';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -134,6 +142,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   // Abstract methods
   public abstract exportType: string;
+  protected abstract readonly scheduleType: ScheduleType;
   public abstract get TYPE(): string;
 
   public abstract getTaskDefinition(): TaskRegisterDefinition;
@@ -146,6 +155,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected abstract prepareJob(taskInstance: ConcreteTaskInstance): Promise<PrepareJobResults>;
 
   protected abstract getMaxAttempts(): MaxAttempts;
+
+  /**
+   * Lets `render_retry.ts` reschedule or fail this task. Off by default: rescheduling a recurring
+   * task re-runs its schedule, and an unrecoverable error deletes it.
+   */
+  protected readonly reschedulesRenderRetries: boolean = false;
 
   protected abstract notify(
     report: SavedReport,
@@ -283,6 +298,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       // event tracking of failed job
       const eventTracker = this.getEventTracker(report);
       const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      reportingTelemetry.recordDelivery(timeSinceCreation / 1000, {
+        jobType: report.jobtype,
+        outcome: 'failed',
+        errorCode: docOutput?.error_code ?? 'unknown',
+      });
       eventTracker?.failJob({
         timeSinceCreation,
         errorCode: docOutput?.error_code ?? 'unknown',
@@ -381,7 +401,18 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       headersToUse = decryptedHeaders || {};
     }
 
-    return this.getFakeRequest(headersToUse, spaceId, this.logger);
+    const requestToUse = this.getFakeRequest(headersToUse, spaceId, this.logger);
+
+    // The external-credential verdict Task Manager marked on `requestFromTask` is bound to that
+    // request object, so rebuilding the request drops it. Re-mark the rebuilt request: its
+    // `authorization` header is the task request's one (decrypted `authorization` is excluded from
+    // the merge above), and UIAM rejects user-created (external) Cloud API keys presented with the
+    // UIAM shared secret.
+    if (requestFromTask && isExternalUiamCredential(requestFromTask)) {
+      markExternalUiamCredential(requestToUse);
+    }
+
+    return requestToUse;
   }
 
   protected getFakeRequest(
@@ -409,6 +440,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
+    }
+    if (!(await this.opts.reporting.isExportTypeEnabled(exportType.id, this.scheduleType))) {
+      throw new Error(`Export type ${exportType.id} is disabled`);
     }
     // notify usage
     exportType.notifyUsage(this.exportType);
@@ -446,20 +480,19 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
     // Hard timeout fallback: the cooperative timer above only cancels the token, so a runTask that
     // ignores it would hang this run forever. Force-fail a grace period after the cancel.
-    let forceTimerId: ReturnType<typeof setTimeout> | undefined;
-    const forceTimeoutPromise = new Promise<never>((_, reject) => {
-      forceTimerId = setTimeout(() => {
+    try {
+      const outcome = await withTimeout({
+        promise: runTaskPromise,
+        timeoutMs: this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD,
+      });
+      if (outcome.timedout) {
         errorLogger(
           this.logger,
           `Report ${task.id} did not honor the cancellation token within the grace period; force-failing the run.`
         );
-        reject(new QueueTimeoutError());
-      }, this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD);
-    });
-
-    try {
-      const result = await Promise.race([runTaskPromise, forceTimeoutPromise]);
-      return { result, timedOut: jobTimedOut };
+        throw new QueueTimeoutError();
+      }
+      return { result: outcome.value, timedOut: jobTimedOut };
     } catch (err) {
       // Surface the timeout even when runTask rejects on cancel instead of resolving with partial data like CSV does.
       if (jobTimedOut) {
@@ -468,7 +501,6 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       throw err;
     } finally {
       clearTimeout(timerId);
-      clearTimeout(forceTimerId);
       // If the force timeout won the race, runTask may still reject later; catch to prevent unhandled rejection.
       runTaskPromise.catch(() => {});
     }
@@ -503,6 +535,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     const eventTracker = this.getEventTracker(report);
     const byteSize = docOutput.size;
     const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
+    reportingTelemetry.recordDelivery(timeSinceCreation / 1000, {
+      jobType: report.jobtype,
+      outcome: 'completed',
+    });
 
     const scheduleType = report.scheduled_report_id ? ScheduleType.SCHEDULED : ScheduleType.SINGLE;
     if (output.metrics?.csv != null) {
@@ -564,6 +600,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             throw new Error(`Kibana instance name is undefined!`);
           }
           const { attempts: taskAttempts } = taskInstance;
+          const { waitingSince } = (taskInstance.state ?? {}) as RenderRetryState;
 
           let report: SavedReport | undefined;
           const {
@@ -582,6 +619,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           }
 
           const { jobtype: jobType, attempts } = report;
+          // Finds every run of a report in APM; page-render-service records the same ID.
+          apm.currentTransaction?.addLabels({ report_id: jobId });
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
@@ -646,7 +685,22 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 const performJobPromise = this.performJob({
                   task,
                   fakeRequest,
-                  taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                  taskInstanceFields: {
+                    retryAt: taskRetryAt,
+                    startedAt: taskStartedAt,
+                    ...(task.created_at
+                      ? {
+                          report: {
+                            id: task.id,
+                            createdAt: new Date(task.created_at),
+                            ...(waitingSince === undefined
+                              ? {}
+                              : { waitingSince: new Date(waitingSince) }),
+                          },
+                        }
+                      : {}),
+                    canHandBack: this.reschedulesRenderRetries,
+                  },
                   cancellationToken,
                   stream,
                 });
@@ -717,7 +771,34 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               },
             });
           } catch (failedToExecuteErr) {
-            const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
+            const renderRetryState = taskInstance.state as RenderRetryState | undefined;
+            const renderRetry = this.reschedulesRenderRetries
+              ? decideRenderRetry(failedToExecuteErr, renderRetryState, {
+                  attempts,
+                  maxAttempts: maxAttempts.maxTaskAttempts,
+                })
+              : undefined;
+            if (renderRetry) {
+              reportingTelemetry.recordRenderRetry(renderRetry.reason, renderRetry.action);
+            }
+
+            if (renderRetry?.action === RenderRetryAction.HAND_BACK) {
+              // Not a failure: the report stays processing, and the next run waits again.
+              eventLog.logRetry();
+              cancellationToken?.cancel();
+              this.logger.info(
+                `Job ${jobId} is waiting for render capacity and will run again: ${failedToExecuteErr.message}`,
+                { tags: [jobId] }
+              );
+              return { runAt: renderRetry.runAt, state: renderRetry.state };
+            }
+
+            const attemptCount = attemptsMade(renderRetryState, taskAttempts ?? 0, attempts);
+            const isLastAttempt = renderRetry
+              ? renderRetry.action === RenderRetryAction.FAIL
+              : attemptCount
+              ? attemptCount >= maxAttempts.maxTaskAttempts
+              : true;
             eventLog.logError(failedToExecuteErr);
 
             // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
@@ -751,6 +832,17 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
                 { tags: [jobId] }
               );
+            }
+
+            if (renderRetry?.action === RenderRetryAction.RESCHEDULE) {
+              return { runAt: renderRetry.runAt, state: renderRetry.state };
+            }
+            if (
+              renderRetry?.action === RenderRetryAction.FAIL ||
+              (isLastAttempt && attemptCount > (taskAttempts ?? 0))
+            ) {
+              // A reschedule may have restarted Task Manager's count: don't rerun a spent report.
+              throwUnrecoverableError(failedToExecuteErr);
             }
 
             let error = failedToExecuteErr;

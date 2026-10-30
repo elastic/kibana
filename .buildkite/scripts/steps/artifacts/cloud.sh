@@ -29,7 +29,7 @@ esac
 echo "--- Push docker image"
 mkdir -p target
 
-download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz" ./target --build "$BUILDKITE_BUILD_ID"
 docker load < "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 rm -f "target/kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 

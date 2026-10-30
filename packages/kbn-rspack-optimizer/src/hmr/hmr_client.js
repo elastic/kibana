@@ -66,6 +66,10 @@ function injectIndicatorStyles() {
     '#' + INDICATOR_ID + ' {',
     '  width: 14px;',
     '  padding: 0 2px;',
+    '  bottom: 16px;',
+    '}',
+    'body:has(#developerToolbar) #' + INDICATOR_ID + ' {',
+    '  bottom: 40px;', // 32px toolbar + 8px gap
     '}',
     '#' + INDICATOR_ID + ':hover {',
     '  width: 150px;',
@@ -95,7 +99,6 @@ function createIndicator() {
     'style',
     [
       'position:fixed',
-      'bottom:16px',
       'right:16px',
       'height:28px',
       'border-radius:14px',
@@ -375,6 +378,20 @@ if (window.__kbnHmrActive__ && module.hot) {
 
         if (data.building) {
           setIndicatorState('building');
+          return;
+        }
+
+        if (data.reload) {
+          // Replay of a reload this page already applied would loop. sessionStorage
+          // survives the reload, so the new EventSource can recognize the same id.
+          if (data.id && window.sessionStorage.getItem('__kbnHmrReloadId__') === data.id) {
+            return;
+          }
+          if (data.id) {
+            window.sessionStorage.setItem('__kbnHmrReloadId__', data.id);
+          }
+          console.log(LOG_PREFIX + ' Shared bundles updated, reloading page...');
+          window.location.reload();
           return;
         }
 

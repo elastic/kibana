@@ -80,6 +80,15 @@ Tools can come from multiple sources:
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
+### HTTP API tools
+
+Agents reach the Elasticsearch and Kibana HTTP APIs through a set of internal tools:
+
+- `describe_api`: the parameter schema, method, and path of one operation.
+- `describe_api_type`: the full definition of a shared type `describe_api` only stubbed.
+- `execute_api`: the call itself, on behalf of the current user.
+- `discover_apis` (gated by `agentBuilder:apiDiscovery`): a searchable listing of every operation a target exposes.
+
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
@@ -102,6 +111,56 @@ It can also be done directly from a tool definition:
 const tool = await agentBuilder.tools.registry.get({ toolId: 'my_tool', request });
 const { result } = await tool.execute({ toolParams: { someNumber: 9000 } });
 ```
+
+#### Pre-approving destructive APIs
+
+A tool run has no live user, so a destructive Elasticsearch or Kibana API the tool reaches
+through `execute_api` is refused rather than executed. Pass `approvals.autoApprovedApis` to
+grant specific APIs for the run:
+
+```ts
+const { result } = await agentBuilder.tools.execute({
+  toolId: 'my_tool',
+  toolParams: { someNumber: 9000 },
+  request,
+  approvals: {
+    autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.put_mapping' }],
+  },
+});
+```
+
+This covers the run and the sub-agents it spawns. Every destructive API outside the list is
+still refused, and omitting the field refuses all destructive APIs. An entry naming an API that
+does not exist on its target is rejected with a bad-request error.
+
+An entry can also be a namespace wildcard such as `indices.*`, or `*` for every API on that
+target. Prefer the narrowest grant that works: `indices.*` includes `indices.delete`, and `*`
+lets the agent perform any destructive operation the run's credentials allow, with nobody to
+confirm it.
+
+The HTTP API and the `ai.agent` workflow step take the same grant keyed by target, as the
+`approvals` body property of `POST /api/agent_builder/tools/_execute` and as the `approvals`
+input of the step:
+
+```json
+{
+  "approvals": {
+    "auto_approved_apis": {
+      "elasticsearch": ["indices.put_mapping", "indices.update_aliases"],
+      "kibana": ["alerting.delete-alerting-rule-id"]
+    }
+  }
+}
+```
+
+In a conversation, the grant can widen when a delegating agent requests destructive APIs for a
+sub-agent through `run_subagent`, and the user is asked once to approve them before it starts. That
+approval covers only the delegated execution, so a sub-agent can hold access the parent run was not
+configured with, though never more than the delegating user could exercise themselves.
+
+An agent can also store the grant as a default in `configuration.approvals`, either via API, from the
+auto-approved APIs section of the agent editor, or in a built-in agent's definition. Every run of the
+agent, including as a sub-agent, adds the stored defaults to the grant supplied by the caller.
 
 ### Error handling
 
@@ -133,6 +192,58 @@ Agents can be either built-in or user-defined.
 ### Registering a built-in agent
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
+
+### Running an agent as a service account
+
+Where service accounts are enabled, an agent can be bound to a service account by the plugin
+that owns it, through the agent registry on the start contract:
+
+```ts
+const registry = await agentBuilder.agents.getRegistry({ request });
+await registry.setServiceAccount(agentId, 'kibana/my-account'); // `null` unbinds
+```
+
+The request must belong to a user with write access to the agent and the `manage_security`
+privilege, because Core creates the binding under that user. The binding is not part of the
+agent update request: there is no HTTP API for it until the UI manages it (tracked in
+[elastic/kibana#300118](https://github.com/elastic/kibana/issues/300118)), and the agent editor
+shows it read-only. The agent then runs every conversation with that account's permissions,
+whoever started it; the conversation owner and round authors stay the caller.
+
+- Binding, replacing or removing the account needs write access to the agent and the
+  Elasticsearch `manage_security` cluster privilege. Every edit of a bound agent, including its
+  access control, needs the same privilege, so the agent is read-only for everyone else.
+  The update permissions are reported as false on a bound agent for callers without
+  `manage_security`.
+- Chatting with a bound agent needs the `invoke_bound_agents` sub-feature privilege (included in
+  `all`). A caller without it is refused with a 403 and never falls back to their own identity.
+  Grant it to the service account the Slack relay or a workflow uses to call bound agents.
+- Bound runs execute through Task Manager with the account's short-lived token, minted by Core's
+  service account workload bindings. Core's binding is the authority: the agent only stores the
+  account id, so the dispatcher and the UI know it is bound, and a mismatch between the two fails
+  the run at mint. A request that already runs as the bound account (a workflow step or a parent
+  agent under the same account) runs the agent inline instead of nesting a second task.
+- The account holds no access to agents of its own. A run resolves the agent it was dispatched
+  for without consulting access control, since the caller's access was checked at dispatch, and
+  refuses to continue if the agent is no longer bound to that account. Anything else the run
+  looks up, such as sub-agents, is subject to the account's own access.
+
+**Residual risk.** The `manage_security` gate protects the agent document, not what it refers to.
+Everything a bound run executes beyond the agent itself runs with the account's permissions and
+is editable by people who hold neither `manage_security` nor `invoke_bound_agents`:
+
+- Pre-agent workflows: the agent's own `workflow_ids` are locked with the rest of its
+  configuration, but the workflow definitions are editable by anyone who can edit workflows, and
+  the space-wide pre-prompt workflows setting by anyone who can change advanced settings.
+- Sub-agents: an unbound sub-agent the agent calls runs as the account (the account needs `use`
+  access to it) and its definition is editable by its owner. A sub-agent bound to another account
+  runs in its own task as that account, which requires the first account to hold
+  `invoke_bound_agents`.
+- Tools: custom tools are editable by anyone who can edit tools, and a `*` tool selection picks
+  up tools created after the binding.
+
+Before binding an agent, check that its workflows, sub-agents and tools are managed by people you
+would trust with the account, and prefer an explicit tool list over `*`.
 
 ## Hooks
 
@@ -250,6 +361,52 @@ Configure Claude Desktop by adding this to its configuration:
   }
 }
 ```
+
+### Local OAuth setup (serverless only)
+
+MCP clients can authenticate with an OAuth 2.1 access token instead of an API key. Clients discover how to do so from the OAuth 2.0 Protected Resource Metadata that Kibana serves at `/.well-known/oauth-protected-resource`, which is populated from `xpack.security.mcp.oauth2.metadata`. That setting only exists in serverless, so this flow needs a serverless Kibana pointed at an Elasticsearch that runs the UIAM OAuth authorization server.
+
+1. Add the following to `config/kibana.dev.yml`, adjusting the URLs if you serve Kibana over HTTPS or on a different port:
+
+   ```yaml
+   server.publicBaseUrl: http://localhost:5601
+   xpack.security.mcp.oauth2.metadata:
+     authorization_servers: [https://localhost:8444/oauth2]
+     resource: http://localhost:5601/api/agent_builder/mcp
+   ```
+
+   `server.publicBaseUrl` determines the resource metadata URL that Kibana advertises in the `WWW-Authenticate` header when an MCP request is rejected with a 401. Without it, Kibana falls back to the incoming request URL, which is not necessarily reachable by the client.
+
+   > **Note:** `xpack.security.mcp` is only accepted in serverless. While these keys are in `kibana.dev.yml`, a non-serverless Kibana refuses to start with `[config validation of [xpack.security].mcp]: a value wasn't expected to be present`, so comment them out before going back to `pnpm start`.
+
+2. Start Elasticsearch with the UIAM OAuth authorization server by passing `--uiam-oauth`. For example:
+
+   ```bash
+   pnpm es serverless --projectType elasticsearch --uiam-oauth
+   ```
+
+   That flag defaults to `false` even though `--uiam` defaults to `true`, so it has to be passed explicitly. It starts an additional `uiam-oauth` container that serves the authorization server on `https://localhost:8444`, alongside the UIAM service itself on `https://localhost:8443`. Leave UIAM itself enabled: the MCP client management UI used in step 4 is hidden when it is off.
+
+3. Run Kibana in serverless mode, for example:
+
+   ```bash
+   pnpm serverless-es
+   ```
+
+4. Register an OAuth client from **Agents > Tools > Manage all tools > Manage MCP > Manage MCP clients (OAuth) > Add MCP client**. The dialog shown after creation has the client ID and MCP server URL that your client needs. Redirect URIs are client-specific, and the authorization server accepts any localhost port but matches the path exactly, so refer to [Create an OAuth client in Elastic Agent Builder](https://www.elastic.co/docs/deploy-manage/app-connections/create-oauth-client) for the value your client expects.
+
+5. Configure your MCP client with that client ID and server URL, then complete the browser-based authorization. [Connect an MCP host to Elastic Agent Builder](https://www.elastic.co/docs/deploy-manage/app-connections/connect-mcp-host) covers the setup for Claude Code and Claude Desktop.
+
+#### Troubleshooting
+
+Node-based clients may reject the self-signed certificate that the OAuth container serves on `https://localhost:8444` and fail during the token exchange. If you hit a certificate error, point Node at the Kibana development CA in the shell that runs the client:
+
+```bash
+# Run from the Kibana root, in the same shell as your MCP client
+export NODE_EXTRA_CA_CERTS="$(pwd)/src/platform/packages/shared/kbn-dev-utils/certs/ca.crt"
+```
+
+Whether this is needed depends on the client: some ship their own trust store, and others ignore the variable entirely.
 
 ## A2A Server
 

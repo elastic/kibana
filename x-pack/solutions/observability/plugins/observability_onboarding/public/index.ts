@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type {
   ObservabilityOnboardingPluginSetup,
@@ -58,6 +59,8 @@ export interface ObservabilityOnboardingAppServices {
   featureFlags: FeatureFlagsStart;
   observability: ObservabilityPublicStart;
   cloud?: CloudStart;
+  /** Present at runtime as a required plugin, absent in tests that do not read it. */
+  fleet?: FleetStart;
 }
 
 export const plugin: PluginInitializer<

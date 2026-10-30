@@ -11,32 +11,36 @@
  *
  * info:
  *   title: Enable Attack Discovery Schedule Internal API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../common_attributes.gen';
 
+export const EnableAttackDiscoveryScheduleRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the schedule to enable
+     */
+    id: NonEmptyString.describe('The unique identifier of the schedule to enable'),
+  })
+);
 export type EnableAttackDiscoveryScheduleRequestParams = z.infer<
   typeof EnableAttackDiscoveryScheduleRequestParams
 >;
-export const EnableAttackDiscoveryScheduleRequestParams = z.object({
-  /**
-   * The unique identifier of the schedule to enable
-   */
-  id: NonEmptyString,
-});
 export type EnableAttackDiscoveryScheduleRequestParamsInput = z.input<
   typeof EnableAttackDiscoveryScheduleRequestParams
 >;
 
+export const EnableAttackDiscoveryScheduleResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier of the enabled schedule
+     */
+    id: NonEmptyString.describe('The unique identifier of the enabled schedule'),
+  })
+);
 export type EnableAttackDiscoveryScheduleResponse = z.infer<
   typeof EnableAttackDiscoveryScheduleResponse
 >;
-export const EnableAttackDiscoveryScheduleResponse = z.object({
-  /**
-   * The unique identifier of the enabled schedule
-   */
-  id: NonEmptyString,
-});

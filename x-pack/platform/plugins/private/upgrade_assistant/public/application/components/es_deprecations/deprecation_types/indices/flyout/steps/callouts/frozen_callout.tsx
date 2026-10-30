@@ -6,7 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../../../../../app_context';
@@ -20,32 +21,32 @@ export const FrozenCallOut: React.FunctionComponent = () => {
 
   return (
     <Fragment>
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.frozenCallout.reindexFrozenIndexTitle"
             defaultMessage="This index is frozen"
           />
         }
-        iconType="info"
-      >
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.frozenCallout.reindexFrozenIndex"
-          defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a non-frozen index during the update operation. {docsLink}"
-          values={{
-            docsLink: (
-              <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
-                {i18n.translate(
-                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
-                  {
-                    defaultMessage: 'Learn more',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.frozenCallout.reindexFrozenIndex"
+            defaultMessage="Frozen indices will no longer be supported after the upgrade. As a result, this index will be transformed into a non-frozen index during the update operation. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
+                  {i18n.translate(
+                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
+                    {
+                      defaultMessage: 'Learn more',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
       <EuiSpacer size="m" />
     </Fragment>
   );

@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { noDataStrategy } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
-import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
 import type { RuleResponse } from '../../rules_client/types';
 import { parseDurationToMs } from '../../duration';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import { BasicTransitionStrategy } from './basic_strategy';
 import type { StateTransitionContext, StateTransitionResult } from './types';
 import type { LatestAlertEventState } from '../queries';
 
 const DEFAULT_STATUS_COUNT = 1;
 
-type Operator = NonNullable<NonNullable<RuleResponse['state_transition']>['pending_operator']>;
-const DEFAULT_OPERATOR: Operator = 'OR';
+type StateTransition = NonNullable<RuleResponse['state_transition']>;
+type StateTransitionPhase = NonNullable<StateTransition['pending']>;
+type Operator = NonNullable<StateTransitionPhase['operator']>;
+const DEFAULT_OPERATOR: Operator = 'or';
 
 interface ThresholdConfig {
   operator: Operator;
@@ -57,8 +65,8 @@ const isTimeframeThresholdMet = (elapsedMs: number, thresholdMs?: number): boole
  * Evaluates whether a combined (count + timeframe) threshold is met,
  * taking the operator into account.
  *
- * - AND: both count and timeframe must be met.
- * - OR:  either count or timeframe is sufficient.
+ * - and: both count and timeframe must be met.
+ * - or:  either count or timeframe is sufficient.
  *
  * When only one dimension is configured, the operator is irrelevant;
  * the single dimension decides.
@@ -75,7 +83,7 @@ const isThresholdMet = (
   const hasTimeframe = config.timeframeMs != null;
 
   if (hasCount && hasTimeframe) {
-    return config.operator === 'AND' ? countMet && timeframeMet : countMet || timeframeMet;
+    return config.operator === 'and' ? countMet && timeframeMet : countMet || timeframeMet;
   }
 
   if (hasCount) {
@@ -91,12 +99,26 @@ const isThresholdMet = (
 };
 
 /**
+ * A count of 0 skips the phase, unless a timeframe is ANDed with it: then the
+ * timeframe must still elapse, so the phase is entered and held until the
+ * timeframe is met.
+ *
+ * Elapsed time is measured against when the phase was entered (the timestamp of
+ * the latest `status_count == 1` event, derived by the query, see `getElapsedMs`),
+ * so an ANDed timeframe accumulates across evaluations and resolves correctly
+ * regardless of how the schedule interval compares to the timeframe.
+ */
+const isPhaseSkipped = (phase?: StateTransitionPhase): boolean =>
+  phase?.count === 0 && !(phase.timeframe != null && phase.operator === 'and');
+
+/**
  * A transition strategy that extends the basic state machine with
  * configurable count (and future timeframe) thresholds for the
  * `pending → active` and `recovering → inactive` transitions.
  *
- * - pending count of 0 means skip pending entirely (inactive → active).
- * - recovering count of 0 means skip recovering entirely (active → inactive).
+ * - A count of N holds the phase for N evaluations and resolves it on evaluation N+1.
+ * - A count of 0 skips the phase entirely, unless a timeframe is ANDed with it
+ *   (see `isPhaseSkipped`).
  * - When no threshold is configured for a phase, the strategy behaves
  *   identically to the basic strategy for that phase.
  */
@@ -104,24 +126,37 @@ const isThresholdMet = (
 export class CountTimeframeStrategy extends BasicTransitionStrategy {
   override readonly name = 'count_timeframe';
 
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    super();
+    this.logger = loggerService.forSubsystem('director');
+  }
+
   override canHandle(rule: RuleResponse): boolean {
     return rule.state_transition != null && Object.keys(rule.state_transition).length > 0;
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
-    const { rule, previousEpisode, alertEvent } = ctx;
+    const { rule, previousEpisode, alertEvent, evaluatedAt } = ctx;
     const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
-    const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
-    const alertEventTimestamp = alertEvent['@timestamp'];
-
-    const elapsedMs = this.getElapsedMs(alertEventTimestamp, currentEpisodeTimestamp);
+    const phaseStartedAt =
+      previousEpisode?.last_episode_phase_started_at ?? previousEpisode?.last_episode_timestamp;
+    const elapsedMs = this.getElapsedMs(evaluatedAt, phaseStartedAt);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
     const basicResult = super.getNextState(ctx);
 
     if (!stateTransition) {
+      return basicResult;
+    }
+
+    if (
+      alertEvent.status === alertEventStatus.no_data &&
+      rule.no_data?.strategy === noDataStrategy.resolve
+    ) {
       return basicResult;
     }
 
@@ -140,9 +175,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.pending_count,
-        timeframeMs: this.safeParseDurationToMs(stateTransition.pending_timeframe),
+        operator: stateTransition.pending?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.pending?.count,
+        timeframeMs: this.safeParseDurationToMs(
+          stateTransition.pending?.timeframe,
+          rule.id,
+          'pending_timeframe'
+        ),
         successStatus: alertEpisodeStatus.active,
         stayStatus: alertEpisodeStatus.pending,
       });
@@ -153,9 +192,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
-        operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
-        count: stateTransition.recovering_count,
-        timeframeMs: this.safeParseDurationToMs(stateTransition.recovering_timeframe),
+        operator: stateTransition.recovering?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.recovering?.count,
+        timeframeMs: this.safeParseDurationToMs(
+          stateTransition.recovering?.timeframe,
+          rule.id,
+          'recovering_timeframe'
+        ),
         successStatus: alertEpisodeStatus.inactive,
         stayStatus: alertEpisodeStatus.recovering,
       });
@@ -187,17 +230,19 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   private shouldSkipPending(
-    stateTransition: NonNullable<RuleResponse['state_transition']>,
+    stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.pending_count === 0 && nextStatus === alertEpisodeStatus.pending;
+    return isPhaseSkipped(stateTransition.pending) && nextStatus === alertEpisodeStatus.pending;
   }
 
   private shouldSkipRecovering(
-    stateTransition: NonNullable<RuleResponse['state_transition']>,
+    stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.recovering_count === 0 && nextStatus === alertEpisodeStatus.recovering;
+    return (
+      isPhaseSkipped(stateTransition.recovering) && nextStatus === alertEpisodeStatus.recovering
+    );
   }
 
   private isPendingToActiveTransition(
@@ -241,14 +286,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     successStatus: AlertEpisodeStatus;
     stayStatus: AlertEpisodeStatus;
   }): StateTransitionResult {
-    const nextCount = currentStatusCount + 1;
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
-    if (isThresholdMet(nextCount, elapsedMs, config)) {
+    if (isThresholdMet(currentStatusCount, elapsedMs, config)) {
       return { status: successStatus };
     }
 
-    return { status: stayStatus, statusCount: nextCount };
+    return { status: stayStatus, statusCount: currentStatusCount + 1 };
   }
 
   /**
@@ -257,7 +301,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
    * the timeframe dimension is simply ignored instead of
    * blowing up the entire state transition evaluation.
    */
-  private safeParseDurationToMs(value?: string): number | undefined {
+  private safeParseDurationToMs(
+    value: string | undefined,
+    ruleId: string,
+    resource: 'pending_timeframe' | 'recovering_timeframe'
+  ): number | undefined {
     if (!value) {
       return undefined;
     }
@@ -265,22 +313,27 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     try {
       return parseDurationToMs(value);
     } catch {
+      this.logger.warn({
+        message: 'Rule state transition timeframe is invalid',
+        code: ALERTING_LOG_CODES.DIRECTOR_TIMEFRAME_INVALID,
+        labels: { rule_id: ruleId, resource },
+      });
       return undefined;
     }
   }
 
-  private getElapsedMs(currentTimestamp?: string, previousTimestamp?: string | null): number {
-    if (!currentTimestamp || !previousTimestamp) {
+  private getElapsedMs(evaluatedAt: string, phaseStartedAt?: string | null): number {
+    if (!phaseStartedAt) {
       return 0;
     }
 
-    const currentMs = Date.parse(currentTimestamp);
-    const previousMs = Date.parse(previousTimestamp);
+    const currentMs = Date.parse(evaluatedAt);
+    const phaseStartedMs = Date.parse(phaseStartedAt);
 
-    if (Number.isNaN(currentMs) || Number.isNaN(previousMs)) {
+    if (Number.isNaN(currentMs) || Number.isNaN(phaseStartedMs)) {
       return 0;
     }
 
-    return Math.max(0, currentMs - previousMs);
+    return Math.max(0, currentMs - phaseStartedMs);
   }
 }

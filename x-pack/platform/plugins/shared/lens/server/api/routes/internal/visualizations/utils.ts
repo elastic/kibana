@@ -6,9 +6,11 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder, LensApiConfig } from '@kbn/lens-embeddable-utils';
+import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../../content_management/zod';
+import type { LensApiConfigLibItemNoESQL } from '../../types';
 import type {
   LensCreateRequestBody,
   LensItemMeta,
@@ -27,11 +29,13 @@ export function getLensInternalRequestConfig(
   const useApiFormat = builder.isEnabled && builder.isSupported(chartType);
 
   if (useApiFormat) {
-    const config = request as LensApiConfig;
+    const config = request as LensApiConfigLibItemNoESQL;
+    const { references: tagReferences } = toStoredTags(config);
     const attributes = builder.fromAPIFormat(config);
 
     return {
       ...attributes,
+      references: [...(attributes.references ?? []), ...tagReferences],
     } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
   }
 
@@ -78,18 +82,25 @@ export function getLensInternalResponseItem<M extends Record<string, string | bo
   const useApiFormat = builder.isEnabled && builder.isSupported(attributes.visualizationType);
 
   if (useApiFormat) {
-    const data = builder.toAPIFormat({
+    const { tags } = toAsCodeTags(references);
+    const chartData = builder.toAPIFormat({
       references,
       ...attributes,
       // TODO: fix these type issues
       state: attributes.state!,
       visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
-    return {
-      id,
-      data,
-      meta,
-    } satisfies LensResponseItem;
+    const data = { ...chartData, tags };
+
+    if (isLensDSLConfig(data)) {
+      return {
+        id,
+        data,
+        meta,
+      } satisfies LensResponseItem;
+    }
+
+    throw new Error('ES|QL charts are not supported in Lens internal API');
   }
 
   return {

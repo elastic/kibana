@@ -9,20 +9,23 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { ChromeNext } from './chrome_next';
+import type { AppMenuConfig } from '@kbn/app-menu';
+import type { ChromeControls } from './controls';
+import type { ChromeHelp } from './help';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
-import type { ChromeHelpMenuLink, ChromeNavControls } from './nav_controls';
-import type { ChromeHelpExtension } from './help_extension';
+import type {
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
+  ChromeHelpMenuLink,
+} from './help_extension';
 import type {
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
-import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 import type { SolutionId } from './project_navigation';
 import type { SidebarStart, SidebarSetup } from './sidebar';
 
@@ -64,18 +67,23 @@ export interface ChromeSetup {
 export interface ChromeStart {
   /** {@inheritdoc ChromeNavLinks} */
   navLinks: ChromeNavLinks;
-  /** {@inheritdoc ChromeNavControls} */
-  navControls: ChromeNavControls;
   /** {@inheritdoc ChromeRecentlyAccessed} */
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
   /**
-   * Chrome Next rollout namespace.
+   * Persistent interactive chrome controls. Chrome decides where they render.
    *
-   * {@inheritdoc ChromeNext}
+   * {@inheritdoc ChromeControls}
    */
-  next: ChromeNext;
+  controls: ChromeControls;
+
+  /**
+   * Newsfeed and Feedback action registration for the Help menu.
+   *
+   * {@inheritdoc ChromeHelp}
+   */
+  help: ChromeHelp;
 
   /**
    * Get an observable of the current visibility state of the chrome.

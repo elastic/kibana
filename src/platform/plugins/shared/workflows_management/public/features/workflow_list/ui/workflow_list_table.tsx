@@ -24,9 +24,10 @@ import {
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import {
@@ -91,6 +92,7 @@ export const WorkflowListTable = ({
   sortOrder,
   onSortChange,
 }: WorkflowListTableProps) => {
+  const routerHistory = useHistory();
   const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
@@ -117,24 +119,27 @@ export const WorkflowListTable = ({
                     `}
                   >
                     {canReadWorkflow ? (
-                      <EuiLink>
-                        <Link
-                          to={{
+                      <EuiLink
+                        href={routerHistory.createHref({ pathname: `/${item.id}` })}
+                        onClick={(event: React.MouseEvent) => {
+                          if (hasActiveModifierKey(event)) return;
+                          event.preventDefault();
+                          routerHistory.push({
                             pathname: `/${item.id}`,
                             state: getWorkflowDetailRouteState(workflowsListSearch),
-                          }}
-                          css={css`
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            display: block;
-                            max-width: 100%;
-                          `}
-                          title={name}
-                          data-test-subj="workflowNameLink"
-                        >
-                          {name}
-                        </Link>
+                          });
+                        }}
+                        css={css`
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          display: block;
+                          max-width: 100%;
+                        `}
+                        title={name}
+                        data-test-subj="workflowNameLink"
+                      >
+                        {name}
                       </EuiLink>
                     ) : (
                       <EuiText
@@ -250,7 +255,7 @@ export const WorkflowListTable = ({
                 >
                   <EuiSwitch
                     data-test-subj={`workflowToggleSwitch-${item.id}`}
-                    disabled={!canUpdateWorkflow || !item.valid}
+                    disabled={!canUpdateWorkflow || item.permissions?.edit === false || !item.valid}
                     checked={item.enabled}
                     onChange={() => onToggleWorkflow(item)}
                     label={
@@ -281,7 +286,11 @@ export const WorkflowListTable = ({
         actions: [
           {
             isPrimary: true,
-            enabled: (item) => canExecuteWorkflow && item.enabled && item.valid,
+            enabled: (item) =>
+              canExecuteWorkflow &&
+              item.permissions?.execute !== false &&
+              item.enabled &&
+              item.valid,
             type: 'icon',
             color: 'text',
             name: i18n.translate('workflows.workflowList.run', { defaultMessage: 'Run' }),
@@ -290,13 +299,14 @@ export const WorkflowListTable = ({
             description: (item: WorkflowListItemDto) =>
               getRunTooltipContent({
                 isValid: item.valid,
-                canRunWorkflow: canExecuteWorkflow,
+                canRunWorkflow: canExecuteWorkflow && item.permissions?.execute !== false,
                 isEnabled: item.enabled,
               }) ?? i18n.translate('workflows.workflowList.run', { defaultMessage: 'Run' }),
             onClick: (item: WorkflowListItemDto) => onRequestRun(item),
           },
           {
-            enabled: (item) => canUpdateWorkflow && item.managed !== true,
+            enabled: (item) =>
+              canUpdateWorkflow && item.permissions?.edit !== false && item.managed !== true,
             type: 'icon',
             color: 'text',
             isPrimary: true,
@@ -308,7 +318,7 @@ export const WorkflowListTable = ({
                 ? i18n.translate('workflows.workflowList.editManagedDisabled', {
                     defaultMessage: 'Managed workflows cannot be edited',
                   })
-                : i18n.translate('workflows.workflowList.edit', {
+                : i18n.translate('workflows.workflowList.editWorkflow', {
                     defaultMessage: 'Edit workflow',
                   }),
             onClick: (item: WorkflowListItemDto) => onEditWorkflow(item),
@@ -316,29 +326,26 @@ export const WorkflowListTable = ({
           {
             enabled: () => canCreateWorkflow && canReadWorkflow,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
             name: i18n.translate('workflows.workflowList.clone', { defaultMessage: 'Clone' }),
             'data-test-subj': 'cloneWorkflowAction',
             icon: 'copy',
-            description: i18n.translate('workflows.workflowList.clone', {
-              defaultMessage: 'Clone workflow',
-            }),
+            description: '',
             onClick: (item: WorkflowListItemDto) => onCloneWorkflow(item),
           },
           {
             enabled: (item) => item.definition !== null && canReadWorkflow,
             type: 'icon',
-            color: 'primary',
+            color: 'text',
             name: i18n.translate('workflows.workflowList.export', { defaultMessage: 'Export' }),
             'data-test-subj': 'exportWorkflowAction',
             icon: 'export',
-            description: i18n.translate('workflows.workflowList.export', {
-              defaultMessage: 'Export workflow',
-            }),
+            description: '',
             onClick: (item: WorkflowListItemDto) => onExportWorkflow(item),
           },
           {
-            enabled: (item) => canDeleteWorkflow && item.managed !== true,
+            enabled: (item) =>
+              canDeleteWorkflow && item.permissions?.edit !== false && item.managed !== true,
             type: 'icon',
             color: 'danger',
             name: i18n.translate('workflows.workflowList.delete', { defaultMessage: 'Delete' }),
@@ -349,9 +356,7 @@ export const WorkflowListTable = ({
                 ? i18n.translate('workflows.workflowList.deleteManagedDisabled', {
                     defaultMessage: 'Managed workflows cannot be deleted',
                   })
-                : i18n.translate('workflows.workflowList.deleteDescription', {
-                    defaultMessage: 'Delete workflow',
-                  }),
+                : '',
             onClick: (item: WorkflowListItemDto) => onDeleteWorkflow(item),
           },
         ],
@@ -365,6 +370,7 @@ export const WorkflowListTable = ({
       canCreateWorkflow,
       canDeleteWorkflow,
       onEditWorkflow,
+      routerHistory,
       workflowsListSearch,
       onToggleWorkflow,
       onCloneWorkflow,

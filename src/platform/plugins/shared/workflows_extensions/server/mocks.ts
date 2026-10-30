@@ -79,6 +79,8 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
         storedHash: 'mock-hash',
         registryHash: 'mock-hash',
       }),
+      getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+      listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     }),
     getManagedWorkflowPluginIds: jest.fn().mockReturnValue([]),

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EVALS_EVALUATE_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
+import { EVALS_EVALUATE_URL, EVALS_ONLINE_SCORES_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
 import type { EvalsTaskProvider, TaskProviderRegistry } from '../task_providers/types';
 import {
   evaluateWorkBatch,
   normalizeReferenceData,
+  persistOnlineScores,
   runExampleEvaluation,
   type DatasetEvaluationConfig,
   type DatasetWorkItem,
@@ -216,6 +217,171 @@ describe('runExampleEvaluation failure capture', () => {
   });
 });
 
+describe('runExampleEvaluation evaluator model attribution', () => {
+  it('carries each evaluator model from /_evaluate into the ingest body, omitting it for code', async () => {
+    const recorded: RecordedCall[] = [];
+    const judgeModel = { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' };
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return {
+            status: 200,
+            headers: {},
+            body: {
+              results: [
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'correctness',
+                    version: '1',
+                    kind: 'llm',
+                    model: judgeModel,
+                  },
+                  scores: [{ name: 'correctness', score: 1 }],
+                },
+                {
+                  status: 'ok',
+                  evaluator: { name: 'input_tokens', version: '1', kind: 'code' },
+                  scores: [{ name: 'input_tokens', score: 42 }],
+                },
+              ],
+            },
+          };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return { status: 200, headers: {}, body: { ingested: 2, conflicted: 0, failed: [] } };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    const scores = ingestedScoresBody(recorded).scores;
+    expect(
+      scores.map(({ evaluator }: { evaluator: Record<string, unknown> }) => ({
+        name: evaluator.name,
+        kind: evaluator.kind,
+        model: evaluator.model,
+      }))
+    ).toEqual([
+      { name: 'correctness', kind: 'llm', model: judgeModel },
+      { name: 'input_tokens', kind: 'code', model: undefined },
+    ]);
+  });
+
+  it('carries evaluator.direction from /_evaluate into the ingest body', async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return {
+            status: 200,
+            headers: {},
+            body: {
+              results: [
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'input_tokens',
+                    version: '1',
+                    kind: 'code',
+                    direction: 'minimize',
+                  },
+                  scores: [{ name: 'input_tokens', score: 42 }],
+                },
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'correctness',
+                    version: '1',
+                    kind: 'llm',
+                    direction: 'maximize',
+                  },
+                  scores: [{ name: 'correctness', score: 1 }],
+                },
+              ],
+            },
+          };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return { status: 200, headers: {}, body: { ingested: 2, conflicted: 0, failed: [] } };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    const scores = ingestedScoresBody(recorded).scores;
+    expect(
+      scores.map(({ evaluator }: { evaluator: Record<string, unknown> }) => ({
+        name: evaluator.name,
+        direction: evaluator.direction,
+      }))
+    ).toEqual([
+      { name: 'input_tokens', direction: 'minimize' },
+      { name: 'correctness', direction: 'maximize' },
+    ]);
+  });
+
+  it("stamps each score with its own direction when a judge's scores point different ways", async () => {
+    const recorded: RecordedCall[] = [];
+    const runtime: StepRuntime = {
+      ...createRuntime(recorded),
+      callKibanaApi: (async ({ path, body }: { path: string; body?: unknown }) => {
+        recorded.push({ path, body });
+        if (path === EVALS_EVALUATE_URL) {
+          return {
+            status: 200,
+            headers: {},
+            body: {
+              results: [
+                {
+                  status: 'ok',
+                  evaluator: {
+                    name: 'answer-quality',
+                    version: '1.0.0',
+                    kind: 'llm',
+                    direction: 'maximize',
+                  },
+                  scores: [
+                    { name: 'grounded', score: 0.9, direction: 'maximize' },
+                    { name: 'hallucination', score: 0.1, direction: 'minimize' },
+                    { name: 'length', score: 0.5, direction: 'neutral' },
+                  ],
+                },
+              ],
+            },
+          };
+        }
+        if (path === EVALS_SCORES_URL) {
+          return { status: 200, headers: {}, body: { ingested: 3, conflicted: 0, failed: [] } };
+        }
+        throw new Error(`Unexpected path: ${path}`);
+      }) as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    await runExampleEvaluation(createRegistry(), runtime, baseParams());
+
+    const scores = ingestedScoresBody(recorded).scores;
+    expect(
+      scores.map(({ evaluator }: { evaluator: Record<string, unknown> }) => ({
+        name: evaluator.name,
+        direction: evaluator.direction,
+      }))
+    ).toEqual([
+      { name: 'answer-quality.grounded', direction: 'maximize' },
+      { name: 'answer-quality.hallucination', direction: 'minimize' },
+      { name: 'answer-quality.length', direction: 'neutral' },
+    ]);
+  });
+});
+
 describe('evaluateWorkBatch reference data', () => {
   it("forwards each example's output as reference_data (workflow batch path)", async () => {
     const recorded: RecordedCall[] = [];
@@ -331,5 +497,57 @@ describe('evaluateWorkBatch reference data', () => {
     // ex-1 finished before the abort; ex-2 was never started.
     expect(result.completed).toBe(1);
     expect(runs).toBe(1);
+  });
+});
+
+describe('persistOnlineScores', () => {
+  it('posts the successful results to the online scores route and counts failed evaluators', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { created: 2, skipped: 1, failed_evaluators: 0 },
+    });
+    const runtime = {
+      ...createRuntime([]),
+      callKibanaApi: callKibanaApi as unknown as StepRuntime['callKibanaApi'],
+    };
+
+    const response = await persistOnlineScores(runtime, {
+      monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+      traceId: VALID_TRACE_ID,
+      connectorId: 'conn-1',
+      results: [
+        {
+          evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+          scores: [
+            { name: 'factuality', score: 0.9, label: 'pass', explanation: null },
+            { name: 'relevance', score: null, label: null },
+          ],
+        },
+      ],
+      errors: ['Evaluator "groundedness" failed: boom'],
+    });
+
+    expect(callKibanaApi).toHaveBeenCalledWith({
+      method: 'POST',
+      path: EVALS_ONLINE_SCORES_URL,
+      headers: { 'elastic-api-version': '1' },
+      body: {
+        monitor: { id: 'workflow-1', name: '[online-eval] quality monitor' },
+        trace_id: VALID_TRACE_ID,
+        connector_id: 'conn-1',
+        results: [
+          {
+            status: 'ok',
+            evaluator: { name: 'correctness', version: '1.0.0', kind: 'llm' },
+            scores: [
+              { name: 'factuality', score: 0.9, label: 'pass' },
+              { name: 'relevance', score: null },
+            ],
+          },
+        ],
+      },
+    });
+    expect(response).toEqual({ created: 2, skipped: 1, failed_evaluators: 1 });
   });
 });

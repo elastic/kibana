@@ -25,19 +25,35 @@ export class CloudLinksPageObject {
     await this.page.testSubj.waitForSelector('userMenu', { state: 'visible' });
   }
 
+  public get profileLink() {
+    return this.page.testSubj.locator('userMenuLink__profile');
+  }
+
+  public get billingLink() {
+    return this.page.testSubj.locator('userMenuLink__billing');
+  }
+
+  public get organizationLink() {
+    return this.page.testSubj.locator('userMenuLink__organization');
+  }
+
   async isProfileLinkVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('userMenuLink__Profile').isVisible();
+    return this.profileLink.isVisible();
   }
 
   async isBillingLinkVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('userMenuLink__Billing').isVisible();
+    return this.billingLink.isVisible();
   }
 
   async isOrganizationLinkVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('userMenuLink__Organization').isVisible();
+    return this.organizationLink.isVisible();
   }
 
   async isAppearanceButtonVisible(): Promise<boolean> {
     return this.page.testSubj.locator('appearanceSelector').isVisible();
+  }
+
+  async isSpacesConfigurationButtonVisible(): Promise<boolean> {
+    return this.page.testSubj.locator('spacePreferenceSelector').isVisible();
   }
 }

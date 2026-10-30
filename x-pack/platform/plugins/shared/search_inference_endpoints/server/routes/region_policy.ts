@@ -70,6 +70,9 @@ export const defineRegionPolicyRoutes = ({
         },
         validate: {
           request: {
+            query: schema.object({
+              force: schema.maybe(schema.boolean()),
+            }),
             body: schema.object({
               allowed_regions: schema.maybe(
                 schema.arrayOf(
@@ -101,7 +104,7 @@ export const defineRegionPolicyRoutes = ({
           client: { asCurrentUser },
         } = (await context.core).elasticsearch;
 
-        const policy = await putRegionPolicy(asCurrentUser, request.body);
+        const policy = await putRegionPolicy(asCurrentUser, request.body, request.query.force);
         return response.ok({ body: policy, headers: { 'content-type': 'application/json' } });
       })
     );

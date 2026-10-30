@@ -8,15 +8,8 @@
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiCallOut,
-  EuiText,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiText, EuiFlexGrid, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
@@ -53,7 +46,7 @@ export const Page: FC = () => {
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
   });
 
-  const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const [recognizerResultsCount, setRecognizerResultsCount] = useState<number | null>(null);
 
   const { selectedDataView, selectedSavedSearch, projectRouting } = useDataSource();
 
@@ -122,13 +115,6 @@ export const Page: FC = () => {
         values: { dataViewName: selectedDataView.getName() },
       });
 
-  const recognizerResults = {
-    count: 0,
-    onChange() {
-      setRecognizerResultsCount(recognizerResults.count);
-    },
-  };
-
   const getJobTypeUrlParams = () =>
     getUrlParams({
       dataView: selectedDataView,
@@ -167,12 +153,7 @@ export const Page: FC = () => {
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/single_metric${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createSingleMetricJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
-          defaultMessage: 'Single metric job',
-        }),
-      },
+      iconType: 'createSingleMetricJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricTitle', {
         defaultMessage: 'Single metric',
       }),
@@ -183,12 +164,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/multi_metric${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createMultiMetricJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
-          defaultMessage: 'Multi-metric job',
-        }),
-      },
+      iconType: 'createMultiMetricJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricTitle', {
         defaultMessage: 'Multi-metric',
       }),
@@ -200,12 +176,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/population${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createPopulationJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
-          defaultMessage: 'Population job',
-        }),
-      },
+      iconType: 'createPopulationJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.populationTitle', {
         defaultMessage: 'Population',
       }),
@@ -217,12 +188,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/advanced${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createAdvancedJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
-          defaultMessage: 'Advanced job',
-        }),
-      },
+      iconType: 'createAdvancedJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedTitle', {
         defaultMessage: 'Advanced',
       }),
@@ -235,12 +201,7 @@ export const Page: FC = () => {
     {
       onClick: () =>
         navigateToManagementPath(`/jobs/new_job/categorization${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createGenericJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
-          defaultMessage: 'Categorization job',
-        }),
-      },
+      iconType: 'createGenericJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
         defaultMessage: 'Categorization',
       }),
@@ -251,12 +212,7 @@ export const Page: FC = () => {
     },
     {
       onClick: () => navigateToManagementPath(`/jobs/new_job/rare${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createGenericJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
-          defaultMessage: 'Rare job',
-        }),
-      },
+      iconType: 'createGenericJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.rareTitle', {
         defaultMessage: 'Rare',
       }),
@@ -270,12 +226,7 @@ export const Page: FC = () => {
   if (hasGeoFields) {
     jobTypes.push({
       onClick: () => navigateToManagementPath(`/jobs/new_job/geo${getJobTypeUrlParams()}`),
-      icon: {
-        type: 'createGeoJob',
-        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {
-          defaultMessage: 'Geo job',
-        }),
-      },
+      iconType: 'createGeoJob',
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.geoTitle', {
         defaultMessage: 'Geo',
       }),
@@ -298,29 +249,32 @@ export const Page: FC = () => {
 
       {isTimeBasedIndex === false && (
         <>
-          <EuiCallOut
-            announceOnMount={false}
+          <KbnWarningCallout
             title={indexWarningTitle}
-            color="warning"
-            iconType="warning"
-          >
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
-              defaultMessage="Anomaly detection can only be run over indices which are time based."
-            />
-            <br />
-            <EuiLink href={selectDifferentIndexHref} onClick={onSelectDifferentIndex}>
+            text={
               <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
-                defaultMessage="Select a different data view or saved Discover session"
+                id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
+                defaultMessage="Anomaly detection can only be run over indices which are time based."
               />
-            </EuiLink>
-          </EuiCallOut>
+            }
+            actionProps={{
+              primary: {
+                href: selectDifferentIndexHref,
+                onClick: onSelectDifferentIndex,
+                children: (
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
+                    defaultMessage="Select a different data view or saved Discover session"
+                  />
+                ),
+              },
+            }}
+          />
           <EuiSpacer size="l" />
         </>
       )}
 
-      <div hidden={recognizerResultsCount === 0}>
+      <div hidden={!recognizerResultsCount}>
         <EuiTitle size="s">
           <h2>
             <FormattedMessage
@@ -346,7 +300,7 @@ export const Page: FC = () => {
           <DataRecognizer
             indexPattern={selectedDataView}
             savedSearch={selectedSavedSearch}
-            results={recognizerResults}
+            onResultsChange={setRecognizerResultsCount}
           />
         </EuiFlexGrid>
 
@@ -363,14 +317,19 @@ export const Page: FC = () => {
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <EuiFlexGrid gutterSize="l" columns={4}>
-        {jobTypes.map(({ onClick, icon, title, description, id }) => (
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={4}
+        data-test-subj={`mlJobTypeSelectionWizardCards ${
+          recognizerResultsCount === null ? 'loading' : 'loaded'
+        }`}
+      >
+        {jobTypes.map(({ onClick, iconType, title, description, id }) => (
           <EuiFlexItem key={id}>
             <LinkCard
               data-test-subj={id}
               onClick={onClick}
-              icon={icon.type}
-              iconAreaLabel={icon.ariaLabel}
+              icon={<EuiIcon size="xl" type={iconType} aria-hidden={true} />}
               title={title}
               description={description}
               isDisabled={!isTimeBasedIndex}
@@ -402,25 +361,17 @@ export const Page: FC = () => {
       <EuiFlexGrid gutterSize="l" columns={4}>
         <EuiFlexItem>
           <LinkCard
-            icon="dataVisualizer"
-            iconAreaLabel={i18n.translate(
-              'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
+            icon={<EuiIcon size="xl" type="dataVisualizer" aria-hidden={true} />}
+            title={i18n.translate('xpack.ml.newJob.wizard.jobType.dataVisualizerTitle', {
+              defaultMessage: 'Data Visualizer',
+            })}
+            description={i18n.translate(
+              'xpack.ml.newJob.wizard.jobType.dataVisualizerDescription',
               {
-                defaultMessage: 'Data Visualizer',
+                defaultMessage:
+                  'Learn more about the characteristics of your data and identify the fields for analysis with machine learning.',
               }
             )}
-            title={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
-                defaultMessage="Data Visualizer"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
-                defaultMessage="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
-              />
-            }
             onClick={addSelectionToRecentlyAccessed}
           />
         </EuiFlexItem>

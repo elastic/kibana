@@ -36,9 +36,9 @@ apiTest.describe(
         responseType: 'json',
         body: validateLogEntryDatasetsRequestPayloadRT.encode({
           data: {
-            endTime: Date.now().valueOf(),
+            endTime: testData.DATES['8.0.0'].logs_and_metrics.max,
             indices: ['filebeat-*'],
-            startTime: 1562766600672,
+            startTime: testData.DATES['8.0.0'].logs_and_metrics.min,
             timestampField: '@timestamp',
             runtimeMappings: {},
           },
@@ -70,9 +70,9 @@ apiTest.describe(
         responseType: 'json',
         body: validateLogEntryDatasetsRequestPayloadRT.encode({
           data: {
-            endTime: Date.now().valueOf(),
+            endTime: testData.DATES['8.0.0'].logs_and_metrics.max,
             indices: ['filebeat-*', 'filebeat-*'],
-            startTime: 1562766600672,
+            startTime: testData.DATES['8.0.0'].logs_and_metrics.min,
             timestampField: '@timestamp',
             runtimeMappings: {},
           },
@@ -106,9 +106,9 @@ apiTest.describe(
         responseType: 'json',
         body: {
           data: {
-            endTime: Date.now().valueOf(),
+            endTime: testData.DATES['8.0.0'].logs_and_metrics.max,
             indices,
-            startTime: 1562766600672,
+            startTime: testData.DATES['8.0.0'].logs_and_metrics.min,
             timestampField: '@timestamp',
             runtimeMappings: {},
           },

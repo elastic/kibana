@@ -48,6 +48,7 @@ export {
   INGEST_SAVED_OBJECT_INDEX,
   // Saved object types
   SO_SEARCH_LIMIT,
+  API_KEY_INVALIDATION_BATCH_SIZE,
   AGENTS_PREFIX,
   AGENT_POLICY_VERSION_SEPARATOR,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -85,8 +86,10 @@ export {
   MAX_REINSTALL_RETRIES,
   // Download sources
   DEFAULT_DOWNLOAD_SOURCE_URI,
+  DEFAULT_DOWNLOAD_SOURCE_NAME,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
   // Fleet server host
   DEFAULT_FLEET_SERVER_HOST_ID,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -143,4 +146,5 @@ export {
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
 export * from '../../common/constants/mappings';
+export * from '../../common/constants/schema_field_limits';
 export * from './max_concurrency_constants';

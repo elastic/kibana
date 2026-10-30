@@ -11,6 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
+jest.mock('../../../../../../hooks/use_streams_privileges', () => ({
+  useStreamsPrivileges: jest.fn(() => ({ features: { canvas: { enabled: false } } })),
+}));
+
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
   useIlmPhasesColorAndDescription: () => ({
     ilmPhases: {
@@ -585,18 +589,20 @@ describe('EditIlmPhasesFlyout', () => {
       expect(downsamplingCheckbox).toBeDisabled();
 
       // The previously enabled readonly state is preserved in the output alongside downsample.
-      expect(onChange).toHaveBeenLastCalledWith(
-        {
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: {
-            name: 'warm',
-            size_in_bytes: 0,
-            min_age: '30d',
-            readonly: true,
-            downsample: { after: '30d', fixed_interval: '1d' },
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: {
+              name: 'warm',
+              size_in_bytes: 0,
+              min_age: '30d',
+              readonly: true,
+              downsample: { after: '30d', fixed_interval: '1d' },
+            },
           },
-        },
-        { invalidPhases: [] }
+          { invalidPhases: [] }
+        )
       );
 
       // Disable downsampling -> readonly should be enabled again and keep its previous checked state.

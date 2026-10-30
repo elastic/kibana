@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/sort-predicates",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "shared"

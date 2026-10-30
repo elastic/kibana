@@ -89,6 +89,25 @@ describe('getHighlightReact', () => {
       );
     });
 
+    test('does not match highlight terms inside previously inserted tag markers', () => {
+      // "field" is a substring of the @kibana-highlighted-field@ tag literal itself:
+      // matching it against a partially tagged working string used to corrupt the
+      // markers and render raw tag debris
+      check(
+        'the field is great',
+        [`the ${hl('field')} is great`, hl('field')],
+        `the ${mark('field')} is great`
+      );
+    });
+
+    test('does not match highlight terms inside tag markers across occurrences', () => {
+      check(
+        'field one field',
+        [`${hl('field')} one field`, hl('field')],
+        `${mark('field')} one ${mark('field')}`
+      );
+    });
+
     test('highlights the same word appearing multiple times via multiple highlight entries', () => {
       check(
         'lorem ipsum lorem ipsum lorem',

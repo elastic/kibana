@@ -816,7 +816,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         <>
           <EuiButtonGroup
             legend="Events or Process descendants selector"
-            color="primary"
             onChange={handleFilterTypeOnChange}
             options={filterTypeOptions}
             idSelected={isProcessDescendantsSelected ? 'descendants' : 'trustedApps'}
@@ -929,7 +928,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               <EuiFormRow fullWidth>
                 <StyledButtonGroup
                   legend="Advanced Mode Toggle"
-                  color="primary"
                   data-test-subj={getTestId('advancedModeToggle')}
                   options={advancedModeToggle}
                   idSelected={selectedFormType}

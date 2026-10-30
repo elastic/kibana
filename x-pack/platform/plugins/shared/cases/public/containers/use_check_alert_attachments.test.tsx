@@ -6,10 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { hasDocReferences, useCheckDocumentAttachments } from './use_check_alert_attachments';
 import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
 jest.mock('./use_find_cases_containing_all_selected_alerts');
+jest.mock('../components/cases_context/use_cases_context');
+
+const mockUseCasesContext = useCasesContext as jest.Mock;
 
 const cases = [{ id: 'case-1' }, { id: 'case-2' }];
 
@@ -43,6 +47,7 @@ describe('hasDocReferences', () => {
 describe('useCheckDocumentAttachments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCasesContext.mockReturnValue({ owner: ['securitySolution'] });
     (useFindCasesContainingAllSelectedDocuments as jest.Mock).mockReturnValue({
       data: { casesWithAllAttachments: [] },
       isFetching: false,
@@ -62,9 +67,33 @@ describe('useCheckDocumentAttachments', () => {
 
     renderHook(() => useCheckDocumentAttachments({ cases, getAttachments }));
 
-    expect(getAttachments).toHaveBeenCalledWith({ theCase: undefined });
+    expect(getAttachments).toHaveBeenCalledWith({ theCase: { owner: 'securitySolution' } });
     expect(useFindCasesContainingAllSelectedDocuments).toHaveBeenCalledWith(
       ['alert-1', 'event-1', 'alert-2', 'event-2', 'external-ref-1'],
+      ['case-1', 'case-2']
+    );
+  });
+
+  it('calls getAttachments with theCase undefined when no owner is in context', () => {
+    mockUseCasesContext.mockReturnValue({ owner: [] });
+    const getAttachments = jest.fn().mockReturnValue([]);
+
+    renderHook(() => useCheckDocumentAttachments({ cases, getAttachments }));
+
+    expect(getAttachments).toHaveBeenCalledWith({ theCase: undefined });
+  });
+
+  it('collects document IDs for callbacks that branch on theCase being defined', () => {
+    // mirrors consumers (e.g. ML, Osquery) whose getAttachments returns [] when theCase
+    // is falsy; a synthesized owner-only theCase must still be truthy for them to work
+    const getAttachments = jest
+      .fn()
+      .mockImplementation(({ theCase }) => (theCase ? [{ alertId: 'alert-1' }] : []));
+
+    renderHook(() => useCheckDocumentAttachments({ cases, getAttachments }));
+
+    expect(useFindCasesContainingAllSelectedDocuments).toHaveBeenCalledWith(
+      ['alert-1'],
       ['case-1', 'case-2']
     );
   });

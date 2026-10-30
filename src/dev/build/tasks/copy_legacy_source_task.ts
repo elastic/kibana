@@ -10,19 +10,26 @@
 import { resolve } from 'path';
 
 import { getPackages } from '@kbn/repo-packages';
-import globby from 'globby';
+import { globbyStream } from 'globby';
 import Piscina from 'piscina';
 
 import type { Task } from '../lib';
+import { read } from '../lib';
+import { getLocalFileDependencyPaths } from './local_file_dependencies';
 
 export const CopyLegacySource: Task = {
   description: 'Copying legacy/non-package source into platform-generic build directory',
 
   async run(config, log) {
+    const localDependencyFiles = getLocalFileDependencyPaths(
+      config.getKibanaPkg(),
+      await read(config.resolveFromRepo('pnpm-workspace.yaml'))
+    );
     const select = [
-      'yarn.lock',
+      'pnpm-lock.yaml',
       '.npmrc',
       '.puppeteerrc',
+      ...localDependencyFiles,
       'config/kibana.yml',
       'config/node.options',
       '.i18nrc.json',
@@ -58,7 +65,7 @@ export const CopyLegacySource: Task = {
 
     const globbyOptions = { cwd: config.resolveFromRepo('.') };
     const promises = [];
-    for await (const source of globby.stream(select, globbyOptions)) {
+    for await (const source of globbyStream(select, globbyOptions)) {
       promises.push(piscina.run({ source }));
     }
     await Promise.all(promises);

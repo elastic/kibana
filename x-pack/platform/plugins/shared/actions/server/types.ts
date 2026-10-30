@@ -19,7 +19,8 @@ import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
-import type { AuthMode } from '@kbn/connector-specs';
+import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -113,6 +114,10 @@ export interface InMemoryConnector<
   config: Config;
   exposeConfig?: boolean;
   isDynamic?: boolean;
+  /**
+   * Events are on for this in-memory connector. GET reports it for a dual type.
+   */
+  isInboundEventsEnabled?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
@@ -234,6 +239,10 @@ export interface ActionTypeCoreFields<
   supportedFeatureIds: string[];
   isSystemActionType?: boolean;
   source?: ActionTypeSource;
+  /**
+   * Spec this type was generated from; only set for spec-backed types
+   */
+  spec?: ConnectorSpec;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -255,6 +264,32 @@ export interface ActionTypeCoreFields<
    * When true, the connector type is shown as technical preview in the UI.
    */
   isExperimental?: boolean;
+  /**
+   * Auth type ids from the connector spec that opted into sandbox credential injection.
+   * Populated for spec-backed connectors via createConnectorTypeFromSpec.
+   */
+  sandboxSupportedAuthTypes?: readonly string[];
+  /**
+   * Per-instance check for stack connectors that are not driven by sandboxSupportedAuthTypes.
+   * Also called when listing connectors, where secrets are not decrypted and are passed as an
+   * empty object, so implementations should decide from config alone when possible.
+   */
+  isSandboxCapable?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+  }) => boolean;
+  /**
+   * Builds auth headers for sandbox credential injection from the decrypted secrets of a
+   * stack connector. Headers from secretHeaders take precedence over these.
+   */
+  getSandboxAuthHeaders?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+    connectorId: string;
+    connectorTokenClient?: ConnectorTokenClientContract;
+    configurationUtilities: ActionsConfigurationUtilities;
+    logger: Logger;
+  }) => Record<string, string> | Promise<Record<string, string>>;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -316,6 +351,10 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
+  hasInboundEventIdentity?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -325,13 +364,24 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  /**
+   * Id of the UIAM API key in `apiKey`. Unencrypted and mapped so the alerting API key
+   * invalidation task can see this pending execution still needs the key.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId?: string;
   consumer?: string;
   source?: string;
 }
 
 export interface ActionTaskExecutorParams {
-  spaceId: string;
+  spaceId: SpaceId;
   actionTaskParamsId: string;
 }
 

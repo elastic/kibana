@@ -28,6 +28,7 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
+  createDiscoverSession: platformCoreTool('create_discover_session'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
@@ -39,6 +40,7 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listInferenceEndpoints: platformCoreTool('list_inference_endpoints'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -54,8 +56,10 @@ const casesTool = <TName extends string>(
  */
 export const platformCoreCasesTools = {
   manage: casesTool('manage'),
-  attachments: casesTool('attachments'),
+  getAttachments: casesTool('get_attachments'),
+  manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
+  findTemplates: casesTool('find_templates'),
 } as const;
 
 /**
@@ -68,15 +72,43 @@ export const platformCoreCasesTools = {
  */
 export const platformSignificantEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformSignificantEvents}.ki_search`,
+  searchSimilarFeatures: `${internalNamespaces.platformSignificantEvents}.ki_feature_similarity_search`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_feature_create`,
   createQueryKnowledgeIndicator: `${internalNamespaces.platformSignificantEvents}.ki_query_create`,
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
-
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
-  reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
+} as const;
+
+/** Nightshift source tools, registered by the Significant Events plugin. */
+export const observabilityNightshiftSourceTools = {
+  listSources: `${internalNamespaces.observability}.nightshift.source_list`,
+  getSource: `${internalNamespaces.observability}.nightshift.source_get`,
+  createSource: `${internalNamespaces.observability}.nightshift.source_create`,
+  updateSource: `${internalNamespaces.observability}.nightshift.source_update`,
+  deleteSource: `${internalNamespaces.observability}.nightshift.source_delete`,
+} as const;
+
+/** AI-index tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAiIndexTools = {
+  listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
+  describeAiIndex: `${internalNamespaces.platformContextEngine}.describe_ai_index`,
+  queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
+} as const;
+
+/** AI-index memory tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineMemoryTools = {
+  remember: `${internalNamespaces.platformContextEngine}.remember`,
+  forget: `${internalNamespaces.platformContextEngine}.forget`,
+} as const;
+
+/** AI-index automation tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAutomationTools = {
+  installAutomationTemplate: `${internalNamespaces.platformContextEngine}.install_automation_template`,
+  saveAutomation: `${internalNamespaces.platformContextEngine}.save_automation`,
+  runAutomation: `${internalNamespaces.platformContextEngine}.run_automation`,
 } as const;
 
 export const attachmentTools = {
@@ -89,6 +121,7 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
+  sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
@@ -97,9 +130,12 @@ export const internalTools = {
   readFile: 'read_file',
   listFiles: 'list_files',
   bash: 'bash',
+  setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
+  describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
+  executeDynamicTool: 'execute_dynamic_tool',
 };
 
 export const isAttachmentTool = (toolName: string) =>
@@ -127,6 +163,7 @@ export const isInternalTool = (toolName: string) =>
 const filestoreAllowedInternalToolIds = new Set<string>([
   internalTools.discoverApis,
   internalTools.describeApi,
+  internalTools.describeApiType,
   internalTools.executeApi,
 ]);
 
@@ -158,6 +195,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.productDocumentation,
 ];
 
 /**

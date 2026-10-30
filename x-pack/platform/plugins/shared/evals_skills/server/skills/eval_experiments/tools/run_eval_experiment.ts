@@ -12,15 +12,16 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateExperimentRun } from '@kbn/evals-plugin/server';
 import {
+  assertDatasetsVisible,
   buildResultsLink,
   errorResult,
   evalExperimentConfigSchema,
-  evalsTools,
+  evalsExperimentTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
-} from './common';
-import { hasManageEvalsPrivilege } from './check_privileges';
+} from './tool_utils';
+import { hasManageEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const cancelLaunchedExecutions = async (
@@ -64,7 +65,7 @@ const runSchema = evalExperimentConfigSchema.extend({
 export const runEvalExperimentTool = (
   deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof runSchema> => ({
-  id: evalsTools.runExperiment,
+  id: evalsExperimentTools.runExperiment,
   type: ToolType.builtin,
   description:
     'Run an evaluation experiment now. Launches one or more workflow executions (without waiting for completion) and returns the execution ids plus a link to the live results. Prefer preview_eval_experiment first so the user can review the configuration.',
@@ -88,12 +89,25 @@ export const runEvalExperimentTool = (
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     const workflowExecutionIds: string[] = [];
     try {
-      const { security } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
       if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
         return errorResult(
           'You do not have the manage_evals privilege required to run evaluation experiments in this space.'
         );
       }
+
+      if (!evals.datasetService) {
+        return toErrorResult(
+          new Error('the evals dataset service is unavailable'),
+          'Failed to run experiment'
+        );
+      }
+
+      await assertDatasetsVisible({
+        datasetService: evals.datasetService,
+        spaceId,
+        datasetIds: config.dataset_ids,
+      });
 
       const params = toGenerateParams(config);
       const run = generateExperimentRun(params);

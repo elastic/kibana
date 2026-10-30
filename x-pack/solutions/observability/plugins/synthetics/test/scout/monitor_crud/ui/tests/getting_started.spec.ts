@@ -10,9 +10,12 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
 test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
+  let locationLabel: string;
+
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deleteMonitors();
-    await syntheticsServices.ensurePrivateLocationExists();
+    const location = await syntheticsServices.ensurePrivateLocationExists();
+    locationLabel = location.label;
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
@@ -35,7 +38,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('shows validation error on submit', async () => {
-      await page.locator('.euiSideNavItem').locator('text=Synthetics').click();
+      await page.testSubj.click('observability-nav-synthetics-monitors');
       await page.click('text=Create monitor');
       await expect(page.getByText('URL is required')).toBeVisible();
     });
@@ -43,7 +46,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
     await test.step('create basic monitor', async () => {
       await pageObjects.syntheticsApp.fillFirstMonitorDetails({
         url: 'https://www.elastic.co',
-        location: 'Test private location',
+        location: locationLabel,
       });
       await pageObjects.syntheticsApp.confirmAndSave();
     });

@@ -8,15 +8,13 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RawRule, IntervalSchedule } from '../../../../types';
+import type { RawRule, IntervalSchedule, RuleTypeParams } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import {
-  addMissingUiamKeyTagIfNeeded,
-  API_KEY_ATTRIBUTES_TO_STRIP,
-} from '../../../../rules_client/common';
+import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
@@ -24,6 +22,7 @@ import {
   scheduleTask,
   bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
+import { authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -114,6 +113,13 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   }
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+  // Re-authorize persisted params before activating them: they may have bypassed
+  // the authorizer entirely (e.g. via Saved Objects import).
+  await authorizeRuleTypeParams(attributes.params as RuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
+
   const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
   const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
 
@@ -140,9 +146,10 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
+    await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
+    const profileUid = await context.getProfileUid();
     const now = new Date();
     const nowIso = now.toISOString();
 
@@ -153,29 +160,22 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
+          profileUid,
           shouldUpdateApiKey: true,
           apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
         })
       : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
-      attributes.tags,
-      existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
-      existingApiKey ? attributes.apiKeyCreatedByUser : apiKeyAttributes.apiKeyCreatedByUser,
-      context.isServerless,
-      context.featureFlags
-    );
-
     const updateAttributes = updateMeta(context, {
       ...(existingApiKey ? attributes : omit(attributes, API_KEY_ATTRIBUTES_TO_STRIP)),
       ...apiKeyAttributes,
-      tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: nowIso,
       lastEnabledAt: nowIso,
       executionStatus: {
@@ -188,31 +188,57 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     });
 
     try {
-      // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
-      // we call create with overwrite=true
-      if (migratedIds.includes(alert.id)) {
-        await context.unsecuredSavedObjectsClient.create<RawRule>(
-          RULE_SAVED_OBJECT_TYPE,
-          updateAttributes,
-          {
-            id,
-            overwrite: true,
-            version,
-            references: alert.references,
-          }
-        );
-      } else {
-        await context.unsecuredSavedObjectsClient.update(
-          RULE_SAVED_OBJECT_TYPE,
+      // Write the whole document instead of a partial update. A partial update merges attributes,
+      // so the API key attributes stripped above would keep their stored values rather than being
+      // removed, leaving a rule that runs on a new key while still holding the previous one. It
+      // also mitigates AAD issues, since `actions` is not used for encrypting the API key in a
+      // partial saved-object update.
+      await context.unsecuredSavedObjectsClient.create<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        updateAttributes,
+        {
           id,
-          updateAttributes,
-          {
-            version,
-          }
+          overwrite: true,
+          version,
+          references: alert.references,
+        }
+      );
+    } catch (e) {
+      // The rule never took ownership of the key set minted above, so nothing will ever present it
+      // or clean it up. A version conflict here is retried by `retryIfConflicts`, which mints again
+      // on every attempt, so leaving these behind leaks a key per attempt. Only keys this call
+      // created can be invalidated: when the rule already had one, `apiKeyAttributes` is empty and
+      // the stored key stays in use.
+      const { apiKey, apiKeyCreatedByUser, uiamApiKey } = apiKeyAttributes;
+      const apiKeysToInvalidate = [];
+
+      if (apiKey && !apiKeyCreatedByUser) {
+        apiKeysToInvalidate.push(apiKey);
+      }
+      if (uiamApiKey && !apiKeyCreatedByUser) {
+        apiKeysToInvalidate.push(uiamApiKey);
+      }
+
+      if (apiKeysToInvalidate.length > 0) {
+        await bulkMarkApiKeysForInvalidation(
+          { apiKeys: apiKeysToInvalidate },
+          context.logger,
+          context.unsecuredSavedObjectsClient
         );
       }
-    } catch (e) {
+
       throw e;
+    }
+
+    // A rule with only a UIAM key, such as one created by a UIAM service account, gets a new key
+    // set above, so the UIAM key it held is no longer used. The key may also be a stale one that
+    // was already invalidated, and invalidating it again is harmless.
+    if (!existingApiKey && attributes.uiamApiKey && !attributes.apiKeyCreatedByUser) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: [attributes.uiamApiKey] },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
     }
   }
 

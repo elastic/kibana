@@ -10,3 +10,13 @@ export enum ActionAgentStatus {
   PENDING = 'pending',
   FAILED = 'failed',
 }
+
+export interface ActionResultsSummaryProps {
+  actionId: string;
+  startDate?: string;
+  expirationDate?: string;
+  agentIds?: string[];
+  error?: string;
+  scheduleId?: string;
+  executionCount?: number;
+}

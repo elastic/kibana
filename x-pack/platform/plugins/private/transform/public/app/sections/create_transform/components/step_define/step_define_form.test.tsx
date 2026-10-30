@@ -100,7 +100,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
     await waitFor(() => {
       expect(getByText('Source data')).toBeInTheDocument();
-      expect(mockOnChange).toBeCalled();
+      expect(mockOnChange).toHaveBeenCalled();
     });
   }, 10000);
 });

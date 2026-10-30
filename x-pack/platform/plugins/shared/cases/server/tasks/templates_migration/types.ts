@@ -11,19 +11,28 @@ import type { ConfigurationPersistedAttributes } from '../../common/types/config
 /** How many spaces the field-definition/template phase migrates in parallel. */
 export const MAX_CONCURRENT_MIGRATIONS = 3;
 
+export const CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT = '10m' as const;
+export const CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT_MS = 10 * 60 * 1000;
+export const CASE_BACKFILL_RUN_BUDGET_MS = Math.round(
+  CASES_TEMPLATES_MIGRATION_TASK_TIMEOUT_MS * 0.7
+);
+
 /**
  * Case-backfill tuning. The backfill scans an unbounded number of cases, so it pages with a
  * Point-In-Time cursor (from/size pagination fails past `index.max_result_window`, ~10k) and scans
  * at most `CASE_BACKFILL_SCAN_BUDGET` cases per run before rescheduling — a space with millions of
- * cases finishes across many short runs instead of one run that times out.
+ * cases finishes across many short runs instead of one run that times out. The scan budget bounds
+ * work, not time; `CASE_BACKFILL_RUN_BUDGET_MS` is the backstop for when the two diverge on a slow
+ * cluster.
  */
 export const CASE_BACKFILL_PAGE_SIZE = 1000;
 export const CASE_BACKFILL_SCAN_BUDGET = 25000;
 export const CASE_BACKFILL_PIT_KEEP_ALIVE = '5m';
 export const CASE_BACKFILL_RESCHEDULE_DELAY_MS = 3000;
-// When a run can't fully backfill a space because its case updates keep failing, we back off and,
-// after this many consecutive failing runs, give up (with an error log) rather than rescheduling
-// forever — a single "poison" case must not spin the task or starve other spaces indefinitely.
+// When a run can't fully backfill a space because its case updates keep failing, or a space is
+// stuck on an unresolved Phase-1 (field-definitions/templates) error, we back off and, after this
+// many consecutive failing runs, give up (with an error log) rather than rescheduling forever — a
+// single "poison" space must not spin the task or starve other spaces indefinitely.
 export const CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS = 30000;
 export const MAX_CASE_BACKFILL_FAILED_RUNS = 5;
 
@@ -39,13 +48,17 @@ export interface MigrationCounts {
   fieldDefsReused: number;
   templatesCreated: number;
   templatesReused: number;
+  /**
+   * The phase-completion flags as of the end of this call — either already true from a prior run,
+   * or just persisted this run, or still false (an unexpected error withheld them). The task
+   * runner merges these into its in-memory configure snapshot so the case-backfill phase (gated
+   * on both being true) can run in the SAME cycle right after a fresh migration, instead of
+   * waiting a full extra run for the next `findAllConfigurations` read to see the persisted flags.
+   */
+  legacyCustomFieldsMigrated: boolean;
+  legacyTemplatesMigrated: boolean;
 }
 
-/**
- * Cross-run cursor for the existing-case backfill. Persisted in Task Manager `state` so a run that
- * hits its scan budget (or is cancelled) resumes exactly where it left off, without re-writing cases
- * already backfilled. `pitId` + `searchAfter` are an Elasticsearch Point-In-Time cursor.
- */
 export interface CaseBackfillCursor {
   configureId: string;
   owner: string;
@@ -68,7 +81,8 @@ export interface MigrationTaskState {
 /**
  * Outcome of backfilling one space:
  * - `complete` — fully scanned with no failed updates; the space can be flagged migrated.
- * - `paused`   — stopped early by the scan budget or cancellation; resume this space from `cursor`.
+ * - `paused`   — stopped early by the scan budget, the run budget, or cancellation; resume this
+ *                space from `cursor`.
  * - `failed`   — scanned but some updates failed; leave it unflagged and retry it on a later run
  *                (the phase moves on to other spaces so one bad space can't starve the rest).
  */

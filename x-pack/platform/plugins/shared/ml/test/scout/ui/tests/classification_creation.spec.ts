@@ -16,7 +16,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
-import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
+import { setupDfaSourceFixtures, cleanupDfaTest } from '../fixtures/helpers/dfa';
 
 // ── Test data ────────────────────────────────────────────────────────────────
 
@@ -78,16 +78,17 @@ test.describe('classification creation', { tag: '@local-stateful-classic' }, () 
   let dataViewId: string;
   let dashboardSavedObjectId: string;
 
-  test.beforeAll(async ({ apiServices, kbnClient, esArchiver }) => {
-    await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/bm_classification');
-
-    const { data: dataView } = await apiServices.dataViews.create({
-      title: 'ft_bank_marketing',
-      name: 'ft_bank_marketing',
-      override: true,
+  test.beforeAll(async ({ apiServices, kbnClient, esArchiver, esClient }) => {
+    const setup = await setupDfaSourceFixtures({
+      esArchiver,
+      apiServices,
+      kbnClient,
+      esClient,
+      archivePath: 'x-pack/platform/test/fixtures/es_archives/ml/bm_classification',
+      indexName: 'ft_bank_marketing',
     });
-    dataViewId = dataView.id;
-    dashboardSavedObjectId = await createMLTestDashboard(kbnClient);
+    dataViewId = setup.dataViewId;
+    dashboardSavedObjectId = setup.dashboardId;
   });
 
   test.afterAll(async ({ apiServices, kbnClient, esClient }) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -26,7 +26,7 @@ import {
 } from '../../../lib/siem_readiness/fetchers';
 import { SIEM_READINESS_CONTINUITY_TOOL_ID } from './tool_ids';
 
-const schema = z.object({});
+const schema = lazySchema(() => z.object({}));
 
 export const getContinuityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -39,6 +39,13 @@ export const getContinuityTool = (
     'Retrieves SIEM ingest pipeline continuity health. Returns active pipelines with document counts, failure rates, and which indices they serve — filtered to pipelines that serve categorized SIEM indices. Includes an overall health status (healthy / actionsRequired / noData) and actionable findings for: (1) pipelines with critical failure rates, (2) data streams that have gone silent (no events received beyond the category-specific threshold), and (3) data streams showing a significant volume drop versus the 7-day baseline. Each actionable finding includes blast radius data (affectedRules, affectedTactics, affectedPlatform) and a type field (pipeline_failure | silence | volume_drop_warning | volume_drop_critical). When presenting any finding, always show these as explicit labeled fields: Affected Platform, Affected Rules, Affected Tactics.',
   schema,
   tags: ['security', 'siem-readiness', 'continuity'],
+  annotations: {
+    title: 'Get SIEM Continuity',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'space',
     handler: async ({ request }) => {

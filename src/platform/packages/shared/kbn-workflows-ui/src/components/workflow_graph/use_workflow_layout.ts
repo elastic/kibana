@@ -13,17 +13,20 @@ import { useMemo } from 'react';
 import {
   computeTopologyFingerprint,
   ExecutionStatus,
+  getTriggerName,
   transformWorkflowToGraph,
 } from '@kbn/workflows';
 import type {
   HandleSide,
   LayoutDirection,
+  StructureSequence,
   TransformResult,
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { computeWorkflowLayout } from './workflow_layout_pipeline';
 import type { LayoutSnapshot } from './workflow_layout_pipeline';
+import { useOptionalWorkflowsUiServices } from '../../context';
 
 /** Stable empty result used when no workflow is loaded, avoiding `as TransformResult` casts. */
 const EMPTY_TRANSFORM: TransformResult = {
@@ -32,7 +35,26 @@ const EMPTY_TRANSFORM: TransformResult = {
   foreachGroups: [],
   bypassLaneNodes: [],
   nodeRefs: {},
+  fallbackLanes: [],
+  structure: { triggers: [], items: [] },
 };
+
+/**
+ * The part of a workflow's content the layout depends on beyond its topology: an empty
+ * branch is a bypass lane that reserves the width of its edge label, so its head and
+ * label belong in the layout key. Labels of branches with steps do not move anything.
+ */
+const emptyBranchSignature = (items: StructureSequence): string[] =>
+  items.flatMap((item) => [
+    ...(item.kind === 'fork'
+      ? item.branches.flatMap(({ head, items: branchItems, label }) =>
+          branchItems.length === 0 ? [`${head}:${label}`] : emptyBranchSignature(branchItems)
+        )
+      : []),
+    ...(item.kind === 'container' ? emptyBranchSignature(item.body) : []),
+    ...(item.kind === 'step' && item.attached ? emptyBranchSignature(item.attached) : []),
+    ...item.lanes.flatMap((lane) => emptyBranchSignature(lane.items)),
+  ]);
 
 const HANDLE_SIDE_TO_POSITION: Record<HandleSide, Position> = {
   top: Position.Top,
@@ -61,9 +83,9 @@ interface UseWorkflowLayoutResult {
 }
 
 /**
- * Memoized YAML→graph transform + dagre layout. Layout is keyed on the
- * topology fingerprint so non-structural edits (description, params, etc.)
- * never retrigger dagre.
+ * Memoized YAML→graph transform + dagre layout. Layout is keyed on the topology
+ * fingerprint and the labels of empty branches, so other edits (description, params,
+ * the match value of a case with steps) never retrigger dagre.
  *
  * Step-execution status is merged onto node data without retriggering layout.
  */
@@ -75,19 +97,31 @@ export function useWorkflowLayout({
   onPerfMark,
   onLayoutFailed,
 }: UseWorkflowLayoutParams): UseWorkflowLayoutResult {
+  const services = useOptionalWorkflowsUiServices();
   const transformed: TransformResult = useMemo(() => {
     if (transformedProp) return transformedProp;
     if (!workflow) return EMPTY_TRANSFORM;
     const t0 = performance.now();
-    const next = transformWorkflowToGraph(workflow);
+    const next = transformWorkflowToGraph(workflow, (triggerType) =>
+      getTriggerName(
+        triggerType,
+        services?.workflowsExtensions.getTriggerDefinition(triggerType)?.title
+      )
+    );
     onPerfMark?.('transform_ms', performance.now() - t0);
     return next;
-  }, [transformedProp, workflow, onPerfMark]);
+  }, [transformedProp, workflow, onPerfMark, services]);
 
   // Stable string capturing only topology (step names/types/nesting/trigger
   // types). Non-structural edits (descriptions, params, expressions) produce
   // the same fingerprint → dagre never re-runs for them.
   const topologyFingerprint = computeTopologyFingerprint(workflow);
+  // The fingerprint skips empty branches, but each one is a bypass node whose size
+  // comes from its label, so adding one or editing its label must re-run the layout.
+  const layoutKey = useMemo(
+    () => `${topologyFingerprint}\n${emptyBranchSignature(transformed.structure.items).join('\n')}`,
+    [topologyFingerprint, transformed]
+  );
 
   const layoutSnapshot = useMemo<LayoutSnapshot>(() => {
     if (!workflow) return { nodes: [], edges: [] };
@@ -100,13 +134,13 @@ export function useWorkflowLayout({
       onLayoutFailed?.(err instanceof Error ? err.message : 'unknown');
       return { nodes: [], edges: [] };
     }
-    // Keyed on the topology fingerprint string (not `workflow` or `transformed`
-    // object identity) so that non-structural YAML edits never retrigger dagre.
-    // `transformed` is read directly — it is always consistent with the
-    // fingerprint because both are computed from the same `workflow`/
-    // `transformedProp` on the same render.
+    // Keyed on `layoutKey` (not `workflow` or `transformed` object identity) so that
+    // edits which change neither the topology nor an empty branch's label never
+    // retrigger dagre. `transformed` is read directly — it is always consistent with
+    // the key because both are computed from the same `workflow`/`transformedProp`
+    // on the same render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topologyFingerprint, direction, onLayoutFailed, onPerfMark]);
+  }, [layoutKey, direction, onLayoutFailed, onPerfMark]);
 
   const stepExecutionMap = useMemo(() => {
     if (!stepExecutions) return null;
@@ -181,9 +215,13 @@ export function useWorkflowLayout({
     }
     const mergeNodeIds = new Set<string>();
     for (const [target, sources] of incomingByTarget) {
-      if (sources.length > 1 && sources.some((s) => allBypassLaneIds.has(s))) {
-        mergeNodeIds.add(target);
-      }
+      // Every fan-in joins on the shared bus just above its target, so the lane
+      // change happens as late as possible. Synthetic bypass lanes are not special
+      // here — this is exactly the set of edges for which applyDagre blanks
+      // `points` (predecessorCount > 1), so nothing usable is being discarded.
+      // Array length is safe as a distinct-source count: transformWorkflowToGraph
+      // dedupes exit ids (`dedupeIds`) before emitting sequential edges.
+      if (sources.length > 1) mergeNodeIds.add(target);
     }
 
     return {
@@ -408,16 +446,46 @@ export function useWorkflowLayout({
       return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
     };
 
+    // Pre-build a map from fallback owner id → Set of lane node ids so the
+    // failure-edge traversal check is O(1) per node, not O(lane-size²).
+    const laneNodesByOwner = new Map<string, Set<string>>();
+    for (const [nodeId, node] of nodeById) {
+      const fof = (node.data as Record<string, unknown>).fallbackOf;
+      if (typeof fof === 'string') {
+        let s = laneNodesByOwner.get(fof);
+        if (!s) {
+          s = new Set();
+          laneNodesByOwner.set(fof, s);
+        }
+        s.add(nodeId);
+      }
+    }
+
     const mapped = allEdges.map((e) => {
       const laid = layoutEdgeById.get(e.id);
+      const isFailure = (e as { isFailure?: boolean }).isFailure === true;
+
       // Fork edges (if/switch branches) highlight only for the branch that ran;
       // edges leaving an empty (bypass) lane inherit that lane's traversal;
+      // failure edges traverse when any lane node has started (third rule, see
+      // plan assumption 8 — step records are created at RUNNING, never SKIPPED);
       // everything else falls back to source-step completion.
       let traversed: boolean;
       if (e.branchType) {
         traversed = traversedForkEdgeIds.has(e.id);
       } else if (allBypassLaneIds.has(e.source)) {
         traversed = traversedBypassIds.has(e.source);
+      } else if (isFailure) {
+        // Probe the whole lane, not just the head: guards (if:) on lane steps
+        // mean the head may never have run even if a later step did.
+        // SKIPPED step records are not emitted by the engine today but the union
+        // type allows them; excluding them guards a representable-but-unemitted
+        // state (plan assumption 9).
+        const laneNodes = laneNodesByOwner.get(e.source) ?? new Set<string>();
+        traversed = [...laneNodes].some((nodeId) => {
+          const exec = getExec(nodeId);
+          return exec !== undefined && exec.status !== ExecutionStatus.SKIPPED;
+        });
       } else {
         // Trigger nodes have no persisted step execution; mirror the node's
         // synthetic "completed" status so the trigger's outgoing edge highlights
@@ -433,6 +501,9 @@ export function useWorkflowLayout({
         id: e.id,
         source: e.source,
         target: e.target,
+        // Failure edges exit via the dedicated bottom-right handle so React Flow
+        // hands computeEdgePath the correct sourceX (right edge, not centre).
+        sourceHandle: isFailure ? 'fallback' : undefined,
         type: 'workflowEdge',
         data: {
           label: e.label,
@@ -441,6 +512,7 @@ export function useWorkflowLayout({
           branchType: e.branchType,
           isMerge: mergeNodeIds.has(e.target),
           hideEndMarker: allBypassLaneIds.has(e.target),
+          isFailure,
         },
       };
     });

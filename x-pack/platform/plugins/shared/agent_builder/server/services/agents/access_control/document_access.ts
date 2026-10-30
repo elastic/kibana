@@ -15,10 +15,14 @@ import type { AgentPermissions } from '../../../../common/http_api/agents';
 import type { AgentUpdateRequest } from '../../../../common/agents';
 import {
   canChangeAgentAccessControl,
+  canConfigureAgentApprovals,
+  canEditBoundAgent,
+  canConfigureAgentExecutionIdentity,
   canDeleteAgent,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
+  matchesAccessControlEntry,
 } from './authorization';
 import type { AgentProperties } from '../persisted/client/storage';
 
@@ -40,7 +44,7 @@ export const normalizeAccessControl = (
   entries: source.access_control?.entries ?? source.acl?.entries ?? [],
 });
 
-const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
+export const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
@@ -48,96 +52,122 @@ const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
 export const hasReadAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasUseAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasWriteAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasDeleteAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasManageAccessControlAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   canChangeAgentAccessControl({
     agentId: source.id,
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
+
+export const hasConfigureApprovalsAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canConfigureAgentApprovals({
+    agentId: source.id,
+    accessControl: normalizeAccessControl(source),
+    owner: sourceToOwner(source),
+    currentUser: user,
+  });
+
+export const hasConfigureExecutionIdentityAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canConfigureAgentExecutionIdentity({
+    agentId: source.id,
+    accessControl: normalizeAccessControl(source),
+    owner: sourceToOwner(source),
+    currentUser: user,
+  });
+
+/** Whether the caller may edit the agent given its binding; see {@link canEditBoundAgent}. */
+export const hasEditBoundAgentAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canEditBoundAgent({ boundServiceAccountId: source.service_account_id, currentUser: user });
 
 export const getAgentPermissions = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
-}): AgentPermissions => ({
-  update_agent: hasWriteAccess({ source, user, isAdmin }),
-  update_access_control: hasManageAccessControlAccess({ source, user, isAdmin }),
-});
+}): AgentPermissions => {
+  // A bound agent is read-only for anyone who cannot bind it.
+  const editable = hasEditBoundAgentAccess({ source, user });
+  return {
+    update_agent: editable && hasWriteAccess({ source, user }),
+    update_access_control: editable && hasManageAccessControlAccess({ source, user }),
+    update_approvals: editable && hasConfigureApprovalsAccess({ source, user }),
+  };
+};
 
 /**
  * Redacts `access_control.entries` from a returned agent definition when the caller is not allowed
@@ -148,17 +178,15 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
   definition,
   source,
   user,
-  isAdmin,
 }: {
   definition: T;
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): T => {
   if (!definition.access_control || definition.access_control.entries.length === 0) {
     return definition;
   }
-  const canManage = hasManageAccessControlAccess({ source, user, isAdmin });
+  const canManage = hasManageAccessControlAccess({ source, user });
   if (canManage) {
     return definition;
   }
@@ -166,8 +194,8 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
     ...definition,
     access_control: {
       ...definition.access_control,
-      entries: definition.access_control.entries.filter(
-        (entry) => entry.type === 'user' && user.username && entry.name === user.username
+      entries: definition.access_control.entries.filter((entry) =>
+        matchesAccessControlEntry(entry, user)
       ),
     },
   };
@@ -177,12 +205,10 @@ export const validateAccessControlUpdateAccess = ({
   source,
   update,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   update: AgentUpdateRequest;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean => {
   const currentAccessControl = normalizeAccessControl(source);
   const currentAccessMode = currentAccessControl.access_mode;
@@ -196,7 +222,6 @@ export const validateAccessControlUpdateAccess = ({
       accessControl: currentAccessControl,
       owner: sourceToOwner(source),
       currentUser: user,
-      isAdmin,
     })
   );
 };

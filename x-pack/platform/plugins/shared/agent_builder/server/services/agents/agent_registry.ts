@@ -11,7 +11,7 @@ import {
   createAgentNotFoundError,
   createAgentUnavailableError,
   createBadRequestError,
-  chatAgentTypeId,
+  SELF_AGENT_ID,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
@@ -58,6 +58,15 @@ export interface AgentRegistry {
   getIds(opts?: AgentListOptions): Promise<string[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
+  /**
+   * Binds the agent to a service account, or unbinds it with `null`. Needs write access to the
+   * agent and the `manage_security` privilege; every conversation with the agent then runs as
+   * that account.
+   */
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
   getAccessControl(agentId: string): Promise<AgentAccessControlResult>;
   updateAccessControl(
@@ -80,14 +89,8 @@ export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistr
   return new AgentRegistryImpl(opts);
 };
 
-/**
- * Whether an agent should surface in default listings (agent management page, pickers, ...).
- * Read-only managed built-ins (a non-chat type)
- * Chat agents and editable (persisted) agents always show, so the admin-editable managed agent stays visible.
- */
-const isVisibleAgent = (agent: InternalAgentDefinition): boolean => {
-  return agent.type === chatAgentTypeId || !agent.readonly;
-};
+/** Returns true for agents that appear in UI listings by default (agent picker, management page). */
+const isVisibleAgent = (agent: InternalAgentDefinition): boolean => !agent.hidden;
 
 class AgentRegistryImpl implements AgentRegistry {
   private readonly request: KibanaRequest;
@@ -130,16 +133,24 @@ class AgentRegistryImpl implements AgentRegistry {
   }
 
   async get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition> {
+    // Only persisted agents can be bound, and the account running one holds no read access to
+    // it, so a bound run skips the access-checked `has` lookups and resolves the agent directly.
+    if (opts?.runAs !== undefined) {
+      return this.ensureAvailable(await this.persistedProvider.get(agentId, opts));
+    }
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
-        const agent = await provider.get(agentId, opts);
-        if (!(await this.isAvailable(agent))) {
-          throw createAgentUnavailableError({ agentId });
-        }
-        return agent;
+        return this.ensureAvailable(await provider.get(agentId, opts));
       }
     }
     throw createAgentNotFoundError({ agentId });
+  }
+
+  private async ensureAvailable(agent: InternalAgentDefinition): Promise<InternalAgentDefinition> {
+    if (!(await this.isAvailable(agent))) {
+      throw createAgentUnavailableError({ agentId: agent.id });
+    }
+    return agent;
   }
 
   async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {
@@ -149,7 +160,7 @@ class AgentRegistryImpl implements AgentRegistry {
       allAgents.push(...(await this.getAvailableAgents(provider, opts)));
     }
 
-    return opts.includeManaged ? allAgents : allAgents.filter(isVisibleAgent);
+    return opts.includeHidden ? allAgents : allAgents.filter(isVisibleAgent);
   }
 
   async getIds(opts: AgentListOptions = {}): Promise<string[]> {
@@ -179,10 +190,22 @@ class AgentRegistryImpl implements AgentRegistry {
       throw createBadRequestError(`Agent with id ${agentId} already exists`);
     }
 
+    await this.validateSubagentIds({
+      agentId,
+      subagentIds: createRequest.configuration?.subagent_ids ?? [],
+    });
+
     return this.persistedProvider.create(createRequest);
   }
 
   async update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition> {
+    if (update.configuration?.subagent_ids !== undefined) {
+      await this.validateSubagentIds({
+        agentId,
+        subagentIds: update.configuration.subagent_ids,
+      });
+    }
+
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
         if (isReadonlyProvider(provider)) {
@@ -193,6 +216,58 @@ class AgentRegistryImpl implements AgentRegistry {
       }
     }
     throw createAgentNotFoundError({ agentId });
+  }
+
+  async setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(agentId)) {
+        if (isReadonlyProvider(provider)) {
+          throw createBadRequestError(`Agent ${agentId} is read-only and can't be updated`);
+        }
+        return provider.setServiceAccount(agentId, serviceAccountId);
+      }
+    }
+    throw createAgentNotFoundError({ agentId });
+  }
+
+  private async validateSubagentIds({
+    agentId,
+    subagentIds,
+  }: {
+    agentId: string;
+    subagentIds: string[];
+  }): Promise<void> {
+    if (subagentIds.length === 0) {
+      return;
+    }
+
+    const seen = new Set<string>();
+    for (const id of subagentIds) {
+      if (seen.has(id)) {
+        throw createBadRequestError(`subagent_ids must be unique (duplicate: "${id}")`);
+      }
+      seen.add(id);
+    }
+
+    if (subagentIds.includes(agentId)) {
+      throw createBadRequestError(
+        `subagent_ids contains this agent's own id — use '${SELF_AGENT_ID}' to enable self-fork`
+      );
+    }
+
+    for (const id of subagentIds) {
+      if (id === SELF_AGENT_ID) continue;
+      try {
+        await this.get(id);
+      } catch {
+        throw createBadRequestError(
+          `subagent_ids contains an unknown or inaccessible agent: "${id}"`
+        );
+      }
+    }
   }
 
   async delete({ id: agentId }: AgentDeleteRequest): Promise<boolean> {

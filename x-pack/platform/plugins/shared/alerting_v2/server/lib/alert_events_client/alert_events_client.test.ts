@@ -10,7 +10,11 @@ import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_events_client';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
-import { alertEpisodeStatus } from '../../resources/datastreams/alert_events';
+import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
+import {
+  ALERT_EVENTS_RESOURCE_KEY,
+  alertEpisodeStatus,
+} from '../../resources/datastreams/alert_events';
 
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 
@@ -109,7 +113,7 @@ describe('getGroupHash', () => {
   });
 });
 
-describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
+describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
   const spaceId = 'default';
 
   const createClient = (
@@ -126,27 +130,79 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       executeQueryRows: jest.fn().mockResolvedValue(queryRows),
     };
 
+    const resourceManager = createMockResourceManager();
+
     const client = new AlertEventsClient(
       storageService,
       queryService as unknown as QueryServiceContract,
-      spaceId
+      spaceId,
+      resourceManager
     );
 
-    return { client, storageService, queryService };
+    return { client, storageService, queryService, resourceManager };
   };
+
+  it('waits for the rule events data stream to be ready before writing', async () => {
+    const { client, storageService, resourceManager } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'ready-fp' });
+
+    expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_EVENTS_RESOURCE_KEY);
+    expect(resourceManager.ensureResourceReady.mock.invocationCallOrder[0]).toBeLessThan(
+      storageService.bulkIndexDocs.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not write when the data stream fails to initialize', async () => {
+    const { client, storageService, resourceManager } = createClient([]);
+    resourceManager.ensureResourceReady.mockRejectedValue(new Error('init failed'));
+
+    await expect(
+      client.createAlertEvent({ source: 'datadog', fingerprint: 'ready-fp' })
+    ).rejects.toThrow('init failed');
+    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+  });
 
   it('mints a new episode id when no prior episode exists', async () => {
     const { client, storageService } = createClient([]);
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
-    expect(result.episode_id).toMatch(
+    expect(result.alert_id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     );
     expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the group hash and the alert id written on the rule event', async () => {
+    const { client, storageService } = createClient([]);
+    const result = await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'lifecycle-fp',
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
+    });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toMatchObject({
+      group_hash: result.group_hash,
+      alert: { id: result.alert_id },
+    });
+    expect(result).not.toHaveProperty('episode_id');
+  });
+
+  it('resolves the prior episode from the alert.id and alert.status of the series', async () => {
+    const { client, queryService } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'lifecycle-fp' });
+
+    const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+    expect(query).toContain('alert.status IS NOT NULL');
+    expect(query).toContain('last_episode_id = LAST(alert.id, @timestamp)');
+    expect(query).toContain('last_episode_status = LAST(alert.status, @timestamp)');
+    expect(query).not.toContain('episode.');
   });
 
   it('reuses the prior episode id while the series is still active', async () => {
@@ -155,13 +211,13 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.active },
     ]);
 
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
-    expect(result.episode_id).toBe(priorEpisodeId);
+    expect(result.alert_id).toBe(priorEpisodeId);
   });
 
   it('mints a new episode id after an inactive episode when re-firing', async () => {
@@ -170,15 +226,35 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
       { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.inactive },
     ]);
 
-    const result = await client.ingestAlertEvent({
+    const result = await client.createAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
-    expect(result.episode_id).not.toBe(priorEpisodeId);
-    expect(result.episode_id).toMatch(
+    expect(result.alert_id).not.toBe(priorEpisodeId);
+    expect(result.alert_id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     );
+  });
+
+  it('leaves @timestamp unset when the caller does not supply one', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'ts-fp' });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).not.toHaveProperty('@timestamp');
+    expect(docs[0]).toHaveProperty('scheduled_timestamp', expect.any(String));
+  });
+
+  it('passes a caller-supplied timestamp through as @timestamp and scheduled_timestamp', async () => {
+    const { client, storageService } = createClient([]);
+    const timestamp = '2026-07-29T12:00:00.000Z';
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'ts-fp', timestamp });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toMatchObject({ '@timestamp': timestamp, scheduled_timestamp: timestamp });
   });
 });

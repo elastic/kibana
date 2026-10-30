@@ -22,19 +22,19 @@ export const InstallPrebuiltRulesAndTimelinesResponse = lazySchema(() =>
       /**
        * The number of rules installed
        */
-      rules_installed: z.number().int().min(0),
+      rules_installed: z.number().int().min(0).describe('The number of rules installed'),
       /**
        * The number of rules updated
        */
-      rules_updated: z.number().int().min(0),
+      rules_updated: z.number().int().min(0).describe('The number of rules updated'),
       /**
        * The number of timelines installed
        */
-      timelines_installed: z.number().int().min(0),
+      timelines_installed: z.number().int().min(0).describe('The number of timelines installed'),
       /**
        * The number of timelines updated
        */
-      timelines_updated: z.number().int().min(0),
+      timelines_updated: z.number().int().min(0).describe('The number of timelines updated'),
     })
     .strict()
 );

@@ -78,7 +78,7 @@ export const Databricks: ConnectorSpec = {
   metadata: {
     id: '.databricks',
     displayName: 'Databricks',
-    description: i18n.translate('core.kibanaConnectorSpecs.databricks.metadata.description', {
+    description: i18n.translate('connectorSpecs.databricks.metadata.description', {
       defaultMessage:
         'Execute SQL queries, manage jobs, clusters, and warehouses, and monitor alerts in Databricks',
     }),
@@ -99,7 +99,7 @@ export const Databricks: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://{workspace}.azuredatabricks.net/oidc/v1/authorize',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.databricks.auth.oauth.authorizationUrl.helpText',
+                'connectorSpecs.databricks.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Databricks workspace OAuth authorization URL. Replace '{workspace}' with your Databricks workspace hostname (e.g. adb-1234567890123456.7).",
@@ -108,13 +108,10 @@ export const Databricks: ConnectorSpec = {
             },
             tokenUrl: {
               placeholder: 'https://{workspace}.azuredatabricks.net/oidc/v1/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.databricks.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    "Databricks workspace OAuth token endpoint. Replace '{workspace}' with your Databricks workspace hostname.",
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.databricks.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  "Databricks workspace OAuth token endpoint. Replace '{workspace}' with your Databricks workspace hostname.",
+              }),
             },
             scope: {
               hidden: true,
@@ -126,16 +123,16 @@ export const Databricks: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.databricks.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.databricks.auth.bearer.label', {
             defaultMessage: 'Personal access token (PAT)',
           }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.databricks.auth.pat.label', {
+              label: i18n.translate('connectorSpecs.databricks.auth.pat.label', {
                 defaultMessage: 'Databricks access token',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.databricks.auth.pat.helpText', {
+              helpText: i18n.translate('connectorSpecs.databricks.auth.pat.helpText', {
                 defaultMessage:
                   'A Databricks personal access token (PAT). Generate one in the Databricks workspace under User Settings → Developer → Access tokens.',
               }),
@@ -153,16 +150,13 @@ export const Databricks: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://{workspace}.azuredatabricks.net/api/2.0/mcp/sql',
-          label: i18n.translate('core.kibanaConnectorSpecs.databricks.config.serverUrl.label', {
+          label: i18n.translate('connectorSpecs.databricks.config.serverUrl.label', {
             defaultMessage: 'MCP server URL',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.databricks.config.serverUrl.helpText',
-            {
-              defaultMessage:
-                "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.databricks.config.serverUrl.helpText', {
+            defaultMessage:
+              "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
+          }),
         }),
     })
   ),
@@ -175,6 +169,7 @@ export const Databricks: ConnectorSpec = {
     // ── Read-only SQL queries (exposed to AI agents) ──────────────────────────
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Execute a read-only SQL query against the Databricks SQL warehouse. ' +
         'Only SELECT, SHOW, DESCRIBE, DESC, EXPLAIN, and WITH statements are permitted. ' +
@@ -189,6 +184,7 @@ export const Databricks: ConnectorSpec = {
     // ── Unrestricted SQL execution (workflow-only, not exposed to AI agents) ──
     executeStatement: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Execute a SQL statement on the Databricks SQL warehouse. Supports DML (INSERT, UPDATE, DELETE), ' +
         'DDL (CREATE, ALTER, DROP), SHOW, DESCRIBE, and other SQL dialects supported by Databricks SQL. ' +
@@ -202,6 +198,7 @@ export const Databricks: ConnectorSpec = {
     // ── Async result polling ──────────────────────────────────────────────────
     pollResponse: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll the status and retrieve results for a previously submitted SQL query. ' +
         'Use this when runQuery or executeStatement returns a statement_id instead of immediate results — ' +
@@ -219,6 +216,7 @@ export const Databricks: ConnectorSpec = {
     // ── Escape hatches ────────────────────────────────────────────────────────
     listTools: {
       isTool: false,
+      scope: 'read',
       description:
         'List all tools available on the Databricks MCP server. Use this to discover server capabilities ' +
         'and verify exact tool names before using callTool.',
@@ -233,6 +231,7 @@ export const Databricks: ConnectorSpec = {
 
     callTool: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Call any tool on the Databricks MCP server directly by name. Workflow-only. Use this as an escape hatch for tools ' +
         'not yet exposed as named actions. Use listTools first to discover available tool names and their arguments.',
@@ -245,6 +244,7 @@ export const Databricks: ConnectorSpec = {
     // ── Jobs REST API ─────────────────────────────────────────────────────────
     listRuns: {
       isTool: true,
+      scope: 'read',
       description:
         'List job runs in the Databricks workspace. Optionally filter by job ID, active-only, or page size. ' +
         'Returns run metadata including run_id, job_id, state, start_time, and task results. ' +
@@ -265,6 +265,7 @@ export const Databricks: ConnectorSpec = {
 
     getRun: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a specific job run by run ID. Returns the full run object including state, ' +
         'tasks, start/end times, and error messages. Use this to check run status or retrieve task details.',
@@ -279,6 +280,7 @@ export const Databricks: ConnectorSpec = {
 
     getRunOutput: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the output of a completed task run (notebook output, logs, return values). ' +
         "Requires a task-level run ID from getRun's tasks[].run_id. " +
@@ -295,6 +297,7 @@ export const Databricks: ConnectorSpec = {
 
     runJobNow: {
       isTool: false,
+      scope: 'write',
       description:
         'Trigger a Databricks job run immediately. Optionally override job parameters. ' +
         'Returns a run_id — use getRun or listRuns to track progress.',
@@ -312,6 +315,7 @@ export const Databricks: ConnectorSpec = {
 
     cancelRun: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Cancel an active Databricks job run. The run must be in PENDING or RUNNING state. ' +
         'Cancellation is asynchronous — poll getRun until state is CANCELLED.',
@@ -326,6 +330,7 @@ export const Databricks: ConnectorSpec = {
 
     repairRun: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Re-run failed tasks in a completed job run without re-running tasks that succeeded. ' +
         'Specify exactly one: rerunTasks (one or more task keys) to target specific tasks, or rerunAllFailedTasks: true to retry everything that failed. ' +
@@ -350,6 +355,7 @@ export const Databricks: ConnectorSpec = {
     // ── Clusters REST API ─────────────────────────────────────────────────────
     listClusters: {
       isTool: true,
+      scope: 'read',
       description:
         'List all clusters in the Databricks workspace. Returns cluster metadata including cluster_id, ' +
         'cluster_name, state (RUNNING, TERMINATED, PENDING, etc.), spark_version, and node type. ' +
@@ -363,6 +369,7 @@ export const Databricks: ConnectorSpec = {
 
     startCluster: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Start a terminated Databricks cluster. The cluster must be in TERMINATED state. ' +
         'Startup is asynchronous — use listClusters to poll until state is RUNNING.',
@@ -377,6 +384,7 @@ export const Databricks: ConnectorSpec = {
 
     restartCluster: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Restart a running Databricks cluster. The cluster must be in RUNNING state. ' +
         'Restart is asynchronous — use listClusters to poll until state returns to RUNNING.',
@@ -392,6 +400,7 @@ export const Databricks: ConnectorSpec = {
     // ── Warehouses REST API ───────────────────────────────────────────────────
     listWarehouses: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SQL warehouses in the Databricks workspace. Returns warehouse metadata including id, ' +
         'name, state (RUNNING, STOPPED, STARTING, etc.), cluster_size, and auto_stop_mins. ' +
@@ -405,6 +414,7 @@ export const Databricks: ConnectorSpec = {
 
     startWarehouse: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Start a stopped SQL warehouse. Startup is asynchronous — use listWarehouses to poll ' +
         'until state is RUNNING before submitting queries.',
@@ -421,6 +431,7 @@ export const Databricks: ConnectorSpec = {
 
     stopWarehouse: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Stop a running SQL warehouse. Use this to save costs when the warehouse is no longer needed. ' +
         'Stop is asynchronous — use listWarehouses to confirm state transitions to STOPPED.',
@@ -438,6 +449,7 @@ export const Databricks: ConnectorSpec = {
     // ── Alerts REST API ───────────────────────────────────────────────────────
     listAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List all SQL alerts in the Databricks workspace. Returns alert metadata including id, name, ' +
         'state (OK, TRIGGERED, UNKNOWN), query_id, and condition. ' +
@@ -451,6 +463,7 @@ export const Databricks: ConnectorSpec = {
 
     getAlert: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a specific SQL alert by ID. Returns the full alert definition including ' +
         'the associated query, condition (op, value, empty_result_state), notification schedule, ' +
@@ -466,7 +479,7 @@ export const Databricks: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.databricks.test.description', {
+    description: i18n.translate('connectorSpecs.databricks.test.description', {
       defaultMessage:
         'Verifies connection to the Databricks MCP server by listing available tools.',
     }),

@@ -156,7 +156,7 @@ function isOldSchema(attributes: AttachmentAttributesV2): boolean {
 }
 
 /**
- * Transformer for migrated persistable visualization attachments (e.g. Lens): legacy
+ * Transformer for mapped persistable visualization attachments (e.g. Lens): legacy
  * `persistableState` wrapper <-> unified value shape (`type` + `data.state`).
  */
 export const persistableStateAttachmentTransformer: AttachmentTypeTransformer<
@@ -238,7 +238,7 @@ export const persistableStateAttachmentTransformer: AttachmentTypeTransformer<
     return isLegacyPayloadPersistableStateAttachment(attachment);
   },
 
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return isUnifiedPayloadPersistableStateAttachment(attachment);
   },
 

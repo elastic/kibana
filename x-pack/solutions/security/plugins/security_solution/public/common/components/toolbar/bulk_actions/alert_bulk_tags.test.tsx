@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../mock';
@@ -138,17 +138,19 @@ describe('BulkAlertTagsPanel', () => {
     ];
     const wrapper = renderTagsMenu(mockTags);
 
-    expect(wrapper.getByTitle('default-test-tag-1')).toBeChecked();
+    const getTagOption = (name: string) => wrapper.getByRole('option', { name });
+
+    expect(getTagOption('default-test-tag-1')).toBeChecked();
     act(() => {
       fireEvent.click(wrapper.getByText('default-test-tag-1'));
     });
-    expect(wrapper.getByTitle('default-test-tag-1')).not.toBeChecked();
+    expect(getTagOption('default-test-tag-1')).not.toBeChecked();
 
-    expect(wrapper.getByTitle('default-test-tag-2')).not.toBeChecked();
+    expect(getTagOption('default-test-tag-2')).not.toBeChecked();
     act(() => {
       fireEvent.click(wrapper.getByText('default-test-tag-2'));
     });
-    expect(wrapper.getByTitle('default-test-tag-2')).toBeChecked();
+    expect(getTagOption('default-test-tag-2')).toBeChecked();
   });
 
   test('it calls expected functions on submit when alerts have changed', () => {

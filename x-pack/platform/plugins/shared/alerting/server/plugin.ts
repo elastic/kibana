@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -36,6 +36,7 @@ import type {
   CoreStatus,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type {
@@ -53,7 +54,19 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import { ApiKeyType } from './task_runner/types';
+import { AsyncDomainEventBus } from './lib/events/event_bus';
+import type {
+  AlertingDomainEvent,
+  AlertingPublisherContext,
+} from './lib/workflow_extensions/events';
+import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import type { AlertStatusChangedOptIn } from './lib/workflow_extensions/alert_status_changed_opt_in';
+import { AlertStatusChangedWorkflowSubscriber } from './lib/workflow_extensions/alert_status_changed_subscriber';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -117,9 +130,7 @@ import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
-import { UiamApiKeyProvisioningTask } from './provisioning';
-import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
-import { ruleCreateTelemetryEvents } from './application/rule/methods/create/event_based_telemetry';
+import { ruleCreateTelemetryEvents } from './application/rule/methods/common_utils/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -173,6 +184,12 @@ export interface AlertingServerSetup {
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
   getDataStreamAdapter: () => DataStreamAdapter;
+  /**
+   * Opts in to the `alerting.v1.alertStatusChanged` workflow trigger. Until a plugin opts in,
+   * rule runs build and publish no status change events. The caller owns its own enablement
+   * signal and answers per rule run through `isEnabled`.
+   */
+  enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
 }
 
 export interface AlertingServerStart {
@@ -190,7 +207,7 @@ export interface AlertingServerStart {
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
@@ -212,6 +229,7 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   kql: KQLPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -227,6 +245,7 @@ export interface AlertingPluginsStart {
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
   maintenanceWindows?: MaintenanceWindowsServerStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export class AlertingPlugin {
@@ -242,6 +261,7 @@ export class AlertingPlugin {
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private readonly serverUuid: string;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private kibanaBaseUrl: string | undefined;
@@ -255,11 +275,13 @@ export class AlertingPlugin {
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
+  private alertingEventBus?: AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>;
+  private alertStatusChangedSubscriber?: AlertStatusChangedWorkflowSubscriber;
+  private readonly alertStatusChangedOptIns: AlertStatusChangedOptIn[] = [];
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
   private changeTrackingService?: ChangeTrackingService;
-  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -272,6 +294,7 @@ export class AlertingPlugin {
     this.rulesSettingsClientFactory = new RulesSettingsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.serverUuid = initializerContext.env.instanceUuid;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -361,6 +384,7 @@ export class AlertingPlugin {
           logger: this.logger,
           pluginStop$: this.pluginStop$,
           kibanaVersion: this.kibanaVersion,
+          serverUuid: this.serverUuid,
           dataStreamAdapter: this.dataStreamAdapter!,
           elasticsearchClientPromise: core
             .getStartServices()
@@ -368,6 +392,11 @@ export class AlertingPlugin {
           elasticsearchAndSOAvailability$,
           isServerless: this.isServerless,
           totalFieldsLimit: this.config.alertsService.totalFieldsLimit,
+          // Coordinate resource installation across nodes with a cluster-wide lock
+          // unless disabled via config.
+          lockManager: this.config.alertsService.coordinateInstallation
+            ? new LockManagerService(core, this.logger)
+            : undefined,
         });
       }
     }
@@ -429,17 +458,9 @@ export class AlertingPlugin {
       this.config
     );
 
-    uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     ruleCreateTelemetryEvents.forEach((eventConfig) =>
       core.analytics.registerEventType(eventConfig)
     );
-
-    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
-      logger: this.logger,
-      isServerless: this.isServerless,
-      analytics: core.analytics,
-    });
-    this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
@@ -497,7 +518,18 @@ export class AlertingPlugin {
       core
     );
 
+    if (plugins.workflowsExtensions) {
+      this.alertingEventBus = new AsyncDomainEventBus<
+        AlertingDomainEvent,
+        AlertingPublisherContext
+      >(this.logger);
+      registerTriggerDefinitions(plugins.workflowsExtensions);
+    }
+
     return {
+      enableAlertStatusChanged: (optIn: AlertStatusChangedOptIn) => {
+        this.alertStatusChangedOptIns.push(optIn);
+      },
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
         ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
@@ -683,6 +715,7 @@ export class AlertingPlugin {
     changeTrackingService?.initialize({
       elasticsearchClient: core.elasticsearch.client.asInternalUser,
       authService: core.security.authc,
+      userProfileService: core.userProfile,
     });
 
     rulesClientFactory.initialize({
@@ -716,8 +749,8 @@ export class AlertingPlugin {
       uiSettings: core.uiSettings,
       securityService: core.security,
       shouldGrantUiam,
+      apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       isServerless: this.isServerless,
-      featureFlags: core.featureFlags,
       analytics: core.analytics,
     });
 
@@ -742,7 +775,7 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequestInSpace = async (
       request: KibanaRequest,
-      spaceId: string,
+      spaceId: SpaceId,
       options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
@@ -808,7 +841,18 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
+      alertingEventBus: this.alertingEventBus,
+      alertStatusChangedOptIns: this.alertStatusChangedOptIns,
     });
+
+    if (this.alertingEventBus && plugins.workflowsExtensions) {
+      this.alertStatusChangedSubscriber = new AlertStatusChangedWorkflowSubscriber(
+        this.alertingEventBus,
+        plugins.workflowsExtensions,
+        this.logger
+      );
+      this.alertStatusChangedSubscriber.start();
+    }
 
     this.eventLogService!.registerSavedObjectProvider(
       RULE_SAVED_OBJECT_TYPE,
@@ -837,10 +881,6 @@ export class AlertingPlugin {
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
       () => {}
     ); // it shouldn't reject, but just in case
-
-    this.uiamApiKeyProvisioningTask
-      ?.start({ core, taskManager: plugins.taskManager })
-      .catch(() => {});
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
@@ -898,7 +938,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
-    this.uiamApiKeyProvisioningTask?.stop();
+    this.alertStatusChangedSubscriber?.stop();
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }

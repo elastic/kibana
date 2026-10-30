@@ -37,8 +37,7 @@ jest.mock('../hooks/use_inference_endpoint_mutation', () => ({
   })),
 }));
 
-// FLAKY: https://github.com/elastic/kibana/issues/253507
-describe.skip('InferenceFlyout', () => {
+describe('InferenceFlyout', () => {
   const Wrapper = ({ children }: { children: React.ReactElement }) => {
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -89,18 +88,21 @@ describe.skip('InferenceFlyout', () => {
   });
 
   it('submits form with correct data', async () => {
+    const user = userEvent.setup();
     renderComponent();
-    await userEvent.click(screen.getByTestId('provider-select'));
-    await userEvent.click(screen.getByText('Elasticsearch'));
-    await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
+    await user.click(screen.getByTestId('provider-select'));
+    await user.click(await screen.findByText('Elasticsearch'));
+    await user.click(screen.getByTestId('inference-endpoint-submit-button'));
 
-    expect(mockMutationFn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        config: expect.objectContaining({
-          provider: 'elasticsearch',
+    await waitFor(() =>
+      expect(mockMutationFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            provider: 'elasticsearch',
+          }),
         }),
-      }),
-      false
+        false
+      )
     );
   });
 

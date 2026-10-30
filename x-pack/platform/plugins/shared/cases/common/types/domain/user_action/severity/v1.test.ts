@@ -7,34 +7,28 @@
 
 import { CaseSeverity } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
-import { SeverityUserActionPayloadRt, SeverityUserActionRt } from './v1';
+import { SeverityUserActionPayloadSchema, SeverityUserActionSchema } from './v1';
 
 describe('Severity', () => {
-  describe('SeverityUserActionPayloadRt', () => {
+  describe('SeverityUserActionPayloadSchema', () => {
     const defaultRequest = {
       severity: CaseSeverity.MEDIUM,
     };
 
     it('has expected attributes in request', () => {
-      const query = SeverityUserActionPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = SeverityUserActionPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = SeverityUserActionPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = SeverityUserActionPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
-  describe('SeverityUserActionRt', () => {
+  describe('SeverityUserActionSchema', () => {
     const defaultRequest = {
       type: UserActionTypes.severity,
       payload: {
@@ -43,33 +37,25 @@ describe('Severity', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = SeverityUserActionRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = SeverityUserActionSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = SeverityUserActionRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = SeverityUserActionSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from payload', () => {
-      const query = SeverityUserActionRt.decode({
+    it('strips unknown fields from payload', () => {
+      const result = SeverityUserActionSchema.safeParse({
         ...defaultRequest,
         payload: { ...defaultRequest.payload, foo: 'bar' },
       });
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

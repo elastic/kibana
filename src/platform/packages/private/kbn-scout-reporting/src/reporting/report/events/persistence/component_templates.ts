@@ -18,7 +18,7 @@ import {
 
 export const buildkiteMappings: ClusterPutComponentTemplateRequest = {
   name: 'scout-test-event.mappings.buildkite',
-  version: 3,
+  version: 4,
   template: {
     mappings: {
       properties: {
@@ -48,7 +48,7 @@ export const reporterMappings: ClusterPutComponentTemplateRequest = {
 
 export const testRunMappings: ClusterPutComponentTemplateRequest = {
   name: 'scout-test-event.mappings.test-run',
-  version: 6,
+  version: 9,
   template: {
     mappings: {
       properties: {
@@ -63,7 +63,7 @@ export const testRunMappings: ClusterPutComponentTemplateRequest = {
 
 export const suiteMappings: ClusterPutComponentTemplateRequest = {
   name: 'scout-test-event.mappings.suite',
-  version: 1,
+  version: 2,
   template: {
     mappings: {
       properties: {
@@ -78,7 +78,7 @@ export const suiteMappings: ClusterPutComponentTemplateRequest = {
 
 export const testMappings: ClusterPutComponentTemplateRequest = {
   name: 'scout-test-event.mappings.test',
-  version: 4,
+  version: 5,
   template: {
     mappings: {
       properties: {

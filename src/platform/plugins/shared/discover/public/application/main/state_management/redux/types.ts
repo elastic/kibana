@@ -10,16 +10,22 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ESQLEditorRestorableState, QuickSearchVisorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
-import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
@@ -29,15 +35,22 @@ import type { RenderDocumentViewMeta } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import type { DocViewerRestorableState, DocViewerShareableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { ExpandedDocRef } from '../../utils/expanded_doc';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 import type { CascadedDocumentsDataGridUiStateMap } from '../../components/layout/cascaded_documents';
+
+/** Group path used to reconstruct a cascade leaf query for a nested-grid flyout. */
+export interface ExpandedDocCascadePath {
+  nodePath: string[];
+  nodePathMap: Record<string, string>;
+}
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -130,17 +143,31 @@ export interface DiscoverAppState {
    */
   density?: DataGridDensity;
   /**
-   * When true, ES|QL queries use approximate execution for faster, estimated results.
-   * Intentionally URL-only and not persisted to saved sessions in v1 — this may need to
-   * be reconsidered in a future version once the embedding story is clearer.
+   * Documents display mode: 'table' or 'json'
    */
-  isApproximate?: boolean;
+  documentsDisplayMode?: DocumentsDisplayMode;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode
+   */
+  jsonModeSettings?: JsonModeSettings;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  esqlApproximation?: boolean;
+  /**
+   * The expanded document reference
+   */
+  expandedDoc?: ExpandedDocRef;
+  /**
+   * The URL-shareable doc viewer state (selected tab + per-tab shareable slices) restored alongside
+   * the expanded document from a shared link.
+   */
+  docViewerState?: DocViewerShareableState;
 }
 
 export interface CascadedDocumentsState {
   availableCascadeGroups: string[];
   selectedCascadeGroups: string[];
-  columnsMeta: DataTableColumnsMeta;
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
@@ -198,10 +225,14 @@ export interface TabState extends TabItem {
     | { initializationStatus: Exclude<TabInitializationStatus, TabInitializationStatus.Error> }
     | { initializationStatus: TabInitializationStatus.Error; error: Error | SerializedError };
 
+  // Indicates the tab was created via "+" and should not auto-fetch on init.
+  skipInitialFetch?: boolean;
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
     searchSessionId?: string;
+    tabType?: DiscoverTabType;
   };
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
@@ -219,12 +250,15 @@ export interface TabState extends TabItem {
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
+  isWarningCalloutDismissed: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   profileAppStateDefaults: ProfileAppStateDefaults;
   profileState: ProfileStateMap;
   uiState: {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
+    // Unlike the editor state, the visor mode is also persisted locally
+    visor?: Partial<QuickSearchVisorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
@@ -237,6 +271,7 @@ export interface TabState extends TabItem {
   };
   expandedDoc: DataTableRecord | undefined;
   expandedDocOwner: string | undefined;
+  expandedDocCascadePath: ExpandedDocCascadePath | undefined;
   renderDocumentViewMeta: RenderDocumentViewMeta | undefined;
   initialDocViewerTabId?: string;
 }
@@ -250,11 +285,18 @@ export enum TabsBarVisibility {
   hidden = 'hidden',
 }
 
+export interface SaveSessionModalState {
+  isOpen: boolean;
+  initialTitle: string | undefined;
+  initialCopyOnSave: boolean;
+}
+
 export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  initializationState: { hasESData: boolean; hasDataView: boolean };
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  saveSessionModal: SaveSessionModalState;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];

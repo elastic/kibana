@@ -12,6 +12,7 @@ import type { TimeUnit } from '../types';
 import { DE_DE_GRAMMAR } from './locales/de_de';
 import { FR_FR_GRAMMAR } from './locales/fr_fr';
 import { JA_JP_GRAMMAR } from './locales/ja_jp';
+import { PT_BR_GRAMMAR } from './locales/pt_br';
 import { ZH_CN_GRAMMAR } from './locales/zh_cn';
 
 /**
@@ -217,6 +218,7 @@ const LOCALE_GRAMMARS: Record<string, LocaleGrammar> = {
   de: DE_DE_GRAMMAR,
   fr: FR_FR_GRAMMAR,
   ja: JA_JP_GRAMMAR,
+  pt: PT_BR_GRAMMAR,
   zh: ZH_CN_GRAMMAR,
 };
 

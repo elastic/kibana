@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertComment } from '../../../containers/mock';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -34,10 +34,8 @@ describe('use cases add to new case flyout hook', () => {
             basePath: '/jest',
             dispatch,
             features: {
-              alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+              alerts: { read: true, all: true },
               metrics: [],
-              observables: { enabled: true, autoExtract: true },
-              events: { enabled: true },
             },
             releasePhase: 'ga',
           }}
@@ -82,13 +80,19 @@ describe('use cases add to new case flyout hook', () => {
       { wrapper }
     );
 
-    result.current.open({ attachments: [alertComment] });
+    const alertAttachment = {
+      type: SECURITY_ALERT_ATTACHMENT_TYPE,
+      attachmentId: 'alert-id-1',
+      metadata: { index: 'alert-index' },
+    };
+
+    result.current.open({ attachments: [alertAttachment] });
 
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: expect.objectContaining({
-          attachments: [alertComment],
+          attachments: [alertAttachment],
         }),
       })
     );

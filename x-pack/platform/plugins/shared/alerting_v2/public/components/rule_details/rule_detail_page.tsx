@@ -14,24 +14,33 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge, AppHeaderMenu, AppHeaderMetadataItems } from '@kbn/app-header';
+import type {
+  AppHeaderBadge,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+} from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
+import { useRuleLastExecution } from '../../hooks/use_rule_last_execution';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { useRunRule } from '../../hooks/use_run_rule';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
+import { useRuleChangeHistoryModal } from '../rule/modals/change_history';
+import { getRuleDetailMenu } from './get_rule_detail_menu';
 import { UpdateApiKeyConfirmationModal } from '../rule/modals/update_api_key_confirmation_modal';
 import { RuleKindBadge } from './rule_summary_header';
 import { RuleOverviewSection } from './overview';
@@ -41,6 +50,13 @@ import type { RuleApiResponse } from '../../services/rules_api';
 
 const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [
+    {
+      label: i18n.translate('xpack.alertingV2.ruleDetails.universalRulesBadge', {
+        defaultMessage: 'Universal',
+      }),
+      color: 'hollow',
+      'data-test-subj': 'universalRulesBadge',
+    },
     {
       label: RULE_KIND_LABELS[rule.kind] ?? rule.kind,
       renderCustomBadge: () => <RuleKindBadge kind={rule.kind} />,
@@ -58,132 +74,32 @@ const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
     },
   ];
 
-  for (const tag of rule.metadata.tags ?? []) {
-    badges.push({ label: tag, color: 'hollow' });
-  }
-
   return badges;
 };
-
-const getRuleDetailMenu = ({
-  rule,
-  onEdit,
-  onToggleEnabled,
-  isToggleLoading,
-  onClone,
-  onUpdateApiKey,
-  onDelete,
-  onRun,
-}: {
-  rule: RuleApiResponse;
-  onEdit: () => void;
-  onToggleEnabled: (enabled: boolean) => void;
-  isToggleLoading: boolean;
-  onClone: () => void;
-  onUpdateApiKey: () => void;
-  onDelete: () => void;
-  onRun: () => void;
-}): AppHeaderMenu => ({
-  primaryActionItem: {
-    id: 'editRule',
-    label: i18n.translate('xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel', {
-      defaultMessage: 'Edit Rule',
-    }),
-    iconType: 'pencil',
-    run: onEdit,
-    testId: 'openEditRuleFlyoutButton',
-  },
-  switch: {
-    id: 'ruleEnabled',
-    label: rule.enabled
-      ? i18n.translate('xpack.alertingV2.ruleDetails.enabled', {
-          defaultMessage: 'Enabled',
-        })
-      : i18n.translate('xpack.alertingV2.ruleDetails.disabled', {
-          defaultMessage: 'Disabled',
-        }),
-    labelProps: undefined,
-    checked: rule.enabled,
-    onChange: onToggleEnabled,
-    disabled: isToggleLoading,
-    'data-test-subj': 'ruleDetailsEnabledSwitch',
-  },
-  items: [
-    {
-      id: 'runRule',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.runRuleButtonLabel', {
-        defaultMessage: 'Run rule',
-      }),
-      iconType: 'play',
-      order: 0,
-      run: onRun,
-      testId: 'ruleDetailsRunButton',
-      overflow: true,
-      disableButton: !rule.enabled,
-      tooltipContent: rule.enabled
-        ? undefined
-        : i18n.translate('xpack.alertingV2.ruleDetails.runRuleDisabledTooltip', {
-            defaultMessage: 'Enable the rule to run it',
-          }),
-    },
-    {
-      id: 'cloneRule',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.cloneRuleButtonLabel', {
-        defaultMessage: 'Clone rule',
-      }),
-      iconType: 'copy',
-      order: 1,
-      run: onClone,
-      testId: 'ruleDetailsCloneButton',
-      overflow: true,
-    },
-    {
-      id: 'updateRuleApiKey',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.updateApiKeyButtonLabel', {
-        defaultMessage: 'Update API key',
-      }),
-      iconType: 'key',
-      order: 1,
-      run: onUpdateApiKey,
-      testId: 'ruleDetailsUpdateApiKeyButton',
-      overflow: true,
-      disableButton: !rule.enabled,
-      tooltipContent: rule.enabled
-        ? undefined
-        : i18n.translate('xpack.alertingV2.ruleDetails.updateApiKeyDisabledTooltip', {
-            defaultMessage: 'Enable the rule to update its API key',
-          }),
-    },
-    {
-      id: 'deleteRule',
-      label: i18n.translate('xpack.alertingV2.ruleDetails.deleteRuleButtonLabel', {
-        defaultMessage: 'Delete rule',
-      }),
-      iconType: 'trash',
-      order: 2,
-      run: onDelete,
-      testId: 'ruleDetailsDeleteButton',
-      overflow: true,
-    },
-  ],
-});
 
 export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
-  const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
-  const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { flyout, confirmationModal, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
 
@@ -201,7 +117,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       { id: rule.id, name: rule.metadata.name },
       {
         onSuccess: () => {
-          history.push('/');
+          rulesLocators.navigateSync({});
         },
       }
     );
@@ -233,43 +149,69 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     runRule({ id: rule.id });
   }, [runRule, rule.id]);
 
+  const onViewChangeHistory = React.useCallback(
+    () => openChangeHistory({ id: rule.id, name: rule.metadata.name }),
+    [openChangeHistory, rule.id, rule.metadata.name]
+  );
+
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
     useRuleAuditMetadata(rule);
+  const lastExecution = useRuleLastExecution(rule.id);
 
   const badges = React.useMemo(() => getRuleDetailBadges(rule), [rule]);
 
-  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(
-    () => [
-      {
-        type: 'text',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
-          defaultMessage: 'Created by',
-        }),
-        value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
-          defaultMessage: '{user} on {date}',
-          values: { user: createdByDisplay, date: createdAtFormatted },
-        }),
-        'data-test-subj': 'ruleDetailsCreatedByMetadata',
-      },
-      {
-        type: 'text',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
-          defaultMessage: 'Last updated by',
-        }),
-        value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
-          defaultMessage: '{user} on {date}',
-          values: { user: updatedByDisplay, date: updatedAtFormatted },
-        }),
-        'data-test-subj': 'ruleDetailsUpdatedByMetadata',
-      },
-    ],
-    [createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted]
-  );
+  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(() => {
+    const createdBy: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
+        defaultMessage: 'Created by',
+      }),
+      value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
+        defaultMessage: '{user} on {date}',
+        values: { user: createdByDisplay, date: createdAtFormatted },
+      }),
+      'data-test-subj': 'ruleDetailsCreatedByMetadata',
+    };
+    const updatedBy: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
+        defaultMessage: 'Last updated by',
+      }),
+      value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
+        defaultMessage: '{user} on {date}',
+        values: { user: updatedByDisplay, date: updatedAtFormatted },
+      }),
+      'data-test-subj': 'ruleDetailsUpdatedByMetadata',
+    };
+
+    if (!lastExecution.visible) {
+      return [createdBy, updatedBy];
+    }
+
+    const lastExecutionMetadata: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.lastExecution', {
+        defaultMessage: 'Last execution',
+      }),
+      value: lastExecution.value,
+      'data-test-subj': 'ruleDetailsLastExecutionMetadata',
+    };
+
+    return [lastExecutionMetadata, createdBy, updatedBy];
+  }, [
+    createdAtFormatted,
+    createdByDisplay,
+    lastExecution.value,
+    lastExecution.visible,
+    updatedAtFormatted,
+    updatedByDisplay,
+  ]);
 
   const menu = React.useMemo(
     () =>
       getRuleDetailMenu({
         rule,
+        canWrite,
         onEdit,
         onToggleEnabled: handleToggleEnabled,
         isToggleLoading: isToggling,
@@ -277,15 +219,18 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         onUpdateApiKey: showUpdateApiKeyConfirmationModal,
         onDelete: showDeleteConfirmationModal,
         onRun: handleRunRule,
+        onViewChangeHistory,
       }),
     [
       rule,
+      canWrite,
       onEdit,
       handleToggleEnabled,
       isToggling,
       onClone,
       showDeleteConfirmationModal,
       handleRunRule,
+      onViewChangeHistory,
       showUpdateApiKeyConfirmationModal,
     ]
   );
@@ -306,15 +251,15 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       <AppHeader
         title={rule.metadata.name}
         back={{
-          href: paths.ruleList,
+          href: rulesListHref,
           label: i18n.translate('xpack.alertingV2.ruleDetails.header.backToRulesLabel', {
             defaultMessage: 'Rules',
           }),
         }}
         badges={badges}
         metadata={headerMetadata}
-        menu={canWrite ? menu : undefined}
-        spacing="flush"
+        menu={menu}
+        spacing="bleed"
         sticky={false}
       />
       <KibanaPageTemplate.Section
@@ -343,7 +288,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             }
           `}
         >
-          <EuiSplitPanel.Inner grow paddingSize="none" data-test-subj="ruleDetailOverviewColumn">
+          <EuiSplitPanel.Inner
+            grow
+            paddingSize="none"
+            data-test-subj="ruleDetailOverviewColumn"
+            css={css`
+              min-inline-size: 0;
+            `}
+          >
             <EuiPanel
               hasBorder={false}
               hasShadow={false}
@@ -368,18 +320,15 @@ export const RuleDetailPage: React.FunctionComponent = () => {
             data-test-subj="ruleDetailSidebarColumn"
             css={css`
               min-height: 0;
-              ${logicalCSS('padding-top', euiTheme.size.l)}
+              padding: ${euiTheme.size.l};
 
               ${largeMediaQuery} {
-                ${logicalCSS('padding-top', '0')}
                 flex-shrink: 0;
                 flex-basis: 400px;
                 min-width: 40px;
                 max-width: 500px;
                 height: 100%;
                 overflow-y: auto;
-                padding: ${euiTheme.size.l};
-                ${logicalCSS('padding-right', '0')}
                 border-left: ${euiTheme.border.thin};
               }
             `}
@@ -406,6 +355,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         />
       )}
       {flyout}
+      {confirmationModal}
+      {changeHistoryModal}
     </KibanaPageTemplate>
   );
 };

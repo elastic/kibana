@@ -7,9 +7,16 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
+import { euiSelectors } from '@kbn/scout';
 import moment from 'moment';
-import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
+import {
+  AppMenu,
+  EsqlEditor,
+  KibanaCodeEditorWrapper,
+  type EuiDataGridObject,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../../public/components/stream_management/data_management/schema_editor/constants';
 
@@ -29,10 +36,13 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly dateProcessorFormatsComboBox;
+  private readonly globalToastList;
+  public readonly stepsListSaveSettledToast;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
   public readonly kibanaMonacoEditor;
+  private readonly esqlEditor: EsqlEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
@@ -51,6 +61,7 @@ export class StreamsApp {
   public readonly fetchMoreMatchingSamplesButton;
   // Canvas
   public readonly canvasTab;
+  public readonly canvasViewport;
   public readonly canvasZoomControls;
   public readonly canvasZoomIn;
   public readonly canvasZoomOut;
@@ -65,12 +76,25 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
+  public readonly canvasEmptyState;
+  public readonly canvasSearch;
+  public readonly canvasSearchNoMatches;
+  public readonly canvasEdgeMenuButton;
+  public readonly canvasEdgeMenuAddProcessing;
+  public readonly canvasEdgeMenuAddRouting;
+  public readonly canvasProcessingNode;
+  public readonly processingFlyout;
+  public readonly processingFlyoutSave;
+  public readonly canvasDataStreamsNode;
   // Streams layout
-  public readonly streamsLayoutSourcesPlaceholder;
-  public readonly streamsLayoutPipelinesPlaceholder;
-  public readonly streamsLayoutDestinationsPlaceholder;
+  public readonly streamsSourcesTable;
+  public readonly streamsAddSourceButton;
+  public readonly streamsDestinationsTable;
+  public readonly streamsDestinationsSearch;
+  private readonly appMenu: AppMenu;
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.processorFieldComboBox = this.page.components.comboBox(
       'streamsAppProcessorFieldSelectorComboFieldText'
     );
@@ -84,10 +108,16 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
+    this.globalToastList = this.page.components.toast();
+    // Either terminal outcome of a steps list "Save changes" round-trip.
+    this.stepsListSaveSettledToast = this.toastWithText("Stream's processors updated").or(
+      this.toastWithText("An issue occurred saving processors' changes.")
+    );
     this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
+    this.esqlEditor = new EsqlEditor(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
@@ -98,22 +128,23 @@ export class StreamsApp {
     this.queryStreamFlyoutSaveButton = this.page.getByTestId(
       'streamsAppQueryStreamFlyoutSaveButton'
     );
-    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
-    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
+    this.queryStreamCreatedSuccessToast = this.toastWithText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.toastWithText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.toastWithText('Query stream updated');
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
     this.deleteQueryStreamModalInput = this.page.getByTestId(
       'streamsAppDeleteStreamModalStreamNameInput'
     );
-    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
-    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
+    this.queryStreamDeletedSuccessToast = this.toastWithText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.toastWithText('Error creating query stream');
     this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
       'streamsAppFetchMoreMatchingSamplesButton'
     );
     // Canvas locators
     this.canvasTab = this.page.testSubj.locator('streamsCanvasTab');
+    this.canvasViewport = this.canvasTab.locator('.react-flow__viewport');
     this.canvasZoomControls = this.page.testSubj.locator('streamsCanvasZoomControls');
     this.canvasZoomIn = this.page.testSubj.locator('streamsCanvasZoomIn');
     this.canvasZoomOut = this.page.testSubj.locator('streamsCanvasZoomOut');
@@ -128,16 +159,28 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
+    this.canvasSearch = this.page.testSubj.locator('streamsCanvasSearch');
+    this.canvasSearchNoMatches = this.page.testSubj.locator('streamsCanvasSearchNoMatches');
+    this.canvasEdgeMenuButton = this.page.testSubj.locator('streamsCanvasEdgeMenuButton');
+    this.canvasEdgeMenuAddProcessing = this.page.testSubj.locator(
+      'streamsCanvasEdgeMenu-addProcessing'
+    );
+    this.canvasEdgeMenuAddRouting = this.page.testSubj.locator('streamsCanvasEdgeMenu-addRouting');
+    this.canvasProcessingNode = this.page.testSubj.locator('streamsCanvasProcessingNode');
+    this.processingFlyout = this.page.testSubj.locator('streamsProcessingFlyout');
+    this.processingFlyoutSave = this.page.testSubj.locator('streamsProcessingFlyoutSave');
+    this.canvasDataStreamsNode = this.page.testSubj.locator('streamsCanvasDataStreamsNode');
     // Streams layout locators
-    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutSourcesPlaceholder'
-    );
-    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutPipelinesPlaceholder'
-    );
-    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutDestinationsPlaceholder'
-    );
+    this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
+    this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
+    this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
+    this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
+  }
+
+  // Scoped to the toast list: core's screen reader announcer repeats every toast's text page-wide.
+  private toastWithText(text: string): Locator {
+    return this.globalToastList.toasts.getByText(text);
   }
 
   async goto() {
@@ -148,12 +191,16 @@ export class StreamsApp {
     await this.page.gotoApp(`streams`);
   }
 
-  async gotoStreamManagementTab(streamName: string, tabName: string) {
-    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
+  async gotoStreamManagementTab(
+    streamName: string,
+    tabName: string,
+    options?: Parameters<ScoutPage['gotoApp']>[1]
+  ) {
+    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`, options);
   }
 
-  async gotoPartitioningTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'partitioning');
+  async gotoPartitioningTab(streamName: string, options?: Parameters<ScoutPage['gotoApp']>[1]) {
+    await this.gotoStreamManagementTab(streamName, 'partitioning', options);
   }
 
   async gotoDataRetentionTab(streamName: string) {
@@ -196,6 +243,20 @@ export class StreamsApp {
     await this.getStreamsLayoutTab(tabName).click();
   }
 
+  /** Opens the map with its search pre-filled from the URL. */
+  async gotoCanvasSearch(query: string) {
+    await this.page.gotoApp('streams/new-experience/map', {
+      params: { mapState: `(flyoutName:!n,flyoutTab:!n,query:'${query}')` },
+    });
+  }
+
+  getDestinationShowOnCanvasButton(destinationName: string) {
+    return this.streamsDestinationsTable
+      .getByRole('row')
+      .filter({ hasText: destinationName })
+      .getByTestId('streamsShowOnCanvasAction');
+  }
+
   // Canvas utility methods
   getCanvasSourceNode(streamName: string) {
     return this.page.testSubj.locator('streamsCanvasSourceNode').filter({ hasText: streamName });
@@ -207,16 +268,80 @@ export class StreamsApp {
       .filter({ hasText: streamName });
   }
 
-  getCanvasProcessingButton(streamName: string) {
-    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingButton');
-  }
-
   getCanvasNodeByAriaLabel(ariaLabel: string) {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
+  /** Edge ids contain `->`, which `testSubj` selectors would read as a child combinator. */
+  getCanvasEdge(edgeId: string) {
+    return this.page.locator(`[data-test-subj="streamsCanvasEdge-${edgeId}"]`);
+  }
+
+  /**
+   * Hovers a canvas line and opens its "Add processing / Add routing" menu. A
+   * smooth-step line always passes through the centre of its bounding box, which
+   * is where the pointer goes.
+   */
+  async openCanvasEdgeMenu(edgeId: string) {
+    const line = this.getCanvasEdge(edgeId).getByTestId('streamsCanvasBasicEdge');
+    await line.waitFor({ state: 'attached' });
+    const box = await line.boundingBox();
+    if (!box) {
+      throw new Error(`Canvas edge ${edgeId} is not rendered`);
+    }
+    await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await this.canvasEdgeMenuButton.click();
+  }
+
+  /** Adds an `add_fields` processor that upserts a literal value at a record path. */
+  async addAddFieldsProcessor(path: string, value: string) {
+    const pathInput = this.processingFlyout
+      .getByTestId('componentDefinitionFormPath-path')
+      .getByRole('combobox');
+    await pathInput.fill(path);
+    await pathInput.press('Enter');
+    await this.processingFlyout.getByTestId('componentDefinitionFormLiteral-value').fill(value);
+    await this.processingFlyout.getByTestId('streamsProcessingFlyoutEditorSubmit').click();
+  }
+
+  /**
+   * React Flow's viewport transform, which encodes both pan and zoom.
+   */
+  async getCanvasViewportTransform(): Promise<string> {
+    return this.canvasViewport.evaluate((element) => window.getComputedStyle(element).transform);
+  }
+
+  /** Current canvas zoom, read the way React Flow itself reads it (`@xyflow/system`). */
+  async getCanvasZoom(): Promise<number> {
+    return this.canvasViewport.evaluate((element) => {
+      const { transform } = window.getComputedStyle(element);
+      return transform === 'none' ? 1 : new DOMMatrixReadOnly(transform).m22;
+    });
+  }
+
+  /** Zooms in once, resolving when the viewport reflects the higher zoom. */
+  async zoomInCanvas() {
+    const previousZoom = await this.getCanvasZoom();
+    await this.canvasZoomIn.click();
+    await expect.poll(() => this.getCanvasZoom()).toBeGreaterThan(previousZoom);
+  }
+
+  /**
+   * Click near the top of a node card so the floating toolbar (bottom-center)
+   * cannot intercept the pointer when a node sits toward the bottom of the pane.
+   */
+  async clickCanvasNode(
+    node: Locator,
+    options: { button?: 'left' | 'right'; modifiers?: Array<'Shift'> } = {}
+  ) {
+    await node.click({
+      position: { x: 24, y: 16 },
+      ...options,
+    });
+  }
+
   async rightClickCanvasNode(node: Locator) {
-    await node.click({ button: 'right' });
+    await this.clickCanvasNode(node, { button: 'right' });
   }
 
   async openCanvasPaneContextMenu() {
@@ -271,25 +396,24 @@ export class StreamsApp {
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
     // Use .first() because some pages (like Retention) may have multiple date pickers
     const newControlButton = this.page.testSubj.locator('dateRangePickerControlButton').first();
-    try {
-      await newControlButton.waitFor({ state: 'visible', timeout: 5_000 });
-      // New DateRangePicker stores the range as ISO strings on data-date-range
-      // for absolute dates. Compare canonical ISO on both sides to avoid the
-      // display-format differences between the legacy and new pickers.
-      const dateRange = (await newControlButton.getAttribute('data-date-range')) ?? '';
-      const [actualStart, actualEnd] = dateRange.split(' to ').map((s) => s.trim());
-      const expectedStart = moment.utc(expectedRange.from, LEGACY_DATE_FORMAT, true).toISOString();
-      const expectedEnd = moment.utc(expectedRange.to, LEGACY_DATE_FORMAT, true).toISOString();
-      expect(actualStart, `Date picker 'start date' is incorrect`).toBe(expectedStart);
-      expect(actualEnd, `Date picker 'end date' is incorrect`).toBe(expectedEnd);
+    const legacyStartButton = this.page.testSubj
+      .locator('superDatePickerstartDatePopoverButton')
+      .first();
+    // `waitFor` is not a strict-mode action, so it tolerates whichever picker variant mounted.
+    await newControlButton.or(legacyStartButton).waitFor({ state: 'visible', timeout: 10_000 });
+
+    if ((await newControlButton.count()) > 0) {
+      const toIso = (value: string) => moment.utc(value, LEGACY_DATE_FORMAT, true).toISOString();
+      await expect(newControlButton, `Date picker time range is incorrect`).toHaveAttribute(
+        'data-date-range',
+        `${toIso(expectedRange.from)} to ${toIso(expectedRange.to)}`
+      );
       return;
-    } catch {
-      // New picker not present; fall through to legacy assertions.
     }
-    await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
-      `Date picker 'start date' is incorrect`
-    ).toHaveText(expectedRange.from);
+
+    await expect(legacyStartButton, `Date picker 'start date' is incorrect`).toHaveText(
+      expectedRange.from
+    );
     await expect(
       this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
@@ -462,10 +586,7 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-    await expect(button).toBeVisible();
-    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
-    await button.evaluate((el) => (el as HTMLElement).click());
+    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
   }
 
   async fillRoutingRuleName(name: string) {
@@ -609,33 +730,15 @@ export class StreamsApp {
 
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
-    // Focus source item and activate DnD
-    await this.page.getByTestId(`routingRuleDragHandle-${sourceStream}`).focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components.draggable(`routingRuleDragHandle-${sourceStream}`).reorder(steps);
   }
 
   async dragProcessor({ processorPos, steps }: { processorPos: number; steps: number }) {
-    // Focus source item and activate DnD
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[processorPos];
-    await targetProcessor.getByTestId('streamsAppProcessorDragHandle').focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components
+      .draggable('streamsAppProcessorDragHandle', targetProcessor)
+      .reorder(steps);
   }
 
   // Expectation utility methods
@@ -863,25 +966,18 @@ export class StreamsApp {
   }
 
   async fillGrokPatternInput(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternExpression').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternExpression',
+      value
+    );
   }
 
   async fillGrokPatternDefinitionsInput(value: string) {
     await this.page.getByRole('button', { name: 'Advanced settings' }).click();
-    // Clean previous content
-    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppPatternDefinitionsEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppPatternDefinitionsEditor',
+      value
+    );
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -913,15 +1009,10 @@ export class StreamsApp {
   }
 
   async fillCustomSamplesEditor(value: string) {
-    // Clean previous content
-    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
-    await this.page.keyboard.press('Control+A');
-    await this.page.keyboard.press('Backspace');
-    // Fill with new condition
-    await this.page
-      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
-      .getByRole('textbox')
-      .fill(value);
+    await this.kibanaMonacoEditor.setCodeEditorValueByTestSubj(
+      'streamsAppCustomSamplesDataSourceEditor',
+      value
+    );
   }
 
   async fillCondition(field: string, operator: string, value: string) {
@@ -954,8 +1045,29 @@ export class StreamsApp {
     await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
-  async saveStepsListChanges() {
+  async clickSaveStepsListChanges() {
+    // Clearing the toast list first keeps the Save button clickable and guarantees that a
+    // toast awaited after the click belongs to this save rather than a previous one.
+    await this.waitForEmptyGlobalToastList();
     await this.page.getByRole('button', { name: 'Save changes' }).click();
+  }
+
+  /**
+   * Waits for the steps list save round-trip to reach a terminal state. The success and
+   * failure toasts both fire on the upsert actor settling, i.e. strictly after the
+   * `_ingest` request has resolved and released the deployment-wide streams lock.
+   */
+  async waitForStepsListSaveSettled(timeout: number = 30_000) {
+    // `stepsListSaveSettledToast` matches either outcome, so avoid strict-locator
+    // assertions like `toBeVisible()` which require a single match.
+    await expect
+      .poll(async () => this.stepsListSaveSettledToast.count(), { timeout })
+      .toBeGreaterThan(0);
+  }
+
+  async saveStepsListChanges() {
+    await this.clickSaveStepsListChanges();
+    await this.waitForStepsListSaveSettled();
   }
 
   private async getStepListItems(testId: string, expectItems: boolean = true) {
@@ -1402,14 +1514,14 @@ export class StreamsApp {
 
   async expectAttachmentDetailsFlyoutDescription(description: string) {
     // The description is shown in the first InfoPanel - scope to the flyout
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const descriptionText = flyout.getByText(description);
     await expect(descriptionText).toBeVisible();
   }
 
   async expectAttachmentDetailsFlyoutType(typeLabel: string) {
     // The type badge is inside the flyout - scope to the flyout to avoid matching table badges
-    const flyout = this.page.locator('.euiFlyout');
+    const flyout = this.page.locator(euiSelectors.flyout.ROOT_SELECTOR);
     const typeBadge = flyout.getByText(typeLabel, { exact: true });
     await expect(typeBadge).toBeVisible();
   }
@@ -1452,8 +1564,7 @@ export class StreamsApp {
   }
 
   async openStreamsSettings() {
-    await this.page.getByTestId('app-menu-overflow-button').click();
-    await this.page.getByTestId('streamsAppSettingsButton').click();
+    await this.appMenu.clickItem('streamsAppSettingsButton');
   }
 
   async clickCreateQueryStreamButton() {
@@ -1490,8 +1601,7 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.testSubj.click('app-menu-overflow-button');
-    await this.page.testSubj.click('streamsDeleteStreamButton');
+    await this.appMenu.clickItem('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {
@@ -1547,19 +1657,18 @@ export class StreamsApp {
   async createRootQueryStream(name: string, esqlQuery: string) {
     await this.clickCreateQueryStreamButton();
     await this.fillRoutingRuleName(name);
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
     await this.saveFlyoutQueryStreamCreate();
   }
 
   async openCreateChildQueryStreamForm() {
     await this.clickQueryModeCreateQueryStreamButton();
-    await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async fillChildQueryStreamForm(childName: string, esqlQuery: string) {
     await this.fillRoutingRuleName(childName);
-    await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+    await this.esqlEditor.setQuery(esqlQuery);
   }
 
   async saveChildQueryStream() {

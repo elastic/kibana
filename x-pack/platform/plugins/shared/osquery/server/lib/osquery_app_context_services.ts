@@ -140,5 +140,10 @@ export interface OsqueryAppContext {
    * Object readiness is tied to plugin start method
    */
   service: OsqueryAppContextService;
-  cpsEnabled: boolean;
+  /**
+   * Resolves whether THIS request can fan out — deployment capability AND the
+   * `crossProjectSearch` experimental flag AND at least one linked project
+   * visible to the principal.
+   */
+  isCpsActive: (request: KibanaRequest) => Promise<boolean>;
 }

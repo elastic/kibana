@@ -19,8 +19,7 @@ import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/consta
 import type { SLODefinition } from '../domain/models/slo';
 import { computeHealth, type SLOHealth } from '../domain/services/compute_health';
 import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { DefaultSummaryTransformManager } from './summay_transform_manager';
-import type { DefaultTransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 
 interface RepairActionsGroup {
   slo: SLODefinition;
@@ -32,8 +31,9 @@ export class RepairSLO {
     private logger: Logger,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLODefinitionRepository,
-    private transformManager: DefaultTransformManager,
-    private summaryTransformManager: DefaultSummaryTransformManager
+    private transformManager: TransformManager,
+    private summaryTransformManager: TransformManager,
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   public async execute(params: RepairParams): Promise<RepairActionsGroupResult[]> {
@@ -147,23 +147,23 @@ export class RepairSLO {
         this.logger.debug(
           `Recreating ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
-        await manager.install(slo);
+        await manager.install(slo, { signal: this.signal });
         if (!slo.enabled) {
-          return manager.stop(transformId);
+          return manager.stop(transformId, { signal: this.signal });
         }
 
-        return manager.start(transformId);
+        return manager.start(transformId, { signal: this.signal });
       case 'start-transform':
         this.logger.debug(
           `Starting ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
-        return manager.start(transformId);
+        return manager.start(transformId, { signal: this.signal });
 
       case 'stop-transform':
         this.logger.debug(
           `Stopping ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
-        return manager.stop(transformId);
+        return manager.stop(transformId, { signal: this.signal });
     }
   }
 }

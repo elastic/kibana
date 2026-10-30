@@ -12,6 +12,21 @@ import { isMap, isPair, isScalar, visit } from 'yaml';
 import type { StepInfo } from '../../../../../entities/workflows/store';
 
 /**
+ * When the YAML path is `triggers[i].connector-id`, returns `i`. Otherwise `null`.
+ */
+export function getTriggerConnectorIdBlockIndex(path: (string | number)[]): number | null {
+  if (
+    path.length !== 3 ||
+    path[0] !== 'triggers' ||
+    typeof path[1] !== 'number' ||
+    path[2] !== 'connector-id'
+  ) {
+    return null;
+  }
+  return path[1];
+}
+
+/**
  * When the YAML path is `triggers[i].on.condition` (cursor in the condition value),
  * returns `i`. Otherwise `null`.
  */

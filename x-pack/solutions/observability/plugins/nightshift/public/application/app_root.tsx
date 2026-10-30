@@ -11,7 +11,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
+import type { FocusedSignificantEventService } from '../chat/focused_significant_event_service';
 import { NightshiftPage } from '../nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
 
@@ -22,25 +24,44 @@ export function AppRoot({
   coreStart,
   pluginsStart,
   isServerless,
+  focusedSignificantEventService,
 }: {
   appMountParameters: AppMountParameters;
   coreStart: CoreStart;
   pluginsStart: NightshiftStartDependencies;
   isServerless: boolean;
+  focusedSignificantEventService: FocusedSignificantEventService;
 }) {
   const { history } = appMountParameters;
 
   // Flat shape so `useKibana().services` destructures the same way it did while
   // this app lived inside the observability plugin.
   const services = useMemo(
-    () => ({ ...coreStart, ...pluginsStart, isServerless }),
-    [coreStart, pluginsStart, isServerless]
+    () => ({
+      ...coreStart,
+      ...pluginsStart,
+      isServerless,
+      appParams: { history },
+      focusedSignificantEventService,
+    }),
+    [coreStart, history, pluginsStart, isServerless, focusedSignificantEventService]
   );
 
   return (
     <KibanaContextProvider services={services}>
       <Router history={history}>
-        <RedirectAppLinks coreStart={coreStart} data-test-subj="nightshiftMainContainer">
+        <RedirectAppLinks
+          coreStart={coreStart}
+          data-test-subj="nightshiftMainContainer"
+          css={css`
+            display: flex;
+            flex: 1 1 0;
+            flex-flow: column nowrap;
+            height: 100%;
+            min-height: 0;
+            width: 100%;
+          `}
+        >
           <PerformanceContextProvider>
             <QueryClientProvider client={queryClient}>
               <NightshiftPage />

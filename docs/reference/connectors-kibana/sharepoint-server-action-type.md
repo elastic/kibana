@@ -11,6 +11,8 @@ applies_to:
 
 Use the SharePoint Server connector to search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance. It communicates with SharePoint Server through its native REST API (`/_api/`).
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-sharepoint-server-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
