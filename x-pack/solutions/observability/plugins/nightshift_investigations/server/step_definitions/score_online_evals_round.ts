@@ -155,6 +155,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         results = await evaluate({
           request,
+          spaceId: workflow.spaceId,
           evidence: buildOnlineEvalsEvidence({ round }),
           evaluators: input.evaluators.map((evaluator) => ({
             ...evaluator,

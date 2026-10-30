@@ -110,6 +110,7 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(get).toHaveBeenCalledWith('inv-1');
     expect(evaluate).toHaveBeenCalledWith({
       request,
+      spaceId: 'ops',
       evidence: {
         round: {
           input: { message: 'Why did the checkout alert fire?' },

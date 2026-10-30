@@ -13,8 +13,8 @@ export const MAX_EVIDENCE_TOOL_CALLS = 200;
 
 /**
  * The evidence judges grade for one round: its user input, tool calls and final response. Keeps
- * the latest tool calls when there are more than `evaluate()` accepts, since the conclusion
- * rests on them.
+ * the earliest tool calls when there are more than `evaluate()` accepts, the same end the
+ * judges' renderer keeps within its prompt budget; the final response is always included.
  */
 export const buildOnlineEvalsEvidence = ({
   round,
@@ -37,7 +37,7 @@ export const buildOnlineEvalsEvidence = ({
   return {
     round: {
       input: { message: round.input.message },
-      steps: toolCalls.slice(-MAX_EVIDENCE_TOOL_CALLS),
+      steps: toolCalls.slice(0, MAX_EVIDENCE_TOOL_CALLS),
       response: { message: round.response.message },
     },
   };

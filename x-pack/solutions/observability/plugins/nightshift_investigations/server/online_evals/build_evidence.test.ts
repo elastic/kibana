@@ -46,14 +46,18 @@ describe('buildOnlineEvalsEvidence', () => {
     });
   });
 
-  it('keeps the latest tool calls when there are more than evaluate() accepts', () => {
+  it('keeps the earliest tool calls when there are more than evaluate() accepts', () => {
     const calls = Array.from({ length: MAX_EVIDENCE_TOOL_CALLS + 5 }, (_, index) =>
       toolCall(`call-${index}`)
     );
 
-    const { steps } = buildOnlineEvalsEvidence({ round: round(calls) }).round;
+    const { steps, response } = buildOnlineEvalsEvidence({ round: round(calls) }).round;
 
     expect(steps).toHaveLength(MAX_EVIDENCE_TOOL_CALLS);
-    expect(steps[0].tool_call_id).toBe('call-5');
+    expect(steps[0].tool_call_id).toBe('call-0');
+    expect(steps[MAX_EVIDENCE_TOOL_CALLS - 1].tool_call_id).toBe(
+      `call-${MAX_EVIDENCE_TOOL_CALLS - 1}`
+    );
+    expect(response.message).toBe('A bad deploy of the payments service.');
   });
 });
