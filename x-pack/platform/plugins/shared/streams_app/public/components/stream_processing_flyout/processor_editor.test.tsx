@@ -54,6 +54,15 @@ const renderEditor = (props: Partial<React.ComponentProps<typeof ProcessorEditor
   return { onCommit, onCancel };
 };
 
+const commitPath = (value: string) => {
+  const input = screen.getByTestId('componentDefinitionFormPath-path').querySelector('input');
+  if (!input) {
+    throw new Error('Path combo box rendered without a search input');
+  }
+  fireEvent.change(input, { target: { value } });
+  fireEvent.keyDown(input, { key: 'Enter' });
+};
+
 beforeEach(() => {
   mockOpenConfirm.mockReset();
 });
@@ -63,11 +72,7 @@ describe('ProcessorEditor', () => {
     const { onCommit } = renderEditor();
 
     expect(screen.getByTestId('componentDefinitionForm-processor-add_fields')).toBeTruthy();
-    await userEvent.type(
-      screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-        document.body,
-      'team{enter}'
-    );
+    commitPath('team');
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
       target: { value: 'core' },
     });
@@ -154,11 +159,7 @@ describe('ProcessorEditor', () => {
       ),
     };
     const { onCommit } = renderEditor({ catalogue: fixedCatalogue });
-    await userEvent.type(
-      screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-        document.body,
-      'team{enter}'
-    );
+    commitPath('team');
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
       target: { value: 'core' },
     });

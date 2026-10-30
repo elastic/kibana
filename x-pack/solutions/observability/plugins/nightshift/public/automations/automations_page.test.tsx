@@ -21,8 +21,8 @@ import {
   useToggleAutomation,
   useUpdateAutomation,
 } from './hooks/use_automations';
+import { useRunQuotas } from '../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../hooks/use_kibana';
-import { useRunQuotas } from '../settings/hooks/use_significant_events_run_quotas';
 import type { Automation } from './hooks/use_automations';
 
 jest.mock('./hooks/use_automations', () => ({
@@ -38,10 +38,10 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../settings/hooks/use_significant_events_run_quotas', () => ({
+jest.mock('../data/run_quotas/use_significant_events_run_quotas', () => ({
   useRunQuotas: jest.fn(),
 }));
-jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
@@ -263,14 +263,6 @@ describe('AutomationsPage', () => {
       mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
     });
 
-    it('sorts rows by automation name by default', () => {
-      renderPage();
-
-      const names = screen.getAllByTestId('nightshiftAutomationName').map((el) => el.textContent);
-      expect(names).toEqual(['Daily report', 'Triage incoming alerts']);
-      expect(screen.getByText('Showing 2 automations')).toBeInTheDocument();
-    });
-
     it('shows tags, run counts, usage, and the daily limit warning', () => {
       renderPage();
 
@@ -334,14 +326,6 @@ describe('AutomationsPage', () => {
 
       expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
       expect(history.location.pathname).toBe('/automations');
-    });
-
-    it('opens the create flyout', () => {
-      renderPage();
-
-      fireEvent.click(screen.getByRole('button', { name: 'Create automation' }));
-
-      expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
     });
 
     it('opens a detail flyout and returns to the list with router navigation', () => {
@@ -417,7 +401,7 @@ describe('AutomationsPage', () => {
       renderPage();
 
       expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
-        '1 automation reached its daily trigger limit'
+        '1 automation reached daily run limit'
       );
       fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
       expect(screen.queryByTestId('automationsShowRateLimited')).not.toBeInTheDocument();

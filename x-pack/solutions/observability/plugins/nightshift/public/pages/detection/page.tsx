@@ -31,8 +31,8 @@ import React, {
   type UIEvent,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { NightshiftAppHeader } from '../../app/app_header';
-import type { NightshiftAppHeaderProps } from '../../app/app_header';
+import { NightshiftAppHeader } from '../../components/app_header';
+import type { NightshiftAppHeaderProps } from '../../components/app_header';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import {
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
@@ -48,6 +48,7 @@ import { DETECTION_TAB_LABELS, getVisibleDetectionTabs } from './detection_tabs'
 import { DetectionOverview } from './overview/detection_overview';
 import { EntitiesPanel } from './entities/entities_panel';
 import { PAGE_QUERY_PARAM } from './constants';
+import { RunLimitsBanner } from './run_limits_banner';
 import { useEntitySelection } from './use_entity_selection';
 import {
   RANGE_FROM_QUERY_PARAM,
@@ -189,6 +190,7 @@ export const DetectionPage = ({
           `,
         }}
       >
+        <RunLimitsBanner />
         <div
           ref={fullOverviewSlotRef}
           css={overviewSlotStyles(!isOverviewCompact)}
