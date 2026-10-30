@@ -32,7 +32,6 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const { isAvailable, reason } = useGetRollbackAvailableCheck(packageInfo.name);
   const hasPreviousVersion = !!packageInfo?.installationInfo?.previous_version;
   const isRollbackTTLExpired = !!packageInfo.installationInfo?.is_rollback_ttl_expired;
-  const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
   const isRegistryPackage = packageInfo.installationInfo?.install_source === 'registry';
 
   const {
@@ -49,7 +48,6 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const isDisabled =
     !canRollbackPackages ||
     !hasPreviousVersion ||
-    isUploadedPackage ||
     !isRegistryPackage ||
     isCustomPackage ||
     !licenseService.isEnterprise() ||
@@ -97,15 +95,10 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
                 id="xpack.fleet.integrations.rollbackPackage.noPermissionTooltip"
                 defaultMessage="You don't have permissions to rollback integrations. Contact your administrator."
               />
-            ) : isUploadedPackage ? (
-              <FormattedMessage
-                id="xpack.fleet.integrations.rollbackPackage.uploadedTooltip"
-                defaultMessage="This integration was installed by upload and cannot be rolled back."
-              />
             ) : isCustomPackage ? (
               <FormattedMessage
-                id="xpack.fleet.integrations.rollbackPackage.customTooltip"
-                defaultMessage="Custom integrations cannot be rolled back."
+                id="xpack.fleet.integrations.rollbackPackage.customOrUploadedTooltip"
+                defaultMessage="Custom and uploaded integrations cannot be rolled back."
               />
             ) : !isRegistryPackage ? (
               <FormattedMessage

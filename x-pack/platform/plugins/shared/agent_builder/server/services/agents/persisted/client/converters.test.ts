@@ -1162,3 +1162,39 @@ describe('accessControlUpdateToEs', () => {
     expect(result.created_by_id).toBe('creator-id');
   });
 });
+
+describe('service_account_id', () => {
+  const storedDoc = (serviceAccountId?: string): Document => ({
+    _id: 'agent-1',
+    _source: {
+      id: 'agent-1',
+      name: 'Agent 1',
+      type: AgentType.chat,
+      space: 'default',
+      description: 'description',
+      config: { tools: [] },
+      created_at: creationDate,
+      updated_at: updateDate,
+      ...(serviceAccountId ? { service_account_id: serviceAccountId } : {}),
+    },
+  });
+
+  it('reads the bound account from the document', () => {
+    expect(fromEs(storedDoc('kibana/sa-1')).service_account_id).toBe('kibana/sa-1');
+    expect(fromEs(storedDoc()).service_account_id).toBeUndefined();
+  });
+
+  it('writes the account on create only when the request names one', () => {
+    const request: AgentCreateRequest = {
+      id: 'agent-1',
+      name: 'Agent 1',
+      description: 'description',
+      configuration: { tools: [] },
+    };
+    const base = { user: testUser, space: 'default', creationDate: new Date(creationDate) };
+
+    expect(createRequestToEs({ ...base, profile: request })).not.toHaveProperty(
+      'service_account_id'
+    );
+  });
+});

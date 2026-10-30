@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
@@ -62,6 +63,7 @@ describe('runResolutionScoringStep', () => {
     (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([[]]));
 
     const result = await runResolutionScoringStep({
+      pageTimings: createPageStepTimings(),
       esClient,
       crudClient,
       logger,
@@ -99,6 +101,7 @@ describe('runResolutionScoringStep', () => {
     (calculateResolutionEntityScores as jest.Mock).mockReturnValue(toAsyncGenerator([]));
 
     const result = await runResolutionScoringStep({
+      pageTimings: createPageStepTimings(),
       esClient,
       crudClient,
       logger,
@@ -136,6 +139,7 @@ describe('runResolutionScoringStep', () => {
 
     const run = (overrides: Partial<Parameters<typeof runResolutionScoringStep>[0]> = {}) =>
       runResolutionScoringStep({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
