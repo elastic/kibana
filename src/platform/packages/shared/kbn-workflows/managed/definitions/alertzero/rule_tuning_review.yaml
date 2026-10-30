@@ -365,6 +365,24 @@ steps:
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
     timeout: "10m"
+    on-failure:
+      fallback:
+        - name: post_diagnosis_failed
+          type: ai.conversation.add_user_message
+          on-failure:
+            continue: true
+          with:
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            message: |-
+              **Diagnosis failed**
+              **Rule:** {{ steps.fetch_rule.output.name }}
+
+              The rule could not be diagnosed, so no tuning proposal will follow: {{ steps.diagnose_rule.error.message }}
+
+              Diagnosis runs on the AlertZero model set in **Feature settings**. A connector or connection error usually means that model is missing or can't be reached. 
+              
+              The next sweep will retry to diagnose this rule.
     create-conversation: true
     with:
       author_name: "{{ consts.author_name }}"
