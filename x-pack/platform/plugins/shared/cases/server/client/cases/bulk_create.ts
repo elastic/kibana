@@ -85,10 +85,10 @@ export interface BulkCreateCasesClientOptions {
    * Where each case's `settings.extractObservables` value came from, keyed by the case id the
    * caller put in the request. Stored as the server-owned `extract_observables_source`
    * attribute. Only an automated writer knows the source (the cases connector knows a rule
-   * override from a template value), so the caller passes an entry for every case id in the
-   * request. The source is always `explicit`, `rule`, `template`, or `space_default`.
+   * override from a template value). A case without an entry gets no source. The source is
+   * always `explicit`, `rule`, `template`, or `space_default`.
    */
-  extractObservablesSourceByCaseId: ReadonlyMap<string, ExtractObservablesSource>;
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }
 
 /**
@@ -115,7 +115,7 @@ export const bulkCreate = async (
   data: BulkCreateCasesRequest,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient,
-  options: BulkCreateCasesClientOptions
+  options: BulkCreateCasesClientOptions = {}
 ): Promise<BulkCreateCasesResponse> => {
   const {
     services: {
@@ -529,7 +529,7 @@ const createBulkCreateCaseRequest = async ({
   /** Space-level extractObservables default from the configuration saved object. */
   spaceExtractObservables?: boolean;
   /** See {@link BulkCreateCasesClientOptions.extractObservablesSourceByCaseId}. */
-  extractObservablesSourceByCaseId: ReadonlyMap<string, ExtractObservablesSource>;
+  extractObservablesSourceByCaseId?: ReadonlyMap<string, ExtractObservablesSource>;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
@@ -561,7 +561,7 @@ const createBulkCreateCaseRequest = async ({
   // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
   // only sees the latter and rejects the former as missing.
 
-  const extractObservablesSource = extractObservablesSourceByCaseId.get(id);
+  const extractObservablesSource = extractObservablesSourceByCaseId?.get(id);
 
   // Default extractObservables when the caller omitted it.
   // Precedence: caller-explicit > space config > owner default > false.
