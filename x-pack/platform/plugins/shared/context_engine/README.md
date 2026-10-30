@@ -4,7 +4,7 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a hidden Kibana system index
+AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a Kibana system index
 (`.context-engine-ai-indices`), separate from the backing data.
 
 | Method   | Path                                                            | Description                          |

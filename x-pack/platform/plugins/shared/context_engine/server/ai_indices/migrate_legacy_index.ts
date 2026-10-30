@@ -33,9 +33,17 @@ export const migrateLegacyAiIndices = async ({
   const response = await esClient.search<StoredAiIndexDocument>({
     index: legacyAiIndicesIndexName,
     size: MAX_MIGRATED_AI_INDICES,
-    track_total_hits: false,
+    track_total_hits: true,
+    ignore_unavailable: true,
     query: { match_all: {} },
   });
+  const total =
+    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+  if (total > response.hits.hits.length) {
+    throw new Error(
+      `Legacy registry ${legacyAiIndicesIndexName} holds ${total} entries, above the ${MAX_MIGRATED_AI_INDICES} migration limit`
+    );
+  }
   const operations = response.hits.hits.flatMap(({ _id: id, _source: document }) =>
     id !== undefined && document ? [{ create: { _id: id, document } }] : []
   );
@@ -51,7 +59,7 @@ export const migrateLegacyAiIndices = async ({
     }
   }
 
-  await esClient.indices.delete({ index: legacyIndexNames });
+  await esClient.indices.delete({ index: legacyIndexNames }, { ignore: [404] });
   await esClient.indices.deleteIndexTemplate({ name: legacyAiIndicesIndexName }, { ignore: [404] });
   logger.info(
     `Migrated ${operations.length} AI index entries from ${legacyAiIndicesIndexName} and removed it`

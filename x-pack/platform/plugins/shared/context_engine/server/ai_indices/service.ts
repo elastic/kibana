@@ -119,24 +119,45 @@ export class AiIndexService {
   private readonly storageClient: AiIndexStorageClient;
   private readonly managedBootstrap?: AiIndexManagedBootstrap;
   private readonly logger: Logger;
-  private readonly legacyMigration?: Promise<void>;
+  private readonly migrateLegacy?: () => Promise<void>;
+  private legacyMigration?: Promise<void>;
 
   constructor({
     esClient,
     logger,
     managedBootstrap,
-    legacyMigration,
+    migrateLegacy,
   }: {
     esClient: ElasticsearchClient;
     logger: Logger;
     managedBootstrap?: AiIndexManagedBootstrap;
-    legacyMigration?: Promise<void>;
+    migrateLegacy?: () => Promise<void>;
   }) {
     this.esClient = esClient;
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
     this.managedBootstrap = managedBootstrap;
     this.logger = logger;
-    this.legacyMigration = legacyMigration;
+    this.migrateLegacy = migrateLegacy;
+    this.ensureLegacyMigrated();
+  }
+
+  // Registry access waits on this; a failed attempt is retried on the next call.
+  private ensureLegacyMigrated(): Promise<void> {
+    if (!this.migrateLegacy) {
+      return Promise.resolve();
+    }
+    if (!this.legacyMigration) {
+      this.legacyMigration = this.migrateLegacy().catch((err) => {
+        this.legacyMigration = undefined;
+        this.logger.error(
+          `Failed to migrate the legacy AI index registry: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        throw err;
+      });
+    }
+    return this.legacyMigration;
   }
 
   /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
@@ -437,7 +458,7 @@ export class AiIndexService {
   }
 
   private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
-    await this.legacyMigration;
+    await this.ensureLegacyMigrated();
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
@@ -474,7 +495,7 @@ export class AiIndexService {
       }
     | undefined
   > {
-    await this.legacyMigration;
+    await this.ensureLegacyMigrated();
     const response = await this.storageClient.search({
       size: 1,
       track_total_hits: false,

@@ -371,21 +371,12 @@ export class ContextEnginePlugin
       return true;
     };
 
-    const legacyMigration = migrateLegacyAiIndices({
-      esClient: this.esClient,
-      logger: aiIndexLogger,
-    }).catch((err) => {
-      aiIndexLogger.error(
-        `Failed to migrate the legacy AI index registry: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    });
-
+    const internalEsClient = this.esClient;
     this.aiIndexService = new AiIndexService({
-      esClient: this.esClient,
+      esClient: internalEsClient,
       logger: aiIndexLogger,
-      legacyMigration,
+      migrateLegacy: () =>
+        migrateLegacyAiIndices({ esClient: internalEsClient, logger: aiIndexLogger }),
       managedBootstrap: {
         isManaged: (id) => this.aiIndexRegistry.has(id),
         getManagedIds: () => this.aiIndexRegistry.getManagedIds(),

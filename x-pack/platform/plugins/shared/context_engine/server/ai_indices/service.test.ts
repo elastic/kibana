@@ -1565,6 +1565,40 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('legacy migration', () => {
+    it('runs once and gates registry reads', async () => {
+      const migrateLegacy = jest.fn().mockResolvedValue(undefined);
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        migrateLegacy,
+      });
+
+      await service.list(DEFAULT_SPACE);
+      await service.list(DEFAULT_SPACE);
+
+      expect(migrateLegacy).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails reads while migration fails and retries on the next read', async () => {
+      const migrateLegacy = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValue(undefined);
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        migrateLegacy,
+      });
+
+      await expect(service.list(DEFAULT_SPACE)).rejects.toThrow('boom');
+      expect(storageClient.search).not.toHaveBeenCalled();
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([]);
+      expect(migrateLegacy).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('space isolation', () => {
     it('treats the same logical id as independent across spaces', async () => {
       const defaultDocument: AiIndexDocument = {

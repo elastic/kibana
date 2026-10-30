@@ -37,6 +37,7 @@ describe('migrateLegacyAiIndices', () => {
     getIndices.mockResolvedValue({ [`${legacyAiIndicesIndexName}-000001`]: {} });
     search.mockResolvedValue({
       hits: {
+        total: { value: 2, relation: 'eq' },
         hits: [
           { _id: 'default:logs', _source: { id: 'logs', space: 'default' } },
           { _id: 'team:ops', _source: { id: 'ops', space: 'team' } },
@@ -67,7 +68,10 @@ describe('migrateLegacyAiIndices', () => {
         { create: { _id: 'team:ops', document: { id: 'ops', space: 'team' } } },
       ],
     });
-    expect(deleteIndex).toHaveBeenCalledWith({ index: [`${legacyAiIndicesIndexName}-000001`] });
+    expect(deleteIndex).toHaveBeenCalledWith(
+      { index: [`${legacyAiIndicesIndexName}-000001`] },
+      { ignore: [404] }
+    );
     expect(deleteIndexTemplate).toHaveBeenCalledWith(
       { name: legacyAiIndicesIndexName },
       { ignore: [404] }
@@ -95,8 +99,31 @@ describe('migrateLegacyAiIndices', () => {
     expect(deleteIndex).not.toHaveBeenCalled();
   });
 
+  it('keeps the legacy index when not every entry was fetched', async () => {
+    search.mockResolvedValue({
+      hits: {
+        total: { value: 3, relation: 'eq' },
+        hits: [{ _id: 'default:logs', _source: { id: 'logs', space: 'default' } }],
+      },
+    });
+
+    await expect(migrate()).rejects.toThrow('holds 3 entries');
+    expect(bulk).not.toHaveBeenCalled();
+    expect(deleteIndex).not.toHaveBeenCalled();
+  });
+
+  it('tolerates another node deleting the legacy index first', async () => {
+    search.mockResolvedValue({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
+
+    await migrate();
+
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ ignore_unavailable: true }));
+    expect(bulk).not.toHaveBeenCalled();
+    expect(deleteIndex).toHaveBeenCalled();
+  });
+
   it('removes an empty legacy index', async () => {
-    search.mockResolvedValue({ hits: { hits: [] } });
+    search.mockResolvedValue({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
 
     await migrate();
 
