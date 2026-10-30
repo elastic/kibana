@@ -57,6 +57,14 @@ const inputSchema = lazySchema(() =>
       .max(100)
       .refine(isDate, 'Must be a date')
       .describe('When the scored investigation run started.'),
+    investigation_ended_at: z
+      .string()
+      .max(100)
+      .refine(isDate, 'Must be a date')
+      .optional()
+      .describe(
+        'When the scored investigation run ended, set by the investigation workflow when it hands off to scoring.'
+      ),
     investigation_execution_id: z
       .string()
       .max(1024)
@@ -161,11 +169,6 @@ const runJudges = async ({
   }
 };
 
-const getRoundEndedAt = (round: ConversationRound): string | undefined => {
-  const endedAt = Date.parse(round.started_at) + round.time_to_last_token;
-  return Number.isFinite(endedAt) ? new Date(endedAt).toISOString() : undefined;
-};
-
 export const scoreOnlineEvalsRoundStepDefinition = ({
   getAgentBuilder,
   getEvaluate,
@@ -217,7 +220,6 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const { agentId, round } = await readRound({ input, getAgentBuilder, request });
         const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
-        const investigationEndedAt = getRoundEndedAt(round);
         const { results, failedEvaluators } = await runJudges({
           input,
           round,
@@ -245,7 +247,9 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
             ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
             judge_connector_id: input.judge_connector_id,
             investigation_started_at: input.investigation_started_at,
-            ...(investigationEndedAt ? { investigation_ended_at: investigationEndedAt } : {}),
+            ...(input.investigation_ended_at
+              ? { investigation_ended_at: input.investigation_ended_at }
+              : {}),
             scoring_duration_ms: Date.now() - scoringStartedAt,
           },
           results,
