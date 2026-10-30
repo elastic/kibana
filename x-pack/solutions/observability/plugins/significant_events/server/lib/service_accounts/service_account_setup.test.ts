@@ -39,6 +39,7 @@ const setup = ({
   continuousOnboardingOn = false,
   scheduledDiscoveryOn = false,
   boundAccountId = ACCOUNT_ID,
+  pauseFailures = [],
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -47,6 +48,8 @@ const setup = ({
   scheduledDiscoveryOn?: boolean;
   /** The account the space is bound to before the setup, if any. */
   boundAccountId?: string;
+  /** What pausing the space could not stop. */
+  pauseFailures?: Array<{ target: string; error: string }>;
 } = {}) => {
   // What happened, in order, across the services the setup touches.
   const calls: string[] = [];
@@ -110,7 +113,13 @@ const setup = ({
     getState: jest.fn(async () => (paused ? 'paused' : 'enabled')),
     pause: jest.fn(async () => {
       calls.push('pause');
-      return { state: 'paused' };
+      return {
+        state: 'paused',
+        executionsCancelled: 0,
+        workflowsDisabled: 0,
+        rulesDisabled: 0,
+        partialFailures: pauseFailures,
+      };
     }),
   };
   const settings: Record<string, boolean> = {
@@ -345,7 +354,7 @@ describe('createServiceAccountSetupService', () => {
 
       const result = await fixture.service.disable({ request, spaceId: SPACE_ID });
 
-      expect(result.pause).toEqual({ state: 'paused' });
+      expect(result.pause).toMatchObject({ state: 'paused', partialFailures: [] });
       expect(result.serviceAccountIds).toEqual({ detectionEngine: ACCOUNT_ID });
       expect(fixture.calls).toEqual(['pause', 'stopRuns', 'unbind']);
       for (const id of [
@@ -354,6 +363,42 @@ describe('createServiceAccountSetupService', () => {
       ]) {
         expect(fixture.installed.get(id)).toBe(false);
       }
+    });
+
+    it('keeps the setup and names what it could not stop when the pause reports failures', async () => {
+      const fixture = setup({
+        pauseFailures: [
+          { target: 'rule:rule-1', error: 'boom' },
+          { target: 'workflow:sync@default', error: 'boom' },
+        ],
+      });
+      await fixture.service.enable({
+        request,
+        spaceId: SPACE_ID,
+        serviceAccountIds: { detectionEngine: ACCOUNT_ID },
+      });
+      fixture.calls.length = 0;
+
+      await expect(fixture.service.disable({ request, spaceId: SPACE_ID })).rejects.toMatchObject({
+        statusCode: 500,
+        message: expect.stringContaining('rule:rule-1, workflow:sync@default'),
+      });
+
+      expect(fixture.calls).toEqual(['pause']);
+      expect(fixture.serviceAccounts.unbindWorkload).not.toHaveBeenCalled();
+    });
+
+    it('names only the first failures and counts the rest', async () => {
+      const fixture = setup({
+        pauseFailures: Array.from({ length: 7 }, (_, index) => ({
+          target: `rule:rule-${index}`,
+          error: 'boom',
+        })),
+      });
+
+      await expect(fixture.service.disable({ request, spaceId: SPACE_ID })).rejects.toMatchObject({
+        message: expect.stringMatching(/rule:rule-4 and 2 more\./),
+      });
     });
 
     it('keeps the workflows installed, so their run history survives', async () => {

@@ -95,6 +95,9 @@ const assertSpaceExists = async ({
  * Sets a space up to run the detection engine as its service accounts. Binding a workload needs an
  * authenticated request with `manage_security`, so setup is an explicit admin action.
  */
+/** How many failed targets the error of an incomplete pause names. */
+const MAX_FAILED_TARGETS_IN_ERROR = 5;
+
 export const createServiceAccountSetupService = ({
   core,
   spaces,
@@ -341,7 +344,8 @@ export const createServiceAccountSetupService = ({
    * switches its bound workflows off, waits for their runs to stop and unbinds the detection
    * engine, so nothing in the space runs as the account. The workflows are kept, with their run
    * history, and `_enable` switches them back on. Resume is refused until the space is set up
-   * again. The account is shared by every space and is kept.
+   * again. The account is shared by every space and is kept. When the pause could not stop
+   * everything the setup is kept and the call fails: calling it again retries what failed.
    */
   const disable = async ({
     request,
@@ -366,6 +370,21 @@ export const createServiceAccountSetupService = ({
       request,
       updatedBy: core.security.authc.getCurrentUser(request)?.username,
     });
+    // A rule or workflow the pause could not stop keeps running as the account, on a key or a
+    // binding that unbinding the engine does not remove. Pausing again retries the ones that failed.
+    if (pause.partialFailures.length > 0) {
+      const targets = pause.partialFailures.map(({ target }) => target);
+      const shown = targets.slice(0, MAX_FAILED_TARGETS_IN_ERROR).join(', ');
+      const more =
+        targets.length > MAX_FAILED_TARGETS_IN_ERROR
+          ? ` and ${targets.length - MAX_FAILED_TARGETS_IN_ERROR} more`
+          : '';
+      throw new StatusError(
+        `Pausing the space did not stop everything: ${shown}${more}. The space is still set up: ` +
+          'call _disable again to retry.',
+        500
+      );
+    }
     // The manually started ones too, so nothing can start a run as the account.
     for (const workflowId of [
       getNightshiftBoundKiOnboardingWorkflowId(spaceId),
