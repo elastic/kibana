@@ -37,16 +37,10 @@ export const AppMenuComponent = ({
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
-  // Keep these referentially stable: they feed the popover's `panels` memo, and a new identity
-  // on every render makes EuiContextMenu rebuild its items each time.
-  const handlePopoverToggle = useCallback((id: string) => {
-    setOpenPopoverId((openId) => (openId === id ? null : id));
-  }, []);
-
-  const handleOnPopoverClose = useCallback(() => {
-    setOpenPopoverId(null);
-  }, []);
-
+  /**
+   * keep these referentially stable; they feed the popover's `panels` memo, and a new identity
+   * on every render makes EuiContextMenu rebuild its items each time
+   */
   const { displayedItems, overflowItems, shouldOverflow } = useMemo(
     () =>
       config
@@ -59,6 +53,14 @@ export const AppMenuComponent = ({
     () => [...displayedItems, ...overflowItems],
     [displayedItems, overflowItems]
   );
+
+  const handlePopoverToggle = useCallback((id: string) => {
+    setOpenPopoverId((openId) => (openId === id ? null : id));
+  }, []);
+
+  const handleOnPopoverClose = useCallback(() => {
+    setOpenPopoverId(null);
+  }, []);
 
   if (!config || hasNoItems(config) || !visible) {
     return null;
