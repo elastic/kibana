@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import { API_VERSIONS, CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT } from '../../../common';
+import { CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES } from '../../../common/constants';
 import type {
   CreateCloudOnboardingDeploymentRequest,
   CreateCloudOnboardingDeploymentResponse,
@@ -15,6 +16,8 @@ import type {
   GetCloudOnboardingDeploymentResponse,
   GetCloudOnboardingDeploymentsRequest,
   GetCloudOnboardingDeploymentsResponse,
+  GetCloudOnboardingDeploymentCountsRequest,
+  GetCloudOnboardingDeploymentCountsResponse,
   UpdateCloudOnboardingDeploymentRequest,
   UpdateCloudOnboardingDeploymentResponse,
 } from '../../../common/types/rest_spec/cloud_onboarding_deployment';
@@ -72,46 +75,44 @@ export const sendGetCloudOnboardingDeployments = (
   });
 };
 
-const LIST_PAGE_SIZE = 100;
-// Stops a runaway loop: 2000 sessions in one space is far beyond what the list is meant for.
-export const MAX_CLOUD_ONBOARDING_DEPLOYMENTS = 2000;
-
-export interface AllCloudOnboardingDeployments {
-  items: GetCloudOnboardingDeploymentsResponse['items'];
-  /** How many deployments match the query in total. */
-  total: number;
-  /** True when `items` is a subset of `total` because the page cap was reached. */
-  isTruncated: boolean;
-}
-
-/** Every deployment matching the query, fetched page by page, up to a cap. */
-export const sendGetAllCloudOnboardingDeployments = async (
-  query?: Omit<NonNullable<GetCloudOnboardingDeploymentsRequest['query']>, 'page' | 'perPage'>
-): Promise<AllCloudOnboardingDeployments> => {
-  const items: GetCloudOnboardingDeploymentsResponse['items'] = [];
-  let total = 0;
-  for (let page = 1; page <= MAX_CLOUD_ONBOARDING_DEPLOYMENTS / LIST_PAGE_SIZE; page++) {
-    const response = await sendGetCloudOnboardingDeployments({
-      ...query,
-      page,
-      perPage: LIST_PAGE_SIZE,
-    });
-    items.push(...response.items);
-    total = response.total;
-    if (response.items.length === 0 || items.length >= total) break;
-  }
-  return { items, total, isTruncated: items.length < total };
+export const sendGetCloudOnboardingDeploymentCounts = (
+  query?: GetCloudOnboardingDeploymentCountsRequest['query']
+) => {
+  return sendRequestForRq<GetCloudOnboardingDeploymentCountsResponse>({
+    path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.COUNTS_PATTERN,
+    method: 'get',
+    version: API_VERSIONS.internal.v1,
+    query,
+  });
 };
 
-export const useGetAllCloudOnboardingDeploymentsQuery = (
-  query?: Omit<NonNullable<GetCloudOnboardingDeploymentsRequest['query']>, 'page' | 'perPage'>,
+// Both queries share the key prefix, so invalidating it (e.g. after a delete) refreshes both.
+const QUERY_KEY = 'cloud_onboarding_deployments';
+
+/** The number of deployments that cover each package, by package name. */
+export const useGetCloudOnboardingDeploymentCountsQuery = (
+  query?: GetCloudOnboardingDeploymentCountsRequest['query'],
   options: { enabled?: boolean } = {}
 ) => {
-  return useQuery<AllCloudOnboardingDeployments, RequestError>({
-    queryKey: ['cloud_onboarding_deployments', query],
-    queryFn: () => sendGetAllCloudOnboardingDeployments(query),
+  return useQuery<GetCloudOnboardingDeploymentCountsResponse, RequestError>({
+    queryKey: [QUERY_KEY, 'counts', query],
+    queryFn: () => sendGetCloudOnboardingDeploymentCounts(query),
     enabled: options.enabled,
-    // A refetch reads every page with its policies and agents: not worth it on every tab focus.
+  });
+};
+
+/** One page of deployments, enriched with their policies and agents. */
+export const useGetCloudOnboardingDeploymentsQuery = (
+  query: GetCloudOnboardingDeploymentsRequest['query'],
+  options: { enabled?: boolean } = {}
+) => {
+  return useQuery<GetCloudOnboardingDeploymentsResponse, RequestError>({
+    queryKey: [QUERY_KEY, 'list', query],
+    queryFn: () => sendGetCloudOnboardingDeployments(query),
+    enabled: options.enabled,
+    // A page is enriched with policies and agents: not worth refetching on every tab focus.
     refetchOnWindowFocus: false,
+    // Keeps the current page on screen while the next one loads.
+    keepPreviousData: true,
   });
 };

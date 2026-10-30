@@ -20,6 +20,7 @@ import type {
   GetCloudOnboardingDeploymentRequestSchema,
   GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
   GetCloudOnboardingDeploymentsRequestSchema,
+  GetCloudOnboardingDeploymentCountsRequestSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
@@ -143,6 +144,19 @@ export const getCloudOnboardingDeploymentsHandler: FleetRequestHandler<
   return response.ok({
     body: { items: enriched.map(toResponseItem), total, page, perPage },
   });
+};
+
+export const getCloudOnboardingDeploymentCountsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetCloudOnboardingDeploymentCountsRequestSchema.query>
+> = async (context, request, response) => {
+  const { internalSoClient } = await context.fleet;
+
+  const counts = await cloudOnboardingDeploymentService.getCountsByPackage(
+    internalSoClient,
+    request.query
+  );
+  return response.ok({ body: { counts } });
 };
 
 export const getCloudOnboardingDeploymentsByConnectorIdHandler: FleetRequestHandler<

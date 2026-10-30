@@ -12,11 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { Loading } from '../../../../../../components';
-import {
-  MAX_CLOUD_ONBOARDING_DEPLOYMENTS,
-  useGetPackageInfoByKeyQuery,
-  useUrlPagination,
-} from '../../../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useUrlPagination } from '../../../../../../hooks';
 
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
@@ -42,10 +38,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   const { selectedPackageViewOnboardingInstances } = useViewOnboardingInstances();
   const {
     isEnabled: isOnboardingInstancesEnabled,
-    isLoading: isOnboardingInstancesLoading,
-    onboardingInstancesByPackage,
+    onboardingInstanceCounts,
     isError: isOnboardingInstancesError,
-    isTruncated: isOnboardingInstancesTruncated,
     refetch: refetchOnboardingInstances,
   } = useOnboardingInstances();
   const pagination = useUrlPagination();
@@ -85,8 +79,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
     [selectedPackageViewOnboardingInstances, installedPackages]
   );
   // A link from outside, like Finish in the AWS onboarding flow, can name a package that is not on
-  // the current page of the table: read its title and icon from the package itself. The instances
-  // come from the full list either way.
+  // the current page of the table: read its title and icon from the package itself. The panel loads
+  // the package's instances either way.
   const { data: onboardingInstancesPackageInfo, isError: isOnboardingInstancesPackageInfoError } =
     useGetPackageInfoByKeyQuery(
       selectedPackageViewOnboardingInstances ?? '',
@@ -123,17 +117,6 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
     isOnboardingInstancesPackageInfoError,
     selectedPackageViewOnboardingInstances,
   ]);
-
-  const onboardingInstanceCounts = useMemo(
-    () =>
-      new Map(
-        [...onboardingInstancesByPackage].map(([packageName, onboardingInstances]) => [
-          packageName,
-          onboardingInstances.length,
-        ])
-      ),
-    [onboardingInstancesByPackage]
-  );
 
   if (isInitialLoading) {
     return <Loading />;
@@ -181,23 +164,6 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
             <EuiSpacer size="m" />
           </>
         ) : null}
-        {isOnboardingInstancesTruncated ? (
-          <>
-            <EuiCallOut
-              announceOnMount
-              color="warning"
-              iconType="warning"
-              size="s"
-              data-test-subj="instancesTruncated"
-              title={i18n.translate('xpack.fleet.epmInstalledIntegrations.instancesTruncated', {
-                defaultMessage:
-                  'Only the {max} most recent instances are shown, so some instance counts may be incomplete.',
-                values: { max: MAX_CLOUD_ONBOARDING_DEPLOYMENTS },
-              })}
-            />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
         <InstalledIntegrationsTable
           total={total}
           pagination={pagination}
@@ -212,11 +178,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
       ) : null}
       {onboardingInstancesSelectedItem ? (
         <OnboardingInstancesPanel
+          key={onboardingInstancesSelectedItem.name}
           installedPackage={onboardingInstancesSelectedItem}
-          onboardingInstances={
-            onboardingInstancesByPackage.get(onboardingInstancesSelectedItem.name) ?? []
-          }
-          isLoading={isOnboardingInstancesLoading}
         />
       ) : null}
     </>

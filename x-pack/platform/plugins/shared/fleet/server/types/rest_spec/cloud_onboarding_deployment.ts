@@ -487,6 +487,20 @@ export const GetCloudOnboardingDeploymentsResponseSchema = schema.object({
   perPage: schema.number(),
 });
 
+export const GetCloudOnboardingDeploymentCountsRequestSchema = {
+  query: schema.object({
+    provider: schema.maybe(CloudOnboardingDeploymentProviderSchema),
+  }),
+};
+
+export const GetCloudOnboardingDeploymentCountsResponseSchema = schema.object({
+  counts: schema.recordOf(schema.string(), schema.number({ min: 0 }), {
+    meta: {
+      description: 'Number of deployment instances that cover each package, by package name.',
+    },
+  }),
+});
+
 export const UpdateCloudOnboardingDeploymentRequestSchema = {
   params: OnboardingDeploymentIdParamSchema,
   body: schema.object({

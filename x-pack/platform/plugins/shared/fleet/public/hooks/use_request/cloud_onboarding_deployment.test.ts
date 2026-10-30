@@ -5,79 +5,48 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '../../../common';
+
 import { sendRequestForRq } from './use_request';
-import { sendGetAllCloudOnboardingDeployments } from './cloud_onboarding_deployment';
+import {
+  sendGetCloudOnboardingDeploymentCounts,
+  sendGetCloudOnboardingDeployments,
+} from './cloud_onboarding_deployment';
 
 jest.mock('./use_request');
 
 const mockSendRequest = sendRequestForRq as jest.Mock;
 
-const makeItems = (from: number, count: number) =>
-  Array.from({ length: count }, (_, i) => ({ id: `d${from + i}` }));
-
-describe('sendGetAllCloudOnboardingDeployments', () => {
+describe('cloud onboarding deployment requests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSendRequest.mockResolvedValue({});
   });
 
-  it('fetches every page until all deployments are loaded', async () => {
-    mockSendRequest
-      .mockResolvedValueOnce({ items: makeItems(0, 100), total: 250, page: 1, perPage: 100 })
-      .mockResolvedValueOnce({ items: makeItems(100, 100), total: 250, page: 2, perPage: 100 })
-      .mockResolvedValueOnce({ items: makeItems(200, 50), total: 250, page: 3, perPage: 100 });
+  it('requests the counts from the internal route', async () => {
+    await sendGetCloudOnboardingDeploymentCounts({ provider: 'aws' });
 
-    const result = await sendGetAllCloudOnboardingDeployments({ provider: 'aws' });
-
-    expect(result.items).toHaveLength(250);
-    expect(result).toEqual(expect.objectContaining({ total: 250, isTruncated: false }));
-    expect(mockSendRequest.mock.calls.map(([req]) => req.query)).toEqual([
-      { provider: 'aws', page: 1, perPage: 100 },
-      { provider: 'aws', page: 2, perPage: 100 },
-      { provider: 'aws', page: 3, perPage: 100 },
-    ]);
+    expect(mockSendRequest).toHaveBeenCalledWith({
+      path: '/internal/fleet/cloud_onboarding_deployments/counts',
+      method: 'get',
+      version: API_VERSIONS.internal.v1,
+      query: { provider: 'aws' },
+    });
   });
 
-  it('makes a single request when everything fits in one page', async () => {
-    mockSendRequest.mockResolvedValueOnce({
-      items: makeItems(0, 3),
-      total: 3,
-      page: 1,
-      perPage: 100,
+  it('requests one page of a package from the public list route', async () => {
+    await sendGetCloudOnboardingDeployments({
+      provider: 'aws',
+      packageName: 'aws_bedrock',
+      page: 2,
+      perPage: 20,
     });
 
-    expect((await sendGetAllCloudOnboardingDeployments()).items).toHaveLength(3);
-    expect(mockSendRequest).toHaveBeenCalledTimes(1);
-  });
-
-  it('stops when a page comes back empty even if the total says there is more', async () => {
-    mockSendRequest
-      .mockResolvedValueOnce({ items: makeItems(0, 100), total: 500, page: 1, perPage: 100 })
-      .mockResolvedValueOnce({ items: [], total: 500, page: 2, perPage: 100 });
-
-    const result = await sendGetAllCloudOnboardingDeployments();
-    expect(result.items).toHaveLength(100);
-    expect(result.isTruncated).toBe(true);
-    expect(mockSendRequest).toHaveBeenCalledTimes(2);
-  });
-
-  it('stops at the cap and reports that the result is truncated', async () => {
-    mockSendRequest.mockImplementation(async ({ query }) => ({
-      items: makeItems((query.page - 1) * 100, 100),
-      total: 2500,
-      page: query.page,
-      perPage: 100,
-    }));
-
-    const result = await sendGetAllCloudOnboardingDeployments();
-
-    expect(mockSendRequest).toHaveBeenCalledTimes(20);
-    expect(result.items).toHaveLength(2000);
-    expect(result).toEqual(expect.objectContaining({ total: 2500, isTruncated: true }));
-  });
-
-  it('propagates a failed request', async () => {
-    mockSendRequest.mockRejectedValueOnce(new Error('boom'));
-
-    await expect(sendGetAllCloudOnboardingDeployments()).rejects.toThrow('boom');
+    expect(mockSendRequest).toHaveBeenCalledWith({
+      path: '/api/fleet/cloud_onboarding_deployments',
+      method: 'get',
+      version: API_VERSIONS.public.v1,
+      query: { provider: 'aws', packageName: 'aws_bedrock', page: 2, perPage: 20 },
+    });
   });
 });

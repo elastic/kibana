@@ -60,6 +60,17 @@ export interface GetCloudOnboardingDeploymentsResponse {
   perPage: number;
 }
 
+export interface GetCloudOnboardingDeploymentCountsRequest {
+  query?: {
+    provider?: CloudProvider;
+  };
+}
+
+export interface GetCloudOnboardingDeploymentCountsResponse {
+  /** Number of deployment instances that cover each package, by package name. */
+  counts: Record<string, number>;
+}
+
 export interface UpdateCloudOnboardingDeploymentRequest {
   params: { id: string };
   body: {

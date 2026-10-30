@@ -20,6 +20,8 @@ import type {
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
 const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
+// Distinct package names to count: far more than any provider's onboarding covers.
+const MAX_COUNTED_PACKAGES = 1000;
 
 const toDeployment = (
   so: SavedObject<CloudOnboardingDeploymentSOAttributes>
@@ -105,6 +107,46 @@ class CloudOnboardingDeploymentService {
       page,
       perPage,
     };
+  }
+
+  /**
+   * The number of deployments that cover each package, by package name. A deployment covering
+   * several packages counts once for each of them; one without packageNames is not counted.
+   */
+  public async getCountsByPackage(
+    soClient: SavedObjectsClientContract,
+    { provider }: { provider?: string } = {}
+  ): Promise<Record<string, number>> {
+    const result = await soClient.find<
+      CloudOnboardingDeploymentSOAttributes,
+      { by_package: { buckets: Array<{ key: string; doc_count: number }> } }
+    >({
+      type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      ...(provider
+        ? {
+            filter: nodeBuilder.is(
+              `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.provider`,
+              provider
+            ),
+          }
+        : {}),
+      aggs: {
+        by_package: {
+          terms: {
+            field: `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.packageNames`,
+            size: MAX_COUNTED_PACKAGES,
+          },
+        },
+      },
+    });
+
+    return Object.fromEntries(
+      (result.aggregations?.by_package?.buckets ?? []).map(({ key, doc_count: count }) => [
+        key,
+        count,
+      ])
+    );
   }
 
   public async getByConnectorId(
