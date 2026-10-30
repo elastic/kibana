@@ -49,8 +49,8 @@ const panelSelectHintStyles = {
       // positioned in the grid root, so it scrolls together with the panel
       position: 'absolute',
       pointerEvents: 'none',
-      // above the panels but below the sticky top nav (levels.mask), so it slides under the query bar
-      zIndex: euiTheme.levels.menu,
+      // below the hover actions (levels.menu) and the sticky top nav (levels.mask), above the panel content
+      zIndex: euiTheme.levels.header,
       // centered on the panel's title bar strip (size.xl tall, like the select checkbox), titled or not
       transform: `translate(-50%, calc(${euiTheme.size.xl} / 2 - 50%))`,
       animation: `${fadeIn} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
