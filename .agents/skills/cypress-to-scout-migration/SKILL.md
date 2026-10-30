@@ -151,7 +151,7 @@ Use the solution-specific skill's page object and API service templates as start
 
 | Cypress | Scout |
 |---------|-------|
-| `cy.visit()` | `page.gotoApp()` or page object `goto()` |
+| `cy.visit()` | Page object `goto()` using `page.gotoApp(app, { readyWhen })` on the app's ready element (see **Gate app navigation on the app's own ready element** in `docs/extend/testing/ui-best-practices.md`) |
 | `cy.get('[data-test-subj="x"]')` | `page.testSubj.locator('x')` |
 | `cy.intercept() + cy.wait()` | Playwright auto-waiting or `expect.poll()` |
 | `cy.request()` (setup/teardown) | `apiServices` / `kbnClient` in `beforeAll` |
