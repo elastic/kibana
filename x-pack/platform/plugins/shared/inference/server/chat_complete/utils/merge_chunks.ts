@@ -6,6 +6,7 @@
  */
 
 import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
+import { createToolCallIndexResolver } from './normalize_tool_call_indexes';
 
 interface UnvalidatedMessage {
   content: string;
@@ -22,20 +23,14 @@ interface UnvalidatedMessage {
  * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index
  */
 const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
-  // Map to store tool calls by their unique identifier
-  const toolCallsMap = new Map<string, UnvalidatedToolCall>();
-  // Map to track which index corresponds to which toolCallId
-  const indexToToolCallId = new Map<number, string>();
+  // Map to store tool calls by their resolved index
+  const toolCallsMap = new Map<number, UnvalidatedToolCall>();
+  const resolveIndex = createToolCallIndexResolver();
 
   for (const chunk of chunks) {
     chunk.tool_calls?.forEach((toolCall) => {
-      // Track toolCallId for continuation chunks
-      if (toolCall.toolCallId) {
-        indexToToolCallId.set(toolCall.index, toolCall.toolCallId);
-      }
-
-      const key = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
-      if (!key) {
+      const key = resolveIndex(toolCall);
+      if (key === undefined) {
         throw new Error(
           `Tool call key is missing for index ${toolCall.index} in chunk ${JSON.stringify(chunk)}`
         );

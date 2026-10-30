@@ -17,6 +17,7 @@ import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 import { mergeChunks } from './merge_chunks';
+import { normalizeToolCallIndexes } from './normalize_tool_call_indexes';
 
 export function chunksIntoMessage<TToolOptions extends ToolOptions>({
   logger,
@@ -31,7 +32,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
   | ChatCompletionMessageEvent<TToolOptions>
 > {
   return (chunks$) => {
-    const shared$ = chunks$.pipe(share());
+    const shared$ = chunks$.pipe(normalizeToolCallIndexes(), share());
 
     return merge(
       shared$,
