@@ -6,6 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const ENDPOINT = '/internal/nightshift/investigations/service_account';
@@ -29,8 +30,9 @@ export const getInvestigatorServiceAccountRoute = createNightshiftInvestigations
     access: 'internal',
     summary: 'Get whether Nightshift is set up with its service account in this space',
   },
-  // Readable by anyone who can read investigations, so every Nightshift user sees the setup step.
-  security: { authz: { requiredPrivileges: ['agentBuilder:read'] } },
+  // Readable by every Nightshift user, so each sees the setup step and whether they may change
+  // automations, whether or not their role also grants Agent Builder.
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>
     getInvestigatorServiceAccountService().getStatus(request, getSpaceId(request)),
 });
