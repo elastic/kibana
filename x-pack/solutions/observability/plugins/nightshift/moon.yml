@@ -91,6 +91,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
