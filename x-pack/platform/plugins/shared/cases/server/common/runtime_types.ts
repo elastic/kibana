@@ -14,11 +14,8 @@ type ErrorFactory = (message: string) => Error;
 export const createPlainError = (message: string) => new Error(message);
 
 /**
- * Zod equivalent of `decodeOrThrow` from `./runtime_types`. Parses input
- * against the provided schema and throws (via `createError`) when the input
- * fails validation. Unknown keys are silently stripped — matching io-ts's
- * `decodeOrThrow` behavior on `rt.exact` schemas. (`rt.strict` rejected
- * excess keys; for that behavior use `decodeWithExcessOrThrowZod`.)
+ * Parses `value` with `schema` and throws `createError` when it fails. Unknown keys are stripped;
+ * use `decodeWithExcessOrThrowZod` to reject them.
  */
 export const decodeOrThrowZod =
   <T>(schema: ZodType<T>, createError: ErrorFactory = createPlainError) =>
@@ -29,11 +26,8 @@ export const decodeOrThrowZod =
   };
 
 /**
- * Zod equivalent of `decodeWithExcessOrThrow` from `./runtime_types`. Wraps
- * the schema with `DeepStrict` so any unrecognized keys (at any depth) cause
- * validation to fail with `Boom.badRequest` — matching io-ts's `exactCheck`
- * behavior. Use this for incoming request bodies / query strings where
- * extra keys should be rejected.
+ * Parses `value` with `schema` and throws a 400 when it fails or has unknown keys at any depth.
+ * Use it for request bodies and query strings.
  */
 export const decodeWithExcessOrThrowZod =
   <T>(schema: ZodType<T>) =>

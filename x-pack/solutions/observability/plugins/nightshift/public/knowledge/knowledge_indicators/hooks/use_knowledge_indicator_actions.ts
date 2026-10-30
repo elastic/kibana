@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   resolveSignificantEventsTuningConfig,
@@ -17,8 +18,11 @@ import { useCallback, useMemo } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../../../data/query_keys';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../data/rules/use_queries_api';
-import { useStreamFeaturesApi } from '../../../data/knowledge_indicators/use_stream_features_api';
-import { getFormattedError } from '../../../common/errors';
+import {
+  type BulkOperationResult,
+  useDiscoveryFeaturesApi,
+} from '../../../data/knowledge_indicators/use_discovery_features_api';
+import { BULK_WRITE_CONFLICT_MESSAGE, getFormattedError } from '../../../common/errors';
 import { PROMOTE_QUERY_ALREADY_PROMOTED } from '../translations';
 import { getPromoteSkipReason } from '../utils/promote_skip_reason';
 
@@ -29,15 +33,31 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const durabilityExpiresAt = (durable: boolean, ttlDays: number): string | undefined =>
   durable ? undefined : new Date(Date.now() + ttlDays * DAY_MS).toISOString();
 
+// The cross-source bulk route reports per-instance failures and conflicts instead of rejecting;
+// some may have applied.
+const assertNoFailures = ({ failedCount, conflictCount }: BulkOperationResult): void => {
+  if (failedCount === 0 && conflictCount === 0) {
+    return;
+  }
+  if (failedCount === 0) {
+    throw new Error(BULK_WRITE_CONFLICT_MESSAGE);
+  }
+  const count = failedCount + conflictCount;
+  throw new Error(
+    i18n.translate('xpack.nightshift.knowledge.knowledgeIndicatorActions.partialFailureError', {
+      defaultMessage: '{count, plural, one {# source} other {# sources}} could not be updated',
+      values: { count },
+    })
+  );
+};
+
 interface UseKnowledgeIndicatorActionsParams {
-  sourceId: string;
   onSuccess?: () => void;
 }
 
 export function useKnowledgeIndicatorActions({
-  sourceId,
   onSuccess,
-}: UseKnowledgeIndicatorActionsParams) {
+}: UseKnowledgeIndicatorActionsParams = {}) {
   const { notifications, settings } = useKibana().services;
   const { toasts } = notifications;
   const queryClient = useQueryClient();
@@ -54,45 +74,46 @@ export function useKnowledgeIndicatorActions({
       return DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.feature_ttl_days;
     }
   }, [settings]);
-  const { excludeFeaturesInBulk, restoreFeaturesInBulk, setFeatureDurability } =
-    useStreamFeaturesApi(sourceId);
+  const { excludeFeaturesInBulk, restoreFeaturesInBulk, setFeaturesDurabilityInBulk } =
+    useDiscoveryFeaturesApi();
   const { promote, setQueryDurability } = useQueriesApi();
 
   const invalidateData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: [...FEATURES_QUERY_KEY, sourceId] }),
-      queryClient.invalidateQueries({ queryKey: [...FEATURES_QUERY_KEY, 'all'] }),
+      queryClient.invalidateQueries({ queryKey: FEATURES_QUERY_KEY }),
     ]);
-  }, [sourceId, queryClient]);
+  }, [queryClient]);
 
-  const excludeAction = useMutation<void, Error, string>({
+  const excludeAction = useMutation<void, Error, AggregatedFeature>({
     mutationKey: KI_ROW_ACTION_MUTATION_KEY,
-    mutationFn: async (featureUuid) => {
-      await excludeFeaturesInBulk([featureUuid]);
+    mutationFn: async (feature) => {
+      assertNoFailures(await excludeFeaturesInBulk([feature]));
     },
     onSuccess: async () => {
       await invalidateData();
       toasts.addSuccess({ title: EXCLUDE_SUCCESS_TOAST });
       onSuccess?.();
     },
-    onError: (error) => {
+    onError: async (error) => {
       toasts.addError(getFormattedError(error), { title: EXCLUDE_ERROR_TOAST });
+      await invalidateData();
     },
   });
 
-  const restoreAction = useMutation<void, Error, string>({
+  const restoreAction = useMutation<void, Error, AggregatedFeature>({
     mutationKey: KI_ROW_ACTION_MUTATION_KEY,
-    mutationFn: async (featureUuid) => {
-      await restoreFeaturesInBulk([featureUuid]);
+    mutationFn: async (feature) => {
+      assertNoFailures(await restoreFeaturesInBulk([feature]));
     },
     onSuccess: async () => {
       await invalidateData();
       toasts.addSuccess({ title: RESTORE_SUCCESS_TOAST });
       onSuccess?.();
     },
-    onError: (error) => {
+    onError: async (error) => {
       toasts.addError(getFormattedError(error), { title: RESTORE_ERROR_TOAST });
+      await invalidateData();
     },
   });
 
@@ -124,14 +145,13 @@ export function useKnowledgeIndicatorActions({
   >({
     mutationKey: KI_ROW_ACTION_MUTATION_KEY,
     mutationFn: async ({ knowledgeIndicator, durable }) => {
-      const expiresAt = durabilityExpiresAt(durable, featureTtlDays);
       if (knowledgeIndicator.kind === 'feature') {
-        await setFeatureDurability(knowledgeIndicator.feature, expiresAt);
+        assertNoFailures(await setFeaturesDurabilityInBulk([knowledgeIndicator.feature], durable));
       } else {
         await setQueryDurability({
           query: knowledgeIndicator.query,
           sourceId: knowledgeIndicator.source_id,
-          expiresAt,
+          expiresAt: durabilityExpiresAt(durable, featureTtlDays),
         });
       }
     },
@@ -142,10 +162,11 @@ export function useKnowledgeIndicatorActions({
       });
       onSuccess?.();
     },
-    onError: (error, { durable }) => {
+    onError: async (error, { durable }) => {
       toasts.addError(getFormattedError(error), {
         title: durable ? MAKE_DURABLE_ERROR_TOAST : MAKE_EXPIRING_ERROR_TOAST,
       });
+      await invalidateData();
     },
   });
 

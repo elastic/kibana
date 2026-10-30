@@ -24,6 +24,7 @@ export enum AgentBuilderErrorCode {
   agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
   conversationWriteConflict = 'conversationWriteConflict',
+  conversationBusy = 'conversationBusy',
   conversationAlreadyExists = 'conversationAlreadyExists',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
@@ -333,6 +334,35 @@ export const createConversationWriteConflictError = ({
     AgentBuilderErrorCode.conversationWriteConflict,
     `Conversation ${conversationId} was modified concurrently and the change could not be saved`,
     { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when another live execution already holds the conversation.
+ */
+export type AgentBuilderConversationBusyError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationBusy>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationBusyError}
+ */
+export const isConversationBusyError = (err: unknown): err is AgentBuilderConversationBusyError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationBusy;
+};
+
+export const createConversationBusyError = ({
+  conversationId,
+  activeExecutionId,
+  meta = {},
+}: {
+  conversationId: string;
+  activeExecutionId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationBusyError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationBusy,
+    `Conversation ${conversationId} already has an execution in progress`,
+    { ...meta, conversationId, activeExecutionId, statusCode: 409 }
   );
 };
 
@@ -663,6 +693,7 @@ export const AgentBuilderErrorUtils = {
   isAgentUnavailableError,
   isConversationNotFoundError,
   isConversationWriteConflictError,
+  isConversationBusyError,
   isPluginNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
@@ -680,6 +711,7 @@ export const AgentBuilderErrorUtils = {
   createAgentUnavailableError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
+  createConversationBusyError,
   createPluginNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,

@@ -11,22 +11,15 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
 
 export const createNavigationTree = (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  alertZeroEnabled: boolean = false
 ): NavigationTreeDefinition => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  let agentBuilderNavAtTop = false;
-  services.featureFlags
-    .getBooleanValue$(AGENT_BUILDER_NAV_AT_TOP_FLAG, false)
-    .subscribe((enabled) => {
-      agentBuilderNavAtTop = enabled;
-    })
-    .unsubscribe();
 
   const agentBuilderLink = {
     icon: 'productAgent',
@@ -39,23 +32,26 @@ export const createNavigationTree = (
 
   return {
     body: [
-      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      // Context Engine follows Agent Builder wherever it renders; it no longer has a
-      // fixed top position.
-      ...(showAgentBuilder && agentBuilderNavAtTop ? [contextEngineLink] : []),
-      ...(!showAgentBuilder ? [contextEngineLink] : []),
+      // With AlertZero off, keep the original order: Context Engine stays at the top without Agents, and
+      // Agents and Context Engine follow Workflows. With AlertZero on, Agents sits between Escalations
+      // and Watches, and Context Engine follows Workflows.
+      ...(!alertZeroEnabled && !showAgentBuilder ? [contextEngineLink] : []),
+      ...(alertZeroEnabled
+        ? [
+            ...defaultNavigationTree.alertZero(),
+            ...(showAgentBuilder ? [agentBuilderLink] : []),
+            ...defaultNavigationTree.alertZeroSecondary(),
+          ]
+        : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when securitySolution:enableAlertZero is off)
-      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
       services.experimentalFeatures?.enableAlertsAndAttacksAlignment
         ? defaultNavigationTree.alertDetections()
@@ -65,9 +61,8 @@ export const createNavigationTree = (
             link: securityLink(SecurityPageName.alerts),
           },
       ...getWorkflowsNavPanel(services),
-      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
-      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      ...(showAgentBuilder && !agentBuilderNavAtTop ? [contextEngineLink] : []),
+      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink] : []),
+      ...(alertZeroEnabled || showAgentBuilder ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',

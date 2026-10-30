@@ -63,7 +63,15 @@ export function getLogsForDataset({
     });
 }
 
-export function getInitialTestLogs({ to, count = 1 }: { to: string; count?: number }) {
+export function getInitialTestLogs({
+  to,
+  count = 1,
+  namespace = DEFAULT_NAMESPACE,
+}: {
+  to: string;
+  count?: number;
+  namespace?: string;
+}) {
   return timerange(moment(to).subtract(count, 'minute'), moment(to))
     .interval('1m')
     .rate(1)
@@ -79,7 +87,8 @@ export function getInitialTestLogs({ to, count = 1 }: { to: string; count?: numb
             CLUSTER[0],
             CLOUD_PROVIDERS[0],
             CLOUD_REGION[0],
-            false
+            false,
+            namespace
           ),
           createLogRecord(
             timestamp,
@@ -89,7 +98,8 @@ export function getInitialTestLogs({ to, count = 1 }: { to: string; count?: numb
             CLUSTER[1],
             CLOUD_PROVIDERS[1],
             CLOUD_REGION[1],
-            false
+            false,
+            namespace
           ),
           createLogRecord(
             timestamp,
@@ -99,7 +109,8 @@ export function getInitialTestLogs({ to, count = 1 }: { to: string; count?: numb
             CLUSTER[2],
             CLOUD_PROVIDERS[2],
             CLOUD_REGION[2],
-            false
+            false,
+            namespace
           ),
         ]);
     });

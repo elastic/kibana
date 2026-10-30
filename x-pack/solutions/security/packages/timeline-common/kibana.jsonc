@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-timeline-common",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "security",
+  "visibility": "private"
+}
