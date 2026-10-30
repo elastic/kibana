@@ -127,7 +127,11 @@ export class SubjectClaimsService {
         }
       }
     } catch (error) {
-      await this.deleteByConversationIds([conversationId], spaceId).catch(() => undefined);
+      await this.deleteMatching([
+        { term: { spaceId } },
+        { term: { conversationId } },
+        { terms: { _id: taken } },
+      ]).catch(() => undefined);
       throw error;
     }
     return { claimed: true };

@@ -194,6 +194,29 @@ describe('SubjectClaimsService', () => {
     expect(holderOf(EVENT)).toBeUndefined();
   });
 
+  it('keeps the claims the investigation held before a failed claim', async () => {
+    const { storage, service, holderOf } = setup();
+    await service.claim({
+      spaceId: SPACE_ID,
+      conversationId: 'conv-1',
+      subjects: [ALERT],
+      isHolderOpen: isOpen(true),
+    });
+    (storage.index as jest.Mock).mockRejectedValueOnce(new Error('storage unavailable'));
+
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjects: [ALERT, EVENT],
+        isHolderOpen: isOpen(true),
+      })
+    ).rejects.toThrow('storage unavailable');
+
+    expect(holderOf(ALERT)).toBe('conv-1');
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
   it('re-reads when a concurrent start wins the create', async () => {
     const { storage, service } = setup();
     const id = subjectClaimId(SPACE_ID, ALERT);
