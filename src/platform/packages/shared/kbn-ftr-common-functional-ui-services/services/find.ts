@@ -282,29 +282,22 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
-    // Use implicit timeout 0 so findElements returns immediately inside the poll loop,
-    // avoiding redundant WebDriver round-trips to change timeout on every iteration.
-    await this._withTimeout(0);
     try {
-      // driver.wait treats timeout=0 as "wait forever"; use 1ms so a single
-      // check fires and the timeout guard (elapsed >= timeout) trips immediately.
-      await this.driver.wait(async () => {
+      await this.retry.tryForTime(timeout, async () => {
+        // make sure that the find timeout is not longer than the retry timeout
+        await this._withTimeout(Math.min(timeout, this.WAIT_FOR_EXISTS_TIME));
         const elements = await this.driver.findElements(By.css(selector));
-        for (const el of elements) {
-          try {
-            if (await el.isDisplayed()) return true;
-          } catch {
-            // stale element; continue to next
-          }
+        await this._withTimeout(this.defaultFindTimeout);
+        const displayed = await this.filterElementIsDisplayed(this.wrapAll(elements));
+        if (displayed.length === 0) {
+          throw new Error(`${selector} is not displayed`);
         }
-        return false;
-      }, timeout || 1);
-      return true;
+      });
     } catch (err) {
-      return false;
-    } finally {
       await this._withTimeout(this.defaultFindTimeout);
+      return false;
     }
+    return true;
   }
 
   /**
