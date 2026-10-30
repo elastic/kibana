@@ -14,10 +14,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import {
-  assertPackagePoliciesUpgradeAcknowledged,
-  installPackage,
-} from '../../services/epm/packages';
+import { installPackage } from '../../services/epm/packages';
 import { appContextService, packagePolicyService } from '../../services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
@@ -98,7 +95,6 @@ export async function _runBulkUpgradeTask({
           savedObjectsClient,
           esClient,
           pkgName: pkg.name,
-          acknowledgeBreakingChanges,
         });
       }
 
@@ -122,12 +118,10 @@ async function bulkUpgradePackagePolicies({
   savedObjectsClient,
   esClient,
   pkgName,
-  acknowledgeBreakingChanges,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   pkgName: string;
-  acknowledgeBreakingChanges?: boolean;
 }) {
   const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
     page: 1,
@@ -136,16 +130,6 @@ async function bulkUpgradePackagePolicies({
   });
 
   if (policyIdsToUpgrade.items.length) {
-    // Policies can lag behind the previously installed version, so their upgrade range can include
-    // breaking changes the package upgrade check did not cover.
-    if (!acknowledgeBreakingChanges) {
-      const packagePolicies =
-        (await packagePolicyService.getByIDs(savedObjectsClient, policyIdsToUpgrade.items, {
-          ignoreMissing: true,
-        })) ?? [];
-      await assertPackagePoliciesUpgradeAcknowledged(packagePolicies);
-    }
-
     // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
     // the public legacy policy APIs, not this system path. Same engine the agentless API uses, and
     // the periodic deployment-sync task reconciles the workload by revision.

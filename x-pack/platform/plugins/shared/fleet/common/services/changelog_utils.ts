@@ -47,7 +47,20 @@ export const parseYamlChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsedChangelog: Changelog = changelogText ? (parse(changelogText) as Changelog) : [];
+  // A malformed changelog must not break the callers: it is treated as empty, and entries without
+  // a valid version are ignored.
+  let parsed: unknown = [];
+  try {
+    parsed = changelogText ? parse(changelogText) : [];
+  } catch (error) {
+    return [];
+  }
+  const parsedChangelog: Changelog = Array.isArray(parsed)
+    ? parsed.filter(
+        (entry): entry is ChangelogEntry =>
+          typeof entry?.version === 'string' && semverValid(entry.version) !== null
+      )
+    : [];
 
   if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 

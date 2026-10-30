@@ -11,10 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../../services';
 import { packagePolicyService } from '../../services/package_policy';
-import {
-  assertPackagePoliciesUpgradeAcknowledged,
-  installPackage,
-} from '../../services/epm/packages';
+import { installPackage } from '../../services/epm/packages';
 import { PackageBreakingChangesNotAcknowledgedError } from '../../errors';
 
 import { _runBulkUpgradeTask } from './run_bulk_upgrade';
@@ -29,8 +26,6 @@ describe('Bulk upgrade task', () => {
 
     jest.mocked(installPackage).mockReset();
     jest.mocked(packagePolicyService.listIds).mockReset();
-    jest.mocked(packagePolicyService.bulkUpgrade).mockReset();
-    jest.mocked(assertPackagePoliciesUpgradeAcknowledged).mockReset();
     jest.mocked(installPackage).mockImplementation(async (params) => {
       if (!('pkgkey' in params)) {
         throw new Error('Invalid call to installPackage');
@@ -174,52 +169,6 @@ describe('Bulk upgrade task', () => {
         expect.anything(),
         expect.objectContaining({ kuery: expect.stringContaining('test_valid') })
       );
-    });
-
-    it('should not upgrade package policies whose upgrade has unacknowledged breaking changes', async () => {
-      jest.mocked(packagePolicyService.getByIDs).mockResolvedValue([{ id: 'id1' }] as any);
-      jest
-        .mocked(assertPackagePoliciesUpgradeAcknowledged)
-        .mockRejectedValueOnce(
-          new PackageBreakingChangesNotAcknowledgedError('Package policy id1: breaking', [])
-        );
-
-      const res = await _runBulkUpgradeTask({
-        signal: new AbortController().signal,
-        logger: loggingSystemMock.createLogger(),
-        taskParams: {
-          type: 'bulk_upgrade',
-          packages: [{ name: 'test_valid' }],
-          upgradePackagePolicies: true,
-        },
-        request: {} as KibanaRequest,
-      });
-
-      expect(res).toEqual([
-        {
-          name: 'test_valid',
-          success: false,
-          error: { message: 'Package policy id1: breaking' },
-        },
-      ]);
-      expect(packagePolicyService.bulkUpgrade).not.toHaveBeenCalled();
-    });
-
-    it('should not check package policies breaking changes when acknowledged', async () => {
-      await _runBulkUpgradeTask({
-        signal: new AbortController().signal,
-        logger: loggingSystemMock.createLogger(),
-        taskParams: {
-          type: 'bulk_upgrade',
-          packages: [{ name: 'test_valid' }],
-          upgradePackagePolicies: true,
-          acknowledgeBreakingChanges: true,
-        },
-        request: {} as KibanaRequest,
-      });
-
-      expect(assertPackagePoliciesUpgradeAcknowledged).not.toHaveBeenCalled();
-      expect(packagePolicyService.bulkUpgrade).toHaveBeenCalled();
     });
 
     it('should not continue to upgrade packages when task is cancelled', async () => {

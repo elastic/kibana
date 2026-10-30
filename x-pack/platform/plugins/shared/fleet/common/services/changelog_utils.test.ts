@@ -123,6 +123,25 @@ describe('parseYamlChangelog', () => {
   it('should return empty array if changelog text is null', () => {
     expect(parseYamlChangelog(parse, null, `2.4.0`, `2.2.0`)).toEqual([]);
   });
+
+  it('should return empty array if changelog text is not valid YAML', () => {
+    expect(parseYamlChangelog(parse, 'foo: [bar', `2.4.0`, `2.2.0`)).toEqual([]);
+  });
+
+  it('should return empty array if changelog is not a list', () => {
+    expect(parseYamlChangelog(parse, 'foo: bar', `2.4.0`, `2.2.0`)).toEqual([]);
+  });
+
+  it('should ignore entries without a valid version', () => {
+    expect(
+      parseYamlChangelog(
+        parse,
+        `${changelogText}\n- foo\n- version: invalid\n  changes: []`,
+        `2.4.0`,
+        `2.3.0`
+      ).map(({ version }) => version)
+    ).toEqual(['2.4.0', '2.3.0']);
+  });
 });
 
 describe('getBreakingChangesInRange', () => {

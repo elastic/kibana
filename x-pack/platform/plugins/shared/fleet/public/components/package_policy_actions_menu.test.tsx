@@ -21,9 +21,6 @@ import {
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../services';
 
-import { useChangelog } from '../applications/integrations/sections/epm/screens/detail/hooks';
-import { ChangeType } from '../../common/services';
-
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
 jest.mock('../hooks', () => {
@@ -59,10 +56,6 @@ jest.mock('../hooks', () => {
   };
 });
 jest.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
-jest.mock('../applications/integrations/sections/epm/screens/detail/hooks', () => ({
-  ...jest.requireActual('../applications/integrations/sections/epm/screens/detail/hooks'),
-  useChangelog: jest.fn(),
-}));
 jest.mock(
   '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status',
   () => ({
@@ -217,12 +210,6 @@ describe('PackagePolicyActionsMenu', () => {
   describe('agentless upgrade (disableAgentlessLegacyAPI enabled)', () => {
     beforeEach(() => {
       jest.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
-      jest.mocked(useChangelog).mockReturnValue({
-        changelog: [],
-        breakingChanges: null,
-        error: null,
-        isLoading: false,
-      });
       // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
       jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
         ...allowedExperimentalValues,
@@ -259,66 +246,9 @@ describe('PackagePolicyActionsMenu', () => {
       });
 
       await waitFor(() => {
-        expect(sendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['some-uuid2'], {
-          acknowledgeBreakingChanges: false,
-        });
+        expect(sendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['some-uuid2']);
       });
       expect(onUpgraded).toHaveBeenCalledTimes(1);
-    });
-
-    it('requires acknowledging the breaking changes of the upgrade before confirming', async () => {
-      jest.mocked(useChangelog).mockReturnValue({
-        changelog: [],
-        breakingChanges: [
-          {
-            version: '2.0.0',
-            changes: [
-              {
-                description: 'Removed the foo input.',
-                link: 'https://github.com/elastic/integrations/pull/1',
-                type: ChangeType.BreakingChange,
-              },
-            ],
-          },
-        ],
-        error: null,
-        isLoading: false,
-      });
-      jest
-        .mocked(sendBulkUpgradeAgentlessPolicies)
-        .mockResolvedValue([
-          { id: 'some-uuid2', name: 'mock-package-policy', success: true },
-        ] as any);
-      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
-      const packagePolicy = createMockPackagePolicy({
-        hasUpgrade: true,
-        supports_agentless: true,
-        package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
-        upgradeVersion: '2.0.0',
-      });
-      const { utils } = renderMenu({ agentPolicies, packagePolicy });
-
-      await act(async () => {
-        fireEvent.click(await utils.findByTestId('PackagePolicyActionsUpgradeItem'));
-      });
-
-      expect(await utils.findByTestId('agentlessUpgradeBreakingChangesCallout')).toHaveTextContent(
-        '2.0.0: Removed the foo input.'
-      );
-      expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
-
-      await act(async () => {
-        fireEvent.click(utils.getByTestId('agentlessUpgradeBreakingChangesCheckbox'));
-      });
-      await act(async () => {
-        fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
-      });
-
-      await waitFor(() => {
-        expect(sendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['some-uuid2'], {
-          acknowledgeBreakingChanges: true,
-        });
-      });
     });
 
     it('keeps the legacy upgrade link for a non-agentless policy', async () => {
