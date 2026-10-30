@@ -15,8 +15,15 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import type { SLODefinition } from '../domain/models';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -35,6 +42,7 @@ describe('CreateSLO', () => {
   let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockTelemetry: jest.Mocked<SloTelemetryReporter>;
   let createSLO: CreateSLO;
 
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
@@ -45,6 +53,7 @@ describe('CreateSLO', () => {
     mockLogger = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
+    mockTelemetry = createSloTelemetryReporterMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
       mockScopedClusterClient,
@@ -55,7 +64,8 @@ describe('CreateSLO', () => {
       mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath,
-      'some-user-id'
+      'some-user-id',
+      mockTelemetry
     );
   });
 
@@ -70,6 +80,35 @@ describe('CreateSLO', () => {
         page: 0,
         total: 0,
       });
+    });
+
+    it('reports the slo_created telemetry event', async () => {
+      const sloParams = createSLOParams({
+        id: 'unique-id',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+
+      await createSLO.execute(sloParams);
+
+      expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_created',
+          expect.objectContaining({
+            slo_id: hashSloId('unique-id'),
+            indicator_type: 'sli.apm.transactionErrorRate',
+            budgeting_method: sloParams.budgetingMethod,
+          }),
+        ],
+      ]);
+    });
+
+    it('does not report telemetry when inspecting', async () => {
+      await createSLO.inspect(
+        createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() })
+      );
+
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
     });
 
     it('calls the expected services', async () => {
@@ -205,6 +244,10 @@ describe('CreateSLO', () => {
   });
 
   describe('unhappy path', () => {
+    afterEach(() => {
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
+    });
+
     beforeEach(() => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
@@ -242,6 +285,10 @@ describe('CreateSLO', () => {
 
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
       expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
+        { ignore: [404] }
+      );
     });
 
     it('rollbacks completed operations when summary transform install fails', async () => {

@@ -36,7 +36,7 @@ import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
-import { sanitizeToolSchemasForVertex } from './sanitize_tool_schemas_for_vertex';
+import { sanitizeToolSchemasForVertex } from '../../utils/sanitize_tool_schemas_for_vertex';
 import type { InferenceEndpointRequest } from './types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {

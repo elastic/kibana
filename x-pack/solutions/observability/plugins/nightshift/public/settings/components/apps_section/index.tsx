@@ -330,7 +330,7 @@ function SlackCardFooter({
         </EuiFlexItem>
         {showChannels && (
           <EuiFlexItem grow={false} css={{ width: '100%' }}>
-            <SlackConnectionBindings canEdit={canEdit} />
+            <SlackConnectionBindings canEdit={canEdit} onReconnect={onConnect} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -345,6 +345,14 @@ function SlackCardFooter({
           <KbnDangerCallout announceOnMount size="s" title={error} />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued" data-test-subj="streamsSlackAppPrivateChannelsNote">
+          {i18n.translate('xpack.nightshift.settings.apps.slackPrivateChannelsNote', {
+            defaultMessage:
+              'To use private channels, allow private channel access when authorizing Slack. It applies to the whole workspace, including every Elastic deployment connected to it.',
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"

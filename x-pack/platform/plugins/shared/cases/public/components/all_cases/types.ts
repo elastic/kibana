@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import type { FilterOptions, QueryParams, SortOrder } from '../../../common/ui';
-import type { AllCasesURLQueryParamsRt } from './schema';
+import type { AllCasesURLQueryParamsSchema } from './schema';
 
 export interface FilterConfigState {
   key: string;
@@ -69,4 +69,4 @@ export interface AllCasesURLState {
   queryParams: Partial<QueryParams>;
 }
 
-export type AllCasesURLQueryParams = rt.TypeOf<typeof AllCasesURLQueryParamsRt>;
+export type AllCasesURLQueryParams = z.infer<typeof AllCasesURLQueryParamsSchema>;
