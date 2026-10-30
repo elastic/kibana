@@ -6,6 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator, TaskOutput } from '@kbn/evals';
+import { relevantSkillsHookId } from '@kbn/agent-builder-common';
 import type { BenchmarkExample } from '../evals/skill_selection/benchmark_dataset';
 
 // Raw step shape returned by the agent-builder converse API.
@@ -127,6 +128,127 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
     };
   },
 });
+
+interface SurfacedSkill {
+  id?: string;
+  name?: string;
+  path?: string;
+}
+
+interface RelevantSkillsHookStep extends Record<string, unknown> {
+  type: 'injected_context';
+  hook_id: typeof relevantSkillsHookId;
+  data?: { skills?: SurfacedSkill[] };
+}
+
+interface ImplicitRelevantSkillsStep extends Record<string, unknown> {
+  type: 'relevant_skills';
+  source: 'implicit';
+  skills?: SurfacedSkill[];
+}
+
+const isRelevantSkillsHookStep = (step: Record<string, unknown>): step is RelevantSkillsHookStep =>
+  step.type === 'injected_context' && step.hook_id === relevantSkillsHookId;
+
+const isImplicitRelevantSkillsStep = (
+  step: Record<string, unknown>
+): step is ImplicitRelevantSkillsStep =>
+  step.type === 'relevant_skills' && step.source === 'implicit';
+
+/**
+ * The skills the implicit pre-selection surfaced, or `undefined` when it produced no step. Today
+ * the selection is a cycle hook and lands as an `injected_context` step stamped with its hook id,
+ * with the skills in `data`; conversations recorded before that carry a `relevant_skills` step.
+ */
+const getImplicitPreSelection = (
+  steps: Array<Record<string, unknown>>
+): SurfacedSkill[] | undefined => {
+  const hookStep = steps.find(isRelevantSkillsHookStep);
+  if (hookStep) {
+    return hookStep.data?.skills ?? [];
+  }
+  const legacyStep = steps.find(isImplicitRelevantSkillsStep);
+  return legacyStep ? legacyStep.skills ?? [] : undefined;
+};
+
+/**
+ * Evaluates whether the implicit `<relevant_skills>` pre-selection surfaced the correct skill
+ * before the agent acts.
+ *
+ * Reads the pre-selection step from the output steps (see {@link getImplicitPreSelection}): the
+ * fast-model call that runs at the start of each round when the `relevantSkills` experiment flag
+ * is on. Returns `score: null / label: 'SKIP'` when the step is absent — meaning the feature is
+ * disabled or the skill list was below the threshold that bypasses the model call.
+ *
+ * Ground truth keys (same as {@link skillSelectionEvaluator}):
+ * - `expectedSkill` — must appear in the pre-selected list. Score 1 if found.
+ * - `shouldNotActivateSkill` — must NOT appear in the pre-selected list. Score 1 if absent.
+ */
+export const preSelectionEvaluator: Evaluator = {
+  name: 'Pre-Selection Recall',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
+    const { expectedSkill, shouldNotActivateSkill } =
+      (expected as BenchmarkExample['output']) ?? {};
+
+    if (!expectedSkill && !shouldNotActivateSkill) {
+      return {
+        score: 1,
+        label: 'SKIP',
+        explanation: 'No skill routing assertion in expected output',
+      };
+    }
+
+    const steps = (output as { steps?: Array<Record<string, unknown>> })?.steps ?? [];
+    const surfaced = getImplicitPreSelection(steps);
+
+    if (!surfaced) {
+      return {
+        score: null,
+        label: 'SKIP',
+        explanation:
+          'No implicit pre-selection step — feature disabled, or skill list below threshold',
+      };
+    }
+
+    const surfacedNames = surfaced.flatMap((s) =>
+      [s.id, s.name, s.path].filter((v): v is string => typeof v === 'string')
+    );
+    const surfacedIds = surfaced.map((s) => s.id).filter(Boolean);
+
+    if (expectedSkill) {
+      const found = skillIsPresent(expectedSkill, surfacedNames);
+      return {
+        score: found ? 1 : 0,
+        label: found ? 'PASS' : 'FAIL',
+        explanation: found
+          ? `Skill '${expectedSkill}' was surfaced in pre-selection. Skills shown: ${surfacedIds.join(
+              ', '
+            )}`
+          : `Skill '${expectedSkill}' was NOT surfaced in pre-selection. Skills shown: ${
+              surfacedIds.join(', ') || 'none'
+            }`,
+        metadata: { expectedSkill, surfacedSkillIds: surfacedIds, found },
+      };
+    }
+
+    const activated = skillIsPresent(shouldNotActivateSkill!, surfacedNames);
+    const passed = !activated;
+    return {
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: passed
+        ? `Skill '${shouldNotActivateSkill}' correctly absent from pre-selection. Skills shown: ${
+            surfacedIds.join(', ') || 'none'
+          }`
+        : `Skill '${shouldNotActivateSkill}' incorrectly surfaced in pre-selection. Skills shown: ${surfacedIds.join(
+            ', '
+          )}`,
+      metadata: { shouldNotActivateSkill, surfacedSkillIds: surfacedIds, activated },
+    };
+  },
+};
 
 /**
  * A single generic evaluator that reads routing assertions from example ground truth

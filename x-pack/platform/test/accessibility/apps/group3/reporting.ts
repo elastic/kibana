@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('Reporting app', async () => {
         await common.navigateToApp('reporting');
-        return testSubjects.exists(REPORT_TABLE_ID, { timeout: 10 * 1000 });
+        return testSubjects.exists(REPORT_TABLE_ID);
       });
     });
 

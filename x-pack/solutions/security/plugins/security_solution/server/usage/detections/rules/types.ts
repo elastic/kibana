@@ -123,6 +123,7 @@ export interface RuleAdoption {
   detection_rule_status: EventLogStatusMetric;
   elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
   elastic_detection_rule_customization_status: RuleCustomizationCounts;
+  elastic_detection_rule_customization_status_missing_base_version: RuleCustomizationCounts;
   elastic_detection_rule_deprecated_status: DeprecatedRulesSummary;
   ai_created_rules: AiCreatedRulesUsage;
   spaces_usage: SpacesUsage;
@@ -137,6 +138,7 @@ export interface RuleMetric {
   enabled: boolean;
   elastic_rule: boolean;
   is_customized: boolean;
+  has_base_version: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;

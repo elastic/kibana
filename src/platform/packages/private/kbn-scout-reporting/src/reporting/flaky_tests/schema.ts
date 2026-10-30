@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Bump whenever a change to the schemas below would break a consumer reading a previously
  * written report.
  */
-export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
+export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 2;
 
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
@@ -37,6 +37,44 @@ export const FlakyTestSampleFailureSchema = z.object({
   timestamp: z.coerce.date(),
 });
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
+
+/** Builds with one error on one pipeline. */
+export const FlakyTestErrorPipelineSchema = lazySchema(() =>
+  z.object({
+    pipeline: z.string(),
+    buildsCount: z.int(),
+    /** Buildkite build ids, sorted; lets a consumer count builds across several tests. */
+    buildIds: z.array(z.string()),
+  })
+);
+
+/**
+ * One distinct error of a test over the window, across every pipeline and branch, not just the
+ * report scope. Errors are told apart by the first three lines of their message with ids, URLs
+ * and numbers normalised away, so a diff that differs only in a count is one error.
+ */
+export const FlakyTestErrorSchema = lazySchema(() =>
+  z.object({
+    /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
+    key: z.string(),
+    /** The newest failure's message, in full. */
+    message: z.string(),
+    /** Distinct builds with this error; retries in one build count once. */
+    buildsCount: z.int(),
+    /** Most builds first. */
+    byPipeline: z.array(FlakyTestErrorPipelineSchema),
+    /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
+    branches: z.array(z.string()),
+    /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
+    targets: z.array(z.string()),
+    firstFailedAt: z.coerce.date(),
+    lastFailedAt: z.coerce.date(),
+    /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
+    lastFailedBuildUrl: z.optional(z.string()),
+    lastFailedJobId: z.optional(z.string()),
+  })
+);
+export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
 
 /**
  * Most recent run of the test on one branch within the report window, regardless of result.
@@ -73,12 +111,15 @@ export const FlakyTestBranchStatsSchema = z.object({
   /** Most recent execution, i.e. run that was not skipped; absent when every run was skipped. */
   latestExecutionAt: z.optional(z.coerce.date()),
   latestRun: z.optional(FlakyTestBranchLatestRunSchema),
+  /** Every setup (pipeline, config, target) that ran the test on this branch skipped it last. */
+  skipped: z.optional(z.boolean()),
 });
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
 
 /**
- * Build counts of one test on one Scout test target, any branch. Only Scout (Playwright) runs
- * record a target; Jest, FTR and Cypress runs report the mode `unknown`.
+ * Build counts of one test on one Scout test target, any branch. Scout (Playwright) and FTR runs
+ * record a target; Jest and Cypress runs, and FTR runs whose target can't be resolved, report
+ * the mode `unknown`.
  */
 export const FlakyTestTargetStatsSchema = z.object({
   /** `<arch>-<domain>`, e.g. `stateful-classic` or `serverless-security_complete`. */
@@ -163,6 +204,11 @@ export const FlakyTestEntrySchema = z.object({
   /** Absent only if the test emitted no execution events in the window (should not happen). */
   latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
+  /**
+   * The test's distinct errors over the window, most failures first. Defaults so that reports
+   * written before the field existed still parse.
+   */
+  errors: z.array(FlakyTestErrorSchema).default([]),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 

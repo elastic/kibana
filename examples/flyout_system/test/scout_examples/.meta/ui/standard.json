@@ -1,5 +1,5 @@
 {
-  "sha1": "2ec6f231e3a361dc4a7ffa8d84113f145f82a488",
+  "sha1": "44e8877c54a92ef2f3b4738f70e4f43298feb352",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 41
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 13
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 13
       }
     },
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 61,
+        "line": 63,
         "column": 11
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 74,
+        "line": 76,
         "column": 28
       }
     },
@@ -260,7 +260,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 74,
+        "line": 76,
         "column": 28
       }
     },
@@ -273,7 +273,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 90,
+        "line": 92,
         "column": 15
       }
     },
@@ -286,7 +286,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 101,
+        "line": 103,
         "column": 30
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 101,
+        "line": 103,
         "column": 30
       }
     },
@@ -312,7 +312,7 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 122,
+        "line": 124,
         "column": 25
       }
     },
@@ -325,8 +325,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 154,
-        "column": 7
+        "line": 160,
+        "column": 29
       }
     },
     {
@@ -338,8 +338,8 @@
       ],
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/full_surface_a11y.spec.ts",
-        "line": 154,
-        "column": 7
+        "line": 160,
+        "column": 29
       }
     },
     {
@@ -586,6 +586,84 @@
       "location": {
         "file": "examples/flyout_system/test/scout_examples/ui/tests/header_collapse_a11y.spec.ts",
         "line": 190,
+        "column": 9
+      }
+    },
+    {
+      "id": "c32ff464cbbe5a6-b4e9c74c2c4fdea",
+      "title": "Flyout System - push flyouts elastic/eui#9788: closing the older of two standalone push flyouts first leaves no padding behind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_flyouts.spec.ts",
+        "line": 30,
+        "column": 26
+      }
+    },
+    {
+      "id": "c32ff464cbbe5a6-494323f92ebf1c7",
+      "title": "Flyout System - push flyouts elastic/eui#9788: closing a standalone push flyout keeps the page pushed for an open system push flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_flyouts.spec.ts",
+        "line": 44,
+        "column": 11
+      }
+    },
+    {
+      "id": "c32ff464cbbe5a6-892b9956b69158e",
+      "title": "Flyout System - push flyouts elastic/eui#9788: closing a system overlay keeps the padding of a standalone push flyout under it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_flyouts.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "c32ff464cbbe5a6-8c9c9f4801fd2dc",
+      "title": "Flyout System - push flyouts elastic/eui#9788: the padding follows the widest push flyout, including one resized in the background",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_flyouts.spec.ts",
+        "line": 89,
+        "column": 11
+      }
+    },
+    {
+      "id": "c32ff464cbbe5a6-70abca05f7f3881",
+      "title": "Flyout System - push flyouts elastic/eui#10061: closing the older of two system push flyouts keeps the newer one open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_flyouts.spec.ts",
+        "line": 116,
+        "column": 24
+      }
+    },
+    {
+      "id": "c32ff464cbbe5a6-a635d593399e517",
+      "title": "Flyout System - push flyouts elastic/eui#10075: a second system push flyout opens at the width the first one was resized to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/flyout_system/test/scout_examples/ui/tests/push_flyouts.spec.ts",
+        "line": 143,
         "column": 9
       }
     },

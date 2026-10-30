@@ -6,7 +6,7 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName } from '../constants';
+import { ALERTZERO_APP_ID, SecurityPageName } from '../constants';
 import { i18nStrings } from '../i18n_strings';
 import { alertZeroLink } from '../links';
 
@@ -19,10 +19,10 @@ import { alertZeroLink } from '../links';
  */
 
 /**
- * The AlertZero nodes that sit directly in the solution navigation body, in display order.
+ * The AlertZero nodes that open the solution navigation body, in display order.
  *
  * Returned as a list rather than a single node because AlertZero contributes several top-level entries that
- * interleave with platform ones (Discover sits between this group and Alerts).
+ * interleave with platform ones (Agents sits between this group and Watches when Agents is on).
  */
 export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   {
@@ -31,22 +31,14 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
     title: i18nStrings.alertZero.title,
     icon: 'sun',
   },
-];
-
-/** AlertZero nodes that follow the platform Discover / Dashboards entries. */
-export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
-  {
-    link: alertZeroLink(SecurityPageName.alerts),
-    icon: 'bell',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.attacks),
-    icon: 'warning',
-  },
   {
     link: alertZeroLink(SecurityPageName.alertZeroEscalations),
     icon: 'flag',
   },
+];
+
+/** AlertZero nodes that follow the Agents entry, or the Escalations entry without Agents. */
+export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep
     // links so they stay searchable, but they are not children here — the chrome sub-panel is not the
@@ -55,12 +47,13 @@ export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
     link: alertZeroLink(SecurityPageName.alertZeroWatches),
     icon: 'eye',
   },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroThreatHunt),
-    icon: 'inspect',
-  },
-  {
-    link: alertZeroLink(SecurityPageName.alertZeroStreams),
-    icon: 'aggregate',
-  },
 ];
+
+/**
+ * Whether the AlertZero entries are shown in the solution navigation. The `securitySolution:enableAlertZero`
+ * setting alone is not enough: the app is also hidden when the deployment kill switch is off or the user has no
+ * access, so read its registration from the core `applications$` map instead.
+ */
+export const isAlertZeroNavVisible = (
+  applications: ReadonlyMap<string, { visibleIn?: readonly string[] }>
+): boolean => applications.get(ALERTZERO_APP_ID)?.visibleIn?.includes('projectSideNav') === true;

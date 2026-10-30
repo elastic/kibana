@@ -8,7 +8,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RawRule, IntervalSchedule } from '../../../../types';
+import type { RawRule, IntervalSchedule, RuleTypeParams } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -22,6 +22,7 @@ import {
   scheduleTask,
   bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
+import { authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -112,6 +113,13 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   }
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+  // Re-authorize persisted params before activating them: they may have bypassed
+  // the authorizer entirely (e.g. via Saved Objects import).
+  await authorizeRuleTypeParams(attributes.params as RuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
+
   const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
   const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
 
@@ -141,6 +149,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
+    const profileUid = await context.getProfileUid();
     const now = new Date();
     const nowIso = now.toISOString();
 
@@ -151,6 +160,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
+          profileUid,
           shouldUpdateApiKey: true,
           apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
         })
@@ -165,6 +175,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: nowIso,
       lastEnabledAt: nowIso,
       executionStatus: {
@@ -217,6 +228,17 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       }
 
       throw e;
+    }
+
+    // A rule with only a UIAM key, such as one created by a UIAM service account, gets a new key
+    // set above, so the UIAM key it held is no longer used. The key may also be a stale one that
+    // was already invalidated, and invalidating it again is harmless.
+    if (!existingApiKey && attributes.uiamApiKey && !attributes.apiKeyCreatedByUser) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: [attributes.uiamApiKey] },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
     }
   }
 

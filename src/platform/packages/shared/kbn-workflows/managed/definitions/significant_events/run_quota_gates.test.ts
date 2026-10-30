@@ -37,7 +37,9 @@ interface WorkflowStep {
 interface WorkflowDefinition {
   triggers: Array<{
     type: string;
-    inputs?: Array<{ name: string; type: string }>;
+    inputs?:
+      | Array<{ name: string; type: string }>
+      | { properties?: Record<string, { type: string }> };
   }>;
   steps: WorkflowStep[];
 }
@@ -71,7 +73,13 @@ const findInput = (
   name: string
 ): { name: string; type: string } | undefined =>
   definition.triggers
-    .flatMap((trigger) => trigger.inputs ?? [])
+    .flatMap((trigger) => {
+      if (Array.isArray(trigger.inputs)) {
+        return trigger.inputs;
+      }
+      const input = trigger.inputs?.properties?.[name];
+      return input ? [{ name, type: input.type }] : [];
+    })
     .find((input) => input.name === name);
 
 const stepIndex = (definition: WorkflowDefinition, name: string): number =>
@@ -180,7 +188,12 @@ describe('Significant Events run quota workflow contracts', () => {
         with: {
           processedCount: 0,
           hasWork: false,
-          suppressedRuleCount: 0,
+          skippedCount: 0,
+          heldBackCount: 0,
+          needsAgentCount: 0,
+          classifierReasonCounts: '{}',
+          classifierProbeStatusCounts: '{}',
+          classifierFailed: false,
         },
       }),
     ]);
@@ -189,7 +202,7 @@ describe('Significant Events run quota workflow contracts', () => {
         type: 'workflow.output',
         status: 'cancelled',
         with: {
-          streamName: '${{ inputs.streamName }}',
+          sourceId: '${{ inputs.sourceId }}',
           featuresSkipped: true,
           featuresConnectorUsed: '',
           discoveredFeatures: [],
@@ -207,8 +220,7 @@ describe('Significant Events run quota workflow contracts', () => {
   it('starts investigations after eligibility, event resolution, and deduplication', () => {
     const orderedSteps = [
       'gate_investigatable_severity',
-      'resolve_open_event',
-      'check_prior_investigation',
+      'resolve_active_event',
       'guard_resolved_event',
       'guard_missing_investigation',
       'trigger_investigation',

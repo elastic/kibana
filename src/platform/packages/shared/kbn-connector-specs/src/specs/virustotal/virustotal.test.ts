@@ -844,4 +844,33 @@ describe('VirusTotalConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('submitFile file size', () => {
+    const maxBytes = 32 * 1024 * 1024;
+    const isValid = (bytes: number) =>
+      VirusTotalConnector.actions.submitFile.input.safeParse({
+        file: Buffer.alloc(bytes).toString('base64'),
+      }).success;
+
+    it('is bounded at 32 MB once decoded', () => {
+      expect(isValid(maxBytes)).toBe(true);
+      expect(isValid(maxBytes + 1)).toBe(false);
+    });
+  });
+
+  describe('URL length bounds', () => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [8192, true],
+      [8193, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      const { scanUrl, getAnalysisResults } = VirusTotalConnector.actions;
+      expect(scanUrl.input.safeParse({ url: url(length) }).success).toBe(expected);
+      expect(
+        getAnalysisResults.input.safeParse({ id: url(length), resourceType: 'url' }).success
+      ).toBe(expected);
+    });
+  });
 });

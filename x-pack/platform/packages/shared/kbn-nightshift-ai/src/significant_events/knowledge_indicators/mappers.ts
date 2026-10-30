@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { Feature, QueryLink } from '@kbn/significant-events-schema';
+import type { AggregatedFeature, QueryLink } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorFeature, KnowledgeIndicatorQuery } from './types';
 
-export const featureToKnowledgeIndicatorFeature = (feature: Feature): KnowledgeIndicatorFeature => {
+export const featureToKnowledgeIndicatorFeature = (
+  feature: AggregatedFeature
+): KnowledgeIndicatorFeature => {
   return {
     kind: 'feature',
     feature,
@@ -18,7 +20,7 @@ export const featureToKnowledgeIndicatorFeature = (feature: Feature): KnowledgeI
 export const queryLinkToKnowledgeIndicatorQuery = (
   queryLink: QueryLink
 ): KnowledgeIndicatorQuery => {
-  const { query, rule_backed, rule_id, stream_name } = queryLink;
+  const { query, rule_backed, rule_id, source_id } = queryLink;
 
   return {
     kind: 'query',
@@ -27,6 +29,6 @@ export const queryLinkToKnowledgeIndicatorQuery = (
       backed: rule_backed,
       id: rule_id,
     },
-    stream_name,
+    source_id,
   };
 };

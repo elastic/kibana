@@ -26,8 +26,8 @@ import type {
   IngestHubStartDependencies,
   IngestFlow,
 } from './types';
-import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
-import { registerOnboardingApp } from './onboarding';
+import { INGEST_HUB_ENABLED_FLAG } from '../common/core/constants';
+import { registerOnboardingApp } from './onboarding/core';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))

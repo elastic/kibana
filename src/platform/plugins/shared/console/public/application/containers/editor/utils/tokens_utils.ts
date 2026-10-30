@@ -29,7 +29,8 @@ export const parseLine = (line: string, parseUrlIntoTokens: boolean = true): Par
   const firstWhitespaceIndex = line.indexOf(' ');
   if (firstWhitespaceIndex < 0) {
     // there is no url, only method
-    return { method: line, url: '', urlPathTokens: [], urlParamsTokens: [] };
+    // Endpoint definitions are keyed by upper-case method, so `get` must match like `GET`.
+    return { method: line.toUpperCase(), url: '', urlPathTokens: [], urlParamsTokens: [] };
   }
   // 1st part is the method
   const method = line.slice(0, firstWhitespaceIndex).trim().toUpperCase();

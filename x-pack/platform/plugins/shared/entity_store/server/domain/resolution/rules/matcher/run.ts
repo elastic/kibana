@@ -10,16 +10,16 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Logger } from '@kbn/logging';
 import { getErrorMessage } from '../../../../../common';
 import { ENTITY_ID_FIELD } from '../../../../../common/domain/definitions/common_fields';
+import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/user_entity_constants';
 import { getFieldValue } from '../../../../../common/domain/euid/commons';
-import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
+import { executeEsqlQuery, isPartialEsqlResponse } from '../../../../infra/elasticsearch/esql';
 import { searchEntitiesByIds } from '../../../../infra/elasticsearch/resolution';
-import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import { ResolutionSearchTruncatedError } from '../../../errors';
 import type { ResolutionClient } from '../../resolution_client';
 import { selectTarget, type TargetSelectionEntity } from '../../target_selection';
 import type { MaintainerTelemetryClient } from '../../../../tasks/entity_maintainers/maintainer_telemetry_client';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
-import type { EsqlMatchSpec } from '../rule_registry';
+import type { MatcherSpec } from '../rule_registry';
 import {
   ENTITY_NAMESPACE_FIELD,
   GROUP_SIZE_CEILING,
@@ -32,13 +32,12 @@ import { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
 
 export interface RunEsqlMatcherDeps {
   state: PerRuleState;
-  namespace: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   resolutionClient: ResolutionClient;
   signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
-  spec: EsqlMatchSpec;
+  spec: MatcherSpec;
   ruleId: string;
   pageSize?: number;
   /**
@@ -47,20 +46,30 @@ export interface RunEsqlMatcherDeps {
    * documents Elasticsearch has not refreshed yet.
    */
   mutatedIds?: Set<string>;
+  index: string;
+  /** Telemetry scope value; defaults to `ruleId`. Keeps per-deployment ids out of telemetry. */
+  telemetryRuleId?: string;
 }
 
-interface MatchGroupRow {
+export interface MatchGroupRow {
   matchValue: string;
   unresolvedIds: string[];
   unresolvedNamespaces: string[];
   existingTargetIds: string[];
   unresolvedCount: number;
+  unresolvedLocalCount: number;
   groupSize: number;
 }
 
-interface FetchedEntity extends TargetSelectionEntity {
+export interface FetchedEntity extends TargetSelectionEntity {
   resolvedTo?: string;
 }
+
+export type MatchGroupVerdict =
+  | 'oversized'
+  | 'same_namespace_duplicates'
+  | 'nothing_to_link'
+  | 'candidate';
 
 interface BucketStats {
   resolutionsCreated: number;
@@ -75,6 +84,10 @@ interface BucketStats {
   failedBuckets: number;
   appliedBuckets: number;
   examinedBuckets: number;
+  oversized101To1000: number;
+  oversized1001To10000: number;
+  oversizedOver10000: number;
+  oversizedLargestGroup: number;
 }
 
 const emptyStats = (): BucketStats => ({
@@ -90,14 +103,31 @@ const emptyStats = (): BucketStats => ({
   failedBuckets: 0,
   appliedBuckets: 0,
   examinedBuckets: 0,
+  oversized101To1000: 0,
+  oversized1001To10000: 0,
+  oversizedOver10000: 0,
+  oversizedLargestGroup: 0,
 });
 
+const recordOversizedGroup = (stats: BucketStats, groupSize: number): void => {
+  stats.skippedOversizedBuckets++;
+  if (groupSize > stats.oversizedLargestGroup) {
+    stats.oversizedLargestGroup = groupSize;
+  }
+  if (groupSize <= 1000) {
+    stats.oversized101To1000++;
+  } else if (groupSize <= 10000) {
+    stats.oversized1001To10000++;
+  } else {
+    stats.oversizedOver10000++;
+  }
+};
+
 export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerRuleState> {
-  const { state, namespace, esClient, logger, resolutionClient, signal, telemetry, spec, ruleId } =
+  const { state, esClient, logger, resolutionClient, signal, telemetry, spec, ruleId, index } =
     deps;
   const pageSize = deps.pageSize ?? MATCHER_PAGE_SIZE;
   const mutatedIds = deps.mutatedIds ?? new Set<string>();
-  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
   const maxTimestamp = await readWatermarkCandidate(
     esClient,
@@ -138,6 +168,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
         resolutionClient,
         logger,
         stats,
+        spec,
         ruleId,
         mutatedIds,
       });
@@ -166,7 +197,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
   );
 
   telemetry.report({
-    scope: { kind: 'rule', value: ruleId },
+    scope: { kind: 'rule', value: deps.telemetryRuleId ?? ruleId },
     funnel: {
       scanned: stats.examinedBuckets,
       qualified: stats.appliedBuckets + skippedBuckets,
@@ -181,6 +212,11 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       { name: 'cascades_blocked', count: stats.cascadesBlocked },
       { name: 'ambiguous_skips', count: stats.skippedAmbiguousBuckets },
       { name: 'oversized_skips', count: stats.skippedOversizedBuckets },
+      { name: 'oversized_101_1000', count: stats.oversized101To1000 },
+      { name: 'oversized_1001_10000', count: stats.oversized1001To10000 },
+      { name: 'oversized_over_10000', count: stats.oversizedOver10000 },
+      // oversized_largest_group is a size (max declined groupSize), not a count of buckets.
+      { name: 'oversized_largest_group', count: stats.oversizedLargestGroup },
       { name: 'noop_skips', count: stats.skippedNoopBuckets },
       { name: 'blocked_skips', count: stats.skippedBlockedBuckets },
       { name: 'stale_overlap_skips', count: stats.skippedStaleOverlapBuckets },
@@ -211,7 +247,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
 async function readWatermarkCandidate(
   esClient: ElasticsearchClient,
   index: string,
-  spec: EsqlMatchSpec,
+  spec: MatcherSpec,
   watermark: string | null,
   signal: AbortSignal
 ): Promise<string | null> {
@@ -225,6 +261,71 @@ async function readWatermarkCandidate(
   return toTimestamp(response.values[0][maxTsIndex]);
 }
 
+// A `local` user id is `user:<user.name>@<host.id>@local`, one per user name per
+// host, so several `local` entities sharing a value are not a collision.
+function countNonLocalUnresolved(row: MatchGroupRow): {
+  entityCount: number;
+  namespaceCount: number;
+} {
+  return {
+    entityCount: row.unresolvedCount - row.unresolvedLocalCount,
+    namespaceCount: row.unresolvedNamespaces.filter(
+      (namespace) => namespace !== USER_ENTITY_NAMESPACE.Local
+    ).length,
+  };
+}
+
+/** What the engine does with a group before reading any entity: the checks that need only the row. */
+export function classifyMatchGroup(
+  row: MatchGroupRow,
+  declineSameNamespaceDuplicates: boolean
+): MatchGroupVerdict {
+  if (row.groupSize > GROUP_SIZE_CEILING) {
+    return 'oversized';
+  }
+
+  // Same-namespace duplicates are declined by default (two AD emails + one Okta
+  // must not make Okta the target). SID rules set this false: a SID names one
+  // account, so duplicates are identifier drift, not a collision. Well-known
+  // SIDs are excluded at query time so LocalSystem never reaches this path.
+  const nonLocal = countNonLocalUnresolved(row);
+  if (declineSameNamespaceDuplicates && nonLocal.namespaceCount < nonLocal.entityCount) {
+    return 'same_namespace_duplicates';
+  }
+
+  if (row.unresolvedIds.length < 2 && row.existingTargetIds.length === 0) {
+    return 'nothing_to_link';
+  }
+
+  return 'candidate';
+}
+
+/** Picks the target and aliases for a candidate group; null when no linkable entity was fetched. */
+export function planMatchGroupLink(
+  row: MatchGroupRow,
+  entities: Map<string, FetchedEntity>
+): { target: FetchedEntity; aliasIds: string[] } | null {
+  const unresolved = row.unresolvedIds
+    .map((id) => entities.get(id))
+    .filter((entity): entity is FetchedEntity => entity != null);
+  const existingTargets = row.existingTargetIds
+    .map((id) => entities.get(id))
+    .filter((entity): entity is FetchedEntity => entity != null);
+
+  // Drop mid-chain aliases: cascadeLinkEntities rejects them as a target.
+  const linkable = [...unresolved, ...existingTargets.filter((entity) => !entity.resolvedTo)];
+  const candidates = uniqueById(linkable);
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  const target = selectTarget(candidates);
+  const aliasIds = candidates
+    .map((entity) => entity.entityId)
+    .filter((id) => id !== target.entityId);
+  return { target, aliasIds };
+}
+
 async function resolveMatchGroup(
   row: MatchGroupRow,
   deps: {
@@ -233,34 +334,34 @@ async function resolveMatchGroup(
     resolutionClient: ResolutionClient;
     logger: Logger;
     stats: BucketStats;
+    spec: MatcherSpec;
     ruleId: string;
     mutatedIds: Set<string>;
   }
 ): Promise<void> {
   const { logger, stats, ruleId, resolutionClient, mutatedIds } = deps;
+  const declineSameNamespaceDuplicates = deps.spec.declineSameNamespaceDuplicates !== false;
   stats.examinedBuckets++;
 
-  if (row.groupSize > GROUP_SIZE_CEILING) {
-    stats.skippedOversizedBuckets++;
+  const verdict = classifyMatchGroup(row, declineSameNamespaceDuplicates);
+  if (verdict === 'oversized') {
+    recordOversizedGroup(stats, row.groupSize);
     logger.warn(
       `${ruleId}: declining oversized bucket '${row.matchValue}' with ${row.groupSize} entities (ceiling ${GROUP_SIZE_CEILING})`
     );
     return;
   }
 
-  if (row.unresolvedNamespaces.length < row.unresolvedCount) {
-    // Two unresolved entities in one namespace (including two `local` hosts
-    // sharing an email) decline the whole group, including a clear IDP pair
-    // sitting next to them. Decline-all is intentional: dropping the doubled
-    // namespace can promote a worse target (two ADs + one Okta → Okta wins).
+  if (verdict === 'same_namespace_duplicates') {
+    const nonLocal = countNonLocalUnresolved(row);
     stats.skippedAmbiguousBuckets++;
     logger.warn(
-      `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
+      `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${nonLocal.entityCount} unresolved entities across ${nonLocal.namespaceCount} namespaces (${row.unresolvedLocalCount} local not counted)`
     );
     return;
   }
 
-  if (row.unresolvedIds.length < 2 && row.existingTargetIds.length === 0) {
+  if (verdict === 'nothing_to_link') {
     stats.skippedNoopBuckets++;
     return;
   }
@@ -277,17 +378,8 @@ async function resolveMatchGroup(
   try {
     const idsToFetch = [...new Set(groupIds)];
     const entities = await fetchEntities(deps.esClient, deps.index, idsToFetch);
-    const unresolved = row.unresolvedIds
-      .map((id) => entities.get(id))
-      .filter((entity): entity is FetchedEntity => entity != null);
-    const existingTargets = row.existingTargetIds
-      .map((id) => entities.get(id))
-      .filter((entity): entity is FetchedEntity => entity != null);
-
-    // Drop mid-chain aliases: cascadeLinkEntities rejects them as a target.
-    const linkable = [...unresolved, ...existingTargets.filter((entity) => !entity.resolvedTo)];
-    const candidates = uniqueById(linkable);
-    if (candidates.length === 0) {
+    const plan = planMatchGroupLink(row, entities);
+    if (!plan) {
       stats.skippedNoopBuckets++;
       logger.warn(
         `${ruleId}: expected entities for bucket '${row.matchValue}' but Elasticsearch returned none`
@@ -295,11 +387,7 @@ async function resolveMatchGroup(
       return;
     }
 
-    const target = selectTarget(candidates);
-    const aliasIds = candidates
-      .map((entity) => entity.entityId)
-      .filter((id) => id !== target.entityId);
-
+    const { target, aliasIds } = plan;
     if (aliasIds.length === 0) {
       stats.skippedNoopBuckets++;
       logger.debug(`${ruleId}: no-op bucket '${row.matchValue}' (already resolved)`);
@@ -336,7 +424,7 @@ async function resolveMatchGroup(
   }
 }
 
-async function fetchEntities(
+export async function fetchEntities(
   esClient: ElasticsearchClient,
   index: string,
   entityIds: string[]
@@ -369,12 +457,13 @@ async function fetchEntities(
   return entities;
 }
 
-function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow[] {
+export function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow[] {
   const matchValueIdx = requireColumn(response, MATCH_GROUP_COLUMNS.matchValue);
   const idsIdx = requireColumn(response, MATCH_GROUP_COLUMNS.ids);
   const nsIdx = requireColumn(response, MATCH_GROUP_COLUMNS.unresolvedNs);
   const targetsIdx = requireColumn(response, MATCH_GROUP_COLUMNS.existingTargets);
   const unresolvedNIdx = requireColumn(response, MATCH_GROUP_COLUMNS.unresolvedN);
+  const unresolvedLocalNIdx = requireColumn(response, MATCH_GROUP_COLUMNS.unresolvedLocalN);
   const nIdx = requireColumn(response, MATCH_GROUP_COLUMNS.totalN);
 
   return response.values.flatMap((row) => {
@@ -389,6 +478,7 @@ function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow[] {
         unresolvedNamespaces: toStringArray(row[nsIdx]),
         existingTargetIds: toStringArray(row[targetsIdx]),
         unresolvedCount: toNumber(row[unresolvedNIdx]),
+        unresolvedLocalCount: toNumber(row[unresolvedLocalNIdx]),
         groupSize: toNumber(row[nIdx]),
       },
     ];
@@ -396,7 +486,7 @@ function parseMatchGroupRows(response: ESQLSearchResponse): MatchGroupRow[] {
 }
 
 function assertCompleteEsqlResults(response: ESQLSearchResponse, context: string): void {
-  if ((response as ESQLSearchResponse & { is_partial?: boolean }).is_partial === true) {
+  if (isPartialEsqlResponse(response)) {
     throw new Error(`${context}: ES|QL returned partial results; watermark will not advance`);
   }
 }

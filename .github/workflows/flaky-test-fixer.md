@@ -55,6 +55,7 @@ engine:
   model: opus
   max-turns: 200
   env:
+    BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
@@ -113,6 +114,43 @@ steps:
           core.warning(`Duplicate detection failed: ${err.message}`);
         }
 
+# Copy ownership metadata automatically once safe_outputs creates a PR, even if
+# posting the outcome comment fails or the agent never calls link_fix_pr.
+jobs:
+  label_fix_pr:
+    # gh-aw requires an explicit agent dependency to classify this as a post-agent job.
+    needs: [agent, safe_outputs]
+    if: ${{ !cancelled() && needs.safe_outputs.outputs.created_pr_number != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout labeling helper from trusted main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: elastic/kibana
+          ref: main
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Copy source issue ownership labels to the fix PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SOURCE_ISSUE_NUMBER: *issue_number
+          FIX_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          retries: 3
+          script: |
+            const { labelFlakyFixPr } = require('./.github/scripts/label_flaky_fix_pr.ts');
+            await labelFlakyFixPr({
+              github,
+              core,
+              ...context.repo,
+              issueNumber: Number(process.env.SOURCE_ISSUE_NUMBER),
+              prNumber: Number(process.env.FIX_PR_NUMBER),
+            });
+
 network:
   allowed:
     - defaults
@@ -129,6 +167,12 @@ sandbox:
   agent: awf
 
 safe-outputs:
+  threat-detection:
+    engine:
+      id: claude
+      version: '2.1.165'
+      env:
+        BUILDKITE_API_TOKEN: ${{ '' }}
   activation-comments: true
   report-failure-as-issue: false
   messages:
@@ -194,7 +238,7 @@ safe-outputs:
         - name: Append PR link to outcome comment
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
-            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            github-token: ${{ github.token }}
             script: |
               const prUrl = process.env.GH_AW_PR_URL;
               const prNumber = process.env.GH_AW_PR_NUMBER;
@@ -284,11 +328,12 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 ## Validate the investigation is current
 
-The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale** and re-run a complete investigation yourself when **any** of these hold:
+The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale or unsupported** and re-run a complete investigation yourself when **any** of these hold:
 
 - it was posted **more than 1 day ago** (older analyses have drifted from the current code and failure signature more often than not);
-- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
-- the comment is **absent**, or offers no actionable root cause.
+- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one;
+- the comment is **absent**, or offers no actionable root cause; or
+- the evidence **contradicts the diagnosis**, or a key assumption remains unverified after checking it against the [Fix guidelines](#fix-guidelines), even if the analysis is recent.
 
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). The doctor owns the diagnosis and recommended action; if the two skills disagree, the doctor wins. Use the `flaky-test-investigator` skill only for CI artifact retrieval, pipeline context, and this workflow's steps, PR format, and fix guidelines. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance. Then apply [Security Cypress: what this fixer may ship](#security-cypress-what-this-fixer-may-ship) before writing any patch.
 
@@ -402,11 +447,15 @@ The first line links only the failed-test issue. When supported, the **Relevant 
 Add the following at the very end of the PR description (and outside of the details block):
 
 ```markdown
-> [!NOTE]
-> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Mention `@copilot` to make quick changes.
+> [!IMPORTANT]
+> Requested by @${{ env.REQUESTED_BY }}. The flaky test runner may verify the PR, but the owning **team is responsible the next steps**:
+>
+> - Review and merge it (update the branch or add missing labels if needed)
+> - Make changes (check out the branch locally, or ask `@copilot` if Copilot is enabled on your account)
+> - Close it if it is not worth shipping (share feedback in #kibana-qa)
 ```
 
-(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
+(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the IMPORTANT block if the requester is a bot or `kibanamachine`, leaving the rest of the block.)
 
 ## Release-note and backport labels
 

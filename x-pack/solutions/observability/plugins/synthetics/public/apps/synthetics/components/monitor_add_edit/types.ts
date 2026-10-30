@@ -18,6 +18,8 @@ import type {
   ConfigKey,
   ServiceLocation,
   FormMonitorType,
+  HttpAuthMethod,
+  KerberosAuthType,
   MonitorFields,
   ResponseCheckJSON,
   RequestBodyCheck,
@@ -45,6 +47,8 @@ export interface FormLocation {
 
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
+  // UI-only selector that controls which mutually exclusive HTTP auth scheme is shown.
+  authType: HttpAuthMethod;
   ['schedule.number']: string;
   ['schedule.unit']: string;
   ['source.inline']: string;
@@ -71,6 +75,41 @@ export type FormConfig = MonitorFields & {
       json: ResponseCheckJSON[];
     };
   };
+  // Nested auth objects (also present via ConfigKey.KERBEROS / ConfigKey.NTLM on MonitorFields).
+  kerberos: {
+    enabled: boolean;
+    auth_type: KerberosAuthType;
+    username: string;
+    password: string;
+    keytab: string;
+    config_path: string;
+    krb5_conf: string;
+    realm: string;
+    service_name: string;
+    enable_krb5_fast: boolean;
+  };
+  ntlm: {
+    enabled: boolean;
+    username: string;
+    password: string;
+    domain: string;
+    workstation: string;
+  };
+  ['kerberos.enabled']: boolean;
+  ['kerberos.auth_type']: KerberosAuthType;
+  ['kerberos.username']: string;
+  ['kerberos.password']: string;
+  ['kerberos.keytab']: string;
+  ['kerberos.config_path']: string;
+  ['kerberos.krb5_conf']: string;
+  ['kerberos.realm']: string;
+  ['kerberos.service_name']: string;
+  ['kerberos.enable_krb5_fast']: boolean;
+  ['ntlm.enabled']: boolean;
+  ['ntlm.username']: string;
+  ['ntlm.password']: string;
+  ['ntlm.domain']: string;
+  ['ntlm.workstation']: string;
 };
 
 export interface FieldMeta<TFieldKey extends keyof FormConfig> {
@@ -137,8 +176,22 @@ export interface FieldMap {
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;
   [ConfigKey.WAIT]: FieldMeta<ConfigKey.WAIT>;
+  ['authType']: FieldMeta<'authType'>;
   [ConfigKey.USERNAME]: FieldMeta<ConfigKey.USERNAME>;
   [ConfigKey.PASSWORD]: FieldMeta<ConfigKey.PASSWORD>;
+  ['kerberos.auth_type']: FieldMeta<'kerberos.auth_type'>;
+  ['kerberos.username']: FieldMeta<'kerberos.username'>;
+  ['kerberos.password']: FieldMeta<'kerberos.password'>;
+  ['kerberos.keytab']: FieldMeta<'kerberos.keytab'>;
+  ['kerberos.config_path']: FieldMeta<'kerberos.config_path'>;
+  ['kerberos.krb5_conf']: FieldMeta<'kerberos.krb5_conf'>;
+  ['kerberos.realm']: FieldMeta<'kerberos.realm'>;
+  ['kerberos.service_name']: FieldMeta<'kerberos.service_name'>;
+  ['kerberos.enable_krb5_fast']: FieldMeta<'kerberos.enable_krb5_fast'>;
+  ['ntlm.username']: FieldMeta<'ntlm.username'>;
+  ['ntlm.password']: FieldMeta<'ntlm.password'>;
+  ['ntlm.domain']: FieldMeta<'ntlm.domain'>;
+  ['ntlm.workstation']: FieldMeta<'ntlm.workstation'>;
   [ConfigKey.PROXY_URL]: FieldMeta<ConfigKey.PROXY_URL>;
   [ConfigKey.PROXY_HEADERS]: FieldMeta<ConfigKey.PROXY_HEADERS>;
   ['proxy_url__tcp']: FieldMeta<ConfigKey.PROXY_URL>;

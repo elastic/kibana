@@ -15,6 +15,10 @@ import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolCallGroup } from './tool_call_group';
 
+jest.mock('../../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: () => ({ isEmbeddedContext: false }),
+}));
+
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>

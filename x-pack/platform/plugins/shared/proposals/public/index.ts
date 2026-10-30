@@ -20,10 +20,13 @@ export {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
   usePendingProposals,
   useProposal,
+  useReopenProposal,
+  useSettleDeclinedProposal,
+  RETRY_WAIT_MS,
+  isInFlux,
 } from './hooks/use_proposals_api';
 
 export { mutationKeys, queryKeys } from './query_keys';
-
-export { DISMISS_REASON_LABELS, DISMISS_REASON_OPTIONS } from './dismiss_reason_i18n';

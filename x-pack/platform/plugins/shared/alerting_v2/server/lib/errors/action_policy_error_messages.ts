@@ -19,6 +19,10 @@ export const getActionPolicyVersionConflictMessage = (id: string): string =>
 export const getActionPolicyLicenseNotSupportedMessage = (requiredLicense: string): string =>
   `Action policies require an active ${requiredLicense} license`;
 
+export const getActionPolicyCloudApiKeyNotSupportedMessage = (name: string): string =>
+  `Cannot use a Cloud API key to create or update action policy "${name}". ` +
+  'Authenticate with a user session or a project-scoped Elasticsearch API key instead.';
+
 export const getInvalidActionPolicyDataMessage = (
   context: ActionPolicyValidationContext,
   zodError: string

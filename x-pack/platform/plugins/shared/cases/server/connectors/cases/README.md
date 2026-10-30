@@ -1,5 +1,9 @@
 # Summary
 
+> **Note on fields:** the case action applies a selected template (`templateId`/`templateVersion`) and
+> builds the case's field values internally. Case field values now live in `extended_fields` (the
+> field-library system), which supersedes the legacy `customFields`. Legacy `customFields` continue to
+> work during migration but are deprecated.
 
 The case action groups related alerts to cases automatically based on rules and conditions when alerts are detected. Specifically the case action:
 

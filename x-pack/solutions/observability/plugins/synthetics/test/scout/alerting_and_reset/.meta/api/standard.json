@@ -1,9 +1,135 @@
 {
-  "sha1": "fbe20ab225f38fccdba2068b98c7ace4f61d51d6",
+  "sha1": "6d852d165dd42fd113b755e3668cbcf7e13768f7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "8c53aec116a7430-bbc5c122cb266d2",
+      "title": "SyntheticsAlertOnNoData triggers pending alerts per location, transitions pending to down, and recovers pending to up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/alert_on_no_data.spec.ts",
+        "line": 55,
+        "column": 53
+      }
+    },
+    {
+      "id": "880be216a949605-3b65aba041bb86a",
+      "title": "SyntheticsCustomStatusRule — numberOfChecks grouped, 1 down location numberOfChecks - location threshold = 1 - grouped by location - 1 location down",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_checks_grouped_one_location.spec.ts",
+        "line": 53,
+        "column": 53
+      }
+    },
+    {
+      "id": "1197da2d24de97c-792085f69d1ed80",
+      "title": "SyntheticsCustomStatusRule — numberOfChecks grouped, 2 down locations numberOfChecks - location threshold = 1 - grouped by location - 2 down locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_checks_grouped_two_locations.spec.ts",
+        "line": 53,
+        "column": 53
+      }
+    },
+    {
+      "id": "b4a0307eb2bc4dd-68becad6fcf7aba",
+      "title": "SyntheticsCustomStatusRule — numberOfChecks ungrouped, 1 down location numberOfChecks - location threshold = 1 - ungrouped - 1 down location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_checks_ungrouped_one_location.spec.ts",
+        "line": 53,
+        "column": 53
+      }
+    },
+    {
+      "id": "090770c4b017338-4a48b4c01487d1e",
+      "title": "SyntheticsCustomStatusRule — numberOfChecks ungrouped, 2 down locations, firstUp recovery numberOfChecks - location threshold > 1 - ungrouped - 2 down locations - recoveryStrategy: firstUp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_checks_ungrouped_two_locations_first_up.spec.ts",
+        "line": 55,
+        "column": 53
+      }
+    },
+    {
+      "id": "228a22258ae5148-c5d9bf2de196dcd",
+      "title": "SyntheticsCustomStatusRule — numberOfChecks ungrouped, 2 down locations numberOfChecks - location threshold > 1 - ungrouped - 2 down locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_checks_ungrouped_two_locations.spec.ts",
+        "line": 55,
+        "column": 53
+      }
+    },
+    {
+      "id": "40841a796277246-4dfb6c2969d54b2",
+      "title": "SyntheticsCustomStatusRule — time window, firstUp recovery timeWindow - location threshold = 1 - grouped by location - 1 down location - firstUp recovery mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_time_window_first_up.spec.ts",
+        "line": 53,
+        "column": 53
+      }
+    },
+    {
+      "id": "0c5dad4eed49671-a5a8ecbfd09031e",
+      "title": "SyntheticsCustomStatusRule — time window, 1 down location timeWindow - location threshold = 1 - grouped by location - 1 down location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_time_window_one_location.spec.ts",
+        "line": 54,
+        "column": 53
+      }
+    },
+    {
+      "id": "0873fc3996e1443-ed70c9865998902",
+      "title": "SyntheticsCustomStatusRule — time window, 2 down locations timeWindow - location threshold = 2 - grouped by location - 2 down locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/custom_status_rule_time_window_two_locations.spec.ts",
+        "line": 54,
+        "column": 53
+      }
+    },
     {
       "id": "236fa8bc4bd1f77-0fc156f04efa80f",
       "title": "EnableDefaultAlerting does create the rules when there are no connectors defined",
@@ -14,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 127,
-        "column": 19
+        "line": 133,
+        "column": 64
       }
     },
     {
@@ -28,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 139,
-        "column": 14
+        "line": 147,
+        "column": 65
       }
     },
     {
@@ -42,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 148,
-        "column": 13
+        "line": 154,
+        "column": 29
       }
     },
     {
@@ -56,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 163,
-        "column": 27
+        "line": 170,
+        "column": 26
       }
     },
     {
@@ -70,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 222,
-        "column": 80
+        "line": 227,
+        "column": 19
       }
     },
     {
@@ -84,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 196,
+        "line": 199,
         "column": 25
       }
     },
@@ -98,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 209,
+        "line": 213,
         "column": 7
       }
     },
@@ -112,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 261,
+        "line": 265,
         "column": 31
       }
     },
@@ -126,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 269,
+        "line": 273,
         "column": 16
       }
     },
@@ -140,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 274,
+        "line": 278,
         "column": 28
       }
     },
@@ -154,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 283,
+        "line": 287,
         "column": 69
       }
     },
@@ -168,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 294,
+        "line": 298,
         "column": 7
       }
     },
@@ -182,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 331,
+        "line": 335,
         "column": 7
       }
     },
@@ -196,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 395,
+        "line": 399,
         "column": 16
       }
     },
@@ -210,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 393,
+        "line": 397,
         "column": 27
       }
     },
@@ -252,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
-        "line": 184,
+        "line": 123,
         "column": 72
       }
     },
@@ -266,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
-        "line": 203,
+        "line": 142,
         "column": 25
       }
     },
@@ -742,8 +868,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 233,
-        "column": 13
+        "line": 251,
+        "column": 7
       }
     },
     {
@@ -756,8 +882,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 238,
-        "column": 9
+        "line": 257,
+        "column": 23
       }
     },
     {
@@ -770,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 258,
-        "column": 28
+        "line": 277,
+        "column": 15
       }
     },
     {
@@ -784,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 268,
-        "column": 55
+        "line": 288,
+        "column": 40
       }
     },
     {
@@ -798,8 +924,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/status_rule_pending_threshold.spec.ts",
-        "line": 296,
-        "column": 13
+        "line": 313,
+        "column": 20
+      }
+    },
+    {
+      "id": "2267aa8524fb3f7-8d6bfe86cf26c79",
+      "title": "SyntheticsDefaultRules creates rules when settings are configured and updates rules when settings are updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_default_rule.spec.ts",
+        "line": 479,
+        "column": 31
       }
     },
     {

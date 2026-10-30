@@ -22,22 +22,42 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openEscalation: i18n.translate('xpack.alertzero.baseActions.openEscalation', {
       defaultMessage: 'Open an escalation',
     }),
-    addToEscalation: i18n.translate('xpack.alertzero.baseActions.addToEscalation', {
-      defaultMessage: 'Add to an escalation',
+    attachToEscalation: i18n.translate('xpack.alertzero.baseActions.attachToEscalation', {
+      defaultMessage: 'Attach to an escalation',
     }),
-    assign: i18n.translate('xpack.alertzero.baseActions.assign', {
-      defaultMessage: 'Assign',
+    copyLink: i18n.translate('xpack.alertzero.baseActions.copyLink', {
+      defaultMessage: 'Copy link',
     }),
     close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),
+    reopen: i18n.translate('xpack.alertzero.baseActions.reopenInvestigation', {
+      defaultMessage: 'Open investigation',
+    }),
   },
   tooltips: {
+    linkCopied: i18n.translate('xpack.alertzero.baseActions.tooltips.linkCopied', {
+      defaultMessage: 'Link copied',
+    }),
     openMenu: i18n.translate('xpack.alertzero.baseActions.openMenu', {
       defaultMessage: 'Open actions menu',
     }),
     openInChat: i18n.translate('xpack.alertzero.baseActions.tooltips.openInChat', {
       defaultMessage: 'Open in chat',
     }),
+    proposalsAgentBuilderPrivilegeRequired: i18n.translate(
+      'xpack.alertzero.baseActions.tooltips.proposalsAgentBuilderPrivilegeRequired',
+      {
+        defaultMessage:
+          'You need the Agent Builder Kibana privilege to execute actions and view investigations or chats.',
+      }
+    ),
+    escalationsAgentBuilderPrivilegeRequired: i18n.translate(
+      'xpack.alertzero.baseActions.tooltips.escalationsAgentBuilderPrivilegeRequired',
+      {
+        defaultMessage:
+          'You need the Agent Builder Kibana privilege to view linked investigations.',
+      }
+    ),
   },
 });

@@ -1,0 +1,10 @@
+# @kbn/jest
+
+This package owns Kibana's Jest runners, presets, setup files, reporters, and transforms. Functional Test Runner code remains in `@kbn/test`.
+
+Use `node scripts/jest <test-file>` for unit tests or `node scripts/jest_integration --config <config-file>` for integration tests. Jest configurations can use these presets:
+
+- `@kbn/jest` for browser unit tests
+- `@kbn/jest/jest_node` for Node unit tests
+- `@kbn/jest/jest_integration` for browser integration tests
+- `@kbn/jest/jest_integration_node` for Node integration tests

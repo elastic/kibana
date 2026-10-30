@@ -100,7 +100,7 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 import { EditIntegrationFlyout } from './components/edit_integration_flyout';
-import { ErrorIconPanel } from './components/icon_panel';
+import { ErrorIconPanel, getIconPanelWidth } from './components/icon_panel';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -176,7 +176,7 @@ export function Detail() {
 
   const services = useStartServices();
   const { isOnboardingEnabled, navigateToOnboarding, onboardingUrl } = useOnboardingOverride();
-  const { spaceId } = useFleetStatus();
+  const { spaceId, isFipsEnabled } = useFleetStatus();
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
 
@@ -370,7 +370,16 @@ export function Detail() {
   useEffect(() => {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
-      setPackageInfo(packageInfoResponse);
+      const filteredPackageInfo =
+        isFipsEnabled && packageInfoResponse.policy_templates
+          ? {
+              ...packageInfoResponse,
+              policy_templates: packageInfoResponse.policy_templates.filter(
+                (t) => t.fips_compatible !== false
+              ),
+            }
+          : packageInfoResponse;
+      setPackageInfo(filteredPackageInfo);
       setIsCustomPackage(
         (packageInfoResponse?.installationInfo?.install_source &&
           CUSTOM_INTEGRATION_SOURCES.includes(
@@ -388,7 +397,13 @@ export function Detail() {
         setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
     }
-  }, [packageInfoData, packageInfoIsFetchedAfterMount, setPackageInstallStatus, setPackageInfo]);
+  }, [
+    packageInfoData,
+    packageInfoIsFetchedAfterMount,
+    setPackageInstallStatus,
+    setPackageInfo,
+    isFipsEnabled,
+  ]);
 
   const integrationInfo = useMemo(
     () =>
@@ -977,7 +992,7 @@ export function Detail() {
       topContent={securityCallout}
       tabs={headerTabs}
       tabsCss={`
-        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+        margin-left: calc(${getIconPanelWidth(theme.euiTheme.size.base, theme.euiTheme.size.xl)}px +
           ${theme.euiTheme.size.l});
       `}
     >

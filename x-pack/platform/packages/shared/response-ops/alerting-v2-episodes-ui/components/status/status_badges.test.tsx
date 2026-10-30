@@ -147,4 +147,9 @@ describe('AlertEpisodeStatusBadges', () => {
     );
     expect(screen.queryByTestId('alertEpisodeFlappingBadge')).not.toBeInTheDocument();
   });
+
+  it('does not render flapping indicator for a recovered alert even when isFlapping is true', () => {
+    renderWithI18n(<AlertEpisodeStatusBadges status={ALERT_EPISODE_STATUS.INACTIVE} isFlapping />);
+    expect(screen.queryByTestId('alertEpisodeFlappingBadge')).not.toBeInTheDocument();
+  });
 });

@@ -87,7 +87,7 @@ describe('AttackAiAssistantButton', () => {
       expect.objectContaining({
         telemetry: {
           pathway: 'attacks_page_group_summary',
-          attachments: ['alert'],
+          attachments: ['attack_discovery'],
         },
       }),
       {}

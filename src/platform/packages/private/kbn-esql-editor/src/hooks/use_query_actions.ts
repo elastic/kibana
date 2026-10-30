@@ -17,6 +17,14 @@ import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service'
 import { getToggleCommentLines } from '../helpers';
 import type { ESQLEditorProps } from '../types';
 
+/** Hooks a pending AI review into the query actions: running accepts it, replacing the query discards it. */
+export interface PendingReviewActions {
+  /** Accepts the pending review, which submits the resulting query itself; false if nothing was pending. */
+  accept: () => boolean;
+  /** Tears down the pending review without touching the editor content. */
+  discard: () => void;
+}
+
 interface UseQueryActionsParams {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -26,6 +34,7 @@ interface UseQueryActionsParams {
   onTextLangQuerySubmit: ESQLEditorProps['onTextLangQuerySubmit'];
   onQueryUpdate: (value: string) => void;
   telemetryService: ESQLEditorTelemetryService;
+  pendingReviewRef: React.MutableRefObject<PendingReviewActions>;
 }
 
 export const useQueryActions = ({
@@ -37,6 +46,7 @@ export const useQueryActions = ({
   onTextLangQuerySubmit,
   onQueryUpdate,
   telemetryService,
+  pendingReviewRef,
 }: UseQueryActionsParams) => {
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   // Read via ref inside onQuerySubmit to avoid recreating the callback on every loading toggle,
@@ -51,6 +61,9 @@ export const useQueryActions = ({
         abortControllerRef.current.abort();
         setIsQueryLoading(false);
       } else {
+        // Running the current query with a pending AI proposal accepts it: the editor still
+        // holds both the original and generated lines, and accepting submits the result itself.
+        if (source === QuerySource.MANUAL && pendingReviewRef.current.accept()) return;
         setIsQueryLoading(true);
         const abc = new AbortController();
         abortControllerRef.current = abc;
@@ -66,7 +79,14 @@ export const useQueryActions = ({
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
-    [isLoading, allowQueryCancellation, onTextLangQuerySubmit, telemetryService, editorRef]
+    [
+      isLoading,
+      allowQueryCancellation,
+      onTextLangQuerySubmit,
+      telemetryService,
+      editorRef,
+      pendingReviewRef,
+    ]
   );
 
   const onUpdateAndSubmitQuery = useCallback(
@@ -75,6 +95,8 @@ export const useQueryActions = ({
       if (querySource === QuerySource.HISTORY || querySource === QuerySource.STARRED) {
         telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
       }
+      // The new query supersedes whatever a pending AI proposal was about to change.
+      pendingReviewRef.current.discard();
       // Update the query state first, then submit on the next tick so React
       // processes the state change before the submit reads the editor value.
       onQueryUpdate(newQuery);
@@ -82,7 +104,7 @@ export const useQueryActions = ({
         onQuerySubmit(querySource);
       }, 0);
     },
-    [onQuerySubmit, onQueryUpdate, telemetryService]
+    [onQuerySubmit, onQueryUpdate, telemetryService, pendingReviewRef]
   );
 
   const onPrettifyQuery = useCallback(() => {

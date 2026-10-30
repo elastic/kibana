@@ -49,6 +49,7 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      logger: this.logger,
     });
     registerConversationTemplates({ setupDeps });
     registerConversationEventTypes({ setupDeps });

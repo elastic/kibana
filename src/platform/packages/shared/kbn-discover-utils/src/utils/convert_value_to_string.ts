@@ -21,6 +21,26 @@ interface ConvertedResult {
 
 const separator = ',';
 
+/**
+ * The whole document, as shown by copying the summary (_source) column.
+ */
+export const convertSourceToString = ({
+  dataTableRecord,
+  options,
+}: {
+  dataTableRecord: DataTableRecord;
+  options?: {
+    compatibleWithCSV?: boolean;
+    compatibleWithMarkdown?: boolean;
+  };
+}): ConvertedResult => ({
+  formattedString: stringify(
+    dataTableRecord.flattened,
+    (options?.compatibleWithMarkdown || options?.compatibleWithCSV) ?? false
+  ),
+  withFormula: false,
+});
+
 export const convertValueToString = ({
   dataView,
   dataViewField,
@@ -42,10 +62,7 @@ export const convertValueToString = ({
   const disableMultiline = (options?.compatibleWithMarkdown || options?.compatibleWithCSV) ?? false;
 
   if (dataViewField?.type === '_source') {
-    return {
-      formattedString: stringify(dataTableRecord.flattened, disableMultiline),
-      withFormula: false,
-    };
+    return convertSourceToString({ dataTableRecord, options });
   }
 
   const valuesArray = Array.isArray(flattenedValue) ? flattenedValue : [flattenedValue];

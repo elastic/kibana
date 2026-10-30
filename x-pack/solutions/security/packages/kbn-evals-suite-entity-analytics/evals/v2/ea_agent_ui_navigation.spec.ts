@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import {
+  bulkIndexEntities,
   createWatchlist,
   deleteEntityEngines,
   deleteWatchlistsByName,
@@ -38,13 +39,16 @@ const WATCHLISTS_TAB_PATH = `${MANAGEMENT_BASE_PATH}/watchlists`;
 const LINK_TOOL_ID = 'security.build_redirect_url';
 
 const MANAGED_WATCHLIST_NAMES = ['Privileged Users', 'High Risk Hosts'];
+const RESOLUTION_FLYOUT_HOST_EUID = 'host:myserver';
 
 evaluate.describe(
   'SIEM Entity Analytics V2 - UI-guided navigation',
   { tag: tags.serverless.security.complete },
   () => {
-    evaluate.beforeAll(async ({ log, supertest }) => {
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
       await installEntityStoreV2AndWait({ supertest, log });
+
+      await bulkIndexEntities({ esClient, entities: [{ euid: RESOLUTION_FLYOUT_HOST_EUID }] });
 
       // Seed watchlists so the agent can resolve the watchlist name the user gives to a real id
       // via `security.get_watchlist_id` before building the edit-flyout deep-link.
@@ -129,13 +133,13 @@ evaluate.describe(
     );
 
     evaluate(
-      'risk engine — scoring config & re-score intents redirect to the Risk Score tab',
+      'risk engine — scoring config intents redirect to the Risk Score tab',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
             name: 'entity-analytics-v2: UI navigation — risk engine',
             description:
-              'Risk-scoring configuration and re-score-now intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
+              'Risk-scoring configuration intents redirect to the Risk Score management tab via security.build_redirect_url with the risk_score tab path.',
             examples: [
               {
                 input: { question: 'Change the alert filters used by risk scoring.' },
@@ -153,22 +157,6 @@ evaluate.describe(
                   ],
                 },
                 metadata: { query_intent: 'Nav Risk Engine Config' },
-              },
-              {
-                input: { question: 'Re-score all entities now.' },
-                output: {
-                  criteria: [
-                    'The agent does not itself run a re-score and calls NO mutating tool.',
-                    `The reply links to a path ending with \`${RISK_SCORE_TAB_PATH}\` and mentions the Run button to trigger a re-score.`,
-                  ],
-                  toolCalls: [
-                    {
-                      id: LINK_TOOL_ID,
-                      criteria: [`The tool is called with path '${RISK_SCORE_TAB_PATH}'.`],
-                    },
-                  ],
-                },
-                metadata: { query_intent: 'Nav Risk Engine Re-score' },
               },
             ],
           },
@@ -262,6 +250,41 @@ evaluate.describe(
     );
 
     evaluate(
+      'entity resolution — explicit "show me the panel" intent opens the resolution flyout',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'entity-analytics-v2: UI navigation — resolution flyout',
+            description:
+              'security.get_resolution_group already answers "who is this resolved with" in chat, but an explicit request to see/open the resolution panel in the UI redirects to the Entity Analytics home page with a flyout deep-link, via security.build_redirect_url.',
+            examples: [
+              {
+                input: {
+                  question: `Show me the resolution panel for ${RESOLUTION_FLYOUT_HOST_EUID} in the UI.`,
+                },
+                output: {
+                  criteria: [
+                    'The agent calls NO mutating tool (no security.link_entities or security.unlink_entities) — the user asked to see the UI, not to change anything.',
+                    `The reply contains a clickable markdown link whose URL carries a flyout deep-link for ${RESOLUTION_FLYOUT_HOST_EUID} (a \`flyout=\` query parameter opening the "host-panel" panel).`,
+                  ],
+                  toolCalls: [
+                    {
+                      id: LINK_TOOL_ID,
+                      criteria: [
+                        `The tool is called with a flyout whose right panel id is 'host-panel' and whose params include the resolved entityId for ${RESOLUTION_FLYOUT_HOST_EUID}.`,
+                      ],
+                    },
+                  ],
+                },
+                metadata: { query_intent: 'Nav Resolution Flyout Explicit' },
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
       'entity store status intent redirects to the Status tab',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
@@ -299,7 +322,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — watchlist edit flyout',
             description:
-              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool.',
+              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path carrying an `editWatchlistId=<id>` query parameter (no flyout). It must NOT call any mutating watchlist tool.',
             examples: [
               {
                 input: {
@@ -308,14 +331,14 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent declines to upload the CSV in chat and calls NO mutating watchlist tool (no create, update, delete, add_entities, or remove_entities).',
-                    `The reply contains a clickable markdown link to the Privileged Users watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries a \`flyout=\` query parameter opening the watchlists-flyout in edit mode.`,
+                    `The reply contains a clickable markdown link to the Privileged Users watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries an \`editWatchlistId=\` query parameter with that watchlist's id.`,
                     'The reply explains in one short sentence that CSV upload runs through the watchlist editor.',
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
                       criteria: [
-                        `The tool is called with path '${WATCHLISTS_TAB_PATH}' and a flyout whose right panel id is 'watchlists-flyout' with params { mode: 'edit', watchlistId: <the resolved id for 'Privileged Users'> }.`,
+                        `The tool is called with path '${WATCHLISTS_TAB_PATH}?editWatchlistId=<the resolved id for 'Privileged Users'>' and no flyout.`,
                       ],
                     },
                   ],
@@ -329,14 +352,14 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent declines to configure the entity source in chat and calls NO mutating watchlist tool.',
-                    `The reply contains a clickable markdown link to the High Risk Hosts watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries a \`flyout=\` query parameter in edit mode.`,
+                    `The reply contains a clickable markdown link to the High Risk Hosts watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries an \`editWatchlistId=\` query parameter with that watchlist's id.`,
                     'The reply explains that the persistent entity source is configured in the editor, not by the chat tools (which only do one-time add/remove).',
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
                       criteria: [
-                        `The tool is called with path '${WATCHLISTS_TAB_PATH}' and a flyout whose right panel id is 'watchlists-flyout' with params { mode: 'edit', watchlistId: <the resolved id for 'High Risk Hosts'> }.`,
+                        `The tool is called with path '${WATCHLISTS_TAB_PATH}?editWatchlistId=<the resolved id for 'High Risk Hosts'>' and no flyout.`,
                       ],
                     },
                   ],

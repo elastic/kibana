@@ -10,10 +10,8 @@
 import React, { type MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IGNORE_ATTR } from '../constants';
+import { COMMENTS_BUTTON_TEST_SUBJ, IGNORE_ATTR } from '../constants';
 import { useComments, useCommentsState } from './comments_context';
-
-export const COMMENTS_BUTTON_TEST_SUBJ = 'devCommentsButton';
 
 const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
 
@@ -29,6 +27,8 @@ const isMac =
       navigator.userAgent
   );
 const SHORTCUT = isMac ? '⌘⇧K' : 'Ctrl+Shift+K';
+/** The key that hands pointer input to the page in comment mode (see `holdsPassThrough`). */
+const PASS_THROUGH_KEY = isMac ? '⌥' : 'Alt';
 
 export const CommentsToolbarButton = () => {
   const controller = useComments();
@@ -38,8 +38,11 @@ export const CommentsToolbarButton = () => {
     : i18n.translate('devComments.button.enter', { defaultMessage: 'Comment mode' });
   return (
     <EuiToolTip
-      content={`${label} (${SHORTCUT})`}
-      disableScreenReaderOutput
+      title={`${label} (${SHORTCUT})`}
+      content={i18n.translate('devComments.button.modifiers', {
+        defaultMessage: 'Hold {passThroughKey} to interact with the page',
+        values: { passThroughKey: PASS_THROUGH_KEY },
+      })}
       anchorProps={ignoreProps}
     >
       <EuiButtonIcon

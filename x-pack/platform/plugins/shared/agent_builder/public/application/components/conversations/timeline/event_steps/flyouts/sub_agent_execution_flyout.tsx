@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -20,10 +20,14 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
+import { useConversationFlyoutSessionProps } from '../../../../../hooks/use_conversation_flyout_session_props';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { EventSteps } from '../event_steps';
 import { JsonCodeBlock } from '../json_code_block';
 import { FlyoutStackContext } from './flyout_stack_context';
@@ -45,10 +49,26 @@ const executionIdLabel = i18n.translate(
   { defaultMessage: 'Execution ID' }
 );
 
+const getStepStatus = ({
+  hasError,
+  isStopped,
+  isLoading,
+}: {
+  hasError: boolean;
+  isStopped: boolean;
+  isLoading: boolean;
+}): EuiStepStatus => {
+  if (hasError) return 'danger';
+  if (isStopped) return 'incomplete';
+  if (isLoading) return 'loading';
+  return 'complete';
+};
+
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
   params?: Record<string, unknown>;
   isCompleted?: boolean;
+  isStopped?: boolean;
   onBack?: () => void;
   onClose: () => void;
 }
@@ -57,22 +77,34 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
   executionId,
   params,
   isCompleted = false,
+  isStopped = false,
   onBack,
   onClose,
 }) => {
   const [nestedStep, setNestedStep] = useState<ToolCallStep | null>(null);
+  const { isEmbeddedContext } = useConversationContext();
+  const flyoutSessionProps = useConversationFlyoutSessionProps(subAgentExecutionTitle);
+  const closeNestedStep = useCallback(() => setNestedStep(null), []);
   const {
     steps: executionSteps,
     response,
     streamingMessage,
     error,
   } = useFollowExecution(executionId);
+  const liveNestedStep = nestedStep
+    ? (executionSteps.find(
+        (s) =>
+          s.type === ConversationRoundStepType.toolCall &&
+          (s as ToolCallStep).tool_call_id === nestedStep.tool_call_id
+      ) as ToolCallStep | undefined) ?? nestedStep
+    : null;
   const { euiTheme } = useEuiTheme();
   const { backHeaderCss, stepsCss } = useSteppedFlyoutStyles();
   const titleId = useGeneratedHtmlId({ prefix: 'subAgentExecutionFlyout' });
   const displayMessage = response?.message ?? streamingMessage;
   const isRunning = !response && !error;
   const hasError = Boolean(error);
+  const isRunStopped = isStopped && isRunning;
 
   const euiSteps = [
     ...(params
@@ -86,20 +118,18 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       : []),
     {
       title: executionLabel,
-      status: (hasError ? 'danger' : isRunning && !isCompleted ? 'loading' : 'complete') as
-        | 'danger'
-        | 'loading'
-        | 'complete',
-      children: <EventSteps steps={executionSteps} />,
+      status: getStepStatus({
+        hasError,
+        isStopped: isRunStopped,
+        isLoading: isRunning && !isCompleted,
+      }),
+      children: <EventSteps steps={executionSteps} isAborted={isStopped} />,
     },
     ...(!isRunning || displayMessage
       ? [
           {
             title: resultLabel,
-            status: (hasError ? 'danger' : isRunning ? 'loading' : 'complete') as
-              | 'danger'
-              | 'loading'
-              | 'complete',
+            status: getStepStatus({ hasError, isStopped: isRunStopped, isLoading: isRunning }),
             children: (
               <>
                 {hasError ? (
@@ -136,6 +166,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         size="m"
         ownFocus={!onBack}
         outsideClickCloses={onBack ? true : undefined}
+        {...flyoutSessionProps}
       >
         {onBack && (
           <EuiFlyoutHeader hasBorder css={backHeaderCss}>
@@ -161,11 +192,12 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
           <EuiSteps headingElement="h3" titleSize="xxs" steps={euiSteps} css={stepsCss} />
         </EuiFlyoutBody>
       </EuiFlyout>
-      {nestedStep && (
+      {liveNestedStep && (
         <ToolResponseFlyout
-          step={nestedStep}
-          onClose={onClose}
-          onBack={() => setNestedStep(null)}
+          step={liveNestedStep}
+          isAborted={isStopped}
+          onClose={isEmbeddedContext ? onClose : closeNestedStep}
+          onBack={isEmbeddedContext ? closeNestedStep : undefined}
         />
       )}
     </FlyoutStackContext.Provider>

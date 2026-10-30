@@ -17,8 +17,15 @@ import {
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentWorkflowTarget } from '@kbn/cases-plugin/public';
+import {
+  useCaseAttachmentWorkflowRouting,
+  useCaseAttachmentWorkflowRun,
+} from '@kbn/cases-plugin/public';
 import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../common/constants/action_ids';
 import * as i18n from '../translations';
+import { getRunWorkflowTelemetry } from '../../../../common/lib/telemetry/run_workflow_telemetry';
 
 // Sort manual-trigger workflows to the top. Module-scoped so the reference is stable across renders.
 const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
@@ -27,33 +34,69 @@ const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
+
 export interface DocumentWorkflowsPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  /** The selected documents; the server fetches each one's fields. */
+  documentIds: DocumentSelection[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * When set, the panel was opened from a single-document row action. Inside a case the executor
+   * routes through the Cases API with a `cases.attachment` origin so the run appears in the case
+   * activity feed. Absent for bulk actions, which use `cases.attachments` with the document ids.
+   * Outside a case the value is ignored — the panel falls back to the generic Workflows API.
+   */
+  originEventId?: string;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
 export const DocumentWorkflowsPanel = ({
-  documents,
+  documentIds,
   onClose,
   onExecute,
+  originEventId,
+  isBulk = false,
 }: DocumentWorkflowsPanelProps) => {
+  const target = useMemo(
+    (): CaseAttachmentWorkflowTarget =>
+      originEventId !== undefined
+        ? { attachmentId: originEventId }
+        : { attachmentIds: documentIds.map(({ _id }) => _id) },
+    [documentIds, originEventId]
+  );
+  const fallbackTelemetry = useMemo(
+    () => getRunWorkflowTelemetry({ surface: 'document', isBulk, itemCount: documentIds.length }),
+    [documentIds.length, isBulk]
+  );
+  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
+    attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
+    target,
+    fallbackTelemetry,
+  });
+
   const inputs = useMemo(
     () => ({
       event: {
         triggerType: 'document' as const,
-        documents,
+        documentIds,
       },
     }),
-    [documents]
+    [documentIds]
   );
 
   return (
     <RunWorkflowPanel
       inputs={inputs}
+      runWorkflow={runWorkflow}
+      showSuccessToast={showSuccessToast}
+      telemetry={telemetry}
       sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}
@@ -64,9 +107,16 @@ export const DocumentWorkflowsPanel = ({
 export const RUN_DOCUMENT_WORKFLOW_PANEL_ID = 'RUN_DOCUMENT_WORKFLOW_PANEL_ID';
 export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
 export interface UseRunDocumentWorkflowPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  documentIds: DocumentSelection[];
   closePopover: () => void;
+  /**
+   * Pass `ecsRowData._id` from a row action so a run inside a case uses a `cases.attachment`
+   * origin. Omit for bulk actions. Outside a case the value is ignored. The menu item is hidden
+   * when there is no document to run on, or inside a case when Cases runs are unavailable.
+   */
+  originEventId?: string;
+  /** Reports the run as a bulk run outside a case. Bulk actions set it. */
+  isBulk?: boolean;
 }
 
 export interface UseRunDocumentWorkflowPanelResult {
@@ -78,14 +128,20 @@ export interface UseRunDocumentWorkflowPanelResult {
 
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
-  documents,
+  documentIds,
+  originEventId,
+  isBulk,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
+  // Inside a case, only offer the action when the run can be recorded on the case.
+  const caseRouting = useCaseAttachmentWorkflowRouting();
+  const hasDocuments = documentIds.length > 0;
+  const canRunInCase = caseRouting !== 'unavailable';
 
   const canRunWorkflow = useMemo(
-    () => workflowUIEnabled && canExecuteWorkflow,
-    [workflowUIEnabled, canExecuteWorkflow]
+    () => workflowUIEnabled && canExecuteWorkflow && hasDocuments && canRunInCase,
+    [workflowUIEnabled, canExecuteWorkflow, hasDocuments, canRunInCase]
   );
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
@@ -109,10 +165,17 @@ export const useRunDocumentWorkflowPanel = ({
         title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
         'data-test-subj': 'document-workflow-context-menu-panel',
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
-        content: <DocumentWorkflowsPanel documents={documents} onClose={closePopover} />,
+        content: (
+          <DocumentWorkflowsPanel
+            documentIds={documentIds}
+            onClose={closePopover}
+            originEventId={originEventId}
+            isBulk={isBulk}
+          />
+        ),
       },
     ],
-    [closePopover, documents]
+    [closePopover, documentIds, isBulk, originEventId]
   );
 
   return useMemo(

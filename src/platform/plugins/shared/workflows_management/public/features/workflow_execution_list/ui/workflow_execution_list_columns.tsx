@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
+import { executedByFallbackLabel } from '../../../entities/user_profiles';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 import {
@@ -34,7 +35,8 @@ import { getRunMode } from '../../workflow_execution_detail/lib/get_run_mode';
 
 /** Fixed column widths for the execution-history table (panel must not scroll horizontally). */
 export const EXECUTION_HISTORY_COLUMN_WIDTHS = {
-  status: '120px',
+  /** Fits the HITL 'Action is required' badge (wider than Success / Waiting). */
+  status: '160px',
   /** Fits `Yesterday 22:04` / `Aug 17 14:03` without clipping. */
   started: '120px',
   duration: '72px',
@@ -163,7 +165,7 @@ const getExecutedByDisplayName = (
   if (profile?.user) {
     return getUserDisplayName(profile.user) || undefined;
   }
-  return ctx.showUnresolvedExecutors ? execution.executedBy : undefined;
+  return executedByFallbackLabel(execution.executedBy, ctx.showUnresolvedExecutors);
 };
 
 export const getExecutionHistoryColumns = (
@@ -197,7 +199,15 @@ export const getExecutionHistoryColumns = (
           data-test-subj="workflowExecutionListStatusCell"
         >
           <EuiFlexItem grow={false}>
-            <StatusPill status={execution.status} />
+            {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
+              <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
+                {i18n.translate('workflows.executionListItem.actionRequiredBadge', {
+                  defaultMessage: 'Action is required',
+                })}
+              </EuiBadge>
+            ) : (
+              <StatusPill status={execution.status} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <RunModeFlask isTestRun={execution.isTestRun} stepId={execution.stepId} />
@@ -280,7 +290,7 @@ export const getExecutionHistoryColumns = (
     {
       field: 'executedBy',
       name: i18n.translate('workflows.workflowExecutionList.column.executedBy', {
-        defaultMessage: 'Executed by',
+        defaultMessage: 'Triggered by',
       }),
       // Flexible far-right column. truncateText gives the cell max-width/overflow so
       // EuiTextTruncate can measure a real width (width 0 renders an empty visible label).

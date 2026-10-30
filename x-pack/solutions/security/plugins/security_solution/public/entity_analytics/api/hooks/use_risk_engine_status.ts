@@ -7,6 +7,7 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
@@ -25,12 +26,32 @@ export const useRiskEngineStatus = (
   queryOptions: Pick<
     UseQueryOptions<unknown, unknown, RiskEngineStatusResponse, string[]>,
     'refetchInterval' | 'structuralSharing'
-  > = {}
+  > = {},
+  {
+    executionContext,
+  }: {
+    /**
+     * Optional Kibana execution context forwarded to the risk-engine-status fetch so slow logs
+     * and APM traces can attribute the query to the calling page/panel.
+     */
+    executionContext?: KibanaExecutionContext;
+  } = {}
 ) => {
   const { fetchRiskEngineStatus } = useEntityAnalyticsRoutes();
+  // Append caller-supplied context fields to the key so each distinct caller
+  // gets its own cache entry and queryFn. Without this, react-query would store
+  // whichever observer rendered last as the shared queryFn — making invalidation
+  // non-deterministically use the wrong (or missing) context.
+  const queryKey: string[] = executionContext?.child
+    ? [
+        ...FETCH_RISK_ENGINE_STATUS,
+        executionContext.child.name ?? '',
+        executionContext.child.id ?? '',
+      ]
+    : FETCH_RISK_ENGINE_STATUS;
   return useQuery(
-    FETCH_RISK_ENGINE_STATUS,
-    async ({ signal }) => fetchRiskEngineStatus({ signal }),
+    queryKey,
+    async ({ signal }) => fetchRiskEngineStatus({ signal, context: executionContext }),
     queryOptions
   );
 };

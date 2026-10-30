@@ -6,7 +6,12 @@
  */
 
 // Compose Discover flyout — stepped Edit Form + Discover Sandbox
-export { ComposeDiscoverFlyout } from './flyout/compose_discover';
+export {
+  ComposeDiscoverFlyout,
+  STACKED_FLYOUT_SIZE,
+  STACKED_FLYOUT_MIN_WIDTH,
+  useEuiFlyoutReregister,
+} from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
@@ -53,9 +58,11 @@ export type {
   RuleFormLayout,
   RuleRequestCommon,
   RuleQuery,
-  ComposedQuery,
-  StandaloneQuery,
+  RuleRecovery,
+  RuleNoData,
   RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from './form';
 
 export {
@@ -73,8 +80,17 @@ export type {
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './actions_form';
-export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export {
+  matchedActionPoliciesQueryKey,
+  useMatchedActionPolicies,
+} from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export { MatchedPolicyReason } from './flyout/compose_discover/compose_discover_form/matched_policy_reason';
+export { WorkflowConnectorIcons } from './flyout/compose_discover/compose_discover_form/workflow_connector_icons';
+export {
+  useActionPolicyConnectorTypes,
+  type UseActionPolicyConnectorTypesResult,
+} from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';
@@ -105,15 +121,24 @@ export type { RuleArtifactPayload } from './form/utils/artifact_mappers';
 export { getRunbookContent, getDashboardId } from './form';
 export type { RunbookArtifactData, DashboardArtifactData } from './form';
 
-export { composeFormToCreateRequest } from './flyout/compose_discover/compose_mappers';
+export {
+  composeFormToCreateRequest,
+  mapRuleToComposeFormValues,
+} from './flyout/compose_discover/compose_mappers';
 
 // Sequence builder
-export type { SequenceFormValues, SequenceRule, HopWindow } from './sequence/form_types';
+export type {
+  SequenceFormValues,
+  SequenceRecoveryMode,
+  SequenceSubRule,
+  HopWindow,
+} from './sequence/form_types';
 export {
   RULE_DRAG_MIME_TYPE,
   generateStepId,
   DEFAULT_SEQUENCE_FORM_VALUES,
   isSequenceValid,
+  recoveryTrackedStepIndices,
   totalLookbackSeconds,
   getCommonGroupingFields,
   formatLookbackString,
@@ -125,3 +150,12 @@ export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
 export type { SequenceEdgeType } from './sequence/sequence_edge';
 export { layoutSequence } from './sequence/layout_sequence';
 export type { LayoutSequenceOptions } from './sequence/layout_sequence';
+export { parseSequenceEsql } from './sequence/parse_esql';
+
+// Compose form sub-steps — re-exported for sequence builder sidebar
+export { DetailsAndArtifactsStep } from './flyout/compose_discover/compose_discover_form/details_and_artifacts_step';
+export { LinkedActionPoliciesStep } from './flyout/compose_discover/compose_discover_form/linked_action_policies_step';
+
+// Form fields
+export { ScheduleField } from './form/fields/schedule_field';
+export { LookbackWindow } from './form/fields/lookback_window';

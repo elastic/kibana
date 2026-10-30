@@ -22,11 +22,12 @@ import { css } from '@emotion/react';
 import { isPlainObject } from 'lodash/fp';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { omitRequiredWithDefaults } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -189,13 +190,18 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       setSelectedExecutionId(id);
     }, []);
 
+    const editorInputsSchema = useMemo(
+      () => (inputs ? omitRequiredWithDefaults(inputs) : undefined),
+      [inputs]
+    );
+
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
-        if (!inputs) return;
+        if (!editorInputsSchema) return;
 
         try {
           const currentModel = editor.getModel();
-          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             allowComments: false,
             enableSchemaRequest: false,
@@ -203,7 +209,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
               {
                 uri: SCHEMA_URI,
                 fileMatch: [currentModel?.uri.toString() ?? ''],
-                schema: inputs,
+                schema: editorInputsSchema,
               },
             ],
           });
@@ -211,7 +217,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
           // Monaco setup failed — fall back to basic JSON editing
         }
       },
-      [inputs]
+      [editorInputsSchema]
     );
 
     return (
@@ -319,6 +325,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                 >
                   <CodeEditor
                     languageId="json"
+                    chromeOverrides={workflowsEditorChromeOverrides}
                     value={value}
                     width="100%"
                     height="100%"
@@ -341,11 +348,10 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
                       renderWhitespace: 'all',
                       wordWrapColumn: 80,
                       wrappingIndent: 'indent',
-                      theme: WORKFLOWS_MONACO_EDITOR_THEME,
                       formatOnType: true,
                       quickSuggestions: false,
                       suggestOnTriggerCharacters: false,
-                      wordBasedSuggestions: false,
+                      wordBasedSuggestions: 'off',
                       parameterHints: {
                         enabled: false,
                       },

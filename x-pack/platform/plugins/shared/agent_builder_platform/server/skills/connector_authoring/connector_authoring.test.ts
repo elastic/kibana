@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { AgentsStart } from '@kbn/agent-builder-server';
 import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
@@ -82,7 +84,11 @@ const makeActionsStart = (
  * drift between the tool schema and the attachment type's `validate`).
  */
 const createTestContext = () => {
-  const setupType = createConnectorSetupAttachmentType();
+  const setupType = createConnectorSetupAttachmentType({
+    getAgentsStart: async () => ({} as AgentsStart),
+    getActionsStart: async () => ({} as ActionsPluginStart),
+    logger: loggingSystemMock.createLogger(),
+  });
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) =>
       type === CONNECTOR_SETUP_ATTACHMENT_TYPE

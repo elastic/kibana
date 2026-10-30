@@ -6,10 +6,12 @@
  */
 
 import type { PolicyConfig } from '../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { hashPolicyConfig } from './hash_policy_config';
 import type { EndpointPolicySnapshot } from './endpoint_policy_snapshot';
 import type { NormalizedPolicyConfig } from './normalized_policy_config';
 import { normalize } from './normalize_policy_config';
+import type { PolicyCreateEndpointConfig } from '../../../../fleet_integration/types';
 
 export type EndpointPolicySummary = Readonly<{
   windowsProtectionModes: Readonly<{
@@ -24,6 +26,7 @@ export type EndpointPolicySummary = Readonly<{
   }>;
   linuxProtectionModes: Readonly<{
     malware: string;
+    ransomware: string;
     behavior: string;
   }>;
   globalTelemetryEnabled: boolean;
@@ -32,6 +35,23 @@ export type EndpointPolicySummary = Readonly<{
 export type NormalizedEndpointPolicy = Readonly<{
   snapshot: EndpointPolicySnapshot;
   storedConfig: PolicyConfig;
+  normalizedConfig: NormalizedPolicyConfig;
+  normalizedHash: string;
+  summary: EndpointPolicySummary;
+}>;
+
+export type EndpointPolicyBaselinePreset = PolicyCreateEndpointConfig['endpointConfig']['preset'];
+
+export type PolicyBaselineEnvironment = Readonly<{
+  license: string;
+  cloud: boolean;
+  telemetryOptedIn: boolean | 'unresolved';
+}>;
+
+export type EndpointPolicyBaseline = Readonly<{
+  kind: 'baseline';
+  preset: EndpointPolicyBaselinePreset;
+  environment: PolicyBaselineEnvironment;
   normalizedConfig: NormalizedPolicyConfig;
   normalizedHash: string;
   summary: EndpointPolicySummary;
@@ -49,7 +69,7 @@ const extractStoredConfig = (snapshot: EndpointPolicySnapshot): PolicyConfig => 
   return policyValue as PolicyConfig;
 };
 
-const summarizeEndpointPolicy = (config: NormalizedPolicyConfig): EndpointPolicySummary => ({
+export const summarizeEndpointPolicy = (config: NormalizedPolicyConfig): EndpointPolicySummary => ({
   windowsProtectionModes: {
     malware: config.windows.malware.mode,
     ransomware: config.windows.ransomware.mode,
@@ -62,6 +82,8 @@ const summarizeEndpointPolicy = (config: NormalizedPolicyConfig): EndpointPolicy
   },
   linuxProtectionModes: {
     malware: config.linux.malware.mode,
+    // Absent on legacy policies and wherever `linuxRansomwareProtection` is off; absent means off.
+    ransomware: config.linux.ransomware?.mode ?? ProtectionModes.off,
     behavior: config.linux.behavior_protection.mode,
   },
   globalTelemetryEnabled: config.global_telemetry_enabled,

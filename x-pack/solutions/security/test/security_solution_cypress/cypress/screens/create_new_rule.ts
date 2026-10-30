@@ -89,16 +89,7 @@ export const THREAT_MATCH_AND_BUTTON = '[data-test-subj="andButton"]';
 
 export const THREAT_ITEM_ENTRY_DELETE_BUTTON = '[data-test-subj="itemEntryDeleteButton"]';
 
-export const THREAT_MATCH_OR_BUTTON = '[data-test-subj="orButton"]';
-
-export const THREAT_COMBO_BOX_INPUT =
-  '[data-test-subj="stepDefineRule"] [data-test-subj="fieldAutocompleteComboBox"]';
-
 export const THREAT_MATCH_OPERATOR_SELECT = '[data-test-subj="entryItemMatchInputFormRow"]';
-
-export const INVALID_MATCH_CONTENT = 'All matches require both a field and threat index field.';
-
-export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is required.';
 
 export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is required.';
 
@@ -233,12 +224,6 @@ export const SCHEDULE_INTERVAL_AMOUNT_INPUT =
 
 export const SCHEDULE_INTERVAL_UNITS_INPUT =
   '[data-test-subj="detectionEngineStepScheduleRuleInterval"] [data-test-subj="timeType"]';
-
-export const SCHEDULE_LOOKBACK_AMOUNT_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="interval"]';
-
-export const SCHEDULE_LOOKBACK_UNITS_INPUT =
-  '[data-test-subj="detectionEngineStepScheduleRuleFrom"] [data-test-subj="timeType"]';
 
 export const SEVERITY_DROPDOWN =
   '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';

@@ -19,7 +19,7 @@ import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import { createRootStateChunkEvent } from '../../../../test_utils/graph_stream';
 import { RunTracker, type RunSeed } from '../run_tracker';
 import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state';
-import { buildInterruptedRound } from './round_summary';
+import { buildInterruptedRound, getModelUsage } from './round_summary';
 
 jest.mock('../../../../tracing', () => ({
   getCurrentTraceId: () => 'trace-1',
@@ -113,8 +113,36 @@ describe('buildInterruptedRound', () => {
         input_tokens: 10,
         output_tokens: 5,
         model: 'gpt',
+        connectors: [
+          { connector_id: 'main', llm_calls: 1, input_tokens: 10, output_tokens: 5, model: 'gpt' },
+        ],
       },
     });
+  });
+
+  it('records the input tokens of the last LLM call from the latest state', () => {
+    const tracker = new RunTracker({ graphName: 'g' });
+    tracker.seed({ steps: [] });
+    tracker.observeGraphEvent(
+      createRootStateChunkEvent('g', {
+        steps: [],
+        toolRenderState: {},
+        pendingToolCallIds: [],
+        lastCallUsage: { inputTokens: 77 },
+      })
+    );
+
+    const { summary } = buildInterruptedRound({
+      tracker,
+      startTime,
+      endTime,
+      modelProvider: modelProvider([
+        { connectorId: 'main', model: 'gpt', tokens: { prompt: 10, completion: 5 } },
+      ]),
+      mainConnectorId: 'main',
+    });
+
+    expect(summary.model_usage).toMatchObject({ input_tokens: 10, last_call_input_tokens: 77 });
   });
 
   it('falls back to the seeded steps when the stream failed before any state was streamed', () => {
@@ -292,5 +320,190 @@ describe('buildInterruptedRound', () => {
       expect((steps[0] as ToolCallStep).interrupted).toBeUndefined();
       expect((steps[1] as ToolCallStep).interrupted).toBe(true);
     });
+  });
+});
+
+describe('getModelUsage', () => {
+  const call = (
+    connectorId: string,
+    tokens?: { prompt: number; completion: number; cached?: number; thinking?: number },
+    model?: string
+  ) => ({
+    connectorId,
+    ...(tokens ? { tokens: { ...tokens, total: tokens.prompt + tokens.completion } } : {}),
+    ...(model ? { model } : {}),
+  });
+
+  it('breaks the usage down per connector, the main connector first then the others in order of first call', () => {
+    const { connectors } = getModelUsage(
+      {
+        calls: [
+          call('fast', { prompt: 10, completion: 1 }),
+          call('main', { prompt: 100, completion: 10 }),
+          call('other', { prompt: 20, completion: 2 }),
+          call('fast', { prompt: 30, completion: 3 }),
+          call('main', { prompt: 200, completion: 20 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(connectors).toEqual([
+      { connector_id: 'main', llm_calls: 2, input_tokens: 300, output_tokens: 30 },
+      { connector_id: 'fast', llm_calls: 2, input_tokens: 40, output_tokens: 4 },
+      { connector_id: 'other', llm_calls: 1, input_tokens: 20, output_tokens: 2 },
+    ]);
+  });
+
+  it('reports cached tokens only on the connectors that reported them', () => {
+    const { connectors, cached_input_tokens: cachedInputTokens } = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 10, cached: 60 }),
+          call('main', { prompt: 100, completion: 10 }),
+          call('main', { prompt: 100, completion: 10, cached: 40 }),
+          call('fast', { prompt: 10, completion: 1 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(connectors?.map((usage) => usage.cached_input_tokens)).toEqual([100, undefined]);
+    expect(connectors?.[1]).not.toHaveProperty('cached_input_tokens');
+    expect(cachedInputTokens).toBe(100);
+  });
+
+  it('uses the first model reported by each connector', () => {
+    const { connectors } = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 1, completion: 1 }),
+          call('main', { prompt: 1, completion: 1 }, 'claude-opus'),
+          call('main', { prompt: 1, completion: 1 }, 'claude-sonnet'),
+          call('fast', { prompt: 1, completion: 1 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(connectors?.[0].model).toBe('claude-opus');
+    expect(connectors?.[1]).not.toHaveProperty('model');
+  });
+
+  it('counts calls that reported no tokens', () => {
+    const { connectors } = getModelUsage({ calls: [call('main'), call('main')] }, 'main');
+
+    expect(connectors).toEqual([
+      { connector_id: 'main', llm_calls: 2, input_tokens: 0, output_tokens: 0 },
+    ]);
+  });
+
+  it('counts the thinking tokens as output tokens, as they are not part of the completion', () => {
+    const usage = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 8, thinking: 12 }),
+          call('main', { prompt: 100, completion: 5 }),
+          call('fast', { prompt: 10, completion: 1, thinking: 4 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(usage.output_tokens).toBe(30);
+    expect(usage.connectors?.map((connector) => connector.output_tokens)).toEqual([25, 5]);
+  });
+
+  it('reports the thinking tokens as reasoning tokens, only for the connectors that reported them', () => {
+    const usage = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 8, thinking: 12 }),
+          call('main', { prompt: 100, completion: 5, thinking: 0 }),
+          call('fast', { prompt: 10, completion: 1 }),
+          call('other', { prompt: 10, completion: 1, thinking: 4 }),
+        ],
+      },
+      'main'
+    );
+
+    expect(usage.reasoning_tokens).toBe(16);
+    expect(usage.connectors?.map((connector) => connector.reasoning_tokens)).toEqual([
+      12,
+      undefined,
+      4,
+    ]);
+    // a connector that never reported them has no field, not a zero
+    expect(usage.connectors?.[1]).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('counts a reported zero as reported, and omits the reasoning tokens when none was reported', () => {
+    expect(
+      getModelUsage({ calls: [call('main', { prompt: 1, completion: 1, thinking: 0 })] }, 'main')
+        .reasoning_tokens
+    ).toBe(0);
+    expect(
+      getModelUsage({ calls: [call('main', { prompt: 1, completion: 1 })] }, 'main')
+    ).not.toHaveProperty('reasoning_tokens');
+  });
+
+  it('keeps the reasoning tokens as a part of the output tokens', () => {
+    const { output_tokens: outputTokens, reasoning_tokens: reasoningTokens } = getModelUsage(
+      { calls: [call('main', { prompt: 100, completion: 8, thinking: 12 })] },
+      'main'
+    );
+
+    expect(outputTokens).toBe(20);
+    expect(reasoningTokens).toBe(12);
+  });
+
+  it('omits the breakdown when there was no call', () => {
+    expect(getModelUsage({ calls: [] }, 'main')).toEqual({
+      connector_id: 'main',
+      llm_calls: 0,
+      input_tokens: 0,
+      output_tokens: 0,
+    });
+  });
+
+  it('leaves the main connector out of the breakdown when it made no call', () => {
+    const usage = getModelUsage({ calls: [call('fast', { prompt: 10, completion: 1 })] }, 'main');
+
+    expect(usage.connector_id).toBe('main');
+    expect(usage.connectors).toEqual([
+      { connector_id: 'fast', llm_calls: 1, input_tokens: 10, output_tokens: 1 },
+    ]);
+  });
+
+  it('keeps the top-level fields as the totals across connectors', () => {
+    const usage = getModelUsage(
+      {
+        calls: [
+          call('main', { prompt: 100, completion: 10, cached: 50 }, 'claude-opus'),
+          call('fast', { prompt: 10, completion: 1, cached: 5 }, 'claude-haiku'),
+          call('other', { prompt: 20, completion: 2 }),
+        ],
+      },
+      'main',
+      77
+    );
+
+    expect(usage).toMatchObject({
+      connector_id: 'main',
+      model: 'claude-opus',
+      llm_calls: 3,
+      input_tokens: 130,
+      output_tokens: 13,
+      cached_input_tokens: 55,
+      last_call_input_tokens: 77,
+    });
+
+    const connectors = usage.connectors ?? [];
+    const sum = (field: 'llm_calls' | 'input_tokens' | 'output_tokens' | 'cached_input_tokens') =>
+      connectors.reduce((total, connector) => total + (connector[field] ?? 0), 0);
+    expect(sum('llm_calls')).toBe(usage.llm_calls);
+    expect(sum('input_tokens')).toBe(usage.input_tokens);
+    expect(sum('output_tokens')).toBe(usage.output_tokens);
+    expect(sum('cached_input_tokens')).toBe(usage.cached_input_tokens);
   });
 });

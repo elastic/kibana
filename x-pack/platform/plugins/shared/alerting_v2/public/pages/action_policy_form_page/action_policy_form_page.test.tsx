@@ -10,6 +10,8 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
@@ -103,15 +105,18 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     value,
     onChange,
     connectorCreationConfig,
+    forceShowErrors,
   }: {
     value: { id: string; connectorId: string | null; params: string };
     onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
     connectorCreationConfig?: { mode: string; href?: string };
+    forceShowErrors?: boolean;
   }) => (
     <div
       data-test-subj={`inlineWorkflowEditor-${value.id}`}
       data-connector-creation-mode={connectorCreationConfig?.mode}
       data-connector-creation-href={connectorCreationConfig?.href}
+      data-force-show-errors={String(Boolean(forceShowErrors))}
     >
       <button
         type="button"
@@ -173,8 +178,8 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_workflows', () => ({
@@ -186,6 +191,7 @@ jest.mock('../../hooks/use_fetch_workflows', () => ({
       ],
     },
     isLoading: false,
+    refetch: jest.fn(),
   }),
 }));
 
@@ -196,7 +202,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const TEST_SUBJ = {
-  pageTitle: 'pageTitle',
+  title: APP_HEADER_TEST_SUBJECTS.title,
+  backLink: APP_HEADER_TEST_SUBJECTS.back,
   cancelButton: 'cancelButton',
   submitButton: 'submitButton',
   nameInput: 'nameInput',
@@ -207,15 +214,12 @@ const TEST_SUBJ = {
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
@@ -226,9 +230,11 @@ const EXISTING_POLICY: ActionPolicyResponse = {
 const renderPage = () => {
   return render(
     <MockLocatorProvider locators={mockLocators}>
-      <I18nProvider>
-        <ActionPolicyFormPage />
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <ActionPolicyFormPage />
+        </I18nProvider>
+      </MockAppHeaderProvider>
     </MockLocatorProvider>
   );
 };
@@ -259,7 +265,12 @@ describe('ActionPolicyFormPage', () => {
     it('renders create title and save button', () => {
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Create action policy');
+      expect(mockLocators.actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAccessibleName(
+        'Back to Action Policies'
+      );
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAttribute('href', '/mock-locator-url');
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
       expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
     });
@@ -315,8 +326,8 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          grouping_mode: 'per_episode',
-          throttle: { strategy: 'on_status_change', interval: null },
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'on_status_change' },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })
       );
@@ -384,6 +395,39 @@ describe('ActionPolicyFormPage', () => {
       expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
     });
 
+    it('reveals the errors and focuses the first invalid field instead of saving an empty form', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      expect(saveButton).toBeEnabled();
+      await user.click(saveButton);
+
+      expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+      expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.nameInput)).toHaveFocus();
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('does not create anything while a simple workflow draft is incomplete', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
+      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+      await user.click(screen.getByTestId(TEST_SUBJ.submitButton));
+
+      await waitFor(() =>
+        expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+          'data-force-show-errors',
+          'true'
+        )
+      );
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    });
+
     it('navigates to listing page on cancel', async () => {
       const user = userEvent.setup({ delay: null });
       renderPage();
@@ -415,7 +459,7 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Update policy');
     });
 
@@ -430,6 +474,10 @@ describe('ActionPolicyFormPage', () => {
       renderPage();
 
       expect(screen.getByTestId(TEST_SUBJ.loadingSpinner)).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAccessibleName(
+        'Back to Action Policies'
+      );
     });
 
     it('shows error callout when fetch fails', () => {
@@ -442,6 +490,10 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Edit action policy');
+      expect(screen.getByTestId(TEST_SUBJ.backLink)).toHaveAccessibleName(
+        'Back to Action Policies'
+      );
       expect(screen.getByTestId(TEST_SUBJ.fetchErrorCallout)).toBeInTheDocument();
       expect(screen.getByText('Not found')).toBeInTheDocument();
     });
@@ -465,12 +517,10 @@ describe('ActionPolicyFormPage', () => {
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: 'policy-1',
         data: {
-          version: 'WzEsMV0=',
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
-          grouping_mode: 'per_field',
-          matcher: { expression: 'data.severity : "critical"' },
-          group_by: ['host.name', 'service.name'],
+          grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
+          matcher: { tags: null, expression: 'data.severity : "critical"' },
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
         },

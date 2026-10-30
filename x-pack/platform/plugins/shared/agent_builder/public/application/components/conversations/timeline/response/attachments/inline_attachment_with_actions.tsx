@@ -113,7 +113,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         agentId,
         updateOrigin,
         openCanvas,
-        openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+        openSidebarConversation,
         isCanvas: false,
         setPreviewBadgeState: (nextPreviewState) => {
           setPreviewedAttachmentKey(
@@ -189,6 +189,12 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
             > .euiPanel {
               border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
             }
+
+            /* No header rendered (no action buttons): the content is the top of the card too. */
+            &:first-child,
+            &:first-child > .euiPanel {
+              border-radius: ${AB_PANEL_RADIUS}px;
+            }
           `}
         >
           <TimelineRenderErrorBoundary key={attachmentPreviewKey}>
@@ -198,7 +204,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
                   attachment,
                   isSidebar,
                   screenContext,
-                  openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                  openSidebarConversation,
                 },
                 {
                   registerActionButtons,

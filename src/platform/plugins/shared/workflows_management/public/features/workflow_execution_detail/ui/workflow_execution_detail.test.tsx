@@ -49,21 +49,23 @@ const mockStepExecutionDetailsProps: { current: Record<string, unknown> } = {
   current: {},
 };
 
+const mockExecutionPanelProps: { current: Record<string, unknown> } = { current: {} };
+
 jest.mock('./workflow_execution_panel', () => ({
-  WorkflowExecutionPanel: ({
-    execution,
-    error,
-    showBackButton,
-  }: {
+  WorkflowExecutionPanel: (props: {
     execution: WorkflowExecutionDto | null;
-    error: Error | null;
     showBackButton: boolean;
-  }) => (
-    <div data-test-subj="execution-panel">
-      <div data-test-subj="show-back-button">{String(showBackButton)}</div>
-      <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
-    </div>
-  ),
+  }) => {
+    mockExecutionPanelProps.current = props;
+    return (
+      <div data-test-subj="execution-panel">
+        <div data-test-subj="show-back-button">{String(props.showBackButton)}</div>
+        <div data-test-subj="panel-execution-status">
+          {props.execution?.status ?? 'no-execution'}
+        </div>
+      </div>
+    );
+  },
 }));
 
 jest.mock('./workflow_step_execution_details', () => ({
@@ -226,7 +228,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
     });
   });
 
@@ -436,6 +438,7 @@ describe('WorkflowExecutionDetail', () => {
 
       // The component should render without errors when finding child step
       expect(screen.getByTestId('step-details')).toBeInTheDocument();
+      expect(mockStepExecutionDetailsProps.current.resumeExecutionId).toBe('child-exec-1');
     });
   });
 
@@ -460,7 +463,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
     });
 
     it('should auto-select trigger when no step is selected and execution is terminal with no steps', () => {
@@ -477,7 +480,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
     });
   });
 });
@@ -541,6 +544,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStepExecutionDetailsProps.current = {};
+    mockExecutionPanelProps.current = {};
     mockRemoveQueries = jest.fn();
     mockUseQueryClient.mockReturnValue({ removeQueries: mockRemoveQueries } as any);
     mockUseWorkflowUrlState.mockReturnValue({
@@ -593,6 +597,10 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
     expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Top-level approval required');
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
+    const waitingAction = mockExecutionPanelProps.current.waitingAction as {
+      submitState?: unknown;
+    };
+    expect(mockStepExecutionDetailsProps.current.submitState).toBe(waitingAction.submitState);
   });
 
   it('passes undefined resumeMessage and resumeSchema when the paused-step fetch returns no data', () => {
@@ -608,6 +616,21 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
     expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
     expect(mockStepExecutionDetailsProps.current.resumeMessage).toBeUndefined();
     expect(mockStepExecutionDetailsProps.current.resumeSchema).toBeUndefined();
+    expect(mockStepExecutionDetailsProps.current.waitingStepExecutionId).toBeUndefined();
+  });
+
+  it('does not pass waitingStepExecutionId when getStepExecution fails', () => {
+    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: false });
+
+    render(
+      <TestWrapper>
+        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
+      </TestWrapper>
+    );
+
+    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
+    expect(mockStepExecutionDetailsProps.current.waitingStepExecutionId).toBeUndefined();
+    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBeUndefined();
   });
 
   it('passes resumeMessage and resumeSchema when waitForInput is nested under if in YAML (fetch-driven)', () => {
@@ -829,6 +852,6 @@ describe('WorkflowExecutionDetail - auto-select trigger on failed before steps',
       </TestWrapper>
     );
 
-    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger');
+    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('trigger', { replace: true });
   });
 });

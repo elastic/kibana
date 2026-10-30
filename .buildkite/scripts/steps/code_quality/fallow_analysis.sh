@@ -19,7 +19,7 @@ mkdir -p .fallow
 
 echo "Fetching previous owner snapshot for trend analysis..."
 .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
-gsutil cp "$GCS_SNAPSHOT" "$OWNER_SNAPSHOT_PREV" 2>/dev/null \
+gcloud storage cp "$GCS_SNAPSHOT" "$OWNER_SNAPSHOT_PREV" 2>/dev/null \
   && echo "Previous owner snapshot loaded from GCS" \
   || echo "No previous owner snapshot found in GCS — first run without trend"
 .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
@@ -72,14 +72,14 @@ if [ "${FALLOW_SAVE_SNAPSHOT:-}" = "true" ]; then
   GCS_SNAPSHOT_HISTORY="gs://ci-artifacts.kibana.dev/code-quality/history/fallow-owner-snapshot-${SNAPSHOT_DATE}.json"
   echo "--- Save owner snapshot for next run (+ history)"
   .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
-  gsutil cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT"
-  gsutil cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT_HISTORY"
+  gcloud storage cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT"
+  gcloud storage cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT_HISTORY"
   .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
 else
   echo "--- Skip saving snapshot (FALLOW_SAVE_SNAPSHOT not set to 'true')"
 fi
 
-if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
+if [ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ] || [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
   CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-}"
   if [ -z "$CHANNEL" ]; then
@@ -102,7 +102,7 @@ Build: ${BUILD_URL}"
       echo "  - label: \":slack: Code Quality Notify\""
       echo "    command: \"echo 'Code Quality report sent to Slack'\""
       echo "    agents:"
-      echo "      image: family/kibana-ubuntu-2404"
+      echo "      image: family/kibana-minimal-ubuntu-2604"
       echo "      imageProject: elastic-images-prod"
       echo "      provider: gcp"
       echo "      machineType: n2-standard-2"

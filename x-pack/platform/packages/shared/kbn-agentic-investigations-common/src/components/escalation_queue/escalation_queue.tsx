@@ -10,7 +10,6 @@ import styled from '@emotion/styled';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import { css } from '@emotion/react';
 import type { EscalationQueueItem, EscalationStatus } from './types';
 import { EscalationCard } from './escalation_card';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { ShowMoreFooter } from '../show_more_footer';
 
 interface EscalationQueueProps {
   status: EscalationStatus;
@@ -44,11 +44,25 @@ interface EscalationQueueProps {
   error?: Error | null;
   /**
    * When provided, each escalation row becomes clickable and calls this callback
-   * with the escalation id. Used to open the escalation details flyout.
+   * with the full escalation item.
    */
-  onClickCard?: (id: string) => void;
+  onClickCard?: (escalation: EscalationQueueItem) => void;
   /** Highlights the row whose id matches this value (e.g. the flyout is open for it). */
   selectedConversationId?: string;
+  /**
+   * When provided, called per card to produce an href for the title link, enabling
+   * Cmd/middle-click to open in a new tab and showing the URL on hover.
+   */
+  getHref?: (escalation: EscalationQueueItem) => string | undefined;
+  /** When false, cards are inert and show a tooltip naming the missing privilege. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
+  /** An Impact filter is applied, so an empty list means "no match" rather than "no escalations". */
+  isFiltered?: boolean;
+  /**
+   * Explanatory content rendered at the bottom of the section body. When the bucket is empty
+   * and unfiltered it replaces the "No escalations" line.
+   */
+  note?: React.ReactNode;
 }
 
 const StyledAccordion = styled(EuiAccordion)`
@@ -81,6 +95,10 @@ export const EscalationQueue = memo<EscalationQueueProps>(
     error,
     onClickCard,
     selectedConversationId,
+    getHref,
+    canOpenInvestigationDetails = true,
+    isFiltered = false,
+    note,
   }) => {
     const { euiTheme } = useEuiTheme();
     const serverTotal = totalItemCount ?? escalations.length;
@@ -100,16 +118,23 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {/* Show the server total so the badge reflects the full bucket, not just loaded items. */}
           <EuiBadge color="hollow">{serverTotal}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
 
+    const loadMoreButton = showLoadMore ? (
+      <ShowMoreFooter
+        label={ESCALATION_QUEUE_LABELS.showMore(remaining)}
+        onClick={onLoadMore}
+        data-test-subj={`escalationQueueLoadMore-${status}`}
+      />
+    ) : null;
+
     const bodyContent = (() => {
       if (error) {
         return (
-          <EuiPanel>
+          <EuiPanel hasBorder={false} hasShadow={false}>
             <EuiEmptyPrompt
               iconType="warning"
               iconColor="danger"
@@ -123,57 +148,42 @@ export const EscalationQueue = memo<EscalationQueueProps>(
         return (
           <>
             <EuiFlexGroup direction="column" gutterSize="none">
-              {escalations.map((escalation, i) => (
-                <EuiFlexItem key={escalation.id} grow={false}>
-                  <EscalationCard
-                    escalation={escalation}
-                    hasBorder={i < escalations.length - 1 || showLoadMore}
-                    renderAssignees={renderAssignees}
-                    onClickCard={onClickCard}
-                    isSelected={escalation.id === selectedConversationId}
-                  />
-                </EuiFlexItem>
+              {escalations.map((escalation) => (
+                <EscalationCard
+                  key={escalation.id}
+                  escalation={escalation}
+                  renderAssignees={renderAssignees}
+                  onClickCard={onClickCard}
+                  isSelected={escalation.id === selectedConversationId}
+                  href={getHref?.(escalation)}
+                  canOpenInvestigationDetails={canOpenInvestigationDetails}
+                />
               ))}
+              {/* Sibling of the cards so the last card keeps its divider above it. */}
+              {loadMoreButton}
             </EuiFlexGroup>
-            {showLoadMore && (
-              <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType="chevronSingleDown"
-                      iconSide="left"
-                      size="s"
-                      onClick={onLoadMore}
-                      data-test-subj={`escalationQueueLoadMore-${status}`}
-                    >
-                      {ESCALATION_QUEUE_LABELS.showMore(remaining)}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            )}
           </>
         );
       }
+      if (note && !isFiltered) {
+        return loadMoreButton;
+      }
       return (
-        <EuiPanel>
-          <EuiText size="xs" color="subdued">
-            {ESCALATION_QUEUE_LABELS.emptyQueue}
-          </EuiText>
-        </EuiPanel>
+        <>
+          <EuiPanel hasBorder={false} hasShadow={false}>
+            <EuiText size="xs" color="subdued">
+              {isFiltered
+                ? ESCALATION_QUEUE_LABELS.emptyQueueWithFilter
+                : ESCALATION_QUEUE_LABELS.emptyQueue}
+            </EuiText>
+          </EuiPanel>
+          {loadMoreButton}
+        </>
       );
     })();
 
     return (
-      <EuiPanel
-        borderRadius="none"
-        css={{
-          borderRadius: euiTheme.size.s,
-        }}
-        paddingSize="none"
-        hasBorder
-        data-test-subj={`escalationQueue-${status}`}
-      >
+      <EuiPanel paddingSize="none" hasBorder data-test-subj={`escalationQueue-${status}`}>
         <StyledAccordion
           id={`escalation-queue-${status}`}
           buttonContent={buttonContent}
@@ -188,6 +198,18 @@ export const EscalationQueue = memo<EscalationQueueProps>(
           }}
         >
           {bodyContent}
+          {note && !error ? (
+            <div
+              css={css`
+                padding: ${euiTheme.size.base};
+              `}
+              data-test-subj={`escalationQueueNote-${status}`}
+            >
+              <EuiText size="xs" color="subdued">
+                {note}
+              </EuiText>
+            </div>
+          ) : null}
         </StyledAccordion>
       </EuiPanel>
     );

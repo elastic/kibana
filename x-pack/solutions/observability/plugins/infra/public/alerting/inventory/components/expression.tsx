@@ -49,6 +49,7 @@ import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
 import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { getInventoryRuleSchema } from '../../../../common/inventory/get_inventory_rule_schema';
+import { isSchemaSelectableForInventoryRule } from '../is_schema_selectable_for_inventory_rule';
 import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -78,7 +79,10 @@ export interface AlertContextMeta {
   schema?: DataSchemaFormat;
 }
 
-type Criteria = InventoryMetricConditions[];
+type Criteria = Array<
+  Omit<InventoryMetricConditions, 'metric'> & { metric?: InventoryMetricConditions['metric'] }
+>;
+
 export type ExpressionsProps = Omit<
   RuleTypeParamsExpressionProps<
     {
@@ -114,9 +118,9 @@ export const defaultExpression = {
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<ExpressionsProps> = (props) => {
-  const { setRuleParams, ruleParams, errors, metadata } = props;
+  const { id: ruleId, setRuleParams, ruleParams, errors, metadata } = props;
+  const isExistingRule = Boolean(ruleId);
   const { source } = useSourceContext();
-
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
@@ -135,11 +139,12 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     const exp = ruleParams.criteria?.slice() || [];
     exp.push({
       ...defaultExpression,
+      metric: (ruleParams.nodeType ?? 'host') === 'host' ? defaultExpression.metric : undefined,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setRuleParams('criteria', exp);
-  }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
+  }, [setRuleParams, ruleParams.criteria, ruleParams.nodeType, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -203,8 +208,22 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const updateNodeType = useCallback(
     (nt: InventoryItemType) => {
       setRuleParams('nodeType', nt);
+
+      if (!isSchemaSelectableForInventoryRule(nt)) {
+        setRuleParams('schema', undefined);
+      } else if (!ruleParams.schema && !isExistingRule) {
+        setRuleParams('schema', DEFAULT_SCHEMA);
+      }
+
+      setRuleParams(
+        'criteria',
+        ruleParams.criteria.map((c) => ({
+          ...c,
+          metric: undefined,
+        }))
+      );
     },
-    [setRuleParams]
+    [setRuleParams, ruleParams.criteria, ruleParams.schema, isExistingRule]
   );
 
   const updateSchema = useCallback(
@@ -250,7 +269,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
 
   useEffect(() => {
     const md = metadata;
-    const isHost = ruleParams.nodeType === 'host' || (md && md.nodeType === 'host');
+    const canSelectSchema = isSchemaSelectableForInventoryRule(ruleParams.nodeType ?? md?.nodeType);
 
     if (!ruleParams.nodeType) {
       if (md && md.nodeType) {
@@ -260,10 +279,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       }
     }
 
-    if (!ruleParams.schema) {
-      if (md && md.schema && isHost) {
-        setRuleParams('schema', md.schema);
-      }
+    if (!ruleParams.schema && canSelectSchema && !isExistingRule) {
+      setRuleParams('schema', md?.schema ?? DEFAULT_SCHEMA);
     }
 
     if (ruleParams.criteria && ruleParams.criteria.length) {
@@ -280,7 +297,13 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     if (!ruleParams.sourceId) {
       setRuleParams('sourceId', source?.id || 'default');
     }
-  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadata, metricsView?.dataViewReference, defaultExpression, source]);
+
+  const nodeType = ruleParams.nodeType || 'host';
+  const schemaSelectionEnabled = isSchemaSelectableForInventoryRule(nodeType);
+
+  const effectiveSchema = getInventoryRuleSchema(ruleParams.schema);
 
   return (
     <>
@@ -324,13 +347,17 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
           <SupportedDataTooltipLink nodeType={ruleParams.nodeType} isAlertUI />
         </EuiFlexGroup>
       </div>
-      {ruleParams.nodeType === 'host' && (
+      {schemaSelectionEnabled && (
         <div css={StyledExpressionCss}>
           <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
-                value={ruleParams.schema ?? DEFAULT_SCHEMA}
+                // A saved rule without a schema evaluates on ECS fields and aggregations,
+                // so show ECS without writing it to the rule params.
+                value={
+                  ruleParams.schema ?? (isExistingRule ? DataSchemaFormatEnum.ECS : DEFAULT_SCHEMA)
+                }
                 onChange={updateSchema}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
@@ -344,9 +371,9 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
                     defaultMessage: 'Schema',
                   }
                 )}
-                data-test-subj="forExpressionSelect"
+                data-test-subj="schemaExpressionSelect"
                 aria-label={i18n.translate(
-                  'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
+                  'xpack.infra.metrics.alertFlyout.expression.schema.ariaLabel',
                   {
                     defaultMessage: 'Select a schema',
                   }
@@ -372,16 +399,18 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
-              <ExpressionChart
-                expression={e}
-                kuery={ruleParams.filterQueryText}
-                nodeType={ruleParams.nodeType}
-                sourceId={ruleParams.sourceId}
-                accountId={ruleParams.accountId}
-                region={ruleParams.region}
-                schema={getInventoryRuleSchema(ruleParams.nodeType, ruleParams.schema)}
-                data-test-subj="preview-chart"
-              />
+              {e.metric && (
+                <ExpressionChart
+                  expression={{ ...e, metric: e.metric }}
+                  kuery={ruleParams.filterQueryText}
+                  nodeType={ruleParams.nodeType}
+                  sourceId={ruleParams.sourceId}
+                  accountId={ruleParams.accountId}
+                  region={ruleParams.region}
+                  schema={effectiveSchema}
+                  data-test-subj="preview-chart"
+                />
+              )}
             </ExpressionRow>
           );
         })}
