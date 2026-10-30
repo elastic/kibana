@@ -16,3 +16,5 @@ export const QUARKUS_SUPER_HEROES_NAMESPACE = 'quarkus-super-heroes';
 export const QUARKUS_SUPER_HEROES_GCS_BASE_PATH_PREFIX = QUARKUS_SUPER_HEROES_NAMESPACE;
 export const INCIDENTS_NAMESPACE = 'incidents';
 export const INCIDENTS_GCS_BASE_PATH_PREFIX = 'customer0-incidents';
+// Mirrors the default maxIterations of the features identification workflow.
+export const KI_FEATURE_DEDUPLICATION_ITERATIONS = 5;

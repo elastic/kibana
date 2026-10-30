@@ -7,12 +7,16 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import type { AttachRuleToolDeps } from '../tools/attach_rule';
+import { attachRuleTool } from '../tools/attach_rule';
 import { linkRuleToActionPolicySkillTool } from '../tools/link_routing_tag';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
@@ -26,7 +30,8 @@ import {
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-type RuleAuthoringSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+type RuleAuthoringSkillDeps = ManageRuleToolDeps &
+  AttachRuleToolDeps & { availability: AvailabilityConfig };
 
 export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
@@ -86,12 +91,19 @@ Do **not** use this skill for:
 
 ## Rule Discovery
 
-When a user asks about existing rules:
-- Search with \`platform.core.sml_search\`, using keywords from the user's request.
-- For a broad listing, use \`keywords: ["*"]\`.
+When a user asks about existing rules, read them with the Kibana API tools:
+- To list or search, call ${internalTools.describeApi} for \`${
+      ALERTING_API_IDS.listRules
+    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
+- Use \`search\` with keywords from the user's request. For a broad listing, omit \`search\`. Page with \`page\` and \`per_page\`.
+- To read a single rule, call ${internalTools.executeApi} for \`${
+      ALERTING_API_IDS.getRule
+    }\` with the rule \`id\`.
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
-- To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
+- To inspect or edit a saved rule, attach it with ${
+      ALERTING_TOOL_IDS.attachRule
+    } using the rule \`id\`.
 - After attaching, use the returned \`attachment_id\` for subsequent ${
       ALERTING_TOOL_IDS.manageRule
     } calls.
@@ -207,5 +219,9 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To link this rule to an action policy already in the conversation, call \`${
       ALERTING_TOOL_IDS.linkRuleToActionPolicy
     }\` with the rule attachment and the policy attachment, or use the rule attachment's \`link_rule_to_action_policy\` tool.`,
-    getInlineTools: () => [manageRuleTool(deps), linkRuleToActionPolicySkillTool(deps)],
+    getInlineTools: () => [
+      manageRuleTool(deps),
+      attachRuleTool(deps),
+      linkRuleToActionPolicySkillTool(deps),
+    ],
   });

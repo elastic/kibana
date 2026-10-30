@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
   ALERTING_TOOL_IDS,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
@@ -21,6 +23,8 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  getRulesClient: jest.fn(),
+  getPrivilegeChecker: jest.fn(),
   availability: createAlertingV2Availability({
     getActiveSpace: jest.fn().mockResolvedValue({}),
   }),
@@ -63,7 +67,7 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes the manage rule and link rule inline tools', async () => {
+  it('exposes only the rule inline tools to manage, attach and link rules', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
@@ -71,8 +75,30 @@ describe('createRuleAuthoringSkill', () => {
 
     expect(inlineToolIds).toEqual([
       ALERTING_TOOL_IDS.manageRule,
+      ALERTING_TOOL_IDS.attachRule,
       ALERTING_TOOL_IDS.linkRuleToActionPolicy,
     ]);
+    expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
+  });
+
+  it('points the agent to the Kibana API tools to discover existing rules', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
+
+    expect(skill.content).toContain(ALERTING_API_IDS.listRules);
+    expect(skill.content).toContain(ALERTING_API_IDS.getRule);
+    expect(skill.content).toContain(internalTools.describeApi);
+    expect(skill.content).toContain(internalTools.executeApi);
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.attachRule);
+  });
+
+  it('references API operation ids that exist, and are read-only, in the Kibana API registry', async () => {
+    const { kibanaManifest } = await import('@elastic/schemas/kibana/tools/manifest.js');
+
+    Object.values(ALERTING_API_IDS).forEach((apiId) => {
+      expect(kibanaManifest.find(({ id }) => id === apiId)).toEqual(
+        expect.objectContaining({ readOnly: true, destructive: false })
+      );
+    });
   });
 
   it('defers notification and action policy setup to the action-policy-authoring skill', () => {

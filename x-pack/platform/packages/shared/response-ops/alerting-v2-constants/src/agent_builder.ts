@@ -19,6 +19,16 @@ export const ALERTING_TOOL_IDS = {
   manageActionPolicy: alertingTool('manage_action_policy'),
   linkRuleToActionPolicy: alertingTool('link_rule_to_action_policy'),
   linkActionPolicyToRule: alertingTool('link_action_policy_to_rule'),
+  attachRule: alertingTool('attach_rule'),
+} as const;
+
+/**
+ * Kibana HTTP API operation ids the `rule-authoring` skill points the agent to,
+ * as listed in the `@elastic/schemas` Kibana registry.
+ */
+export const ALERTING_API_IDS = {
+  listRules: 'alerting-v2.get-alerting-v2-rules',
+  getRule: 'alerting-v2.get-alerting-v2-rules-id',
 } as const;
 
 export const RULE_AUTHORING_SKILL_ID = 'rule-authoring';
