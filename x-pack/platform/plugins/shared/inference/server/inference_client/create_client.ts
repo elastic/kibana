@@ -31,7 +31,7 @@ import { bindClient } from '../../common/inference_client/bind_client';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
 
-interface CreateClientOptions {
+export interface CreateClientOptions {
   request: KibanaRequest;
   namespace?: string;
   actions: ActionsClientProvider;

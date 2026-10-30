@@ -18,10 +18,11 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('./create_client');
-import { createClient } from './create_client';
-// `createChatModel` only calls the unbound overload of `createClient`
+import { createClient, type CreateClientOptions } from './create_client';
+// `createChatModel` only calls the unbound overload of `createClient`; the overload set does not
+// overlap with a single-signature mock type, so the conversion has to go through `unknown`
 const createClientMock = createClient as unknown as jest.MockedFn<
-  (options: Parameters<typeof createClient>[0]) => InferenceServerClient
+  (options: CreateClientOptions) => InferenceServerClient
 >;
 
 jest.mock('../util/get_connector_by_id');
