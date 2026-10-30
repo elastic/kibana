@@ -551,9 +551,10 @@ describe('WorkflowDetailHeader', () => {
     expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);
   });
 
-  it('does not expose the change history entry point on the executions tab', () => {
+  it('does not expose the change history entry point while an execution is shown', () => {
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'executions',
+      isViewingExecution: true,
       setActiveTab: jest.fn(),
     });
 
@@ -577,5 +578,34 @@ describe('WorkflowDetailHeader', () => {
     );
 
     expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
+  });
+
+  it('selects Executions and keeps the history entry point while only the list is open', () => {
+    mockUseWorkflowUrlState.mockReturnValue({
+      activeTab: 'executions',
+      isViewingExecution: false,
+      setActiveTab: jest.fn(),
+    });
+
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setYamlString(mockWorkflow.yaml));
+
+    const changeHistoryModal = {
+      isOpen: false,
+      openModal: jest.fn(),
+      closeModal: jest.fn(),
+    };
+    const { getByRole, getByTestId } = render(
+      <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
+        <WorkflowDetailHeader {...defaultProps} onOpenExecutionList={jest.fn()} />
+      </ChangeHistoryModalContext.Provider>,
+      {
+        wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+      }
+    );
+
+    expect(getByRole('button', { name: 'Executions' })).toHaveAttribute('aria-pressed', 'true');
+    expect(getByTestId('workflowDetailHistoryButton')).toBeInTheDocument();
   });
 });
