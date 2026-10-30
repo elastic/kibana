@@ -27,7 +27,10 @@ import type { MentionCandidate, UserMentionCandidate } from './types';
 
 const SEARCH_DEBOUNCE_MS = 200;
 
-const getChatPersonIds = (conversation: Conversation | undefined, isPublic: boolean): string[] => {
+const getConversationUserIds = (
+  conversation: Conversation | undefined,
+  isPublic: boolean
+): string[] => {
   if (!conversation) {
     return [];
   }
@@ -81,12 +84,12 @@ export const useMentionCandidates = (
   const isShared = isSharedConversation(conversation?.access_control);
   const isPublic = isPublicConversation(conversation?.access_control);
 
-  const chatPersonIds = useMemo(
-    () => getChatPersonIds(conversation, isPublic),
+  const conversationUserIds = useMemo(
+    () => getConversationUserIds(conversation, isPublic),
     [conversation, isPublic]
   );
   const { data: chatProfiles, isInitialLoading: isLoadingChatProfiles } = useUserProfiles({
-    uids: chatPersonIds,
+    uids: conversationUserIds,
     enabled: isShared,
   });
 
