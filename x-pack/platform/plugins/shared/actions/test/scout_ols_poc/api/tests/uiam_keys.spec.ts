@@ -57,9 +57,11 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       const samlResponse = await createSAMLResponse({
-        username: `ols-uiam-${Date.now()}`,
+        // The mock UIAM backend takes numeric user IDs.
+        username: String(Date.now()),
         email: 'ols-uiam@elastic.co',
-        roles: ['editor'],
+        // A project role that manages connectors without wildcard privileges, so it has no recovery.
+        roles: ['soc_manager'],
         serverless: {
           uiamEnabled: true,
           organizationId: organizationId!,
@@ -69,12 +71,13 @@ apiTest.describe(
       const callback = await apiClient.post('api/security/saml/callback', {
         body: `SAMLResponse=${encodeURIComponent(samlResponse)}`,
       });
+      expect(callback.headers['set-cookie'], JSON.stringify(callback.body)).toBeDefined();
       sessionHeaders = {
         ...HEADERS,
         cookie: parseCookie(callback.headers['set-cookie'][0])!.cookieString(),
       };
 
-      // The editor's own UIAM API key, sent the way Kibana's own callers send internal keys.
+      // The user's own UIAM API key, sent the way Kibana's own callers send internal keys.
       const accessToken = getSamlAttribute(
         Buffer.from(samlResponse, 'base64').toString('utf-8'),
         MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN
@@ -108,8 +111,8 @@ apiTest.describe(
         responseType: 'json',
         body: {
           name: `ols-uiam-${generalAccess}`,
-          connector_type_id: '.server-log',
-          config: {},
+          connector_type_id: '.webhook',
+          config: { url: 'http://localhost:5620/api/status', method: 'post', hasAuth: false },
           secrets: {},
           access_control: { general_access: generalAccess },
         },
@@ -132,16 +135,18 @@ apiTest.describe(
 
       const get = (id: string) =>
         apiClient.get(`api/actions/connector/${id}`, { headers: keyHeaders });
-      expect(await get(publicId)).toHaveStatusCode(200);
-      expect(
-        await apiClient.post(`api/actions/connector/${publicId}/_execute`, {
+      // The connector's own result does not matter here, only that the key may run it.
+      const execute = (id: string) =>
+        apiClient.post(`api/actions/connector/${id}/_execute`, {
           headers: keyHeaders,
-          body: { params: { message: 'uiam' } },
-        })
-      ).toHaveStatusCode(200);
+          body: { params: { body: '{}' } },
+        });
+      expect(await get(publicId)).toHaveStatusCode(200);
+      expect(await execute(publicId)).toHaveStatusCode(200);
 
       // The same user's key cannot be matched to the owner, so the private connector is hidden.
       expect(await get(privateId)).toHaveStatusCode(404);
+      expect(await execute(privateId)).toHaveStatusCode(404);
       const list = await apiClient.get('api/actions/connectors', {
         headers: keyHeaders,
         responseType: 'json',
