@@ -10,6 +10,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
   getEsqlVariables,
+  getEsqlVariablesForSection,
   resolveControls,
   type IdentifiedControl,
   type PlannedControl,
@@ -22,6 +23,7 @@ import type {
   ResolveEsqlControlColumnType,
 } from '../types';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
+import { getSectionIdByPanelId } from '../dashboard_state';
 import type { DashboardFailure } from '../utils';
 import type { PanelChange, PlannedPanel } from './plan';
 
@@ -66,6 +68,7 @@ export const resolvePlan = async ({
   controls,
   existingControls,
   existingPanels,
+  timeRange,
   removedControlIds,
   takenIds,
   projectRouting,
@@ -78,6 +81,8 @@ export const resolvePlan = async ({
   existingControls: NonNullable<DashboardAttachmentData['pinned_panels']>;
   /** The panels of the original dashboard, where an unpinned ES|QL control is. */
   existingPanels: DashboardAttachmentData['panels'];
+  /** The time range of the dashboard once the call is applied. */
+  timeRange?: DashboardAttachmentData['time_range'];
   removedControlIds: ReadonlySet<string>;
   /** Ids of the panels, sections, and controls the dashboard has or the call names. */
   takenIds: Iterable<string>;
@@ -90,12 +95,22 @@ export const resolvePlan = async ({
     ? await getEsqlVariables({
         pinnedPanels: existingControls,
         panels: existingPanels,
+        timeRange,
         resolveColumnType: resolvers.resolveEsqlControlColumnType,
       })
     : [];
+  const sectionIdByPanelId = getSectionIdByPanelId({ panels: existingPanels });
   const [attempts, resolvedControls] = await Promise.all([
     Promise.all(
-      panels.map(({ content }) => content && resolveContent(content, resolvers, esqlVariables))
+      panels.map(({ id, target, content }) => {
+        if (!content) return undefined;
+        const section = target === undefined ? sectionIdByPanelId.get(id) : target;
+        return resolveContent(
+          content,
+          resolvers,
+          getEsqlVariablesForSection(esqlVariables, section)
+        );
+      })
     ),
     resolveControls({
       controls,

@@ -15,30 +15,63 @@ import type { ResolveEsqlControlColumnType } from '../types';
 const isNumericLooking = (option: unknown): boolean =>
   typeof option === 'string' && option.trim() !== '' && !isNaN(Number(option));
 
+interface EsqlControlEntry {
+  config: unknown;
+  /** The section the control is in, which is where its variable applies. */
+  group?: string;
+}
+
+const toVariables = (
+  entries: EsqlControlEntry[],
+  columnTypes: Record<string, string> = {}
+): ESQLControlVariable[] =>
+  entries.flatMap(({ config, group }) =>
+    getESQLControlVariablesFromState([config], columnTypes).map((variable) =>
+      group ? { ...variable, meta: { group } } : variable
+    )
+  );
+
+/** The variables a panel in the section sees: those of controls outside sections, and of its own section. */
+export const getEsqlVariablesForSection = (
+  variables: ESQLControlVariable[],
+  sectionId: string | null | undefined
+): ESQLControlVariable[] =>
+  variables.filter(({ meta }) => !meta?.group || meta.group === sectionId);
+
 /**
- * The ES|QL variables published by the ES|QL controls of a dashboard, pinned or in the grid. The
- * values of a query-based control are cast by the column type its query returns, as a live control does.
+ * The ES|QL variables published by the ES|QL controls of a dashboard, pinned or in the grid. A control
+ * in a section applies only to that section. The values of a query-based control are cast by the
+ * column type its query returns, as a live control does.
  */
 export const getEsqlVariables = async ({
   pinnedPanels = [],
   panels = [],
+  timeRange,
   resolveColumnType,
 }: {
   pinnedPanels?: DashboardAttachmentData['pinned_panels'];
   panels?: DashboardAttachmentData['panels'];
+  timeRange?: DashboardAttachmentData['time_range'];
   resolveColumnType?: ResolveEsqlControlColumnType;
 }): Promise<ESQLControlVariable[]> => {
-  const gridPanels = panels.flatMap((widget) => (isSection(widget) ? widget.panels : [widget]));
-  const configs = [...pinnedPanels, ...gridPanels].flatMap(({ type, config }) =>
-    type === ESQL_CONTROL ? [config] : []
-  );
+  const toEntries = (
+    controls: ReadonlyArray<Record<string, unknown>>,
+    group?: string
+  ): EsqlControlEntry[] =>
+    controls.flatMap(({ type, config }) => (type === ESQL_CONTROL ? [{ config, group }] : []));
+  const entries = [
+    ...toEntries(pinnedPanels),
+    ...panels.flatMap((widget) =>
+      isSection(widget) ? toEntries(widget.panels, widget.id) : toEntries([widget])
+    ),
+  ];
 
-  const variables = getESQLControlVariablesFromState(configs);
+  const variables = toVariables(entries);
   if (!resolveColumnType) return variables;
 
   // Only a selection that looks like a number can end up cast differently.
   const columnTypes = await Promise.all(
-    configs.map(async (config) => {
+    entries.map(async ({ config, group }) => {
       if (
         typeof config !== 'object' ||
         config === null ||
@@ -51,7 +84,8 @@ export const getEsqlVariables = async ({
       try {
         const columnType = await resolveColumnType({
           query: config.esql_query,
-          esqlVariables: variables,
+          esqlVariables: getEsqlVariablesForSection(variables, group),
+          timeRange,
         });
         return columnType ? [[config.variable_name, columnType] as const] : [];
       } catch {
@@ -60,5 +94,5 @@ export const getEsqlVariables = async ({
     })
   );
 
-  return getESQLControlVariablesFromState(configs, Object.fromEntries(columnTypes.flat()));
+  return toVariables(entries, Object.fromEntries(columnTypes.flat()));
 };

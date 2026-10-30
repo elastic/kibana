@@ -6,8 +6,9 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { getEsqlVariables } from './get_esql_variables';
+import { getEsqlVariables, getEsqlVariablesForSection } from './get_esql_variables';
 
 const esqlControl = (name: string, selected: string[], extra: Record<string, unknown> = {}) => ({
   id: `control-${name}`,
@@ -106,7 +107,7 @@ describe('getEsqlVariables', () => {
       ).toEqual([
         { key: 'pinned', value: '0', type: 'values' },
         { key: 'top', value: '1', type: 'values' },
-        { key: 'inner', value: '2', type: 'values' },
+        { key: 'inner', value: '2', type: 'values', meta: { group: 'section' } },
       ]);
     });
   });
@@ -170,6 +171,23 @@ describe('getEsqlVariables', () => {
       expect(await getEsqlVariables({ pinnedPanels: [queryControl('bytes', ['100'])] })).toEqual([
         { key: 'bytes', value: '100', type: 'values' },
       ]);
+    });
+  });
+
+  describe('getEsqlVariablesForSection', () => {
+    const variables = [
+      { key: 'pinned', value: '0', type: ESQLVariableType.VALUES },
+      { key: 'a', value: '1', type: ESQLVariableType.VALUES, meta: { group: 'section-a' } },
+      { key: 'b', value: '2', type: ESQLVariableType.VALUES, meta: { group: 'section-b' } },
+    ];
+
+    it.each([
+      ['a panel at the top level', null, ['pinned']],
+      ['a panel in a section', 'section-a', ['pinned', 'a']],
+      ['a panel in another section', 'section-b', ['pinned', 'b']],
+      ['a panel with no known section', undefined, ['pinned']],
+    ])('gives %s the variables outside sections and of its own section', (_label, id, keys) => {
+      expect(getEsqlVariablesForSection(variables, id).map(({ key }) => key)).toEqual(keys);
     });
   });
 });

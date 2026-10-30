@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PanelContentAttempt } from './resolve_panel';
 
@@ -40,4 +41,6 @@ export type ResolveControlFieldCapabilities = (params: {
 export type ResolveEsqlControlColumnType = (params: {
   query: string;
   esqlVariables: ESQLControlVariable[];
+  /** The dashboard's time range, which binds `?_tstart` and `?_tend` in the query. */
+  timeRange?: DashboardAttachmentData['time_range'];
 }) => Promise<string | undefined>;

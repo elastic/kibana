@@ -18,10 +18,10 @@ export const createEsqlControlColumnTypeResolver = ({
 }: {
   esClient: ElasticsearchClient;
 }): ResolveEsqlControlColumnType => {
-  return async ({ query, esqlVariables }) => {
+  return async ({ query, esqlVariables, timeRange }) => {
     const { columns } = await executeEsql({
       query,
-      params: buildEsqlParams({ query, esqlVariables }),
+      params: buildEsqlParams({ query, timeRange, esqlVariables }),
       limit: 0,
       dropNullColumns: false,
       esClient,

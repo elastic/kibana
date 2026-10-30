@@ -46,6 +46,23 @@ describe('createEsqlControlColumnTypeResolver', () => {
     );
   });
 
+  it('binds the time range of the dashboard to ?_tstart and ?_tend', async () => {
+    const { esClient, resolve } = setup([{ name: 'bytes', type: 'long' }]);
+
+    await resolve({
+      query: 'FROM logs | WHERE @timestamp > ?_tstart AND @timestamp < ?_tend | STATS BY bytes',
+      esqlVariables: [],
+      timeRange: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+    });
+
+    expect(esClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: [{ _tstart: '2026-01-01T00:00:00.000Z' }, { _tend: '2026-01-02T00:00:00.000Z' }],
+      }),
+      expect.anything()
+    );
+  });
+
   it('returns nothing when the query does not return exactly one column', async () => {
     const { resolve } = setup([
       { name: 'a', type: 'long' },

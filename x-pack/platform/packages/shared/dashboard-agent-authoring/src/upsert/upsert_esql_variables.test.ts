@@ -118,13 +118,20 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     );
   });
 
-  it('gives the values of a control unpinned into the grid or a section as well', async () => {
+  it('gives a panel the controls unpinned into the grid, and those of its own section only', async () => {
     const resolvePanelContent = createResolver();
     const unpinned = (id: string, name: string, selected: string) => ({
       ...hostControl,
       id,
       config: { ...hostControl.config, variable_name: name, selected_options: [selected] },
       grid: { ...grid, y: 20 },
+    });
+    const section = (id: string, panels: AttachmentPanel[]) => ({
+      id,
+      title: id,
+      collapsed: false,
+      grid: { y: 30 },
+      panels,
     });
 
     await upsert(
@@ -134,28 +141,63 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
         panels: [
           customContentPanel,
           unpinned('grid-control', 'region', 'eu'),
-          {
-            id: 'section',
-            title: 'Section',
-            collapsed: false,
-            grid: { y: 30 },
-            panels: [unpinned('section-control', 'env', 'prod')],
-          },
+          section('section-a', [
+            { ...customContentPanel, id: 'cc-a' },
+            unpinned('control-a', 'env', 'prod'),
+          ]),
+          section('section-b', [{ ...customContentPanel, id: 'cc-b' }]),
         ],
         pinned_panels: [hostControl],
       },
-      [restyle('cc-1')]
+      [restyle('cc-1'), restyle('cc-a'), restyle('cc-b')]
     );
 
-    expect(resolvePanelContent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esqlVariables: [
-          { key: 'host', value: 'web-1', type: 'values' },
-          { key: 'region', value: 'eu', type: 'values' },
-          { key: 'env', value: 'prod', type: 'values' },
-        ],
-      })
-    );
+    const keysOf = (panelId: string) => {
+      const index = ['cc-1', 'cc-a', 'cc-b'].indexOf(panelId);
+      return resolvePanelContent.mock.calls[index][0].esqlVariables?.map(({ key }) => key);
+    };
+    expect(keysOf('cc-1')).toEqual(['host', 'region']);
+    expect(keysOf('cc-a')).toEqual(['host', 'region', 'env']);
+    expect(keysOf('cc-b')).toEqual(['host', 'region']);
+  });
+
+  it('resolves the column type with the time range the call sets, else the dashboard one', async () => {
+    const resolvePanelContent = createResolver();
+    const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
+    const dashboardData = {
+      title: 'Test',
+      time_range: { from: 'now-7d', to: 'now' },
+      panels: [customContentPanel],
+      pinned_panels: [
+        {
+          id: 'control-bytes',
+          type: ESQL_CONTROL,
+          config: {
+            variable_name: 'bytes',
+            variable_type: 'values',
+            selected_options: ['100'],
+            control_type: 'VALUES_FROM_QUERY',
+            esql_query: 'FROM logs | WHERE @timestamp > ?_tstart | STATS BY bytes',
+          },
+        },
+      ],
+    };
+    const run = (upsertParams: Record<string, unknown>) =>
+      executeDashboardUpsert({
+        dashboardData,
+        upsert: { ...upsertParams, panels: [restyle('cc-1')] } as never,
+        logger,
+        resolvePanelContent,
+        resolveEsqlControlColumnType,
+      });
+
+    await run({});
+    await run({ time_range: { from: 'now-1h', to: 'now' } });
+
+    expect(resolveEsqlControlColumnType.mock.calls.map(([{ timeRange }]) => timeRange)).toEqual([
+      { from: 'now-7d', to: 'now' },
+      { from: 'now-1h', to: 'now' },
+    ]);
   });
 
   it('casts the selection of a query-based control by the column type the resolver finds', async () => {
