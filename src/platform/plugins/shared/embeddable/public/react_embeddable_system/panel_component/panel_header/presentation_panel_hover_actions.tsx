@@ -38,6 +38,7 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
+import { PanelDescription } from './panel_description';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -379,7 +380,7 @@ export const PresentationPanelHoverActions = ({
               <EuiIconTip
                 size="m"
                 title={!hideTitle ? title || undefined : undefined}
-                content={description}
+                content={<PanelDescription description={description} />}
                 position="top"
                 data-test-subj="embeddablePanelDescriptionTooltip"
                 type="info"
