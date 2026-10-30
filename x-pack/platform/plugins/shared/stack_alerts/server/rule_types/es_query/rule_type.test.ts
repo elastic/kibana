@@ -14,6 +14,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
+import { toV2Draft } from './migration/to_v2_draft';
 import type { EsQueryRuleState } from './rule_type_params';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { ActionContext } from './action_context';
@@ -126,6 +127,10 @@ describe('ruleType', () => {
         ],
       }
     `);
+  });
+
+  it('opts in to migration to alerting v2', () => {
+    expect(ruleType.alertingV2Migration?.toV2Draft).toBe(toV2Draft);
   });
 
   describe('elasticsearch query', () => {
