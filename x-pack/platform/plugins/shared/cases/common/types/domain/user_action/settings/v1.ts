@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ExternalSyncSettingsSchema } from '../../external_sync/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const SettingsUserActionPayloadSchema = z.object({
-  settings: z.object({
-    syncAlerts: z.boolean().optional(),
-    extractObservables: z.boolean().optional(),
-    externalSync: ExternalSyncSettingsSchema.optional(),
-  }),
-});
+export const SettingsUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    settings: z.object({
+      syncAlerts: z.boolean().optional(),
+      extractObservables: z.boolean().optional(),
+      externalSync: ExternalSyncSettingsSchema.optional(),
+    }),
+  })
+);
 
 export const SettingsUserActionSchema = z.object({
   type: z.literal(UserActionTypes.settings),

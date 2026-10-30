@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
@@ -13,19 +13,23 @@ import * as i18n from '../translations';
 
 export const SyncCaseStepTypeId = 'cases.syncCase';
 
-const InputSchema = z
-  .object({
-    case_id: z.string().min(1).max(1000).optional(),
-    external_id: z.string().min(1).max(1000).optional(),
-    connector_id: z.string().min(1).max(1000).optional(),
-  })
-  .refine((input) => input.case_id != null || input.external_id != null, {
-    message: 'Either case_id or external_id is required',
-  });
+const InputSchema = lazySchema(() =>
+  z
+    .object({
+      case_id: z.string().min(1).max(1000).optional(),
+      external_id: z.string().min(1).max(1000).optional(),
+      connector_id: z.string().min(1).max(1000).optional(),
+    })
+    .refine((input) => input.case_id != null || input.external_id != null, {
+      message: 'Either case_id or external_id is required',
+    })
+);
 
-const OutputSchema = z.object({
-  cases: z.array(CaseResponsePropertiesSchema),
-});
+const OutputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseResponsePropertiesSchema),
+  })
+);
 
 type SyncCaseStepInputSchema = typeof InputSchema;
 type SyncCaseStepOutputSchema = typeof OutputSchema;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserSchema } from '../user/v1';
 import {
   ActionSourceSchema,
@@ -80,24 +80,26 @@ export const CaseUserActionInjectedIdsSchema = z.object({
   comment_id: z.string().nullable(),
 });
 
-const BasicUserActionsSchema = z.union([
-  DescriptionUserActionSchema,
-  TagsUserActionSchema,
-  TitleUserActionSchema,
-  SettingsUserActionSchema,
-  StatusUserActionSchema,
-  SeverityUserActionSchema,
-  AssigneesUserActionSchema,
-  DeleteCaseUserActionSchema,
-  CategoryUserActionSchema,
-  CustomFieldsUserActionSchema,
-  ObservablesUserActionSchema,
-  ExtendedFieldsUserActionSchema,
-  TemplateUserActionSchema,
-  WorkflowUserActionSchema,
-  BulkAttachmentsUserActionSchema,
-  SyncUserActionSchema,
-]);
+const BasicUserActionsSchema = lazySchema(() =>
+  z.union([
+    DescriptionUserActionSchema,
+    TagsUserActionSchema,
+    TitleUserActionSchema,
+    SettingsUserActionSchema,
+    StatusUserActionSchema,
+    SeverityUserActionSchema,
+    AssigneesUserActionSchema,
+    DeleteCaseUserActionSchema,
+    CategoryUserActionSchema,
+    CustomFieldsUserActionSchema,
+    ObservablesUserActionSchema,
+    ExtendedFieldsUserActionSchema,
+    TemplateUserActionSchema,
+    WorkflowUserActionSchema,
+    BulkAttachmentsUserActionSchema,
+    SyncUserActionSchema,
+  ])
+);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
 const CommonUserActionsWithoutIdsSchema = z.union([

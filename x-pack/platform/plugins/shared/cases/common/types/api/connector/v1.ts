@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ExternalServiceSchema } from '../../domain/external_service/v1';
 import {
   CaseConnectorSchema,
@@ -45,13 +45,15 @@ const ActionConnectorResultSchema = z.object({
 
 export const FindActionConnectorResponseSchema = z.array(ActionConnectorResultSchema);
 
-export const ConnectorMappingResponseSchema = z
-  .object({
-    id: z.string().max(512),
-    version: z.string().max(512),
-    mappings: ConnectorMappingsSchema,
-  })
-  .merge(ConnectorSyncSettingsSchema);
+export const ConnectorMappingResponseSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().max(512),
+      version: z.string().max(512),
+      mappings: ConnectorMappingsSchema,
+    })
+    .merge(ConnectorSyncSettingsSchema)
+);
 
 export type ConnectorMappingResponse = z.infer<typeof ConnectorMappingResponseSchema>;
 export type GetCaseConnectorsResponse = z.infer<typeof GetCaseConnectorsResponseSchema>;

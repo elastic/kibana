@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
@@ -23,11 +23,13 @@ import { ExternalSyncSettingsSchema } from '../external_sync/v1';
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
 
 /** Default case settings a template applies when creating a case; all optional and independent. */
-export const TemplateSettingsSchema = z.object({
-  syncAlerts: z.boolean().optional(),
-  extractObservables: z.boolean().optional(),
-  externalSync: ExternalSyncSettingsSchema.optional(),
-});
+export const TemplateSettingsSchema = lazySchema(() =>
+  z.object({
+    syncAlerts: z.boolean().optional(),
+    extractObservables: z.boolean().optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
+  })
+);
 
 export type TemplateSettings = z.infer<typeof TemplateSettingsSchema>;
 

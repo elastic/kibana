@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -209,28 +209,30 @@ const ExternalSyncFieldMappingsRequestSchema = limitedArraySchema({
   fieldName: 'externalSyncFieldMappings',
 });
 
-export const ConfigurationRequestSchema = z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The plugin owner that manages this configuration
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-  externalSync: ExternalSyncSettingsSchema.optional(),
-  externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
-  externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
-});
+export const ConfigurationRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The plugin owner that manages this configuration
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
+    externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
+    externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
+  })
+);
 
 export const GetConfigurationFindRequestSchema = z.object({
   /**
@@ -246,19 +248,21 @@ export const CaseConfigureRequestParamsSchema = z.object({
   configuration_id: z.string().max(512),
 });
 
-export const ConfigurationPatchRequestSchema = z.object({
-  closure_type: ClosureTypeSchema.optional(),
-  connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-  externalSync: ExternalSyncSettingsSchema.optional(),
-  externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
-  externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
-  version: z.string().max(512),
-});
+export const ConfigurationPatchRequestSchema = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypeSchema.optional(),
+    connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
+    externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
+    externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
+    version: z.string().max(512),
+  })
+);
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
 export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;
