@@ -56,13 +56,15 @@ interface FieldCapsApiParams {
   projectRouting?: string;
 }
 
-// Extracts the alias from a "no such remote cluster: [alias]" root cause
-const getMissingRemoteCluster = (error: {
+const getMissingRemoteAlias = (error: {
   body?: { error?: { root_cause?: Array<{ type?: string; reason?: string }> } };
 }) =>
   error.body?.error?.root_cause
-    ?.find((cause) => cause.type === 'no_such_remote_cluster_exception')
-    ?.reason?.match(/\[(.+)\]$/)?.[1];
+    ?.find(
+      ({ type }) =>
+        type === 'no_such_remote_cluster_exception' || type === 'no_matching_project_exception'
+    )
+    ?.reason?.match(/^(?:no such remote cluster|No such project): \[([^\]]+)\]/)?.[1];
 
 /**
  *  Call the fieldCaps API for a list of indices.
@@ -117,13 +119,13 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     ) {
       return { body: { indices: [], fields: {} } };
     }
-    // ES fails the whole request for a non-existing remote cluster, so retry without its patterns.
+    // ES fails the whole request for a missing cluster or project, so retry without its patterns.
     // TODO: remove once https://github.com/elastic/elasticsearch/issues/163130 is resolved
-    const missingRemoteCluster = getMissingRemoteCluster(error);
-    if (missingRemoteCluster) {
+    const missingRemoteAlias = getMissingRemoteAlias(error);
+    if (missingRemoteAlias) {
       const patterns = castArray(indices).flatMap((pattern) => pattern.split(','));
       const remainingPatterns = patterns.filter(
-        (pattern) => !pattern.replace(/^-/, '').startsWith(`${missingRemoteCluster}:`)
+        (pattern) => !pattern.replace(/^-/, '').startsWith(`${missingRemoteAlias}:`)
       );
       if (remainingPatterns.length > 0 && remainingPatterns.length < patterns.length) {
         return callFieldCapsApi({ ...params, indices: remainingPatterns });
