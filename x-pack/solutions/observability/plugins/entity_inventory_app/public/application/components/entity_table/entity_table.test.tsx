@@ -35,7 +35,7 @@ const getFixture = (scenario: 'normal' | 'truncated' | 'countFailed'): Inventory
 
 const HOST_COLUMNS = getFixture('normal').columns;
 
-const hostRow = (overrides: Partial<Record<string, InventoryRow[string]>>): InventoryRow => ({
+const hostRow = (overrides: InventoryRow): InventoryRow => ({
   ...Object.fromEntries(HOST_COLUMNS.map(({ name }) => [name, null])),
   ...overrides,
 });
