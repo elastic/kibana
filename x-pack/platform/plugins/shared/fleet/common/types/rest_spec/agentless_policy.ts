@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, SO_SEARCH_LIMIT } from '../../constants';
 
 import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
 import {
@@ -340,6 +340,12 @@ export const BulkUpgradeAgentlessPoliciesRequestSchema = {
         meta: {
           description:
             'IDs of the managed integrations to upgrade to their installed package version.',
+        },
+      }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
         },
       }),
     },

@@ -36,6 +36,8 @@ interface BulkInstallPackagesParams {
   prerelease?: boolean;
   request?: KibanaRequest;
   skipIfInstalled?: boolean;
+  checkBreakingChanges?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
 export async function bulkInstallPackages({
@@ -48,6 +50,8 @@ export async function bulkInstallPackages({
   prerelease,
   request,
   skipIfInstalled,
+  checkBreakingChanges,
+  acknowledgeBreakingChanges,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
@@ -151,6 +155,8 @@ export async function bulkInstallPackages({
         prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
         request,
         skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,
+        checkBreakingChanges,
+        acknowledgeBreakingChanges,
       });
 
       if (installResult.error) {

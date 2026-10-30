@@ -25,6 +25,7 @@ import { InstallStatus } from '../../../types';
 import {
   isVerificationError,
   isAssetVerificationError,
+  isBreakingChangesNotAcknowledgedError,
   getMissingAssetsFromError,
 } from '../services';
 
@@ -47,6 +48,7 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   isReinstall?: boolean;
   isUpgrade?: boolean;
   force?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
@@ -94,7 +96,15 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
 
   const installPackage = useCallback(
     async (props: InstallPackageProps) => {
-      const { name, version, title, isReinstall = false, isUpgrade = false, force = false } = props;
+      const {
+        name,
+        version,
+        title,
+        isReinstall = false,
+        isUpgrade = false,
+        force = false,
+        acknowledgeBreakingChanges = false,
+      } = props;
       const prevStatus = getPackageInstallStatus(name);
       const newStatus = {
         ...prevStatus,
@@ -104,7 +114,9 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
       setPackageInstallStatus(newStatus);
 
       try {
-        const res = await sendInstallPackage(name, version, isReinstall || force);
+        const res = await sendInstallPackage(name, version, isReinstall || force, {
+          acknowledgeBreakingChanges,
+        });
         if (res.error) {
           throw res.error;
         }
@@ -182,22 +194,20 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
         }
 
         const missingAssets = getMissingAssetsFromError(error);
-        const toastMessage =
-          isAssetVerificationError(error) && missingAssets?.length
-            ? i18n.translate(
-                'xpack.fleet.integrations.packageInstallVerificationErrorDescription',
-                {
-                  defaultMessage:
-                    'Installation completed but the following asset(s) could not be found in Elasticsearch: {missingAssets}. Please try again later.',
-                  values: {
-                    missingAssets: missingAssets.map((a) => `${a.type}/${a.id}`).join(', '),
-                  },
-                }
-              )
-            : i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
-                defaultMessage:
-                  'Something went wrong while trying to install this package. Please try again later.',
-              });
+        const toastMessage = isBreakingChangesNotAcknowledgedError(error)
+          ? error.message
+          : isAssetVerificationError(error) && missingAssets?.length
+          ? i18n.translate('xpack.fleet.integrations.packageInstallVerificationErrorDescription', {
+              defaultMessage:
+                'Installation completed but the following asset(s) could not be found in Elasticsearch: {missingAssets}. Please try again later.',
+              values: {
+                missingAssets: missingAssets.map((a) => `${a.type}/${a.id}`).join(', '),
+              },
+            })
+          : i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
+              defaultMessage:
+                'Something went wrong while trying to install this package. Please try again later.',
+            });
 
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.integrations.packageInstallErrorTitle', {

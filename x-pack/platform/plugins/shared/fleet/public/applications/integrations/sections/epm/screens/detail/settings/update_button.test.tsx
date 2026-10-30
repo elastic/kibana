@@ -71,7 +71,9 @@ describe('UpdateButton agentless dry-run guard failures', () => {
 
     // The guard-failure policy stays excluded from the upgrade set.
     await waitFor(() =>
-      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['agentless-ok'])
+      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['agentless-ok'], {
+        acknowledgeBreakingChanges: false,
+      })
     );
 
     // The skip is announced: the success toast alone must not read as a full upgrade.
@@ -113,10 +115,12 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     });
 
     await waitFor(() =>
-      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith([
-        'agentless-ok',
-        'agentless-also-ok',
-      ])
+      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(
+        ['agentless-ok', 'agentless-also-ok'],
+        {
+          acknowledgeBreakingChanges: false,
+        }
+      )
     );
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
@@ -191,8 +195,53 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     });
 
     await waitFor(() =>
-      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['agentless-ok'])
+      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['agentless-ok'], {
+        acknowledgeBreakingChanges: false,
+      })
     );
     expect(toasts.addWarning).not.toHaveBeenCalled();
+  });
+});
+
+describe('UpdateButton breaking changes acknowledgement', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInstallPackage.mockResolvedValue(true);
+    mockUpgradePoliciesMutateAsync.mockResolvedValue([]);
+    mockSendBulkUpgradeAgentlessPolicies.mockResolvedValue([{ id: 'agentless-1', success: true }]);
+  });
+
+  it('sends the acknowledgement with the package and policy upgrades when acknowledged', async () => {
+    await renderAndConfirmUpgrade({
+      packagePolicyIds: ['policy-1'],
+      agentlessPolicyIds: ['agentless-1'],
+      acknowledgeBreakingChanges: true,
+    });
+
+    await waitFor(() =>
+      expect(mockSendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['agentless-1'], {
+        acknowledgeBreakingChanges: true,
+      })
+    );
+    expect(mockInstallPackage).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'nginx', version: '2.0.0', acknowledgeBreakingChanges: true })
+    );
+    expect(mockUpgradePoliciesMutateAsync).toHaveBeenCalledWith({
+      packagePolicyIds: ['policy-1'],
+      acknowledgeBreakingChanges: true,
+    });
+  });
+
+  it('does not send the acknowledgement by default', async () => {
+    await renderAndConfirmUpgrade({ packagePolicyIds: ['policy-1'] });
+
+    await waitFor(() => expect(mockUpgradePoliciesMutateAsync).toHaveBeenCalled());
+    expect(mockInstallPackage).toHaveBeenCalledWith(
+      expect.objectContaining({ acknowledgeBreakingChanges: false })
+    );
+    expect(mockUpgradePoliciesMutateAsync).toHaveBeenCalledWith({
+      packagePolicyIds: ['policy-1'],
+      acknowledgeBreakingChanges: false,
+    });
   });
 });

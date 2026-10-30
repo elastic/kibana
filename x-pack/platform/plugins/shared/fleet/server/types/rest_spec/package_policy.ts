@@ -17,7 +17,7 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { inputsFormat } from '../../../common/constants';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, inputsFormat } from '../../../common/constants';
 
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -228,6 +228,12 @@ export const UpgradePackagePoliciesRequestSchema = {
         }),
         { maxSize: 1000 }
       ),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+        },
+      }),
     },
     { meta: { id: 'upgrade_package_policies_request' } }
   ),
