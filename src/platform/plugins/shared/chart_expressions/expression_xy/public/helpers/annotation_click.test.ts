@@ -107,6 +107,76 @@ describe('annotation click helpers', () => {
     ]);
   });
 
+  it('matches the element ids @elastic/charts reports for a clicked marker', () => {
+    // Charts reports `[specId, ...position, index].join('__')`, not the spec id.
+    const row = pointRow();
+    const specId = getLineAnnotationChartId(row.id, row.time);
+    const grouped: MergedAnnotation = {
+      ...row,
+      timebucket: Date.parse(row.timebucket),
+      position: 'bottom',
+      customTooltip: () => null,
+      isGrouped: false,
+      rows: [row],
+    };
+
+    const annotations = mapAnnotationClickEvents({
+      lines: [
+        {
+          id: `${specId}________Alert__0`,
+          datum: { dataValue: row.time, details: row.label },
+        },
+      ],
+      rects: [
+        {
+          id: 'range-1__undefined__undefined__1__2__null__null__Range__0',
+          datum: {
+            coordinates: { x0: 1, x1: 2, y0: null, y1: null },
+            details: 'Range',
+          },
+        },
+      ],
+      groupedLineAnnotations: [grouped],
+      rangeAnnotations: [
+        {
+          id: 'range-1',
+          time: '2022-03-18T08:25:17.140Z',
+          endTime: '2022-03-31T08:25:17.140Z',
+          type: 'range',
+          label: 'Range',
+        },
+      ],
+    });
+
+    expect(annotations.map(({ id }) => id)).toEqual(['ann-1', 'range-1']);
+  });
+
+  it('does not match a spec whose id is only a prefix of the clicked element', () => {
+    const row = pointRow({ id: 'ann' });
+    const grouped: MergedAnnotation = {
+      ...row,
+      timebucket: Date.parse(row.timebucket),
+      position: 'bottom',
+      customTooltip: () => null,
+      isGrouped: false,
+      rows: [row],
+    };
+
+    expect(
+      mapAnnotationClickEvents({
+        lines: [
+          {
+            id: `${getLineAnnotationChartId('ann-1', row.time)}__0`,
+            datum: { dataValue: row.time },
+          },
+        ],
+        rects: [],
+        groupedLineAnnotations: [grouped],
+        rangeAnnotations: [],
+      })
+    ).toEqual([]);
+  });
+
   it('expands grouped line markers into every source row', () => {
     const rows = [
       pointRow({ id: 'event1', time: '2022-03-18T08:25:00.000Z', label: 'Event 1' }),

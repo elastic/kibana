@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import rison from '@kbn/rison';
-import { useAlertsUrl } from './alert_actions';
+import { getAlertsUrl, useAlertsUrl } from './alert_actions';
 
 jest.mock('../../../contexts', () => ({
   useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
@@ -56,5 +56,22 @@ describe('useAlertsUrl', () => {
     expect(kuery).toContain('kibana.space_ids: "default"');
     expect(kuery).toContain('kibana.alert.status: ("active" or "recovered")');
     expect(status).toBe('all');
+  });
+});
+
+describe('getAlertsUrl', () => {
+  it('builds the same URL as useAlertsUrl for the given base path', () => {
+    const params = {
+      rangeFrom: 'now-12h',
+      rangeTo: 'now',
+      includeTls: true,
+      status: 'all' as const,
+    };
+    const { result } = renderHook(() => useAlertsUrl(params));
+
+    expect(getAlertsUrl('/s/default', params)).toBe(result.current);
+    expect(getAlertsUrl('/s/default', params)).toMatch(
+      /^\/s\/default\/app\/observability\/alerts\?_a=/
+    );
   });
 });

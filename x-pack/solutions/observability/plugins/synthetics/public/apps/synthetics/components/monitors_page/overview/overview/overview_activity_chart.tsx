@@ -7,21 +7,25 @@
 
 import { EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import type { AnnotationClickDatum } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import type { ClientPluginsStart } from '../../../../../../plugin';
-import { useSyntheticsRefreshContext } from '../../../../contexts';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../../contexts';
 import { useUrlParams } from '../../../../hooks';
 import { useOverviewRefreshedRange } from '../../common/use_overview_date_range';
-import { useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
+import { getAlertsUrl, useAlertsUrl } from '../../../monitor_details/monitor_summary/alert_actions';
 import { ERRORS_LABEL } from '../../../monitor_details/monitor_summary/monitor_errors_count';
 import {
   useMonitorFilters,
   useMonitorIdFilter,
   useOverviewAlertsKuery,
 } from '../../hooks/use_monitor_filters';
-import { useOverviewAlertsAnnotations } from '../../hooks/use_overview_alerts_annotations';
+import {
+  getClickedAlertsKuery,
+  useOverviewAlertsAnnotations,
+} from '../../hooks/use_overview_alerts_annotations';
 import { useOverviewAlertsCount } from '../../hooks/use_overview_alerts_count';
 import { useOverviewDataViewIndexPatterns } from '../../hooks/use_overview_data_view_index_patterns';
 import type { MonitorStatProps } from './overview_status';
@@ -80,6 +84,7 @@ export const OverviewActivityChart = () => {
   const { from, to } = useOverviewRefreshedRange();
 
   const {
+    application,
     data,
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
@@ -112,6 +117,8 @@ export const OverviewActivityChart = () => {
   );
 
   const annotationLayers = useOverviewAlertsAnnotations();
+  const alertsKuery = useOverviewAlertsKuery();
+  const { basePath } = useSyntheticsSettingsContext();
 
   const [, updateUrlParams] = useUrlParams();
   const { refreshApp } = useSyntheticsRefreshContext();
@@ -133,6 +140,27 @@ export const OverviewActivityChart = () => {
     [data, updateUrlParams, refreshApp]
   );
 
+  // Opens the Alerts app on the clicked marker's monitors, keeping the same
+  // range and overview scoping as the Alerts stat so the two lists agree.
+  const onAnnotationClick = useCallback(
+    ({ annotations }: { annotations: AnnotationClickDatum[] }) => {
+      const clickedKuery = getClickedAlertsKuery(annotations);
+      if (!clickedKuery) {
+        return;
+      }
+      void application.navigateToUrl(
+        getAlertsUrl(basePath, {
+          rangeFrom: from,
+          rangeTo: to,
+          includeTls: true,
+          extraKuery: `${alertsKuery} and ${clickedKuery}`,
+          status: 'all',
+        })
+      );
+    },
+    [application, basePath, from, to, alertsKuery]
+  );
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
@@ -151,6 +179,7 @@ export const OverviewActivityChart = () => {
           dataTypesIndexPatterns={dataTypesIndexPatterns}
           annotationLayers={annotationLayers}
           onBrushEnd={onBrushEnd}
+          onAnnotationClick={onAnnotationClick}
           attributes={[
             {
               time,
