@@ -15,7 +15,9 @@ const indexName = (spaceId: string) => `dvm-a11y-${spaceId}`;
 
 const APP_WRAPPER = '.kbnAppWrapper';
 const FIELD_EDITOR = '[data-test-subj="fieldEditor"]';
-const CREATE_FLYOUT = '[data-test-subj="indexPatternEditorFlyout"]';
+// The `indexPatternEditorFlyout` test subject only wraps the form panel, so scan the whole dialog
+// to also cover the sibling sources preview panel.
+const CREATE_FLYOUT = '[role="dialog"][aria-labelledby="dataViewEditorFlyoutTitle"]';
 
 spaceTest.describe(
   'Data views management - Accessibility',
@@ -61,6 +63,8 @@ spaceTest.describe(
         await spaceTest.step('create data view flyout', async () => {
           await dataViewsManagement.openCreateWizard();
           await expect(dataViewEditorFlyout.flyout).toBeVisible();
+          // The sources preview panel renders asynchronously; wait for it so it is part of the scan.
+          await expect(page.testSubj.locator('createIndexPatternStep1IndicesList')).toBeVisible();
           const { violations } = await page.checkA11y({ include: [CREATE_FLYOUT] });
           expect(violations).toStrictEqual([]);
         });
