@@ -102,14 +102,6 @@ describe('MemorySidebar', () => {
     });
   });
 
-  it('changes the filter through the button group', async () => {
-    const { onFilterChange } = renderSidebar();
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryFilter-archived'));
-
-    expect(onFilterChange).toHaveBeenCalledWith('archived');
-  });
-
   it.each<MemoryFilter>(['all', 'active', 'archived'])('offers the %s filter', async (filter) => {
     const { onFilterChange } = renderSidebar({}, { kind: 'home' }, jest.fn(), jest.fn(), 'active');
 

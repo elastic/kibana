@@ -142,6 +142,12 @@ finish and verify concurrent commands can allocate before launching a larger dat
 
 #### What the run does
 
+Investigations only run as the Nightshift agent service account, so the eval first creates the
+account's roles on stateful (`ensureNightshiftServiceAccountRoles`), finds or creates the accounts
+(`ensureNightshiftServiceAccounts`, as the app's setup step does), and sets up the space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
+user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
+`xpack.security.serviceAccounts.enabled`.
+
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
 The CODE evaluator `ungraded_placeholder` always returns one, uses neutral direction, and states
@@ -390,7 +396,7 @@ The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates
 `Authorization` header. The existing credential resolver authorizes connector access and execution,
 checks the agent's allow-list, and exposes the API key only to the requesting sandbox command.
 Remote telemetry and sandbox credentials are supplied through the hook environment.
-`/workspace/elastic.md` contains variable names and query guidance, never credential values. Its
+`/workspace/.connector-docs/elastic.md` contains variable names and query guidance, never credential values. Its
 examples bound requests by time and advise using explicit remote names and narrow index patterns.
 These are instructions for the agent; the API key's privileges enforce the read restrictions.
 

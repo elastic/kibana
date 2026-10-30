@@ -322,7 +322,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — watchlist edit flyout',
             description:
-              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool.',
+              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls security.build_redirect_url with the watchlists tab path carrying an `editWatchlistId=<id>` query parameter (no flyout). It must NOT call any mutating watchlist tool.',
             examples: [
               {
                 input: {
@@ -331,14 +331,14 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent declines to upload the CSV in chat and calls NO mutating watchlist tool (no create, update, delete, add_entities, or remove_entities).',
-                    `The reply contains a clickable markdown link to the Privileged Users watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries a \`flyout=\` query parameter opening the watchlists-flyout in edit mode.`,
+                    `The reply contains a clickable markdown link to the Privileged Users watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries an \`editWatchlistId=\` query parameter with that watchlist's id.`,
                     'The reply explains in one short sentence that CSV upload runs through the watchlist editor.',
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
                       criteria: [
-                        `The tool is called with path '${WATCHLISTS_TAB_PATH}' and a flyout whose right panel id is 'watchlists-flyout' with params { mode: 'edit', watchlistId: <the resolved id for 'Privileged Users'> }.`,
+                        `The tool is called with path '${WATCHLISTS_TAB_PATH}?editWatchlistId=<the resolved id for 'Privileged Users'>' and no flyout.`,
                       ],
                     },
                   ],
@@ -352,14 +352,14 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent declines to configure the entity source in chat and calls NO mutating watchlist tool.',
-                    `The reply contains a clickable markdown link to the High Risk Hosts watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries a \`flyout=\` query parameter in edit mode.`,
+                    `The reply contains a clickable markdown link to the High Risk Hosts watchlist's edit flyout: the URL path ends with \`${WATCHLISTS_TAB_PATH}\` and carries an \`editWatchlistId=\` query parameter with that watchlist's id.`,
                     'The reply explains that the persistent entity source is configured in the editor, not by the chat tools (which only do one-time add/remove).',
                   ],
                   toolCalls: [
                     {
                       id: LINK_TOOL_ID,
                       criteria: [
-                        `The tool is called with path '${WATCHLISTS_TAB_PATH}' and a flyout whose right panel id is 'watchlists-flyout' with params { mode: 'edit', watchlistId: <the resolved id for 'High Risk Hosts'> }.`,
+                        `The tool is called with path '${WATCHLISTS_TAB_PATH}?editWatchlistId=<the resolved id for 'High Risk Hosts'>' and no flyout.`,
                       ],
                     },
                   ],
