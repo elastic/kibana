@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+
+import { i18n } from '@kbn/i18n';
 
 import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 
-import { editActionNameText, EditActionName } from './edit_action_name';
+export const editActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.editActionNameText',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
+const editActionPermissionText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.editActionPermissionTooltip',
+  {
+    defaultMessage: 'You do not have permission to edit analytics jobs.',
+  }
+);
 
 export const isEditActionFlyoutVisible = (editAction: any): editAction is Required<EditAction> => {
   return editAction.isFlyoutVisible === true && editAction.item !== undefined;
@@ -36,9 +50,10 @@ export const useEditAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () => <EditActionName isDisabled={!canStartStopDataFrameAnalytics} />,
+      name: editActionNameText,
       enabled: () => canStartStopDataFrameAnalytics,
-      description: editActionNameText,
+      description: () =>
+        canStartStopDataFrameAnalytics ? editActionNameText : editActionPermissionText,
       icon: 'pencil',
       type: 'icon',
       onClick: (i: DataFrameAnalyticsListRow) => openFlyout(i),

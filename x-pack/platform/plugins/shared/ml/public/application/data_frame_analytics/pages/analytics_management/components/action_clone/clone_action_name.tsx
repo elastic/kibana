@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
-import type { FC } from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -487,25 +486,4 @@ export const useNavigateToWizardWithClonedJob = () => {
       });
     }
   };
-};
-
-interface CloneActionNameProps {
-  isDisabled: boolean;
-}
-
-export const CloneActionName: FC<CloneActionNameProps> = ({ isDisabled }) => {
-  if (isDisabled) {
-    return (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.ml.dataframe.analyticsList.cloneActionPermissionTooltip', {
-          defaultMessage: 'You do not have permission to clone analytics jobs.',
-        })}
-      >
-        <span tabIndex={0}>{cloneActionNameText}</span>
-      </EuiToolTip>
-    );
-  }
-
-  return <>{cloneActionNameText}</>;
 };
