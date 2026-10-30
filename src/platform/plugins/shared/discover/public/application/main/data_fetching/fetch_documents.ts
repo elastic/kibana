@@ -49,6 +49,8 @@ export const fetchDocuments = async (
   // Build the search request (this is the ES DSL)
   const searchRequest = searchSource.build();
 
+  const adapter = inspectorAdapters.requests;
+
   const result = await services.data.search.dslPaginated(
     {
       index: dataView,
@@ -58,8 +60,8 @@ export const fetchDocuments = async (
       abortSignal: abortController.signal,
       sessionId: searchSessionId,
       executionContext: { description: 'fetch documents' },
-      inspector: {
-        adapter: inspectorAdapters.requests,
+      inspector: adapter && {
+        adapter,
         title: i18n.translate('discover.inspectorRequestDataTitleDocuments', {
           defaultMessage: 'Documents',
         }),
@@ -77,7 +79,6 @@ export const fetchDocuments = async (
     processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
   });
 
-  const adapter = inspectorAdapters.requests;
   const interceptedWarnings: SearchResponseWarning[] = [];
   if (adapter) {
     services.data.search.showWarnings(adapter, (warning) => {
