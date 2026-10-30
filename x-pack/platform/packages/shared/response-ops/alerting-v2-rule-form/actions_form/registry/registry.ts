@@ -15,17 +15,35 @@ const EMAIL_PARAMS_TEMPLATE = `to:
   - ""
 subject: ""
 message: |
-  {% for alert in inputs.payload.alerts %}
-  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
-  {% endfor %}
+  {%- assign alert_count = inputs.payload.alerts | size -%}
+  {%- if alert_count > 1 -%}
+  **{{ alert_count }} alerts**
+
+  {% endif -%}
+  {%- for alert in inputs.payload.alerts -%}
+  **{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}** — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}\\
+  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC" }} · [View in app]({{ alert.alert_url }})\\
+  Alert id: {{ alert.alert_id }}
+  {% unless forloop.last %}
+  {% endunless -%}
+  {%- endfor -%}
 `;
 
 // ToDo: add a channel selector to the Slack (v2) step form
 const SLACK2_PARAMS_TEMPLATE = `channel: ""
 text: |
-  {% for alert in inputs.payload.alerts %}
-  - {{ inputs.payload.rules[alert.rule_id].name | default: "Alert" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
-  {% endfor %}
+  {%- assign alert_count = inputs.payload.alerts | size -%}
+  {%- if alert_count > 1 -%}
+  *{{ alert_count }} alerts*
+
+  {% endif -%}
+  {%- for alert in inputs.payload.alerts -%}
+  *{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}* — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}
+  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC" }} · <{{ alert.alert_url }}|View in app>
+  Alert id: {{ alert.alert_id }}
+  {% unless forloop.last %}
+  {% endunless -%}
+  {%- endfor -%}
 `;
 
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [

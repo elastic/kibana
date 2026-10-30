@@ -43,6 +43,15 @@ describe('parseInlineParams', () => {
   });
 
   describe('default templates', () => {
+    const STANDARD_ALERT_FIELDS = [
+      'inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule"',
+      'alert.alert_status | capitalize',
+      'alert.severity | capitalize',
+      'alert.last_event_timestamp',
+      '{{ alert.alert_url }}',
+      '{{ alert.alert_id }}',
+    ];
+
     it.each([
       [
         'email',
@@ -59,7 +68,9 @@ describe('parseInlineParams', () => {
         const result = parseInlineParams(definition, params);
 
         expect(result.errors).toEqual([]);
-        expect(result.params?.[bodyField]).toContain('{{ alert.alert_url }}');
+        STANDARD_ALERT_FIELDS.forEach((field) => {
+          expect(result.params?.[bodyField]).toContain(field);
+        });
       }
     );
   });
