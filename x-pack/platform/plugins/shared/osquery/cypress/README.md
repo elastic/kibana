@@ -89,7 +89,7 @@ Each file inside the tasks folder represents a screen of our application.
 The data the tests need:
 
 - Is generated on the fly using our application APIs (preferred way)
-- Is ingested on the ELS instance using the `es_archive` utility (there are currently no archives checked in under `x-pack/solutions/security/test/osquery_cypress/es_archives`)
+- Is ingested on the ELS instance using the `es_archive` utility (archives live under `x-pack/solutions/security/test/osquery_cypress/es_archives`, which may be empty)
 
 ### How to generate a new archive
 
