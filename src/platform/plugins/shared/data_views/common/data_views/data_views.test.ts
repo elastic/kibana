@@ -616,6 +616,29 @@ describe('IndexPatterns', () => {
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', ['b']);
   });
 
+  test.each([
+    { requested: ['b', 'c'], expected: ['b', 'c'] },
+    { requested: ['*'], expected: undefined },
+  ])(
+    'createSavedObject with overwrite of a duplicate shared with all spaces, requested $requested',
+    async ({ requested, expected }) => {
+      const dataView = await indexPatterns.create(
+        { title: 'kibana-*', name: 'test', namespaces: requested },
+        true
+      );
+
+      savedObjectsClient.find = jest
+        .fn()
+        .mockResolvedValue([{ ...savedObject, id: 'dupe-id', namespaces: ['*'] }]);
+      savedObjectsClient.delete = jest.fn().mockResolvedValue(undefined);
+      savedObjectsClient.create = jest.fn().mockResolvedValue({ ...savedObject, id: dataView.id });
+
+      await indexPatterns.createSavedObject(dataView, true);
+
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', expected);
+    }
+  );
+
   test('createSavedObject with overwrite deletes from the current space when no namespaces are requested', async () => {
     const dataView = await indexPatterns.create({ title: 'kibana-*', name: 'test' }, true);
 

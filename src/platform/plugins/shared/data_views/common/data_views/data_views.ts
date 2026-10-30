@@ -46,6 +46,33 @@ const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
 const ALL_NAMESPACES_STRING = '*';
 
+/**
+ * Picks the namespaces to try when deleting a duplicate that is about to be overwritten. Only spaces
+ * the caller is creating the data view in are used, since those are the ones they are known to be
+ * able to write to. Undefined means the current space.
+ */
+const getDeleteNamespaces = (
+  requestedNamespaces: string[],
+  duplicateNamespaces: string[] = []
+): string[] | undefined => {
+  if (!requestedNamespaces.length) {
+    return undefined;
+  }
+
+  const isConcrete = (namespace: string) =>
+    namespace !== UNKNOWN_SPACE && namespace !== ALL_NAMESPACES_STRING;
+
+  // A duplicate shared with all spaces exists in every requested space
+  const candidates = duplicateNamespaces.includes(ALL_NAMESPACES_STRING)
+    ? requestedNamespaces
+    : requestedNamespaces.includes(ALL_NAMESPACES_STRING)
+    ? duplicateNamespaces
+    : duplicateNamespaces.filter((namespace) => requestedNamespaces.includes(namespace));
+
+  const namespaces = candidates.filter(isConcrete);
+  return namespaces.length ? namespaces : undefined;
+};
+
 const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string }) =>
   i18n.translate('dataViews.fetchFieldErrorTitle', {
     defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
@@ -1282,18 +1309,7 @@ export class DataViewsService {
 
     if (dupe) {
       if (overwrite) {
-        // Only delete from a space the caller is creating the data view in, since that is the
-        // one they are known to be able to write to. Empty means the current space and the
-        // all-spaces wildcard covers every concrete namespace.
-        const { namespaces: requestedNamespaces } = dataView;
-        const coversAllSpaces = requestedNamespaces.includes(ALL_NAMESPACES_STRING);
-        const deleteNamespaces = requestedNamespaces.length
-          ? dupe.namespaces?.filter(
-              (namespace) =>
-                namespace !== UNKNOWN_SPACE &&
-                (coversAllSpaces || requestedNamespaces.includes(namespace))
-            )
-          : undefined;
+        const deleteNamespaces = getDeleteNamespaces(dataView.namespaces, dupe.namespaces);
         await this.delete(dupe.id, deleteNamespaces);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
