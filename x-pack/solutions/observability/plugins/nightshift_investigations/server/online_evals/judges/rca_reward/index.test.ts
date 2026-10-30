@@ -128,6 +128,24 @@ describe('nightshift_rca_reward', () => {
     });
   });
 
+  it('scores temporal proximity as 0 with a cause_after_onset label when the gap is negative', async () => {
+    const { inferenceClient } = createInferenceClient(
+      judgeOutput({
+        root_cause_timestamp_minutes_before_onset: -3,
+        temporal_proximity_reasoning: 'The deploy happened three minutes after the alert fired.',
+      })
+    );
+
+    const { scores } = await evaluate(inferenceClient);
+
+    expect(scores.find(({ name }) => name === 'rca_temporal_proximity')).toEqual({
+      name: 'rca_temporal_proximity',
+      score: 0,
+      label: 'cause_after_onset',
+      explanation: 'The deploy happened three minutes after the alert fired.',
+    });
+  });
+
   it('drops the confidence score when the answer states no confidence', async () => {
     const { inferenceClient } = createInferenceClient(judgeOutput());
 
@@ -163,6 +181,14 @@ describe('nightshift_rca_reward', () => {
 
     expect(prompt).toHaveBeenCalledTimes(2);
     expect(scores[0]).toMatchObject({ name: 'rca_investigation_complete', score: 1 });
+  });
+
+  it('does not retry inference client errors', async () => {
+    const prompt = jest.fn().mockRejectedValue(new Error('Connector returned 401'));
+    const inferenceClient = { prompt } as unknown as BoundInferenceClient;
+
+    await expect(evaluate(inferenceClient)).rejects.toThrow('Connector returned 401');
+    expect(prompt).toHaveBeenCalledTimes(1);
   });
 
   it('throws without an inference client', async () => {

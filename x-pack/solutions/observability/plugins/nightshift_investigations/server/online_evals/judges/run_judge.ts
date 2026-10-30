@@ -8,12 +8,12 @@
 import type { BoundInferenceClient, Prompt, ToolChoice } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import pRetry from 'p-retry';
+import { MAX_EXPLANATION_LENGTH } from '../build_score_event';
 
 /** Matches the evals plugin's shipped judges. */
 const JUDGE_RETRIES = 3;
 
-/** Explanations are capped at the length the online eval score event keeps. */
-export const MAX_EXPLANATION_LENGTH = 500;
+export { MAX_EXPLANATION_LENGTH };
 
 export const capExplanation = (text: string): string =>
   text.length > MAX_EXPLANATION_LENGTH ? `${text.slice(0, MAX_EXPLANATION_LENGTH - 1)}…` : text;
@@ -58,5 +58,12 @@ export const runJudge = async <TOutput>({
       }
       return parsed.data;
     },
-    { retries: JUDGE_RETRIES }
+    {
+      retries: JUDGE_RETRIES,
+      onFailedAttempt: (error) => {
+        if (!error.message.startsWith('Invalid judge output')) {
+          throw error;
+        }
+      },
+    }
   );

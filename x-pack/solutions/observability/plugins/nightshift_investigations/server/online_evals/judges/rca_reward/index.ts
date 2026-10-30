@@ -68,18 +68,18 @@ export const rcaRewardJudge: RegisteredEvaluatorDefinition = {
 
     const minutes = output.root_cause_timestamp_minutes_before_onset;
     const proximity = temporalProximityScore(minutes);
-    if (proximity !== undefined) {
+    if (proximity !== undefined && minutes != null) {
       scores.push({
         name: 'rca_temporal_proximity',
         score: proximity,
-        label: `gap=${Math.round(minutes!)}min`,
+        label: `gap=${Math.round(minutes)}min`,
         explanation: capExplanation(output.temporal_proximity_reasoning),
       });
     } else if (output.temporal_proximity_reasoning) {
       scores.push({
         name: 'rca_temporal_proximity',
         score: 0,
-        label: 'no_timestamps',
+        label: minutes != null && minutes < 0 ? 'cause_after_onset' : 'no_timestamps',
         explanation: capExplanation(output.temporal_proximity_reasoning),
       });
     }
