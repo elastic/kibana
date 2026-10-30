@@ -106,13 +106,19 @@ export interface InferenceUnboundClientCreateOptions {
 }
 
 /**
+ * Parameters a server-side client can be bound to: the {@link BoundOptions} with the model
+ * given either as a `connectorId` or as a `featureId` (see {@link InferenceModelTarget}).
+ */
+export type ServerBoundOptions = Omit<BoundOptions, 'connectorId'> & InferenceModelTarget;
+
+/**
  * Options to create a bound inference client using the {@link InferenceServerStart.getClient} API.
  */
 export interface InferenceBoundClientCreateOptions extends InferenceUnboundClientCreateOptions {
   /**
    * The parameters to bind the client to.
    */
-  bindTo: BoundOptions;
+  bindTo: ServerBoundOptions;
 }
 
 /**
@@ -165,6 +171,17 @@ export interface InferenceServerStart {
    *
    * const chatResponse = inferenceClient.chatComplete({
    *   messages: [{ role: MessageRole.User, content: 'Do something' }],
+   * });
+   * ```
+   *
+   * A client can also be bound to a `featureId`, so that every `chatComplete`, `output` and
+   * `prompt` call uses the feature's top model.
+   *
+   * @example
+   * ```ts
+   * const inferenceClient = myStartDeps.inference.getClient({
+   *   request,
+   *   bindTo: { featureId: 'my-feature-id' },
    * });
    * ```
    */

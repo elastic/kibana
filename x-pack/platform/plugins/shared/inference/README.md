@@ -182,8 +182,21 @@ The top endpoint is the first one returned by `searchInferenceEndpoints.endpoint
 - The feature must be registered with `searchInferenceEndpoints` with the `chat_completion` task type.
 - `connectorId`, `temperature` and `reasoning` cannot be passed together with `featureId`.
 - `stream: true` and tools work the same way as with `connectorId`.
-- `featureId` is not supported by clients bound to a connector or by `getClientWithoutRequest`.
+- `featureId` is not supported by `getClientWithoutRequest`.
 - The call fails with a request error (400) when the feature is not registered, is not a chat completion feature, or has no endpoint, and with an internal error when the `searchInferenceEndpoints` plugin is disabled.
+
+A server client can also be bound to a feature with `bindTo: { featureId }`. Every `chatComplete`, `output` and `prompt` call on that client then uses the feature's top endpoint, resolved on each call, and the feature's `reasoning` applies even when the call passes its own.
+
+```ts
+const inferenceClient = myStartDeps.inference.getClient({
+  request,
+  bindTo: { featureId: 'my_feature' },
+});
+
+const chatResponse = await inferenceClient.chatComplete({
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+```
 
 #### Streaming mode
 

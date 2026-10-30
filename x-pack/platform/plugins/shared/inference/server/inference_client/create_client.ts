@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {
-  BoundOptions,
   BoundInferenceClient,
   InferenceClient,
   InferenceCallbacks,
@@ -25,6 +24,7 @@ import type {
   ActionsClientProvider,
   InferenceServerClient,
   ScopedFeatureEndpointResolver,
+  ServerBoundOptions,
 } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -53,7 +53,7 @@ interface CreateClientOptions {
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
-  bindTo: BoundOptions;
+  bindTo: ServerBoundOptions;
 }
 
 export function createClient(options: CreateClientOptions): InferenceServerClient;

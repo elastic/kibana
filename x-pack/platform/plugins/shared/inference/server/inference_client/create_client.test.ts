@@ -172,5 +172,38 @@ describe('createClient', () => {
         messages: [],
       });
     });
+
+    it('binds a featureId so chatComplete is called with featureId and no connectorId', async () => {
+      const chatCompleteMock = jest.fn().mockResolvedValue({ content: '', toolCalls: [] });
+      createInferenceClientMock.mockReturnValue({ chatComplete: chatCompleteMock } as any);
+      bindClientMock.mockImplementation(
+        jest.requireActual<typeof import('../../common/inference_client/bind_client')>(
+          '../../common/inference_client/bind_client'
+        ).bindClient
+      );
+
+      const client = createClient({
+        request,
+        actions,
+        logger,
+        bindTo: {
+          featureId: 'my_feature',
+        },
+        esClient: mockEsClient,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        endpointIdCache: new InferenceEndpointIdCache(),
+      });
+
+      await client.chatComplete({
+        messages: [],
+      });
+
+      expect(chatCompleteMock).toHaveBeenCalledTimes(1);
+      expect(chatCompleteMock).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my_feature', messages: [] })
+      );
+      expect(chatCompleteMock.mock.calls[0][0].connectorId).toBeUndefined();
+    });
   });
 });

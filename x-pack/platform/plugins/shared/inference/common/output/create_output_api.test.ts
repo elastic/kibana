@@ -6,7 +6,11 @@
  */
 
 import { firstValueFrom, isObservable, of, toArray } from 'rxjs';
-import type { ChatCompleteResponse, ChatCompletionEvent } from '@kbn/inference-common';
+import type {
+  ChatCompleteResponse,
+  ChatCompletionEvent,
+  OutputOptions,
+} from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';
 import { createToolValidationError } from '../chat_complete/errors';
@@ -47,6 +51,29 @@ describe('createOutputApi', () => {
         },
       ],
     });
+  });
+
+  it('forwards featureId to chatComplete instead of connectorId', async () => {
+    chatComplete.mockResolvedValue(Promise.resolve({ content: 'content', toolCalls: [] }));
+
+    const output = createOutputApi(chatComplete);
+
+    // a feature-bound server client forwards `featureId` in place of `connectorId`
+    await output({
+      id: 'id',
+      featureId: 'my_feature',
+      input: 'input message',
+    } as unknown as OutputOptions);
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    const [chatCompleteOptions] = chatComplete.mock.calls[0];
+    expect(chatCompleteOptions).toEqual(
+      expect.objectContaining({
+        featureId: 'my_feature',
+        messages: [{ content: 'input message', role: 'user' }],
+      })
+    );
+    expect(chatCompleteOptions).not.toHaveProperty('connectorId');
   });
 
   it('returns the expected value when stream=false', async () => {
