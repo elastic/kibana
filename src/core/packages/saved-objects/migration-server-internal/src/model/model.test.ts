@@ -1774,6 +1774,14 @@ describe('migrations v2 model', () => {
         const newState = model(setWriteBlockState, res);
         expect(newState.controlState).toEqual('REFRESH_TARGET');
       });
+
+      test('SET_SOURCE_WRITE_BLOCK -> DONE when a relocation was already published', () => {
+        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.right(
+          'relocation_already_migrated'
+        );
+        const newState = model({ ...setWriteBlockState, mustRelocateDocuments: true }, res);
+        expect(newState.controlState).toEqual('DONE');
+      });
     });
 
     describe('CALCULATE_EXCLUDE_FILTERS', () => {
@@ -1909,6 +1917,7 @@ describe('migrations v2 model', () => {
           const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
             type: 'synchronization_successful' as const,
             data: [],
+            relocationFinished: false,
           });
           const newState = model(state, res);
           expect(newState.controlState).toEqual('DONE_REINDEXING_SYNC');
@@ -1920,6 +1929,7 @@ describe('migrations v2 model', () => {
           const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
             type: 'synchronization_successful' as const,
             data: [],
+            relocationFinished: false,
           });
           const newState = model(
             {
@@ -1930,6 +1940,23 @@ describe('migrations v2 model', () => {
             res
           );
           expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        });
+
+        test('READY_TO_REINDEX_SYNC -> DONE when another node already published the aliases', () => {
+          const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+            type: 'synchronization_successful' as const,
+            data: [],
+            relocationFinished: true,
+          });
+          const newState = model(
+            {
+              ...state,
+              sourceIndex: Option.fromNullable('.kibana'),
+              sourceIndexMappings: Option.fromNullable({} as IndexMapping),
+            },
+            res
+          );
+          expect(newState.controlState).toEqual('DONE');
         });
       });
 
@@ -2195,7 +2222,7 @@ describe('migrations v2 model', () => {
       };
 
       test('DONE_REINDEXING_SYNC -> SET_TEMP_WRITE_BLOCK if synchronization succeeds', () => {
-        const res: ResponseType<'READY_TO_REINDEX_SYNC'> = Either.right({
+        const res: ResponseType<'DONE_REINDEXING_SYNC'> = Either.right({
           type: 'synchronization_successful' as const,
           data: [],
         });

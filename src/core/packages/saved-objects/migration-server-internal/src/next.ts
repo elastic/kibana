@@ -37,6 +37,7 @@ import type {
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsTransform,
   PrepareCompatibleMigration,
+  ReadyToReindexSyncState,
   RefreshSource,
   RefreshTarget,
   ReindexSourceToTempClosePit,
@@ -132,11 +133,19 @@ export const nextActionMap = (
         knownTypes: state.knownTypes,
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
-      Actions.safeWriteBlock({
-        client,
-        sourceIndex: state.sourceIndex.value,
-        targetIndex: state.targetIndex,
-      }),
+      state.mustRelocateDocuments && state.sourceIndex.value === state.targetIndex
+        ? Actions.finishRelocationEarly({
+            client,
+            tempIndex: state.tempIndex,
+            readyToReindex,
+            doneReindexing,
+            updateRelocationAliases,
+          })
+        : Actions.safeWriteBlock({
+            client,
+            sourceIndex: state.sourceIndex.value,
+            targetIndex: state.targetIndex,
+          }),
     CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
       Actions.calculateExcludeFilters({
         client,
@@ -157,10 +166,31 @@ export const nextActionMap = (
         mappings: state.tempIndexMappings,
         esCapabilities: state.esCapabilities,
       }),
-    READY_TO_REINDEX_SYNC: () =>
-      Actions.synchronizeMigrators({
-        waitGroup: readyToReindex,
-      }),
+    READY_TO_REINDEX_SYNC: (state: ReadyToReindexSyncState) =>
+      pipe(
+        Actions.synchronizeMigrators({
+          waitGroup: readyToReindex,
+        }),
+        // The alias publication is the last step of a relocation. Re-read it
+        // once every sibling has reached this barrier, and skip the copy when
+        // another node already finished.
+        TaskEither.chainW(() =>
+          Actions.finishRelocationIfPublished({
+            client,
+            currentAlias: state.currentAlias,
+            versionAlias: state.versionAlias,
+            tempIndex: state.tempIndex,
+            readyToReindex,
+            doneReindexing,
+            updateRelocationAliases,
+          })
+        ),
+        TaskEither.map((outcome) => ({
+          type: 'synchronization_successful' as const,
+          data: [] as void[],
+          relocationFinished: outcome === Actions.RELOCATION_ALREADY_MIGRATED,
+        }))
+      ),
     REINDEX_SOURCE_TO_TEMP_OPEN_PIT: (state: ReindexSourceToTempOpenPit) =>
       Actions.openPit({ client, index: state.sourceIndex.value }),
     REINDEX_SOURCE_TO_TEMP_READ: (state: ReindexSourceToTempRead) =>
