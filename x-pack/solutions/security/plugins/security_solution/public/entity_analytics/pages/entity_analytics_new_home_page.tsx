@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -533,7 +534,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const searchExpression = useSearchBarExpression();
+  const { searchExpression, ignoredFields: ignoredFilterFields } = useSearchBarExpression(
+    isDataViewLoading ? undefined : dataView
+  );
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -1345,6 +1348,26 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             />
           </div>
 
+          {ignoredFilterFields.length > 0 && (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="warning"
+              title={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.filters.ignoredTitle',
+                {
+                  defaultMessage:
+                    'Entities have no {count, plural, one {field} other {fields}} {fields}, so the filters with {count, plural, one {it} other {them}} were ignored.',
+                  values: {
+                    count: ignoredFilterFields.length,
+                    fields: ignoredFilterFields.join(', '),
+                  },
+                }
+              )}
+            />
+          )}
+
           <EuiSpacer size="s" />
 
           <EntityFiltersBar
@@ -1353,6 +1376,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             spaceId={spaceId}
             rowsMode={rowsMode}
             esFilter={esFilter}
+            searchExpression={searchExpression}
             watchlistNames={watchlistNames}
           />
 
