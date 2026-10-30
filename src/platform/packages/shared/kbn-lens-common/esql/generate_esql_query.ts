@@ -201,6 +201,27 @@ const getOtherBucketNamedFlagAlias = (sourceField: string): string =>
 const getOtherBucketKeyAlias = (sourceField: string): string =>
   `key_${sourceField.replace(/[^A-Za-z0-9_]/g, '_')}`;
 
+/**
+ * Creates an allocator that returns a helper column name, adding the first free numeric suffix
+ * when the name is taken by a column the query uses or by a data view field. The Other key
+ * column is created before `STATS`, so reusing the name of a field that `STATS` reads would
+ * replace that field's values.
+ */
+const createHelperAliasAllocator = (
+  takenNames: Iterable<string>,
+  isDataViewField: (name: string) => boolean
+) => {
+  const taken = new Set(takenNames);
+  return (baseName: string): string => {
+    let alias = baseName;
+    for (let suffix = 1; taken.has(alias) || isDataViewField(alias); suffix++) {
+      alias = `${baseName}_${suffix}`;
+    }
+    taken.add(alias);
+    return alias;
+  };
+};
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -796,7 +817,19 @@ export function generateEsqlQuery(
           // DSL's Other request requires the field to exist, so documents without it stay out of
           // every bucket instead of falling into "Other".
           queryParts.push(`WHERE ${fieldExpr} IS NOT NULL`);
-          const keyAlias = getOtherBucketKeyAlias(innerTermsBucket.col.sourceField);
+          const allocateHelperAlias = createHelperAliasAllocator(
+            [
+              ...Object.values(layer.columns).flatMap((col) =>
+                'sourceField' in col ? [col.sourceField] : []
+              ),
+              ...metricOutputNamesByColId.values(),
+              ...resolvedBucketExprs.values(),
+            ],
+            (name) => Boolean(indexPattern.getFieldByName(name))
+          );
+          const keyAlias = allocateHelperAlias(
+            getOtherBucketKeyAlias(innerTermsBucket.col.sourceField)
+          );
           queryParts.push(
             buildOuterTopNOtherRemap({
               source,
@@ -821,7 +854,9 @@ export function generateEsqlQuery(
           // named=1 / Other=0 so SORT named DESC keeps Other last like DSL, for both metric and
           // alphabetical ranking. Metric ranking also breaks ties by the key (DSL key order).
           // A single CASE(metric) cannot mix 0::LONG with AVG (double) or similar.
-          const namedFlagAlias = getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField);
+          const namedFlagAlias = allocateHelperAlias(
+            getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField)
+          );
           const keySortKey: EsqlSortKey = { expr: keyAlias, direction: 'ASC' };
           queryParts.push(
             `EVAL ${buildOtherBucketNamedFlagFragment({ flagAlias: namedFlagAlias, keyAlias })}`

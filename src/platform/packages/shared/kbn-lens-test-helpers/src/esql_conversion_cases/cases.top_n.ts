@@ -278,6 +278,76 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
+      description: 'other bucket key column does not shadow a field that a metric reads',
+      // The sample data has no field named like a helper column.
+      skipApiExecution: true,
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('sum', 'key_host_keyword'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword_1 = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = SUM(key_host_keyword) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS SUM(key_host_keyword) BY key_host_keyword_1 | EVAL named_host_keyword = CASE(key_host_keyword_1 IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`SUM(key_host_keyword)\` DESC, key_host_keyword_1 ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword_1), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword_1`,
+        columnNames: ['SUM(key_host_keyword)', 'host.keyword'],
+        expectedSourceIds: { 'SUM(key_host_keyword)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'other bucket named flag column does not shadow a field that a metric reads',
+      // The sample data has no field named like a helper column.
+      skipApiExecution: true,
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('sum', 'named_host_keyword'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = SUM(named_host_keyword) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS SUM(named_host_keyword) BY key_host_keyword | EVAL named_host_keyword_1 = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword_1 DESC, \`SUM(named_host_keyword)\` DESC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword_1, key_host_keyword`,
+        columnNames: ['SUM(named_host_keyword)', 'host.keyword'],
+        expectedSourceIds: { 'SUM(named_host_keyword)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      // The data view has a field named like the key column that no layer column references,
+      // for example one a metric filter query could read after the remap.
+      dataset: { ...logs, fieldTypes: { ...logs.fieldTypes, key_host_keyword: 'number' } },
+      description: 'other bucket key column does not shadow a data view field',
+      skipApiExecution: true,
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword_1 = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword_1 | EVAL named_host_keyword = CASE(key_host_keyword_1 IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, key_host_keyword_1 ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword_1), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword_1`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
       description: 'single terms with other bucket and missing values is not convertible',
       columns: {
         col1: terms('host.keyword', { otherBucket: true, missingBucket: true }),
