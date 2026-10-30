@@ -205,7 +205,7 @@ export class VisualizePageObject extends FtrService {
     // waiting for the existence of the control gives the UI more time to bind a click handler
     // see https://github.com/elastic/kibana/issues/89958
     if (
-      !(await this.testSubjects.waitForExists(`visType-${type}`, {
+      !(await this.testSubjects.exists(`visType-${type}`, {
         timeout: this.testSubjects.FIND_TIME,
       }))
     ) {
