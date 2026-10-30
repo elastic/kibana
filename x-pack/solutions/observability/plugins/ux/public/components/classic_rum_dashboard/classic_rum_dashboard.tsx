@@ -42,11 +42,12 @@ export const createClassicRumDashboard = ({
 
   function ClassicRumDashboard({
     serviceName,
+    environment,
     timeRange,
     onTimeRangeChange,
   }: ClassicRumDashboardProps) {
     // An in-memory URL keeps the dashboard state out of the host app's URL.
-    const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
+    const history = useEmbeddedHistory({ serviceName, environment, timeRange, onTimeRangeChange });
 
     return (
       // React Router keeps its first history, so a new service remounts the providers.

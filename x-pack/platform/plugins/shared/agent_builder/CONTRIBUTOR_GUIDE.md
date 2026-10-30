@@ -509,8 +509,8 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 
   // Optional: preferred width of the canvas flyout in full-screen context.
   // Accepts any valid CSS width value (e.g. '600px', '40vw').
-  // Defaults to '50vw' when not specified. Has no effect in sidebar context
-  // or on narrow viewports (where the canvas always fills available width).
+  // Defaults to '50vw' when not specified and is capped at '50vw'. Has no effect
+  // in sidebar context or on narrow viewports.
   canvasWidth: '600px',
 
   // Expanded view rendered in the canvas flyout
@@ -615,9 +615,9 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 };
 ```
 
-- Accepts any valid CSS width string: `'600px'`, `'40vw'`, `'80%'`, etc.
-- Has no effect in sidebar context — the canvas always fills available width there.
-- Has no effect on narrow viewports (below the `l` EUI breakpoint, ~992px) — the canvas switches to overlay mode and fills available width regardless of this setting.
+- Accepts any valid CSS width string: `'600px'`, `'40vw'`, etc.
+- Is capped at `50vw`. Users can resize the canvas between `300px` and `50vw`.
+- Has no effect in sidebar context or on narrow viewports (below the `l` EUI breakpoint, ~992px). There the canvas opens as an overlay at `50vw`, or 90% of the space beside the sidebar when that is narrower, and cannot be resized.
 
 #### Opening the sidebar from attachments
 
@@ -1180,6 +1180,19 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
   },
 }));
 ```
+
+### Conversation details flyout width
+
+Every conversation details flyout — the in-chat one and the ones opened with
+`openConversationDetails` — is resizable and uses the same width rules, so it opens at the same
+width in every consuming app:
+
+- Default width 480px, minimum 400px, maximum 640px.
+- When the user drags the flyout, that width is remembered (in `localStorage`) and used on the
+  next open, wherever the flyout is opened from. The flyout menu's reset action returns it to the
+  default.
+
+The width is not configurable per template or per caller: all surfaces share one setting.
 
 ### Conversation details menu actions
 

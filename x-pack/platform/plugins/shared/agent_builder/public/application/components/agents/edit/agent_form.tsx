@@ -163,6 +163,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   });
 
   const canEditAgent = isCreateMode ? manageAgents : permissions?.update_agent ?? false;
+  // A bound agent is read-only without manage_security; binding itself is API-only for now.
+  const isBoundReadOnly = !isCreateMode && Boolean(agentState?.service_account_id) && !canEditAgent;
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
@@ -276,6 +278,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             canChangeApprovals={
               isCreateMode ? manageAgents : permissions?.update_approvals ?? false
             }
+            isBoundReadOnly={isBoundReadOnly}
             owner={agentState?.created_by}
             agentId={editingAgentId}
           />
@@ -386,6 +389,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       manageAgents,
       permissions?.update_access_control,
       permissions?.update_approvals,
+      isBoundReadOnly,
       isExperimentalFeaturesEnabled,
       enableElasticCapabilities,
     ]

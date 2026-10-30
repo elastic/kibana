@@ -20,10 +20,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { isRight } from 'fp-ts/Either';
 import type { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
 import type { Dependency } from '../../../common/burn_rate_rule/types';
-import { DependencyRT } from '../../../common/burn_rate_rule/types';
+import { dependencySchema } from '../../../common/burn_rate_rule/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
@@ -93,9 +92,9 @@ export function DependencyEditor({
   );
 
   const handleSubmit = () => {
-    const dep = DependencyRT.decode(partialDependency);
-    if (isRight(dep)) {
-      onSubmit(dep.right);
+    const result = dependencySchema.safeParse(partialDependency);
+    if (result.success) {
+      onSubmit(result.data);
     }
     handleClosePopover();
   };
