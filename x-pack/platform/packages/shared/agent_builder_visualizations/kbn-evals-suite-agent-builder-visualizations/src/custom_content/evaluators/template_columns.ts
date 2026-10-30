@@ -8,17 +8,9 @@
 import type { EsqlQueryRunner } from '../../evaluators/esql_query_runner';
 import { skippedResult } from '../../evaluator_utils';
 import type { CustomContentEvaluator } from '../types';
+import { readColumnReferences } from './template_column_references';
 
 export const CUSTOM_CONTENT_TEMPLATE_COLUMNS_EVALUATOR_NAME = 'Custom Content Template Columns';
-
-const COLUMN_REFERENCE = /(?:row|max)\[\s*["']([^"']+)["']\s*\]/g;
-
-/** Column names the template reads with `row["name"]` or `max["name"]`. */
-const DOT_ACCESS = /\b(?:row|max)\.\w/;
-
-export const readColumnReferences = (template: string): string[] => [
-  ...new Set([...template.matchAll(COLUMN_REFERENCE)].map((match) => match[1])),
-];
 
 /** Every column the template reads is a column the query returns. */
 export const createTemplateColumnsEvaluator = ({
@@ -37,11 +29,7 @@ export const createTemplateColumnsEvaluator = ({
 
     const references = readColumnReferences(template);
     if (references.length === 0) {
-      return skippedResult(
-        DOT_ACCESS.test(template)
-          ? 'The template reads columns with dot access, which this evaluator does not check.'
-          : 'The template reads no columns.'
-      );
+      return skippedResult('The template reads no columns.');
     }
 
     let columnNames: string[];
