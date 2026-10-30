@@ -105,6 +105,16 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    it('reports all-empty rows as no rows', async () => {
+      mockSearch.mockReturnValue(
+        createMockResponse({ columns: [{ name: 'a', type: 'keyword' }], values: [[], []] })
+      );
+
+      const { rawResponse } = await service.esql({ query: 'FROM logs' });
+
+      expect(rawResponse.values).toEqual([]);
+    });
+
     it('passes options correctly', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));

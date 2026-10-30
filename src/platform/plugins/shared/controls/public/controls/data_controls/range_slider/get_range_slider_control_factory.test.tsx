@@ -25,12 +25,6 @@ import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
-}));
-
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
 const DEFAULT_MAX = 1000;
@@ -227,8 +221,8 @@ describe('RangeSliderControlApi', () => {
     });
 
     test('fetches min/max from ES|QL when values_source is esql', async () => {
-      mockGetESQLResults.mockResolvedValue({
-        response: {
+      (dataService.search.esql as jest.Mock).mockResolvedValue({
+        rawResponse: {
           columns: [{ name: 'myFieldName', type: 'long' }],
           values: [[42], [256], [1024]],
         },

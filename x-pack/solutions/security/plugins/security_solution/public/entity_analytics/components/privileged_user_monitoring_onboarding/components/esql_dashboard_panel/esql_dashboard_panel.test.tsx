@@ -42,10 +42,8 @@ jest.mock('../../../../../common/lib/kibana', () => {
 });
 
 const EMPTY_QUERY_RESPONSE = {
-  response: {
-    columns: [],
-    values: [] as unknown,
-  },
+  columns: [],
+  values: [] as unknown,
 };
 
 const mockUseQuery = jest.fn(() => ({
@@ -147,10 +145,8 @@ describe('EsqlDashboardPanel', () => {
       isError: false,
       isRefetching: false,
       data: {
-        response: {
-          columns: [],
-          values,
-        },
+        columns: [],
+        values,
       },
       error: null,
     });

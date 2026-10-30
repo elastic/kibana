@@ -107,8 +107,15 @@ export class SearchMethodsService implements ISearchMethods {
         requestParams: response.requestParams,
       });
 
+      // An all-empty `values` (e.g. every column dropped) is reported as no rows
+      const rawResponse: IEsqlSearchResult['rawResponse'] = response.rawResponse.values?.every(
+        (row: unknown) => Array.isArray(row) && row.length === 0
+      )
+        ? { ...response.rawResponse, values: [] }
+        : response.rawResponse;
+
       const datatable = options?.includeDataTable
-        ? mapEsqlResponseToDatatable(response.rawResponse as any, {
+        ? mapEsqlResponseToDatatable(rawResponse, {
             query: params.query,
             timeRange: params.kibanaQueryContext?.timeRange,
             esqlVariables: params.kibanaQueryContext?.esqlVariables,
@@ -117,7 +124,7 @@ export class SearchMethodsService implements ISearchMethods {
         : undefined;
 
       return {
-        rawResponse: response.rawResponse,
+        rawResponse,
         warning: response.warning,
         datatable,
       };

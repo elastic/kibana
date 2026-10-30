@@ -88,7 +88,7 @@ const createParams = (
     esqlVariables: TEST_ESQL_VARIABLES,
   }),
   services: {
-    data: { search: { search: jest.fn() } },
+    data: { search: { esql: jest.fn() } },
     uiSettings: {},
   } as unknown as ChartSectionProps['services'],
   metricItem: mockMetric,
@@ -113,7 +113,6 @@ describe('useFetchExemplars', () => {
       rawResponse: {
         columns: TEST_COLUMNS,
         values: TEST_ROWS,
-        requestParams: { query: TEST_ESQL_QUERY },
       },
       requestParams: { query: TEST_ESQL_QUERY },
     });
@@ -251,7 +250,7 @@ describe('useFetchExemplars', () => {
     });
     expect(mockProbe).toHaveBeenCalledWith({
       fetchId: params.fetchParams.lastReloadRequestTime,
-      search: params.services.data.search.search,
+      search: params.services.data.search,
       timeFieldName: '@timestamp',
       timeRange: params.fetchParams.timeRange,
       uiSettings: params.services.uiSettings,
@@ -260,7 +259,7 @@ describe('useFetchExemplars', () => {
     });
     expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       esqlQuery: TEST_ESQL_QUERY,
-      search: params.services.data.search.search,
+      search: params.services.data.search,
       signal: expect.any(AbortSignal),
       timeFieldName: '@timestamp',
       timeRange: params.fetchParams.timeRange,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectionRequestParams } from '@elastic/transport';
+import type { estypes } from '@elastic/elasticsearch';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -19,13 +19,8 @@ import type {
 } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  getESQLResults,
-  getESQLTimeField,
-  getEsqlInspectorStats,
-  getEsqlSearchParams,
-} from '@kbn/esql-utils';
+import type { ISearchMethods } from '@kbn/search-types';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 
@@ -53,13 +48,8 @@ const INSPECTOR_REQUEST_DESCRIPTION = i18n.translate(
   }
 );
 
-const getInspectorErrorJson = (error: unknown): object =>
-  (error as { attributes?: object } | null)?.attributes ?? {
-    message: error instanceof Error ? error.message : String(error),
-  };
-
 export async function fetchEsqlData(
-  search: ISearchGeneric,
+  search: Pick<ISearchMethods, 'esql'>,
   http: HttpStart,
   esqlQuery: string,
   timeRange: TimeRange | undefined,
@@ -77,16 +67,10 @@ export async function fetchEsqlData(
   } = options ?? {};
 
   // One request per fetch, so the Requests view shows the latest query instead of a growing list.
+  // A superseded fetch is dropped by the newer fetch's reset, so it never leaves a stale entry.
   requestAdapter?.reset();
-  const startTime = Date.now();
-  const logRequest = () =>
-    requestAdapter?.start(
-      INSPECTOR_REQUEST_TITLE,
-      { description: INSPECTOR_REQUEST_DESCRIPTION },
-      startTime
-    );
 
-  let timeRangeFilter: { range: Record<string, unknown> } | undefined;
+  let timeRangeFilter: estypes.QueryDslQueryContainer | undefined;
   if (timeRange) {
     let timeField: string | undefined;
     try {
@@ -119,42 +103,27 @@ export async function fetchEsqlData(
 
   const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
-  const requestBody = {
-    ...getEsqlSearchParams({ esqlQuery, filter, timeRange, variables: esqlVariables }),
-    ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
-    ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
-  };
-
-  try {
-    const { response, params } = await getESQLResults({
-      esqlQuery,
-      search,
-      signal,
-      filter,
-      timeRange,
+  const { rawResponse } = await search.esql(
+    {
+      query: esqlQuery,
+      ...(filter ? { filter } : {}),
       ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
       ...(projectRouting !== undefined ? { projectRouting } : {}),
-      ...(esqlVariables?.length ? { variables: esqlVariables } : {}),
-    });
-
-    const requestParams = params as unknown as ConnectionRequestParams;
-
-    // A newer fetch has already reset the adapter, so this response must not leave a stale entry.
-    if (!signal.aborted) {
-      logRequest()
-        ?.stats(getEsqlInspectorStats(response))
-        .json(requestBody)
-        .ok({ json: { rawResponse: response }, requestParams });
+      kibanaQueryContext: { timeRange, esqlVariables },
+    },
+    {
+      abortSignal: signal,
+      ...(requestAdapter
+        ? {
+            inspector: {
+              adapter: requestAdapter,
+              title: INSPECTOR_REQUEST_TITLE,
+              description: INSPECTOR_REQUEST_DESCRIPTION,
+            },
+          }
+        : {}),
     }
+  );
 
-    return response;
-  } catch (error: unknown) {
-    // A superseded fetch is aborted on purpose; it is not a failed request worth showing.
-    if (!signal.aborted) {
-      logRequest()
-        ?.json(requestBody)
-        .error({ json: getInspectorErrorJson(error) });
-    }
-    throw error;
-  }
+  return rawResponse;
 }

@@ -8,20 +8,15 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
-import { getESQLResults } from '@kbn/esql-utils';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSourcePreview } from './use_source_preview';
 
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: jest.fn(),
-}));
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_timefilter');
 
-const getESQLResultsMock = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
+const esqlMock = jest.fn();
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useTimefilterMock = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
 
@@ -39,7 +34,7 @@ describe('useSourcePreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock.mockReturnValue({
-      services: { data: { search: { search: jest.fn() } } },
+      services: { data: { search: { esql: esqlMock } } },
     } as never);
     useTimefilterMock.mockReturnValue({
       timeState: { start: 1000, end: 2000 },
@@ -49,23 +44,22 @@ describe('useSourcePreview', () => {
   // Nightshift never registers a CPS app access, so the picker sends no routing. Validation and
   // onboarding route across all linked projects, so the preview must too or it shows no data.
   it('routes the preview across all linked projects', async () => {
-    getESQLResultsMock.mockResolvedValue({
-      response: { columns: [{ name: 'service.name', type: 'keyword' }], values: [['checkout']] },
-      params: {},
+    esqlMock.mockResolvedValue({
+      rawResponse: { columns: [{ name: 'service.name', type: 'keyword' }], values: [['checkout']] },
     } as never);
 
     const { result } = renderPreview();
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(getESQLResultsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ projectRouting: PROJECT_ROUTING.ALL })
+    expect(esqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: PROJECT_ROUTING.ALL }),
+      expect.anything()
     );
   });
 
   it('returns the sampled rows keyed by column name', async () => {
-    getESQLResultsMock.mockResolvedValue({
-      response: { columns: [{ name: 'service.name', type: 'keyword' }], values: [['checkout']] },
-      params: {},
+    esqlMock.mockResolvedValue({
+      rawResponse: { columns: [{ name: 'service.name', type: 'keyword' }], values: [['checkout']] },
     } as never);
 
     const { result } = renderPreview();

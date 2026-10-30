@@ -6,9 +6,8 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { IEsqlSearchParams, ISearchMethods } from '@kbn/search-types';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-import { getESQLResults } from '@kbn/esql-utils';
 import {
   buildEsqlCategorizeQuery,
   categoryKeyFromPattern,
@@ -34,9 +33,9 @@ export async function runEsqlCategorizeRequest({
   earliest: number;
   latest: number;
   intervalMs: number;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   timeRange?: TimeRange;
-  filter?: unknown;
+  filter?: IEsqlSearchParams['filter'];
   signal?: AbortSignal;
 }): Promise<{ categories: Category[]; hasExamples: boolean }> {
   const { start, end, bucketCount } = getAlignedSparklineRange({ earliest, latest, intervalMs });
@@ -49,14 +48,15 @@ export async function runEsqlCategorizeRequest({
     rangeEnd: end,
   });
 
-  const { response } = await getESQLResults({
-    esqlQuery,
-    search,
-    signal,
-    filter,
-    timeRange,
-    dropNullColumns: true,
-  });
+  const { rawResponse: response } = await search.esql(
+    {
+      query: esqlQuery,
+      filter,
+      dropNullColumns: true,
+      kibanaQueryContext: { timeRange },
+    },
+    { abortSignal: signal }
+  );
 
   const patternIndex = response.columns.findIndex((column) => column.name === 'Pattern');
   const countIndex = response.columns.findIndex((column) => column.name === 'Count');

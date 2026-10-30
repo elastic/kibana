@@ -80,12 +80,10 @@ export { buildMetricsInfoQuery } from './utils/append_to_query/append_metrics_in
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
-  getESQLResults,
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
-  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,

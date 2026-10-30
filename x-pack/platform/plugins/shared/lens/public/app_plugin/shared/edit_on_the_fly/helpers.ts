@@ -6,13 +6,12 @@
  */
 import {
   getIndexPatternFromESQLQuery,
-  getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
@@ -109,21 +108,22 @@ export const getGridAttrs = async (
       });
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
-  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-  const results = await getESQLResults({
-    esqlQuery: query.esql,
-    search: data.search.search,
-    signal: abortController?.signal,
-    filter,
-    dropNullColumns: true,
-    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
-    variables: esqlVariables,
-    timezone,
-    ...(approximation !== undefined ? { approximation } : {}),
-    includeColumnMetadata: true,
-  });
-
-  const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
+  const {
+    rawResponse: { all_columns: allColumns = [], columns: valueColumns = [], values },
+  } = await data.search.esql(
+    {
+      query: query.esql,
+      filter,
+      dropNullColumns: true,
+      columnMetadata: true,
+      ...(approximation !== undefined ? { approximation } : {}),
+      kibanaQueryContext: {
+        timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
+        esqlVariables,
+      },
+    },
+    { abortSignal: abortController?.signal }
+  );
   // Use `all_columns` property if it exists in the payload,
   // which has all columns regardless if they have data or not
   const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;

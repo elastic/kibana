@@ -13,7 +13,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLSearchParams } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
 /**
@@ -299,7 +299,7 @@ export interface IEsqlSearchResult {
   /**
    * Raw Elasticsearch ES|QL async query response
    */
-  rawResponse: estypes.EsqlAsyncQueryResponse;
+  rawResponse: ESQLSearchResponse;
   /**
    * Warning message from the ES Warning HTTP response header
    */

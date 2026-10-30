@@ -85,13 +85,13 @@ export function IngestChartStatistics({
     ({ signal }) =>
       executeEsqlQuery({
         query: buildDataQualityTotalDocCountEsql(esqlSource),
-        search: data.search.search,
+        search: data.search,
         signal,
         start: timeStart - WEEK_MS,
         end: timeEnd - WEEK_MS,
         uiSettings,
       }),
-    [esqlSource, timeStart, timeEnd, data.search.search, uiSettings]
+    [esqlSource, timeStart, timeEnd, data.search, uiSettings]
   );
 
   const storeStatsFetch = useStreamsAppFetch(

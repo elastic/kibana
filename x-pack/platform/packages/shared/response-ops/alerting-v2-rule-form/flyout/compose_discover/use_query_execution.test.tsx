@@ -8,16 +8,9 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createTestQueryClient } from '../../test_utils';
 import { useQueryExecution } from './use_query_execution';
-
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
-}));
-
-const mockGetESQLResults = getESQLResults as jest.Mock;
 
 const createWrapper = () => {
   const queryClient = createTestQueryClient();
@@ -26,7 +19,8 @@ const createWrapper = () => {
   );
 };
 
-const data = { search: { search: jest.fn() } } as unknown as DataPublicPluginStart;
+const mockEsql = jest.fn();
+const data = { search: { esql: mockEsql } } as unknown as DataPublicPluginStart;
 const timeRange = { from: 'now-15m', to: 'now' };
 
 describe('useQueryExecution', () => {
@@ -44,11 +38,11 @@ describe('useQueryExecution', () => {
   });
 
   it("keeps a tab's own error when switching away and back, without re-running or clearing it", async () => {
-    mockGetESQLResults.mockImplementation(async ({ esqlQuery }: { esqlQuery: string }) => {
-      if (esqlQuery.includes('garbage')) {
+    mockEsql.mockImplementation(async ({ query }: { query: string }) => {
+      if (query.includes('garbage')) {
         throw new Error('bad query');
       }
-      return { response: { columns: [], values: [] } };
+      return { rawResponse: { columns: [], values: [] } };
     });
 
     const { result, rerender } = renderHook(
@@ -77,10 +71,10 @@ describe('useQueryExecution', () => {
   });
 
   it('runs each tab independently, never showing one tab’s result for another', async () => {
-    mockGetESQLResults.mockImplementation(async ({ esqlQuery }: { esqlQuery: string }) => ({
-      response: {
+    mockEsql.mockImplementation(async ({ query }: { query: string }) => ({
+      rawResponse: {
         columns: [{ name: 'count', type: 'long' }],
-        values: esqlQuery.includes('base') ? [[1]] : [[2]],
+        values: query.includes('base') ? [[1]] : [[2]],
       },
     }));
 

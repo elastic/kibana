@@ -47,34 +47,6 @@ jest.mock('../../../data_views_service/create_esql_ad_hoc_data_view', () => ({
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
-      response: {
-        columns: [
-          {
-            name: '@timestamp',
-            id: '@timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
-        values: [],
-      },
-    }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     formatESQLColumns: jest.fn().mockReturnValue([
       {
@@ -158,6 +130,37 @@ jest.spyOn(getApplicationUserMessagesModule, 'useApplicationUserMessages');
 
 const data = {
   ...mockDataPlugin(),
+  search: {
+    ...mockDataPlugin().search,
+    esql: jest.fn().mockResolvedValue({
+      rawResponse: {
+        columns: [
+          {
+            name: '@timestamp',
+            id: '@timestamp',
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            name: 'bytes',
+            id: 'bytes',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'memory',
+            id: 'memory',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        values: [],
+      },
+    }),
+  },
   query: {
     ...mockDataPlugin().query,
     timefilter: {

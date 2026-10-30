@@ -6,24 +6,19 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { getESQLResults } from '@kbn/esql-utils';
 import { createReactQueryWrapper } from '../../../../common/mock/create_react_query_wrapper';
 import { useGetLatestCSVPrivilegedUserUploadQuery } from './manage_data_sources_query_hooks';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLResults: jest.fn(),
-}));
+const mockEsql = jest.fn();
 
 jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { data: { search: { search: jest.fn() } } } }),
+  useKibana: () => ({ services: { data: { search: { esql: mockEsql } } } }),
 }));
-
-const mockGetESQLResults = getESQLResults as jest.Mock;
 
 describe('useGetLatestCSVPrivilegedUserUploadQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });
+    mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
   });
 
   it('runs the ES|QL query with the pum_data_sources_latest_csv execution context', async () => {
@@ -31,9 +26,10 @@ describe('useGetLatestCSVPrivilegedUserUploadQuery', () => {
       wrapper: createReactQueryWrapper(),
     });
 
-    await waitFor(() => expect(mockGetESQLResults).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockEsql).toHaveBeenCalledTimes(1));
 
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
+    expect(mockEsql).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({
         executionContext: {
           child: {

@@ -437,7 +437,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
               earliest,
               latest,
               intervalMs,
-              search: search.search,
+              search,
               timeRange: esTimeRange,
               filter: timeFilter,
               signal: abortSignal,
@@ -531,7 +531,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     toasts,
     isEsqlQuery,
     query,
-    search.search,
+    search,
   ]);
 
   useEffect(() => {

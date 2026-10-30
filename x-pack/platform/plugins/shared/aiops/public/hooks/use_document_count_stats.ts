@@ -105,7 +105,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       ) {
         const { totalCount, documentCountStats } = await getEsqlDocumentCountStats({
           esql: esqlQuery,
-          search: data.search.search,
+          search: data.search,
           timeFieldName: searchParams.timeFieldName,
           earliest: searchParams.earliest,
           latest: searchParams.latest,

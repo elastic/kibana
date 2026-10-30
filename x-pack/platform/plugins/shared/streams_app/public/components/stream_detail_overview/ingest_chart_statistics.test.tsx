@@ -20,7 +20,7 @@ jest.mock('../../hooks/use_kibana', () => ({
     isServerless: false,
     dependencies: {
       start: {
-        data: { search: { search: jest.fn() } },
+        data: { search: { esql: jest.fn() } },
         streams: { streamsRepositoryClient: { fetch: jest.fn() } },
       },
     },

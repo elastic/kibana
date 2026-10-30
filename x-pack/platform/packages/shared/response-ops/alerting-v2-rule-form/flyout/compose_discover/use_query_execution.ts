@@ -7,7 +7,6 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import { Parser } from '@elastic/esql';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -113,15 +112,14 @@ export const useQueryExecution = ({
 
     const queryWithTime = injectTimeFilter(executionQuery, executionTimeField);
 
-    const result = await getESQLResults({
-      esqlQuery: queryWithTime,
-      search: data.search.search,
+    const { rawResponse } = await data.search.esql({
+      query: queryWithTime,
       dropNullColumns: true,
-      timeRange: executionTimeRange,
+      kibanaQueryContext: { timeRange: executionTimeRange },
     });
 
-    return result.response;
-  }, [executionQuery, executionTimeRange, executionTimeField, data.search.search]);
+    return rawResponse;
+  }, [executionQuery, executionTimeRange, executionTimeField, data.search]);
 
   const {
     data: response,

@@ -6,35 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ISearchGeneric } from '@kbn/search-types';
 import type {
   GetESQLSingleColumnValuesSuccess,
   GetESQLSingleColumnValuesFailure,
 } from './get_esql_single_column_values';
 import { getESQLSingleColumnValues } from './get_esql_single_column_values';
 
-const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
-  ...jest.requireActual('@kbn/esql-utils'),
-  getESQLResults: (...args: unknown[]) => mockGetESQLResults(...args),
-}));
-
-const searchMock = {} as ISearchGeneric;
+const esqlMock = jest.fn();
 
 describe('getESQLSingleColumnValues', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
   it('returns string values for non-numeric columns', async () => {
-    mockGetESQLResults.mockResolvedValueOnce({
-      response: {
+    esqlMock.mockResolvedValueOnce({
+      rawResponse: {
         columns: [{ name: 'column1', type: 'keyword' }],
         values: [['option1'], ['option2']],
       },
     });
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | STATS BY column',
-      search: searchMock,
+      search: { esql: esqlMock },
       esqlVariables: [],
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
@@ -43,15 +36,15 @@ describe('getESQLSingleColumnValues', () => {
   });
 
   it('coerces values to numbers when the column type is numeric', async () => {
-    mockGetESQLResults.mockResolvedValueOnce({
-      response: {
+    esqlMock.mockResolvedValueOnce({
+      rawResponse: {
         columns: [{ name: 'column1', type: 'long' }],
         values: [['10'], ['20'], ['30']],
       },
     });
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | KEEP bytes',
-      search: searchMock,
+      search: { esql: esqlMock },
       esqlVariables: [],
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isNumericResult(result)).toBe(true);
@@ -59,8 +52,8 @@ describe('getESQLSingleColumnValues', () => {
   });
 
   it('reports the no-results case so callers can distinguish "empty" from "failure"', async () => {
-    mockGetESQLResults.mockResolvedValueOnce({
-      response: {
+    esqlMock.mockResolvedValueOnce({
+      rawResponse: {
         columns: [],
         all_columns: [{ name: 'column1', type: 'keyword' }],
         values: [],
@@ -68,7 +61,7 @@ describe('getESQLSingleColumnValues', () => {
     });
     const result = await getESQLSingleColumnValues({
       query: 'FROM index | WHERE never',
-      search: searchMock,
+      search: { esql: esqlMock },
       esqlVariables: [],
     });
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
@@ -76,15 +69,15 @@ describe('getESQLSingleColumnValues', () => {
   });
 
   it('returns an error when query returns multiple columns', async () => {
-    mockGetESQLResults.mockResolvedValueOnce({
-      response: {
+    esqlMock.mockResolvedValueOnce({
+      rawResponse: {
         columns: [{ name: 'column1' }, { name: 'column2' }],
         values: [['option1'], ['option2']],
       },
     });
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index',
-      search: searchMock,
+      search: { esql: esqlMock },
       esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
@@ -92,10 +85,10 @@ describe('getESQLSingleColumnValues', () => {
     expect(result.errors[0].message).toBe('Query must return a single column');
   });
   it('returns an error on a failed query', async () => {
-    mockGetESQLResults.mockRejectedValueOnce('Invalid ES|QL query');
+    esqlMock.mockRejectedValueOnce('Invalid ES|QL query');
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | EVAL',
-      search: searchMock,
+      search: { esql: esqlMock },
       esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
@@ -113,14 +106,15 @@ describe('getESQLSingleColumnValues', () => {
     const timeRange = { from: 'now-10m', to: 'now' };
     await getESQLSingleColumnValues({
       query: 'FROM index | STATS BY column',
-      search: searchMock,
+      search: { esql: esqlMock },
       timeRange,
       esqlVariables: [],
     });
-    expect(mockGetESQLResults).toHaveBeenCalledWith(
+    expect(esqlMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        timeRange,
-      })
+        kibanaQueryContext: expect.objectContaining({ timeRange }),
+      }),
+      expect.anything()
     );
   });
 });

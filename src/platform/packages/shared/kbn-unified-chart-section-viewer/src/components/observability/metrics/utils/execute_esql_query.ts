@@ -9,10 +9,9 @@
 
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { IEsqlSearchParams, ISearchMethods } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import { getESQLResults } from '@kbn/esql-utils';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
@@ -28,7 +27,7 @@ import { getMetricsExecutionContext } from './execution_context';
 
 export interface ExecuteEsqlParams {
   esqlQuery: string;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   signal?: AbortSignal;
   timeFieldName?: string;
   timeRange?: TimeRange;
@@ -45,21 +44,9 @@ export interface ExecuteEsqlParams {
   executionContextName?: MetricsExecutionContextName;
 }
 
-export const fetchEsqlResponseOrThrow = async (
-  params: Parameters<typeof getESQLResults>[0]
-): Promise<Awaited<ReturnType<typeof getESQLResults>>> => {
-  const result = await getESQLResults(params);
-  const embedded = extractEsqlEmbeddedError(result.response as object);
-  if (embedded) {
-    throw new EsqlResponseError(embedded.cause, { status: embedded.status });
-  }
-
-  return result;
-};
-
 export interface ExecuteEsqlResult<TDocument> {
   documents: TDocument[];
-  rawResponse: ESQLSearchResponse & { requestParams: ESQLSearchParams };
+  rawResponse: ESQLSearchResponse;
   requestParams: { query: string; filter?: object };
 }
 
@@ -90,21 +77,27 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
       ? buildEsQuery(undefined, [], filtersWithTime, esQueryConfig)
       : undefined;
 
-  const { response, params } = await fetchEsqlResponseOrThrow({
-    esqlQuery,
-    search,
-    signal,
-    filter,
-    timeRange,
-    variables,
-    ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
-      profile_id: profileId,
-    }),
-  });
+  const { rawResponse } = await search.esql(
+    {
+      query: esqlQuery,
+      filter: filter as IEsqlSearchParams['filter'],
+      kibanaQueryContext: { timeRange, esqlVariables: variables },
+    },
+    {
+      abortSignal: signal,
+      ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
+        profile_id: profileId,
+      }),
+    }
+  );
+  const embedded = extractEsqlEmbeddedError(rawResponse);
+  if (embedded) {
+    throw new EsqlResponseError(embedded.cause, { status: embedded.status });
+  }
 
   return {
-    documents: esqlResultToPlainObjects<TDocument>(response),
-    rawResponse: { ...response, requestParams: params },
+    documents: esqlResultToPlainObjects<TDocument>(rawResponse),
+    rawResponse,
     requestParams: { query: esqlQuery, ...(filter ? { filter } : {}) },
   };
 }

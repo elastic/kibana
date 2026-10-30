@@ -97,7 +97,7 @@ export const useFetchHistogramBounds = ({
     esqlVariables,
     searchSessionId,
   }: Partial<ChartSectionProps['fetchParams']> = fetchParams ?? {};
-  const search = services.data.search.search;
+  const search = services.data.search;
   const { uiSettings } = services;
 
   // `fetchParams` is the snapshot captured when `metricItems` landed, so the session, time

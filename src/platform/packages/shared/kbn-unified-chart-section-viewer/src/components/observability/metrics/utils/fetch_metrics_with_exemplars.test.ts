@@ -12,7 +12,7 @@ jest.mock('./execute_esql_query', () => ({
 }));
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import { executeEsqlQuery } from './execute_esql_query';
 import { MetricsExecutionContextName } from './execution_context_enums';
 import { EXEMPLARS_PROBE_QUERY, fetchMetricsWithExemplars } from './fetch_metrics_with_exemplars';
@@ -20,7 +20,7 @@ import { EXEMPLARS_PROBE_QUERY, fetchMetricsWithExemplars } from './fetch_metric
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 
 const params = {
-  search: jest.fn() as unknown as ISearchGeneric,
+  search: { esql: jest.fn() } as unknown as Pick<ISearchMethods, 'esql'>,
   timeFieldName: '@timestamp',
   timeRange: { from: 'now-15m', to: 'now' },
   uiSettings: {} as IUiSettingsClient,

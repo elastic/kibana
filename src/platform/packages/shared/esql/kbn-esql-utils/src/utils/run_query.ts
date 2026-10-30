@@ -10,10 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ProjectRouting, TimeRange } from '@kbn/es-query';
-import { getTimeZoneFromSettings } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
@@ -183,108 +181,4 @@ export async function getESQLQueryColumns({
       })
     );
   }
-}
-
-// The parameters getESQLResults sends to the ES|QL search. Exported so callers that display the
-// request (for example in Inspector) show exactly what is sent.
-export function getEsqlSearchParams({
-  esqlQuery,
-  filter,
-  dropNullColumns,
-  timeRange,
-  variables,
-  timezone,
-  includeColumnMetadata,
-}: {
-  esqlQuery: string;
-  filter?: unknown;
-  dropNullColumns?: boolean;
-  timeRange?: TimeRange;
-  variables?: ESQLControlVariable[];
-  timezone?: string;
-  includeColumnMetadata?: boolean;
-}) {
-  const namedParams = getNamedParams(esqlQuery, timeRange, variables);
-  return {
-    ...(filter ? { filter } : {}),
-    query: esqlQuery,
-    ...(dropNullColumns ? { dropNullColumns: true } : {}),
-    ...(namedParams.length ? { params: namedParams } : {}),
-    ...(timezone ? { time_zone: getTimeZoneFromSettings(timezone) } : {}),
-    ...(includeColumnMetadata ? { settings: { column_metadata: true } } : {}),
-  };
-}
-
-// Returns the table as being returned by the _query endpoint
-// Based on the search api from the data plugin
-export async function getESQLResults({
-  esqlQuery,
-  search,
-  signal,
-  filter,
-  dropNullColumns,
-  timeRange,
-  variables,
-  timezone,
-  executionContext,
-  approximation,
-  projectRouting,
-  includeColumnMetadata,
-}: {
-  esqlQuery: string;
-  search: ISearchGeneric;
-  signal?: AbortSignal;
-  filter?: unknown;
-  dropNullColumns?: boolean;
-  timeRange?: TimeRange;
-  variables?: ESQLControlVariable[];
-  timezone?: string;
-  executionContext?: KibanaExecutionContext;
-  approximation?: boolean;
-  projectRouting?: ProjectRouting;
-  includeColumnMetadata?: boolean;
-}): Promise<{
-  response: ESQLSearchResponse;
-  params: ESQLSearchParams;
-}> {
-  const result = await lastValueFrom(
-    search(
-      {
-        params: getEsqlSearchParams({
-          esqlQuery,
-          filter,
-          dropNullColumns,
-          timeRange,
-          variables,
-          timezone,
-          includeColumnMetadata,
-        }),
-      },
-      {
-        abortSignal: signal,
-        strategy: 'esql_async',
-        ...(executionContext ? { executionContext } : {}),
-        ...(approximation !== undefined ? { approximation } : {}),
-        ...(projectRouting !== undefined ? { projectRouting } : {}),
-      }
-    )
-  );
-
-  const rawResponse = result.rawResponse as unknown as ESQLSearchResponse;
-
-  // Normalize response.values: if all arrays are empty, convert to single empty array
-  const normalizedValues =
-    rawResponse.values && rawResponse.values.every((row) => Array.isArray(row) && row.length === 0)
-      ? []
-      : rawResponse.values;
-
-  const response = {
-    ...rawResponse,
-    values: normalizedValues,
-  };
-
-  return {
-    response,
-    params: result.requestParams as unknown as ESQLSearchParams,
-  };
 }

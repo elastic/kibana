@@ -15,7 +15,6 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { fromObservable } from 'xstate';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import { convertQueryToESQLExpression } from '@kbn/esql-utils';
 import { convertFiltersToESQLExpression } from '@kbn/esql-utils';
 import { Observable } from 'rxjs';
@@ -171,11 +170,10 @@ export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }:
           streamsRepositoryClient,
         });
 
-        const { response } = await getESQLResults({
-          esqlQuery,
-          search: data.search.search,
-          signal: abortController.signal,
-        });
+        const { rawResponse: response } = await data.search.esql(
+          { query: esqlQuery },
+          { abortSignal: abortController.signal }
+        );
 
         let docs = esqlResultToPlainObjects<SampleDocument>(response);
         docs = extractRawDocumentsFromSource(docs);

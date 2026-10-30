@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import { esqlResponseToRecords } from '../../../common/utils/esql';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -63,12 +62,10 @@ export const useIntegrationLastAlertIngested = ({
     refetch,
   } = useQuery(
     [integrationName],
-    async ({ signal }) =>
-      getESQLResults({
-        esqlQuery: query,
-        search: data.search.search,
-        signal,
-      }),
+    async ({ signal }) => {
+      const { rawResponse } = await data.search.esql({ query }, { abortSignal: signal });
+      return rawResponse;
+    },
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
@@ -76,9 +73,9 @@ export const useIntegrationLastAlertIngested = ({
   );
 
   const lastAlertIngested: string | null = useMemo(() => {
-    const records = esqlResponseToRecords<{ [FIELD]: string }>(result?.response);
+    const records = esqlResponseToRecords<{ [FIELD]: string }>(result);
     return records.length > 0 ? records[0][FIELD] : null;
-  }, [result?.response]);
+  }, [result]);
 
   return useMemo(
     () => ({

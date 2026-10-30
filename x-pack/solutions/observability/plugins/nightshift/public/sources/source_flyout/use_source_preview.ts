@@ -6,7 +6,7 @@
  */
 
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
-import { appendLimitToQuery, getESQLResults } from '@kbn/esql-utils';
+import { appendLimitToQuery } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
@@ -30,7 +30,7 @@ export function useSourcePreview({
   runId: number;
   refreshCount: number;
 }) {
-  const { data } = useKibana().services;
+  const search = useKibana().services.data.search;
   const {
     timeState: { start, end },
   } = useTimefilter();
@@ -38,14 +38,15 @@ export function useSourcePreview({
   return useQuery({
     queryKey: ['sourcePreview', esql, start, end, runId, refreshCount],
     queryFn: async ({ signal }) => {
-      const { response } = await getESQLResults({
-        esqlQuery: appendLimitToQuery(esql, PREVIEW_ROW_LIMIT),
-        search: data.search.search,
-        signal,
-        dropNullColumns: true,
-        filter: { range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } } },
-        projectRouting: PROJECT_ROUTING.ALL,
-      });
+      const { rawResponse: response } = await search.esql(
+        {
+          query: appendLimitToQuery(esql, PREVIEW_ROW_LIMIT),
+          dropNullColumns: true,
+          filter: { range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } } },
+          projectRouting: PROJECT_ROUTING.ALL,
+        },
+        { abortSignal: signal }
+      );
       return {
         columns: response.columns.map(({ name }) => name),
         rows: esqlResultToRows(response),

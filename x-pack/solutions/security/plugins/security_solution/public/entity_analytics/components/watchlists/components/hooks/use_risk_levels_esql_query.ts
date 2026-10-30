@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
@@ -66,50 +65,19 @@ export const useRiskLevelsEsqlQuery = ({
     error,
     isError,
     refetch,
-  } = useQuery<
-    {
-      response: ESQLSearchResponse;
-      params: ESQLSearchParams;
-    },
-    SecurityAppError
-  >(
+  } = useQuery<ESQLSearchResponse, SecurityAppError>(
     queryKey,
     async ({ signal }) => {
-      // We call `data.search.search` directly rather than `getESQLResults` so we can pass
-      // `projectRouting` as a search option. In CPS environments the search interceptor would
+      // `projectRouting` is passed explicitly. In CPS environments the search interceptor would
       // otherwise inject the space default (`_alias:*`), fanning this entity-store query out to
       // every linked project and inflating the risk-level counts. Passing `_alias:_origin` here
       // makes it the resolved project routing, which is written to the request body before the
       // CPS request handler runs and is then preserved.
-      const searchResult = await lastValueFrom(
-        data.search.search(
-          {
-            params: {
-              query,
-              ...(filterQuery ? { filter: filterQuery } : {}),
-            },
-          },
-          {
-            abortSignal: signal,
-            strategy: 'esql_async',
-            projectRouting: '_alias:_origin',
-            executionContext: RISK_LEVEL_PANEL_CONTEXT,
-          }
-        )
+      const { rawResponse } = await data.search.esql(
+        { query, filter: filterQuery, projectRouting: '_alias:_origin' },
+        { abortSignal: signal, executionContext: RISK_LEVEL_PANEL_CONTEXT }
       );
-
-      const rawResponse = searchResult.rawResponse as unknown as ESQLSearchResponse;
-      // Mirror getESQLResults' normalization: collapse all-empty rows to an empty array.
-      const normalizedValues =
-        rawResponse.values &&
-        rawResponse.values.every((row) => Array.isArray(row) && row.length === 0)
-          ? []
-          : rawResponse.values;
-
-      return {
-        response: { ...rawResponse, values: normalizedValues },
-        params: searchResult.requestParams as unknown as ESQLSearchParams,
-      };
+      return rawResponse;
     },
     {
       keepPreviousData: true,
@@ -128,7 +96,7 @@ export const useRiskLevelsEsqlQuery = ({
     filteredError
   );
 
-  const response = result?.response;
+  const response = result;
 
   const inspect = useMemo(() => {
     return {

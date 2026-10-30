@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom, of } from 'rxjs';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
@@ -59,7 +58,7 @@ export class CreateESQLControlAction implements Action<Context> {
 
   constructor(
     protected readonly core: CoreStart,
-    protected readonly search: ISearchGeneric,
+    protected readonly search: DataPublicPluginStart['search'],
     protected readonly timefilter: TimefilterContract
   ) {}
 

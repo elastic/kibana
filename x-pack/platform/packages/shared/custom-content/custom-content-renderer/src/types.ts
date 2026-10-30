@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 
 /**
  * Services required to render custom content. Passed explicitly by consumers so the package stays
@@ -17,5 +17,5 @@ import type { ISearchGeneric } from '@kbn/search-types';
 export interface CustomContentRendererServices {
   http: HttpStart;
   uiSettings: IUiSettingsClient;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
 }

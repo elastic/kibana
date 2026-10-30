@@ -39,7 +39,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
   }
 
   start(core: CoreStart, { data, uiActions, agentBuilder }: StartDeps) {
-    setServices(core, data.search.search, data.dataViews, agentBuilder);
+    setServices(core, data.search, data.dataViews, agentBuilder);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_CONTENT_ACTION_ID, async () => {
       const { getAddCustomContentAction } = await import('./actions/add_custom_content_action');

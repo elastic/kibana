@@ -6,13 +6,13 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
+import { prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
@@ -59,22 +59,15 @@ export const useRiskLevelsPrivilegedUserQuery = ({
     error,
     isError,
     refetch,
-  } = useQuery<
-    {
-      response: ESQLSearchResponse;
-      params: ESQLSearchParams;
-    },
-    SecurityAppError
-  >(
+  } = useQuery<ESQLSearchResponse, SecurityAppError>(
     [], // query doesn't need a key since it is only run when refetch is called
-    async ({ signal }) =>
-      getESQLResults({
-        esqlQuery: query,
-        search: data.search.search,
-        signal,
-        filter: filterQuery,
-        executionContext: PUM_RISK_LEVEL_PANEL_CONTEXT,
-      }),
+    async ({ signal }) => {
+      const { rawResponse } = await data.search.esql(
+        { query, filter: filterQuery },
+        { abortSignal: signal, executionContext: PUM_RISK_LEVEL_PANEL_CONTEXT }
+      );
+      return rawResponse;
+    },
     {
       keepPreviousData: true,
       enabled: false,
@@ -95,7 +88,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
     filteredError
   );
 
-  const response = result?.response;
+  const response = result;
 
   const inspect = useMemo(() => {
     return {
