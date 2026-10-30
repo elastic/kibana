@@ -27,7 +27,9 @@ jest.mock('@elastic/eui', () => ({
   useCurrentEuiBreakpoint: () => 'xl',
 }));
 jest.mock('./app/app', () => ({
-  NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
+  NightshiftApp: ({ hideDetectionSetupBanner }: { hideDetectionSetupBanner: boolean }) => (
+    <div data-test-subj="nightshiftAppStub">{String(hideDetectionSetupBanner)}</div>
+  ),
 }));
 jest.mock('./automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
@@ -125,17 +127,19 @@ const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
 const featureFlags = { useBooleanValue: jest.fn() };
 
+const renderPageContent = (history: ReturnType<typeof createMemoryHistory>) => (
+  <I18nProvider>
+    <MockAppHeaderProvider>
+      <Router history={history}>
+        <NightshiftPage />
+      </Router>
+    </MockAppHeaderProvider>
+  </I18nProvider>
+);
+
 function renderPage(initialPath = '/') {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
-  const renderResult = render(
-    <I18nProvider>
-      <MockAppHeaderProvider>
-        <Router history={history}>
-          <NightshiftPage />
-        </Router>
-      </MockAppHeaderProvider>
-    </I18nProvider>
-  );
+  const renderResult = render(renderPageContent(history));
   return { ...renderResult, history };
 }
 
@@ -532,6 +536,34 @@ describe('NightshiftPage', () => {
           forceOnboarding: false,
         })
       );
+    });
+
+    it('hides the detection setup banner until a reload after onboarding finishes', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      const { history, rerender, unmount } = renderPage();
+
+      expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: false,
+        dismiss: jest.fn(),
+      });
+      rerender(renderPageContent(history));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftAppStub')).toHaveTextContent('true')
+      );
+
+      unmount();
+      renderPage();
+
+      expect(screen.getByTestId('nightshiftAppStub')).toHaveTextContent('false');
     });
 
     it('hides the Investigations action before the first investigation', async () => {

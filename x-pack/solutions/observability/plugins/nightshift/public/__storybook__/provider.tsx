@@ -125,6 +125,10 @@ const createServices = ({
         params?: { path?: { id?: string; sourceId?: string }; query?: { event_id?: string } };
       }
     ) => {
+      if (route === 'GET /internal/significant_events/availability') {
+        return { available: true };
+      }
+
       if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
           return neverResolve();
@@ -227,6 +231,7 @@ const createServices = ({
     },
     http: {
       basePath: {
+        get: () => '',
         prepend: (path: string) => path,
       },
     },
@@ -238,6 +243,11 @@ const createServices = ({
         addError: () => undefined,
         addSuccess: () => undefined,
       },
+    },
+    nightshiftSources: {
+      getClient: async () => ({
+        fetch: async () => ({ sources: [], total: 0 }),
+      }),
     },
     share: {
       url: {
