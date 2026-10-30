@@ -100,7 +100,8 @@ model-quality claim needs at least that.
 
 The workflow's concurrency group is `max: 1, strategy: drop`, so the experiment runs at
 `concurrency: 1` and **wall time scales linearly with the fixture count**: measured ~233s per fixture,
-i.e. ~6.9h for 39 fixtures × 3 repetitions. `playwright.config.ts` therefore sets `timeout: 8h`; the
+i.e. ~6.9h for 39 fixtures × 3 repetitions. `playwright.config.ts` therefore sets `timeout: 8h`, and
+`evals.suites.json` sets `stepTimeoutInMinutes: 540` so the per-model CI step outlives it; the
 previous 30m budget killed every attempt with `Test timeout of 1800000ms exceeded` regardless of
 model quality. Re-measure both numbers whenever the fixture count or the workflow's step cost moves.
 

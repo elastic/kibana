@@ -503,6 +503,7 @@
       "ciLabels": [
         "evals:detection-watch-rule-tuning"
       ],
+      "stepTimeoutInMinutes": 540,
       "serverConfigSet": "evals_detection_watch_rule_tuning"
     },
     {
