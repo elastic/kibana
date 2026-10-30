@@ -7,6 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { EmptyModelResponseError } from '@kbn/langchain/server';
+
 import { getParseErrorSummary } from '.';
 
 const getJsonParseError = (input: string): unknown => {
@@ -55,6 +57,19 @@ describe('getParseErrorSummary', () => {
       );
     });
 
+    it('drops a quote token and the `...` prefix of a truncated snippet', () => {
+      expect(
+        getParseErrorSummary(
+          new SyntaxError(`Unexpected token ''', "'MARKER"... is not valid JSON`)
+        )
+      ).toBe('SyntaxError: Unexpected token');
+      expect(
+        getParseErrorSummary(
+          new SyntaxError(`Unexpected token 'd', ..."MARKER"... is not valid JSON`)
+        )
+      ).toBe('SyntaxError: Unexpected token');
+    });
+
     it('falls back to a generic reason when the message starts with the quoted input', () => {
       expect(getParseErrorSummary(new SyntaxError('"SECRET" is not valid JSON'))).toBe(
         'SyntaxError: the response is not valid JSON'
@@ -92,6 +107,47 @@ describe('getParseErrorSummary', () => {
 
       expect(summary).toBe('ServerSentEventError [internalError]: Failed to parse line');
       expect(summary).not.toContain('MODEL-OUTPUT-MARKER');
+    });
+
+    it('replaces an error name that carries upstream text with a generic one', () => {
+      const error = new Error('ActionsClientLlm: action result status is error: boom');
+      error.name = `Unexpected token 'd', "data: MODEL-OUTPUT-MARKER"... is not valid JSON`;
+
+      const summary = getParseErrorSummary(error);
+
+      expect(summary).toBe('Error: ActionsClientLlm: action result status is error: boom');
+      expect(summary).not.toContain('MODEL-OUTPUT-MARKER');
+    });
+
+    it('keeps a conventional custom class name', () => {
+      const error = new Error('boom');
+      error.name = 'ServerSentEventError';
+
+      expect(getParseErrorSummary(error)).toBe('ServerSentEventError: boom');
+    });
+
+    it('keeps the diagnostics of an empty model response whole', () => {
+      const error = new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'my-connector',
+        contentLength: 0,
+        model: 'my-model',
+        promptTokens: 1234,
+        traceId: 'trace-abc',
+      });
+
+      const summary = getParseErrorSummary(error);
+
+      expect(summary).toBe(error.message);
+      expect(summary).toContain('trace-abc');
+      expect(summary).toContain('completion tokens');
+    });
+
+    it('does not trust the code alone: a message that is not an empty-response one is sanitized', () => {
+      const error = new Error('Failed to parse line "MODEL-OUTPUT-MARKER"');
+      Object.assign(error, { code: 'EMPTY_MODEL_RESPONSE' });
+
+      expect(getParseErrorSummary(error)).not.toContain('MODEL-OUTPUT-MARKER');
     });
 
     it('keeps the leading diagnostic of an ActionsClientLlm action error', () => {

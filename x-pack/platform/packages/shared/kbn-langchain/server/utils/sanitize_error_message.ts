@@ -11,10 +11,11 @@ export const MAX_SANITIZED_ERROR_MESSAGE_LENGTH = 200;
 /**
  * Reduces an error message to text that is safe to persist or log above debug level.
  *
- * Some errors quote the payload they failed on (for example `Failed to parse line "<SSE chunk>"`,
- * where the chunk carries model output), and the quote is always the start of that payload. The
- * message is therefore cut at the first `"` and bounded, which keeps the leading diagnostic
- * (error class, HTTP status, upstream reason) without the payload.
+ * Covers messages that quote the payload they failed on: `Failed to parse line "<SSE chunk>"`, where
+ * the chunk carries model output, and V8 `JSON.parse` messages, which quote a snippet of the input.
+ * The quote is the start of that payload, so the message is cut at the first `"` and bounded, which
+ * keeps the leading diagnostic. Provider error bodies without a quote pass through unchanged by
+ * design (up to the length bound), because they are the diagnostic.
  */
 export const sanitizeErrorMessage = (message: string): string => {
   const quoteIndex = message.indexOf('"');

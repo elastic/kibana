@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { MAX_SANITIZED_ERROR_MESSAGE_LENGTH, sanitizeErrorMessage } from '@kbn/langchain/server';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  MAX_SANITIZED_ERROR_MESSAGE_LENGTH,
+  isEmptyModelResponseError,
+  sanitizeErrorMessage,
+} from '@kbn/langchain/server';
 
 // a `z.record` / `z.map` schema would put model-chosen keys into this path
 const getIssuePath = (path: unknown): string =>
   Array.isArray(path) && path.length > 0 ? path.map(String).join('.') : '(root)';
 
 const JSON_POSITION_MARKER = ' in JSON at position';
+
+// Connector errors can carry the upstream error body in `name` (`error.name = serviceMessage`), and
+// that body can quote model output, so only a conventional class name is kept.
+const ERROR_CLASS_NAME = /^[A-Za-z]*(Error|Exception)$/;
 
 /**
  * V8 `JSON.parse` messages either quote the input (`Unexpected token 'g', "gen0gen1" is not valid
@@ -26,7 +35,7 @@ const getSyntaxErrorSummary = (error: SyntaxError): string => {
     .reduce((min, index) => Math.min(min, index), message.length);
   const reason = message
     .slice(0, cutAt)
-    .replace(/^(Unexpected token) '[^']*'/, '$1') // the token is a character of the input
+    .replace(/^(Unexpected token)\b.*$/s, '$1') // the token, and any `...` before the cut quote, come from the input
     .trim()
     .replace(/[,:]+$/, '');
 
@@ -41,8 +50,9 @@ const getSyntaxErrorSummary = (error: SyntaxError): string => {
  * `JSON.parse` errors quote a snippet of the input, schema validation errors can quote model-chosen
  * keys and values, and transport errors such as `Failed to parse line "<SSE chunk>"` quote the raw
  * stream chunk. The summary keeps only the error class, the JSON position, the schema issue codes
- * and paths, and, for any other error, the message up to its first quote, so it is safe to persist
- * and to send to telemetry.
+ * and paths, and, for any other error, a conventional class name plus the message up to its first
+ * quote, so it is safe to persist and to send to telemetry. The message of an empty-response error
+ * holds diagnostics only and is kept whole.
  */
 export const getParseErrorSummary = (error: unknown): string => {
   if (error instanceof SyntaxError) {
@@ -63,11 +73,21 @@ export const getParseErrorSummary = (error: unknown): string => {
     return `the response does not match the expected schema (${summary})`;
   }
 
+  if (
+    error instanceof Error &&
+    isEmptyModelResponseError(error) &&
+    error.message.startsWith(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX)
+  ) {
+    // built from connector, model, token counts and trace id only, so it is kept whole
+    return error.message;
+  }
+
   if (error instanceof Error) {
     const code = (error as { code?: unknown }).code;
     const codeSuffix = typeof code === 'string' ? ` [${code}]` : '';
+    const name = ERROR_CLASS_NAME.test(error.name) ? error.name : 'Error';
 
-    return `${error.name}${codeSuffix}: ${sanitizeErrorMessage(error.message)}`.slice(
+    return `${name}${codeSuffix}: ${sanitizeErrorMessage(error.message)}`.slice(
       0,
       MAX_SANITIZED_ERROR_MESSAGE_LENGTH
     );

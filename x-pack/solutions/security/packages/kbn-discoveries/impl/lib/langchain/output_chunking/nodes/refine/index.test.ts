@@ -637,4 +637,26 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
     expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
+
+  it('persists no model output when a connector error carries it in the error name', async () => {
+    const error = new Error('ActionsClientLlm: action result status is error: boom');
+    error.name = `Unexpected token 'd', "data: MODEL-OUTPUT-MARKER"... is not valid JSON`;
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValue(error);
+
+    const node = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('Error: ActionsClientLlm: action result status is error');
+    expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
+  });
 });

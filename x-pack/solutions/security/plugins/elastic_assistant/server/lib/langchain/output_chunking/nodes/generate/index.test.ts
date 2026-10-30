@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -423,4 +423,57 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
     }
   );
+
+  it('persists no model output when a connector error carries it in the error name', async () => {
+    const error = new Error('ActionsClientLlm: action result status is error: boom');
+    error.name = `Unexpected token 'd', "data: MODEL-OUTPUT-MARKER"... is not valid JSON`;
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValue(error);
+
+    const node = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('Error: ActionsClientLlm: action result status is error');
+    expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
+  });
+
+  it('keeps the empty-response diagnostics in state.errors', async () => {
+    const error = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'my-connector',
+      contentLength: 0,
+      model: 'my-model',
+      promptTokens: 1234,
+      traceId: 'trace-abc',
+    });
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValue(error);
+
+    const node = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(error.message);
+    expect(state.errors[0]).toContain('trace-abc');
+    expect(state.errors[0]).toContain('completion tokens');
+  });
 });
