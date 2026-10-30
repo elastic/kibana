@@ -7,7 +7,8 @@
 
 import type { z } from '@kbn/zod';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { KbnPalette, getPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes/constants';
+import { getPalettes } from '@kbn/palettes/palettes';
 import type { ChartTypeRegistry } from './chart_type_registry';
 
 type ConfigInput<T extends SupportedChartType> = z.input<ChartTypeRegistry[T]['schema']>;
