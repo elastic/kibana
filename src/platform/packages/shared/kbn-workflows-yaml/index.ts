@@ -114,12 +114,7 @@ export {
   modifyStepProperty,
   modifyWorkflowProperty,
   deleteStep,
-<<<<<<< HEAD
   getStepNode,
-} from './lib/yaml_edit';
-export type { StepDefinition, EditResult } from './lib/yaml_edit';
-=======
   WORKFLOW_PROPERTY_KEYS,
 } from './lib/yaml_edit';
-export type { StepDefinition } from './lib/yaml_edit';
->>>>>>> fcb726cbbb7c ([One Workflow] Fix generate_workflow timeouts on large workflow edits (#299949))
+export type { StepDefinition, EditResult } from './lib/yaml_edit';
