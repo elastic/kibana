@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, useCallback } from 'react';
-import { getAdaptedTableRows, useAdaptedTableRows, type Row } from '../table';
+import { getAdaptedTableRows, useAdaptedTableRows, type CascadeTableRow } from '../table';
 import type { CascadeVirtualizerReturnValue } from '../virtualizer';
 import type { GroupNode } from '../../../store_provider';
 
@@ -37,7 +37,7 @@ export function useTreeGridRowARIAAttributes<G extends GroupNode>({
   rowInstance,
   virtualRowIndex,
 }: {
-  rowInstance: Row<G>;
+  rowInstance: CascadeTableRow<G>;
   virtualRowIndex: number;
 }) {
   const { rowId, rowIsExpanded, rowDepth, rowChildren } = useAdaptedTableRows({
@@ -71,7 +71,7 @@ export function useRegisterCascadeAccessibilityHelpers<G extends GroupNode>({
   tableWrapperElement,
   scrollToRowIndex,
 }: {
-  tableRows: Row<G>[];
+  tableRows: Array<CascadeTableRow<G>>;
   // element might be null on initialization
   tableWrapperElement: HTMLElement | null;
   scrollToRowIndex: CascadeVirtualizerReturnValue['scrollToVirtualizedIndex'];

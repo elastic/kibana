@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { DataCascadeProvider } from '.';
+import { render, renderHook, screen } from '@testing-library/react';
+import { DataCascadeProvider, useDataCascadeState } from '.';
 
 describe('DataCascadeProvider', () => {
   it('should render children', () => {
@@ -24,5 +24,21 @@ describe('DataCascadeProvider', () => {
     );
 
     expect(screen.getByText('Test Child')).toBeInTheDocument();
+  });
+
+  it('normalizes restored row selection to the v9 selected-id state', () => {
+    const { result } = renderHook(() => useDataCascadeState(), {
+      wrapper: ({ children }) => (
+        <DataCascadeProvider
+          data={[]}
+          cascadeGroups={[]}
+          initialState={{ rowSelection: { selected: true, unselected: false } }}
+        >
+          {children}
+        </DataCascadeProvider>
+      ),
+    });
+
+    expect(result.current.table.rowSelection).toEqual({ selected: true });
   });
 });
