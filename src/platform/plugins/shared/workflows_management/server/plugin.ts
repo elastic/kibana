@@ -103,7 +103,7 @@ export class WorkflowsPlugin
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger, api)
     );
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
