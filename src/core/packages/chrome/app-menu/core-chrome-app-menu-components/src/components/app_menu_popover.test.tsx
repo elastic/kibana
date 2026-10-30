@@ -58,6 +58,56 @@ describe('AppMenuPopover', () => {
     expect(screen.queryByText('Item 2')).not.toBeInTheDocument();
   });
 
+  it('should re-evaluate function-valued disableButton when the popover opens', async () => {
+    let isItemDisabled = true;
+    const items = [
+      {
+        id: 'dynamic',
+        label: 'Dynamic item',
+        run: jest.fn(),
+        order: 1,
+        testId: 'dynamic-item',
+        disableButton: () => isItemDisabled,
+      },
+    ];
+    // `items` and `onClose` keep the same identity across both renders
+    const props = { ...defaultProps, items };
+
+    const { rerender } = render(<AppMenuPopover {...props} isOpen={false} />);
+
+    isItemDisabled = false;
+    rerender(<AppMenuPopover {...props} isOpen={true} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dynamic-item')).toBeEnabled();
+    });
+  });
+
+  it('should not rebuild panels on re-renders that do not change its props', async () => {
+    const disableButton = jest.fn(() => false);
+    const items = [{ id: 'counted', label: 'Counted', run: jest.fn(), order: 1, disableButton }];
+    const props = { ...defaultProps, items };
+
+    const { rerender } = render(<AppMenuPopover {...props} isOpen={true} />);
+    await waitFor(() => expect(screen.getByText('Counted')).toBeInTheDocument());
+    const callsAfterOpen = disableButton.mock.calls.length;
+
+    rerender(<AppMenuPopover {...props} isOpen={true} />);
+    rerender(<AppMenuPopover {...props} isOpen={true} />);
+
+    expect(disableButton).toHaveBeenCalledTimes(callsAfterOpen);
+  });
+
+  it('should keep the anchor and not throw when an open popover closes', async () => {
+    const { rerender } = render(<AppMenuPopover {...defaultProps} isOpen={true} />);
+    await waitFor(() => expect(screen.getByText('Item 1')).toBeInTheDocument());
+
+    rerender(<AppMenuPopover {...defaultProps} isOpen={false} />);
+
+    expect(screen.getByTestId('anchor-button')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Item 1')).not.toBeInTheDocument());
+  });
+
   it('should wrap anchor in tooltip when tooltipContent is provided', () => {
     render(<AppMenuPopover {...defaultProps} tooltipContent="Tooltip content" />);
 

@@ -37,20 +37,30 @@ export const AppMenuPopover = ({
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
-  const panels = useMemo(
-    () =>
-      getPopoverPanels({
-        items,
-        primaryActionItem,
-        rootPanelWidth: popoverWidth,
-        rootPopoverTestId: popoverTestId,
-        onClose,
-        onCloseOverflowButton,
-      }),
-    [items, primaryActionItem, popoverWidth, popoverTestId, onClose, onCloseOverflowButton]
-  );
+  const panels = useMemo(() => {
+    if (!isOpen) {
+      return []; // panels are only needed while open
+    }
+    return getPopoverPanels({
+      items,
+      primaryActionItem,
+      rootPanelWidth: popoverWidth,
+      rootPopoverTestId: popoverTestId,
+      onClose,
+      onCloseOverflowButton,
+    });
+  }, [
+    items,
+    primaryActionItem,
+    popoverWidth,
+    popoverTestId,
+    onClose,
+    onCloseOverflowButton,
+    /** Building panels on every open re-evaluates function-valued `disableButton` and tooltip values. */
+    isOpen,
+  ]);
 
-  if (panels.length === 0) {
+  if (isOpen && panels.length === 0) {
     return null;
   }
 
