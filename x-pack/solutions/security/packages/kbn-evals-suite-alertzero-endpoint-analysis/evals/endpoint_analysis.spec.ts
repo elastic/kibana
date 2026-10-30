@@ -17,6 +17,7 @@ import {
 import {
   AlertZeroRuntime,
   deleteDataStreamQuietly,
+  ensureSecuritySolutionSpace,
   ignore404,
   installWorkerAndPinConnector,
   runAllCleanups,
@@ -34,6 +35,14 @@ import {
 import { analysisWorkflowId, gateWorkflowId, workerWorkflowId } from '../src/contracts';
 
 evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.classic }, () => {
+  let restoreSolutionSpace: (() => Promise<unknown>) | undefined;
+  evaluate.beforeAll(async ({ fetch }) => {
+    restoreSolutionSpace = await ensureSecuritySolutionSpace(fetch);
+  });
+  evaluate.afterAll(async () => {
+    await restoreSolutionSpace?.();
+  });
+
   evaluate('L1 endpoint forensic skill routing', async ({ esClient, agentBuilderClient }) => {
     const index = `logs-endpoint.events.process-alertzero-routing-${Date.now()}`;
     // `logs-*` names match the logs index template, which only creates data streams —
@@ -163,9 +172,11 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
         }
         // Production runs this agent with `create-conversation: false`: no conversation id
         // exists to join agent spans on, so the trace check applies only when one is emitted.
-        const conversationIds = extractAgentConversationIds(child.stepExecutions).map(
-          (entry) => entry.conversationId
-        );
+        // The journal `workflow.execute` steps also output a `conversation_id` (the
+        // investigation's), which no agent span carries, so only `ai.agent` steps count.
+        const conversationIds = extractAgentConversationIds(child.stepExecutions)
+          .filter((entry) => entry.stepType === 'ai.agent')
+          .map((entry) => entry.conversationId);
         if (conversationIds.length > 0) {
           const calls = await readAgentToolCallsFromTraces({
             traceEsClient,

@@ -759,6 +759,30 @@ export const installWorkerAndPinConnector = async (
   }
 };
 
+const SPACES_PUBLIC_API_VERSION = '2023-10-31';
+
+/**
+ * AlertZero routes 404 outside a Security solution space, and the default space of a stateful
+ * stack is Classic. Switches the default space to the Security view and returns a function
+ * restoring the previous view (a no-op when it already was Security).
+ */
+export const ensureSecuritySolutionSpace = async (
+  fetch: HttpHandler
+): Promise<() => Promise<unknown>> => {
+  const { solution = 'classic' } = await fetch<{ solution?: string }>('/api/spaces/space/default', {
+    headers: { 'elastic-api-version': SPACES_PUBLIC_API_VERSION },
+  });
+  if (solution === 'security') return async () => undefined;
+  const setSolution = (value: string) =>
+    fetch('/internal/spaces/space/default/solution', {
+      method: 'PUT',
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': INTERNAL_API_ACCESS },
+      body: JSON.stringify({ solution: value }),
+    });
+  await setSolution('security');
+  return () => setSolution(solution);
+};
+
 /**
  * Runs every cleanup step even when an earlier one throws, so a failed cancellation or fixture
  * teardown can never leave the shared inference settings pinned to the eval connector. The first

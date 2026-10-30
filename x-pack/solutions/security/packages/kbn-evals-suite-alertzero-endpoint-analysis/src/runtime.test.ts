@@ -11,6 +11,7 @@ import { ALERTZERO_BALANCED_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   AlertZeroRuntime,
   assertNoCompetingPendingKis,
+  ensureSecuritySolutionSpace,
   installWorkerAndPinConnector,
   pinAgenticConnector,
   runAllCleanups,
@@ -751,5 +752,30 @@ describe('runAllCleanups', () => {
 
   it('resolves when every step succeeds', async () => {
     await expect(runAllCleanups([async () => 1, async () => 2])).resolves.toBeUndefined();
+  });
+});
+
+describe('ensureSecuritySolutionSpace', () => {
+  const solutionRoute = '/internal/spaces/space/default/solution';
+  const solutionPuts = (fetch: FetchMock) =>
+    fetch.mock.calls
+      .filter(([path, options]) => path === solutionRoute && options?.method === 'PUT')
+      .map(([, options]) => JSON.parse((options as { body: string }).body).solution);
+
+  it('switches a Classic default space to Security and restores Classic', async () => {
+    const fetch = createFetch();
+    const restore = await ensureSecuritySolutionSpace(fetch);
+    expect(solutionPuts(fetch)).toEqual(['security']);
+    await restore();
+    expect(solutionPuts(fetch)).toEqual(['security', 'classic']);
+  });
+
+  it('leaves a Security default space untouched', async () => {
+    const fetch = createFetch((path) =>
+      path === '/api/spaces/space/default' ? { solution: 'security' } : {}
+    );
+    const restore = await ensureSecuritySolutionSpace(fetch);
+    await restore();
+    expect(solutionPuts(fetch)).toEqual([]);
   });
 });
