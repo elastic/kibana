@@ -252,6 +252,23 @@ export class BuildkiteClient {
     return builds[0];
   };
 
+  getFinishedBuildsForBranch = async (
+    pipelineSlug: string,
+    branch: string,
+    numberOfBuilds: number
+  ): Promise<Build[]> => {
+    const params = new URLSearchParams({ branch, per_page: String(numberOfBuilds) });
+    params.append('state[]', 'passed');
+    params.append('state[]', 'failed');
+    params.append('state[]', 'canceled');
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${encodeURIComponent(
+        pipelineSlug
+      )}/builds?${params.toString()}`
+    );
+    return response.data as Build[];
+  };
+
   getCurrentBuild = (includeRetriedJobs = false) => {
     if (!process.env.BUILDKITE_PIPELINE_SLUG || !process.env.BUILDKITE_BUILD_NUMBER) {
       throw new Error(

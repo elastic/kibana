@@ -90,8 +90,18 @@ export interface SeriesHead {
 export interface OperatorDeactivation {
   groupHash: string;
   episodeId: string;
+  /** Empty when the operator gave none (blank, or the standard no-reason note). */
   reason: string;
   deactivatedAt: string;
+}
+
+/**
+ * What the deactivation read found. `failed` means the read did not complete, so an absent series
+ * proves nothing; otherwise an absent series has no user deactivation.
+ */
+export interface OperatorDeactivationLookup {
+  deactivations: Map<string, OperatorDeactivation>;
+  failed: boolean;
 }
 
 /** A `.alert-actions` row; `Readonly` keeps it a type alias, which `esqlToObjects` accepts. */
@@ -717,16 +727,17 @@ export class RuleEventsClient {
    * an older deactivation never applies to it. Other actions (snooze, ack, assign, tag) are not
    * read, so they never mask a deactivation. Keyed by `group_hash`.
    *
-   * Any read failure counts as "not deactivated" and is logged: a missing index or an unreadable
-   * mapping must not break the write path that calls this.
+   * A deactivation with no reason is kept, with an empty `reason`, so it differs from no
+   * deactivation. A read failure is logged and reported as `failed` instead of thrown: a missing
+   * index or an unreadable mapping must not break the write path that calls this.
    */
   async findOperatorDeactivations({
     heads,
   }: {
     heads: readonly SeriesHead[];
-  }): Promise<Map<string, OperatorDeactivation>> {
+  }): Promise<OperatorDeactivationLookup> {
     const deactivations = new Map<string, OperatorDeactivation>();
-    if (heads.length === 0) return deactivations;
+    if (heads.length === 0) return { deactivations, failed: false };
 
     try {
       const groupHashes = [...new Set(heads.map(({ groupHash }) => groupHash))];
@@ -754,9 +765,8 @@ export class RuleEventsClient {
         if (current === undefined || isLaterAction(row, current)) latest.set(row.group_hash, row);
       }
 
-      // A deactivation with no reason carries the standard note and tells the agent nothing, so it
-      // is not held: the series reopens like any new event. Kibana's locale is instance-wide, so
-      // the browser and this server write and read the same text.
+      // The standard no-reason note tells the agent nothing, so it counts as no reason. Kibana's
+      // locale is instance-wide, so the browser and this server write and read the same text.
       const noReasonNote = operatorFallbackAssessmentNote('inactive');
       for (const { groupHash, episodeId } of heads) {
         const action = latest.get(groupHash);
@@ -768,22 +778,21 @@ export class RuleEventsClient {
           continue;
         }
         const reason = (action.reason ?? '').trim();
-        if (reason === noReasonNote) continue;
         deactivations.set(groupHash, {
           groupHash,
           episodeId,
-          reason,
+          reason: reason === noReasonNote ? '' : reason,
           deactivatedAt: action['@timestamp'],
         });
       }
-      return deactivations;
+      return { deactivations, failed: false };
     } catch (error) {
       this.clients.logger?.error(
         `deactivation_check_failed: could not read operator deactivations from ${ALERT_ACTIONS_DATA_STREAM}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return new Map();
+      return { deactivations: new Map(), failed: true };
     }
   }
 
