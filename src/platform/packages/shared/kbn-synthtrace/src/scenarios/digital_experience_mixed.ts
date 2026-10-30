@@ -8,13 +8,15 @@
  */
 
 /**
- * Generates EDOT Browser apps (see `digital_experience_browser`) next to a classic Elastic APM
- * RUM (`rum-js`) app, so the Digital Experience applications list shows both `otel` and
- * `classic` apps.
+ * Generates EDOT Browser apps (see `digital_experience_browser`) and EDOT React Native apps (see
+ * `digital_experience_mobile`) next to a classic Elastic APM RUM (`rum-js`) app, so the Digital
+ * Experience applications list shows `otel`, mobile and `classic` apps.
  *
  * Data shape:
  * - EDOT Browser: OTel-native logs and spans in `logs-generic.otel-default` and
  *   `traces-generic.otel-default`
+ * - EDOT React Native: OTel-native logs and spans in the same data streams, on Android and iOS,
+ *   with the `app.launch` and screen spans that some of the apps create themselves
  * - classic RUM (`storefront-web`): page-load transactions with a few XHR spans in
  *   `traces-apm.rum-default`. Minimal on purpose: no marks or experience metrics. Page loads end
  *   at their generated time, so the first ones of a run may start before `--from`.
@@ -39,20 +41,34 @@ import {
   parseDigitalExperienceScenarioOpts,
 } from './helpers/digital_experience_apps';
 import { generateClassicRumPageLoads } from './helpers/classic_rum_page_loads';
+import { generateEdotReactNativeSessions } from './helpers/digital_experience_mobile_apps';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logger, from }) => {
   const parsedOpts = parseDigitalExperienceScenarioOpts(scenarioOpts);
-  // Both the EDOT Browser and the classic RUM data derive from the same seed
+  // The EDOT Browser, EDOT React Native and classic RUM data derive from the same seed
   const opts = { ...parsedOpts, seed: parsedOpts.seed ?? String(Math.random()) };
-  logger.info(`Generating EDOT Browser and classic RUM data with ${JSON.stringify(opts)}`);
+  logger.info(
+    `Generating EDOT Browser, EDOT React Native and classic RUM data with ${JSON.stringify(opts)}`
+  );
 
   return {
     generate: ({ range, clients: { otelEsClient, apmEsClient } }) => [
       withClient(
         otelEsClient,
         generateEdotBrowserSessions(range, { ...opts, environment: ENVIRONMENT, from })
+      ),
+      withClient(
+        otelEsClient,
+        generateEdotReactNativeSessions(range, {
+          scale: opts.scale,
+          seed: opts.seed,
+          platform: 'both',
+          withManualSpans: true,
+          environment: ENVIRONMENT,
+          from,
+        })
       ),
       withClient(
         apmEsClient,
