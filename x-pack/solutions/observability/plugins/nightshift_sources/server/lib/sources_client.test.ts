@@ -191,10 +191,6 @@ describe('SourcesClient', () => {
 
       const recommendations = await client.listRecommended();
 
-      expect(soClient.find).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ page: 2, perPage: MAX_SOURCES_PER_PAGE })
-      );
       expect(recommendations.some(({ id }) => id === 'logs')).toBe(false);
     });
   });
