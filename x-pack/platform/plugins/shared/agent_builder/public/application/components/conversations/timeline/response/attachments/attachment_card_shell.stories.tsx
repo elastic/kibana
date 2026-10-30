@@ -216,7 +216,18 @@ export const Previewing: Story = {
     title: 'dashboard.json',
     subtitle: 'Currently previewing',
     actionButtons: defaultActions,
-    previewBadgeState: 'previewing',
+    previewBadgeState: 'previewing_in_canvas',
+    body: bodyPlaceholder,
+  },
+};
+
+export const PreviewingInApp: Story = {
+  args: {
+    icon: 'document',
+    title: 'dashboard.json',
+    subtitle: 'Shown in the current app',
+    actionButtons: defaultActions,
+    previewBadgeState: 'previewing_in_app',
     body: bodyPlaceholder,
   },
 };

@@ -6,10 +6,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { BehaviorSubject, type Observable } from 'rxjs';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import {
   ActionButtonType,
+  type ActionButton,
+  type AttachmentPreviewState,
   type AttachmentRenderProps,
+  type GetActionButtonsParams,
   type InlineRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
@@ -20,13 +24,14 @@ const mockOpenCanvas = jest.fn();
 const mockSetPreviewedAttachmentKey = jest.fn();
 const mockInvalidateConversation = jest.fn();
 const mockOpenSidebarConversation = jest.fn();
+let mockPreviewedAttachmentKey: string | null = null;
 
 jest.mock('./canvas_context', () => ({
   getAttachmentPreviewKey: (attachmentId: string, version?: number) =>
     `${attachmentId}:${version ?? 'latest'}`,
   useCanvasContext: () => ({
     openCanvas: mockOpenCanvas,
-    previewedAttachmentKey: null,
+    previewedAttachmentKey: mockPreviewedAttachmentKey,
     setPreviewedAttachmentKey: mockSetPreviewedAttachmentKey,
   }),
 }));
@@ -90,6 +95,7 @@ const createAttachment = (versionedValue: string, version: number): UnknownAttac
 describe('InlineAttachmentWithActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPreviewedAttachmentKey = null;
   });
 
   it('shows a fallback instead of crashing when renderInlineContent throws', () => {
@@ -289,5 +295,81 @@ describe('InlineAttachmentWithActions', () => {
     );
 
     expect(mockRenderInlineContent).toHaveBeenCalledTimes(2);
+  });
+
+  describe('preview state', () => {
+    const PREVIEWING_IN_APP_LABEL = "You're previewing this";
+    const STATIC_ACTION = 'Static action';
+
+    const renderWithPreviewState = (
+      appPreviewState$: Observable<AttachmentPreviewState>,
+      getActionButtons: (params: GetActionButtonsParams) => ActionButton[] = () => [
+        { label: STATIC_ACTION, type: ActionButtonType.SECONDARY, handler: jest.fn() },
+      ]
+    ) => {
+      const attachmentsService = {
+        getAttachmentUiDefinition: jest.fn().mockReturnValue({
+          getLabel: () => 'Test attachment',
+          renderInlineContent: () => <div>Inline content</div>,
+          getActionButtons,
+          getPreviewState$: () => appPreviewState$,
+        }),
+        updateOrigin: jest.fn(),
+      };
+
+      render(
+        <InlineAttachmentWithActions
+          attachment={createAttachment('first', 1)}
+          attachmentsService={attachmentsService as unknown as AttachmentsService}
+          conversationId="conversation-1"
+          isSidebar={false}
+        />
+      );
+    };
+
+    it('shows the in-app preview badge while the app previews the attachment', () => {
+      const appPreviewState$ = new BehaviorSubject<AttachmentPreviewState>('previewing_in_app');
+      renderWithPreviewState(appPreviewState$);
+
+      expect(screen.getByText(PREVIEWING_IN_APP_LABEL)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: STATIC_ACTION })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Close preview' })).not.toBeInTheDocument();
+
+      act(() => appPreviewState$.next('none'));
+
+      expect(screen.queryByText(PREVIEWING_IN_APP_LABEL)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: STATIC_ACTION })).toBeInTheDocument();
+    });
+
+    it('shows the canvas preview over the in-app preview', () => {
+      mockPreviewedAttachmentKey = 'attachment-1:1';
+      renderWithPreviewState(new BehaviorSubject<AttachmentPreviewState>('previewing_in_app'));
+
+      expect(screen.getByRole('button', { name: 'Close preview' })).toBeInTheDocument();
+      expect(screen.queryByText(PREVIEWING_IN_APP_LABEL)).not.toBeInTheDocument();
+    });
+
+    it('marks the attachment as previewed in canvas through setPreviewBadgeState', () => {
+      renderWithPreviewState(
+        new BehaviorSubject<AttachmentPreviewState>('none'),
+        ({ setPreviewBadgeState }) => [
+          {
+            label: 'Mark',
+            type: ActionButtonType.SECONDARY,
+            handler: () => setPreviewBadgeState?.('previewing_in_canvas'),
+          },
+          {
+            label: 'Clear',
+            type: ActionButtonType.SECONDARY,
+            handler: () => setPreviewBadgeState?.('none'),
+          },
+        ]
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Mark' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+
+      expect(mockSetPreviewedAttachmentKey.mock.calls).toEqual([['attachment-1:1'], [null]]);
+    });
   });
 });

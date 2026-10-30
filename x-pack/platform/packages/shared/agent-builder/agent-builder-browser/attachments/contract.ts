@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import type { Observable } from 'rxjs';
 import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
@@ -21,7 +22,20 @@ export enum ActionButtonType {
   OVERFLOW = 'overflow',
 }
 
-export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
+/**
+ * Preview state of an attachment card.
+ * - none: regular action buttons
+ * - preview_available: "Read-only preview" badge
+ * - previewing_in_canvas: previewed in the canvas, with a "Close preview" button instead of the
+ *   action buttons
+ * - previewing_in_app: previewed in the app the user is on, with a "You're previewing this" badge
+ *   instead of the action buttons and no close button
+ */
+export type AttachmentPreviewState =
+  | 'none'
+  | 'preview_available'
+  | 'previewing_in_canvas'
+  | 'previewing_in_app';
 /**
  * Props passed to custom attachment content renderers.
  */
@@ -91,7 +105,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   openSidebarConversation?: () => void;
   /**
    * Optional callback for externally-controlled inline preview state.
-   * Use to mark an attachment as currently previewed outside canvas.
+   * `previewing_in_canvas` marks this attachment as previewed and any other state clears it.
+   * For an attachment shown in the current app, use `getPreviewState$` instead.
    */
   setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
@@ -249,6 +264,12 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * Optional preview state of an inline-rendered attachment that depends on state outside the
+   * conversation, e.g. `previewing_in_app` while the current app shows the attachment. Applies
+   * while the attachment is not previewed in canvas.
+   */
+  getPreviewState$?: (attachment: TAttachment) => Observable<AttachmentPreviewState>;
   /**
    * Optional max-width (in px) for the inline attachment panel.
    * When provided, the outer panel will not exceed this width.

@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { EMPTY } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
@@ -29,7 +31,9 @@ interface InlineAttachmentWithActionsProps {
   conversationId: string;
   screenContext?: ScreenContextAttachmentData;
   /**
-   * Shared preview state for header actions/badges.
+   * Overrides the preview state for header actions/badges. Without it, the card is
+   * `previewing_in_canvas` while previewed in canvas and otherwise takes the state from the
+   * attachment type's `getPreviewState$`, e.g. `previewing_in_app`.
    */
   previewBadgeState?: AttachmentPreviewState;
 }
@@ -93,6 +97,11 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     attachment.id,
     attachment.versionData?.version
   );
+  const appPreviewState$ = useMemo(
+    () => uiDefinition?.getPreviewState$?.(attachment) ?? EMPTY,
+    [uiDefinition, attachment]
+  );
+  const appPreviewState = useObservable(appPreviewState$, 'none');
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -117,7 +126,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         isCanvas: false,
         setPreviewBadgeState: (nextPreviewState) => {
           setPreviewedAttachmentKey(
-            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
+            nextPreviewState === 'previewing_in_canvas' ? attachmentPreviewKey : null
           );
         },
       }) ?? [],
@@ -145,7 +154,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
   const resolvedPreviewBadgeState: AttachmentPreviewState =
-    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing_in_canvas' : appPreviewState);
 
   if (!uiDefinition) {
     return null;
