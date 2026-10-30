@@ -11,8 +11,10 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
 } from '@elastic/eui';
+import { cloudServicesSecurityPosture } from '@elastic/eui-illustrations';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
@@ -24,7 +26,6 @@ import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_n
 import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
 import { RULE_COUNTERS_TEST_SUBJ } from './test_subjects';
-import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../common/constants';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
@@ -118,13 +119,12 @@ export const RulesCounters = ({
         data-test-subj={RULE_COUNTERS_TEST_SUBJ.RULE_COUNTERS_EMPTY_STATE}
         color="plain"
         icon={
-          <EuiImage
-            size="fullWidth"
-            src={noDataIllustration}
-            alt={i18n.translate(
-              'xpack.csp.rulesPage.rulesCounterEmptyState.noDataIllustrationAlt',
-              { defaultMessage: 'No data illustration' }
-            )}
+          <EuiIllustration
+            type={cloudServicesSecurityPosture}
+            alt=""
+            css={css`
+              max-inline-size: 200px !important;
+            `}
           />
         }
         title={
