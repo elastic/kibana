@@ -508,4 +508,40 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
     expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
+
+  it('keeps the accumulated text, and adds no empty entry, when an attempt returns an empty completion', async () => {
+    const error = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'my-connector',
+      contentLength: 0,
+      model: 'my-model',
+      promptTokens: 1234,
+      traceId: 'trace-abc',
+    });
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValue(error);
+
+    const node = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node({
+      ...initialGraphState,
+      combinedGenerations: 'gen0gen1',
+      generationAttempts: 2,
+      generations: ['gen0', 'gen1'],
+    });
+
+    expect(state.combinedGenerations).toBe('gen0gen1');
+    expect(state.generations).toEqual(['gen0', 'gen1']);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('trace-abc');
+    expect(state.generationAttempts).toBe(3);
+  });
 });

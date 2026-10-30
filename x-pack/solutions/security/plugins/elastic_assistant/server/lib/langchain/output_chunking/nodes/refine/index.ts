@@ -19,7 +19,7 @@ import { discardPreviousRefinements } from './helpers/discard_previous_refinemen
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from '../generate/helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_hallucination_failures_reached';
@@ -187,10 +187,16 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        combinedRefinements: combinedResponse,
+        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
+        // the failure produced no content (for example an empty completion); keep the accumulated
+        // refinements instead of dropping them.
+        combinedRefinements: getCombinedAfterFailedAttempt({
+          combinedGenerations: combinedRefinements,
+          combinedResponse,
+        }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        refinements: [...refinements, partialResponse],
+        refinements: partialResponse.length > 0 ? [...refinements, partialResponse] : refinements,
       };
     }
   };

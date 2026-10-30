@@ -65,9 +65,12 @@ export const throwIfErrorCountsExceeded = ({
   }
 
   if (generationAttempts >= maxGenerationAttempts) {
-    // An empty model response is a model/connector failure: report that instead of the "send fewer
-    // alerts" advice, which provably cannot help (see getEmptyModelResponseError):
-    const hasEmptyModelResponseErrors = errors.some(isEmptyModelResponseErrorEntry);
+    // When every failed attempt was an empty model response, this is a model/connector failure:
+    // report that instead of the "send fewer alerts" advice, which provably cannot help (see
+    // getEmptyModelResponseError). A mix with truncated or unparseable responses keeps that advice,
+    // because a smaller prompt can still fix those.
+    const hasEmptyModelResponseErrors =
+      errors.length > 0 && errors.every(isEmptyModelResponseErrorEntry);
 
     const generationAttemptsError = `${
       hasEmptyModelResponseErrors

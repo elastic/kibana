@@ -505,4 +505,39 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
     expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
+
+  it('keeps the accumulated text, and adds no empty entry, when an attempt returns an empty completion', async () => {
+    const error = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'my-connector',
+      contentLength: 0,
+      model: 'my-model',
+      promptTokens: 1234,
+      traceId: 'trace-abc',
+    });
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValue(error);
+
+    const node = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node({
+      ...initialGraphState,
+      combinedRefinements: 'ref0ref1',
+      generationAttempts: 2,
+      refinements: ['ref0', 'ref1'],
+    });
+
+    expect(state.combinedRefinements).toBe('ref0ref1');
+    expect(state.refinements).toEqual(['ref0', 'ref1']);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('trace-abc');
+    expect(state.generationAttempts).toBe(3);
+  });
 });

@@ -15,7 +15,7 @@ import { discardPreviousGenerations } from './helpers/discard_previous_generatio
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from './helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
@@ -174,10 +174,16 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        combinedGenerations: combinedResponse,
+        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
+        // the failure produced no content (for example an empty completion); keep the accumulated
+        // generations instead of dropping them.
+        combinedGenerations: getCombinedAfterFailedAttempt({
+          combinedGenerations,
+          combinedResponse,
+        }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        generations: [...generations, partialResponse],
+        generations: partialResponse.length > 0 ? [...generations, partialResponse] : generations,
       };
     }
   };
