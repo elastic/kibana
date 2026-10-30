@@ -11,7 +11,7 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -99,6 +99,40 @@ describe('Nightshift assistant agent type', () => {
 
     expect(assistant.connector_ids).toEqual(['c0', 'orca']);
     expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+  });
+
+  it('inherits the investigator saved connectors after the telemetry connectors, deduplicated', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const getInheritedConnectorIds = jest.fn(async () => ['github', 'telemetry', 'pagerduty']);
+    const { baseConfiguration } = getAssistantAgentType({ ...options, getInheritedConnectorIds });
+    if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
+
+    const { connector_ids: connectorIds } = await baseConfiguration({ request, spaceId: 'ops' });
+
+    expect(connectorIds).toEqual(['telemetry', 'github', 'pagerduty']);
+    expect(getInheritedConnectorIds).toHaveBeenCalledWith({ request, spaceId: 'ops' });
+  });
+
+  it('keeps the telemetry connectors when the inherited connectors cannot be read', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { baseConfiguration } = getAssistantAgentType({
+      ...options,
+      getInheritedConnectorIds: async () => {
+        throw new Error('registry down');
+      },
+      logger,
+    });
+    if (typeof baseConfiguration !== 'function') throw new Error('Expected a resolver');
+
+    const { connector_ids: connectorIds } = await configurationFor({
+      ...getAssistantAgentType(options),
+      baseConfiguration,
+    });
+
+    expect(connectorIds).toEqual(['telemetry']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to resolve inherited connectors for space "default": registry down'
+    );
   });
 
   it('points to the workspace files instead of embedding their guidance', () => {
