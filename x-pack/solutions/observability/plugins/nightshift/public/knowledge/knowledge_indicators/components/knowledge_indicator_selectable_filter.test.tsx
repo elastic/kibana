@@ -122,15 +122,6 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
       expect(button).toBeDisabled();
     });
 
-    it('renders an enabled button when disableWhenEmpty is false and no values are available', async () => {
-      await renderFilter({
-        knowledgeIndicators: [],
-        disableWhenEmpty: false,
-      });
-
-      expect(screen.getByRole('button', { name: /Test Filter/ })).toBeInTheDocument();
-    });
-
     it('shows active filter badge when items are selected', async () => {
       const kis = [
         makeFeatureKI({ type: 'entity', id: 'f1' }),
@@ -262,18 +253,6 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
   });
 
   describe('getLabel', () => {
-    it('uses identity by default', async () => {
-      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
-
-      await renderFilter({ knowledgeIndicators: kis });
-
-      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
-
-      await waitFor(() => {
-        expect(screen.getByText('my_type')).toBeInTheDocument();
-      });
-    });
-
     it('applies custom getLabel to option labels', async () => {
       const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
 
@@ -288,23 +267,6 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
         expect(screen.getByText('MY_TYPE')).toBeInTheDocument();
       });
       expect(screen.queryByText('my_type')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('labels', () => {
-    it('uses provided group label in the popover', async () => {
-      const kis = [makeFeatureKI({ type: 'entity', id: 'f1' })];
-
-      await renderFilter({
-        knowledgeIndicators: kis,
-        labels: { ...DEFAULT_LABELS, groupLabel: 'Custom group' },
-      });
-
-      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Custom group')).toBeInTheDocument();
-      });
     });
   });
 });

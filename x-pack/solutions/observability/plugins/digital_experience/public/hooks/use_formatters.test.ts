@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { renderHook } from '@testing-library/react';
 import { createUiSettingsMock } from '../test_utils/ui_settings_mock';
 import { useFormatters } from './use_formatters';
@@ -44,7 +45,12 @@ describe('useFormatters', () => {
     expect(timeZone).toBe('America/New_York');
   });
 
-  it("uses the browser's time zone when Kibana follows the browser", () => {
-    expect(renderFormatters({ 'dateFormat:tz': 'Browser' }).timeZone).toBe('local');
+  it("uses the browser's time zone, by its IANA name, when Kibana follows the browser", () => {
+    const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'Browser' });
+
+    expect(timeZone).toBe(moment.tz.guess());
+    expect(formatDate('2021-01-18T12:25:00.000Z')).toBe(
+      moment('2021-01-18T12:25:00.000Z').format('MMM D, YYYY @ HH:mm:ss.SSS')
+    );
   });
 });
