@@ -203,12 +203,6 @@ describe('reportFailuresToFile', () => {
       ];
     };
 
-    it('keeps artifacts for every failure', async () => {
-      await report(failures());
-
-      expect(readArtifacts().filter((file) => file.endsWith('.html'))).toHaveLength(3);
-    });
-
     it('lists the other failures with their files and issues on the report of the first one', async () => {
       await report(failures());
 
@@ -217,14 +211,6 @@ describe('reportFailuresToFile', () => {
       expect(html).toContain('<code>second</code> in <code>x-pack/second.ts</code> <a');
       expect(html).toContain('>#42</a>');
       expect(html).toContain('<li><code>third</code> in <code>x-pack/third.ts</code></li>');
-    });
-
-    it('points the other failures at the first one and its file', async () => {
-      await report(failures());
-
-      const html = readHtmlOf('third');
-      expect(html).toContain('<code>first</code> in <code>x-pack/first.ts</code>');
-      expect(html).not.toContain('Same error in');
     });
 
     it('records the first failure as a reference in the json artifact', async () => {

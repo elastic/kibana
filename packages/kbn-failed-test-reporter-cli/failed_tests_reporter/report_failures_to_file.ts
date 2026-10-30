@@ -357,9 +357,7 @@ export async function reportFailuresToFile(
             ...abortedRunnables,
           ]
         : [],
-      failure.sameErrorAs
-        ? ['', 'Same error as:', '--------------', failure.sameErrorAs.name]
-        : [],
+      failure.sameErrorAs ? ['', 'Same error as:', '--------------', failure.sameErrorAs.name] : [],
       sameError.length
         ? ['', 'Same error in:', '--------------', ...sameError.map(({ name }) => name)]
         : [],

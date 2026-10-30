@@ -121,7 +121,9 @@ export async function processJUnitReports(
 
     const trackedSameErrorIssueUrls = markSameErrorFailures(
       failures,
-      (failure) => existingIssues.getForFailure(failure)?.github.htmlUrl
+      (failure) =>
+        (existingIssues.getSuiteIssueForFailure(failure) ?? existingIssues.getForFailure(failure))
+          ?.github.htmlUrl
     );
 
     const seenNewIssueKeys = new Set<string>();
