@@ -24,6 +24,8 @@ const packagePolicy = {
       type: 'crawler',
       vars: {
         output_index: { value: 'search-docs' },
+        api_key: { value: 'old-encoded-key' },
+        api_key_id: { value: 'old-key-id' },
         domains: {
           type: 'yaml',
           value:
@@ -91,6 +93,16 @@ describe('WebCrawlersService', () => {
   const logger = loggingSystemMock.createLogger();
   const soClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  beforeEach(() => {
+    esClient.security.createApiKey.mockClear();
+    esClient.security.invalidateApiKey.mockClear();
+    esClient.security.createApiKey.mockResolvedValue({
+      id: 'new-key-id',
+      name: 'web-crawler-search-docs',
+      api_key: 'secret',
+      encoded: 'new-encoded-key',
+    });
+  });
 
   it('lists crawler policies with their agent status and last crawl', async () => {
     const fleet = buildFleet();
@@ -152,6 +164,22 @@ describe('WebCrawlersService', () => {
       pkgName: 'crawler',
       pkgVersion: '0.1.0',
     });
+    expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'web-crawler-search-docs',
+        role_descriptors: {
+          'web-crawler': {
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['search-docs'],
+                privileges: expect.arrayContaining(['create_index', 'read', 'write', 'delete']),
+              },
+            ],
+          },
+        },
+      })
+    );
     expect(fleet.agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith({
       package: { name: 'crawler', version: '0.1.0' },
       name: 'Docs crawler',
@@ -162,6 +190,8 @@ describe('WebCrawlersService', () => {
           enabled: true,
           vars: {
             output_index: 'search-docs',
+            api_key: 'new-encoded-key',
+            api_key_id: 'new-key-id',
             domains: '- url: https://docs.example.com\n',
             schedule: '0 2 * * *',
             max_crawl_depth: 3,
@@ -170,6 +200,22 @@ describe('WebCrawlersService', () => {
         },
       },
     });
+  });
+
+  it('invalidates the new API key when Fleet rejects the policy', async () => {
+    const fleet = buildFleet();
+    fleet.agentlessPoliciesService.createAgentlessPolicy.mockRejectedValueOnce(new Error('nope'));
+    const service = new WebCrawlersService(fleet, soClient, esClient, logger);
+
+    await expect(
+      service.create({
+        name: 'x',
+        output_index: 'idx',
+        domains: [{ url: 'https://a.example.com' }],
+      })
+    ).rejects.toThrow('nope');
+
+    expect(esClient.security.invalidateApiKey).toHaveBeenCalledWith({ ids: ['new-key-id'] });
   });
 
   it('uses the installed package version when the package is already installed', async () => {
@@ -206,11 +252,17 @@ describe('WebCrawlersService', () => {
         name: 'Docs crawler v2',
         inputs: {
           'crawler-crawler': expect.objectContaining({
-            vars: { output_index: 'search-docs', domains: '- url: https://docs.example.com\n' },
+            vars: {
+              output_index: 'search-docs',
+              api_key: 'new-encoded-key',
+              api_key_id: 'new-key-id',
+              domains: '- url: https://docs.example.com\n',
+            },
           }),
         },
       })
     );
+    expect(esClient.security.invalidateApiKey).toHaveBeenCalledWith({ ids: ['old-key-id'] });
     expect(crawler.id).toBe('policy-1');
   });
 
@@ -220,10 +272,11 @@ describe('WebCrawlersService', () => {
 
     await service.delete('policy-1');
 
-    expect(fleet.packagePolicyService.delete).toHaveBeenCalledWith(soClient, esClient, [
-      'policy-1',
-    ]);
-    expect(fleet.agentlessPoliciesService.deleteAgentlessPolicy).toHaveBeenCalledWith('policy-1');
+    expect(fleet.packagePolicyService.delete).not.toHaveBeenCalled();
+    expect(fleet.agentlessPoliciesService.deleteAgentlessPolicy).toHaveBeenCalledWith('policy-1', {
+      force: true,
+    });
+    expect(esClient.security.invalidateApiKey).toHaveBeenCalledWith({ ids: ['old-key-id'] });
   });
 
   it('rejects unknown crawlers', async () => {

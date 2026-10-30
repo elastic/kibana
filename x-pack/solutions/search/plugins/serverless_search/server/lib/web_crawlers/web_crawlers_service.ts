@@ -27,10 +27,30 @@ export const CRAWLER_INPUT_TYPE = 'crawler';
 const CRAWL_ACTION_TIMEOUT_SECONDS = 60;
 const CRAWL_ACTION_EXPIRATION_MS = 60 * 60 * 1000;
 
+// The crawler creates its output index, indexes documents into it, and searches and deletes
+// outdated documents when purging. The agent's own output API key cannot be used: Fleet Server
+// mints it and its service account has no privileges on arbitrary (e.g. `search-*`) indices.
+const CRAWL_INDEX_PRIVILEGES = [
+  'auto_configure',
+  'create_index',
+  'delete',
+  'maintenance',
+  'monitor',
+  'read',
+  'view_index_metadata',
+  'write',
+];
+
+interface CrawlerApiKey {
+  id: string;
+  encoded: string;
+}
+
 export class WebCrawlersService {
   constructor(
     private readonly fleet: FleetStartContract,
     private readonly soClient: SavedObjectsClientContract,
+    // scoped to the current user: the crawler's API key is created on their behalf
     private readonly esClient: ElasticsearchClient,
     private readonly logger: Logger
   ) {}
@@ -59,11 +79,18 @@ export class WebCrawlersService {
 
   public async create(config: WebCrawlerConfig): Promise<WebCrawler> {
     const version = await this.packageVersion();
+    const apiKey = await this.createApiKey(config);
 
     this.logger.info(`Creating agentless web crawler policy "${config.name}"`);
-    const policy = await this.fleet.agentlessPoliciesService.createAgentlessPolicy(
-      toPolicyPayload(config, version)
-    );
+    let policy;
+    try {
+      policy = await this.fleet.agentlessPoliciesService.createAgentlessPolicy(
+        toPolicyPayload(config, version, apiKey)
+      );
+    } catch (error) {
+      await this.invalidateApiKey(apiKey.id);
+      throw error;
+    }
 
     return this.get(policy.id);
   }
@@ -74,11 +101,23 @@ export class WebCrawlersService {
       throw notFound(id);
     }
 
+    // the key is rotated on every update so that it always matches the configured index
+    const previousApiKeyId = apiKeyIdOf(policy);
+    const apiKey = await this.createApiKey(config);
+
     this.logger.info(`Updating agentless web crawler policy ${id}`);
-    await this.fleet.agentlessPoliciesService.updateAgentlessPolicy(
-      id,
-      toPolicyPayload(config, policy.package.version)
-    );
+    try {
+      await this.fleet.agentlessPoliciesService.updateAgentlessPolicy(
+        id,
+        toPolicyPayload(config, policy.package.version, apiKey)
+      );
+    } catch (error) {
+      await this.invalidateApiKey(apiKey.id);
+      throw error;
+    }
+    if (previousApiKeyId) {
+      await this.invalidateApiKey(previousApiKeyId);
+    }
 
     return this.get(id);
   }
@@ -90,9 +129,12 @@ export class WebCrawlersService {
     }
 
     this.logger.info(`Deleting web crawler policy ${id}`);
-    await this.fleet.packagePolicyService.delete(this.soClient, this.esClient, [policy.id]);
-    for (const agentPolicyId of policy.policy_ids) {
-      await this.fleet.agentlessPoliciesService.deleteAgentlessPolicy(agentPolicyId);
+    // removes the package policy, its agent policy and the agentless deployment
+    await this.fleet.agentlessPoliciesService.deleteAgentlessPolicy(policy.id, { force: true });
+
+    const apiKeyId = apiKeyIdOf(policy);
+    if (apiKeyId) {
+      await this.invalidateApiKey(apiKeyId);
     }
   }
 
@@ -136,6 +178,31 @@ export class WebCrawlersService {
     return packageInfo.version;
   }
 
+  // An API key limited to the crawl index, created on behalf of the current user so that the
+  // crawler can never do more than they can
+  private async createApiKey(config: WebCrawlerConfig): Promise<CrawlerApiKey> {
+    const { id, encoded } = await this.esClient.security.createApiKey({
+      name: `web-crawler-${config.output_index}`,
+      role_descriptors: {
+        'web-crawler': {
+          // `monitor` lets the crawler read the cluster info it checks on connecting
+          cluster: ['monitor'],
+          indices: [{ names: [config.output_index], privileges: CRAWL_INDEX_PRIVILEGES }],
+        },
+      },
+      metadata: { managed_by: 'serverless_search', web_crawler: config.name },
+    });
+    return { id, encoded };
+  }
+
+  private async invalidateApiKey(apiKeyId: string): Promise<void> {
+    try {
+      await this.esClient.security.invalidateApiKey({ ids: [apiKeyId] });
+    } catch (error) {
+      this.logger.warn(`Could not invalidate web crawler API key ${apiKeyId}: ${error.message}`);
+    }
+  }
+
   private async listAgents(agentPolicyIds: string[]): Promise<Agent[]> {
     if (agentPolicyIds.length === 0) {
       return [];
@@ -172,7 +239,13 @@ export class WebCrawlersService {
   }
 }
 
-function toPolicyPayload(config: WebCrawlerConfig, packageVersion: string) {
+function apiKeyIdOf(policy: PackagePolicy): string | undefined {
+  const vars = policy.inputs.find((input) => input.type === CRAWLER_INPUT_TYPE)?.vars;
+  const value = vars?.api_key_id?.value;
+  return typeof value === 'string' && value !== '' ? value : undefined;
+}
+
+function toPolicyPayload(config: WebCrawlerConfig, packageVersion: string, apiKey: CrawlerApiKey) {
   return {
     package: { name: CRAWLER_PACKAGE_NAME, version: packageVersion },
     name: config.name,
@@ -183,6 +256,8 @@ function toPolicyPayload(config: WebCrawlerConfig, packageVersion: string) {
         enabled: true,
         vars: {
           output_index: config.output_index,
+          api_key: apiKey.encoded,
+          api_key_id: apiKey.id,
           domains: stringify(config.domains),
           ...(config.schedule ? { schedule: config.schedule } : {}),
           ...(config.max_crawl_depth ? { max_crawl_depth: config.max_crawl_depth } : {}),

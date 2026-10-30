@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 import { WEB_CRAWLERS_API_PATH } from '../../common/types/web_crawlers';
@@ -46,9 +46,22 @@ export const registerWebCrawlersRoutes = ({
     return new WebCrawlersService(
       fleet,
       core.savedObjects.client,
-      core.elasticsearch.client.asInternalUser,
+      core.elasticsearch.client.asCurrentUser,
       logger
     );
+  };
+
+  // Errors raised by Fleet for rejected policies are named error classes carrying a user-facing
+  // message (validation, agentless restrictions, missing package); they are reported as 400
+  const errorResponse = (response: KibanaResponseFactory, error: unknown) => {
+    if (error instanceof WebCrawlerError) {
+      return response.customError({ statusCode: error.statusCode, body: error.message });
+    }
+    if (error instanceof Error && error.name !== 'Error' && error.message) {
+      const statusCode = /notfound/i.test(error.name) ? 404 : 400;
+      return response.customError({ statusCode, body: error.message });
+    }
+    throw error;
   };
 
   const canManageCluster = async (core: Awaited<RequestHandlerContext['core']>) => {
@@ -100,8 +113,12 @@ export const registerWebCrawlersRoutes = ({
       if (!service) {
         return response.customError({ statusCode: 503, body: NOT_AVAILABLE_MESSAGE });
       }
-      const crawler = await service.create(request.body);
-      return response.ok({ body: { crawler } });
+      try {
+        const crawler = await service.create(request.body);
+        return response.ok({ body: { crawler } });
+      } catch (error) {
+        return errorResponse(response, error);
+      }
     })
   );
 
@@ -129,10 +146,7 @@ export const registerWebCrawlersRoutes = ({
         const crawler = await service.update(request.params.id, request.body);
         return response.ok({ body: { crawler } });
       } catch (error) {
-        if (error instanceof WebCrawlerError) {
-          return response.customError({ statusCode: error.statusCode, body: error.message });
-        }
-        throw error;
+        return errorResponse(response, error);
       }
     })
   );
@@ -160,10 +174,7 @@ export const registerWebCrawlersRoutes = ({
       try {
         await service.delete(request.params.id);
       } catch (error) {
-        if (error instanceof WebCrawlerError) {
-          return response.customError({ statusCode: error.statusCode, body: error.message });
-        }
-        throw error;
+        return errorResponse(response, error);
       }
       return response.ok({ body: { deleted: true } });
     })
@@ -195,10 +206,7 @@ export const registerWebCrawlersRoutes = ({
         const result = await service.startCrawl(request.params.id, user?.username);
         return response.ok({ body: result });
       } catch (error) {
-        if (error instanceof WebCrawlerError) {
-          return response.customError({ statusCode: error.statusCode, body: error.message });
-        }
-        throw error;
+        return errorResponse(response, error);
       }
     })
   );
