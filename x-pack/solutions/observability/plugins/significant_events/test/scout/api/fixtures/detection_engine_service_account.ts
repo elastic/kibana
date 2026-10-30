@@ -25,7 +25,21 @@ const ENABLE_RETRY_INTERVAL_MS = 5_000;
  * detection as the account.
  * TODO: use the detection engine role once elasticsearch-controller defines it.
  */
-const SERVERLESS_ROLE = 'editor';
+const SERVERLESS_ROLE = 'admin';
+
+/**
+ * Serverless suites create their service accounts as the mock IdP's organization admin, as the
+ * other service account suites do: an account a project admin's session created could not
+ * exchange for a token (403).
+ */
+// Copied from `MOCK_IDP_UIAM_ORG_ADMIN_API_KEY` in `@kbn/mock-idp-utils`, a private platform package
+// this plugin cannot import.
+const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
+  'essu_dev_TnpKcmMyVTFkMEo2WW5scU5XUm9PVWw2TVRNNmJqSXRVbWxTVEZNeVowNVRkMWhUVWpCd1l6SjBadz09AAAAAN10T0s=';
+
+const SERVERLESS_ACCOUNT_CREATION_HEADERS = {
+  authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
+};
 
 interface ServiceAccount {
   id: string;
@@ -46,11 +60,19 @@ const createAdminRequester =
   (kbnUrl: KibanaUrl, cookieHeader: Record<string, string>) =>
   async <T>(
     path: string,
-    { method, body }: { method: 'GET' | 'POST'; body?: string }
+    {
+      method,
+      body,
+      headers,
+    }: { method: 'GET' | 'POST'; body?: string; headers?: Record<string, string> }
   ): Promise<T> => {
     const response = await fetch(new URL(kbnUrl.get(path)), {
       method,
-      headers: { ...COMMON_API_HEADERS, ...cookieHeader, 'content-type': 'application/json' },
+      headers: {
+        ...COMMON_API_HEADERS,
+        ...(headers ?? cookieHeader),
+        'content-type': 'application/json',
+      },
       ...(body ? { body } : {}),
     });
     const text = await response.text();
@@ -101,6 +123,7 @@ export const setUpDetectionEngineServiceAccount = async ({
     serviceAccounts.find(({ name }) => name === DETECTION_ENGINE_SERVICE_ACCOUNT_NAME) ??
     (await request<ServiceAccount>(SERVICE_ACCOUNT_LIST_PATH, {
       method: 'POST',
+      ...(isServerless ? { headers: SERVERLESS_ACCOUNT_CREATION_HEADERS } : {}),
       body: JSON.stringify({
         name: DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
         description: 'The service account the Nightshift detection engine runs as.',

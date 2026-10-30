@@ -10,6 +10,10 @@ import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
+import {
+  DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
+  DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE,
+} from '@kbn/significant-events-plugin/common';
 import type {
   BaseFeature,
   Feature,
@@ -409,5 +413,24 @@ export async function resetMaintenance(
   return apiClient
     .fetch('POST /internal/significant_events/maintenance/_reset')
     .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+/**
+ * Sets the space up to run the detection engine as its service account, which resuming Significant
+ * Events and creating queries (and so rules) require. On stateful the account's role has to exist
+ * first; the setup creates the account itself.
+ */
+export async function setUpDetectionEngine(
+  apiClient: SignificantEventsSupertestRepositoryClient,
+  esClient: Client
+) {
+  await esClient.security.putRole({
+    name: DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
+    ...DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE,
+  });
+  return apiClient
+    .fetch('POST /internal/significant_events/service_account/_enable', { params: { body: {} } })
+    .expect(200)
     .then((response) => response.body);
 }
