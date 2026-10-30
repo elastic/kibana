@@ -422,7 +422,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
       await ml.jobWizardCommon.advanceToValidationSection();
       await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout warning']);
-      await new Promise((resolve) => setTimeout(resolve, 10 * 60 * 1000));
+
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout warning',
         /Time range\s*The selected or available time range might be too short/
