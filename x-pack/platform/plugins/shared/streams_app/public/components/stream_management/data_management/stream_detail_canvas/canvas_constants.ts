@@ -56,7 +56,7 @@ export const PAN_MARGIN = 500;
  * by both the node components and the pan-bound estimate below. */
 export const SOURCE_NODE_WIDTH = 246;
 export const DESTINATION_NODE_WIDTH = 220;
-export const ROUTING_NODE_WIDTH = 220;
+export const ROUTING_NODE_WIDTH = 172;
 export const PROCESSING_NODE_WIDTH = 140;
 
 /**

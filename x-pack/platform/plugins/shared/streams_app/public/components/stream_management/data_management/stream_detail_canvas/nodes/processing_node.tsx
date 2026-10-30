@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { ProcessingNode as ProcessingNodeType } from '../types';
 import { PROCESSING_NODE_HEIGHT, PROCESSING_NODE_WIDTH } from '../canvas_constants';
-import { ConnectionHandle, NODE_HANDLE_CLASS } from './connection_handle';
+import { ConnectionHandle } from './connection_handle';
 import { getNodeCardStyles } from './node_card_styles';
 
 /** Compact pill for processing applied between a source, a route and a destination. */
@@ -25,7 +25,7 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
 
   return (
     <>
-      <Handle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle type="target" position={Position.Left} isConnectable={false} />
       <EuiPanel
         className="nokey"
         hasShadow={false}
@@ -50,12 +50,7 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
         </EuiText>
       </EuiPanel>
       {data.output === 'fixed' ? (
-        <Handle
-          type="source"
-          position={Position.Right}
-          isConnectable={false}
-          className={NODE_HANDLE_CLASS}
-        />
+        <Handle type="source" position={Position.Right} isConnectable={false} />
       ) : (
         <ConnectionHandle
           type="source"
