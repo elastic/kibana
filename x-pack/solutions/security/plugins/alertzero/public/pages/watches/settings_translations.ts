@@ -44,7 +44,7 @@ export const THREAT_INTEL_SUPPLY_SECTION_SUBTITLE = i18n.translate(
 
 export const THREAT_INTEL_SUPPLY_INGEST_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.ingestLabel',
-  { defaultMessage: 'Ingest' }
+  { defaultMessage: 'Ingest threat feeds' }
 );
 
 export const THREAT_INTEL_SUPPLY_ENRICH_LABEL = i18n.translate(
