@@ -10,6 +10,7 @@ import {
   EventActorType,
   isPublicConversation,
   isSharedConversation,
+  isTimelineEvent,
   isUserMessageEvent,
   isUserProfileId,
   normalizeConversationAccessControl,
@@ -37,7 +38,11 @@ const getConversationUserIds = (
   const ids = [conversation.user.id];
   if (isPublic) {
     conversation.events?.forEach((event) => {
-      if (isUserMessageEvent(event) && event.actor.type === EventActorType.user) {
+      if (
+        isTimelineEvent(event) &&
+        isUserMessageEvent(event) &&
+        event.actor.type === EventActorType.user
+      ) {
         ids.push(event.actor.id);
       }
     });
