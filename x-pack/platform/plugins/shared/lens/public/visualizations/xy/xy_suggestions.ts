@@ -45,6 +45,7 @@ const COLUMN_SORT_ORDER = {
   geo_point: 9,
   geo_shape: 10,
   murmur3: 11,
+  number_range: 12,
 };
 
 /**
@@ -703,10 +704,7 @@ function buildSuggestion({
   };
 
   const isIncomplete = yValues.length === 0;
-  // TODO: add number_range to the DataType union in types.ts. There are some implications to covered
-  const bucketTypes: Array<string | undefined> = [xValue, ...(splitBy ?? [])].map(
-    (col) => col?.operation.dataType
-  );
+  const bucketTypes = [xValue, ...(splitBy ?? [])].map((col) => col?.operation.dataType);
   const isRangeOverTime = bucketTypes.includes('date') && bucketTypes.includes('number_range');
 
   return {

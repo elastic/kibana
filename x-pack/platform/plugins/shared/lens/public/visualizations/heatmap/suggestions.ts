@@ -107,9 +107,8 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     newState.valueAccessor = numberMetric.columnId;
   }
 
-  // ES|QL histogram distribution (BUCKET over a histogram field returns a double_range)
-  // (number_range is not part of the DataType union, so compare as a string)
-  const hasRangeBucket = groups.some((g) => (g.operation.dataType as string) === 'number_range');
+  // ES|QL histogram distribution: BUCKET over a histogram field returns a number_range type
+  const hasRangeBucket = groups.some((g) => g.operation.dataType === 'number_range');
 
   const [histogram, ordinal] = partition(
     groups,
