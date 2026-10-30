@@ -20,6 +20,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from './use_run_document_workflow_panel';
+import { toDocumentSelections } from './to_document_selections';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -49,6 +50,7 @@ import type { Status } from '../../../../../common/api/detection_engine';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
+import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAddToChatAction } from './use_add_to_chat_action';
@@ -59,6 +61,7 @@ interface AlertContextMenuProps {
   ariaLabel?: string;
   isRemoteDocument: boolean;
   ecsRowData: Ecs;
+  onRemoveFromCase?: (eventId: string) => void;
   onRuleChange?: () => void;
   scopeId: string;
   refetch: (() => void) | undefined;
@@ -68,6 +71,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   isRemoteDocument,
   ecsRowData,
+  onRemoveFromCase,
   onRuleChange,
   scopeId,
   refetch,
@@ -235,20 +239,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsRowData,
   });
 
-  const documentForWorkflow = useMemo(() => {
-    const fields: Record<string, unknown> = {};
-    for (const { field, value } of flattenedEcsData) {
-      fields[field] = value;
-    }
-    return [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '', ...fields }];
-  }, [ecsRowData._id, ecsRowData._index, flattenedEcsData]);
+  const documentIdsForWorkflow = useMemo(
+    () => toDocumentSelections([{ _id: ecsRowData._id, _index: ecsRowData._index }]),
+    [ecsRowData._id, ecsRowData._index]
+  );
 
   const {
     runWorkflowMenuItem: runDocumentWorkflowMenuItem,
     runDocumentWorkflowPanel: runDocumentWorkflowPanels,
   } = useRunDocumentWorkflowPanel({
     closePopover,
-    documents: documentForWorkflow,
+    documentIds: documentIdsForWorkflow,
     originEventId: ecsRowData._id,
   });
 
@@ -257,6 +258,24 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     onMenuItemClick,
     alertId: ecsRowData._id,
   });
+
+  const removeFromCaseItems = useMemo(
+    () =>
+      onRemoveFromCase
+        ? [
+            {
+              key: REMOVE_FROM_CASE_ACTION_ID,
+              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
+              name: i18n.REMOVE_FROM_CASE,
+              onClick: () => {
+                closePopover();
+                onRemoveFromCase(ecsRowData._id);
+              },
+            },
+          ]
+        : [],
+    [closePopover, onRemoveFromCase, ecsRowData._id]
+  );
 
   const isAlertActionMenu = !isEvent && Boolean(ruleId);
   const hasAgent = Boolean(agentId);
@@ -273,6 +292,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         hasAgent,
         isAlert: isAlertActionMenu,
         osqueryItems: osqueryActionItems,
+        removeFromCaseItems,
         runAlertWorkflowItems: runWorkflowMenuItem,
         runDocumentWorkflowItems: runDocumentWorkflowMenuItem,
         statusItems: statusActionItems,
@@ -288,6 +308,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       hasAgent,
       isAlertActionMenu,
       osqueryActionItems,
+      removeFromCaseItems,
       runWorkflowMenuItem,
       runDocumentWorkflowMenuItem,
       statusActionItems,
@@ -371,6 +392,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
               isAlert={isAlertActionMenu}
               osqueryItems={osqueryActionItems}
               panels={panels}
+              removeFromCaseItems={removeFromCaseItems}
               runAlertWorkflowItems={runWorkflowMenuItem}
               runDocumentWorkflowItems={runDocumentWorkflowMenuItem}
               statusItems={statusActionItems}

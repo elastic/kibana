@@ -53,6 +53,7 @@ interface ReleaseNoteCopy {
   labelStep: string;
   textStep: string;
   guidance: string;
+  breakingContext: string;
   optionalPrompt: string;
 }
 
@@ -220,6 +221,8 @@ Nothing here blocks merge. The approved breaking change(s) still ship with this 
 
 ${releaseNote.guidance}
 
+${releaseNote.breakingContext}
+
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;
   }
 
@@ -252,6 +255,8 @@ ${noteBlock}### What to do
 ### Release note
 
 ${releaseNote.guidance}
+
+${releaseNote.breakingContext}
 
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;
 };

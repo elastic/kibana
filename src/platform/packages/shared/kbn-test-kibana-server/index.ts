@@ -20,3 +20,5 @@ export {
   remapPluginPaths,
 } from './src/kibana_cli_args';
 export { findTestPluginPaths } from './src/find_test_plugin_paths';
+export type { ServerlessProject } from './src/serverless_project';
+export { getServerlessProject } from './src/serverless_project';

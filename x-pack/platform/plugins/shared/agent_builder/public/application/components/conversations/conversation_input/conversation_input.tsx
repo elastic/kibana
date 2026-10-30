@@ -24,15 +24,19 @@ import {
   ConversationInputShell,
   formatAgentBuilderErrorMessage,
 } from '@kbn/agent-builder-browser';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { labels } from '../../../utils/i18n';
 import { useInputDraft } from '../../../hooks/use_input_draft';
 import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import {
@@ -247,7 +251,7 @@ const getMessageEditorAriaLabel = ({
   });
 };
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({
+const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
@@ -337,9 +341,24 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
   const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
 
-  const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
+  const { agent: agentById, isLoading: isLoadingAgentById } = useAgentBuilderAgentById(
+    !isAgentIdValid && isFetched && Boolean(agentId) ? agentId : undefined
+  );
+  const agentExists = isAgentIdValid || Boolean(agentById);
+
+  // An agent bound to a service account can only be invoked with the dedicated privilege; the
+  // server refuses the request, so the composer says why up front instead of failing on send.
+  const { invokeBoundAgents } = useUiPrivileges();
+  const { agent: currentAgent } = useAgentBuilderAgentById(isAgentIdValid ? agentId : undefined);
+  const isBoundAgentForbidden = Boolean(currentAgent?.service_account_id) && !invokeBoundAgents;
+
+  const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
   const isInputDisabled =
-    isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
+    isAgentDeleted ||
+    isBoundAgentForbidden ||
+    isAwaitingPrompt ||
+    isCreatingConversation ||
+    isSendingUserMessage;
   const isMessageTooLong = overLimitCharacterCount > 0;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
@@ -347,12 +366,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isResponseLoading ||
     isSendingUserMessage ||
     isCreatingConversation ||
-    !isAgentIdValid ||
+    !agentExists ||
+    isBoundAgentForbidden ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
 
-  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isAgentDeleted
+    ? disabledPlaceholder(agentId)
+    : isBoundAgentForbidden
+    ? labels.executionIdentity.chatForbiddenPlaceholder
+    : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;
@@ -515,6 +539,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           />
         </EuiFlexItem>
       )}
+      {isBoundAgentForbidden && (
+        <EuiFlexItem grow={false}>
+          <KbnInfoCallout
+            announceOnMount
+            size="s"
+            title={labels.executionIdentity.chatForbiddenTitle}
+            text={labels.executionIdentity.chatForbiddenDescription}
+            data-test-subj="agentBoundForbiddenCallout"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={editorContainerStyles}>
         <MessageEditor
           messageEditor={messageEditor}
@@ -549,3 +584,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     </InputContainer>
   );
 };
+
+export const ConversationInput = React.memo(ConversationInputComponent);
+ConversationInput.displayName = 'ConversationInput';

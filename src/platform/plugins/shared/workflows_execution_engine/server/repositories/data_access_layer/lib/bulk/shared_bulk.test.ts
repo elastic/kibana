@@ -235,7 +235,7 @@ describe('sharedBulk', () => {
         {
           _id: 'a',
           _index: INDEX,
-          _source: { includes: ['status'] },
+          _source: { includes: ['status', 'deleted'] },
         },
       ],
     });
@@ -390,6 +390,91 @@ describe('sharedBulk', () => {
     });
 
     expect(updater).toHaveBeenCalledWith({ id: 'a', status: 'queued' });
+  });
+
+  it('uses a real-time mget version after the updater search fallback', async () => {
+    const { esClient, logger } = createSetup();
+    const olderIndex = '.ds-.workflows-executions-000001';
+    const updater = jest.fn((current: { id: string; status: string }) =>
+      current.status === 'queued' ? { status: 'pending' } : 'noop'
+    );
+
+    esClient.mget
+      .mockResolvedValueOnce({
+        docs: [{ _id: 'a', _index: INDEX, found: false }],
+      } as never)
+      .mockResolvedValueOnce({
+        docs: [
+          {
+            _id: 'a',
+            _index: olderIndex,
+            found: true,
+            _source: { status: 'queued' },
+            _seq_no: 7,
+            _primary_term: 2,
+          },
+        ],
+      } as never);
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'a',
+            _index: olderIndex,
+            _source: { status: 'queued' },
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        ],
+      },
+    } as never);
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [
+        {
+          update: {
+            _id: 'a',
+            _index: olderIndex,
+            result: 'updated',
+            _seq_no: 8,
+            _primary_term: 2,
+          },
+        },
+      ],
+    } as never);
+
+    const result = await sharedBulk<{ id: string; status: string }>({
+      esClient,
+      request: {
+        items: [
+          {
+            operation: 'update',
+            documentId: 'a',
+            sourceFields: ['status'],
+            updater,
+          },
+        ],
+      },
+      logger,
+      fallbackIndexes: [INDEX],
+      searchFallbackIndexes: [INDEX, olderIndex],
+    });
+
+    expect(result.errors).toBe(false);
+    expect(updater).toHaveBeenCalledWith({ id: 'a', status: 'queued' });
+    expect(esClient.mget).toHaveBeenNthCalledWith(2, {
+      docs: [
+        {
+          _index: olderIndex,
+          _id: 'a',
+          _source: { includes: ['status', 'deleted'] },
+        },
+      ],
+    });
+    expect(esClient.bulk.mock.calls[0][0].operations).toEqual([
+      { update: { _id: 'a', _index: olderIndex, if_seq_no: 7, if_primary_term: 2 } },
+      { doc: { id: 'a', status: 'pending' } },
+    ]);
   });
 
   it('throws when a response item has no _id', async () => {

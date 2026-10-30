@@ -49,7 +49,7 @@ export const TemplateRequirements = React.memo<TemplateRequirementsProps>(
       <div data-test-subj="workflowLibraryTemplateRequirements">
         <EuiTitle size="xs">
           <h2>
-            {i18n.translate('workflows.library.requirements.title', {
+            {i18n.translate('workflowsUi.library.requirements.title', {
               defaultMessage: "What you'll need",
             })}
           </h2>

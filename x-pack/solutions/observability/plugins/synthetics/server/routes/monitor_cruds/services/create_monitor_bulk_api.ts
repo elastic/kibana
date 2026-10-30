@@ -167,7 +167,7 @@ export class CreateMonitorBulkAPI {
       return [];
     }
     return (
-      (await this.routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+      (await this.routeContext.syntheticsMonitorClient.getMaintenanceWindows(
         this.routeContext.spaceId
       )) ?? []
     );

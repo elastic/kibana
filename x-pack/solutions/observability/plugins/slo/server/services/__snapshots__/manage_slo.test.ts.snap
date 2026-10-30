@@ -5,6 +5,9 @@ exports[`ManageSLO Disable disables the slo when enabled 1`] = `
   "calls": Array [
     Array [
       "slo-irrelevant-1",
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
   ],
   "results": Array [
@@ -21,6 +24,9 @@ exports[`ManageSLO Disable disables the slo when enabled 2`] = `
   "calls": Array [
     Array [
       "slo-summary-irrelevant-1",
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
   ],
   "results": Array [
@@ -37,6 +43,9 @@ exports[`ManageSLO Enable enables the slo when disabled 1`] = `
   "calls": Array [
     Array [
       "slo-irrelevant-1",
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
   ],
   "results": Array [
@@ -53,6 +62,9 @@ exports[`ManageSLO Enable enables the slo when disabled 2`] = `
   "calls": Array [
     Array [
       "slo-summary-irrelevant-1",
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
   ],
   "results": Array [

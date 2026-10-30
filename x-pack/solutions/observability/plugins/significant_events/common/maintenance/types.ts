@@ -17,8 +17,8 @@ export interface SignificantEventsMaintenanceFailure {
   target: string;
   error: string;
   /**
-   * The space the failure belongs to. Absent for failures that are not tied to one
-   * space (data streams, snapshots, a missing plugin), which every space reports.
+   * The space the failure belongs to. When absent, the failure belongs to the
+   * operation's current space (for example, data-stream or snapshot failures).
    */
   spaceId?: string;
 }
@@ -27,7 +27,7 @@ export interface SignificantEventsMaintenanceDeletedCounts {
   knowledgeIndicators: number;
   storedQueries: number;
   rules: number;
-  investigations: number;
+  /** Streams from which current-space documents were removed, not physically deleted streams. */
   dataStreams: number;
 }
 

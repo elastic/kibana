@@ -21,3 +21,8 @@ export const resultLabel = i18n.translate(
   'xpack.agentBuilder.conversation.toolResponseFlyout.resultLabel',
   { defaultMessage: 'Result' }
 );
+
+export const stoppedLabel = i18n.translate(
+  'xpack.agentBuilder.conversation.toolResponseFlyout.stoppedLabel',
+  { defaultMessage: 'Stopped' }
+);

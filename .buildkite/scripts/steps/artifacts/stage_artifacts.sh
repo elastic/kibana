@@ -31,7 +31,6 @@ download "kibana-$FULL_VERSION-x86_64.rpm"
 download "kibana-$FULL_VERSION-aarch64.rpm"
 
 download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
-download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-build-context.tar.gz"
 

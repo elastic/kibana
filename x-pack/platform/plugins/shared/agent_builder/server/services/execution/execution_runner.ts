@@ -77,6 +77,7 @@ import {
   type ConversationWithOperation,
 } from './utils';
 import { reportRoundTelemetry } from './utils/report_round_telemetry';
+import { buildExecutionTelemetryMetadata } from './utils/build_execution_telemetry_metadata';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { getCurrentTraceId, loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -186,10 +187,12 @@ const handleConversationExecution = async ({
     accessControl,
     readOnly,
     origin,
+    author: requestAuthor,
     nextInput,
     browserApiTools,
     configurationOverrides,
     telemetryMetadata,
+    workflowExecutionId,
     maxContentLength,
     reasoningLevel,
     subagentCreation,
@@ -212,9 +215,10 @@ const handleConversationExecution = async ({
   const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
     user: { ...owner, isAdmin: false },
+    runAs: execution.runAs?.serviceAccountId,
   });
 
-  const author = conversationClient.getAuthor(origin?.author);
+  const author = conversationClient.getAuthor(origin?.author, requestAuthor);
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is
@@ -256,15 +260,26 @@ const handleConversationExecution = async ({
     // the title-generation and default-connector lookups below, which run ahead of the
     // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
     // active when the model-provider's (memoized) telemetry metadata was first resolved.
-    const roundTraceId = getCurrentTraceId();
-    const roundTelemetryMetadata = roundTraceId
-      ? { ...telemetryMetadata, traceId: roundTraceId }
-      : telemetryMetadata;
+    // `workflowExecutionId` is the single source of the workflow run: the same id goes on the
+    // round events and, as `interactionId`, on every EIS call of this round, unless this round
+    // belongs to a sub-agent (only the main agent's loop sends it to EIS).
+    const roundTelemetryMetadata = buildExecutionTelemetryMetadata({
+      parentExecutionId: execution.parentExecutionId,
+      telemetryMetadata,
+      traceId: getCurrentTraceId(),
+      workflowExecutionId,
+    });
 
-    const { modelProvider, selectedConnectorId } = await resolveServices({
+    const {
+      modelProvider,
+      selectedConnectorId,
+      reasoningLevel: resolvedReasoningLevel,
+    } = await resolveServices({
       agentId,
       connectorId,
+      reasoningLevel,
       telemetryMetadata: roundTelemetryMetadata,
+      runAs: execution.runAs?.serviceAccountId,
       request,
       ...deps,
     });
@@ -281,16 +296,19 @@ const handleConversationExecution = async ({
       outputSchema,
       abortSignal,
       conversation,
+      // Only a bound run swaps credentials; an unbound run's request already is the owner.
+      ...(execution.runAs ? { owner, runAs: execution.runAs } : {}),
       defaultConnectorId: selectedConnectorId,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
-      reasoningLevel,
+      reasoningLevel: resolvedReasoningLevel,
       runAgent,
       browserApiTools,
       configurationOverrides,
       interactivity,
       parentExecutionId: execution.parentExecutionId,
       projectRouting,
+      workflowExecutionId,
       roundId,
       conversationAccess,
     });
@@ -306,7 +324,14 @@ const handleConversationExecution = async ({
           ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
           : undefined,
         modelProvider.getDefaultModel(),
-        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        agentService
+          .getRegistry({ request })
+          .then((registry) =>
+            registry.get(
+              agentId,
+              execution.runAs ? { runAs: execution.runAs.serviceAccountId } : undefined
+            )
+          ),
         loadTracingPrivacySettings({
           uiSettingsClient: deps.uiSettings.asScopedToClient(
             deps.savedObjects.getScopedClient(request)
@@ -333,6 +358,7 @@ const handleConversationExecution = async ({
           agentEvents$,
           nextInput,
           author,
+          releaseExecutionId: execution.executionId,
         })
       : EMPTY;
 
@@ -395,6 +421,7 @@ const handleConversationExecution = async ({
                     error,
                     interrupted,
                     completed,
+                    releaseExecutionId: execution.executionId,
                     logger,
                   }),
               })
@@ -414,6 +441,7 @@ const handleConversationExecution = async ({
                 trackingService,
                 analyticsService,
                 logger,
+                workflowExecutionId,
               });
             }
           }),
@@ -429,6 +457,7 @@ const handleConversationExecution = async ({
             conversationId: conversation.id,
             executionId: execution.executionId,
             roundOrigin: telemetryOrigin,
+            workflowExecutionId,
           })
         );
       }
@@ -451,6 +480,7 @@ const handleConversationExecution = async ({
           author,
           origin: roundOrigin,
           error: normalized,
+          releaseExecutionId: execution.executionId,
           logger,
         })
       : [];
@@ -569,6 +599,7 @@ const buildPersistenceEvents = ({
   agentEvents$,
   nextInput,
   author,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -576,6 +607,7 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   nextInput: ConverseInput;
   author?: ConversationRoundAuthor;
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -596,6 +628,7 @@ const buildPersistenceEvents = ({
             take(1)
           ),
           title$: endTitle$,
+          releaseExecutionId,
         })
       )
     );
@@ -611,6 +644,7 @@ const buildPersistenceEvents = ({
     input: nextInput,
     author,
     title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+    releaseExecutionId,
   });
 };
 
@@ -640,19 +674,25 @@ const handleStandaloneExecution = async ({
     projectRouting,
     structuredOutput,
     outputSchema,
+    workflowExecutionId,
   } = execution.agentParams;
 
   // See the matching comment in handleConversationExecution: captured once, ahead of the first
-  // model call, so every EIS call in this execution reports the same trace id.
-  const roundTraceId = getCurrentTraceId();
-  const roundTelemetryMetadata = roundTraceId
-    ? { ...telemetryMetadata, traceId: roundTraceId }
-    : telemetryMetadata;
+  // model call, so every EIS call in this execution reports the same trace id. A standalone
+  // sub-agent has a parent execution, so its EIS calls don't carry the workflow run.
+  const roundTelemetryMetadata = buildExecutionTelemetryMetadata({
+    parentExecutionId: execution.parentExecutionId,
+    telemetryMetadata,
+    traceId: getCurrentTraceId(),
+    workflowExecutionId,
+  });
 
-  const { selectedConnectorId } = await resolveServices({
+  const { selectedConnectorId, reasoningLevel: resolvedReasoningLevel } = await resolveServices({
     agentId,
     connectorId: execution.agentParams.connectorId,
+    reasoningLevel,
     telemetryMetadata: roundTelemetryMetadata,
+    runAs: execution.runAs?.serviceAccountId,
     request,
     ...deps,
   });
@@ -664,16 +704,19 @@ const handleStandaloneExecution = async ({
     nextInput: execution.agentParams.nextInput,
     structuredOutput,
     outputSchema,
+    // Only a bound run swaps credentials; an unbound run's request already is the owner.
+    ...(execution.runAs ? { owner: execution.owner, runAs: execution.runAs } : {}),
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
-    reasoningLevel,
+    reasoningLevel: resolvedReasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,
     interactivity,
+    workflowExecutionId,
     parentExecutionId: execution.parentExecutionId,
   });
 

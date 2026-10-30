@@ -43,6 +43,7 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 }));
 
 const mockGetWorkflowExecutionStates = jest.fn();
+const mockGetWorkflowsSubscribedToTrigger = jest.fn();
 const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
 const mockGetWorkflow = jest.fn();
 const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
@@ -52,6 +53,7 @@ jest.mock('@kbn/workflows', () => {
     ...actual,
     WorkflowRepository: jest.fn().mockImplementation(() => ({
       getWorkflowExecutionStates: mockGetWorkflowExecutionStates,
+      getWorkflowsSubscribedToTrigger: mockGetWorkflowsSubscribedToTrigger,
       isWorkflowEnabled: mockIsWorkflowEnabled,
       isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
       getWorkflow: mockGetWorkflow,
@@ -116,12 +118,14 @@ describe('bulkScheduleWorkflow', () => {
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
     mockEvaluateConcurrencyKey.mockReturnValue(null);
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
+    mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([]);
     mockIsWorkflowEnabled.mockResolvedValue(true);
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
-      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      eventDriven: { enabled: true, logEvents: false, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 
@@ -129,18 +133,31 @@ describe('bulkScheduleWorkflow', () => {
     plugin.setup(coreSetup as any, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      workflowsExtensions: {
+        registerConnectorAdapter: jest.fn(),
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'connector.test',
+          requiresConnectorId: true,
+        }),
+      } as any,
     });
 
     coreStart = coreMock.createStart();
     mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
     mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,
       cloud: {} as any,
-      workflowsExtensions: {} as any,
+      workflowsExtensions: {
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'connector.test',
+          requiresConnectorId: true,
+        }),
+      } as any,
       licensing: licensingMock.createStart(),
     });
   });
@@ -159,6 +176,55 @@ describe('bulkScheduleWorkflow', () => {
     );
     return workflow;
   };
+
+  const delegatedRunner = (): WorkflowExecutionEngineModel =>
+    createWorkflow('system-security-attack-discovery-worker', {
+      definition: {
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'run_generation',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+          },
+        ],
+      } as WorkflowExecutionEngineModel['definition'],
+    });
+
+  it('scheduleWorkflow refuses a delegated-identity workflow before persisting it', async () => {
+    await expect(
+      pluginStart.scheduleWorkflow(delegatedRunner(), { spaceId: 'default' }, request)
+    ).rejects.toThrow(/cannot be run standalone/);
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('scheduleWorkflow still attempts parent inheritance when the run is delegated by a parent', async () => {
+    await expect(
+      pluginStart.scheduleWorkflow(
+        delegatedRunner(),
+        { spaceId: 'default', inheritParentIdentity: true },
+        request
+      )
+    ).rejects.toThrow(/parent executing as a service account/);
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('bulkScheduleWorkflow records a per-item error and does not persist a delegated-identity workflow', async () => {
+    const results = await pluginStart.bulkScheduleWorkflow(
+      [{ workflow: delegatedRunner(), context: { spaceId: 'default', triggeredBy: 'alert' } }],
+      request
+    );
+    expect(results[0]).toEqual({
+      status: 'error',
+      error: { message: expect.stringContaining('cannot be run standalone') },
+    });
+    expect(mockBulkCreateWorkflowExecutions).not.toHaveBeenCalled();
+    expect(mockConcurrencyCheckConcurrency).not.toHaveBeenCalled();
+  });
 
   it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
     '%s rejects a bound execution when deletion wins during persistence',
@@ -773,6 +839,45 @@ describe('bulkScheduleWorkflow', () => {
       { refresh: false }
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('schedules connector-triggered workflows with the authenticated ingress principal', async () => {
+    const authenticatedUser = 'service-account-id';
+    const workflow = {
+      id: 'wf-connector-event',
+      name: 'Connector event workflow',
+      enabled: true,
+      spaceId: 'default',
+      definition: {
+        name: 'Connector event workflow',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'connector.test', 'connector-id': 'connector-1' }],
+        steps: [],
+      },
+      yaml: 'name: Connector event workflow',
+      isTestRun: false,
+      valid: true,
+    };
+    mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([workflow]);
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+
+    await pluginStart.triggerEvents.emitEvent({
+      triggerId: 'connector.test',
+      payload: { connectorId: 'connector-1' },
+      request: { headers: { authorization: 'Bearer essu_token' } } as KibanaRequest,
+      authenticatedUser,
+    });
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: workflow.id,
+        executedBy: authenticatedUser,
+      }),
+      { refresh: false }
+    );
+    expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(getAuthenticatedUser).not.toHaveBeenCalled();
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {

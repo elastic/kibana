@@ -9,9 +9,9 @@ import assert from 'assert';
 
 import { EXTRACTION_MODE, EntityType, type ExtractionMode } from './entity_schema';
 import {
-  type EntityDefinitionWithoutId,
   type GatedEntityDefinition,
   type ManagedEntityDefinition,
+  type ManagedEntityDefinitionWithoutId,
 } from './entity_schema';
 import { resolveExtractionGate } from './extraction_gate';
 import { hostEntityDefinition } from './host';
@@ -29,9 +29,9 @@ const entitiesDefinitionRegistry = {
   user: userEntityDefinition,
   service: serviceEntityDefinition,
   generic: genericEntityDefinition,
-} as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
+} as const satisfies Record<EntityType, ManagedEntityDefinitionWithoutId>;
 
-const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId => {
+const getRegisteredDefinition = (type: EntityType): ManagedEntityDefinitionWithoutId => {
   const definition = entitiesDefinitionRegistry[type];
   assert(
     definition,
@@ -49,14 +49,15 @@ const getRegisteredDefinition = (type: EntityType): EntityDefinitionWithoutId =>
  * the complement the same gate defines.
  */
 export const hasPriorityExtractionGate = (type: EntityType): boolean =>
-  getRegisteredDefinition(type).priorityExtractionGate !== undefined;
+  getRegisteredDefinition(type).extraction.priorityExtractionGate !== undefined;
 
 /**
  * Whether this type's non-priority process applies sampling. Requires the priority gate, since
  * sampling only exists where a non-priority process does.
  */
 export const supportsNonPrioritySampling = (type: EntityType): boolean =>
-  hasPriorityExtractionGate(type) && getRegisteredDefinition(type).nonPrioritySampling === true;
+  hasPriorityExtractionGate(type) &&
+  getRegisteredDefinition(type).extraction.nonPrioritySampling === true;
 
 /**
  * 'nonPriority' is excluded: the non-priority task hardcodes its own mode directly.
@@ -106,18 +107,21 @@ export function getBuiltInEntityDefinition(
   type: EntityType,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   options?: EntityDefinitionOptions
-): GatedEntityDefinition<EntityDefinitionWithoutId> {
+): GatedEntityDefinition<ManagedEntityDefinitionWithoutId> {
   const definition =
     type === EntityType.enum.user && options?.excludedUserNames?.length
       ? buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames })
       : getRegisteredDefinition(type);
 
   assert(
-    extractionMode === EXTRACTION_MODE.single || definition.priorityExtractionGate,
+    extractionMode === EXTRACTION_MODE.single || definition.extraction.priorityExtractionGate,
     `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
   );
 
-  const extractionGate = resolveExtractionGate(definition.priorityExtractionGate, extractionMode);
+  const extractionGate = resolveExtractionGate(
+    definition.extraction.priorityExtractionGate,
+    extractionMode
+  );
   if (!extractionGate) return definition;
 
   return { ...definition, extractionGate };

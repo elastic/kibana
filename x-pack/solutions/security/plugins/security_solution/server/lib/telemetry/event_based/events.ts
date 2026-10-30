@@ -28,6 +28,7 @@ import type {
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
 
+import { ENTITY_ANALYTICS_EVENTS } from './events/entity_analytics';
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
 import type {
   RuleBulkUpgradeTelemetry,
@@ -39,6 +40,7 @@ import type {
 } from '../../detection_engine/rule_management/logic/detection_rules_client/restore_telemetry';
 import type {
   RuleDuplicateTelemetry,
+  RuleImportTelemetry,
   RuleLifecycleTelemetry,
 } from '../../detection_engine/rule_management/logic/detection_rules_client/rule_lifecycle_telemetry';
 import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
@@ -183,9 +185,15 @@ const ruleLifecycleTelemetrySchema = {
   },
 };
 
-export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleImportTelemetry> = {
   eventType: 'detection_rule_import',
-  schema: ruleLifecycleTelemetrySchema,
+  schema: {
+    ...ruleLifecycleTelemetrySchema,
+    outcome: {
+      type: 'keyword',
+      _meta: { description: 'Result of importing the rule: created, updated or skipped' },
+    },
+  },
 };
 
 export const DETECTION_RULE_REVERT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
@@ -2735,6 +2743,7 @@ export const events = [
   TELEMETRY_INDEX_STATS_EVENT,
   TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
+  ...ENTITY_ANALYTICS_EVENTS,
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,

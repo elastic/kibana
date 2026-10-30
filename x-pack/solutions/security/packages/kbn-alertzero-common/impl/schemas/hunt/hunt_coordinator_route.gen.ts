@@ -20,6 +20,7 @@ import {
   HuntIoc,
   HuntForThreatResult,
   HuntIncompleteReason,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntCompleteness,
@@ -32,43 +33,10 @@ export type HuntCoordinatorStatus = z.infer<typeof HuntCoordinatorStatus>;
 export type HuntCoordinatorStatusEnum = typeof HuntCoordinatorStatus.enum;
 export const HuntCoordinatorStatusEnum = HuntCoordinatorStatus.enum;
 
-export const HuntCoordinatorRequestBody = lazySchema(() =>
-  z
-    .object({
-      report_id: z.string().min(1).max(512).optional(),
-      /**
-       * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
-       */
-      run_id: z
-        .string()
-        .min(1)
-        .max(128)
-        .optional()
-        .describe(
-          'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
-        ),
-      text: z.string().max(200000).optional(),
-      iocs: z.array(HuntIoc).max(100).optional(),
-      techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
-      time_range: z
-        .object({
-          from: z.string().min(1).max(64),
-          to: z.string().min(1).max(64),
-        })
-        .optional(),
-      size: z.number().int().min(1).max(100).optional(),
-      max_assets: z.number().int().min(1).max(200).optional(),
-      llm_confidence_threshold: z.number().min(0).max(1).optional(),
-      tier2_when: z.enum(['on_hits', 'always', 'never']).optional(),
-      max_tier2_sample_events: z.number().int().min(1).max(50).optional(),
-      trigger: z.enum(['manual', 'scheduled']),
-    })
-    .strict()
-);
-export type HuntCoordinatorRequestBody = z.infer<typeof HuntCoordinatorRequestBody>;
-export type HuntCoordinatorRequestBodyInput = z.input<typeof HuntCoordinatorRequestBody>;
-
-export const HuntCoordinatorResponse = lazySchema(() =>
+/**
+ * The full outcome of one two-tier hunt run, as the hunt child reads it from the hidden result attachment once the run has completed.
+ */
+export const HuntCoordinatorResult = lazySchema(() =>
   z.object({
     status: HuntCoordinatorStatus,
     report_id: z.string().optional(),
@@ -193,6 +161,16 @@ export const HuntCoordinatorResponse = lazySchema(() =>
               .optional()
               .describe('Distinct user.name values from required-index rows, capped at 20.'),
             /**
+             * Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`.
+             */
+            affected_host_origins: z
+              .array(HostOrigin)
+              .max(20)
+              .optional()
+              .describe(
+                "Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`."
+              ),
+            /**
              * True when more than 20 distinct hosts were seen.
              */
             affected_hosts_truncated: z
@@ -252,6 +230,15 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .nullable()
       .optional(),
     tier2_skipped_reason: z.string().optional(),
+    /**
+     * Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.
+     */
+    unavailable_model_tiers: z
+      .array(z.enum(['efficient', 'balanced', 'frontier']))
+      .optional()
+      .describe(
+        'Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.'
+      ),
     message: z.string(),
     next_step: z.string(),
     /**
@@ -277,6 +264,35 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'Whether this run is done with the report and it can be retired: true when nothing a later sweep would cover is missing. Derived from `completeness`: false only for `incomplete_retryable`, where repeating the run could cover what this one missed. True for `incomplete_final` as well as `complete`, because a deterministic gap returns identically every run, so retrying only re-spends the budget. A caller that writes "clean" off this flag alone will record a clean environment for a run that could not search it — use `completeness` for that.'
       ),
     /**
+     * Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.
+     */
+    searched_technique_ids: z
+      .array(z.string().min(1).max(32))
+      .max(100)
+      .optional()
+      .describe(
+        'Technique ids this run settled in Tier 2: behaviors whose query executed and whose result a retry would not change (a conclusive result, or an inconclusive one the completeness classifier treats as final), plus techniques collapsed into a sibling whose query executed conclusively. Techniques that were skipped, failed, lost to the behavior budget, or whose sibling did not execute conclusively are not listed. Absent or empty when Tier 2 did not run. The caller records these so a later run can skip them.'
+      ),
+    /**
+     * Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.
+     */
+    pending_technique_ids: z
+      .array(z.string().min(1).max(32))
+      .max(100)
+      .optional()
+      .describe(
+        'Technique ids this run could not search but a later run still should: the ones a retryable coverage gap names. The caller records these so the next run keeps them as pending even if its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the caller to leave what it has recorded alone; empty when nothing is pending.'
+      ),
+    /**
+     * True when this was a manual run over the report's own text, so Tier 2 searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Tier 2 did not run.
+     */
+    replayed_whole_report: z
+      .boolean()
+      .optional()
+      .describe(
+        "True when this was a manual run over the report's own text, so Tier 2 searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Tier 2 did not run."
+      ),
+    /**
      * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.
      */
     incomplete: z
@@ -285,6 +301,15 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .describe(
         "The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
+    /**
+     * Report IOCs excluded by adjudication, not searched by this run.
+     */
+    excluded_report_iocs: z
+      .object({
+        count: z.number().int().min(1),
+      })
+      .optional()
+      .describe('Report IOCs excluded by adjudication, not searched by this run.'),
     /**
      * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
      */
@@ -342,6 +367,73 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .optional()
       .describe(
         "Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation."
+      ),
+  })
+);
+export type HuntCoordinatorResult = z.infer<typeof HuntCoordinatorResult>;
+
+export const HuntCoordinatorRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Investigation conversation the hidden result attachment is written to.
+       */
+      conversation_id: z
+        .string()
+        .min(1)
+        .max(256)
+        .describe('Investigation conversation the hidden result attachment is written to.'),
+      report_id: z.string().min(1).max(512).optional(),
+      /**
+       * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
+       */
+      run_id: z
+        .string()
+        .min(1)
+        .max(128)
+        .optional()
+        .describe(
+          'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
+        ),
+      text: z.string().max(200000).optional(),
+      iocs: z.array(HuntIoc).max(100).optional(),
+      techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
+      time_range: z
+        .object({
+          from: z.string().min(1).max(64),
+          to: z.string().min(1).max(64),
+        })
+        .optional(),
+      size: z.number().int().min(1).max(100).optional(),
+      max_assets: z.number().int().min(1).max(200).optional(),
+      llm_confidence_threshold: z.number().min(0).max(1).optional(),
+      tier2_when: z.enum(['on_hits', 'always', 'never']).optional(),
+      max_tier2_sample_events: z.number().int().min(1).max(50).optional(),
+      trigger: z.enum(['manual', 'scheduled']),
+    })
+    .strict()
+);
+export type HuntCoordinatorRequestBody = z.infer<typeof HuntCoordinatorRequestBody>;
+export type HuntCoordinatorRequestBodyInput = z.input<typeof HuntCoordinatorRequestBody>;
+
+export const HuntCoordinatorResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The caller's run id, or the one the route minted when the caller had no sweep to tie the run to.
+     */
+    run_id: z
+      .string()
+      .describe(
+        "The caller's run id, or the one the route minted when the caller had no sweep to tie the run to."
+      ),
+    state: z.literal('running'),
+    /**
+     * Id of the hidden attachment on the Investigation that the run updates to `{ state: completed, result }` or `{ state: failed, error }` when it finishes. Read it by this id; do not rebuild it.
+     */
+    result_attachment_id: z
+      .string()
+      .describe(
+        'Id of the hidden attachment on the Investigation that the run updates to `{ state: completed, result }` or `{ state: failed, error }` when it finishes. Read it by this id; do not rebuild it.'
       ),
   })
 );

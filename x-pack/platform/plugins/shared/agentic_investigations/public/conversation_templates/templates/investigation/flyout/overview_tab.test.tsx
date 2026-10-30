@@ -70,7 +70,7 @@ const renderOverview = () =>
   );
 
 describe('InvestigationOverview', () => {
-  it('renders the subjects, what happened, impact, conclusion, and trace from the query API', () => {
+  it('renders the subjects, what happened, impact, conclusion, and hypothesis tree from the query API', () => {
     mockUseInvestigation.mockReturnValue({ data: investigation });
 
     renderOverview();
@@ -79,7 +79,19 @@ describe('InvestigationOverview', () => {
     expect(screen.getByText('Checkout p99 tripled.')).toBeInTheDocument();
     expect(screen.getByText('Checkout is degraded')).toBeInTheDocument();
     expect(screen.getByText('A bad deploy.')).toBeInTheDocument();
-    expect(screen.getByText('Bad deploy')).toBeInTheDocument();
+    // The tree card replaces the hypotheses list.
+    expect(screen.queryByTestId('investigationHypotheses')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationHypothesisTreeButton')).toHaveTextContent(
+      '1 hypothesis analyzed'
+    );
+  });
+
+  it('leaves the hypothesis tree out without hypotheses', () => {
+    mockUseInvestigation.mockReturnValue({ data: { ...investigation, hypotheses: undefined } });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
   });
 
   it('falls back to the conversation when the investigation cannot be read', () => {
@@ -89,6 +101,22 @@ describe('InvestigationOverview', () => {
 
     expect(screen.getByText('From the conversation')).toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
-    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
+  });
+
+  it('ends in a loading skeleton while an agent still works on the investigation', () => {
+    mockUseInvestigation.mockReturnValue({ data: { ...investigation, in_progress: true } });
+
+    renderOverview();
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton once the investigation is no longer in progress', () => {
+    mockUseInvestigation.mockReturnValue({ data: investigation });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 });

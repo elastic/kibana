@@ -20,7 +20,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { TEST_SUBJ_DATA_GRID, TEST_SUBJ_EMPTY_STATE } from './constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_DATA_GRID, TEST_SUBJ_EMPTY_STATE } from './constants';
 
 const mockUseFetchGridData = jest.mocked(useFetchGridData);
 const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
@@ -153,12 +153,13 @@ const renderWithProviders = (
   state: EntityURLStateResult,
   dataView: DataView = mockDataView,
   dataViewIsLoading = false,
-  config = DEFAULT_ENTITIES_TABLE_CONFIG
+  config = DEFAULT_ENTITIES_TABLE_CONFIG,
+  selectedGroup?: string
 ) =>
   render(
     <TestProviders>
       <DataViewContext.Provider value={{ dataView, dataViewIsLoading }}>
-        <EntitiesDataTable state={state} config={config} />
+        <EntitiesDataTable state={state} config={config} selectedGroup={selectedGroup} />
       </DataViewContext.Provider>
     </TestProviders>
   );
@@ -315,6 +316,47 @@ describe('EntitiesDataTable', () => {
       expect(getByText('Okta')).toBeInTheDocument();
       expect(queryByText('okta')).not.toBeInTheDocument();
       expect(getByTestId('entitySourceValue-more')).toHaveTextContent('+1');
+    });
+  });
+
+  describe('entity.name column renderer in resolution grouping', () => {
+    it('gives the target entity icon an accessible name matching its tooltip', () => {
+      const state = createMockState();
+      renderWithProviders(
+        state,
+        mockDataView,
+        false,
+        DEFAULT_ENTITIES_TABLE_CONFIG,
+        ENTITY_GROUPING_OPTIONS.RESOLUTION
+      );
+
+      const renderer = capturedProps.externalCustomRenderers?.['entity.name'];
+      if (!renderer) throw new Error('entity.name renderer was not registered');
+
+      const row = { flattened: { 'entity.name': 'alice' } } as never;
+      const fieldFormats = { getDefaultInstance: () => ({ convertToText: String }) };
+      // The renderer only consumes `row`, `dataView` and `fieldFormats`, so the rest are stubs.
+      render(
+        <TestProviders>
+          {renderer({
+            row,
+            columnId: 'entity.name',
+            rowIndex: 0,
+            colIndex: 0,
+            setCellProps: jest.fn(),
+            isDetails: false,
+            isExpanded: false,
+            isExpandable: false,
+            dataView: mockDataView,
+            fieldFormats,
+          } as never)}
+        </TestProviders>
+      );
+
+      // The EUI test-env EuiIcon stub renders aria-label as text content
+      expect(screen.getByTestId('target-entity-icon')).toHaveTextContent(
+        'Primary entity in the resolution group'
+      );
     });
   });
 

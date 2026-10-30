@@ -12,17 +12,7 @@ export {
   INVESTIGATIONS_WRITE_ROLE,
   NO_AGENT_BUILDER_ROLE,
 } from './constants';
-export {
-  seedInvestigation,
-  deleteInvestigation,
-  getInvestigation,
-  listInvestigations,
-  updateInvestigation,
-  ensureInvestigation,
-  uniqueId,
-  seedTimeWindow,
-} from './helpers';
-export type { SeedTimeWindow } from './helpers';
+export { ensureInvestigation, uniqueId } from './helpers';
 export {
   cancelRunsOf,
   cancelWorkflowRuns,
@@ -41,14 +31,13 @@ export {
   waitForInvestigationInProgress,
 } from './write_path';
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
+export { NIGHTSHIFT_MANAGE_ROLE, NIGHTSHIFT_READ_ROLE, NIGHTSHIFT_NO_ACCESS_ROLE } from './roles';
+export { ensureNightshiftServiceAccountRoles } from '../../../../common';
 export {
-  NIGHTSHIFT_MANAGE_ROLE,
-  NIGHTSHIFT_READ_ROLE,
-  NIGHTSHIFT_NO_ACCESS_ROLE,
-  getSandboxSecrets,
-  putSandboxSecrets,
-  replaceSandboxSecrets,
-} from './sandbox_secrets';
+  getNightshiftServiceAccountStatus,
+  setUpNightshiftServiceAccount,
+  SERVICE_ACCOUNT_PATH,
+} from './service_account';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,

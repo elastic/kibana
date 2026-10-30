@@ -5,4 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
+export const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.noneValue', {
+  defaultMessage: 'None',
+});
+
 export const formatKiTypeLabel = (type: string): string => type.replace(/[._]/g, ' ');

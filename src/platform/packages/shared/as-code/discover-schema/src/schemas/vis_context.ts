@@ -26,7 +26,11 @@ export const visContextSchema = z
           'Chart suggestion type used by Discover to generate this histogram configuration.',
       }),
     attributes: z.record(z.string().max(MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH), z.any()).meta({
-      description: 'Chart configuration payload for the selected `suggestion_type`.',
+      description: 'Lens visualization attributes used to render the Discover chart.',
     }),
   })
-  .strict();
+  .strict()
+  .meta({
+    description:
+      'The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.',
+  });

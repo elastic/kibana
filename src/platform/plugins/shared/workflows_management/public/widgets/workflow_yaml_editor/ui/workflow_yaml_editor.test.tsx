@@ -191,7 +191,6 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
-  useWorkflowsMonacoTheme: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
@@ -284,7 +283,6 @@ jest.mock('@kbn/monaco', () => {
         }),
       },
     },
-    defaultThemesResolvers: {},
     initializeSupportedLanguages: jest.fn(),
   };
 });
@@ -465,10 +463,10 @@ describe('WorkflowYAMLEditor', () => {
     });
   });
 
-  it('renders workflow YAML as read-only on the executions tab without a selection', async () => {
+  it('keeps workflow YAML editable on the executions tab without a selection', async () => {
     const store = createMockStore();
     store.dispatch(setWorkflow(mockWorkflow));
-    store.dispatch(setActiveTab('executions'));
+    store.dispatch(setActiveTab('workflow'));
 
     renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store, ['/?tab=executions']);
 
@@ -476,7 +474,7 @@ describe('WorkflowYAMLEditor', () => {
       const textarea = document.querySelector(
         '[data-testid="yaml-textarea"]'
       ) as HTMLTextAreaElement;
-      expect(textarea.readOnly).toBe(true);
+      expect(textarea.readOnly).toBe(false);
     });
   });
 
