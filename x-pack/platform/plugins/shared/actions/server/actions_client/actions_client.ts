@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CanonicalAcl } from '@kbn/access-control';
 import Boom from '@hapi/boom';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -66,6 +67,11 @@ import type {
 } from '../create_execute_function';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
+import {
+  ensureConnectorOperation,
+  getConnectorAccessControl,
+  operationForAuthMode,
+} from '../lib/connector_access';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   OAuthAuthorizationCodeParams,
@@ -508,16 +514,33 @@ export class ActionsClient {
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
         let authMode: AuthMode | undefined;
+        let acl: CanonicalAcl | undefined;
+        const isInMemory = this.context.inMemoryConnectors.some(
+          ({ id }) => id === tokenOpts.connectorId
+        );
         try {
           const rawConnector = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
             'action',
             tokenOpts.connectorId
           );
           authMode = rawConnector.attributes.authMode;
+          acl = rawConnector.acl;
         } catch (err) {
+          // With object-level security, a connector the caller cannot see never hands out a token.
+          if (!isInMemory && getConnectorAccessControl(this.context)) {
+            throw err;
+          }
           this.context.logger.debug(
             `Failed to read authMode for connector ${tokenOpts.connectorId}: ${err.message}`
           );
+        }
+
+        if (!isInMemory) {
+          await ensureConnectorOperation(this.context, {
+            id: tokenOpts.connectorId,
+            acl,
+            operation: operationForAuthMode(authMode),
+          });
         }
 
         const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
@@ -553,6 +576,26 @@ export class ActionsClient {
   }
 
   /**
+   * Throws unless the caller can start or end an OAuth flow on a stored connector. A per-user flow
+   * needs `use`; a shared flow changes credentials everyone uses, so it needs `edit`.
+   */
+  public async ensureOAuthAccess(id: string) {
+    if (this.context.inMemoryConnectors.some((connector) => connector.id === id)) {
+      return;
+    }
+
+    const { attributes, acl } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+      'action',
+      id
+    );
+    await ensureConnectorOperation(this.context, {
+      id,
+      acl,
+      operation: operationForAuthMode(attributes.authMode),
+    });
+  }
+
+  /**
    * Delete action
    */
   public async delete({ id }: { id: string }) {
@@ -584,14 +627,6 @@ export class ActionsClient {
       throw error;
     }
 
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.DELETE,
-        outcome: 'unknown',
-        savedObject: { type: 'action', id },
-      })
-    );
-
     let rawAction;
     try {
       rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
@@ -612,6 +647,19 @@ export class ActionsClient {
     const {
       attributes: { actionTypeId, config, authMode },
     } = rawAction;
+
+    // Checked before the audit event of the delete itself and before any side effect, such as token
+    // revocation. The final delete is bound to the authorized document, so a concurrent access change
+    // fails it with a conflict.
+    await ensureConnectorOperation(this.context, { id, acl: rawAction.acl, operation: 'delete' });
+
+    this.context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.DELETE,
+        outcome: 'unknown',
+        savedObject: { type: 'action', id },
+      })
+    );
 
     let actionType: ActionType | undefined;
     try {

@@ -40,6 +40,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
+import { AclService } from './access_control/acl_service';
 import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
@@ -222,6 +223,14 @@ export class SecurityPlugin
       throw new Error(`userProfileStart is not registered!`);
     }
     return this.userProfileStart;
+  };
+
+  private aclService?: AclService;
+  private readonly getAclService = () => {
+    if (!this.aclService) {
+      throw new Error(`aclService is not registered!`);
+    }
+    return this.aclService;
   };
 
   private readonly fipsService: FipsService;
@@ -411,6 +420,8 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
+      accessControlEnabled: config.accessControl.enabled,
+      getAclService: this.getAclService,
     });
 
     this.registerDeprecations(core, license);
@@ -423,6 +434,7 @@ export class SecurityPlugin
         audit: this.auditSetup,
         config,
         logger: this.logger,
+        getAclService: this.getAclService,
       })
     ));
     core.userProfile.registerUserProfileDelegate(
@@ -449,6 +461,8 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       getServiceAccountsService: this.getServiceAccountsService,
+      getAclService: this.getAclService,
+      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
@@ -582,6 +596,19 @@ export class SecurityPlugin
       features,
       clusterClient,
       online$: watchOnlineStatus$(),
+    });
+
+    this.aclService = new AclService({
+      enabled: config.accessControl.enabled,
+      clusterClient,
+      authz: this.authorizationSetup!,
+      audit: this.auditSetup!,
+      typeRegistry: core.savedObjects.getTypeRegistry(),
+      userProfiles: this.userProfileStart,
+      getAuthenticatedPrincipal: core.security.authc.getPrincipal,
+      serviceAccountExists: async (id) =>
+        (await this.serviceAccountsStart?.backend.exists(id)) ?? false,
+      logger: this.logger.get('access-control'),
     });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({

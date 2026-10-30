@@ -11,6 +11,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 
 import type { RawAction } from '../../../../types';
+import { ensureConnectorOperation } from '../../../../lib/connector_access';
 import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound_events_space_id';
 import { mintIngressCredential } from '../../../../inbound/ingress_credential';
 import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity/encode_api_key';
@@ -27,6 +28,12 @@ export async function rotateInboundIngress({
     'action',
     id,
     spaceId !== DEFAULT_SPACE_ID ? { namespace: spaceId } : {}
+  );
+  // The read above is a system read, so object-level access is checked here, before anything is
+  // minted. Rotating credentials changes the connector, so it needs edit.
+  await ensureConnectorOperation(
+    { ...context, spaceId },
+    { id, acl: rawAction.acl, operation: 'edit' }
   );
 
   const actionTypeId = rawAction.attributes.actionTypeId;

@@ -25,6 +25,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
  */
 export interface CoreAccessControlService {
   /**
+   * Whether platform object-level security is enforced. When it is not, consumers keep their
+   * behavior from before platform object-level security.
+   */
+  isEnabled(): boolean;
+
+  /**
    * Returns the service scoped to a request. Within one request, the principal is resolved at most
    * once and recovery authority is checked at most once per type and space.
    *

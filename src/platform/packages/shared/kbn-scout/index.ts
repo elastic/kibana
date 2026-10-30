@@ -121,6 +121,7 @@ export type { SelectorInput } from './src/playwright/utils';
 
 // Config-set constants — exported so test files can import instead of redeclaring.
 export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
+export { OLS_POC_AUDIT_LOG_PATH } from './src/servers/configs/config_sets/ols_poc/shared';
 export { ELASTICSEARCH_MAX_RESPONSE_SIZE_BYTES } from './src/servers/configs/config_sets/es_max_response_size/shared';
 export {
   OTEL_RECEIVER_PORT,

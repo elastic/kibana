@@ -338,6 +338,12 @@ export const ConfigSchema = schema.object({
     }),
   }),
 
+  // Platform object-level security. Disabling it restores the behavior from before platform object-level
+  // security for adopted types, including objects with stored ACLs, which are kept for re-enabling.
+  accessControl: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({
     serverless: schema.object({

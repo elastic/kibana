@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { generalAccessPermits, type CanonicalAcl } from '@kbn/access-control';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   type AuthenticatedUser,
+  type CoreScopedAccessControl,
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
@@ -17,6 +19,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
@@ -68,6 +71,8 @@ import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import { CONNECTOR_ACCESS_POLICY } from '../../common/access_policy';
+import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
 // 1,000,000 nanoseconds in 1 millisecond
@@ -114,7 +119,7 @@ export interface ExecuteOptions<Source = unknown> {
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
   currentUser?: AuthenticatedUser | null;
   connectorTokenClient?: ConnectorTokenClientContract;
-  checkCanExecuteFn?: (connectorTypeId: string) => Promise<void>;
+  checkCanExecuteFn?: (connectorTypeId: string, actionInfo: ActionInfo) => Promise<void>;
   executeLabel: string;
   namespace: { namespace?: string };
   request?: KibanaRequest;
@@ -191,7 +196,7 @@ export class ActionExecutor {
       connectorTokenClient,
       consumer,
       currentUser,
-      checkCanExecuteFn: async (connectorTypeId: string) => {
+      checkCanExecuteFn: async (connectorTypeId: string, { acl, isInMemory }: ActionInfo) => {
         /**
          * Ensures correct permissions for execution and
          * performs authorization checks for system actions.
@@ -205,6 +210,17 @@ export class ActionExecutor {
           authorization,
           source: source?.type,
         });
+
+        if (!isInMemory) {
+          await ensureAllowedToUseConnector({
+            actionId,
+            actionTypeId: connectorTypeId,
+            acl,
+            authorization,
+            accessControl: security?.accessControl.asScoped(request),
+            spaceId: spaceId ?? DEFAULT_SPACE_ID,
+          });
+        }
       },
       executeLabel: `execute_action`,
       executionId,
@@ -228,7 +244,7 @@ export class ActionExecutor {
     spaceId,
     source,
   }: UnsecuredExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
-    const { actionTypeRegistry, getUnsecuredServices } = this.actionExecutorContext!;
+    const { actionTypeRegistry, getUnsecuredServices, security } = this.actionExecutorContext!;
 
     const services = getUnsecuredServices();
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
@@ -236,7 +252,7 @@ export class ActionExecutor {
     return await this.executeHelper({
       actionExecutionId,
       actionId,
-      checkCanExecuteFn: async (connectorTypeId: string) => {
+      checkCanExecuteFn: async (connectorTypeId: string, { acl, isInMemory }: ActionInfo) => {
         let errorMessage: string | null = null;
         if (UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS.includes(connectorTypeId)) {
           errorMessage = `Cannot execute unsecured "${connectorTypeId}" action - execution of this type is not allowed`;
@@ -245,6 +261,16 @@ export class ActionExecutor {
         // We don't allow execute system actions in unsecured manner because they require a request
         if (actionTypeRegistry.isSystemActionType(connectorTypeId)) {
           errorMessage = `Cannot execute unsecured system action`;
+        }
+
+        // Without a request there is no principal to match against a restricted connector.
+        // shortcut: system callers that need restricted connectors require a reviewed allowlist.
+        if (
+          !isInMemory &&
+          security?.accessControl.isEnabled() &&
+          !generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')
+        ) {
+          errorMessage = `Cannot execute unsecured action on a restricted connector`;
         }
 
         if (errorMessage) {
@@ -387,6 +413,7 @@ export class ActionExecutor {
         actionId,
         connectorVersion: rawAction.version,
         rawAction: rawAction.attributes,
+        acl: rawAction.acl,
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -620,7 +647,7 @@ export class ActionExecutor {
         const executionStartedAt = Date.now();
         try {
           if (checkCanExecuteFn) {
-            await checkCanExecuteFn(actionTypeId);
+            await checkCanExecuteFn(actionTypeId, actionInfo);
           }
 
           rawResult = await actionType.executor({
@@ -893,6 +920,8 @@ export interface ActionInfo {
   isInMemory?: boolean;
   connectorVersion?: string;
   rawAction: RawAction;
+  /** Object-level access of a stored connector, as stored. In-memory connectors have none. */
+  acl?: CanonicalAcl;
 }
 
 function getErrorSource(error: Error): TaskErrorSource | undefined {
@@ -1006,6 +1035,56 @@ const ensureAuthorizedToExecute = async ({
         additionalPrivileges,
         actionTypeId,
       });
+    }
+  } catch (error) {
+    throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
+      actionId,
+      status: 'error',
+      message: error.message,
+      retry: false,
+      errorSource: TaskErrorSource.USER,
+    });
+  }
+};
+
+/**
+ * Ensures that the execution's own credential can use a stored connector. It runs for every
+ * execution path, including queued tasks, so access revoked after a rule was saved stops the next
+ * run. Connectors whose general access permits running them need no check, so unrestricted
+ * connectors keep today's behavior and cost.
+ */
+const ensureAllowedToUseConnector = async ({
+  actionId,
+  actionTypeId,
+  acl,
+  authorization,
+  accessControl,
+  spaceId,
+}: {
+  actionId: string;
+  actionTypeId: string;
+  acl?: CanonicalAcl;
+  authorization: ActionsAuthorization;
+  accessControl?: CoreScopedAccessControl;
+  spaceId: string;
+}) => {
+  if (!accessControl?.isEnabled() || generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')) {
+    return;
+  }
+
+  try {
+    // Object-level grants never exceed the credential's own feature privileges, which today are
+    // checked here only for system connectors and connectors with sub-features.
+    await authorization.ensureAuthorized({ operation: 'execute', actionTypeId });
+
+    const decisions = await accessControl.authorize({
+      type: ACTION_SAVED_OBJECT_TYPE,
+      spaceId,
+      operation: 'use',
+      objects: [{ id: actionId, acl }],
+    });
+    if (decisions.get(actionId)?.status !== 'allowed') {
+      throw new Error(`Unauthorized to execute connector [id=${actionId}]`);
     }
   } catch (error) {
     throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {

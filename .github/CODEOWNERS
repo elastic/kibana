@@ -614,6 +614,7 @@ src/platform/packages/shared/kbn-edot-collector @elastic/nightshift-context-and-
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-signals-traces-team
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 src/platform/packages/shared/kbn-access-control @elastic/kibana-security
+src/platform/packages/shared/kbn-access-control-ui @elastic/kibana-security
 src/platform/packages/shared/kbn-entity-access-control @elastic/workflows-eng
 src/platform/packages/shared/kbn-entity-access-control-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-es @elastic/kibana-operations

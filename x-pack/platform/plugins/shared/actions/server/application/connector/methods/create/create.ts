@@ -32,6 +32,8 @@ import {
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { getConnectorSpaceId } from '../../../../lib/connector_access';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 import {
   invalidateStoredConnectorEventIdentity,
@@ -76,6 +78,7 @@ async function createConnector({
     config,
     secrets,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
+    accessControl,
   },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
@@ -154,6 +157,20 @@ async function createConnector({
     validateConnectorId(options.id);
   }
 
+  // Requested access is validated before any side effect, such as the pre-save hook, so that an invalid
+  // request leaves nothing behind. The repository builds the stored ACL in the same write that creates
+  // the connector: it is never created public and restricted later.
+  if (accessControl) {
+    if (!context.securityService) {
+      throw Boom.badRequest('Access control is not available.');
+    }
+    await context.securityService.accessControl.asScoped(context.request).validateInitialAcl({
+      type: ACTION_SAVED_OBJECT_TYPE,
+      spaceId: getConnectorSpaceId(context),
+      requested: accessControl,
+    });
+  }
+
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
   };
@@ -227,7 +244,7 @@ async function createConnector({
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
         },
-        { id }
+        { id, ...(accessControl ? { initialAcl: accessControl } : {}) }
       )
   );
 

@@ -35,6 +35,7 @@ const createActionsClientMock = () => {
     getAxiosInstance: jest.fn(),
     getSandboxCredentials: jest.fn(),
     evictClientPool: jest.fn(),
+    ensureOAuthAccess: jest.fn(),
   };
   return mocked;
 };

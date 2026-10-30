@@ -53,6 +53,35 @@ const createConnectorRequestBodyFields = {
       defaultValue: {},
     }
   ),
+  access_control: schema.maybe(
+    schema.object(
+      {
+        general_access: schema.oneOf(
+          [schema.literal('none'), schema.literal('use'), schema.literal('edit')],
+          {
+            meta: {
+              description:
+                'What everyone else in the space can do: nothing, run the connector, or also edit it.',
+            },
+          }
+        ),
+        entries: schema.arrayOf(
+          schema.object({
+            type: schema.oneOf([schema.literal('user'), schema.literal('service_account')]),
+            id: schema.string({ minLength: 1, maxLength: 1024 }),
+            access: schema.literal('use'),
+          }),
+          { maxSize: 100, defaultValue: [] }
+        ),
+      },
+      {
+        meta: {
+          description:
+            'Initial access to the connector. The creator becomes its owner. Only valid when object-level access control is enabled.',
+        },
+      }
+    )
+  ),
 };
 
 const isInboundEventsEnabledCreateField = {

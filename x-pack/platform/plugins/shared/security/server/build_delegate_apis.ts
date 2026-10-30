@@ -17,6 +17,7 @@ import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-ser
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
+import type { AclService } from './access_control/acl_service';
 import type { InternalAuthenticationServiceStart } from './authentication';
 import { createFakeRequestEnrichment } from './authentication/fake_request_enrichment';
 import type { ServiceAccountsServiceStart } from './service_accounts';
@@ -28,6 +29,7 @@ export const buildSecurityApi = ({
   getAuthc,
   getSession,
   getServiceAccounts,
+  getAclService,
   audit,
   config,
   logger,
@@ -35,6 +37,7 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   getServiceAccounts: () => ServiceAccountsServiceStart | null;
+  getAclService: () => AclService;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
   logger: Logger;
@@ -134,6 +137,11 @@ export const buildSecurityApi = ({
         requireServiceAccounts().workloads.getBinding(pluginId, params),
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
+    },
+    // The service exists only after start, while the delegate is registered during setup.
+    accessControl: {
+      isEnabled: () => getAclService().isEnabled(),
+      asScoped: (request, options) => getAclService().asScoped(request, options),
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };
