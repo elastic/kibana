@@ -146,6 +146,34 @@ describe('InferenceClientLlm', () => {
     expect(debugMessages.some((message) => message.includes('MODEL-OUTPUT-MARKER'))).toBe(true);
   });
 
+  describe.each([
+    ['a string', 'plain string failure', 'plain string failure'],
+    ['undefined', undefined, 'undefined'],
+    ['a plain object without a message', { reason: 'boom' }, '[object Object]'],
+  ])('when chatComplete rejects with %s', (_label, rejection, expectedMessage) => {
+    it('logs the failure and rethrows the original rejection', async () => {
+      mockInferenceClient.chatComplete.mockRejectedValueOnce(rejection);
+
+      const llm = new InferenceClientLlm({
+        connectorId: 'test-connector',
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      let thrown: unknown = 'not thrown';
+      try {
+        await llm._call('test prompt');
+      } catch (e) {
+        thrown = e;
+      }
+
+      expect(thrown).toBe(rejection);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        `InferenceClientLlm: chatComplete failed for connector test-connector: undefined - ${expectedMessage}`
+      );
+    });
+  });
+
   describe('empty completions', () => {
     it('rejects with an empty-response error when the model returns no content', async () => {
       (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({

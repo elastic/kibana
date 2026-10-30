@@ -106,19 +106,24 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         ...(this.#telemetryMetadata ? { metadata: this.#telemetryMetadata } : {}),
       })
       .catch((error: unknown) => {
-        const err = error as Error & { code?: string };
+        // `chatComplete` can reject with any value; the original is always rethrown below.
+        const { code, message: errorMessage } = (error ?? {}) as {
+          code?: unknown;
+          message?: unknown;
+        };
+        const message = typeof errorMessage === 'string' ? errorMessage : String(error);
         // The message can quote the payload it failed on (`Failed to parse line "<SSE chunk>"`, which
         // carries model output), so only its sanitized head is logged above debug level.
         this.#logger.error(
-          `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${
-            err.code
-          } - ${sanitizeErrorMessage(err.message)}`
+          `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${String(
+            code
+          )} - ${sanitizeErrorMessage(message)}`
         );
         this.#logger.debug(
           () =>
-            `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}, full message: ${
-              err.message
-            }`
+            `${LLM_TYPE}: chatComplete failed for connector ${
+              this.#connectorId
+            }, full message: ${message}`
         );
         throw error;
       });

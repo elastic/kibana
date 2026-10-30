@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { isEmptyModelResponseErrorEntry } from '@kbn/discoveries';
 
 import * as i18n from './translations';
 
@@ -34,9 +35,16 @@ export const throwIfErrorCountsExceeded = ({
   }
 
   if (generationAttempts >= maxGenerationAttempts) {
-    const generationAttemptsError = `${i18n.MAX_GENERATION_ATTEMPTS(
-      generationAttempts
-    )}\n${errors.join(',\n')}`;
+    // every failed attempt being an empty model response is a model/connector failure, so the
+    // "send fewer alerts" advice cannot help; a mix with other failures keeps it
+    const hasEmptyModelResponseErrors =
+      errors.length > 0 && errors.every(isEmptyModelResponseErrorEntry);
+
+    const generationAttemptsError = `${
+      hasEmptyModelResponseErrors
+        ? i18n.MAX_GENERATION_ATTEMPTS_WITH_EMPTY_MODEL_RESPONSE(generationAttempts)
+        : i18n.MAX_GENERATION_ATTEMPTS(generationAttempts)
+    }\n${errors.join(',\n')}`;
 
     logger?.error(generationAttemptsError);
     throw new Error(generationAttemptsError);

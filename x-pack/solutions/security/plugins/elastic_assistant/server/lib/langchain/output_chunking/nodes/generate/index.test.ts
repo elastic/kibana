@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import { isEmptyModelResponseErrorEntry } from '@kbn/discoveries';
 import { FakeLLM } from '@langchain/core/utils/testing';
 
 import type { AttackDiscoveryGraphState } from '../../../graphs';
@@ -475,6 +476,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors[0]).toContain(error.message);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.errors[0]).toContain('completion tokens');
+    expect(isEmptyModelResponseErrorEntry(state.errors[0])).toBe(true); // the marker survives the node's prefix
     expect(state.errors[0]).not.toContain('raw response length'); // nothing was returned to measure
   });
 
