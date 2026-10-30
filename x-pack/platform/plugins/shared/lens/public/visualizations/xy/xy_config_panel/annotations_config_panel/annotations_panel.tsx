@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLTimeField } from '@kbn/esql-utils';
+import { getESQLQueryColumns, getESQLTimeField } from '@kbn/esql-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
@@ -101,22 +101,25 @@ export const AnnotationsPanel = (
 
   const queryInputServices = useKibana<LensAppServices>().services;
   const { data, http } = queryInputServices;
-  const { fromDate, toDate } = frame.absDateRange;
+  // Read through a ref: columns do not depend on the time range, so changing it must not
+  // refetch. The range is only needed to bind ?_tstart/?_tend if the query uses them.
+  const timeRangeRef = useRef({ from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate });
+  timeRangeRef.current = { from: frame.absDateRange.fromDate, to: frame.absDateRange.toDate };
   const fetchColumns = useCallback(
     async (query: AggregateQuery, abortSignal: AbortSignal) => {
-      const timeField = await getESQLTimeField({ query: query.esql, http });
-      const { datatable } = await data.search.esql(
-        {
-          query: query.esql,
-          kibanaQueryContext: { timeRange: { from: fromDate, to: toDate }, timeField },
-          dropNullColumns: false,
-          columnMetadata: true,
-        },
-        { abortSignal, includeDataTable: true }
-      );
-      return { columns: datatable?.columns ?? [], timeField };
+      const [columns, timeField] = await Promise.all([
+        getESQLQueryColumns({
+          esqlQuery: query.esql,
+          search: data.search.search,
+          signal: abortSignal,
+          timeRange: timeRangeRef.current,
+          includeColumnMetadata: true,
+        }),
+        getESQLTimeField({ query: query.esql, http }),
+      ]);
+      return { columns, timeField };
     },
-    [data.search, http, fromDate, toDate]
+    [data.search.search, http]
   );
 
   if (!currentAnnotation) {
