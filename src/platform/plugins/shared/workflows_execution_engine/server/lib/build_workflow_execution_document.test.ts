@@ -196,6 +196,53 @@ describe('buildWorkflowExecutionDocument', () => {
     expect(workflowExecution.finishedAt).toBeUndefined();
   });
 
+  describe('event chain', () => {
+    const parentEventChain = {
+      eventChainDepth: 1,
+      eventChainVisitedWorkflowIds: ['emitter', 'parent'],
+    };
+
+    it('inherits the parent event chain when the context has no event', () => {
+      const workflowExecution = buildWorkflowExecutionDocument({
+        ...baseParams,
+        context: { parentWorkflowId: 'parent', parentEventChain },
+      });
+
+      expect(workflowExecution).toMatchObject({
+        eventChainDepth: 1,
+        eventChainVisitedWorkflowIds: ['emitter', 'parent'],
+      });
+      expect(workflowExecution.context).not.toHaveProperty('event');
+    });
+
+    it('inherits the parent event chain when the event carries no chain fields', () => {
+      const workflowExecution = buildWorkflowExecutionDocument({
+        ...baseParams,
+        context: { event: { caseId: 'case-1' }, parentEventChain },
+      });
+
+      expect(workflowExecution).toMatchObject({
+        eventChainDepth: 1,
+        eventChainVisitedWorkflowIds: ['emitter', 'parent'],
+      });
+    });
+
+    it('prefers the event chain over the inherited chain', () => {
+      const workflowExecution = buildWorkflowExecutionDocument({
+        ...baseParams,
+        context: {
+          event: { eventChainDepth: 3, eventChainVisitedWorkflowIds: ['from-event'] },
+          parentEventChain,
+        },
+      });
+
+      expect(workflowExecution).toMatchObject({
+        eventChainDepth: 3,
+        eventChainVisitedWorkflowIds: ['from-event'],
+      });
+    });
+  });
+
   it('copies managed workflow billable metadata', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,

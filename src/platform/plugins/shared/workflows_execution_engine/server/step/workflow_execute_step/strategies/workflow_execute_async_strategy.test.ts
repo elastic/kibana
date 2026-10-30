@@ -365,6 +365,32 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         expect.objectContaining({ parentWorkflowInvocation: 'async' })
       );
     });
+
+    it("forwards the parent's event chain with the parent marked as visited", async () => {
+      Object.assign(mockStepRuntime.workflowExecution, {
+        eventChainDepth: 2,
+        eventChainVisitedWorkflowIds: ['emitter-workflow-id'],
+      });
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'async-step-1'
+      );
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          parentEventChain: {
+            eventChainDepth: 2,
+            eventChainVisitedWorkflowIds: ['emitter-workflow-id', 'parent-workflow-id'],
+          },
+        })
+      );
+    });
   });
 
   it('should log info about the started execution', async () => {
