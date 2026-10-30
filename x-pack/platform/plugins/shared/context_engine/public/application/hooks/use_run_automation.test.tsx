@@ -9,6 +9,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
 import type { RunWorkflowParams } from '@kbn/workflows-ui';
 import { renderHook } from '@testing-library/react';
@@ -53,21 +54,39 @@ const renderUseRunAutomation = () => {
   core.notifications.toasts.addSuccess = mockAddSuccess;
   core.notifications.toasts.addError = mockAddError;
 
+  const queryClient = new QueryClient();
+  jest.spyOn(queryClient, 'invalidateQueries');
+
   const { result } = renderHook(() => useRunAutomation(), {
     wrapper: ({ children }) => (
       <I18nProvider>
-        <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={core}>{children}</KibanaContextProvider>
+        </QueryClientProvider>
       </I18nProvider>
     ),
   });
 
-  return { core, result };
+  return { core, result, queryClient };
 };
 
 describe('useRunAutomation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedRunWorkflowOptions = undefined;
+  });
+
+  it('refreshes the latest execution of the workflow once its run starts', () => {
+    const { queryClient } = renderUseRunAutomation();
+
+    capturedRunWorkflowOptions?.onSuccess(
+      { workflowExecutionId: 'run-1' } as RunWorkflowResponseDto,
+      { id: 'workflow-1', inputs: {} } as RunWorkflowParams
+    );
+
+    expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'workflow_latest_execution', 'workflow-1'],
+    });
   });
 
   it('delegates runAutomation to useRunWorkflow mutate', () => {

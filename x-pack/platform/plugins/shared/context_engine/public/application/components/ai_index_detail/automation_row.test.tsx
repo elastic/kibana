@@ -16,6 +16,21 @@ import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { AutomationRow } from './automation_row';
 
 const mockRunAutomation = jest.fn();
+const mockLatestExecution = jest.fn();
+
+jest.mock('../../hooks/use_latest_workflow_execution', () => ({
+  useLatestWorkflowExecution: (...args: unknown[]) => mockLatestExecution(...args),
+}));
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+      },
+    },
+  }),
+}));
 
 jest.mock('../../hooks/use_run_automation', () => ({
   useRunAutomation: () => ({
@@ -153,6 +168,11 @@ const openActionsMenu = () => {
 describe('AutomationRow', () => {
   beforeEach(() => {
     mockRunAutomation.mockClear();
+    mockLatestExecution.mockReturnValue({
+      execution: undefined,
+      isRunning: false,
+      isLoading: true,
+    });
   });
 
   it('renders the resolved workflow name when provided', () => {
@@ -213,7 +233,6 @@ describe('AutomationRow', () => {
     openActionsMenu();
 
     expect(screen.getByTestId('contextPreviewWorkflowButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextRunAutomationButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextOpenWorkflowButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
   });
@@ -288,8 +307,6 @@ describe('AutomationRow', () => {
       workflowSummary: undefined,
     });
 
-    openActionsMenu();
-
     expect(screen.getByTestId('contextRunAutomationButton')).toBeDisabled();
     expect(mockRunAutomation).not.toHaveBeenCalled();
   });
@@ -300,8 +317,6 @@ describe('AutomationRow', () => {
       workflowSummary: createWorkflowSummary(),
     });
 
-    openActionsMenu();
-
     expect(screen.getByTestId('contextRunAutomationButton')).toBeDisabled();
   });
 
@@ -311,7 +326,6 @@ describe('AutomationRow', () => {
       workflowSummary: createWorkflowSummary({ definition: workflowWithoutManualInputs }),
     });
 
-    openActionsMenu();
     fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
 
     expect(mockRunAutomation).toHaveBeenCalledWith('workflow-value-id');
@@ -324,7 +338,6 @@ describe('AutomationRow', () => {
       workflowSummary: createWorkflowSummary({ definition: workflowWithRequiredInputs }),
     });
 
-    openActionsMenu();
     fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
 
     expect(mockRunAutomation).not.toHaveBeenCalled();
@@ -337,11 +350,57 @@ describe('AutomationRow', () => {
       workflowSummary: createWorkflowSummary({ definition: workflowWithRequiredInputs }),
     });
 
-    openActionsMenu();
     fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
     fireEvent.click(screen.getByRole('button', { name: 'Submit inputs' }));
 
     expect(mockRunAutomation).toHaveBeenCalledWith('workflow-value-id', { ticketId: 'T-1' });
     expect(screen.queryByTestId('contextRunWorkflowInputsModalStub')).not.toBeInTheDocument();
+  });
+
+  describe('run state and last execution', () => {
+    const runnable = {
+      canRun: true,
+      workflowSummary: createWorkflowSummary({ definition: workflowWithoutManualInputs }),
+    };
+
+    it('shows a spinner linking to the running execution instead of Run', () => {
+      mockLatestExecution.mockReturnValue({
+        execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+        isRunning: true,
+        isLoading: false,
+      });
+      renderAutomationRow(runnable);
+
+      expect(screen.queryByTestId('contextRunAutomationButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextAutomationRunning')).toHaveAttribute(
+        'href',
+        '/app/workflows/workflow-value-id?tab=executions&executionId=run-1'
+      );
+    });
+
+    it('shows when the workflow last ran and how it ended', () => {
+      mockLatestExecution.mockReturnValue({
+        execution: { id: 'run-1', status: 'failed', startedAt: new Date().toISOString() },
+        isRunning: false,
+        isLoading: false,
+      });
+      renderAutomationRow(runnable);
+
+      expect(screen.getByTestId('contextRunAutomationButton')).toBeEnabled();
+      expect(screen.getByTestId('contextAutomationLastExecutionStatus-failed')).toBeInTheDocument();
+    });
+
+    it('says so when the workflow never ran', () => {
+      mockLatestExecution.mockReturnValue({ execution: null, isRunning: false, isLoading: false });
+      renderAutomationRow(runnable);
+
+      expect(screen.getByTestId('contextAutomationLastExecution')).toHaveTextContent('Never run');
+    });
+
+    it('shows no last run before the workflow definition loads', () => {
+      renderAutomationRow({ workflowSummary: createWorkflowSummary() });
+
+      expect(screen.queryByTestId('contextAutomationLastExecution')).not.toBeInTheDocument();
+    });
   });
 });
