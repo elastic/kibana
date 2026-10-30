@@ -13,8 +13,17 @@ What works end to end:
   connector is created in one request with `access_control`. No interval exists in which it is public.
 - **List and read.** The list, point reads, `bulkGet`, `resolve` and `find` apply the ACL. Elasticsearch filters
   `find`, so totals, aggregations and pages count only visible objects.
-- **Execute.** HTTP execution, task execution and connector auth paths need `use`. An object the caller cannot
-  view returns 404. A visible object with insufficient access returns 403.
+- **Execute.** HTTP execution, enqueue, task execution and connector auth paths need `use`. An object the caller
+  cannot view returns 404. A visible object with insufficient access returns 403.
+- **Execution logs and KPIs.** Events of connectors the caller cannot view add nothing to rows, totals or
+  aggregations. The event log query excludes their IDs, which a system read of the connector index returns.
+- **Rules.** Every path that creates or keeps a rule API key checks that the key can use the rule's restricted
+  connectors: create, update, bulk edit, bulk create, enable, bulk enable, clone, bulk update and update API key.
+  When the check fails, only the keys created in that attempt are invalidated.
+- **Workflows.** The connector list hides restricted connectors the caller cannot view. A connector name that
+  matches more than one connector, any of them restricted, fails the same way for every caller. A name that
+  matches only a hidden connector reads as missing. A workflow bound to a service account runs its connector steps
+  as that service account.
 - **Edit and delete.** These need `edit`. Denied OAuth, token, rotation, update and delete requests change nothing.
 - **Access management.** The generic API under `/internal/security/access_control/{type}` reads, replaces,
   claims and transfers access, with optimistic concurrency. The owner manages access. A recovery administrator
@@ -107,43 +116,55 @@ Operation coverage, by the rows of the OLS validation plan:
 | Mixed registered/unregistered types              | Only registered types are decided. `acl_enforcement.test.ts` "does not filter unregistered types".              |
 
 Personas in the Scout API suites (all Basic-auth users): owner, `use` grantee, stranger, feature-read user, user
-without Actions, SOM All user, recovery administrator, and an owner API key with read-only privileges. Service
-accounts are tested only as grant recipients.
+without Actions, SOM All user, recovery administrator, and an owner API key with read-only privileges. A Kibana
+service account acts through a Workflow bound to it (`service_accounts.spec.ts`), and a UIAM API key acts on
+serverless with local UIAM (`uiam_keys.spec.ts`).
 
 Connector tests:
 
-| Group         | Coverage                                                                                                   |
-| ------------- | ---------------------------------------------------------------------------------------------------------- |
-| Execution     | HTTP: `connector_access.spec.ts`. Task and missing-request paths: `action_executor.test.ts`. Enqueue: gap. |
-| Side effects  | `actions_client.test.ts` "object-level security"; `oauth_*.test.ts`.                                       |
-| Rules         | Gap (PS12).                                                                                                |
-| Logs and KPIs | Gap (PS11).                                                                                                |
-| Workflows     | Gap (PS13).                                                                                                |
-| Search copies | Out of scope (D3).                                                                                         |
-| UI            | `connector_access.spec.ts` (Scout UI, 6 tests); Jest tests for the panel, the editor and both flyouts.     |
+| Group         | Coverage                                                                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Execution     | HTTP: `connector_access.spec.ts`. Enqueue: `create_execute_function.test.ts`. Task and missing-request paths: `action_executor.test.ts`. Service account: `service_accounts.spec.ts`. |
+| Side effects  | `actions_client.test.ts` "object-level security"; `oauth_*.test.ts`.                                                                                                                  |
+| Rules         | `validate_rule_key_connector_access.test.ts` and a permitted and a refused key per path in each method suite; `rule_keys.spec.ts`.                                                    |
+| Logs and KPIs | `hidden_connectors.test.ts` (more than one page of hidden IDs, lookup failure, nothing hidden); `execution_logs.spec.ts`.                                                             |
+| Workflows     | `resolve_connector_name.test.ts`, `workflow_connectors.test.ts`, `connector_executor.test.ts`; `service_accounts.spec.ts`.                                                            |
+| Search copies | Out of scope (D3).                                                                                                                                                                    |
+| UI            | `connector_access.spec.ts` (Scout UI, 6 tests); Jest tests for the panel, the editor and both flyouts.                                                                                |
+
+Two choices in the rule paths need review:
+
+- A key created in the same request may not be searchable yet, so its principal is the caller's. A granted key
+  belongs to the caller, and a cloned key copies the caller's own key, so the two are the same by construction.
+  Feature privileges still come from the key's own request.
+- Bulk edit rebuilds a rule's references as the caller. A caller who cannot view a restricted connector on a rule
+  cannot bulk edit that rule at all, whatever the key allows.
 
 ## 5. Defaults chosen for open decisions
 
-| Decision   | Default                                                                                  | Effect                                                               |
-| ---------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| D3         | None. Agent Builder connector search is not changed.                                     | The search copy index still holds names of restricted connectors.    |
-| D5         | No admin adoption. Any editor can claim an object without an ACL; recovery can transfer. | An administrator cannot pick an initial owner for an unowned object. |
-| D7         | Export strips `acl`. Import ignores `acl` in the file.                                   | Moving objects between deployments loses their access settings.      |
-| A2 history | Not implemented.                                                                         | Execution logs and KPIs still include restricted connectors.         |
+| Decision   | Default                                                                                  | Effect                                                                                                        |
+| ---------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| D3         | None. Agent Builder connector search is not changed.                                     | The search copy index still holds names of restricted connectors.                                             |
+| D5         | No admin adoption. Any editor can claim an object without an ACL; recovery can transfer. | An administrator cannot pick an initial owner for an unowned object.                                          |
+| D7         | Export strips `acl`. Import ignores `acl` in the file.                                   | Moving objects between deployments loses their access settings.                                               |
+| A2 history | The current ACL decides.                                                                 | Records of deleted connectors stay visible. A reused ID follows the new connector's ACL. Both are unresolved. |
 
 ## 6. Gaps and follow-ups
 
 - **PS0, PS18:** baseline and bench. Needed before reviewers choose the integration on cost.
-- **PS11:** execution logs and KPIs ignore the ACL.
-- **PS12:** rule execution-key validation.
-- **PS13:** Workflows list and name resolution.
-- **PS10:** enqueue does not check `use`. Task execution checks it, so revocation after enqueue stops the run.
 - **PS10:** system callers without a request cannot run restricted connectors. They need a reviewed allowlist.
-- **PS16:** no Scout test acts as a service account or a UIAM key.
+- **PS15:** the connector list still shows the delete action for connectors the caller cannot delete. Deleting
+  fails with 403. The list needs per-connector permissions to hide it.
+- **PS13:** Workflow validation lists connectors on every request. With many restricted connectors, this adds an
+  ACL decision per request.
 - **PS5:** counters on registered types are rejected, because counters have no preflight read.
 - **PS4:** excluding the `acl` extension always throws. Guardrail G2 needs a reviewed allowlist of system uses.
 - **PS8:** UIAM API keys and UIAM service accounts get general access only ([kibana#271760](https://github.com/elastic/kibana/issues/271760)).
 - **D2:** `acl` is a root field, so every read includes it. Its cost is part of the bench.
 - **CI:** `.buildkite/scout_ci_config.yml` disables `actions` and excludes the UI config. Enable them when the draft PR
   wants CI runs. The `ols_poc` config set needs Apps DX review.
-- **FTR:** the existing Actions and Alerting FTR suites were not run on this branch.
+- **FTR:** the 34 Actions and Alerting API FTR configs run with OLS disabled. 30 pass locally.
+  `spaces_only/tests/alerting/group4` ("should list all registered rule types") fails the same way on the base
+  commit, and `spaces_only_legacy` does not load its tests. `spaces_only/tests/alerting/group3`, the email trimming
+  tests in `security_and_spaces/group2/tests/actions`, and the connectors and rules UI FTRs are still to confirm.
+  None of these suites run with OLS enabled yet.
