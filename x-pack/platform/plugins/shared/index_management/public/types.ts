@@ -25,6 +25,7 @@ import type {
   ReindexServicePublicSetup,
   ReindexServicePublicStart,
 } from '@kbn/reindex-service-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -55,6 +56,7 @@ export interface StartDependencies {
   ml?: MlPluginStart;
   streams?: StreamsPluginStart;
   reindexService: ReindexServicePublicStart;
+  uiActions?: UiActionsStart;
 }
 
 export interface ClientConfigType {
