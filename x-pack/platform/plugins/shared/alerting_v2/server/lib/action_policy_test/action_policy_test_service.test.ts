@@ -56,8 +56,11 @@ const createWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDet
 
 const setup = ({
   policy = createPolicy(),
-  canRunWorkflows = true,
-}: { policy?: ActionPolicyResponse; canRunWorkflows?: boolean } = {}) => {
+  workflowPrivileges = { read: true, execute: true },
+}: {
+  policy?: ActionPolicyResponse;
+  workflowPrivileges?: { read: boolean; execute: boolean };
+} = {}) => {
   const request = httpServerMock.createKibanaRequest();
   const actionPolicyClient = { getActionPolicy: jest.fn().mockResolvedValue(policy) };
   const workflowsManagement = {
@@ -67,7 +70,9 @@ const setup = ({
   };
   const licenseService = createMockLicenseService();
   const ebtService = createMockEbtService();
-  const privilegeChecker = { canRunWorkflows: jest.fn().mockResolvedValue(canRunWorkflows) };
+  const privilegeChecker = {
+    getWorkflowPrivileges: jest.fn().mockResolvedValue(workflowPrivileges),
+  };
   const { loggerService } = createLoggerService();
 
   const service = new ActionPolicyTestService(
@@ -143,16 +148,34 @@ describe('ActionPolicyTestService', () => {
       ]);
     });
 
-    it('reports destinations as not executable without reading them when the user cannot run workflows', async () => {
-      const { service, workflowsManagement } = setup({ canRunWorkflows: false });
+    it('reports destinations as executable without reading them when the user can only run workflows', async () => {
+      const { service, workflowsManagement } = setup({
+        workflowPrivileges: { read: false, execute: true },
+      });
 
       const { destinations } = await service.preview({ policyId: 'policy-1' });
 
       expect(workflowsManagement.getWorkflowsByIds).not.toHaveBeenCalled();
       expect(destinations).toEqual([
-        { id: 'workflow-1', executable: false },
-        { id: 'workflow-2', executable: false },
+        { id: 'workflow-1', executable: true },
+        { id: 'workflow-2', executable: true },
       ]);
+    });
+
+    it('reports readable destinations as not executable when the user cannot run workflows', async () => {
+      const { service, workflowsManagement } = setup({
+        workflowPrivileges: { read: true, execute: false },
+      });
+      workflowsManagement.getWorkflowsByIds.mockResolvedValue([createWorkflow()]);
+
+      const { destinations } = await service.preview({ policyId: 'policy-1' });
+
+      expect(destinations[0]).toEqual({
+        id: 'workflow-1',
+        name: 'Workflow 1',
+        enabled: true,
+        executable: false,
+      });
     });
 
     it('reports a destination the user cannot read as not executable', async () => {

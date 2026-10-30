@@ -82,12 +82,12 @@ export class ActionPolicyTestService {
     seed = createSeed(),
   }: ActionPolicyTestPreviewParams): Promise<ActionPolicyTestPreviewResponse> {
     await this.licenseService.assertActionPoliciesLicense();
-    const [policy, canRunWorkflows] = await Promise.all([
+    const [policy, workflowPrivileges] = await Promise.all([
       this.actionPolicyClient.getActionPolicy({ id: policyId }),
-      this.privilegeChecker.canRunWorkflows(),
+      this.privilegeChecker.getWorkflowPrivileges(),
     ]);
     const groups = this.buildScenario(policy, seed);
-    const destinations = await this.describeDestinations(policy, canRunWorkflows);
+    const destinations = await this.describeDestinations(policy, workflowPrivileges);
 
     return { seed, groups: groups.map((payload) => ({ ...payload })), destinations };
   }
@@ -156,20 +156,21 @@ export class ActionPolicyTestService {
   }
 
   /**
-   * Destination metadata for the current user. Workflows are only read when the user may read and
-   * run workflows; otherwise each destination is reported as not executable, without its name.
+   * Destination metadata for the current user. A destination is executable when the user may run
+   * workflows and the workflow's access control allows it. Workflows are only read when the user
+   * may read workflows; otherwise each destination is reported without its name.
    */
   private async describeDestinations(
     policy: ActionPolicyResponse,
-    canRunWorkflows: boolean
+    { read, execute }: { read: boolean; execute: boolean }
   ): Promise<ActionPolicyTestDestination[]> {
     const ids = getWorkflowDestinationIds(policy);
     if (ids.length === 0) {
       return [];
     }
 
-    if (!canRunWorkflows) {
-      return ids.map((id) => ({ id, executable: false }));
+    if (!read) {
+      return ids.map((id) => ({ id, executable: execute }));
     }
 
     const workflows = await this.workflowsManagement.getWorkflowsByIds(
@@ -188,7 +189,7 @@ export class ActionPolicyTestService {
         id,
         name: workflow.name,
         enabled: workflow.enabled,
-        executable: workflow.permissions?.execute !== false,
+        executable: execute && workflow.permissions?.execute !== false,
       };
     });
   }
