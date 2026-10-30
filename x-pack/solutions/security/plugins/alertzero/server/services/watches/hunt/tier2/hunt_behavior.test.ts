@@ -1271,6 +1271,23 @@ describe('huntBehavior', () => {
       expect(debugSpy).not.toHaveBeenCalledWith(expect.stringContaining('ungrounded query'));
     });
 
+    it('executes the query with the universe exclusions appended to its FROM', async () => {
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+
+      await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        { ...executeParams, excluded_indices: ['*secret*'] },
+        esClient
+      );
+
+      expect(executeEsqlMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.stringContaining('FROM logs-aws.cloudtrail-*, -*secret*'),
+        })
+      );
+    });
+
     describe('the cross-project flag reaching the source gates', () => {
       const cpsAllowed = ['logs-aws.*', '*:logs-aws.*', 'linked:-logs-aws.cloudtrail-*'];
       const unqualifiedQuery = GROUNDED_ESQL;

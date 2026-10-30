@@ -52,6 +52,18 @@ export const tier2AllowedIndices = ({
     ? withLinkedProjectTwins([...targets, ...universe.filter(isQualifiedExclusion)])
     : targets;
 
+/**
+ * The universe's unqualified exclusions, without their `-`. Under cross-project search an
+ * unqualified `FROM` fans out to every project, so these go onto the query itself: the source
+ * guard cannot hold them, since it judges wildcards by literal prefix and `*secret*` would veto
+ * every wildcard source.
+ */
+export const unqualifiedExclusions = (universe: string[]): string[] =>
+  universe.flatMap((entry) => {
+    const { exclude, cluster, index } = parseIndexScopeEntry(entry);
+    return exclude && cluster === undefined ? [index] : [];
+  });
+
 /** The patterns the guards compare against: widened when cross-project search is on. */
 export const scopeGuardPatterns = (patterns: string[], crossProjectSearch: boolean): string[] =>
   crossProjectSearch ? withLinkedProjectTwins(patterns) : patterns;

@@ -6,6 +6,7 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { isIndexPatternAllowed } from '../common/matches_required';
 
 export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason: string };
@@ -47,7 +48,10 @@ export const assertEsqlSourcesAllowed = (
     return names;
   };
 
-  if (sourcesOf(root.commands[0]).length === 0) {
+  // An exclusion (`-*secret*`) only narrows what a FROM reads, so it needs no allowlist entry;
+  // the sources it narrows do. A FROM naming nothing but exclusions reads nothing useful.
+  const positiveSources = sourcesOf(root.commands[0]).filter((name) => !isIndexExclusion(name));
+  if (positiveSources.length === 0) {
     return { ok: false, reason: 'FROM has no sources' };
   }
 
@@ -67,6 +71,7 @@ export const assertEsqlSourcesAllowed = (
 
   for (const command of root.commands) {
     for (const source of sourcesOf(command)) {
+      if (isIndexExclusion(source)) continue;
       if (!isIndexPatternAllowed(source, allowedPatterns, options)) {
         return {
           ok: false,

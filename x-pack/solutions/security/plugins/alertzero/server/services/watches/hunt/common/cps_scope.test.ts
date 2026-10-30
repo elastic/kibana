@@ -6,7 +6,12 @@
  */
 
 import { assertEsqlSourcesAllowed } from '../tier2/assert_esql_sources_allowed';
-import { scopeGuardPatterns, tier2AllowedIndices, withLinkedProjectTwins } from './cps_scope';
+import {
+  scopeGuardPatterns,
+  tier2AllowedIndices,
+  unqualifiedExclusions,
+  withLinkedProjectTwins,
+} from './cps_scope';
 import { buildMatchesRequired } from './matches_required';
 
 describe('withLinkedProjectTwins', () => {
@@ -29,6 +34,20 @@ describe('withLinkedProjectTwins', () => {
 
   it('does not repeat an entry', () => {
     expect(withLinkedProjectTwins(['logs-*', '*:logs-*'])).toEqual(['logs-*', '*:logs-*']);
+  });
+});
+
+describe('unqualifiedExclusions', () => {
+  it('returns the exclusions that name no project, without their `-`', () => {
+    expect(
+      unqualifiedExclusions([
+        'logs-*',
+        '-*secret*',
+        '-logs-elastic_agent*',
+        'linked:-logs-aws.*',
+        '-linked:*',
+      ])
+    ).toEqual(['*secret*', 'logs-elastic_agent*']);
   });
 });
 

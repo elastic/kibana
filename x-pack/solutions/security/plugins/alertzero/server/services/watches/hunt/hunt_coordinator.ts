@@ -21,7 +21,7 @@ import {
   FINAL_WHEN_NOTHING_SEARCHABLE,
   huntCompletenessOf,
 } from './common/completeness';
-import { tier2AllowedIndices } from './common/cps_scope';
+import { tier2AllowedIndices, unqualifiedExclusions } from './common/cps_scope';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
@@ -1037,6 +1037,9 @@ const huntCoordinatorCore = async (
           crossProjectSearch,
         }),
         cross_project_search: crossProjectSearch,
+        ...(crossProjectSearch
+          ? { excluded_indices: unqualifiedExclusions(scope.index_patterns) }
+          : {}),
         ...(continuation
           ? {
               already_searched_technique_ids: continuation.already_searched_technique_ids,

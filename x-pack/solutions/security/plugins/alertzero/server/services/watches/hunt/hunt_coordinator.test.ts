@@ -683,6 +683,7 @@ describe('huntCoordinator', () => {
           '*:logs-endpoint.events.process-default*',
         ],
         cross_project_search: true,
+        excluded_indices: ['*elastic-cloud-logs-*'],
       }),
       esClient,
       undefined

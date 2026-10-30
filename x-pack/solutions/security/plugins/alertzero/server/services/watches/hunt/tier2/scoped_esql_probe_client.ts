@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
+import { addFromExclusions } from './prepare_esql_for_execute';
 
 /**
  * `generateEsql` runs a `LIMIT 1` schema probe of the model's query during generation, and that
@@ -28,7 +29,7 @@ import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
 export const scopedEsqlProbeClient = (
   esClient: ElasticsearchClient,
   allowedPatterns: string[],
-  options: { crossProjectSearch?: boolean } = {}
+  options: { crossProjectSearch?: boolean; excludedIndices?: readonly string[] } = {}
 ): ElasticsearchClient => {
   const gatedQuery = ((...args: Parameters<ElasticsearchClient['esql']['query']>) => {
     const params = args[0] as { query?: unknown } | undefined;
@@ -39,7 +40,13 @@ export const scopedEsqlProbeClient = (
         new Error(`refused to probe an out-of-scope generated query: ${check.reason}`)
       );
     }
-    return esClient.esql.query(...args);
+    // The probe reads like the execute step will, so it carries the same read-time exclusions.
+    if (!options.excludedIndices?.length) return esClient.esql.query(...args);
+    const [first, ...rest] = args;
+    return esClient.esql.query(
+      { ...first, query: addFromExclusions(query, options.excludedIndices ?? []) },
+      ...rest
+    );
   }) as ElasticsearchClient['esql']['query'];
 
   const bindThrough = (target: object, prop: string | symbol) => {

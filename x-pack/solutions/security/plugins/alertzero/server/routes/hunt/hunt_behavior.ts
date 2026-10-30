@@ -16,7 +16,10 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
-import { scopeGuardPatterns } from '../../services/watches/hunt/common/cps_scope';
+import {
+  scopeGuardPatterns,
+  unqualifiedExclusions,
+} from '../../services/watches/hunt/common/cps_scope';
 import { selectHuntCallModel } from '../../services/watches/hunt/common/select_hunt_call_model';
 import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
 import { huntEsClient } from './hunt_es_client';
@@ -132,6 +135,9 @@ export const registerHuntBehaviorRoute = ({
               article_context,
               allowed_indices: scopeGuardPatterns(indexPatterns, crossProjectSearch),
               cross_project_search: crossProjectSearch,
+              ...(crossProjectSearch
+                ? { excluded_indices: unqualifiedExclusions(indexPatterns) }
+                : {}),
             },
             esClient,
             mitreDataClient

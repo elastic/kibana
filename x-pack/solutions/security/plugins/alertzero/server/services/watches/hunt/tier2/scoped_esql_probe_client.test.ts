@@ -22,6 +22,17 @@ const buildEsClient = () => {
 };
 
 describe('scopedEsqlProbeClient', () => {
+  it('probes with the read-time exclusions the execute step will carry', async () => {
+    const { esClient, query } = buildEsClient();
+    const scoped = scopedEsqlProbeClient(esClient, ALLOWED, { excludedIndices: ['*secret*'] });
+
+    await scoped.esql.query({ query: 'FROM logs-aws.cloudtrail-* | LIMIT 1' });
+
+    expect(query).toHaveBeenCalledWith({
+      query: 'FROM logs-aws.cloudtrail-*, -*secret*\n| LIMIT 1',
+    });
+  });
+
   it('delegates an in-scope FROM to the underlying esql.query', async () => {
     const { esClient, query } = buildEsClient();
     const scoped = scopedEsqlProbeClient(esClient, ALLOWED);

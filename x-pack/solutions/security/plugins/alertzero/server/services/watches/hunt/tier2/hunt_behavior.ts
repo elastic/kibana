@@ -264,6 +264,7 @@ const executeValidatedEsql = async ({
   row_limit,
   allowedIndices,
   crossProjectSearch,
+  excludedIndices,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -273,6 +274,7 @@ const executeValidatedEsql = async ({
   row_limit: number;
   allowedIndices: string[];
   crossProjectSearch: boolean;
+  excludedIndices: string[];
 }): Promise<{
   execution: BehaviorExecution;
   affected_hosts?: string[];
@@ -285,7 +287,7 @@ const executeValidatedEsql = async ({
   const matchesRequired = buildMatchesRequired(allowedIndices);
 
   try {
-    const prepared = prepareEsqlForExecute(esql);
+    const prepared = prepareEsqlForExecute(esql, { excludedIndices });
     const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices, {
       crossProjectSearch,
     });
@@ -535,6 +537,7 @@ const generateGroundedEsql = async ({
   articleContext,
   allowedIndices,
   crossProjectSearch,
+  excludedIndices,
   rowLimit,
 }: {
   esqlModel: ScopedModel;
@@ -547,6 +550,7 @@ const generateGroundedEsql = async ({
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
   crossProjectSearch: boolean;
+  excludedIndices: string[];
   rowLimit: number;
 }): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
@@ -554,7 +558,10 @@ const generateGroundedEsql = async ({
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
-  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices, { crossProjectSearch });
+  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices, {
+    crossProjectSearch,
+    excludedIndices,
+  });
   const iocValues = (iocs ?? []).map((ioc) => ioc.value);
   const excludedIocValues = (excludedIocs ?? []).map((ioc) => ioc.value);
 
@@ -765,6 +772,7 @@ export const huntBehavior = async (
     row_limit: rowLimitFromParams,
     allowed_indices: allowedIndices = [],
     cross_project_search: crossProjectSearch = false,
+    excluded_indices: excludedIndices = [],
     already_searched_technique_ids: alreadySearchedIds = [],
     pending_technique_ids: pendingIds = [],
   } = params;
@@ -1141,6 +1149,7 @@ export const huntBehavior = async (
         row_limit: rowLimit!,
         allowedIndices,
         crossProjectSearch,
+        excludedIndices,
       });
       behavior.execution = executed.execution;
       const executeReason = executed.execution.inconclusive_reason;
@@ -1177,6 +1186,7 @@ export const huntBehavior = async (
       articleContext,
       allowedIndices,
       crossProjectSearch,
+      excludedIndices,
       rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
     });
     const published = new Map<string, string>();
@@ -1258,6 +1268,7 @@ export const huntBehavior = async (
         articleContext,
         allowedIndices,
         crossProjectSearch,
+        excludedIndices,
         rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
       });
       for (const behavior of validated) {
