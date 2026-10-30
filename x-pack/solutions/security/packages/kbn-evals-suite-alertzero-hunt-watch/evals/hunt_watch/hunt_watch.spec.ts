@@ -144,9 +144,9 @@ evaluate(
             onCandidates: (batch, response) => {
               if (response.ids.length !== batch.length || response.skipped.length > 0) {
                 log.error(
-                  `[hunt-watch] ${phase} per-batch candidates violation: ids=${response.ids.length}/${
-                    batch.length
-                  } skipped=${JSON.stringify(response.skipped)}`
+                  `[hunt-watch] ${phase} per-batch candidates violation: ids=${
+                    response.ids.length
+                  }/${batch.length} skipped=${JSON.stringify(response.skipped)}`
                 );
               }
             },

@@ -216,7 +216,9 @@ export const restoreHuntWorker = async (
       });
     } catch (e) {
       log.warning(
-        `[hunt-watch] could not delete service account ${prior.createdServiceAccountId}: ${String(e)}`
+        `[hunt-watch] could not delete service account ${prior.createdServiceAccountId}: ${String(
+          e
+        )}`
       );
     }
   }
