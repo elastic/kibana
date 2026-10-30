@@ -32,9 +32,10 @@ export const getCountText = (unit: LatencyMapUnit, count: number, estimated = fa
 
 export const getFailedText = (failed: number, spans: number) =>
   i18n.translate('traceLatencyMap.count.failed', {
-    defaultMessage: '{failed} failed ({percent}%)',
+    // `number` formats in the i18n locale; toLocaleString would use the browser's.
+    defaultMessage: '{failed, number} failed ({percent}%)',
     values: {
-      failed: failed.toLocaleString(),
+      failed,
       percent: spans ? Number(((failed / spans) * 100).toPrecision(2)) : 0,
     },
   });

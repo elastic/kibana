@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiColorPaletteDisplay, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 import type { LatencyMapUnit } from '../types';
@@ -24,31 +24,28 @@ const Ramp = ({
   label: string;
   low: string;
   high: string;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiText size="xs" color="subdued">
-        {label}
-      </EuiText>
-      <EuiText size="xs" color="subdued">
-        {low}
-      </EuiText>
-      <span
-        aria-hidden="true"
-        css={css`
-          width: 80px;
-          height: ${euiTheme.size.s};
-          border-radius: ${euiTheme.border.radius.small};
-          background: linear-gradient(to right, ${colors.join(',')});
-        `}
-      />
-      <EuiText size="xs" color="subdued">
-        {high}
-      </EuiText>
-    </EuiFlexGroup>
-  );
-};
+}) => (
+  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiText size="xs" color="subdued">
+      {label}
+    </EuiText>
+    <EuiText size="xs" color="subdued">
+      {low}
+    </EuiText>
+    <EuiColorPaletteDisplay
+      type="gradient"
+      palette={colors}
+      size="xs"
+      aria-hidden="true"
+      css={css`
+        width: 80px;
+      `}
+    />
+    <EuiText size="xs" color="subdued">
+      {high}
+    </EuiText>
+  </EuiFlexGroup>
+);
 
 /** Two ramps: opacity is how many, hue is how many of them failed. */
 export function LatencyMapLegend({

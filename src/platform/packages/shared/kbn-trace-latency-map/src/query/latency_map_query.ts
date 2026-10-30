@@ -10,7 +10,12 @@
 import { esql } from '@elastic/esql';
 import type { ComposerQuery } from '@elastic/esql';
 import type { DurationStats, LatencyMapUnit, TraceSource } from '../types';
-import { ESQL_MAX_ROWS, LATENCY_MAP_INNER_ROWS, getLogDurationBounds } from './duration_rows';
+import {
+  ESQL_MAX_ROWS,
+  LATENCY_MAP_INNER_ROWS,
+  getLogDurationBounds,
+  getTopRowStart,
+} from './duration_rows';
 import type { TimeGrid } from './time_grid';
 import {
   DURATION_COLUMN,
@@ -122,7 +127,9 @@ function buildRowExpression(stats: DurationStats) {
   const logRow = `TO_INTEGER(FLOOR((LOG10(TO_DOUBLE(${DURATION_COLUMN})) - ${logMin}) / ${
     logMax - logMin
   } * ${inner}))`;
-  return `CASE(${DURATION_COLUMN} >= ${stats.p99}, ${inner}, GREATEST(0, LEAST(${
+  // The top row starts where rowToDuration says, not at the raw p99: the two differ when the
+  // p99 sits within 1% of the fastest span, and the binning must match the selection edges.
+  return `CASE(${DURATION_COLUMN} >= ${getTopRowStart(stats)}, ${inner}, GREATEST(0, LEAST(${
     inner - 1
   }, ${logRow})))`;
 }

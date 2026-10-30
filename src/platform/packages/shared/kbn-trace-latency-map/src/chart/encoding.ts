@@ -83,7 +83,8 @@ export function buildHeatmapData(
     });
   }
   for (let yi = 0; yi < LATENCY_MAP_ROWS; yi++) {
-    for (const xi of [0, bins - 1]) {
+    // A set, so a single-column grid does not get each filler twice.
+    for (const xi of new Set([0, bins - 1])) {
       if (present.has(yi * bins + xi)) continue;
       data.push({ x: fromMs + xi * binMs, y: yi, value: 0, spans: 0, failed: 0 });
     }

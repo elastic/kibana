@@ -45,4 +45,4 @@ hosts that restore a selection from the URL.
 - `src/geometry`, `src/selection/{gesture,keyboard}.ts`: pure pixel, cell and interaction logic.
 - `src/hooks`, `src/components`: React.
 - `src/components/latency_map.stories.tsx`: Storybook with a fake `runEsql` producing bimodal, moving, burst and outlier
-  patterns. `yarn storybook trace_latency_map`.
+  patterns. `node scripts/storybook trace_latency_map`.

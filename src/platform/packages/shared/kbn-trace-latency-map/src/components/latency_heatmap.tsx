@@ -17,6 +17,7 @@ import type {
   PartialTheme,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { DurationStats, LatencyMapUnit } from '../types';
 import { LATENCY_MAP_ROWS, rowToDuration } from '../query/duration_rows';
@@ -72,15 +73,22 @@ interface ChartDatum {
   y: number | string;
 }
 
+const isChartCell = (cell: unknown): cell is ChartCell & { datum: ChartDatum } =>
+  typeof (cell as ChartCell | undefined)?.yIndex === 'number' &&
+  Boolean((cell as { datum?: unknown } | undefined)?.datum);
+
 const isCell = (element: unknown): element is [ChartCell & { datum: ChartDatum }] =>
-  Array.isArray(element) && typeof element[0]?.yIndex === 'number' && Boolean(element[0]?.datum);
+  Array.isArray(element) && isChartCell(element[0]);
 
 /**
  * The map as an `@elastic/charts` heatmap: time on X as a raster time scale, the duration rows
  * as categories. One colour scale carries opacity and hue together, see `encodeCell`. The brush,
  * the tooltip and the highlight of the selection are the chart's own.
+ *
+ * Memoized: the chart re-dispatches its specs on every render, so renders of the host that
+ * change nothing of the chart (a hover, a gesture) must not reach it.
  */
-export function LatencyHeatmap({
+export const LatencyHeatmap = React.memo(function LatencyHeatmap({
   grid,
   timeGrid,
   stats,
@@ -159,7 +167,8 @@ export function LatencyHeatmap({
           <EuiPanel paddingSize="s" hasShadow>
             <CellDetails
               fromMs={datum.x}
-              toMs={datum.x + timeGrid.binMs}
+              // The last column can be clipped by the range: its cell ends there, not a bin on.
+              toMs={Math.min(datum.x + timeGrid.binMs, timeGrid.endMs)}
               minDuration={rowToDuration(datum.y, stats)}
               maxDuration={rowToDuration(datum.y + 1, stats)}
               spans={datum.spans}
@@ -171,13 +180,13 @@ export function LatencyHeatmap({
           </EuiPanel>
         );
       },
-    [dataByCell, timeGrid.binMs, stats, unit, sampled, timeZone]
+    [dataByCell, timeGrid, stats, unit, sampled, timeZone]
   );
 
   const handleBrush: BrushEndListener = (event) => {
     if (!('cells' in event)) return;
     const [cell] = event.cells;
-    if (cell) onPlot(toChartCell(cell as never, timeGrid));
+    if (isChartCell(cell)) onPlot(toChartCell(cell, timeGrid));
     const range = brushToRange(event.x, event.y, timeGrid, LATENCY_MAP_ROWS);
     if (range) onBrush(range);
   };
@@ -228,7 +237,11 @@ export function LatencyHeatmap({
         />
         <Heatmap
           id="traceLatencyMap"
-          name={unit}
+          name={
+            unit === 'traces'
+              ? i18n.translate('traceLatencyMap.chart.tracesName', { defaultMessage: 'Traces' })
+              : i18n.translate('traceLatencyMap.chart.spansName', { defaultMessage: 'Spans' })
+          }
           data={data}
           xAccessor="x"
           yAccessor="y"
@@ -256,4 +269,4 @@ export function LatencyHeatmap({
       </Chart>
     </div>
   );
-}
+});

@@ -128,16 +128,15 @@ function renderMap(
     query.includes('PERCENTILE') ? statsTable : table
   );
   const onSelectionCommit = jest.fn();
-  const view = render(
-    <LatencyMap
-      source={source}
-      runEsql={runEsql}
-      onSelectionCommit={onSelectionCommit}
-      timeZone="UTC"
-      {...props}
-    />
-  );
-  return { ...view, runEsql, onSelectionCommit };
+  const mapProps = { source, runEsql, onSelectionCommit, timeZone: 'UTC', ...props };
+  const view = render(<LatencyMap {...mapProps} />);
+  return {
+    ...view,
+    runEsql,
+    onSelectionCommit,
+    /** Renders again with the same props, picking up a changed `mockWidth`. */
+    rerenderMap: () => view.rerender(<LatencyMap {...mapProps} />),
+  };
 }
 
 const waitForChart = async () => screen.findByTestId('mockChart');
@@ -154,12 +153,49 @@ const brush = (xs: [number, number], rows: number[]) =>
   );
 
 describe('LatencyMap', () => {
+  beforeEach(() => {
+    // Not carried between tests: a test must not read the chart of the one before it.
+    mockChart.settings = mockChart.heatmap = mockChart.tooltip = undefined;
+  });
+
   it('loads nothing until the map is measured', async () => {
     mockWidth = 0;
     try {
       const { runEsql } = renderMap();
       expect(await screen.findByTestId('traceLatencyMapLoading')).toBeInTheDocument();
       expect(runEsql).not.toHaveBeenCalled();
+    } finally {
+      mockWidth = 320;
+    }
+  });
+
+  it('reloads only when a resize crosses a tier of time columns', async () => {
+    try {
+      const { runEsql, rerenderMap } = renderMap();
+      await waitForChart();
+      const initialCalls = runEsql.mock.calls.length;
+
+      // A resize inside the tier: the cells stretch, nothing reloads.
+      mockWidth = 321;
+      rerenderMap();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 300)));
+      expect(runEsql.mock.calls.length).toBe(initialCalls);
+
+      // Across tiers: the grid loads again, with the statistics it already has.
+      mockWidth = 2000;
+      rerenderMap();
+      await waitFor(() => expect(runEsql.mock.calls.length).toBeGreaterThan(initialCalls));
+      const newQueries = runEsql.mock.calls.slice(initialCalls).map(([query]) => query);
+      expect(newQueries.some((query) => query.includes('PERCENTILE'))).toBe(false);
+
+      // Hidden (width 0) and shown again: the width is kept, nothing reloads.
+      const total = runEsql.mock.calls.length;
+      mockWidth = 0;
+      rerenderMap();
+      mockWidth = 2000;
+      rerenderMap();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 300)));
+      expect(runEsql.mock.calls.length).toBe(total);
     } finally {
       mockWidth = 320;
     }
@@ -544,6 +580,22 @@ describe('LatencyMap', () => {
       expect(onSelectionCommit).not.toHaveBeenCalled();
       expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(range, timeGrid));
     });
+
+    it('leaves the selection as it was when Escape ends the gesture', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(9, 9), pointerId: 1 });
+      fireEvent.keyDown(screen.getByTestId('traceLatencyMapLayer'), { key: 'Escape' });
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(range, timeGrid));
+    });
   });
 
   describe('with a selection', () => {
@@ -634,6 +686,24 @@ describe('LatencyMap', () => {
       press(layer, 'Enter');
       expect(onSelectionCommit.mock.calls[0][0]).toEqual(
         geometry.rangeToSelection({ x0: 20, x1: 23, y0: 11, y1: 13 })
+      );
+      // Done selecting: the cursor and its readout close, instead of hiding the
+      // fresh selection behind a one-cell highlight.
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+    });
+
+    it('drops the cursor when focus leaves the map', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toBeInTheDocument();
+
+      fireEvent.focusOut(layer, { relatedTarget: document.body });
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 5, y0: 5, y1: 6 }, timeGrid)
       );
     });
 

@@ -11,5 +11,4 @@ module.exports = {
   preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-trace-latency-map'],
-  setupFilesAfterEnv: ['@testing-library/jest-dom'],
 };

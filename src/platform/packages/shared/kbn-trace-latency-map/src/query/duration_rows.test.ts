@@ -55,6 +55,29 @@ describe('latency map rows', () => {
     ).toEqual({ min: 1, p90: 2, p95: 3, p99: 4, max: 5, spans: 6 });
   });
 
+  describe('a flat range, the p99 on the fastest span', () => {
+    // Every span at 5µs: the top row must start where the inner rows end, not at the raw
+    // p99 below it, or the inner rows and the top row would overlap and not round-trip.
+    const flat: DurationStats = {
+      min: 5000,
+      p90: 5000,
+      p95: 5000,
+      p99: 5000,
+      max: 5000,
+      spans: 9,
+    };
+
+    it.each([0, 5, 12, 22])('round-trips the edge of row %s', (row) => {
+      expect(durationToRow(rowToDuration(row, flat), flat)).toBeCloseTo(row, 5);
+    });
+
+    it('starts the top row where the inner rows end', () => {
+      const topStart = rowToDuration(LATENCY_MAP_INNER_ROWS, flat);
+      expect(durationToRow(topStart, flat)).toBe(LATENCY_MAP_INNER_ROWS);
+      expect(durationToRow(topStart - 1, flat)).toBeLessThan(LATENCY_MAP_INNER_ROWS);
+    });
+  });
+
   describe('a range under a microsecond', () => {
     // OTel spans of 100 to 900 ns: the rows must follow them, not stop at 1µs.
     const sub: DurationStats = { min: 100, p90: 700, p95: 800, p99: 900, max: 1200, spans: 100 };

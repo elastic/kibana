@@ -9,7 +9,12 @@
 
 import moment from 'moment-timezone';
 import type { DurationStats } from '../types';
-import { durationToRow, getLogDurationBounds } from '../query/duration_rows';
+import {
+  durationToRow,
+  getDurationFloor,
+  getLogDurationBounds,
+  getTopRowStart,
+} from '../query/duration_rows';
 
 /** Each unit, and how many of it make the next one up. */
 const DURATION_UNITS = [
@@ -47,12 +52,16 @@ export interface DurationTick {
  */
 export function getDurationTicks(stats: DurationStats, minRowGap: number): DurationTick[] {
   const { logMin, logMax } = getLogDurationBounds(stats);
+  // The bounds themselves, not 10^log of them: re-exponentiation overshoots round values
+  // (10^log10(2000) > 2000), which would drop a tick sitting exactly on a bound.
+  const lowest = getDurationFloor(stats);
+  const highest = getTopRowStart(stats);
   const ticks: DurationTick[] = [];
   let lastRow = -Infinity;
   for (let exponent = Math.floor(logMin); exponent <= Math.ceil(logMax); exponent++) {
     for (const mantissa of [1, 2, 5]) {
       const duration = mantissa * Math.pow(10, exponent);
-      if (duration < Math.pow(10, logMin) || duration > Math.pow(10, logMax)) continue;
+      if (duration < lowest || duration > highest) continue;
       const row = durationToRow(duration, stats);
       if (row - lastRow < minRowGap) continue;
       ticks.push({ duration, row, label: formatDuration(duration) });

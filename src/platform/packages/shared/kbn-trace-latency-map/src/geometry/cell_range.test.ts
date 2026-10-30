@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { clampRange, extendRange, moveRange, rangeFromCells, resizeRange } from './cell_range';
+import { clampRange, moveRange, rangeFromCells, resizeRange } from './cell_range';
 
 describe('cell ranges', () => {
   const range = { x0: 2, x1: 5, y0: 3, y1: 6 };
@@ -50,16 +50,6 @@ describe('cell ranges', () => {
       x1: 10,
       y0: 0,
       y1: 1,
-    });
-  });
-
-  it('extends from the far corner by a cell, one cell at least', () => {
-    expect(extendRange(range, 1, 1, 10, 8)).toEqual({ x0: 2, x1: 6, y0: 3, y1: 7 });
-    expect(extendRange({ x0: 2, x1: 3, y0: 3, y1: 4 }, -1, -1, 10, 8)).toEqual({
-      x0: 2,
-      x1: 3,
-      y0: 3,
-      y1: 4,
     });
   });
 

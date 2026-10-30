@@ -60,16 +60,24 @@ export function useLatencyGrid({
   const stableSource = useMemo(() => JSON.parse(sourceKey) as TraceSource, [sourceKey]);
   const runEsqlRef = useRef(runEsql);
   runEsqlRef.current = runEsql;
+  // The statistics of a source do not depend on the columns: a resize into another tier
+  // reloads the grid with the stats it already has, not the percentiles again.
+  const statsCache = useRef<{ key: string; stats: DurationStats }>();
   const [state, setState] = useState<LatencyGridState>(LOADING);
 
   useEffect(() => {
     if (!enabled) return;
     const controller = new AbortController();
     const run = (query: string) => runEsqlRef.current(query, { signal: controller.signal });
-    setState((previous) => ({ ...previous, isLoading: true, error: undefined }));
+    // Not the previous isEmpty: while a new source loads, the map is loading, not empty.
+    setState((previous) => ({ ...previous, isLoading: true, isEmpty: false, error: undefined }));
 
     (async () => {
-      const stats = parseDurationStats(await run(buildDurationStatsQuery(stableSource)));
+      const stats =
+        statsCache.current?.key === sourceKey
+          ? statsCache.current.stats
+          : parseDurationStats(await run(buildDurationStatsQuery(stableSource)));
+      statsCache.current = { key: sourceKey, stats };
       const timeGrid = getTimeGrid(
         stableSource.timeRange.from,
         stableSource.timeRange.to,
@@ -127,7 +135,7 @@ export function useLatencyGrid({
     );
 
     return () => controller.abort();
-  }, [stableSource, targetBins, enabled]);
+  }, [sourceKey, stableSource, targetBins, enabled]);
 
   return state;
 }

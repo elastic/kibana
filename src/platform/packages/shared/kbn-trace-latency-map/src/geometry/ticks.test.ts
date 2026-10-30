@@ -37,6 +37,14 @@ describe('getDurationTicks', () => {
     ticks.slice(1).forEach((tick, i) => expect(tick.row - ticks[i].row).toBeGreaterThanOrEqual(3));
     expect(ticks.length).toBeLessThan(8);
   });
+
+  it('keeps a tick sitting exactly on a bound', () => {
+    // 10^log10(2000) overshoots 2000: the bounds must be compared as values, not re-exponentiated.
+    const bounded = { ...stats, min: 2000, p99: 50_000 };
+    const labels = getDurationTicks(bounded, 0).map((tick) => tick.label);
+    expect(labels[0]).toBe('2µs');
+    expect(labels[labels.length - 1]).toBe('50µs');
+  });
 });
 
 describe('formatColumnTime', () => {

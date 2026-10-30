@@ -21,28 +21,41 @@ export const ESQL_MAX_ROWS = 10_000;
 export const MAX_TIME_BINS = Math.floor(ESQL_MAX_ROWS / LATENCY_MAP_ROWS);
 
 /** The shortest duration the rows tell apart, in nanoseconds: one, the unit of OTel durations. */
-const MIN_DURATION = 1;
+export const MIN_DURATION = 1;
 
-/** Log10 bounds of the inner rows: the fastest span to the p99. */
+/** The fastest duration the inner rows start from, in ns. */
+export const getDurationFloor = (stats: DurationStats) => Math.max(stats.min, MIN_DURATION);
+
+/**
+ * Where the reserved top row starts, in ns: the p99, pushed just above the floor when the p99
+ * sits within 1% of it. The inner rows, the ES|QL binning and the top-row branch all switch at
+ * this one duration, so {@link rowToDuration} and {@link durationToRow} stay inverses even when
+ * every span has the same duration.
+ */
+export const getTopRowStart = (stats: DurationStats) =>
+  Math.max(stats.p99, getDurationFloor(stats) * 1.01);
+
+/** Log10 bounds of the inner rows: the fastest span to where the top row starts. */
 export function getLogDurationBounds(stats: DurationStats) {
-  const floor = Math.max(stats.min, MIN_DURATION);
   return {
-    logMin: Math.log10(floor),
-    logMax: Math.log10(Math.max(stats.p99, floor * 1.01)),
+    logMin: Math.log10(getDurationFloor(stats)),
+    logMax: Math.log10(getTopRowStart(stats)),
   };
 }
 
 /**
- * Height of the reserved top row in ns, from the p99 to just above the max. Never zero:
- * when the max equals the p99, the row still covers the spans at that duration.
+ * Height of the reserved top row in ns, from its start to just above the max. Never zero:
+ * when the max does not clear the start, the row still covers the spans at that duration.
  */
-const getTopRowSpan = (stats: DurationStats) =>
-  Math.max(stats.max - stats.p99, stats.p99 * 0.001, MIN_DURATION) * 1.001;
+const getTopRowSpan = (stats: DurationStats) => {
+  const start = getTopRowStart(stats);
+  return Math.max(stats.max - start, start * 0.001, MIN_DURATION) * 1.001;
+};
 
-/** Duration (ns) at a fractional row position: log scale below the p99, linear above it. */
+/** Duration (ns) at a fractional row position: log scale below the top row, linear inside it. */
 export function rowToDuration(row: number, stats: DurationStats): number {
   if (row >= LATENCY_MAP_INNER_ROWS) {
-    return stats.p99 + (row - LATENCY_MAP_INNER_ROWS) * getTopRowSpan(stats);
+    return getTopRowStart(stats) + (row - LATENCY_MAP_INNER_ROWS) * getTopRowSpan(stats);
   }
   const { logMin, logMax } = getLogDurationBounds(stats);
   return Math.pow(10, logMin + (row / LATENCY_MAP_INNER_ROWS) * (logMax - logMin));
@@ -50,8 +63,9 @@ export function rowToDuration(row: number, stats: DurationStats): number {
 
 /** Fractional row position of a duration (ns), the inverse of {@link rowToDuration}. */
 export function durationToRow(duration: number, stats: DurationStats): number {
-  if (duration >= stats.p99) {
-    const fraction = (duration - stats.p99) / getTopRowSpan(stats);
+  const topRowStart = getTopRowStart(stats);
+  if (duration >= topRowStart) {
+    const fraction = (duration - topRowStart) / getTopRowSpan(stats);
     return LATENCY_MAP_INNER_ROWS + Math.min(1, Math.max(0, fraction));
   }
   const { logMin, logMax } = getLogDurationBounds(stats);

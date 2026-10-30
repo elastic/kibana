@@ -80,19 +80,6 @@ export function resizeRange(
   return { x0, x1, y0, y1 };
 }
 
-/** Grows or shrinks a range from its far corner by a whole cell, as arrow keys do. */
-export function extendRange(
-  range: CellRange,
-  dCols: number,
-  dRows: number,
-  bins: number,
-  rows: number
-): CellRange {
-  const [x0, x1] = normalizeEdges(range.x0, range.x1 + dCols, bins);
-  const [y0, y1] = normalizeEdges(range.y0, range.y1 + dRows, rows);
-  return { x0, x1, y0, y1 };
-}
-
 export const isSameRange = (a: CellRange, b: CellRange) =>
   a.x0 === b.x0 && a.x1 === b.x1 && a.y0 === b.y0 && a.y1 === b.y1;
 

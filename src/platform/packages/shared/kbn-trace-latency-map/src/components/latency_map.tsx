@@ -16,6 +16,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -128,6 +129,7 @@ export function LatencyMap({
   'data-test-subj': dataTestSubj = 'traceLatencyMap',
 }: LatencyMapProps) {
   const colors = useLatencyMapColors();
+  const { euiTheme } = useEuiTheme();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width: measuredWidth } = useResizeObserver(container);
   const width = Math.max(measuredWidth, LAYOUT.minWidth);
@@ -200,6 +202,7 @@ export function LatencyMap({
   useEffect(() => {
     setKeyboard(undefined);
     setDraft(undefined);
+    setHoverCell(undefined);
     gestureRef.current = undefined;
     setIsMoving(false);
     setIsBrushing(false);
@@ -220,7 +223,8 @@ export function LatencyMap({
       const failed = counts?.failed ?? 0;
       return {
         fromMs,
-        toMs: fromMs + timeGrid!.binMs,
+        // The last column can be clipped by the range: its cell ends there, not a bin on.
+        toMs: Math.min(fromMs + timeGrid!.binMs, timeGrid!.endMs),
         minDuration: rowToDuration(cell.yi, stats!),
         maxDuration: rowToDuration(cell.yi + 1, stats!),
         // With "failed only" the map shows the failed spans alone, and so does the cell.
@@ -241,26 +245,33 @@ export function LatencyMap({
     [grid, timeGrid, stats, selection]
   );
 
-  const commitRange = (requested: CellRange) => {
-    if (!geometry) return;
-    const range = clampRange(requested, geometry.bins, geometry.rows);
-    if (selection && committedRange && isSameRange(range, committedRange)) return;
-    commit(geometry.rangeToSelection(range, failedOnly));
-  };
+  // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
+  const commitRange = useCallback(
+    (requested: CellRange) => {
+      if (!geometry) return;
+      const range = clampRange(requested, geometry.bins, geometry.rows);
+      if (selection && committedRange && isSameRange(range, committedRange)) return;
+      commit(geometry.rangeToSelection(range, failedOnly));
+    },
+    [geometry, selection, committedRange, commit, failedOnly]
+  );
 
-  const clickCell = (cell: Cell) => {
-    if (!geometry || !onCellClick) return;
-    const details = describeCell(cell);
-    if (details.spans <= 0) return;
-    onCellClick({
-      ...geometry.rangeToSelection(
-        { x0: cell.xi, x1: cell.xi + 1, y0: cell.yi, y1: cell.yi + 1 },
-        failedOnly
-      ),
-      spans: details.spans,
-      failed: details.failed,
-    });
-  };
+  const clickCell = useCallback(
+    (cell: Cell) => {
+      if (!geometry || !onCellClick) return;
+      const details = describeCell(cell);
+      if (details.spans <= 0) return;
+      onCellClick({
+        ...geometry.rangeToSelection(
+          { x0: cell.xi, x1: cell.xi + 1, y0: cell.yi, y1: cell.yi + 1 },
+          failedOnly
+        ),
+        spans: details.spans,
+        failed: details.failed,
+      });
+    },
+    [geometry, onCellClick, describeCell, failedOnly]
+  );
 
   const getPoint = (event: PointerEvent<SVGSVGElement>): Point => {
     const box = event.currentTarget.getBoundingClientRect();
@@ -338,8 +349,14 @@ export function LatencyMap({
       if (selection) commit(undefined);
       return;
     }
-    setKeyboard(result.state);
-    if (result.action?.type === 'commit') commitRange(result.action.range);
+    if (result.action?.type === 'commit') {
+      // Done selecting: the cursor would otherwise sit over the fresh selection as a
+      // one-cell highlight. The next arrow key starts again from the selection's corner.
+      setKeyboard(undefined);
+      commitRange(result.action.range);
+    } else {
+      setKeyboard(result.state);
+    }
   };
 
   // The map's wrapper takes the keyboard, and gives it up on focus loss or a pointer press. The
@@ -419,9 +436,13 @@ export function LatencyMap({
         data-test-subj="traceLatencyMapEmpty"
       >
         <EuiText size="s" color="subdued">
-          {i18n.translate('traceLatencyMap.empty', {
-            defaultMessage: 'No spans in this time range.',
-          })}
+          {unit === 'traces'
+            ? i18n.translate('traceLatencyMap.emptyTraces', {
+                defaultMessage: 'No traces in this time range.',
+              })
+            : i18n.translate('traceLatencyMap.emptySpans', {
+                defaultMessage: 'No spans in this time range.',
+              })}
         </EuiText>
       </EuiFlexGroup>
     );
@@ -453,6 +474,9 @@ export function LatencyMap({
           css={css`
             position: relative;
             opacity: ${isLoading ? 0.5 : 1};
+            &:focus-visible {
+              outline: ${euiTheme.focus.width} solid ${euiTheme.colors.primary};
+            }
           `}
           data-test-subj="traceLatencyMapLayer"
         >
@@ -505,16 +529,18 @@ export function LatencyMap({
         <EuiScreenReaderOnly>
           <div aria-live="polite" data-test-subj="traceLatencyMapAnnouncement">
             {keyboardCell
-              ? [
-                  `${formatTimestamp(keyboardCell.fromMs, timeZone)} – ${formatTimestamp(
-                    keyboardCell.toMs,
-                    timeZone
-                  )}`,
-                  `${formatDuration(keyboardCell.minDuration)} – ${formatDuration(
-                    keyboardCell.maxDuration
-                  )}`,
-                  getCountText(unit, keyboardCell.spans, sampled),
-                ].join(', ')
+              ? // One message, so translations can reorder it; 'to', not a dash, which a
+                // screen reader would skip.
+                i18n.translate('traceLatencyMap.cellAnnouncement', {
+                  defaultMessage: '{fromTime} to {toTime}, {minDuration} to {maxDuration}, {count}',
+                  values: {
+                    fromTime: formatTimestamp(keyboardCell.fromMs, timeZone),
+                    toTime: formatTimestamp(keyboardCell.toMs, timeZone),
+                    minDuration: formatDuration(keyboardCell.minDuration),
+                    maxDuration: formatDuration(keyboardCell.maxDuration),
+                    count: getCountText(unit, keyboardCell.spans, sampled),
+                  },
+                })
               : ''}
           </div>
         </EuiScreenReaderOnly>
