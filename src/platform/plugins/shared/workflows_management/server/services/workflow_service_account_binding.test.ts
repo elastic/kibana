@@ -14,7 +14,12 @@ import {
   loggingSystemMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
-import { withWorkflowBindingChange } from './workflow_service_account_binding';
+import {
+  isBoundWorkflowDisableOnly,
+  withWorkflowBindingChange,
+} from './workflow_service_account_binding';
+import { applyFieldUpdates } from '../api/lib/workflow_prepare';
+import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const setup = () => {
   const core = {
@@ -294,4 +299,84 @@ it('reconciles to persisted identity when both competing writes fail', async () 
     })
   ).rejects.toThrow('Y failed');
   expect(currentBinding.serviceAccountId).toBe('original');
+});
+
+describe('isBoundWorkflowDisableOnly', () => {
+  const definition = {
+    version: '1' as const,
+    name: 'Bound',
+    enabled: true,
+    triggers: [{ type: 'scheduled' as const, with: { every: '5m' } }],
+    steps: [],
+    settings: { run_as: 'account-a' },
+  };
+  const bound: WorkflowProperties = {
+    name: 'Bound',
+    enabled: true,
+    tags: ['nightshift'],
+    triggerTypes: ['scheduled'],
+    yaml: 'name: Bound\nenabled: true\n',
+    definition,
+    createdBy: 'installer',
+    lastUpdatedBy: 'installer',
+    spaceId: 'default',
+    managed: true,
+    managedBy: 'significantEvents',
+    managedVersion: 1,
+    version: 3,
+    deleted_at: null,
+    valid: true,
+    created_at: '2026-09-01T00:00:00.000Z',
+    updated_at: '2026-09-01T00:00:00.000Z',
+  };
+
+  // The write `updateWorkflow(id, { enabled: false })` makes, built by the code that makes it.
+  const switchedOff = (): WorkflowProperties => ({
+    ...bound,
+    ...applyFieldUpdates({ enabled: false }, bound).patch,
+    lastUpdatedBy: 'system',
+    updated_at: '2026-09-02T00:00:00.000Z',
+    version: 4,
+  });
+
+  it('accepts the write that switches the workflow off', () => {
+    const document = switchedOff();
+
+    expect(document.enabled).toBe(false);
+    expect(isBoundWorkflowDisableOnly(document, bound)).toBe(true);
+  });
+
+  it('refuses a write that leaves the workflow on', () => {
+    expect(isBoundWorkflowDisableOnly({ ...switchedOff(), enabled: true }, bound)).toBe(false);
+  });
+
+  it('refuses a change of the account or of the definition', () => {
+    const document = switchedOff();
+
+    expect(
+      isBoundWorkflowDisableOnly(
+        { ...document, definition: { ...document.definition!, settings: { run_as: 'account-b' } } },
+        bound
+      )
+    ).toBe(false);
+    expect(
+      isBoundWorkflowDisableOnly(
+        { ...document, definition: { ...document.definition!, name: 'Renamed' } },
+        bound
+      )
+    ).toBe(false);
+  });
+
+  it.each<[string, Partial<WorkflowProperties>]>([
+    ['space', { spaceId: 'other' }],
+    ['deletion', { deleted_at: new Date('2026-09-02T00:00:00.000Z') }],
+    ['managing plugin', { managedBy: 'other' }],
+    ['managed flag', { managed: false }],
+    ['tags', { tags: ['other'] }],
+    ['name', { name: 'Renamed' }],
+    ['creator', { createdBy: 'someone' }],
+    ['validity', { valid: false }],
+  ])('refuses a write that also changes the %s', (_name, change) => {
+    expect(isBoundWorkflowDisableOnly({ ...switchedOff(), ...change }, bound)).toBe(false);
+  });
 });

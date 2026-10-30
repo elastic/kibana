@@ -9,7 +9,9 @@
 
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
+import isUndefined from 'lodash/isUndefined';
 import omit from 'lodash/omit';
+import omitBy from 'lodash/omitBy';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -39,8 +41,24 @@ export const ensureWorkflowServiceAccountMutationAuthorized = async (
 };
 
 /**
- * Whether a write only switches a bound workflow off, leaving its definition, account and binding
- * as they are. That withdraws the delegation, so it does not escalate anything.
+ * What a write that only switches a workflow off changes besides the flag: the parsed definition
+ * and the YAML text, which carry it, what is derived from the definition, and who wrote it and when.
+ */
+const SWITCH_OFF_CHANGES = [
+  'enabled',
+  'definition',
+  'yaml',
+  'triggerTypes',
+  'definitionHash',
+  'version',
+  'lastUpdatedBy',
+  'updated_at',
+] as const;
+
+/**
+ * Whether a write only switches a bound workflow off, leaving everything else as it is: its
+ * definition, account and binding, and every other stored field. That withdraws the delegation, so
+ * it does not escalate anything.
  */
 export const isBoundWorkflowDisableOnly = (
   document: WorkflowProperties,
@@ -48,7 +66,11 @@ export const isBoundWorkflowDisableOnly = (
 ): boolean =>
   document.enabled === false &&
   document.definition?.settings?.run_as === previous.definition?.settings?.run_as &&
-  isEqual(omit(document.definition, 'enabled'), omit(previous.definition, 'enabled'));
+  isEqual(omit(document.definition, 'enabled'), omit(previous.definition, 'enabled')) &&
+  isEqual(
+    omitBy(omit(document, SWITCH_OFF_CHANGES), isUndefined),
+    omitBy(omit(previous, SWITCH_OFF_CHANGES), isUndefined)
+  );
 
 export const withWorkflowBindingChange = async <T>({
   bindings,
