@@ -407,23 +407,38 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('names the default connector for every prompt step, inside and outside the templates', () => {
-      expect(content).toMatch(
-        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
+      expect(content).toContain('connector-id: "{{ consts.connector_id }}"');
+      expect(content).toContain(
+        'connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"'
       );
-      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
+      expect(content).toMatch(/default model for every prompt step in every automation/);
       expect(content).toMatch(
-        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
+        /a workflow you assemble outside the templates carries them too, on each\s+`ai\.prompt` and `ai\.agent` step/
       );
       expect(content).toMatch(/Use a different connector only when the user names one/);
     });
 
-    it('says the templates carry the default connector and it is not a placeholder', () => {
+    it('says the templates take the model from an empty const, and it is not a placeholder', () => {
       expect(content).toMatch(
-        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
+        /Every `ai\.prompt` step in the templates takes its model from `consts\.connector_id`/
       );
       expect(content).toMatch(/That is the default, not a placeholder/);
       expect(content).toMatch(
-        /put the same id on any prompt step you add or write outside the templates/
+        /put the same two lines on any prompt step\s+you add or write outside the templates/
+      );
+    });
+
+    it('puts prompt guidance in an instructions const that is not Liquid', () => {
+      expect(content).toMatch(/carries its prompt guidance in `consts\.instructions`/);
+      expect(content).toMatch(/is an edit to `instructions`, not to the prompt/);
+      expect(content).toMatch(/is not rendered as Liquid/);
+    });
+
+    it('keeps derived values out of consts, and concurrency on scheduled templates', () => {
+      expect(content).toMatch(/Consts hold what the installer or the user chose, and nothing else/);
+      expect(content).toMatch(/computed when the workflow runs, with `data\.set` and Liquid/);
+      expect(content).toContain(
+        '`key: "<template>-{{ consts.ai_index_id }}-{{ consts.automation_name }}"`'
       );
     });
 

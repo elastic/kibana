@@ -48,12 +48,18 @@ Whatever the strategy, a generated workflow has to:
   detections a distribution aggregation whose observed counts every threshold must quote. Sample
   with `function_score` + `random_score` so repeated runs see different records rather than always
   the first-ingested ones.
-- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and set its
-  `connector-id` to `.google-gemini-3.5-flash-chat_completion`. That is the default model for
-  every prompt step in every automation this skill produces: the templates carry it, and a
-  workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
-  step. Use a different connector only when the user names one; they can change it after the save,
-  in the workflow editor, without your involvement.
+- **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and take its
+  model from a `connector_id` const, left `""`:
+  ```yaml
+  connector-id: "{{ consts.connector_id }}"
+  connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
+  ```
+  An empty `connector_id` is the default model for every prompt step in every automation this
+  skill produces: Context Engine's own, the `context_engine_prompt` feature. The templates carry
+  these two lines, and a workflow you assemble outside the templates carries them too, on each
+  `ai.prompt` and `ai.agent` step. Use a different connector only when the user names one, by
+  setting `connector_id`; they can change it after the save, in the workflow editor, without your
+  involvement.
 - **Retry `ai.prompt` outside a `parallel` branch**: `on-failure.retry` with three attempts,
   exponential delay and jitter. Rate limits, transient connector errors and a structured output
   that failed to parse once are the ordinary failures of a model call, and without the retry each
@@ -500,11 +506,29 @@ Each template opens with a comment saying what to change and what to leave. Take
 Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
 have, and none of them announce themselves — the workflow still runs, and still writes indicators.
 
-Every `ai.prompt` step in the templates carries `connector-id: .google-gemini-3.5-flash-chat_completion`.
-That is the default, not a placeholder: leave it as it stands unless the user has named another
-connector, and put the same id on any prompt step you add or write outside the templates. A
-workflow whose prompt step has no `connector-id` falls back to whatever the deployment happens to
-call its default, which is not what the user approved.
+Every `ai.prompt` step in the templates takes its model from `consts.connector_id`, which ships
+empty. That is the default, not a placeholder: the step then uses Context Engine's model. Leave it
+empty unless the user has named another connector, and put the same two lines on any prompt step
+you add or write outside the templates. A workflow whose prompt step has neither falls back to
+whatever the deployment happens to call its default, which is not what the user approved.
+
+Every template that calls a model carries its prompt guidance in `consts.instructions`: what the
+documents are, what a summary or profile should lead with, how many access patterns to give.
+Tailoring an automation to its corpus is an edit to `instructions`, not to the prompt. The prompt
+around it carries the data, the output fields and the ES|QL rules the verifiers enforce. The
+const is inserted as written and is not rendered as Liquid, so refer to the index, the unit or the
+document as the prompt shows them above it, never with `{{ }}`.
+
+Consts hold what the installer or the user chose, and nothing else. A value that follows from
+other values, such as a list built from another const or a query assembled from fields, is
+computed when the workflow runs, with `data.set` and Liquid, and never stored as a const of its
+own: a stored derived value goes stale the moment someone edits the const it came from, and
+nothing recomputes it.
+
+A template with a scheduled trigger carries `settings.concurrency` with
+`key: "<template>-{{ consts.ai_index_id }}-{{ consts.automation_name }}"`, `strategy: drop` and
+`max: 1`, so a run still working when the next one is due is not doubled. Manual-only templates
+leave it out, so a full run started while its pilot is finishing is not dropped.
 
 **Do not generate a workflow.** `platform.core.generate_workflow` may be in your toolset whether or
 not any skill offered it (the default agent has it; the Context Engine agent does not), and both
