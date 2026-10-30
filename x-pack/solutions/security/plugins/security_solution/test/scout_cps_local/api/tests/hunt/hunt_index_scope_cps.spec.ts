@@ -106,7 +106,7 @@ apiTest.describe.serial(
       });
     });
 
-    apiTest.afterAll(async ({ apiServices, apiClient, esClient, linkedProject }) => {
+    apiTest.afterAll(async ({ apiServices, esClient, linkedProject }) => {
       await runCleanupSteps([
         {
           name: 'delete the linked data stream',
