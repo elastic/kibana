@@ -134,6 +134,10 @@ export const ErrorPatternPanel: React.FC = () => {
     error,
   } = useErrorPatterns({ serviceInstanceId: serviceInstanceId ?? '', timeRange, enrolledAt });
 
+  // The counts are only meaningful when a search actually ran and succeeded: without a
+  // service instance id the query is disabled, and after a failure the arrays are just empty.
+  const hideCounts = !serviceInstanceId || !!error;
+
   const patterns = useMemo(
     () => sortPatterns(selectedLevel === 'error' ? errorPatterns : warningPatterns, sortField),
     [selectedLevel, errorPatterns, warningPatterns, sortField]
@@ -322,7 +326,7 @@ export const ErrorPatternPanel: React.FC = () => {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        {!error && (
+        {!hideCounts && (
           <EuiFlexItem grow={false}>
             <EuiText
               size="xs"
@@ -359,7 +363,7 @@ export const ErrorPatternPanel: React.FC = () => {
               withNext
               data-test-subj="errorPatternLevelToggle-error"
             >
-              {error
+              {hideCounts
                 ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggleNoCount', {
                     defaultMessage: 'Errors',
                   })
@@ -375,7 +379,7 @@ export const ErrorPatternPanel: React.FC = () => {
               color={selectedLevel === 'warning' && warningCount > 0 ? 'warning' : 'text'}
               data-test-subj="errorPatternLevelToggle-warning"
             >
-              {error
+              {hideCounts
                 ? i18n.translate(
                     'xpack.fleet.collectorDetail.errorPatterns.warningsToggleNoCount',
                     {
@@ -415,13 +419,6 @@ export const ErrorPatternPanel: React.FC = () => {
         })}
         tableLayout="auto"
         loading={isLoading}
-        error={
-          error
-            ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.loadError', {
-                defaultMessage: 'Unable to load error patterns',
-              })
-            : undefined
-        }
         noItemsMessage={emptyMessage}
         rowProps={() => ({
           css: rowBackgroundCss,

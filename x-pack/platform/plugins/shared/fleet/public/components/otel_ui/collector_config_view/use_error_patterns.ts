@@ -178,9 +178,7 @@ export const useErrorPatterns = ({
     },
     {
       enabled: !!serviceInstanceId,
-      retry: 1,
-      // Stop polling once the search has failed so the panel settles in the error state
-      refetchInterval: (_data, query) => (query.state.status === 'error' ? false : 30 * 1000),
+      refetchInterval: 30 * 1000, // 30 seconds
       keepPreviousData: true,
     }
   );

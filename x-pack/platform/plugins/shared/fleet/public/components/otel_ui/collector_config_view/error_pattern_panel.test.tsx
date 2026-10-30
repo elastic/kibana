@@ -80,6 +80,7 @@ describe('ErrorPatternPanel', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
     mockUseErrorPatterns.mockReturnValue(makePattern());
+    mockUseCollectorContext.mockReturnValue({ serviceInstanceId: 'collector-001' });
     mockGetRedirectUrl.mockReturnValue('http://discover-link');
   });
 
@@ -236,7 +237,7 @@ describe('ErrorPatternPanel', () => {
     expect(result.getByTestId('errorPatternTable')).toBeInTheDocument();
   });
 
-  it('shows an error message instead of the empty message when loading patterns failed', () => {
+  it('hides the summary line and toggle counts when loading patterns failed', () => {
     mockUseErrorPatterns.mockReturnValue(
       makePattern({
         errorPatterns: [],
@@ -248,14 +249,26 @@ describe('ErrorPatternPanel', () => {
 
     const result = testRenderer.render(<ErrorPatternPanel />);
 
-    expect(result.getByText('Unable to load error patterns')).toBeInTheDocument();
-    expect(
-      result.queryByText('No error patterns found in the selected time range')
-    ).not.toBeInTheDocument();
     // Counts are meaningless when the request failed, so they are not shown
     expect(result.queryByText(/error patterns across/)).not.toBeInTheDocument();
     expect(result.getByTestId('errorPatternLevelToggle-error')).toHaveTextContent(/^Errors$/);
     expect(result.getByTestId('errorPatternLevelToggle-warning')).toHaveTextContent(/^Warnings$/);
+  });
+
+  it('hides the summary line and toggle counts when there is no service instance id to search by', () => {
+    mockUseCollectorContext.mockReturnValue({ serviceInstanceId: '' });
+    mockUseErrorPatterns.mockReturnValue(
+      makePattern({ errorPatterns: [], warningPatterns: [], errorCount: 0, warningCount: 0 })
+    );
+
+    const result = testRenderer.render(<ErrorPatternPanel />);
+
+    expect(result.queryByText(/error patterns across/)).not.toBeInTheDocument();
+    expect(result.getByTestId('errorPatternLevelToggle-error')).toHaveTextContent(/^Errors$/);
+    expect(result.getByTestId('errorPatternLevelToggle-warning')).toHaveTextContent(/^Warnings$/);
+    expect(
+      result.getByText('No error patterns found in the selected time range')
+    ).toBeInTheDocument();
   });
 
   it('does not apply color to error toggle when error count is 0', () => {
