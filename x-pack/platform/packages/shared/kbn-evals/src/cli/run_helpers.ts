@@ -109,6 +109,25 @@ export const promptForProfile = async (repoRoot: string, log: ToolingLog): Promi
   return resolvedProfile;
 };
 
+/**
+ * Restores `KIBANA_TESTING_INFERENCE_ENDPOINTS` from the EIS connector cache. Never overrides an
+ * endpoint list the caller already exported. Returns whether the cache was loaded.
+ */
+const loadEisConnectorsFromCache = (log: ToolingLog): boolean => {
+  if (process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS) {
+    return false;
+  }
+  const cached = readCachedEisConnectors();
+  if (!cached) {
+    return false;
+  }
+  process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
+    'base64'
+  );
+  log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
+  return true;
+};
+
 export const ensureEvalInit = async (
   repoRoot: string,
   log: ToolingLog,
@@ -140,6 +159,10 @@ export const ensureEvalInit = async (
         log.info('');
         await runConfigInit(repoRoot, log, { profile });
       }
+    }
+
+    if (getAllAvailableConnectors(repoRoot).length === 0) {
+      loadEisConnectorsFromCache(log);
     }
 
     if (getAllAvailableConnectors(repoRoot).length === 0) {
@@ -279,12 +302,16 @@ export const resolveProfileEnvOverrides = async ({
   const exportProfile =
     flagsReader.string('export-profile') ?? profile ?? defaultExportProfile(repoRoot);
 
-  const profileEnvOverrides: Record<string, string> = {
-    ...envFromDatasetsProfile(repoRoot, datasetsProfile),
-    ...envFromExportProfile(repoRoot, exportProfile, {
-      defaultTracingExporters: exportProfile === 'local',
-    }),
-  };
+  // Profile values are defaults: a variable the caller already exported wins over them. The
+  // exported value stays in the map because the managed stack reads its config only from here.
+  const profileEnvOverrides: Record<string, string> = Object.fromEntries(
+    Object.entries({
+      ...envFromDatasetsProfile(repoRoot, datasetsProfile),
+      ...envFromExportProfile(repoRoot, exportProfile, {
+        defaultTracingExporters: exportProfile === 'local',
+      }),
+    }).map(([key, profileValue]) => [key, process.env[key] || profileValue])
+  );
 
   if (!profile && isExportProfileImplicitLocal(flagsReader, exportProfile)) {
     const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
@@ -398,14 +425,8 @@ export const resolveEvalRunContext = async ({
       ? projects.some(isEisConnectorId)
       : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
-  if (requiresEisCcm && !process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS) {
-    const cached = readCachedEisConnectors();
-    if (cached) {
-      process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
-        'base64'
-      );
-      log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
-    }
+  if (requiresEisCcm) {
+    loadEisConnectorsFromCache(log);
   }
 
   const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
@@ -581,6 +602,31 @@ export const resolveEvalScoutTarget = (
     domain: flagsReader.string('scout-domain'),
   });
 
+/**
+ * Reads `--skip-server`: bare `--skip-server` is true, `--skip-server=<true|false|1|0>` and
+ * `--no-skip-server` are honoured, and an unset flag is false.
+ */
+export const readSkipServerFlag = (flagsReader: FlagsReader): boolean => {
+  let raw: string | undefined;
+  try {
+    raw = flagsReader.string('skip-server');
+  } catch {
+    // getopts reports the default and `--no-skip-server` as the boolean `false`, which `string()` rejects.
+    return false;
+  }
+  if (raw === undefined) {
+    return true;
+  }
+  const normalized = raw.toLowerCase();
+  if (normalized === 'true' || normalized === '1') {
+    return true;
+  }
+  if (normalized === 'false' || normalized === '0') {
+    return false;
+  }
+  throw createFlagError(`invalid --skip-server value "${raw}", expected true or false`);
+};
+
 export const evalRunFlags: FlagOptions = {
   string: [
     'suite',
@@ -598,8 +644,10 @@ export const evalRunFlags: FlagOptions = {
     'evaluations-kbn-api-key',
     'scout-arch',
     'scout-domain',
+    // Read with readSkipServerFlag: getopts turns `--skip-server=false` into `true` for a boolean flag.
+    'skip-server',
   ],
-  boolean: ['skip-server', 'dry-run', 'skip-init'],
+  boolean: ['dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },
   default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
 };
