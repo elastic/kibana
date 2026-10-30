@@ -257,10 +257,9 @@ export const enableSessions = async ({
   // Created here rather than by the transform once it starts, so the index exists when enabling
   // returns and the list can read it; the index template gives it its mappings. As the current
   // user, checked above for `create_index`: Elasticsearch ignores secondary authorization here.
+  // Created without checking first, as `indices.exists` needs `view_index_metadata`.
   const user = esClient.asCurrentUser;
-  if (!(await user.indices.exists({ index: SESSIONS_INDEX }))) {
-    await user.indices.create({ index: SESSIONS_INDEX });
-  }
+  await createUnlessExists(user, SESSIONS_INDEX);
 
   await Promise.all(
     desired.map(({ transform_id: transformId }) =>
@@ -269,6 +268,18 @@ export const enableSessions = async ({
   );
 
   await waitUntilSearchable(user);
+};
+
+const createUnlessExists = async (client: ElasticsearchClient, index: string): Promise<void> => {
+  try {
+    await client.indices.create({ index });
+  } catch (error) {
+    const exists =
+      isResponseError(error) && error.body?.error?.type === 'resource_already_exists_exception';
+    if (!exists) {
+      throw error;
+    }
+  }
 };
 
 /** How long, and how often, enabling checks that the sessions dest index accepts searches. */

@@ -220,7 +220,6 @@ describe('sessions setup', () => {
       mockTransforms(esClient.asSecondaryAuthUser, []);
       // The index calls run as the current user: Elasticsearch ignores secondary authorization there.
       const client = esClient.asCurrentUser;
-      client.indices.exists.mockResolvedValue(false);
       client.count.mockRejectedValueOnce(esError(503)).mockResolvedValueOnce({ count: 0 } as never);
 
       await enableSessions({ ...enableArgs(), settings: oneTransform });
@@ -242,14 +241,32 @@ describe('sessions setup', () => {
       expect(firstCount).toBeGreaterThan(start);
     });
 
-    it('keeps an existing dest index', async () => {
+    it('keeps an existing dest index, without needing view_index_metadata to check for it', async () => {
       grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);
-      esClient.asCurrentUser.indices.exists.mockResolvedValue(true);
+      esClient.asCurrentUser.indices.create.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 400,
+          body: { error: { type: 'resource_already_exists_exception' } },
+          headers: {},
+          warnings: null,
+          meta: {} as never,
+        })
+      );
 
       await enableSessions({ ...enableArgs(), settings: oneTransform });
 
-      expect(esClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
+      expect(esClient.asCurrentUser.indices.exists).not.toHaveBeenCalled();
+      expect(esClient.asSecondaryAuthUser.transform.startTransform).toHaveBeenCalled();
+    });
+
+    it('fails when the dest index cannot be created for another reason', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      esClient.asCurrentUser.indices.create.mockRejectedValue(esError(403));
+
+      await expect(enableSessions({ ...enableArgs(), settings: oneTransform })).rejects.toThrow();
+      expect(esClient.asSecondaryAuthUser.transform.startTransform).not.toHaveBeenCalled();
     });
 
     it('does not wait on errors other than an unavailable index', async () => {
