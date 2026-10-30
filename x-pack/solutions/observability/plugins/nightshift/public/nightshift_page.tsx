@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
@@ -187,6 +187,14 @@ export function NightshiftPage(): React.ReactElement | null {
     dismissOnboarding();
   }, [dismissOnboarding, history]);
   const isOnboarding = !canUseAutomationsPage && onboarding.showOnboarding;
+  const previousIsOnboarding = useRef(isOnboarding);
+  const [onboardingFinishedThisLoad, setOnboardingFinishedThisLoad] = useState(false);
+  useEffect(() => {
+    if (previousIsOnboarding.current && !isOnboarding) {
+      setOnboardingFinishedThisLoad(true);
+    }
+    previousIsOnboarding.current = isOnboarding;
+  }, [isOnboarding]);
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
 
@@ -449,7 +457,7 @@ export function NightshiftPage(): React.ReactElement | null {
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp />
+              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
             )}
           </EuiPageTemplate.Section>
         </>
