@@ -178,7 +178,11 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     expect(await keysOf(2)).toEqual(['host', 'region']);
   });
 
-  it('uses the sections a control and a panel are moved to in the same call', async () => {
+  // `cc-a` and the control start in `section-a`, `cc-b` in `section-b`.
+  it.each([
+    ['a control moves into the section of the panel', 'control-a', 'cc-b', ['host']],
+    ['a panel moves out of the section of the control', 'cc-a', 'cc-a', []],
+  ])('uses the sections after the call when %s', async (_label, movedId, editedId, keys) => {
     const resolvePanelContent = createResolver();
     const section = (id: string, panels: AttachmentPanel[]) => ({
       id,
@@ -188,6 +192,7 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       panels,
     });
     const control = { ...hostControl, id: 'control-a', grid };
+    const moved = { id: movedId, section: 'section-b' };
 
     await upsert(
       resolvePanelContent,
@@ -195,16 +200,13 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
         title: 'Test',
         panels: [
           section('section-a', [{ ...customContentPanel, id: 'cc-a' }, control]),
-          section('section-b', []),
+          section('section-b', [{ ...customContentPanel, id: 'cc-b' }]),
         ],
       },
-      [
-        { ...restyle('cc-a'), section: 'section-b' },
-        { id: 'control-a', section: 'section-b' },
-      ]
+      movedId === editedId ? [{ ...restyle(editedId), ...moved }] : [moved, restyle(editedId)]
     );
 
-    expect((await variablesAskedBy(resolvePanelContent))?.map(({ key }) => key)).toEqual(['host']);
+    expect((await variablesAskedBy(resolvePanelContent))?.map(({ key }) => key)).toEqual(keys);
   });
 
   describe('the column type of a query-based control', () => {
