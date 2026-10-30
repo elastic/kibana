@@ -38,10 +38,14 @@ export const ExceptionInlineContent: React.FC<AttachmentRenderProps<ExceptionAtt
 
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-      <EuiText size="s" data-test-subj={NAME_TEST_SUBJ}>
-        <strong>{name}</strong>
-      </EuiText>
-      <EuiSpacer size="s" />
+      {name ? (
+        <>
+          <EuiText size="s" data-test-subj={NAME_TEST_SUBJ}>
+            <strong>{name}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {description ? (
         <>
           <EuiText size="s">{description}</EuiText>
