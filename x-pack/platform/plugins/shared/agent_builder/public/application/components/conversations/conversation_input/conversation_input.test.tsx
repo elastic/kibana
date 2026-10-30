@@ -890,6 +890,17 @@ describe('InputActions', () => {
       }
     );
 
+    it('is disabled and does not call onMentionClick while isMentionDisabled', () => {
+      const onMentionClick = jest.fn();
+      renderActions({ onMentionClick, isMentionDisabled: true });
+
+      const button = screen.getByTestId('agentBuilderConversationInputMentionButton');
+      fireEvent.click(button);
+
+      expect(button).toBeDisabled();
+      expect(onMentionClick).not.toHaveBeenCalled();
+    });
+
     it('is named for screen readers', () => {
       renderActions({ onMentionClick: jest.fn() });
 

@@ -33,6 +33,7 @@ interface InputActionsProps {
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
   onMentionClick?: () => void;
+  isMentionDisabled?: boolean;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
@@ -43,6 +44,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
   triggerMode,
   onTriggerModeChange,
   onMentionClick,
+  isMentionDisabled = false,
 }) => {
   const showConnectorSelector = triggerMode !== ChatTriggerMode.Never;
   const showStartActions = showConnectorSelector || Boolean(onMentionClick);
@@ -69,6 +71,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
                       data-test-subj="agentBuilderConversationInputMentionButton"
                       // Keeps the focus in the editor, so the menu opens under the caret
                       onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+                      isDisabled={isMentionDisabled}
                       onClick={onMentionClick}
                     />
                   </EuiToolTip>

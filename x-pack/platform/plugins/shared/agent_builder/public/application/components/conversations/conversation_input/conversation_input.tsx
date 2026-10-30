@@ -543,6 +543,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
           onMentionClick={canMention ? handleMentionClick : undefined}
+          isMentionDisabled={isInputDisabled}
         />
       )}
     </InputContainer>
