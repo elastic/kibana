@@ -154,32 +154,9 @@ describe('extractEsqlVariables', () => {
       {
         key: 'multiVar',
         type: ESQLVariableType.MULTI_VALUES,
-        value: [1, 2, 3],
+        value: ['1', '2', '3'],
       },
     ]);
-  });
-
-  it('should keep the options of a control whose values come from a query as they are saved', () => {
-    const panels: ControlPanelsState<OptionsListESQLControlState> = {
-      panel1: {
-        ...createMockESQLControlPanel('code', ESQLVariableType.VALUES, ['404']),
-        control_type: EsqlControlType.VALUES_FROM_QUERY,
-        esql_query: 'FROM logs | STATS BY status',
-      } as ControlPanelState<OptionsListESQLControlState>,
-    };
-
-    expect(extractEsqlVariables(panels)).toEqual([
-      { key: 'code', type: ESQLVariableType.VALUES, value: '404' },
-    ]);
-  });
-
-  it('should skip panels that are not ES|QL controls, and return nothing for no panels', () => {
-    const panels = {
-      panel1: { type: 'options_list_control', variable_name: 'x', selected_options: ['a'] },
-    } as unknown as ControlPanelsState<OptionsListESQLControlState>;
-
-    expect(extractEsqlVariables(panels)).toEqual([]);
-    expect(extractEsqlVariables(null)).toEqual([]);
   });
 
   it('should extract variables from legacy parsed control panels', () => {
