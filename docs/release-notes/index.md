@@ -971,7 +971,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix managed integration policy upgrades redeploying the agent policy once per integration policy, which slowed upgrades and could stall them when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
 * Fix integrations that default to agentless deployment saving an agent-based policy when the integration also has a cloud connector option [#299039]({{kib-pull}}299039).
 * Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
-* Validate the `agents` input consistently in {{fleet}} bulk agent action APIs. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters [#299837]({{kib-pull}}299837).
+* Fix {{fleet}} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters [#299837]({{kib-pull}}299837).
 
 **Data management**:
 * Fix the runtime field editor ignoring **Save** when you edit a field's script while the preview is still updating [#294753]({{kib-pull}}294753).
@@ -999,7 +999,7 @@ For the {{elastic-sec}} 9.4.9 release information, refer to [{{elastic-sec}} Sol
 
 **{{kib}} platform**:
 * Fix tag filters in listing pages, such as the dashboards list, returning no results when a tag name contains an ampersand (`&`) [#297231]({{kib-pull}}297231).
-* Fix the Analytics overview page showing the **Ingest your data** section to users who can't add data or upload files [#297717]({{kib-pull}}297717).
+* Fix the Analytics overview page showing the **Ingest your data** section when you can't add data or upload files [#297717]({{kib-pull}}297717).
 * Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out [#296117]({{kib-pull}}296117).
 * Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it [#299786]({{kib-pull}}299786).
 * Fix {{kib}}'s OpenTelemetry process resource exposing command-line arguments. {{kib}} now records the number of arguments instead [#299043]({{kib-pull}}299043).
