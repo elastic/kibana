@@ -49,6 +49,7 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
+import type { WorkflowExecutionHistory } from './step_types/get_last_run';
 import { ContextEngineAnalyticsService, registerContextEngineUsageCollector } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
 import { resolveSpaceId } from './utils/resolve_space_id';
@@ -83,7 +84,7 @@ export class ContextEnginePlugin
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
-    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner & WorkflowExecutionHistory) | undefined
   > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
@@ -308,6 +309,10 @@ export class ContextEnginePlugin
         checkWritePrivilege,
         logger: this.logger.get('feedback_analysis'),
       },
+      lastRunSteps: {
+        getExecutionHistory: () => this.workflowsManagementApiPromise,
+        isContextEngineEnabled,
+      },
     });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
@@ -332,7 +337,9 @@ export class ContextEnginePlugin
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
         .onSetup<{
-          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+          workflowsManagement: {
+            management: DeleteWorkflowsApi & KiVerifierWorkflowRunner & WorkflowExecutionHistory;
+          };
         }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined

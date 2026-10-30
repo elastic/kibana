@@ -8,3 +8,4 @@
 export { createKiStepDefinition } from './create_ki';
 export { updateKiStepDefinition } from './update_ki';
 export { deleteKiStepDefinition } from './delete_ki';
+export { getLastRunStepDefinition } from './get_last_run';

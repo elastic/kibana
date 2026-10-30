@@ -12,7 +12,7 @@ import { registerStepDefinitions } from '.';
 import { mockKiStepTelemetry } from './test_utils';
 
 describe('registerStepDefinitions', () => {
-  it('registers the KI and feedback analysis step definitions', () => {
+  it('registers the KI, feedback analysis and automation step definitions', () => {
     const definitions: Array<{ id: string }> = [];
     const workflowsExtensions = {
       registerStepDefinition: jest.fn((definition: { id: string }) => definitions.push(definition)),
@@ -35,6 +35,10 @@ describe('registerStepDefinitions', () => {
         checkWritePrivilege: async () => true,
         logger: telemetry.logger,
       },
+      lastRunSteps: {
+        getExecutionHistory: async () => undefined,
+        isContextEngineEnabled: async () => true,
+      },
     });
 
     expect(definitions.map((definition) => definition.id)).toEqual([
@@ -43,6 +47,7 @@ describe('registerStepDefinitions', () => {
       'context-engine.deleteKi',
       'context-engine.getFeedbackContext',
       'context-engine.recordImprovements',
+      'context-engine.getLastRun',
     ]);
   });
 });

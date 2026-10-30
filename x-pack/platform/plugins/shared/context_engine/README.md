@@ -573,3 +573,26 @@ A bad proposal is skipped, not fatal. Every rejection comes back as a `skipped`
 entry with a reason: `invalid`, `action_not_allowed`, `duplicate`, `conflict`,
 or `limit_exceeded`.
 
+## Incremental automations
+
+`context-engine.getLastRun` lets a scheduled automation process only what is new
+since its last successful run, without storing state of its own. It reads the
+workflow's own execution history and returns the window to process:
+
+| Output         | Description                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| `first_run`    | No earlier successful run                                                   |
+| `since`        | When the last successful run started, or `default_hours` ago on a first run |
+| `hours_since`  | Whole hours from `since` to now, rounded up, for ES\|QL `NOW() - N hours`   |
+| `last_success` | `execution_id`, `started_at` and `finished_at` of that run                  |
+
+`default_hours` (24 unless set) sizes the first window, and `max_hours` caps every
+window, so a run after a long pause doesn't read everything since.
+
+Only completed production runs count: test runs, the current run, and failed or
+cancelled runs don't move the window, so a failed run's records are read again
+by the next one. The window starts when the last run *started*, so records written
+while it worked aren't missed. Windows can overlap, so write results
+idempotently (stable ids), and fail the run rather than continue on failure when
+losing records matters.
+
