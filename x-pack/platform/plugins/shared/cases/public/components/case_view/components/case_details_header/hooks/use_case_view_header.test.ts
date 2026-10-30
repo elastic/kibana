@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 
 import { useCaseViewHeader } from './use_case_view_header';
 import { basicCase } from '../../../../../containers/mock';
@@ -402,6 +403,119 @@ describe('useCaseViewHeader', () => {
 
     expect(result.current.isSettingsOpen).toBe(true);
     expect(result.current.settingsAnchor).toBe(mockElement);
+  });
+
+  describe('settings popover anchor', () => {
+    const createOverflowButton = ({ isPressed }: { isPressed: boolean }) => {
+      const button = document.createElement('button');
+      button.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
+      button.setAttribute('aria-pressed', String(isPressed));
+      document.body.appendChild(button);
+      return button;
+    };
+
+    const createOverflowMenuItem = () => {
+      const popover = document.createElement('div');
+      popover.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.popover);
+      const menuItem = document.createElement('button');
+      popover.appendChild(menuItem);
+      document.body.appendChild(popover);
+      return menuItem;
+    };
+
+    const createInlineButton = () => {
+      const button = document.createElement('button');
+      document.body.appendChild(button);
+      return button;
+    };
+
+    const openSettings = (
+      result: { current: ReturnType<typeof useCaseViewHeader> },
+      triggerElement: HTMLElement
+    ) =>
+      act(() => {
+        const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
+        settingsItem?.run?.({ triggerElement, returnFocus: jest.fn() });
+      });
+
+    afterEach(() => {
+      // Unmount the hook first so removing the anchors does not trigger state updates.
+      cleanup();
+      document.body.innerHTML = '';
+    });
+
+    it('anchors to the overflow button whose popover is open when the trigger is in the overflow menu', () => {
+      createOverflowButton({ isPressed: false });
+      const openOverflowButton = createOverflowButton({ isPressed: true });
+      const overflowMenuItem = createOverflowMenuItem();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, overflowMenuItem);
+
+      expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.settingsAnchor).toBe(openOverflowButton);
+    });
+
+    it('anchors to the trigger when it is in the overflow menu but no overflow button is open', () => {
+      createOverflowButton({ isPressed: false });
+      const overflowMenuItem = createOverflowMenuItem();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, overflowMenuItem);
+
+      expect(result.current.settingsAnchor).toBe(overflowMenuItem);
+    });
+
+    it('anchors to the trigger when it is rendered inline, even if an overflow popover is open', () => {
+      createOverflowButton({ isPressed: true });
+      const inlineButton = createInlineButton();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, inlineButton);
+
+      expect(result.current.settingsAnchor).toBe(inlineButton);
+    });
+
+    it('keeps the anchor when the settings popover is closed by triggering the action again', () => {
+      const overflowButton = createOverflowButton({ isPressed: true });
+      const inlineButton = createInlineButton();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, createOverflowMenuItem());
+      openSettings(result, inlineButton);
+
+      expect(result.current.isSettingsOpen).toBe(false);
+      expect(result.current.settingsAnchor).toBe(overflowButton);
+    });
+
+    it('keeps the menu config stable when the settings popover opens and closes', () => {
+      const inlineButton = createInlineButton();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      const { menu } = result.current;
+
+      openSettings(result, inlineButton);
+      expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.menu).toBe(menu);
+
+      openSettings(result, inlineButton);
+      expect(result.current.isSettingsOpen).toBe(false);
+      expect(result.current.menu).toBe(menu);
+    });
+
+    it('closes the settings popover when its anchor is removed from the DOM', async () => {
+      const overflowButton = createOverflowButton({ isPressed: true });
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, createOverflowMenuItem());
+      expect(result.current.settingsAnchor).toBe(overflowButton);
+
+      act(() => {
+        overflowButton.remove();
+      });
+
+      await waitFor(() => expect(result.current.isSettingsOpen).toBe(false));
+    });
   });
 
   it('calls onStatusChanged when status badge item is clicked', () => {
