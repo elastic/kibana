@@ -17,7 +17,7 @@ A change's tier is the highest tier of any file it touches. Risk means how much 
 - **Sandbox:** isolation, credentials passed into containers, network access, and command execution (`x-pack/platform/plugins/shared/sandbox`).
 - **Secrets and credentials.**
 - **Prompts and guardrails:** `**/instructions/*.md.text` and the prompts and submission guardrails in `kbn-nightshift-decision-trees`.
-- **Outbound messages** to external systems (for example Slack), which cannot be unsent.
+- **Outbound messages** to external systems (for example Slack), which cannot be unsent. This includes `significant_events/server/lib/slack_app/**`, `significant_events/server/routes/internal/apps/slack/**`, and in `nightshift_investigations`: `server/lib/notifications/**`, `server/step_definitions/send_notifications.ts`, `server/step_definitions/render_slack_message.ts`, `server/lib/automations/generate_workflow_yaml.ts` and `server/routes/find_or_create_slack_thread_investigation.ts`.
 - **Data migrations** and changes to stored data.
 
 ### Medium
