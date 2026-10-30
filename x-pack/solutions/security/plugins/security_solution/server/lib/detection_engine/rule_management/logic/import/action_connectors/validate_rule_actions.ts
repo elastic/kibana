@@ -54,7 +54,7 @@ export const validateRuleActions = async ({
   actionsClient: ActionsClient;
   rules: RuleToImport[];
 }): Promise<ValidatedRulesAndErrors> =>
-  withSecuritySpan('validateRuleActions', async () => {
+  withSecuritySpan('ruleManagement.validateRuleActions', async () => {
     const [rulesWithActions, rulesWithoutActions] = partition(
       rules,
       (rule) => rule.actions != null && rule.actions.length > 0

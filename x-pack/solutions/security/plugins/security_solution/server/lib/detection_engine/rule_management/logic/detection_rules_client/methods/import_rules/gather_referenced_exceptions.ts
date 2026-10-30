@@ -66,7 +66,7 @@ export const getReferencedExceptionLists = async ({
   rules: Array<RuleToImport | Error>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Record<string, ExceptionListSchema>> =>
-  withSecuritySpan('getReferencedExceptionLists', async () => {
+  withSecuritySpan('ruleManagement.getReferencedExceptionLists', async () => {
     const [agnosticLists, nonAgnosticLists] = parseReferencedExceptionsLists(rules);
     return getAllListTypes(agnosticLists, nonAgnosticLists, savedObjectsClient);
   });

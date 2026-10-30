@@ -44,7 +44,7 @@ export async function validateRulesToImport({
   existingExceptionLists,
   deps,
 }: ValidateRulesToImportParams): Promise<ValidateRulesToImportResult> {
-  return withSecuritySpan('validateRulesToImport', async () => {
+  return withSecuritySpan('ruleManagement.validateRulesToImport', async () => {
     const { prebuiltContext, mlAuthz } = deps;
 
     const importableRules: ImportableRuleData[] = [];

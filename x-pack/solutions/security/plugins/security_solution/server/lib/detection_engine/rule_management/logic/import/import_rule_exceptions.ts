@@ -34,7 +34,7 @@ export const importRuleExceptions = async ({
   overwrite: boolean;
   maxExceptionsImportSize: number;
 }) =>
-  withSecuritySpan('importRuleExceptions', async () => {
+  withSecuritySpan('ruleManagement.importRuleExceptions', async () => {
     if (exceptionsClient == null) {
       return {
         success: true,

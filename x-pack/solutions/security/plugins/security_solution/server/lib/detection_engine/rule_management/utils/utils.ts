@@ -249,7 +249,7 @@ export const migrateLegacyActionsIds = async (
   savedObjectsClient: SavedObjectsClientContract,
   actionsClient: ActionsClient
 ): Promise<PromiseFromStreams[]> =>
-  withSecuritySpan('migrateLegacyActionsIds', async () => {
+  withSecuritySpan('ruleManagement.migrateLegacyActionsIds', async () => {
     const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
 
     const toReturn = await pMap(

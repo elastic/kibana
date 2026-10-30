@@ -27,7 +27,7 @@ export const importRuleActionConnectors = async ({
   actionsImporter,
   overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> =>
-  withSecuritySpan('importRuleActionConnectors', async () => {
+  withSecuritySpan('ruleManagement.importRuleActionConnectors', async () => {
     try {
       if (!actionConnectors.length) {
         return NO_ACTION_RESULT;

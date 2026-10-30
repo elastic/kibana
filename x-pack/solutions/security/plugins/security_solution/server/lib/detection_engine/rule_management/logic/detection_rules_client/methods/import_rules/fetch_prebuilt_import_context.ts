@@ -24,7 +24,7 @@ export const fetchPrebuiltImportContext = async ({
   rules: RuleToImport[];
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
 }): Promise<PrebuiltImportContext> =>
-  withSecuritySpan('fetchPrebuiltImportContext', async () => {
+  withSecuritySpan('ruleManagement.fetchPrebuiltImportContext', async () => {
     const ruleIds = rules.map((r) => r.rule_id);
     const ruleVersions = rules.flatMap((r) =>
       r.version == null ? [] : [{ rule_id: r.rule_id, version: r.version }]

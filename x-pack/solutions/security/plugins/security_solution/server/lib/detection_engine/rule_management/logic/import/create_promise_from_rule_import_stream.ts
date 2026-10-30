@@ -34,7 +34,7 @@ export const createPromiseFromRuleImportStream = ({
   objectLimit: number;
   stream: Readable;
 }): Promise<RuleImportStreamResult[]> =>
-  withSecuritySpan('createPromiseFromRuleImportStream', async () => {
+  withSecuritySpan('ruleManagement.createPromiseFromRuleImportStream', async () => {
     const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
 
     return createPromiseFromStreams<RuleImportStreamResult[]>([stream, ...readAllStream]);

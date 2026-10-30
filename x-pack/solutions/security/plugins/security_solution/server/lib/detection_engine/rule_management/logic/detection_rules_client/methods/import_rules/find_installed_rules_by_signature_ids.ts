@@ -33,7 +33,7 @@ export const findInstalledRulesBySignatureIds = async ({
   rulesClient: RulesClient;
   ruleIds: RuleSignatureId[];
 }): Promise<Record<string, RuleResponse>> =>
-  withSecuritySpan('findInstalledRulesBySignatureIds', async () => {
+  withSecuritySpan('ruleManagement.findInstalledRulesBySignatureIds', async () => {
     if (ruleIds.length === 0) return {};
 
     const filter = `alert.attributes.params.ruleId: (${ruleIds

@@ -71,7 +71,7 @@ export const deleteExceptionListItemByList = async ({
   withSpan(
     {
       labels: { listId, namespaceType },
-      name: 'deleteExceptionListItemByList',
+      name: 'exceptionLists.deleteExceptionListItemByList',
       type: 'lists',
     },
     async () => {

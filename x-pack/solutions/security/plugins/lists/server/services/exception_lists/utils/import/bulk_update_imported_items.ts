@@ -19,7 +19,7 @@ export const bulkUpdateImportedItems = async ({
   itemsToUpdate: Array<SavedObjectsBulkUpdateObject<ExceptionListSoSchema>>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<ImportResponse[]> =>
-  withSpan({ name: 'bulkUpdateImportedItems', type: 'lists' }, async () => {
+  withSpan({ name: 'exceptionLists.bulkUpdateImportedItems', type: 'lists' }, async () => {
     if (!itemsToUpdate.length) {
       return [];
     }

@@ -16,7 +16,7 @@ export async function ensureLatestRulesPackageInstalled(
   securityContext: SecuritySolutionApiRequestHandlerContext,
   logger: Logger
 ): Promise<void> {
-  return withSecuritySpan('ensureLatestRulesPackageInstalled', async () => {
+  return withSecuritySpan('prebuiltRules.ensureLatestRulesPackageInstalled', async () => {
     logger.debug(
       'ensureLatestRulesPackageInstalled: Fetching latest versions of prebuilt rule assets'
     );

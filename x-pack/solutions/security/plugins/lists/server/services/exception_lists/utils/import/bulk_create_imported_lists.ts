@@ -26,7 +26,7 @@ export const bulkCreateImportedLists = async ({
   listsToCreate: Array<SavedObjectsBulkCreateObject<ExceptionListSoSchema>>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<ImportResponse[]> =>
-  withSpan({ name: 'bulkCreateImportedLists', type: 'lists' }, async () => {
+  withSpan({ name: 'exceptionLists.bulkCreateImportedLists', type: 'lists' }, async () => {
     if (!listsToCreate.length) {
       return [];
     }

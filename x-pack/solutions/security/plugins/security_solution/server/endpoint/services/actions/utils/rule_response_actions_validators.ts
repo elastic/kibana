@@ -387,7 +387,7 @@ export const validateRuleImportResponseActions = async <
 }: ValidateRuleImportResponseActionsOptions<T>): Promise<
   ValidateRuleImportResponseActionsResult<T>
 > =>
-  withSecuritySpan('validateRuleImportResponseActions', async () => {
+  withSecuritySpan('endpoint.validateRuleImportResponseActions', async () => {
     const logger = endpointService.createLogger('validateRuleImportResponseActions');
     const response: ValidateRuleImportResponseActionsResult<T> = { valid: [], errors: [] };
 

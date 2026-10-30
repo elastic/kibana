@@ -38,7 +38,7 @@ export const importExceptionLists = async ({
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
 }): Promise<ImportDataResponse> =>
-  withSpan({ name: 'importExceptionLists', type: 'lists' }, async () => {
+  withSpan({ name: 'exceptionLists.importExceptionLists', type: 'lists' }, async () => {
     let importExceptionListsResponse: ImportResponse[] = [];
 
     for await (const listChunk of listsChunks) {
