@@ -20,7 +20,7 @@ import { AlertZeroPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
-import { ensureAgentSafe, registerAgentType } from './agent';
+import { ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { ALERTZERO_TELEMETRY_EVENT_TYPES } from './telemetry';
 import { ReportWorkerOutcomeStepId } from '../common/step_types';
@@ -39,6 +39,7 @@ jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
 
 jest.mock('./agent', () => ({
   agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
+  ensureAgent: jest.fn().mockResolvedValue(undefined),
   ensureAgentSafe: jest.fn().mockResolvedValue(undefined),
   registerAgentType: jest.fn(),
 }));
@@ -715,6 +716,48 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           agentBuilder,
           spaceId: DEFAULT_SPACE_ID,
         })
+      );
+    });
+
+    it('wires the Workers service so a failed agent store refuses an enable', async () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreStart = coreMock.createStart();
+      jest.spyOn(coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
+      const agentBuilder = { agents: { ensure: jest.fn() } };
+      jest.mocked(ensureAgent).mockRejectedValueOnce(new Error('agent store unavailable'));
+
+      plugin.start(coreStart, {
+        spaces: undefined,
+        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        agentBuilder,
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
+        agenticInvestigations: {
+          getImpactClient: jest.fn(),
+        },
+        inference: {},
+      } as never);
+
+      const { agentOpts } = (
+        plugin as unknown as {
+          workersService: {
+            agentOpts: {
+              ensureAgentForSpace: (spaceId: string) => Promise<void>;
+              requireAgentForSpace: (spaceId: string) => Promise<void>;
+            };
+          };
+        }
+      ).workersService;
+
+      // Enable path: the error reaches the caller instead of being logged and swallowed.
+      await expect(agentOpts.requireAgentForSpace('space-a')).rejects.toThrow(
+        'agent store unavailable'
+      );
+      expect(ensureAgent).toHaveBeenCalledWith({ agentBuilder, spaceId: 'space-a' });
+
+      // List/get path stays best-effort.
+      await agentOpts.ensureAgentForSpace('space-a');
+      expect(ensureAgentSafe).toHaveBeenCalledWith(
+        expect.objectContaining({ agentBuilder, spaceId: 'space-a' })
       );
     });
   });

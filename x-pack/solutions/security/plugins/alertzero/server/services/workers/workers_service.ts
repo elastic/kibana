@@ -135,8 +135,10 @@ export class WorkersService {
       | undefined,
     private readonly logger: Logger,
     private readonly agentOpts: {
-      /** Lazy ensure of the shared thin agent for the caller's space. */
+      /** Lazy, best-effort ensure of the shared thin agent for the caller's space. */
       ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+      /** Ensure of the shared thin agent that throws when the agent cannot be stored. */
+      requireAgentForSpace?: (spaceId: string) => Promise<void>;
       agentBuilder?: AgentBuilderPluginStart;
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
@@ -180,6 +182,10 @@ export class WorkersService {
 
   private async ensureAgent(spaceId: string): Promise<void> {
     await this.agentOpts.ensureAgentForSpace?.(spaceId);
+  }
+
+  private async requireAgent(spaceId: string): Promise<void> {
+    await this.agentOpts.requireAgentForSpace?.(spaceId);
   }
 
   private async buildAgentLookup(request: KibanaRequest) {
@@ -431,6 +437,12 @@ export class WorkersService {
     }
 
     try {
+      // An API enable can come before any list ensured the shared agent, and a Worker enabled
+      // without it fails every run, so a failed ensure refuses the enable.
+      if (nextEnabled) {
+        await this.requireAgent(spaceId);
+      }
+
       if (pendingSettingsValues) {
         await this.persistWorker(request, registration, {
           spaceId,

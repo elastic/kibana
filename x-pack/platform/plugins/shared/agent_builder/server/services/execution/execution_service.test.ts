@@ -32,6 +32,7 @@ import {
   createConversationBusyError,
   createConversationWriteConflictError,
   createRequestAbortedError,
+  createAgentNotFoundError,
   isBadRequestError,
   isConversationBusyError,
   isConversationWriteConflictError,
@@ -518,6 +519,52 @@ describe('AgentExecutionService', () => {
       // Reported on the result whether or not the event was emitted, so a caller that never
       // reads the stream still learns the conversation.
       expect(conversationId).toBe(existing.id);
+    });
+
+    it('rejects a new conversation for an agent the caller cannot use, before storing anything', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      conversationClient.exists.mockResolvedValue(false);
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'missing-agent' }));
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: {
+            agentId: 'missing-agent',
+            conversationId: 'new-conversation',
+            autoCreateConversationWithId: true,
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: false,
+        })
+      ).rejects.toThrow('Agent missing-agent not found');
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('missing-agent', { access: 'use' });
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('does not re-check the agent when continuing an existing conversation', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const existing = createEmptyConversation({ id: 'conversation-1', agent_id: 'agent-1' });
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.get.mockResolvedValue(existing);
+      mockHandleAgentExecution.mockResolvedValue(of());
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          conversationId: existing.id,
+          autoCreateConversationWithId: true,
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: false,
+      });
+
+      expect(agentRegistry.get).not.toHaveBeenCalledWith('agent-1', { access: 'use' });
     });
   });
 
@@ -1059,7 +1106,9 @@ describe('AgentExecutionService', () => {
     });
 
     it("validates the agent's inference feature model when the agent declares one", async () => {
-      agentRegistry.get.mockResolvedValueOnce(
+      // Persistent: creating the conversation reads the agent for use access before its model is
+      // resolved.
+      agentRegistry.get.mockResolvedValue(
         createMockedInternalAgent({
           id: 'agent-1',
           configuration: { tools: [], inference_feature_id: 'my_feature' },
