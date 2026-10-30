@@ -38,15 +38,14 @@ export function ColorPicker({
       : 'custom'
   );
 
-  const swatchesPerRow = getPaletteSwatchesPerRow(palette.colorCount);
+  // EuiColorPicker's inline layout is fixed to 5 swatch columns
+  const columns = tab === 'palette' ? getPaletteSwatchesPerRow(palette.colorCount) : 5;
 
   return (
     <div
       css={({ euiTheme }) => ({
         // swatch (size.l) × columns + gutters + horizontal padding
-        width: `calc(${euiTheme.size.l} * ${swatchesPerRow} + ${euiTheme.size.s} * ${
-          swatchesPerRow + 1
-        })`,
+        width: `calc(${euiTheme.size.l} * ${columns} + ${euiTheme.size.s} * ${columns + 1})`,
         position: 'relative',
       })}
     >

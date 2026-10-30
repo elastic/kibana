@@ -23,5 +23,5 @@ export const elasticLineOptimizedExtendedPalette = new KbnColorFnPalette({
   name: i18n.translate('palettes.elasticLineOptimizedExtended.name', {
     defaultMessage: 'Elastic (line optimized)',
   }),
-  colorFn: (n) => repeatColors(getLineOptimizedColors(euiPaletteColorBlind()), n),
+  colorFn: (n) => repeatColors(getLineOptimizedColors(euiPaletteColorBlind({ extended: true })), n),
 });

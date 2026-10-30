@@ -17,7 +17,7 @@ import {
 import { elasticLineOptimizedExtendedPalette } from './elastic_line_optimized_extended';
 import { visPaletteSize } from './elastic';
 
-const BASE = euiPaletteColorBlind({ rotations: 1 });
+const BASE = euiPaletteColorBlind({ rotations: 1, extended: true });
 
 describe('swapColorPairs', () => {
   it('swaps red (index 6) with yellow (index 8) and their light variants', () => {
@@ -35,7 +35,7 @@ describe('swapColorPairs', () => {
   });
 
   it('applies swaps per group in multi-rotation palettes', () => {
-    const baseTwoRotations = euiPaletteColorBlind({ rotations: 2 });
+    const baseTwoRotations = euiPaletteColorBlind({ rotations: 2, extended: true });
     const result = swapColorPairs(baseTwoRotations, visPaletteSize);
     expect(result[6]).toBe(baseTwoRotations[8]);
     expect(result[visPaletteSize + 6]).toBe(baseTwoRotations[visPaletteSize + 8]);

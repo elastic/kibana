@@ -12,7 +12,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { KbnPalette } from '../../constants';
 import { KbnColorFnPalette } from '../../classes/color_fn_palette';
 
-export const visPaletteSize = euiPaletteColorBlind().length;
+export const visPaletteSize = euiPaletteColorBlind({ extended: true }).length;
 
 export const elasticPalette = new KbnColorFnPalette({
   id: KbnPalette.Default,
@@ -31,5 +31,6 @@ export const elasticPalette = new KbnColorFnPalette({
     defaultMessage: 'Default',
   }),
   // Return exact colors requested given enough rotations
-  colorFn: (n) => euiPaletteColorBlind({ rotations: Math.ceil(n / visPaletteSize) }).slice(0, n),
+  colorFn: (n) =>
+    euiPaletteColorBlind({ rotations: Math.ceil(n / visPaletteSize), extended: true }).slice(0, n),
 });
