@@ -27,25 +27,6 @@ import type { GetUserProfileResponse, UserProfile } from '../../../common';
  */
 const DEFAULT_PROFILE_CACHE_KEY = '__profile__';
 
-/**
- * The profile data API validates `userSettings.locale` against the locales the deployment
- * enables, and that list can shrink after a locale is stored. Re-posting the stored locale
- * would then reject the whole update. A locale-only body is kept as-is, because the route
- * rejects an empty update for Elastic Cloud SSO users.
- */
-function omitStoredLocale(data: UserProfileData, stored: UserProfileData | null): UserProfileData {
-  const userSettings = data.userSettings;
-  if (
-    !userSettings?.locale ||
-    userSettings.locale !== stored?.userSettings?.locale ||
-    Object.keys(userSettings).length === 1
-  ) {
-    return data;
-  }
-  const { locale: _locale, ...otherSettings } = userSettings;
-  return { ...data, userSettings: otherSettings };
-}
-
 export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly _cache = new Map<string, Promise<GetUserProfileResponse>>();
 
@@ -171,9 +152,7 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
     this._userProfile$.next(data);
 
     return this.http
-      .post('/internal/security/user_profile/_data', {
-        body: JSON.stringify(omitStoredLocale(data, previous)),
-      })
+      .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
       .then(() => {
         this._cache.clear();
         this.internalDataUpdates$.next(data);
@@ -186,11 +165,24 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   /**
-   * Updates user profile data of the current user.
-   * @param data Application data to be written (merged with existing data).
+   * Updates user profile data of the current user, posting only `data`. The server merges it
+   * into the stored profile, so fields left out of `data` are not re-validated.
+   * @param data Application data to be merged with existing data.
    */
   public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
-    const updated = merge({}, this._userProfile$.getValue(), data);
-    return this.update(updated);
+    const previous = this._userProfile$.getValue();
+    const updated = merge({}, previous, data);
+    this._userProfile$.next(updated);
+
+    return this.http
+      .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
+      .then(() => {
+        this._cache.clear();
+        this.internalDataUpdates$.next(updated);
+      })
+      .catch((err) => {
+        this._userProfile$.next(previous);
+        return Promise.reject(err);
+      });
   }
 }

@@ -100,43 +100,19 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
-  it('posts the stored locale when it is the only setting', async () => {
-    coreStart.http.get.mockResolvedValue({ data: { userSettings: { locale: 'de-DE' } } });
-    await apiClient.getCurrent({ dataPath: 'userSettings' });
-
-    await apiClient.update({ userSettings: { locale: 'de-DE' } });
-
-    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
-      body: JSON.stringify({ userSettings: { locale: 'de-DE' } }),
-    });
-  });
-
-  it('does not post the stored locale when updating the whole profile', async () => {
+  it('reverts the in-memory profile when a partial update fails', async () => {
     coreStart.http.get.mockResolvedValue({
       data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
     });
     await apiClient.getCurrent({ dataPath: 'userSettings' });
+    coreStart.http.post.mockRejectedValueOnce(new Error('nope'));
 
-    await apiClient.update({ userSettings: { locale: 'de-DE', darkMode: 'dark' } });
+    await expect(apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } })).rejects.toThrow(
+      'nope'
+    );
 
-    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
-      body: JSON.stringify({ userSettings: { darkMode: 'dark' } }),
-    });
     expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
-      userSettings: { locale: 'de-DE', darkMode: 'dark' },
-    });
-  });
-
-  it('posts a locale that differs from the stored one', async () => {
-    coreStart.http.get.mockResolvedValue({
-      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
-    });
-    await apiClient.getCurrent({ dataPath: 'userSettings' });
-
-    await apiClient.update({ userSettings: { locale: 'fr-FR', darkMode: 'light' } });
-
-    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
-      body: JSON.stringify({ userSettings: { locale: 'fr-FR', darkMode: 'light' } }),
+      userSettings: { locale: 'de-DE', darkMode: 'light' },
     });
   });
 
