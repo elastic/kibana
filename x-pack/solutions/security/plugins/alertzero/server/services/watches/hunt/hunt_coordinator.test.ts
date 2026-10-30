@@ -1590,6 +1590,27 @@ describe('huntCoordinator', () => {
       expect(result.pending_technique_ids).toEqual(['T1059']);
     });
 
+    it('keeps a pending technique the model returned but whose quote did not ground', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_validated',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'quote_ungrounded', technique_id: 'T1059', detail: 'quote not in the report' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-quote-ungrounded');
+
+      // T1059 was named, so it keeps its retry; T1003 was not named at all and is given up on.
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
     it('drops nothing on a manual run, which does not carry the earlier pending list', async () => {
       mockLoad.mockResolvedValueOnce(loaded);
       mockT2.mockResolvedValueOnce({
@@ -1621,6 +1642,8 @@ describe('huntCoordinator', () => {
       const result = await run('run-no-catalog');
 
       expect(result.completeness).toBe('incomplete_retryable');
+      // Extraction never ran, so the recorded pending list must be left alone, not replaced by [].
+      expect(result.pending_technique_ids).toBeUndefined();
     });
   });
 

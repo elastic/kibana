@@ -884,21 +884,22 @@ export const huntBehavior = async (
       droppedIds.push(candidate.technique_id);
       continue;
     }
+    // A revoked id resolves to its live successor; carry the live id forward so
+    // the hunt query and the indexed projection never cite a retired technique.
+    const techniqueId = entry.id;
+    // An earlier run already searched this technique. Dropped here, before the quote check and any
+    // generation, so it takes no slot of the budget and is not reported as a gap: it was covered,
+    // not missed, and a quote that does not ground this time must not undo that.
+    if (alreadySearched.has(techniqueId)) {
+      skippedAsSearched.add(techniqueId);
+      continue;
+    }
     // The extraction contract promises a verbatim quote, but only the technique id is
     // verified above. A real id paired with a fabricated quote would still become a
     // proposed behavior and an indexed finding attributed to this report, so drop a
     // candidate whose quote is not grounded in the report text.
     if (!isEvidenceQuoteGrounded(candidate.evidence_quote, text)) {
       ungroundedQuoteIds.push(candidate.technique_id);
-      continue;
-    }
-    // A revoked id resolves to its live successor; carry the live id forward so
-    // the hunt query and the indexed projection never cite a retired technique.
-    const techniqueId = entry.id;
-    // An earlier run already searched this technique. Dropped here, before any generation, so it
-    // takes no slot of the budget and is not reported as a gap: it was covered, not missed.
-    if (alreadySearched.has(techniqueId)) {
-      skippedAsSearched.add(techniqueId);
       continue;
     }
     // One behavior per live technique id. The LLM can emit the same id twice

@@ -1078,18 +1078,29 @@ const huntCoordinatorCore = async (
   // retired (seen live). If even one behavior grounded and executed, the text does hold
   // usable literals and the remaining ungrounded ones keep their retry.
   const nothingGroundable = tier1Raw.status === 'no_searchable_terms' && !tier2Executed;
+  // Extraction ran unless the managed ATT&CK catalog was missing, which leaves one report-level
+  // gap and no technique to judge. Then the recorded pending list is neither consumed nor replaced.
+  const extractionRan = !tier2Gaps.some(({ reason }) => reason === 'catalog_unavailable');
   // A technique an earlier run left pending gets exactly one more run. When this run's extraction
   // did not return it, nothing can search it (only extracted techniques are searched), so it is
   // given up on: its gap is still reported, but it no longer keeps the report eligible, and it is
   // not carried forward again. Without this bound the gap is re-emitted every sweep until the
   // publish-date window closes, re-running Tier 1 and an extraction call each time.
-  const extractedTechniqueIds = new Set(
-    tier2Raw.behaviors.map(({ technique_id: techniqueId }) => techniqueId)
-  );
+  // A technique the extraction did return counts as named even if it did not survive validation:
+  // its own gap (a refused quote, a failed query) keeps its retry. Only the `generation_budget`
+  // gap that `pendingGaps` adds for a technique nothing named is the one given up on.
+  const namedTechniqueIds = new Set([
+    ...tier2Raw.behaviors.map(({ technique_id: techniqueId }) => techniqueId),
+    ...tier2Gaps
+      .filter(({ reason }) => reason !== 'generation_budget')
+      .map(({ technique_id: techniqueId }) => techniqueId),
+  ]);
   const droppedTechniqueIds = new Set(
-    (continuation?.pending_technique_ids ?? []).filter(
-      (techniqueId) => !extractedTechniqueIds.has(techniqueId)
-    )
+    extractionRan
+      ? (continuation?.pending_technique_ids ?? []).filter(
+          (techniqueId) => !namedTechniqueIds.has(techniqueId)
+        )
+      : []
   );
   const completeness = huntCompletenessOf(gaps, {
     ...(nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}),
@@ -1126,10 +1137,16 @@ const huntCoordinatorCore = async (
     ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     searched_technique_ids: getSearchedTechniqueIds(tier2Raw),
-    pending_technique_ids: getPendingTechniqueIds(
-      tier2Raw,
-      nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
-    ).filter((techniqueId) => !droppedTechniqueIds.has(techniqueId)),
+    // Left out when extraction did not run: an absent list keeps what the report recorded, while
+    // an empty one would erase the techniques an earlier run still owes.
+    ...(extractionRan
+      ? {
+          pending_technique_ids: getPendingTechniqueIds(
+            tier2Raw,
+            nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+          ).filter((techniqueId) => !droppedTechniqueIds.has(techniqueId)),
+        }
+      : {}),
     replayed_whole_report:
       trigger === 'manual' &&
       callerText === undefined &&

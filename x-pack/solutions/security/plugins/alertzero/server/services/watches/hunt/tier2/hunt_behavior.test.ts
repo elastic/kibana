@@ -1755,6 +1755,23 @@ describe('huntBehavior', () => {
       expect(result.incomplete).toBeUndefined();
     });
 
+    it('does not report a gap for an already-searched technique whose quote no longer grounds', async () => {
+      // The model's quotes vary between runs. A technique the ledger already settled must not turn
+      // into a retryable gap because this run's quote for it is not in the report text.
+      const result = await huntBehavior(
+        buildMockModel([
+          t1566Candidate,
+          { ...t1078Candidate, evidence_quote: 'never written in the report' },
+        ]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004'] },
+        esClient
+      );
+
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.incomplete).toBeUndefined();
+    });
+
     it('says there was nothing new to hunt when every extracted technique was already searched', async () => {
       const result = await huntBehavior(
         buildMockModel([t1078Candidate, t1566Candidate]),
