@@ -164,7 +164,7 @@ export const EpisodesFilterBar = ({
     (value: string) => {
       setQueryStringInput(value);
       if (appliedQueryString && !value.trim()) {
-        onFilterChange(({ queryString: _queryString, ...rest }) => rest);
+        onFilterChange((prev) => ({ ...prev, queryString: undefined }));
       }
     },
     [appliedQueryString, onFilterChange]
