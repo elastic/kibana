@@ -192,7 +192,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.workerValue',
-              '<worker> classifies new alerts.'
+              '<worker> classifies new alerts and proposes closing false positives.'
             ),
           },
           {
