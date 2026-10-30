@@ -146,6 +146,17 @@ const toConnectionPayload = (
   };
 };
 
+/**
+ * The hosts the impact preview covers: the confirmed ones plus a host that was typed but not
+ * confirmed with Enter yet, which Save also counts.
+ */
+const hostsToPreview = (confirmed: string[], typed: string): string[] => {
+  const pending = normalizeAllowedMonitorHost(typed);
+  // An IPv6 literal is left out: only the server can tell it from a half-typed one.
+  const isPreviewable = isAllowedMonitorHostShape(pending) && !pending.includes(':');
+  return isPreviewable && !confirmed.includes(pending) ? [...confirmed, pending] : confirmed;
+};
+
 export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
   const canManage = (application?.capabilities.uptime.canManageSecretConnections ??
@@ -161,10 +172,8 @@ export const SecretConnectionPanel = () => {
   const [hostError, setHostError] = useState<string | undefined>();
   // Text typed into the allowed hosts field that was not turned into a host yet.
   const [hostInput, setHostInput] = useState('');
-  const affectedPreview = useAffectedMonitorsPreview(
-    editing?.name.trim() ?? '',
-    editing?.allowedMonitorHosts ?? []
-  );
+  const hostsForPreview = hostsToPreview(editing?.allowedMonitorHosts ?? [], hostInput);
+  const affectedPreview = useAffectedMonitorsPreview(editing?.name.trim() ?? '', hostsForPreview);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
@@ -606,7 +615,7 @@ export const SecretConnectionPanel = () => {
                     }}
                   />
                 </EuiFormRow>
-                {editing.allowedMonitorHosts.length > 0 && (
+                {hostsForPreview.length > 0 && (
                   <>
                     <EuiSpacer size="s" />
                     <AffectedMonitorsPreview state={affectedPreview} />

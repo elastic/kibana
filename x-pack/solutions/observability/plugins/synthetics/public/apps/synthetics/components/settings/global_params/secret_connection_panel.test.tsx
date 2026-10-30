@@ -138,6 +138,45 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
       });
     });
 
+    it('includes a host that was typed but not confirmed with Enter', async () => {
+      mockPreview.mockResolvedValue({ monitors: [{ name: 'checkout', reason: 'host' }], total: 1 });
+      await openEditFlyout();
+
+      await userEvent.type(hostsInput(), 'API.example.com');
+
+      const callout = await screen.findByTestId('syntheticsVaultAffectedMonitorsCallout');
+      expect(callout).toHaveTextContent('checkout (other host)');
+      expect(mockPreview).toHaveBeenLastCalledWith({
+        name: 'prod',
+        allowedMonitorHosts: ['api.example.com'],
+      });
+    });
+
+    it('adds the typed host to the confirmed ones, once', async () => {
+      await openEditFlyout();
+      await userEvent.type(hostsInput(), 'a.example.com{enter}');
+      await waitFor(() => expect(mockPreview).toHaveBeenCalled());
+
+      await userEvent.type(hostsInput(), 'b.example.com');
+      await waitFor(() =>
+        expect(mockPreview).toHaveBeenLastCalledWith({
+          name: 'prod',
+          allowedMonitorHosts: ['a.example.com', 'b.example.com'],
+        })
+      );
+    });
+
+    it('does not ask for text that is not a host yet', async () => {
+      await openEditFlyout();
+
+      await userEvent.type(hostsInput(), 'https://api');
+      await userEvent.clear(hostsInput());
+      await userEvent.type(hostsInput(), '2001:db8:');
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      expect(mockPreview).not.toHaveBeenCalled();
+    });
+
     it('says when no existing monitor is affected', async () => {
       await openEditFlyout();
 
