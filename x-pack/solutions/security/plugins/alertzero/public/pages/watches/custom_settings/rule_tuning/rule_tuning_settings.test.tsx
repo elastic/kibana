@@ -180,13 +180,14 @@ describe('RuleTuningSettings', () => {
     const thresholdsGroup = expectRowWiring(
       'alertZeroQualifyingThresholdsRow',
       'Qualifying thresholds',
-      /meets both thresholds in this window/
+      /meets both thresholds in this window\. Count between 2 and 100, rate between 0 and 100%\./
     );
 
-    // The ranges sit behind an info icon; screen readers get them as part of the row description.
+    // The threshold definitions sit behind an info icon; screen readers get them as part of the row
+    // description.
     expect(screen.getByTestId('alertZeroQualifyingThresholdsRowTooltip')).toBeInTheDocument();
     const tooltipText = within(screen.getByTestId('alertZeroQualifyingThresholdsRow')).getByText(
-      /Count between 2 and 100, rate between 0 and 100%\./
+      /Rate is the share of the rule's alerts closed as false positives\./
     );
     expect(thresholdsGroup.getAttribute('aria-describedby')?.split(' ')).toContain(tooltipText.id);
   });
