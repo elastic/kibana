@@ -337,6 +337,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
         {showStopAction && (
           <FlyoutTemplate.Footer.PrimaryAction
             label={stopActionLabel}
+            color="danger"
             onClick={() => onStopQuery(displayedQuery.taskId)}
             isDisabled={isStopRequested || displayedQuery.cancelled}
             isLoading={isStopRequested}

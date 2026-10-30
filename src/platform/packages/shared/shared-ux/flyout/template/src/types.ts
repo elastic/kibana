@@ -203,12 +203,18 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   tooltip?: ReactNode;
 }
 
+/** Colors a `FlyoutTemplate.Footer.PrimaryAction` can take. */
+export type FlyoutFooterPrimaryActionColor = 'primary' | 'danger';
+
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
 export type FlyoutFooterPrimaryActionProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick'
 > &
-  FlyoutFooterActionBaseProps;
+  FlyoutFooterActionBaseProps & {
+    /** Button color; defaults to `primary`. Use `danger` for a destructive action. */
+    color?: FlyoutFooterPrimaryActionColor;
+  };
 
 /** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
 export type FlyoutFooterSecondaryActionProps = Omit<
