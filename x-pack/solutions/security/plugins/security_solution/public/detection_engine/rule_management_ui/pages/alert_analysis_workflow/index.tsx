@@ -45,6 +45,7 @@ import {
   saveAlertAnalysisWorkflowSettings,
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
+import { AlertAnalysisWorkflowDeprecationCallout } from './deprecation_callout';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
 import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_agents';
 import * as translations from './translations';
@@ -203,6 +204,8 @@ const AlertAnalysisWorkflowContent: React.FC = () => {
             />
           }
         />
+        <AlertAnalysisWorkflowDeprecationCallout />
+        <EuiSpacer size="l" />
         {isSettingsError && !pageSettings ? (
           <EuiEmptyPrompt
             color="danger"
