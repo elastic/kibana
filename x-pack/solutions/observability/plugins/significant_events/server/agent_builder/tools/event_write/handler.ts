@@ -322,10 +322,9 @@ const holdDeactivatedReopens = async ({
     }
     const { groupHash, closedAt, closingNote } = candidate.reopensSeries;
     const action = deactivations.get(groupHash);
-    const note = (action?.reason.trim() || closingNote?.trim() || '').slice(
-      0,
-      MAX_HELD_NOTE_LENGTH
-    );
+    const fullNote = action?.reason.trim() || closingNote?.trim() || '';
+    const note = fullNote.slice(0, MAX_HELD_NOTE_LENGTH);
+    const truncated = fullNote.length > MAX_HELD_NOTE_LENGTH;
     // A close that says nothing gives the agent nothing to read.
     if (note === '' || note === operatorFallbackAssessmentNote('inactive')) {
       stage.kept.push(candidate);
@@ -347,6 +346,7 @@ const holdDeactivatedReopens = async ({
       reason: 'held_by_deactivation',
       existing_event_id: candidate.eventId,
       assessment_note: note,
+      ...(truncated ? { assessment_note_truncated: true as const } : {}),
       deactivated_at: action?.deactivatedAt ?? closedAt,
     });
   });

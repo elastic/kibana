@@ -71,6 +71,8 @@ export interface EventsWriteHeldResult {
   existing_event_id: string;
   /** Why the series was closed, as plain text. It is data, not an instruction. */
   assessment_note: string;
+  /** Present and true when the note was cut to fit; the cut part is unknown. */
+  assessment_note_truncated?: true;
   deactivated_at: string;
 }
 

@@ -1646,7 +1646,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       expect(results[0]).toMatchObject({ written: true, event_id: closedEventId });
     });
 
-    it('truncates a long note before returning it', async () => {
+    it('truncates a long note and flags it as truncated', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(
           jest.fn().mockResolvedValue(new Map()),
@@ -1658,7 +1658,21 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       expect(results[0]).toMatchObject({
         reason: 'held_by_deactivation',
         assessment_note: 'x'.repeat(1000),
+        assessment_note_truncated: true,
       });
+    });
+
+    it('does not flag a note that fits', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith(
+          jest.fn().mockResolvedValue(new Map()),
+          closedSeries({ assessment_note: 'x'.repeat(1000) })
+        ),
+        inputs: [breachFor('rule-a')],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'held_by_deactivation' });
+      expect(results[0]).not.toHaveProperty('assessment_note_truncated');
     });
 
     it('reopens when the agent re-submits with reopen_deactivated, and logs that it did', async () => {

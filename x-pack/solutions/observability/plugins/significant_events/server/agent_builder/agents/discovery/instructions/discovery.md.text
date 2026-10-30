@@ -605,7 +605,8 @@ rules were written.
       benign change) and this cycle's grounded `confirms` description is within what the note names.
       A note that covers every source or every future detection does not clear it.
    2. Otherwise, reopen: the note is unclear, mixed, empty, says only that the event was set
-      inactive, records a recovery, or this cycle's evidence is outside what it names. When unsure,
+      inactive, records a recovery, this cycle's evidence is outside what it names, or the result
+      carries `assessment_note_truncated: true` (a cut-off note never clears an item). When unsure,
       reopen. Send the item again with `reopen_deactivated: true`; in your own `assessment_note`,
       attribute the claim ("the closing note says …") and give the new evidence from this cycle's
       signals only.
