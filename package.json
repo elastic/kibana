@@ -200,6 +200,7 @@
     "@hapi/wreck": "18.1.2",
     "@hello-pangea/dnd": "18.0.1",
     "@kbn/aad-fixtures-plugin": "workspace:*",
+    "@kbn/access-control": "workspace:*",
     "@kbn/access-control-test-plugin": "workspace:*",
     "@kbn/actions-plugin": "workspace:*",
     "@kbn/actions-simulators-plugin": "workspace:*",
