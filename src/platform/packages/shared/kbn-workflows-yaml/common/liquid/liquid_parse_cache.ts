@@ -35,11 +35,10 @@ export function getLiquidInstance(): Liquid {
 }
 
 /**
- * Total template length the cache may hold. The parsed tree grows with the
- * template, not with the entry count: the densest template the engine accepts
- * under strict filters retains ~145 bytes per character, so this is a ceiling
- * of roughly 16 MiB. The largest workflow shipped in this repo holds ~45,000
- * characters of Liquid, so every realistic workflow stays cached in full.
+ * Total template length the cache may hold. Bounding by length rather than
+ * entry count keeps the footprint independent of how large each template is.
+ * Sized so the largest workflow shipped in this repo (~45,000 characters of
+ * Liquid) stays cached in full, with headroom.
  */
 export const MAX_PARSE_CACHE_CHARS = 100_000;
 
