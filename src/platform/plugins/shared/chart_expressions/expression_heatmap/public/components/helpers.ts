@@ -118,7 +118,9 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
 };
 
 export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSortPredicate) => {
-  if (!predicate) {
+  // number ranges are already sorted by sortRowsByRangeLowerBound, the chart has to keep that order
+  // required until comparator is introduced in https://github.com/elastic/elastic-charts/issues/2782
+  if (!predicate || column.meta.type === 'number_range') {
     return 'dataIndex';
   }
   // for now sort only numerical types, and sort the rest as string.
@@ -129,6 +131,25 @@ export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSor
   } else {
     return predicate === 'asc' ? 'alphaAsc' : 'alphaDesc';
   }
+};
+
+// ES|QL ranges (e.g. "500.0..550.0") are strings, which the chart can only sort alphabetically.
+// Like a numeric axis, the largest range comes first unless the sort is ascending.
+// TODO remove together with the number_range exception in getSortPredicate
+// https://github.com/elastic/elastic-charts/issues/2782
+export const sortRowsByRangeLowerBound = (
+  rows: Datatable['rows'],
+  columnId: string,
+  predicate?: HeatmapSortPredicate
+) => {
+  const isAscending = predicate === 'asc';
+  const getLowerBound = (row: Datatable['rows'][number]) => {
+    const [lowerBound] = String(row[columnId]).split('..');
+    return Number(lowerBound);
+  };
+  return rows.toSorted((a, b) =>
+    isAscending ? getLowerBound(a) - getLowerBound(b) : getLowerBound(b) - getLowerBound(a)
+  );
 };
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
