@@ -8,7 +8,12 @@
 import Boom from '@hapi/boom';
 import pRetry, { AbortError } from 'p-retry';
 import { parse as parseYaml } from 'yaml';
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { isAgentNotFoundError } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -23,6 +28,7 @@ import {
   type NightshiftBoundWorkflowStatus,
   type NightshiftServiceAccountIds,
   type NightshiftServiceAccountInfo,
+  type NightshiftUnboundAutomation,
 } from '../../../common';
 import type { NightshiftInvestigationsStartDeps } from '../../types';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
@@ -31,7 +37,14 @@ import { installInvestigationAgent } from '../install_investigation_agent';
 import { installDecisionTreeReinforcementAgent } from '../install_decision_tree_reinforcement_agent';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
-import { AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE, getBoundInvestigationWorkflowId } from './constants';
+import {
+  AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE,
+  getBoundInvestigationWorkflowId,
+  isEntryPointReady,
+} from './constants';
+import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import { generateWorkflowYaml } from '../automations/generate_workflow_yaml';
+import type { NightshiftAutomationAttributes } from '../automations/types';
 
 type PluginScopedManagedWorkflows = Awaited<
   ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
@@ -50,6 +63,8 @@ interface Deps {
   getAgentAvailability: () => AgentAvailabilityConfig;
   /** The decision-tree reinforcement agent only exists while decision trees are on. */
   isDecisionTreesEnabled: () => boolean;
+  /** Automations are hidden saved objects; this client can read and write them. */
+  getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
@@ -99,6 +114,7 @@ export const createInvestigatorServiceAccountService = ({
   getAgentBuilder,
   getAgentAvailability,
   isDecisionTreesEnabled,
+  getAutomationsSoClient,
   isServerless,
   logger,
 }: Deps) => {
@@ -204,6 +220,101 @@ export const createInvestigatorServiceAccountService = ({
       }),
       boundWorkflows,
     };
+  };
+
+  /** Changing or deleting an automation whose workflow is bound to an account needs this. */
+  const assertCanModifyBoundAutomations = async (request: KibanaRequest): Promise<void> => {
+    if (!(await canManageSecurity(request))) {
+      throw Boom.forbidden(
+        'Automations run as the Nightshift automations service account, so changing them requires the manage_security cluster privilege.'
+      );
+    }
+  };
+
+  /**
+   * The account an automation's workflow runs as: the automations account the space was set up
+   * with, kept on its entry point. Automations then keep running whoever created them. Writing a workflow bound to a service account requires
+   * `manage_security` (the workflows plugin enforces it on every create, update and delete), so
+   * this refuses callers without it. Returns undefined when service accounts are off: the workflow
+   * then runs as its author, as before.
+   */
+  const resolveAutomationRunAs = async (
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<string | undefined> => {
+    if (!core.security.serviceAccounts.isEnabled()) return undefined;
+    const entryPoint = await workflowsManagement?.management
+      .getWorkflow(getBoundInvestigationWorkflowId(spaceId), spaceId, request)
+      .catch(() => null);
+    const automationsServiceAccountId = isEntryPointReady(entryPoint)
+      ? await readAutomationsServiceAccountId(spaceId)
+      : undefined;
+    if (!automationsServiceAccountId) {
+      throw Boom.badRequest(
+        'Nightshift is not set up in this space. An admin must enable its service accounts before automations can run.'
+      );
+    }
+    await assertCanModifyBoundAutomations(request);
+    return automationsServiceAccountId;
+  };
+
+  /**
+   * Binds every automation's workflow in the space to the automations account, as the admin
+   * setting the space up, so automations created before setup stop running as their authors. A
+   * failure is not fatal: it is logged and returned, so setup can report the automations that
+   * still run as their author instead of leaving them unbound silently.
+   */
+  const bindAutomations = async (
+    request: KibanaRequest,
+    spaceId: string,
+    automationsServiceAccountId: string
+  ): Promise<NightshiftUnboundAutomation[]> => {
+    const unbound: NightshiftUnboundAutomation[] = [];
+    if (!getAutomationsSoClient || !workflowsManagement) return unbound;
+    const soClient = getAutomationsSoClient(request, spaceId);
+    const finder = soClient.createPointInTimeFinder<NightshiftAutomationAttributes>({
+      type: NIGHTSHIFT_AUTOMATION_SO_TYPE,
+      perPage: 100,
+    });
+    try {
+      for await (const { saved_objects: automations } of finder.find()) {
+        for (const { id, attributes } of automations) {
+          if (!attributes.workflowId) continue;
+          try {
+            const workflow = await workflowsManagement.management.getWorkflow(
+              attributes.workflowId,
+              spaceId,
+              request
+            );
+            if (workflow?.definition?.settings?.run_as === automationsServiceAccountId) continue;
+            await workflowsManagement.management.updateWorkflow(
+              attributes.workflowId,
+              {
+                yaml: generateWorkflowYaml({
+                  automationId: id,
+                  automation: attributes,
+                  serviceAccountId: automationsServiceAccountId,
+                }),
+              },
+              spaceId,
+              request
+            );
+          } catch (error) {
+            logger.warn(
+              `Nightshift setup in space [${spaceId}] could not bind automation [${id}] to [${automationsServiceAccountId}]: ${error}`
+            );
+            unbound.push({
+              id,
+              ...(attributes.name ? { name: attributes.name } : {}),
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      }
+    } finally {
+      await finder.close();
+    }
+    return unbound;
   };
 
   const assertSpaceExists = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -365,6 +476,11 @@ export const createInvestigatorServiceAccountService = ({
 
     await installBoundWorkflows(request, spaceId, serviceAccountIds);
     await bindAgents(request, spaceId, serviceAccountIds.agent);
+    const unboundAutomations = await bindAutomations(
+      request,
+      spaceId,
+      serviceAccountIds.automations
+    );
 
     let status = await getStatus(request, spaceId);
     if (await enableDisabledWorkflows(request, spaceId, status)) {
@@ -374,7 +490,16 @@ export const createInvestigatorServiceAccountService = ({
     logger.info(
       `Nightshift in space [${spaceId}] is set up with service accounts [${serviceAccountIds.agent}] and [${serviceAccountIds.automations}]`
     );
-    return status;
+    if (unboundAutomations.length > 0) {
+      logger.warn(
+        `Nightshift setup in space [${spaceId}] left ${
+          unboundAutomations.length
+        } automation(s) running as their author: ${unboundAutomations
+          .map(({ id }) => id)
+          .join(', ')}`
+      );
+    }
+    return unboundAutomations.length > 0 ? { ...status, unboundAutomations } : status;
   };
 
   /**
@@ -432,7 +557,14 @@ export const createInvestigatorServiceAccountService = ({
     return getStatus(request, spaceId);
   };
 
-  return { enable, disable, getStatus, canManageSecurity };
+  return {
+    enable,
+    disable,
+    getStatus,
+    canManageSecurity,
+    resolveAutomationRunAs,
+    assertCanModifyBoundAutomations,
+  };
 };
 
 export type InvestigatorServiceAccountService = ReturnType<

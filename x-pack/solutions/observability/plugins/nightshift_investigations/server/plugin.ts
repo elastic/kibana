@@ -801,6 +801,7 @@ export class NightshiftInvestigationsPlugin
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
       isDecisionTreesEnabled: () => this.decisionTreesEnabled,
+      getAutomationsSoClient: this.getAutomationsSoClient,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });
