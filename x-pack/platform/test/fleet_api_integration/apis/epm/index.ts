@@ -30,6 +30,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./install_remove_kbn_assets_in_space'));
     loadTestFile(require.resolve('./install_remove_multiple'));
     loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./install_breaking_changes'));
     loadTestFile(require.resolve('./install_tsds_disable'));
     loadTestFile(require.resolve('./install_tsds_enable'));
     loadTestFile(require.resolve('./install_tag_assets'));

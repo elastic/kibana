@@ -12,6 +12,7 @@ import {
   ExperimentalDataStreamFeaturesSchema,
 } from '../models/package_policy';
 import { OtelCollectorConfigSchema } from '../models';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION } from '../../../common/constants';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -1091,6 +1092,12 @@ export const InstallPackageFromRegistryRequestSchema = {
               'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
           },
         }),
+        acknowledge_breaking_changes: schema.boolean({
+          defaultValue: false,
+          meta: {
+            description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          },
+        }),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
@@ -1157,6 +1164,12 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
             'When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.',
         },
       }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+        },
+      }),
     },
     { meta: { id: 'bulk_install_packages_from_registry_request' } }
   ),
@@ -1190,6 +1203,12 @@ export const BulkUpgradePackagesRequestSchema = {
       prerelease: schema.maybe(schema.boolean()),
       force: schema.boolean({ defaultValue: false }),
       upgrade_package_policies: schema.boolean({ defaultValue: false }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+        },
+      }),
     },
     { meta: { id: 'bulk_upgrade_packages_request' } }
   ),

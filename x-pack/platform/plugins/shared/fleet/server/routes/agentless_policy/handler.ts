@@ -140,7 +140,9 @@ export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
   );
 
   const policyIds = uniq(request.body.policyIds);
-  const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request);
+  const body = await agentlessPoliciesService.bulkUpgradeAgentlessPolicies(policyIds, request, {
+    acknowledgeBreakingChanges: request.body.acknowledge_breaking_changes,
+  });
 
   // Unlike the package-policy bulk upgrade handler, we deliberately do NOT promote the first
   // per-policy fatal error to a top-level HTTP status. The batch always returns 200 with the

@@ -25,6 +25,7 @@ import { appContextService } from '../../app_context';
 import {
   ConcurrentInstallOperationError,
   FleetError,
+  PackageBreakingChangesNotAcknowledgedError,
   PackageFipsIncompatibleError,
   PackageInvalidArchiveError,
   PackageNotFoundError,
@@ -46,12 +47,14 @@ import {
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_packages';
 
-import { getInstallationObject, getPackageSavedObjects } from './get';
+import { getInstallation, getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 import { setLastUploadInstallCache } from './utils';
+import { assertBreakingChangesAcknowledged } from './breaking_changes';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
+jest.mock('./breaking_changes');
 jest.mock('./install_index_template_pipeline');
 jest.mock('./es_assets_reference');
 jest.mock('./exclude_datastreams_helper', () => ({
@@ -521,6 +524,38 @@ describe('install', () => {
       });
     });
 
+    it('should reject a bundled package upgrade with unacknowledged breaking changes', async () => {
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '2.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
+      jest.mocked(getInstallation).mockResolvedValueOnce({ version: '1.0.0' } as any);
+      jest
+        .mocked(assertBreakingChangesAcknowledged)
+        .mockRejectedValueOnce(new PackageBreakingChangesNotAcknowledgedError('breaking', []));
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package-2.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        checkBreakingChanges: true,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageBreakingChangesNotAcknowledgedError);
+      expect(response.installSource).toEqual('bundled');
+      expect(assertBreakingChangesAcknowledged).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pkgName: 'test_package',
+          fromVersion: '1.0.0',
+          toVersion: '2.0.0',
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+    });
+
     it('should install from bundled package if one exists', async () => {
       (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
@@ -691,6 +726,95 @@ describe('install', () => {
       });
 
       expect(response.status).toEqual('already_installed');
+    });
+
+    describe('breaking changes', () => {
+      const mockInstalledVersion = (version: string) =>
+        jest.mocked(getInstallationObject).mockResolvedValueOnce({
+          attributes: {
+            version,
+            install_status: 'installed',
+            installed_es: [],
+            installed_kibana: [],
+          },
+        } as any);
+
+      beforeEach(() => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest.mocked(assertBreakingChangesAcknowledged).mockReset();
+      });
+
+      it('should reject an update with unacknowledged breaking changes without installing', async () => {
+        mockInstalledVersion('1.2.0');
+        jest
+          .mocked(assertBreakingChangesAcknowledged)
+          .mockRejectedValueOnce(
+            new PackageBreakingChangesNotAcknowledgedError('breaking changes', [])
+          );
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          force: true,
+          checkBreakingChanges: true,
+        });
+
+        expect(response.error).toBeInstanceOf(PackageBreakingChangesNotAcknowledgedError);
+        expect(assertBreakingChangesAcknowledged).toHaveBeenCalledWith(
+          expect.objectContaining({ pkgName: 'apache', fromVersion: '1.2.0', toVersion: '1.3.0' })
+        );
+        expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      });
+
+      it('should not check breaking changes when the upgrade is acknowledged', async () => {
+        mockInstalledVersion('1.2.0');
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          checkBreakingChanges: true,
+          acknowledgeBreakingChanges: true,
+        });
+
+        expect(response.error).toBeUndefined();
+        expect(assertBreakingChangesAcknowledged).not.toHaveBeenCalled();
+        expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalled();
+      });
+
+      it('should not check breaking changes when checkBreakingChanges is not set', async () => {
+        mockInstalledVersion('1.2.0');
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.error).toBeUndefined();
+        expect(assertBreakingChangesAcknowledged).not.toHaveBeenCalled();
+      });
+
+      it('should not check breaking changes on a new install', async () => {
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'apache-1.3.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          checkBreakingChanges: true,
+        });
+
+        expect(response.error).toBeUndefined();
+        expect(assertBreakingChangesAcknowledged).not.toHaveBeenCalled();
+      });
     });
 
     describe('agentless', () => {

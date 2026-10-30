@@ -73,7 +73,7 @@ import { appContextService } from '../../app_context';
 import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_install_content_packages_task';
 import * as Registry from '../registry';
 import { setPackageInfo, deleteVerificationResult, unpackBufferToAssetsMap } from '../archive';
-import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+import { createArchiveIterator, createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
@@ -102,6 +102,7 @@ import { generateDatastreamEntries } from './custom_integrations/assets/dataset/
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
+import { assertBreakingChangesAcknowledged } from './breaking_changes';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
 import {
@@ -420,6 +421,9 @@ interface InstallRegistryPackageParams {
   automaticInstall?: boolean;
   installedAsDependencyOf?: { name: string; version: string };
   skipDependencyCheck?: boolean;
+  /** Reject upgrades whose version range includes breaking changes, unless acknowledged. */
+  checkBreakingChanges?: boolean;
+  acknowledgeBreakingChanges?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -508,6 +512,8 @@ async function installPackageFromRegistry({
   automaticInstall = false,
   installedAsDependencyOf,
   skipDependencyCheck = false,
+  checkBreakingChanges = false,
+  acknowledgeBreakingChanges = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -599,6 +605,15 @@ async function installPackageFromRegistry({
     }
 
     assertFipsCompatibleOrThrow(packageInfo, force);
+
+    if (checkBreakingChanges && !acknowledgeBreakingChanges && installType === 'update') {
+      await assertBreakingChangesAcknowledged({
+        pkgName,
+        fromVersion: installedPkg!.attributes.version,
+        toVersion: pkgVersion,
+        archiveIterator,
+      });
+    }
 
     const result = await installPackageWithStateMachine({
       pkgName,
@@ -1098,6 +1113,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       automaticInstall,
       installedAsDependencyOf,
       skipDependencyCheck,
+      checkBreakingChanges,
+      acknowledgeBreakingChanges,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1108,6 +1125,30 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       );
 
       const archiveBuffer = await matchingBundledPackage.getBuffer();
+
+      if (checkBreakingChanges && !acknowledgeBreakingChanges) {
+        try {
+          const installation = await getInstallation({
+            savedObjectsClient,
+            pkgName: matchingBundledPackage.name,
+          });
+          if (installation) {
+            await assertBreakingChangesAcknowledged({
+              pkgName: matchingBundledPackage.name,
+              fromVersion: installation.version,
+              toVersion: matchingBundledPackage.version,
+              archiveIterator: createArchiveIterator(archiveBuffer, 'application/zip'),
+            });
+          }
+        } catch (error) {
+          return {
+            error,
+            installType: 'update',
+            installSource: 'bundled',
+            pkgName: matchingBundledPackage.name,
+          };
+        }
+      }
 
       const response = await installPackageByUpload({
         savedObjectsClient,
@@ -1146,6 +1187,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       automaticInstall,
       installedAsDependencyOf,
       skipDependencyCheck,
+      checkBreakingChanges,
+      acknowledgeBreakingChanges,
     });
 
     return response;

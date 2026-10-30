@@ -211,6 +211,7 @@ export interface BulkUpgradePackagesRequest {
   upgrade_package_policies?: boolean;
   force?: boolean;
   prerelease?: boolean;
+  acknowledge_breaking_changes?: boolean;
 }
 
 export interface BulkUninstallPackagesRequest {

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semverGt from 'semver/functions/gt';
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
+import semverValid from 'semver/functions/valid';
 
 export type YamlParseFn = (value: string) => unknown;
 
@@ -56,7 +58,7 @@ export const parseYamlChangelog = (
 
 export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => {
   return changelog.reduce<BreakingChangesLog>((acc, entry) => {
-    const breakingChanges = entry.changes.filter(
+    const breakingChanges = (entry.changes ?? []).filter(
       (change): change is Change<ChangeType.BreakingChange> => {
         return change.type === ChangeType.BreakingChange;
       }
@@ -68,4 +70,27 @@ export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => 
 
     return acc;
   }, []);
+};
+
+/**
+ * Returns the breaking changes of the versions greater than `fromVersion` and lower than or equal
+ * to `toVersion`, i.e. the breaking changes applied by an upgrade from `fromVersion` to `toVersion`.
+ * Entries with an invalid version are ignored.
+ */
+export const getBreakingChangesInRange = (
+  changelog: Changelog,
+  fromVersion: string,
+  toVersion: string
+): BreakingChangesLog => {
+  if (!Array.isArray(changelog)) return [];
+
+  return getBreakingChanges(
+    changelog.filter(
+      (entry) =>
+        typeof entry?.version === 'string' &&
+        semverValid(entry.version) !== null &&
+        semverGt(entry.version, fromVersion) &&
+        semverLte(entry.version, toVersion)
+    )
+  );
 };

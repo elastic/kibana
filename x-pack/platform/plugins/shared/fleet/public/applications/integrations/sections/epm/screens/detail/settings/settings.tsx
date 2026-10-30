@@ -558,6 +558,9 @@ export const SettingsPage: React.FC<Props> = memo(
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
                           isDisabled={Boolean(breakingChanges) && !isBreakingChangesUnderstood}
+                          acknowledgeBreakingChanges={
+                            Boolean(breakingChanges) && isBreakingChangesUnderstood
+                          }
                         />
                       </p>
                     </>
