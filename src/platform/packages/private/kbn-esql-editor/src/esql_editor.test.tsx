@@ -159,6 +159,26 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
   });
 
+  it('contains the footer inside the outline shell when hasOutline is set', () => {
+    const { getByTestId, queryByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hasOutline: true })
+    );
+
+    expect(queryByTestId('ESQLEditor-outline')).toBeInTheDocument();
+    expect(getByTestId('ESQLEditor-outline')).toContainElement(getByTestId('ESQLEditor-footer'));
+    expect(getByTestId('ESQLEditor-outline')).toContainElement(getByTestId('ESQLEditor'));
+  });
+
+  it('keeps the search button outside the outline shell', () => {
+    const { getByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hasOutline: true, editorIsInline: true })
+    );
+
+    expect(getByTestId('ESQLEditor-outline')).not.toContainElement(
+      getByTestId('ESQLEditor-run-query-button')
+    );
+  });
+
   it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
     const newProps = {
       ...props,
