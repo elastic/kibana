@@ -23,6 +23,44 @@ const createContext = () =>
     savedObjectsClient: { resolve: resolveMock },
   } as unknown as AttachmentResolveContext);
 
+describe('createVisualizationAttachmentType format()', () => {
+  const represent = async (data: Record<string, unknown>): Promise<string> => {
+    const definition = createVisualizationAttachmentType();
+    const formatted = await definition.format(
+      { id: 'att-1', type: 'visualization', data } as never,
+      { request: {}, spaceId: 'default' } as never
+    );
+    const representation = await formatted.getRepresentation!();
+    return (representation as { type: 'text'; value: string }).value;
+  };
+
+  it('lists the additional queries of a custom content panel with the name its template reads', async () => {
+    const value = await represent({
+      renderer: 'custom_content',
+      query: 'totals above a host list',
+      visualization: { template: '<div/>' },
+      esql: 'FROM logs | STATS total = COUNT(*)',
+      additional_esql: ['FROM logs | STATS hits = COUNT(*) BY host', 'FROM logs | LIMIT 5'],
+    });
+
+    expect(value).toContain('ES|QL: FROM logs | STATS total = COUNT(*)');
+    expect(value).toContain(
+      'ES|QL (read by the template as queries[1]): FROM logs | STATS hits = COUNT(*) BY host'
+    );
+    expect(value).toContain('ES|QL (read by the template as queries[2]): FROM logs | LIMIT 5');
+  });
+
+  it('adds nothing for a panel with a single query', async () => {
+    const value = await represent({
+      renderer: 'custom_content',
+      query: 'a board',
+      visualization: { template: '<div/>' },
+      esql: 'FROM logs',
+    });
+    expect(value).not.toContain('queries[');
+  });
+});
+
 describe('createVisualizationAttachmentType resolve()', () => {
   beforeEach(() => {
     jest.clearAllMocks();

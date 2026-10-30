@@ -139,6 +139,161 @@ describe('createCustomContentPanelResolver', () => {
     });
   });
 
+  describe('datasets', () => {
+    const queryFor = (description: string) => `FROM logs-* | /* ${description} */ LIMIT 1`;
+
+    beforeEach(() => {
+      generateEsql.mockImplementation(async ({ nlQuery }: { nlQuery: string }) =>
+        queryFor(nlQuery)
+      );
+    });
+
+    it('creates a panel with a query per dataset, the first as the main one', async () => {
+      const result = await resolve(
+        addRequest({
+          nlQuery: 'Totals above a host list',
+          hasData: true,
+          datasets: [{ description: 'totals', index: 'logs-*' }, { description: 'top hosts' }],
+        })
+      );
+
+      expect(generateEsql).toHaveBeenCalledTimes(2);
+      expect(generateEsql).toHaveBeenCalledWith({
+        nlQuery: 'totals',
+        index: 'logs-*',
+        existingQueries: [],
+        isDataset: true,
+      });
+      expect(generateEsql).toHaveBeenCalledWith({
+        nlQuery: 'top hosts',
+        index: undefined,
+        existingQueries: [],
+        isDataset: true,
+      });
+      expect(resolveTemplate).toHaveBeenCalledWith({
+        prompt: 'Totals above a host list',
+        esqlQuery: queryFor('totals'),
+        existingTemplate: undefined,
+        hasExistingQuery: false,
+        additionalEsqlQueries: [queryFor('top hosts')],
+      });
+      expect(result).toMatchObject({
+        panelContent: {
+          config: {
+            esql_query: [queryFor('totals'), queryFor('top hosts')],
+            template: '<div>resolved</div>',
+          },
+        },
+      });
+    });
+
+    it('uses a supplied query as it is', async () => {
+      await resolve(
+        addRequest({
+          hasData: true,
+          datasets: [{ esql: 'FROM mine' }, { description: 'top hosts' }],
+        })
+      );
+
+      expect(generateEsql).toHaveBeenCalledTimes(1);
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: 'FROM mine' })
+      );
+    });
+
+    it('fails the panel, without a template, when one query cannot be generated', async () => {
+      generateEsql
+        .mockResolvedValueOnce(queryFor('totals'))
+        .mockRejectedValueOnce(new Error('Could not generate an ES|QL query for this panel'));
+
+      const result = await resolve(
+        addRequest({
+          hasData: true,
+          datasets: [{ description: 'totals' }, { description: 'top hosts' }],
+        })
+      );
+
+      expect(resolveTemplate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        type: 'failure',
+        error: 'Could not generate an ES|QL query for this panel',
+      });
+    });
+
+    describe('on an edit', () => {
+      const existing = customContentPanel({
+        template: '<div>{{ queries[1].rows.size }}</div>',
+        esql_query: ['FROM main', 'FROM second'],
+      });
+
+      it('regenerates one position seeded with its stored query, and keeps the template context', async () => {
+        const result = await resolve(
+          editRequest(existing, {
+            nlQuery: 'Show ten hosts',
+            datasets: [{}, { description: 'top 10 hosts' }],
+          })
+        );
+
+        expect(generateEsql).toHaveBeenCalledTimes(1);
+        expect(generateEsql).toHaveBeenCalledWith({
+          nlQuery: 'top 10 hosts',
+          index: undefined,
+          existingQueries: ['FROM second'],
+          isDataset: true,
+        });
+        // The main query is unchanged, so it is not sampled again; the other one is always sampled.
+        expect(resolveTemplate).toHaveBeenCalledWith({
+          prompt: 'Show ten hosts',
+          esqlQuery: undefined,
+          existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+          hasExistingQuery: true,
+          additionalEsqlQueries: [queryFor('top 10 hosts')],
+        });
+        expect(result).toMatchObject({
+          panelContent: { config: { esql_query: ['FROM main', queryFor('top 10 hosts')] } },
+        });
+      });
+
+      it('adds a query after the stored ones', async () => {
+        const result = await resolve(
+          editRequest(existing, {
+            nlQuery: 'Add a third section',
+            datasets: [{}, {}, { description: 'errors by host' }],
+          })
+        );
+
+        expect(result).toMatchObject({
+          panelContent: {
+            config: { esql_query: ['FROM main', 'FROM second', queryFor('errors by host')] },
+          },
+        });
+      });
+
+      it('marks the main query as changing when the first dataset replaces it', async () => {
+        await resolve(
+          editRequest(existing, { nlQuery: 'Use mine', datasets: [{ esql: 'FROM mine' }] })
+        );
+
+        expect(resolveTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlQuery: 'FROM mine',
+            hasExistingQuery: false,
+            additionalEsqlQueries: ['FROM second'],
+          })
+        );
+      });
+
+      it('keeps every query when the datasets are empty entries', async () => {
+        const result = await resolve(editRequest(existing, { nlQuery: 'Restyle', datasets: [{}] }));
+
+        expect(generateEsql).not.toHaveBeenCalled();
+        expect(result).toMatchObject({
+          panelContent: { config: { esql_query: ['FROM main', 'FROM second'] } },
+        });
+      });
+    });
+  });
+
   describe('edits', () => {
     it('refines the existing template and keeps the existing query without re-sampling it', async () => {
       const result = await resolve(
@@ -153,9 +308,59 @@ describe('createCustomContentPanelResolver', () => {
         esqlQuery: undefined,
         existingTemplate: '<div>old</div>',
         hasExistingQuery: true,
+        additionalEsqlQueries: [],
       });
       expect(result).toMatchObject({
         panelContent: { config: { esql_query: ['FROM logs-*'], template: '<div>resolved</div>' } },
+      });
+    });
+
+    it('gives the template resolver the additional queries of a multi-query panel', async () => {
+      await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>{{ queries[1].rows.size }}</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Restyle' }
+        )
+      );
+
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalEsqlQueries: ['FROM metrics-*'] })
+      );
+    });
+
+    it('drops the additional queries, and does not sample them, when the query is removed', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Make it static', hasData: false }
+        )
+      );
+
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalEsqlQueries: [] })
+      );
+      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
+    });
+
+    it('keeps the additional queries of a multi-query panel on an edit', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Updated' }
+        )
+      );
+
+      expect(result).toMatchObject({
+        panelContent: { config: { esql_query: ['FROM logs-*', 'FROM metrics-*'] } },
       });
     });
 

@@ -104,6 +104,32 @@ describe('createAttachmentPanelResolver', () => {
     });
   });
 
+  it('puts the additional queries after the main one when a custom content attachment has several', () => {
+    const resolve = createAttachmentPanelResolver({
+      attachments: makeAttachments(
+        makeVisualizationAttachment({
+          renderer: 'custom_content',
+          query: 'totals above a host list',
+          visualization: { template: '<div>board</div>' },
+          esql: 'FROM logs | STATS total = COUNT(*)',
+          additional_esql: ['FROM logs | STATS hits = COUNT(*) BY host'],
+        })
+      ),
+    });
+
+    expect(resolve('att-1')).toMatchObject({
+      type: 'success',
+      panelContent: {
+        config: {
+          esql_query: [
+            'FROM logs | STATS total = COUNT(*)',
+            'FROM logs | STATS hits = COUNT(*) BY host',
+          ],
+        },
+      },
+    });
+  });
+
   it('carries no query for a static custom content attachment', () => {
     const resolve = createAttachmentPanelResolver({
       attachments: makeAttachments(

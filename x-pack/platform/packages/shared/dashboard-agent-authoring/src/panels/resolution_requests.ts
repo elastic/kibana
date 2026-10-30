@@ -52,13 +52,58 @@ const getPanelEditError = (
 
 type ResolutionRequestResult = { request: PanelResolutionRequest } | { error: string };
 
+/** The single-query fields `datasets` stands in for, so sending both is ambiguous. */
+const getReplacedByDatasets = ({
+  esql,
+  hasData,
+  regenerateESQL,
+  index,
+}: {
+  esql?: string | null;
+  hasData?: boolean;
+  regenerateESQL?: boolean;
+  index?: string;
+}): string[] => [
+  ...(esql !== undefined ? ['`esql`'] : []),
+  ...(hasData !== undefined ? ['`hasData`'] : []),
+  ...(regenerateESQL ? ['`regenerateESQL`'] : []),
+  ...(index !== undefined ? ['`index`'] : []),
+];
+
+const datasetsReplaceError = (id: string, replaced: string[]): string =>
+  `Panel "${id}" uses \`datasets\`, which replaces ${replaced.join(
+    ', '
+  )}: put each query's \`esql\` and \`index\` on its dataset and drop the others.`;
+
 /** Maps request content for a new panel onto the resolution request for its renderer. */
 const toCreationResolutionRequest = (
   content: PanelRequestContent,
   id: string
 ): ResolutionRequestResult => {
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
+    const { renderer, query, esql, hasData, regenerateESQL, index, datasets } = content;
+    if (datasets) {
+      const replaced = getReplacedByDatasets(content);
+      if (replaced.length > 0) {
+        return { error: datasetsReplaceError(id, replaced) };
+      }
+      if (query === undefined) {
+        return {
+          error: `Panel "${id}" is new. Provide \`query\` to say how it looks and uses each dataset.`,
+        };
+      }
+      const empty = datasets.findIndex(
+        (dataset) => !dataset.description?.trim() && !dataset.esql?.trim()
+      );
+      if (empty !== -1) {
+        return {
+          error: `Dataset ${
+            empty + 1
+          } of the new panel "${id}" needs a \`description\` or an \`esql\` query.`,
+        };
+      }
+      return { request: { renderer, nlQuery: query, hasData: true, datasets } };
+    }
     if (query === undefined || hasData === undefined) {
       const missing = [
         ...(query === undefined ? ['`query`'] : []),
@@ -100,7 +145,24 @@ const toEditResolutionRequest = (
   const base = { existingPanel };
 
   if (content.renderer === 'custom_content') {
-    const { renderer, query, esql, hasData, regenerateESQL, index } = content;
+    const { renderer, query, esql, hasData, regenerateESQL, index, datasets } = content;
+    if (datasets) {
+      const replaced = getReplacedByDatasets(content);
+      if (replaced.length > 0) {
+        return { error: datasetsReplaceError(existingPanel.id, replaced) };
+      }
+      const existingCount =
+        (existingPanel.config as { esql_query?: unknown[] }).esql_query?.length ?? 0;
+      const changesWhatIsShown = datasets.some(
+        (dataset, position) => Boolean(dataset.description?.trim()) || position >= existingCount
+      );
+      if (query === undefined && changesWhatIsShown) {
+        return {
+          error: `Panel "${existingPanel.id}" edit needs \`query\` when a dataset has a \`description\` or adds a query: say how the panel should now use the data.`,
+        };
+      }
+      return { request: { ...base, renderer, nlQuery: query, datasets } };
+    }
     if (regenerateESQL && hasData === false) {
       return {
         error: `Panel "${existingPanel.id}" cannot combine \`regenerateESQL\` with \`hasData\`: false, which removes the query.`,

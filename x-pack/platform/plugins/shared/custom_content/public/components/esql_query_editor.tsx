@@ -7,7 +7,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,7 +19,6 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -31,7 +29,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 import { getServices } from '../services';
 
-interface EsqlPreviewSectionProps {
+export interface EsqlQueryEditorProps {
   esqlQuery: string;
   onEsqlQueryChange: (q: string) => void;
   isDataLoading: boolean;
@@ -90,7 +88,8 @@ const detectTimeField = (
   };
 };
 
-export const EsqlPreviewSection = ({
+/** One ES|QL query with its editor, a sample of the data it returns and the time filter hint. */
+export const EsqlQueryEditor = ({
   esqlQuery,
   onEsqlQueryChange,
   isDataLoading,
@@ -98,7 +97,7 @@ export const EsqlPreviewSection = ({
   esqlDataError,
   onFetchData,
   esqlVariables,
-}: EsqlPreviewSectionProps) => {
+}: EsqlQueryEditorProps) => {
   const previewRows = esqlData?.values?.slice(0, MAX_PREVIEW_ROWS) ?? [];
   const columns = esqlData?.columns ?? [];
 
@@ -107,7 +106,6 @@ export const EsqlPreviewSection = ({
     field: undefined,
   });
   const initialQueryRef = useRef(esqlQuery);
-  const accordionId = useGeneratedHtmlId({ prefix: 'customContentEsql' });
 
   useEffect(() => {
     const query = initialQueryRef.current;
@@ -120,34 +118,7 @@ export const EsqlPreviewSection = ({
   };
 
   return (
-    <EuiAccordion
-      id={accordionId}
-      data-test-subj="customContentEsqlSection"
-      buttonContent={
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="database" size="s" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.customContent.editFlyout.esqlSection.title', {
-                  defaultMessage: 'Data source (ES|QL)',
-                })}
-              </strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      extraAction={
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.customContent.editFlyout.esqlSection.optional', {
-            defaultMessage: 'Optional',
-          })}
-        </EuiText>
-      }
-      paddingSize="none"
-    >
+    <>
       <EuiSpacer size="s" />
       <ESQLLangEditor
         query={{ esql: esqlQuery }}
@@ -235,6 +206,6 @@ export const EsqlPreviewSection = ({
           </EuiTable>
         </>
       )}
-    </EuiAccordion>
+    </>
   );
 };

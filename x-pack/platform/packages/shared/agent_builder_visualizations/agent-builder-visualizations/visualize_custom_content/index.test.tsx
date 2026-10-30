@@ -12,8 +12,12 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { VisualizeCustomContent } from '.';
 import type { VisualizationServices } from '../services';
 
+let capturedComponentProps: Record<string, unknown> | undefined;
 jest.mock('@kbn/custom-content-renderer', () => ({
-  CustomContentComponent: () => <span data-test-subj="custom-content" />,
+  CustomContentComponent: (props: Record<string, unknown>) => {
+    capturedComponentProps = props;
+    return <span data-test-subj="custom-content" />;
+  },
 }));
 
 jest.mock('../shared/use_vis_preview_unified_search', () => ({
@@ -64,6 +68,7 @@ const renderComponent = (
 beforeEach(() => {
   jest.clearAllMocks();
   capturedOnSave = undefined;
+  capturedComponentProps = undefined;
 });
 
 describe('VisualizeCustomContent', () => {
@@ -86,6 +91,36 @@ describe('VisualizeCustomContent', () => {
               title: 'Board',
               description: '',
             },
+          }),
+        ],
+      })
+    );
+  });
+
+  it('renders every query, the first as the main one', () => {
+    renderComponent({ additionalEsql: ['FROM metrics', 'FROM traces'] });
+
+    expect(capturedComponentProps).toMatchObject({
+      esqlQuery: 'FROM logs',
+      additionalEsqlQueries: ['FROM metrics', 'FROM traces'],
+    });
+  });
+
+  it('saves every query to the dashboard panel, the main one first', async () => {
+    const buttons = renderComponent({ additionalEsql: ['FROM metrics'] });
+    buttons.find((button) => button.icon === 'save')!.handler();
+    await screen.findByTestId('save-modal');
+
+    capturedOnSave!({ dashboardId: 'dash-1', newTitle: 'Board', newDescription: '' });
+
+    expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+      'dashboards',
+      expect.objectContaining({
+        state: [
+          expect.objectContaining({
+            serializedState: expect.objectContaining({
+              esql_query: ['FROM logs', 'FROM metrics'],
+            }),
           }),
         ],
       })

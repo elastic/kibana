@@ -19,11 +19,12 @@ const NO_QUERY_HINT =
 
 const createCustomContentEsqlGenerator =
   ({ logger, modelProvider, events, esClient }: VisPanelResolverDeps): CustomContentEsqlGenerator =>
-  ({ nlQuery, index, existingQueries }) =>
+  ({ nlQuery, index, existingQueries, isDataset }) =>
     generateCustomContentEsql({
       nlQuery,
       index,
       existingQueries,
+      isDataset,
       modelProvider,
       events,
       logger,

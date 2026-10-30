@@ -63,7 +63,10 @@ const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
   chartType,
 });
 const vegaTarget = { type: 'vega' as const };
-const customContentTarget = (rest: { esql?: string | null; has_data?: boolean } = {}) => ({
+type TestDatasets = Array<{ description?: string; esql?: string; index?: string }>;
+const customContentTarget = (
+  rest: { esql?: string | null; has_data?: boolean; datasets?: TestDatasets } = {}
+) => ({
   type: 'custom_content' as const,
   has_data: true,
   ...rest,
@@ -75,6 +78,7 @@ const attachmentTarget = (
     esql?: string | null;
     has_data?: boolean | null;
     regenerate_esql?: boolean | null;
+    datasets?: TestDatasets;
   } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
 
@@ -193,6 +197,40 @@ describe('createVisualizationTool schema', () => {
     if (lens.success) {
       expect(lens.data.target).not.toHaveProperty('has_data');
     }
+  });
+
+  describe('datasets', () => {
+    const parseTarget = (target: Record<string, unknown>) =>
+      schema.safeParse({ query: 'totals above a host list', target });
+
+    it('accepts datasets on custom_content and attachment targets', () => {
+      const datasets = [{ description: 'totals' }, { esql: 'FROM logs | LIMIT 5' }];
+      expect(parseTarget({ type: 'custom_content', has_data: true, datasets }).success).toBe(true);
+      expect(parseTarget({ type: 'attachment', attachment_id: 'att-1', datasets }).success).toBe(
+        true
+      );
+    });
+
+    it('strips datasets from Lens and Vega targets, which have one query', () => {
+      const parsed = schema.parse({
+        query: 'errors over time',
+        target: { type: 'lens', chartType: SupportedChartType.XY, datasets: [{ esql: 'FROM a' }] },
+      });
+      expect(parsed.target).not.toHaveProperty('datasets');
+    });
+
+    it('rejects an empty list and more datasets than a panel can hold', () => {
+      expect(parseTarget({ type: 'custom_content', has_data: true, datasets: [] }).success).toBe(
+        false
+      );
+      expect(
+        parseTarget({
+          type: 'custom_content',
+          has_data: true,
+          datasets: Array.from({ length: 6 }, () => ({ esql: 'FROM a' })),
+        }).success
+      ).toBe(false);
+    });
   });
 
   it('accepts regenerate_esql only on attachment targets', () => {
@@ -904,6 +942,7 @@ describe('createVisualizationTool handler', () => {
         esqlQuery: undefined,
         existingTemplate: '<div>old</div>',
         hasExistingQuery: true,
+        additionalEsqlQueries: [],
       });
 
       const [{ data }] = result.results;
@@ -1037,6 +1076,7 @@ describe('createVisualizationTool handler', () => {
         esqlQuery: undefined,
         existingTemplate: '<div>old</div>',
         hasExistingQuery: false,
+        additionalEsqlQueries: [],
       });
       expect(attachments.update).toHaveBeenCalledWith(
         'att-1',
@@ -1110,6 +1150,7 @@ describe('createVisualizationTool handler', () => {
         esqlQuery: undefined,
         existingTemplate: '<div>hi</div>',
         hasExistingQuery: false,
+        additionalEsqlQueries: [],
       });
 
       const [{ type, data }] = result.results;
@@ -1149,6 +1190,266 @@ describe('createVisualizationTool handler', () => {
 
       expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
       expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    describe('datasets', () => {
+      const storedAttachment = (data: Record<string, unknown>) => {
+        const attachments = createAttachments();
+        attachments.getAttachmentRecord.mockReturnValue({
+          id: 'att-1',
+          current_version: 1,
+          versions: [
+            {
+              version: 1,
+              data: {
+                renderer: 'custom_content',
+                query: 'totals above a host list',
+                visualization: { template: '<div>{{ queries[1].rows.size }}</div>' },
+                ...data,
+              },
+            },
+          ],
+        });
+        return attachments;
+      };
+
+      const persisted = (attachments: MockAttachments) =>
+        (attachments.update.mock.calls[0]?.[1] ?? attachments.add.mock.calls[0]?.[0]).data;
+
+      beforeEach(() => {
+        mockGenerateEsql.mockImplementation(async ({ nlQuery }: { nlQuery: string }) => {
+          return `FROM logs | /* ${nlQuery} */ LIMIT 1`;
+        });
+      });
+
+      it('creates a panel with a query per dataset, the first as the main one', async () => {
+        const { result, attachments } = await runHandler({
+          query: 'totals above a host list',
+          index: 'logs-*',
+          target: customContentTarget({
+            datasets: [{ description: 'totals' }, { description: 'top hosts', index: 'hosts-*' }],
+          }),
+        });
+
+        expect(mockGenerateEsql).toHaveBeenCalledTimes(2);
+        expect(mockGenerateEsql).toHaveBeenCalledWith(
+          expect.objectContaining({
+            nlQuery: 'totals',
+            index: 'logs-*',
+            existingQueries: [],
+            isDataset: true,
+          })
+        );
+        // A dataset's own index wins over the call's.
+        expect(mockGenerateEsql).toHaveBeenCalledWith(
+          expect.objectContaining({ nlQuery: 'top hosts', index: 'hosts-*', isDataset: true })
+        );
+        expect(mockResolveTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            prompt: 'totals above a host list',
+            esqlQuery: 'FROM logs | /* totals */ LIMIT 1',
+            hasExistingQuery: false,
+            additionalEsqlQueries: ['FROM logs | /* top hosts */ LIMIT 1'],
+          })
+        );
+        expect(persisted(attachments)).toMatchObject({
+          renderer: 'custom_content',
+          esql: 'FROM logs | /* totals */ LIMIT 1',
+          additional_esql: ['FROM logs | /* top hosts */ LIMIT 1'],
+        });
+        expect(result.results[0].data.attachment_id).toBe('att-new');
+      });
+
+      it('picks the default time range from every query', async () => {
+        await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({ datasets: [{ description: 'a' }, { description: 'b' }] }),
+        });
+
+        expect(mockSelectDefaultTimeRange).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlQueries: ['FROM logs | /* a */ LIMIT 1', 'FROM logs | /* b */ LIMIT 1'],
+          })
+        );
+      });
+
+      it('uses a supplied query as it is', async () => {
+        const { attachments } = await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({
+            datasets: [{ esql: 'FROM mine' }, { description: 'top hosts' }],
+          }),
+        });
+
+        expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+        expect(persisted(attachments).esql).toBe('FROM mine');
+      });
+
+      it('is not a data-free panel: has_data: false with datasets is rejected', async () => {
+        const { result } = await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({ has_data: false, datasets: [{ description: 'a' }] }),
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(result.results[0].data.message).toContain('"datasets" replaces');
+        expect(mockGenerateEsql).not.toHaveBeenCalled();
+      });
+
+      it('rejects datasets combined with esql', async () => {
+        const { result } = await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({ esql: 'FROM a', datasets: [{ description: 'a' }] }),
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(result.results[0].data.message).toContain('"datasets" replaces');
+      });
+
+      it('fails the call, storing nothing, when one query cannot be generated', async () => {
+        mockGenerateEsql
+          .mockResolvedValueOnce('FROM logs | LIMIT 1')
+          .mockRejectedValueOnce(new Error('Could not generate an ES|QL query for this panel'));
+
+        const { result, attachments } = await runHandler({
+          query: 'totals above a host list',
+          target: customContentTarget({ datasets: [{ description: 'a' }, { description: 'b' }] }),
+        });
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(attachments.add).not.toHaveBeenCalled();
+        expect(mockResolveTemplate).not.toHaveBeenCalled();
+      });
+
+      it('adds a second query to a single-query panel, keeping the first without sampling it', async () => {
+        const attachments = storedAttachment({ esql: 'FROM logs | STATS total = COUNT(*)' });
+
+        await runHandler(
+          {
+            query: 'add the busiest hosts under the total',
+            target: attachmentTarget('att-1', {
+              datasets: [{}, { description: 'the five busiest hosts' }],
+            }),
+          },
+          { attachments }
+        );
+
+        expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+        expect(mockGenerateEsql).toHaveBeenCalledWith(
+          expect.objectContaining({ existingQueries: [], isDataset: true })
+        );
+        expect(mockResolveTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlQuery: undefined,
+            hasExistingQuery: true,
+            additionalEsqlQueries: ['FROM logs | /* the five busiest hosts */ LIMIT 1'],
+          })
+        );
+        expect(persisted(attachments)).toMatchObject({
+          esql: 'FROM logs | STATS total = COUNT(*)',
+          additional_esql: ['FROM logs | /* the five busiest hosts */ LIMIT 1'],
+        });
+      });
+
+      it('regenerates one position seeded with its stored query and keeps the others', async () => {
+        const attachments = storedAttachment({
+          esql: 'FROM main',
+          additional_esql: ['FROM second', 'FROM third'],
+        });
+
+        await runHandler(
+          {
+            query: 'show ten hosts',
+            target: attachmentTarget('att-1', { datasets: [{}, { description: 'top 10' }] }),
+          },
+          { attachments }
+        );
+
+        expect(mockGenerateEsql).toHaveBeenCalledWith(
+          expect.objectContaining({ existingQueries: ['FROM second'] })
+        );
+        expect(persisted(attachments)).toMatchObject({
+          esql: 'FROM main',
+          additional_esql: ['FROM logs | /* top 10 */ LIMIT 1', 'FROM third'],
+        });
+      });
+
+      it('keeps the additional queries on an edit that sends no datasets', async () => {
+        const attachments = storedAttachment({
+          esql: 'FROM main',
+          additional_esql: ['FROM second'],
+        });
+
+        await runHandler(
+          { query: 'use a darker background', target: attachmentTarget('att-1') },
+          { attachments }
+        );
+
+        expect(mockGenerateEsql).not.toHaveBeenCalled();
+        expect(mockResolveTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            esqlQuery: undefined,
+            hasExistingQuery: true,
+            additionalEsqlQueries: ['FROM second'],
+          })
+        );
+        expect(persisted(attachments)).toMatchObject({ additional_esql: ['FROM second'] });
+      });
+
+      it('drops the additional queries with the main one when has_data is false', async () => {
+        const attachments = storedAttachment({
+          esql: 'FROM main',
+          additional_esql: ['FROM second'],
+        });
+
+        await runHandler(
+          {
+            query: 'make it a plain banner',
+            target: attachmentTarget('att-1', { has_data: false }),
+          },
+          { attachments }
+        );
+
+        expect(mockResolveTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({ additionalEsqlQueries: [] })
+        );
+        expect(persisted(attachments)).not.toHaveProperty('esql');
+        expect(persisted(attachments)).not.toHaveProperty('additional_esql');
+      });
+
+      it('does not store the field for a single-query panel', async () => {
+        const { attachments } = await runHandler({
+          query: 'a status board per host',
+          target: customContentTarget(),
+        });
+        expect(persisted(attachments)).not.toHaveProperty('additional_esql');
+      });
+
+      it('rejects datasets for a Lens visualization, which has one query', async () => {
+        const attachments = createAttachments();
+        attachments.getAttachmentRecord.mockReturnValue({
+          id: 'att-1',
+          current_version: 1,
+          versions: [
+            {
+              version: 1,
+              data: { renderer: 'lens', query: 'q', visualization: {}, esql: 'FROM a' },
+            },
+          ],
+        });
+
+        const { result } = await runHandler(
+          {
+            query: 'add hosts',
+            target: attachmentTarget('att-1', { datasets: [{ description: 'hosts' }] }),
+          },
+          { attachments }
+        );
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        expect(result.results[0].data.message).toContain('only applies to custom content');
+        expect(attachments.update).not.toHaveBeenCalled();
+      });
     });
 
     it('reports a template generation failure as an error result', async () => {

@@ -67,6 +67,8 @@ export interface VisualizeCustomContentProps {
   visualization: Record<string, unknown> & { template?: string; height?: number };
   /** ES|QL query backing the template. Absent for static content. */
   esql?: string;
+  /** The queries after `esql`, which the template reads as `queries[1]`, `queries[2]`, ... */
+  additionalEsql?: readonly string[];
   timeRange?: TimeRange;
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
@@ -82,6 +84,7 @@ export const VisualizeCustomContent = ({
   services,
   visualization,
   esql,
+  additionalEsql,
   timeRange,
   registerActionButtons,
 }: VisualizeCustomContentProps) => {
@@ -116,7 +119,7 @@ export const VisualizeCustomContent = ({
       // global time range rather than the preview range from the local date picker.
       const serializedState = {
         template,
-        esql_query: toEsqlQueryState(esql),
+        esql_query: toEsqlQueryState(esql, additionalEsql),
         title: newTitle,
         description: newDescription,
       };
@@ -126,7 +129,7 @@ export const VisualizeCustomContent = ({
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [template, esql, embeddable]
+    [template, esql, additionalEsql, embeddable]
   );
 
   // `registerActionButtons` is optional in the render contract; without it there is no
@@ -179,6 +182,7 @@ export const VisualizeCustomContent = ({
           services={services.customContent}
           embeddableId="agent-builder-custom-content"
           esqlQuery={esql}
+          additionalEsqlQueries={additionalEsql}
           timeRange={effectiveTimeRange}
           generationVersion={0}
           savedTemplate={template}

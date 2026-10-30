@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { getDateRange } from '@kbn/timerange';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -19,7 +19,11 @@ import {
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
-import { resolveCustomContentQuery } from '@kbn/custom-content-common';
+import {
+  customContentDatasetsSchema,
+  resolveCustomContentQueries,
+  resolveCustomContentQuery,
+} from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   ToolResultType,
@@ -98,6 +102,14 @@ const attachmentRegenerateEsqlField = z
     '(optional, custom content only) true: the edit changes what the panel shows, so the stored query is regenerated from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the stored query. A supplied esql wins. Ignored for Lens and Vega.'
   );
 
+const datasetsField = lazySchema(() =>
+  customContentDatasetsSchema
+    .optional()
+    .describe(
+      '(optional, custom content only) For a panel that needs several queries, such as headline numbers plus a ranked list: the panel\'s queries by position, instead of "esql", "regenerate_esql" and a "has_data": false. Pass "has_data": true with it. Each entry describes what ONE query returns, in words (not the layout, which stays in "query"), or supplies one verbatim; the template reads the first as rows and the n-th as queries[n].rows. On an update an entry with a description regenerates the query at its position, one with esql replaces it, {} keeps it, and an entry past the current queries adds one; queries not listed are kept and none can be removed. Omit it to keep every query.'
+    )
+);
+
 const requiredChartTypeField = z
   .nativeEnum(SupportedChartType)
   .describe(
@@ -127,111 +139,121 @@ const vegaTargetSchema = z.object({
   esql: optionalEsqlField,
 });
 
-const customContentTargetSchema = z.object({
-  type: z
-    .literal('custom_content')
-    .describe(
-      'A new HTML/CSS layout, as a last resort when neither chart grammar fits — KPI scorecards with status badges, health boards, panels mixing narrative text with live values. The markup is generated server-side from "query"; never author it yourself.'
-    ),
-  esql: optionalEsqlField,
-  has_data: customContentHasDataField,
-});
+const customContentTargetSchema = lazySchema(() =>
+  z.object({
+    type: z
+      .literal('custom_content')
+      .describe(
+        'A new HTML/CSS layout, as a last resort when neither chart grammar fits — KPI scorecards with status badges, health boards, panels mixing narrative text with live values. The markup is generated server-side from "query"; never author it yourself.'
+      ),
+    esql: optionalEsqlField,
+    has_data: customContentHasDataField,
+    datasets: datasetsField,
+  })
+);
 
-const attachmentTargetSchema = z.object({
-  type: z
-    .literal('attachment')
-    .describe(
-      'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
-    ),
-  attachment_id: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe('ID of the visualization attachment to update.'),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
-    ),
-  esql: optionalEsqlField,
-  has_data: attachmentHasDataField,
-  regenerate_esql: attachmentRegenerateEsqlField,
-});
+const attachmentTargetSchema = lazySchema(() =>
+  z.object({
+    type: z
+      .literal('attachment')
+      .describe(
+        'Update an existing visualization attachment in place. The attachment must exist; edits keep its renderer.'
+      ),
+    attachment_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('ID of the visualization attachment to update.'),
+    chartType: z
+      .nativeEnum(SupportedChartType)
+      .optional()
+      .describe(
+        '(optional) For Lens: pass a new chart type when the request changes the chart family (e.g. xy to pie); omit it to keep the current one. For Vega it is only a styling hint. Ignored for custom content.'
+      ),
+    esql: optionalEsqlField,
+    has_data: attachmentHasDataField,
+    regenerate_esql: attachmentRegenerateEsqlField,
+    datasets: datasetsField,
+  })
+);
 
-const targetSchema = z
-  .discriminatedUnion('type', [
-    lensTargetSchema,
-    vegaTargetSchema,
-    customContentTargetSchema,
-    attachmentTargetSchema,
-  ])
-  .describe(
-    'What to build, discriminated by "type": a new "lens", "vega" or "custom_content" visualization, or an "attachment" update of an existing one. Each type accepts only the fields that apply to it.'
-  );
-
-const createVisualizationSchema = z.object({
-  query: z.string().max(2048).describe('A natural language query describing the visualization.'),
-  index: z
-    .string()
-    .max(1024)
-    .optional()
+const targetSchema = lazySchema(() =>
+  z
+    .discriminatedUnion('type', [
+      lensTargetSchema,
+      vegaTargetSchema,
+      customContentTargetSchema,
+      attachmentTargetSchema,
+    ])
     .describe(
-      '(strongly recommended) Index, alias, or datastream to target, grounded against the actual cluster. If omitted, the tool auto-discovers an index from the query, which FAILS when the referenced fields do not exist in any index. Prefer discovering the index (and verifying the fields exist) first, then pass it here — especially for multi-panel requests, where every call should reuse the same grounded index.'
-    ),
-  target: targetSchema,
-  time_range: z
-    .preprocess(
-      (value) => {
-        if (!value || typeof value !== 'object' || Array.isArray(value)) {
-          return value;
-        }
-        const from = (value as { from?: unknown }).from;
-        const to = (value as { to?: unknown }).to;
-        const fromBlank = from == null || from === '';
-        const toBlank = to == null || to === '';
-        // Both blank: omit so create can apply the data-aware default.
-        if (fromBlank && toBlank) {
-          return undefined;
-        }
-        // Models often dump one empty endpoint. Fill the missing side rather than fail.
-        return {
-          from: fromBlank ? DEFAULT_TIME_RANGE.from : from,
-          to: toBlank ? DEFAULT_TIME_RANGE.to : to,
-        };
-      },
-      z
-        .object({
-          from: z
-            .string()
-            .max(256)
-            .describe(
-              'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
-            ),
-          to: z
-            .string()
-            .max(256)
-            .describe(
-              'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
-            ),
-        })
-        .check((ctx) => {
-          try {
-            getDateRange(ctx.value);
-          } catch (err) {
-            ctx.issues.push({
-              code: 'custom',
-              message: err instanceof Error ? err.message : 'Invalid time_range',
-              input: ctx.value,
-            });
-          }
-        })
-        .optional()
+      'What to build, discriminated by "type": a new "lens", "vega" or "custom_content" visualization, or an "attachment" update of an existing one. Each type accepts only the fields that apply to it.'
     )
-    .describe(
-      '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
-    ),
-});
+);
+
+const createVisualizationSchema = lazySchema(() =>
+  z.object({
+    query: z.string().max(2048).describe('A natural language query describing the visualization.'),
+    index: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe(
+        '(strongly recommended) Index, alias, or datastream to target, grounded against the actual cluster. If omitted, the tool auto-discovers an index from the query, which FAILS when the referenced fields do not exist in any index. Prefer discovering the index (and verifying the fields exist) first, then pass it here — especially for multi-panel requests, where every call should reuse the same grounded index.'
+      ),
+    target: targetSchema,
+    time_range: z
+      .preprocess(
+        (value) => {
+          if (!value || typeof value !== 'object' || Array.isArray(value)) {
+            return value;
+          }
+          const from = (value as { from?: unknown }).from;
+          const to = (value as { to?: unknown }).to;
+          const fromBlank = from == null || from === '';
+          const toBlank = to == null || to === '';
+          // Both blank: omit so create can apply the data-aware default.
+          if (fromBlank && toBlank) {
+            return undefined;
+          }
+          // Models often dump one empty endpoint. Fill the missing side rather than fail.
+          return {
+            from: fromBlank ? DEFAULT_TIME_RANGE.from : from,
+            to: toBlank ? DEFAULT_TIME_RANGE.to : to,
+          };
+        },
+        z
+          .object({
+            from: z
+              .string()
+              .max(256)
+              .describe(
+                'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
+              ),
+            to: z
+              .string()
+              .max(256)
+              .describe(
+                'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
+              ),
+          })
+          .check((ctx) => {
+            try {
+              getDateRange(ctx.value);
+            } catch (err) {
+              ctx.issues.push({
+                code: 'custom',
+                message: err instanceof Error ? err.message : 'Invalid time_range',
+                input: ctx.value,
+              });
+            }
+          })
+          .optional()
+      )
+      .describe(
+        '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
+      ),
+  })
+);
 
 type CreateVisualizationTarget = z.output<typeof targetSchema>;
 
@@ -249,6 +271,8 @@ const readTarget = (target: CreateVisualizationTarget) => ({
       ? target.has_data ?? undefined
       : undefined,
   regenerateEsql: target.type === 'attachment' ? target.regenerate_esql ?? undefined : undefined,
+  datasets:
+    target.type === 'custom_content' || target.type === 'attachment' ? target.datasets : undefined,
 });
 
 const NO_QUERY_HINT =
@@ -267,8 +291,8 @@ You say what to build via "target", discriminated by "target.type":
       ', '
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
-- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Always set "has_data": true (a query is generated unless you pass "esql") or false when the panel genuinely has no data (a banner, a legend, a note).
-- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that changes what the panel shows, pass "regenerate_esql": true: the stored query is regenerated from "query", keeping the parts the request does not change; layout, copy and style edits keep the stored query.
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Always set "has_data": true (a query is generated unless you pass "esql") or false when the panel genuinely has no data (a banner, a legend, a note). When the panel needs data of more than one shape — headline numbers above a ranked list — pass "datasets" instead of "esql": one entry per query, each describing what that query returns (with "has_data": true); the template reads the first as rows and the n-th as queries[n].rows, and "query" stays the layout.
+- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that changes what the panel shows, pass "regenerate_esql": true: the stored query is regenerated from "query", keeping the parts the request does not change; layout, copy and style edits keep the stored query. To change or add one query of a panel that has several, pass "datasets" for just those positions ({} keeps a query; unlisted queries are kept; queries cannot be removed with it).
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 
@@ -293,8 +317,15 @@ Ground first: make sure the target index exists and every field you reference is
       { query: nlQuery, index, target, time_range: requestedTimeRange },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
-      const { attachmentId, requestedRenderer, chartType, esql, hasData, regenerateEsql } =
-        readTarget(target);
+      const {
+        attachmentId,
+        requestedRenderer,
+        chartType,
+        esql,
+        hasData,
+        regenerateEsql,
+        datasets,
+      } = readTarget(target);
       try {
         // Step 1: Read any existing attachment so edits reuse its renderer + config.
         let existingData: VisualizationAttachmentData | undefined;
@@ -321,6 +352,12 @@ Ground first: make sure the target index exists and every field you reference is
           ? getEffectiveRenderer(existingData)
           : requestedRenderer ?? 'lens';
 
+        if (datasets && renderer !== 'custom_content') {
+          throw new Error(
+            '"datasets" only applies to custom content: a Lens or Vega visualization has one query. Use "esql" to supply it.'
+          );
+        }
+
         // Step 3: Generate the spec/config for the chosen renderer and assemble the
         // unified attachment data.
         let visualizationData: VisualizationAttachmentData;
@@ -341,35 +378,73 @@ Ground first: make sure the target index exists and every field you reference is
           });
           const existingTemplate = getExistingTemplate(existingData);
           const existingEsql = existingData?.esql;
+          const existingAdditionalEsql =
+            existingData && isCustomContentVisualization(existingData)
+              ? existingData.additional_esql ?? []
+              : [];
 
-          const { query: mergedEsql, isChanging: isQueryChanging } =
-            await resolveCustomContentQuery({
+          const generateForPanel = (
+            generationQuery: string,
+            generationIndex: string | undefined,
+            existingQueries: string[],
+            isDataset: boolean
+          ) =>
+            generateCustomContentEsql({
+              nlQuery: generationQuery,
+              index: generationIndex,
+              existingQueries,
+              isDataset,
+              modelProvider,
+              events,
+              logger,
+              esClient,
+              noQueryHint: NO_QUERY_HINT,
+              ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
+            });
+
+          let mergedEsql: string | undefined;
+          let isQueryChanging: boolean;
+          let additionalEsql: string[];
+          if (datasets) {
+            if (esql || regenerateEsql || hasData === false) {
+              throw new Error(
+                '"datasets" replaces "esql", "regenerate_esql" and "has_data": false: put each query\'s "esql" on its dataset and pass "has_data": true, or omit it.'
+              );
+            }
+            const { queries, changed } = await resolveCustomContentQueries({
+              datasets,
+              existingQueries: existingEsql ? [existingEsql, ...existingAdditionalEsql] : [],
+              generate: ({ description, index: datasetIndex }, queriesToModify) =>
+                generateForPanel(description, datasetIndex ?? index, queriesToModify, true),
+            });
+            [mergedEsql, ...additionalEsql] = queries;
+            isQueryChanging = changed[0];
+          } else {
+            const resolved = await resolveCustomContentQuery({
               suppliedQuery: esql,
               hasData,
               regenerate: regenerateEsql,
               existingQuery: existingEsql,
               isNewPanel: !existingData,
               generate: (existingQueries) =>
-                generateCustomContentEsql({
-                  nlQuery,
-                  index,
-                  existingQueries,
-                  modelProvider,
-                  events,
-                  logger,
-                  esClient,
-                  noQueryHint: NO_QUERY_HINT,
-                  ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
-                }),
+                generateForPanel(nlQuery, index, existingQueries, false),
             });
+            mergedEsql = resolved.query;
+            isQueryChanging = resolved.isChanging;
+            // The panel's other queries are not changed by this call, but they go with the main
+            // one: without it there is nothing for them to extend.
+            additionalEsql = mergedEsql ? existingAdditionalEsql : [];
+          }
 
-          // Sampling costs a round trip, so it only happens when the query actually changes,
-          // including when has_data: false clears a stored query.
+          // Sampling costs a round trip, so the main query is only sampled when it actually
+          // changes, including when has_data: false clears a stored query. The additional queries
+          // are always sampled, so the template keeps using their real columns.
           const { template, height } = await resolveTemplate({
             prompt: nlQuery,
             esqlQuery: isQueryChanging ? mergedEsql : undefined,
             existingTemplate,
             hasExistingQuery: !isQueryChanging && Boolean(mergedEsql),
+            additionalEsqlQueries: additionalEsql,
           });
 
           visualizationData = {
@@ -377,6 +452,7 @@ Ground first: make sure the target index exists and every field you reference is
             query: nlQuery,
             visualization: { template, height },
             ...(mergedEsql ? { esql: mergedEsql } : {}),
+            ...(additionalEsql.length ? { additional_esql: additionalEsql } : {}),
           };
         } else if (renderer === 'vega') {
           const existingSpec = getExistingVegaSpec(existingData);
@@ -430,7 +506,14 @@ Ground first: make sure the target index exists and every field you reference is
           visualizationData.time_range = existingData.time_range;
         } else if (!existingData) {
           const timeRange = await selectDefaultTimeRange({
-            esqlQueries: visualizationData.esql ? [visualizationData.esql] : [],
+            esqlQueries: visualizationData.esql
+              ? [
+                  visualizationData.esql,
+                  ...(isCustomContentVisualization(visualizationData)
+                    ? visualizationData.additional_esql ?? []
+                    : []),
+                ]
+              : [],
             esClient,
             logger,
           });

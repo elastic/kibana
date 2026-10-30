@@ -87,8 +87,8 @@ Do **not** use this skill when:
      - \`target\` (required) — one of:
        - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "has_data": <true|false>, "esql"?: <ES|QL the user supplied> }\` for an HTML layout — always set \`has_data\`: \`true\` has a query generated (unless you pass \`esql\`), \`false\` is for a panel that genuinely has no data
-       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"?, "regenerate_esql"? }\` to update an existing visualization
+       - \`{ "type": "custom_content", "has_data": <true|false>, "esql"?: <ES|QL the user supplied>, "datasets"?: [...] }\` for an HTML layout — always set \`has_data\`: \`true\` has a query generated (unless you pass \`esql\`), \`false\` is for a panel that genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"?, "regenerate_esql"?, "datasets"? }\` to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it only when the query came from ${
          platformCoreTools.generateEsql
        } or the user pasted it, otherwise it is generated for you.
@@ -158,6 +158,8 @@ You always decide whether the panel has data and say so in \`target.has_data\`; 
     platformCoreTools.generateEsql
   } or the user as \`target.esql\`.
 - Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
+
+When a panel needs data of more than one shape — headline numbers above a ranked list, say — pass \`target.datasets\` instead of \`esql\`, with \`has_data: true\`. It lists the panel's queries by position, and the template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ "description": "total requests and the number of 5xx errors, as one row" }\`, then \`{ "description": "the five hosts with the most requests" }\`; \`query\` stays the layout and says how each query is used. Do not use it for a panel with a single query, and keep a panel to a few queries (at most five). On an update, pass \`datasets\` only for the queries you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one; queries you do not list are kept, and they cannot be removed this way. A layout or style edit omits \`datasets\` and keeps every query.
 
 To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass \`regenerate_esql: true\` when the edit changes what the panel shows (the stored query is regenerated from \`query\`, keeping what the request does not change; layout, copy and style edits keep the stored query), an \`esql\` only when the user supplied one, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
     platformCoreTools.generateEsql

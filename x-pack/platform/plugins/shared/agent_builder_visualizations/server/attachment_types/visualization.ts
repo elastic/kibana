@@ -109,6 +109,10 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
             describeKind(data),
             // Custom content is the only renderer that can be static.
             data.esql ? `ES|QL: ${data.esql}` : 'ES|QL: none (static content)',
+            // Further queries of a custom content panel, in the order its template reads them.
+            ...(isCustomContentVisualization(data) ? data.additional_esql ?? [] : []).map(
+              (query, index) => `ES|QL (read by the template as queries[${index + 1}]): ${query}`
+            ),
           ].join('\n'),
         };
       },
@@ -117,7 +121,7 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
     isReadonly: false,
 
     getAgentDescription: () => {
-      return 'A visualization attachment contains a shared visualization payload and a renderer discriminator (lens, vega, or custom_content). Vega specs live at visualization.spec; custom content HTML templates live at visualization.template. Time range can be controlled by configuring a time_range property directly on the attachment.data with from and to fields. Rendering it inline displays the visualization as a dynamic, interactive chart component in the conversation UI. Visualization attachments can also be added to dashboard compositions through dashboard panel-ingestion operations.';
+      return 'A visualization attachment contains a shared visualization payload and a renderer discriminator (lens, vega, or custom_content). Vega specs live at visualization.spec; custom content HTML templates live at visualization.template. A custom content panel can hold several ES|QL queries: its template reads the first as rows and the others as queries[1], queries[2], ...; they are listed after the main query and kept when you update the attachment. Time range can be controlled by configuring a time_range property directly on the attachment.data with from and to fields. Rendering it inline displays the visualization as a dynamic, interactive chart component in the conversation UI. Visualization attachments can also be added to dashboard compositions through dashboard panel-ingestion operations.';
     },
 
     getTools: () => [],

@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  VISUALIZATION_ATTACHMENT_TYPE,
-  VisualizationAttachmentData,
+import {
+  isCustomContentVisualization,
+  type VISUALIZATION_ATTACHMENT_TYPE,
+  type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
@@ -57,6 +58,7 @@ export const createVisualizationAttachmentDefinition = (
           renderer={data.renderer}
           visualization={data.visualization}
           esql={data.esql}
+          additionalEsql={isCustomContentVisualization(data) ? data.additional_esql : undefined}
           timeRange={data.time_range ?? screenContext?.time_range}
           registerActionButtons={callbacks?.registerActionButtons}
         />

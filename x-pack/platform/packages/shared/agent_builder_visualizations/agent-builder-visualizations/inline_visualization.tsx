@@ -32,6 +32,8 @@ export interface InlineVisualizationProps {
   visualization: Record<string, unknown>;
   /** ES|QL backing the payload. Only the custom content renderer fetches its own data. */
   esql?: string;
+  /** The custom content queries after `esql`, read by the template as `queries[1]`, ... */
+  additionalEsql?: readonly string[];
   timeRange?: TimeRange;
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
@@ -46,6 +48,7 @@ export const InlineVisualization = ({
   renderer,
   visualization,
   esql,
+  additionalEsql,
   timeRange,
   registerActionButtons,
 }: InlineVisualizationProps) => {
@@ -66,6 +69,7 @@ export const InlineVisualization = ({
             services={services}
             visualization={visualization}
             esql={esql}
+            additionalEsql={additionalEsql}
             timeRange={timeRange}
             registerActionButtons={registerActionButtons}
           />

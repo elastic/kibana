@@ -22,7 +22,7 @@ jest.mock('../services', () => ({
 }));
 
 import { getESQLTimeField } from '@kbn/esql-utils';
-import { EsqlPreviewSection } from './esql_preview_section';
+import { EsqlQueryEditor } from './esql_query_editor';
 import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 
 const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getESQLTimeField>;
@@ -36,22 +36,21 @@ const defaultProps = {
   onFetchData: jest.fn(),
 };
 
-describe('EsqlPreviewSection', () => {
+describe('EsqlQueryEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetESQLTimeField.mockResolvedValue(undefined);
   });
 
-  it('renders the accordion and preview button', () => {
-    render(<EsqlPreviewSection {...defaultProps} />);
-    expect(screen.getByText('Data source (ES|QL)')).toBeInTheDocument();
+  it('renders the preview button', () => {
+    render(<EsqlQueryEditor {...defaultProps} />);
     expect(screen.getByText('Preview data')).toBeInTheDocument();
   });
 
   it('shows the time filter hint on mount when the query has no time field', async () => {
     mockGetESQLTimeField.mockResolvedValue(undefined);
 
-    render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
+    render(<EsqlQueryEditor {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
     await act(async () => {});
 
     expect(screen.getByText(/connect the query to the dashboard time filter/i)).toBeInTheDocument();
@@ -60,7 +59,7 @@ describe('EsqlPreviewSection', () => {
   it('does not flash the time filter hint while detection is still pending', () => {
     mockGetESQLTimeField.mockReturnValue(new Promise(() => {}));
 
-    render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
+    render(<EsqlQueryEditor {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
 
     expect(
       screen.queryByText(/connect the query to the dashboard time filter/i)
@@ -70,7 +69,7 @@ describe('EsqlPreviewSection', () => {
   it('does not show the time filter hint on mount when a time field is detected', async () => {
     mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
-    render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
+    render(<EsqlQueryEditor {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
     await act(async () => {});
 
     expect(
@@ -81,7 +80,7 @@ describe('EsqlPreviewSection', () => {
   it('shows the hint after clicking preview when the query has no time field', async () => {
     mockGetESQLTimeField.mockResolvedValue(undefined);
 
-    render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
+    render(<EsqlQueryEditor {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
     await userEvent.click(screen.getByRole('button', { name: 'Preview data' }));
     await act(async () => {});
 
@@ -89,7 +88,7 @@ describe('EsqlPreviewSection', () => {
   });
 
   it('shows the error callout when esqlDataError is provided', () => {
-    render(<EsqlPreviewSection {...defaultProps} esqlDataError="query failed" />);
+    render(<EsqlQueryEditor {...defaultProps} esqlDataError="query failed" />);
     expect(screen.getByText('Preview failed')).toBeInTheDocument();
     expect(screen.getByText('query failed')).toBeInTheDocument();
   });
@@ -101,7 +100,7 @@ describe('EsqlPreviewSection', () => {
       all_columns: [],
     } as unknown as EsqlDataResult;
 
-    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+    render(<EsqlQueryEditor {...defaultProps} esqlData={esqlData} />);
 
     expect(screen.getByText('count')).toBeInTheDocument();
     expect(screen.getByText('42')).toBeInTheDocument();
@@ -115,7 +114,7 @@ describe('EsqlPreviewSection', () => {
       all_columns: [],
     } as unknown as EsqlDataResult;
 
-    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+    render(<EsqlQueryEditor {...defaultProps} esqlData={esqlData} />);
 
     const cell = screen.getByTitle(long);
     expect(cell.textContent).toBe(`${'x'.repeat(120)}…`);
@@ -129,7 +128,7 @@ describe('EsqlPreviewSection', () => {
       all_columns: [],
     } as unknown as EsqlDataResult;
 
-    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+    render(<EsqlQueryEditor {...defaultProps} esqlData={esqlData} />);
 
     expect(screen.getByRole('columnheader')).toHaveAttribute('title', name);
   });
@@ -141,7 +140,7 @@ describe('EsqlPreviewSection', () => {
       all_columns: [],
     } as unknown as EsqlDataResult;
 
-    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
+    render(<EsqlQueryEditor {...defaultProps} esqlData={esqlData} />);
 
     expect(screen.getByText('Initial Access, Execution')).toBeInTheDocument();
   });

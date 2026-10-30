@@ -63,6 +63,12 @@ To create one, set \`query\` to a concise description of what to display; the HT
 
 To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateESQL: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
 
+### Panels with several queries
+
+When one panel needs data of more than one shape — headline numbers above a ranked list, say — send \`datasets\` instead of \`esql\`, \`hasData\`, \`regenerateESQL\` and \`index\`. It lists the panel's queries by position, and the template reads the first as \`rows\` and the n-th as \`queries[n].rows\`. Each entry says what ONE query returns, not how it looks: \`{ description: "total requests and the number of 5xx errors, as one row", index: "logs-*" }\`, then \`{ description: "the five hosts with the most requests" }\`. \`query\` stays the layout and how each query is used. Do not use it for a panel with a single query, and keep a panel to a few queries (at most five).
+
+To edit a panel that has several queries, send \`datasets\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed this way; tell the user to remove one from the panel's editor. For a layout or style edit omit \`datasets\`: every query is kept.
+
 Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
 ## Chart Type Guidance

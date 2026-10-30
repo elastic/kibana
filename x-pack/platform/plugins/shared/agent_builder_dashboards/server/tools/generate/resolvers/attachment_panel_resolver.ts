@@ -30,7 +30,7 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
       type,
       config: {
         template: data.visualization.template,
-        esql_query: toEsqlQueryState(data.esql),
+        esql_query: toEsqlQueryState(data.esql, data.additional_esql),
       },
     };
   }

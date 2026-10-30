@@ -13,6 +13,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/buil
 import {
   customContentPanelUpdateSchema,
   resolveCustomContentQuery,
+  resolveCustomContentQueries,
 } from '@kbn/custom-content-common';
 import { generateCustomContentEsql } from '@kbn/agent-builder-visualizations-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -66,13 +67,14 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - When the edit changes what the panel shows, also set \`regenerateEsql: true\` (and \`index\` when known): the server regenerates the ES|QL query from \`prompt\`, keeping the parts the request does not change, and samples the new schema before generating so the template matches the data. Do not write the query yourself.
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query generation or sampling, preserving layout and design.
 - Pass \`esqlQuery\` only when the user supplied a query verbatim; pass \`esqlQuery: null\` to remove the query entirely.
+- A panel can hold several queries (read by the template as \`queries[1]\`, \`queries[2]\`, … next to \`rows\`, the first query). Use \`datasets\` to change or add them: an entry with \`description\` regenerates the query at its position, one with \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. \`datasets\` replaces \`esqlQuery\`, \`regenerateEsql\` and \`index\`, and a description needs a \`prompt\` saying how the panel should now use the data. Queries cannot be removed with it. To only restyle, omit \`datasets\`: the panel's queries are kept.
 
 This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,
   handler: async (
-    { embeddable_id, prompt, esqlQuery, regenerateEsql, index },
+    { embeddable_id, prompt, esqlQuery, regenerateEsql, index, datasets },
     { attachments, events, logger, esClient, modelProvider }
   ) => {
     const panelAttachments = attachments
@@ -108,26 +110,58 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 
     const currentData = readPanelContextData(contextAttachment);
 
-    let resolved: Awaited<ReturnType<typeof resolveCustomContentQuery>>;
+    let resolvedQuery: string | undefined;
+    let isQueryChanging: boolean;
+    let additionalEsqlQueries: string[];
     try {
-      resolved = await resolveCustomContentQuery({
-        suppliedQuery: esqlQuery,
-        regenerate: regenerateEsql,
-        existingQuery: currentData?.esql_query,
-        isNewPanel: false,
-        generate: (existingQueries) =>
-          generateCustomContentEsql({
-            nlQuery: prompt ?? '',
-            index,
-            existingQueries,
-            modelProvider,
-            events,
-            logger,
-            esClient,
-            noQueryHint:
-              'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
-          }),
-      });
+      if (datasets) {
+        const existingQueries = currentData?.esql_query
+          ? [currentData.esql_query, ...(currentData.additional_esql_queries ?? [])]
+          : [];
+        const { queries, changed } = await resolveCustomContentQueries({
+          datasets,
+          existingQueries,
+          generate: ({ description, index: datasetIndex }, queriesToModify) =>
+            generateCustomContentEsql({
+              nlQuery: description,
+              index: datasetIndex,
+              existingQueries: queriesToModify,
+              isDataset: true,
+              modelProvider,
+              events,
+              logger,
+              esClient,
+              noQueryHint:
+                'Pass an exact "index" on the dataset and a more specific description, or an "esql" the user supplied.',
+            }),
+        });
+        [resolvedQuery, ...additionalEsqlQueries] = queries;
+        isQueryChanging = changed[0];
+      } else {
+        const resolved = await resolveCustomContentQuery({
+          suppliedQuery: esqlQuery,
+          regenerate: regenerateEsql,
+          existingQuery: currentData?.esql_query,
+          isNewPanel: false,
+          generate: (existingQueries) =>
+            generateCustomContentEsql({
+              nlQuery: prompt ?? '',
+              index,
+              existingQueries,
+              modelProvider,
+              events,
+              logger,
+              esClient,
+              noQueryHint:
+                'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
+            }),
+        });
+        resolvedQuery = resolved.query;
+        isQueryChanging = resolved.isChanging;
+        // The panel's other queries are not changed by this call, but they go with the main one:
+        // without it there is nothing for them to extend.
+        additionalEsqlQueries = resolvedQuery ? currentData?.additional_esql_queries ?? [] : [];
+      }
     } catch (err) {
       logger.error(`custom_content_update_panel: query generation failed — ${err}`);
       return {
@@ -142,7 +176,6 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
         ],
       };
     }
-    const { query: resolvedQuery, isChanging: isQueryChanging } = resolved;
 
     let resolvedTemplate: string = currentData?.panel_template ?? '';
     if (prompt !== undefined) {
@@ -153,6 +186,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
+          additionalEsqlQueries,
         }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);
@@ -175,6 +209,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     const newData: CustomContentContextAttachmentData = {
       panel_template: resolvedTemplate,
       esql_query: resolvedQuery,
+      ...(additionalEsqlQueries.length ? { additional_esql_queries: additionalEsqlQueries } : {}),
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
       // Carried over so a refined version still previews against the range the panel was
