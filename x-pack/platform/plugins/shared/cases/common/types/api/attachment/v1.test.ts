@@ -6,6 +6,7 @@
  */
 
 import {
+  MAX_ATTACHMENT_JSON_DEPTH,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
@@ -72,6 +73,18 @@ const validExternalRefSO = {
   externalReferenceMetadata: { foo: 'bar' },
   owner: 'cases',
 };
+
+// Builds an object nested `depth` levels deep, counting the top-level object as 1.
+const nestedObject = (depth: number): Record<string, unknown> => {
+  let value: Record<string, unknown> = { leaf: true };
+  for (let level = 1; level < depth; level++) {
+    value = { child: value };
+  }
+  return value;
+};
+
+const depthError = (field: string) =>
+  `The ${field} field is nested too deeply. The maximum depth is ${MAX_ATTACHMENT_JSON_DEPTH}.`;
 
 const validPersistableState = {
   type: AttachmentType.persistableState,
@@ -186,6 +199,15 @@ describe('AttachmentRequestSchema', () => {
       });
       expect(result.success).toBe(false);
     });
+
+    it('rejects externalReferenceMetadata nested deeper than the max depth', () => {
+      expect(
+        parseErrors(AttachmentRequestSchema, {
+          ...validExternalRefSO,
+          externalReferenceMetadata: nestedObject(MAX_ATTACHMENT_JSON_DEPTH + 1),
+        })
+      ).toContain(depthError('externalReferenceMetadata'));
+    });
   });
 
   describe('persistableState variant', () => {
@@ -196,6 +218,15 @@ describe('AttachmentRequestSchema', () => {
     it('rejects a missing persistableStateAttachmentState', () => {
       const { persistableStateAttachmentState, ...rest } = validPersistableState;
       expect(AttachmentRequestSchema.safeParse(rest).success).toBe(false);
+    });
+
+    it('rejects persistableStateAttachmentState nested deeper than the max depth', () => {
+      expect(
+        parseErrors(AttachmentRequestSchema, {
+          ...validPersistableState,
+          persistableStateAttachmentState: nestedObject(MAX_ATTACHMENT_JSON_DEPTH + 1),
+        })
+      ).toContain(depthError('persistableStateAttachmentState'));
     });
   });
 
