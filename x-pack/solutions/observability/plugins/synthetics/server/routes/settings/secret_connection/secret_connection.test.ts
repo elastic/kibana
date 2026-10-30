@@ -358,6 +358,28 @@ describe('saving allowed monitor hosts', () => {
       expect(result.affectedMonitorCount).toBe(5);
     });
 
+    it('finds browser monitors that get the reference through merged parameters', async () => {
+      const { routeContext } = setup({
+        body: body(['api.example.com']),
+        // Browser monitors read parameters as params.name, so none of these has the reference in
+        // a saved field. Global parameters are merged under the monitor's own.
+        globalParams: { dbPassword: 'vault://prod@app#password' },
+        monitors: [
+          { name: 'uses-global', type: 'browser', params: '' },
+          { name: 'overrides-global', type: 'browser', params: '{"dbPassword":"plain"}' },
+          { name: 'local-reference', type: 'browser', params: '{"other":"vault://prod@app#key"}' },
+          { name: 'http-without-reference', type: 'http', urls: 'https://other.example' },
+        ],
+      });
+
+      const result = (await save(routeContext)) as any;
+
+      expect(result.affectedMonitors).toEqual([
+        { name: 'uses-global', reason: 'monitor_type' },
+        { name: 'local-reference', reason: 'monitor_type' },
+      ]);
+    });
+
     it('does not look at monitors when the list is unchanged', async () => {
       const { routeContext } = setup({
         body: body(['api.example.com']),

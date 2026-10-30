@@ -7,11 +7,13 @@
 
 import { omit } from 'lodash';
 import type { RouteContext } from '../../types';
+import type { SyntheticsMonitor } from '../../../../common/runtime_types';
 import type { AffectedMonitor, AffectedMonitorReason } from '../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { normalizeAllowedMonitorHost } from '../../../../common/lib/allowed_monitor_hosts';
 import { getParamsForSpace } from '../../../synthetics_service/formatters/param_utils';
 import { replaceStringWithParams } from '../../../synthetics_service/formatters/formatting_utils';
+import { mixParamsWithGlobalParams } from '../../../synthetics_service/formatters/public_formatters/format_configs';
 import { referencedConnectionNames } from '../../../synthetics_service/formatters/vault_param_formatter';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
 
@@ -101,6 +103,14 @@ export const findMonitorsAffectedByAllowedHosts = async (
       omit(attributes, [ConfigKey.SOURCE_INLINE, ConfigKey.SOURCE_PROJECT_CONTENT]),
       params
     ) as Record<string, unknown>;
+    // A browser monitor reads parameters as `params.name`, not as `${name}` in a field, and gets
+    // the global ones merged under its own: as deployed, so use the same merge.
+    if (attributes[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
+      resolved[ConfigKey.PARAMS] = mixParamsWithGlobalParams(
+        params,
+        attributes as unknown as SyntheticsMonitor
+      ).params;
+    }
     if (!referencedConnectionNames(resolved).has(connectionName)) continue;
     const reason = getAllowedHostsRefusal(resolved, allowed);
     if (reason) affected.push({ name: String(attributes[ConfigKey.NAME]), reason });
