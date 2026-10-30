@@ -48,6 +48,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       temperature,
       reasoning,
       modelName,
+      logger,
     });
 
     return defer(() => {
