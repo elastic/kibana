@@ -165,12 +165,41 @@ describe('Create Remote cluster', () => {
           act(() => jest.advanceTimersByTime(100));
 
           expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
-            'Some fields require your attention.'
+            'Some fields require your attention. Name is required.'
           );
           expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveAttribute(
             'aria-live',
             'assertive'
           );
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      test('should announce seed node errors when the name is valid', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.type(
+            screen.getByTestId('remoteClusterFormNameInput'),
+            'test-cluster'
+          );
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
+            'Some fields require your attention. At least one seed node is required.'
+          );
+          expect(
+            within(screen.getByTestId('remoteClusterFormSeedsInput')).getByTestId(
+              'comboBoxSearchInput'
+            )
+          ).not.toHaveFocus();
         } finally {
           jest.useRealTimers();
         }
