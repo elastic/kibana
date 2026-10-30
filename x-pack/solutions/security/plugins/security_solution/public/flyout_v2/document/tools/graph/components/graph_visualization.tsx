@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -70,11 +70,14 @@ interface GraphNodeCallbacks {
     entityId: string;
     entityName: string | undefined;
   }) => void;
-  /** Open a grouped-entities or grouped-events preview. */
+  /**
+   * Open a grouped-entities or grouped-events preview. `params.scopeId` is this graph's filter
+   * scope and must be forwarded to the panel so its filter actions reach this graph.
+   */
   onShowGrouped: (
     params: Omit<
       GraphGroupedNodePreviewPanelProps,
-      'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+      'showLoadingState' | 'onShowDocument' | 'onShowEntity'
     >
   ) => void;
   /**
@@ -82,6 +85,13 @@ interface GraphNodeCallbacks {
    * Note: `GraphInvestigation` does not expose flow direction — callers always receive the source IP.
    */
   onShowNetwork: (ip: string) => void;
+  /**
+   * Scope for the graph's filter state. Defaults to a scope unique to this mounted graph so
+   * graphs open at the same time don't share filters. Consumers that only ever mount one graph
+   * and restore grouped-node previews from the URL (the legacy expandable flyout) pass a stable
+   * scope, so restored previews still reach the graph after a reload.
+   */
+  graphScopeId?: string;
 }
 
 /** Props for event/alert mode — drives the graph from an alert/event document */
@@ -116,6 +126,11 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
   const { scopeId, onShowDocument, onShowEntity, onShowGrouped, onShowNetwork } = props;
+
+  // Filter state is keyed by scope, and flyout v2 keeps previous graph flyouts mounted in its
+  // history, so each mounted graph needs its own scope to avoid sharing filters with another graph.
+  const graphInstanceId = useId();
+  const graphScopeId = props.graphScopeId ?? `${scopeId}-graph${graphInstanceId}`;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const height = useFlyoutBodyAvailableHeight(wrapperRef);
@@ -185,7 +200,13 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             icon: node.icon,
             risk: doc.entity.riskScore,
           }));
-        onShowGrouped({ docMode, entityItems, documentIds: [], dataViewId: undefined });
+        onShowGrouped({
+          docMode,
+          entityItems,
+          documentIds: [],
+          dataViewId: undefined,
+          scopeId: graphScopeId,
+        });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
         const documentIds = documentsData.slice(0, MAX_DOCUMENTS_TO_LOAD).map((doc) => doc.id);
         onShowGrouped({
@@ -193,6 +214,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
           documentIds,
           dataViewId: dataViewIndexPattern,
           entityItems: [],
+          scopeId: graphScopeId,
         });
       } else {
         toasts.addDanger({
@@ -202,7 +224,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       }
     },
-    [onShowDocument, onShowEntity, onShowGrouped, dataViewIndexPattern, toasts]
+    [onShowDocument, onShowEntity, onShowGrouped, dataViewIndexPattern, toasts, graphScopeId]
   );
 
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -258,7 +280,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       {status === 'ready' && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
           <GraphInvestigationLazy
-            scopeId={scopeId}
+            scopeId={graphScopeId}
             initialState={
               props.mode === 'event'
                 ? {

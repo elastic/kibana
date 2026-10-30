@@ -108,6 +108,7 @@ export const GraphVisualization: React.FC = memo(() => {
     <SharedGraphVisualization
       mode="event"
       scopeId={scopeId}
+      graphScopeId={scopeId}
       eventIds={eventIds}
       timestamp={timestamp ?? new Date().toISOString()}
       isAlert={isAlert}
