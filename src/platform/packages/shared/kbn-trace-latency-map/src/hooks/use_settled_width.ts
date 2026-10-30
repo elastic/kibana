@@ -15,11 +15,13 @@ export const WIDTH_SETTLE_MS = 250;
 /**
  * A measured width, once it stops changing. The first measure goes through at once, as the map
  * waits for it to load, and a resize is followed after it stops, not on every pixel of a drag.
+ * A width of 0 after that (a hidden tab, a collapsed panel) is not a resize: the last width is
+ * kept, so showing the map again does not load it again.
  */
 export function useSettledWidth(width: number, delayMs = WIDTH_SETTLE_MS) {
   const [settled, setSettled] = useState(width);
   useEffect(() => {
-    if (width === settled) return;
+    if (width === settled || (width === 0 && settled !== 0)) return;
     if (settled === 0) {
       setSettled(width);
       return;

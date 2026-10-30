@@ -74,9 +74,11 @@ const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
 
 /**
- * The time of a column for the axis, in `timeZone`: with seconds when a column is under a minute,
- * with the date when the range is longer than a day or a column is a day, else `10:05`. Every
- * column gets one and the chart thins them to the ones that fit.
+ * The time of a column for the axis, in `timeZone`. The time is as fine as the column needs to
+ * tell it from the next: milliseconds under a second, seconds under a minute or where the column
+ * does not span whole minutes (90s), else `10:05`. The date comes first when the range is longer
+ * than a day, and alone when a column is a day. Every column gets one and the chart thins them
+ * to the ones that fit.
  */
 export function formatColumnTime(
   timestampMs: number,
@@ -84,7 +86,12 @@ export function formatColumnTime(
   rangeMs: number,
   timeZone?: string
 ) {
-  const format =
-    binMs < MINUTE ? 'HH:mm:ss' : binMs >= DAY ? 'MMM D' : rangeMs > DAY ? 'MMM D HH:mm' : 'HH:mm';
+  const time =
+    binMs < 1000
+      ? 'HH:mm:ss.SSS'
+      : binMs < MINUTE || (binMs < DAY && binMs % MINUTE !== 0)
+      ? 'HH:mm:ss'
+      : 'HH:mm';
+  const format = binMs >= DAY ? 'MMM D' : rangeMs > DAY ? `MMM D ${time}` : time;
   return moment.tz(timestampMs, resolveTimeZone(timeZone)).format(format);
 }

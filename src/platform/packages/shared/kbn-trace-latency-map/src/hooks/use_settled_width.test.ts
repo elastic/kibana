@@ -35,4 +35,15 @@ describe('useSettledWidth', () => {
     act(() => jest.advanceTimersByTime(60));
     expect(result.current).toBe(600);
   });
+
+  it('keeps the last width while the map is hidden', () => {
+    const { result, rerender } = renderHook(({ width }) => useSettledWidth(width, 250), {
+      initialProps: { width: 800 },
+    });
+    rerender({ width: 0 });
+    act(() => jest.advanceTimersByTime(500));
+    expect(result.current).toBe(800);
+    rerender({ width: 800 });
+    expect(result.current).toBe(800);
+  });
 });

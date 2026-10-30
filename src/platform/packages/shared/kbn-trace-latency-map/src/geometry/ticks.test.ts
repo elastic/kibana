@@ -52,6 +52,15 @@ describe('formatColumnTime', () => {
     expect(formatColumnTime(from, 15_000, 10 * MINUTE, 'UTC')).toBe('10:03:20');
   });
 
+  it('adds milliseconds when a column is under a second', () => {
+    expect(formatColumnTime(from + 250, 250, 10_000, 'UTC')).toBe('10:03:20.250');
+    expect(formatColumnTime(from + 500, 250, 10_000, 'UTC')).toBe('10:03:20.500');
+  });
+
+  it('adds seconds when a column does not span whole minutes', () => {
+    expect(formatColumnTime(from + 90_000, 90_000, 30 * MINUTE, 'UTC')).toBe('10:04:50');
+  });
+
   it('adds the date for a range of days', () => {
     expect(formatColumnTime(from, 30 * MINUTE, 3 * DAY, 'UTC')).toBe('Oct 26 10:03');
   });
