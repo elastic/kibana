@@ -35,7 +35,7 @@ describe('risk score history route', () => {
         case 'histogram:maxBars':
           return Promise.resolve(100);
         case 'histogram:barTarget':
-          return Promise.resolve(50);
+          return Promise.resolve(100);
         case 'dateFormat':
           return Promise.resolve('MMM D, YYYY @ HH:mm:ss.SSS');
         case 'dateFormat:scaled':
@@ -83,7 +83,7 @@ describe('risk score history route', () => {
     expect(response.body).toEqual({
       entity_id: 'test-entity-id',
       entity_type: 'host',
-      // 90d range at barTarget 50 → daily buckets
+      // 90d range at barTarget 100 → daily buckets
       interval: '1d',
       entries,
     });
@@ -103,7 +103,7 @@ describe('risk score history route', () => {
       entityId: 'test-entity-id',
       range: { gte: 'now-30d', lte: 'now' },
       scoreType: 'base',
-      // 30d range at barTarget 50 → 12h buckets
+      // 30d range at barTarget 100 → 12h buckets
       interval: { value: 12, unit: 'h' },
       includeContributions: false,
     });
