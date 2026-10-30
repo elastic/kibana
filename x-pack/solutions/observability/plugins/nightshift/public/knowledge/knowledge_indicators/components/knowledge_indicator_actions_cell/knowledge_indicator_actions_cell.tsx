@@ -29,20 +29,15 @@ import { useBlocksNewActivity } from '../../../../data/maintenance/use_significa
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../translations';
 
 interface Props {
-  sourceId: string;
   knowledgeIndicator: KnowledgeIndicator;
   onDeleteRequest: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
-export function KnowledgeIndicatorActionsCell({
-  sourceId,
-  knowledgeIndicator,
-  onDeleteRequest,
-}: Props) {
+export function KnowledgeIndicatorActionsCell({ knowledgeIndicator, onDeleteRequest }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const { excludeFeature, restoreFeature, promoteQuery, setDurability, isMutating } =
-    useKnowledgeIndicatorActions({ sourceId });
+    useKnowledgeIndicatorActions();
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {
@@ -61,7 +56,7 @@ export function KnowledgeIndicatorActionsCell({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature);
             }}
           >
             {RESTORE_LABEL}
@@ -75,7 +70,7 @@ export function KnowledgeIndicatorActionsCell({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature);
             }}
           >
             {EXCLUDE_LABEL}

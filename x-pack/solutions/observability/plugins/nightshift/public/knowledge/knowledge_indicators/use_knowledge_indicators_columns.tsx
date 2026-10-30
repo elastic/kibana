@@ -24,7 +24,10 @@ import { DurabilityBadge } from './components/durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from './utils/get_knowledge_indicator_expires_at';
 import { KnowledgeIndicatorActionsCell } from './components/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorSourceId } from './utils/get_knowledge_indicator_source_id';
+import {
+  getKnowledgeIndicatorSourceId,
+  getKnowledgeIndicatorSourceIds,
+} from './utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorTitle } from './use_knowledge_indicators_table';
 import {
   TITLE_COLUMN_LABEL,
@@ -178,8 +181,21 @@ export const useKnowledgeIndicatorsColumns = ({
         name: STREAM_COLUMN_LABEL,
         width: '192px',
         render: (ki: KnowledgeIndicator) => {
-          const sourceId = getKnowledgeIndicatorSourceId(ki);
-          return <EuiBadge color="hollow">{getSourceTitle(sourceId)}</EuiBadge>;
+          const representativeId = getKnowledgeIndicatorSourceId(ki);
+          const representativeTitle = getSourceTitle(representativeId);
+          const otherTitles = getKnowledgeIndicatorSourceIds(ki)
+            .filter((id) => id !== representativeId)
+            .map(getSourceTitle);
+          if (otherTitles.length === 0) {
+            return <EuiBadge color="hollow">{representativeTitle}</EuiBadge>;
+          }
+          return (
+            <EuiToolTip content={[representativeTitle, ...otherTitles].join(', ')}>
+              <EuiBadge color="hollow" tabIndex={0}>
+                {`${representativeTitle} +${otherTitles.length}`}
+              </EuiBadge>
+            </EuiToolTip>
+          );
         },
       },
       {
@@ -195,7 +211,6 @@ export const useKnowledgeIndicatorsColumns = ({
         align: 'right',
         render: (ki: KnowledgeIndicator) => (
           <KnowledgeIndicatorActionsCell
-            sourceId={getKnowledgeIndicatorSourceId(ki)}
             knowledgeIndicator={ki}
             onDeleteRequest={(item) => setKnowledgeIndicatorsToDelete([item])}
           />

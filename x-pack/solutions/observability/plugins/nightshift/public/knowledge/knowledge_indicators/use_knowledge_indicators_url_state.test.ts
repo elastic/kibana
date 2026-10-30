@@ -10,7 +10,7 @@ import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 let mockQuery: Record<string, string | string[]> = {};
@@ -34,7 +34,10 @@ jest.mock('@kbn/react-hooks', () => ({
 }));
 
 function makeFeatureKI(
-  overrides: Partial<Feature> & { uuid: string; source_id: string } & Record<string, unknown>
+  overrides: Partial<AggregatedFeature> & { uuid: string; source_id: string } & Record<
+      string,
+      unknown
+    >
 ): KnowledgeIndicator {
   return {
     kind: 'feature',
@@ -44,8 +47,10 @@ function makeFeatureKI(
       title: overrides.title ?? overrides.uuid,
       subtype: undefined,
       excluded_at: undefined,
+      sources: [overrides.source_id],
+      instances: [{ source_id: overrides.source_id, uuid: overrides.uuid, confidence: 0 }],
       ...overrides,
-    } as unknown as Feature,
+    } as unknown as AggregatedFeature,
   };
 }
 
@@ -435,6 +440,23 @@ describe('useKnowledgeIndicatorsUrlState', () => {
 
       waitFor(() => {
         expect(result.current.selectedStreams).toEqual(['logs']);
+      });
+    });
+
+    it('keeps a stream filter matched only by a non-representative source', async () => {
+      const knowledgeIndicators = [
+        makeFeatureKI({ uuid: 'f1', source_id: 'logs', sources: ['logs', 'metrics'] }),
+      ];
+      const { result } = renderHook(() =>
+        useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
+      );
+
+      act(() => {
+        result.current.handleSelectedStreamsChange(['metrics', 'traces']);
+      });
+
+      await waitFor(() => {
+        expect(result.current.selectedStreams).toEqual(['metrics']);
       });
     });
   });

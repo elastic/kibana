@@ -14,23 +14,36 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
+  EuiIcon,
   EuiText,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
 import { DeveloperModeBadge } from '../../../../components/ui/developer_mode_badge';
 import { InfoPanel } from '../../../../components/ui/info_panel';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { getConfidenceColor } from '../../../../common/get_confidence_color';
+import { DurabilityBadge } from '../durability_badge';
 
 interface Props {
-  feature: Feature;
+  /** Top-level fields belong to the viewed instance, which need not be the representative. */
+  feature: AggregatedFeature;
+  getSourceTitle: (sourceId: string) => string;
+  onSelectInstance: (uuid: string) => void;
   onOpenInDiscover?: () => void;
 }
 
-export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDiscover }: Props) {
+export function KnowledgeIndicatorFeatureDetailsContent({
+  feature,
+  getSourceTitle,
+  onSelectInstance,
+  onOpenInDiscover,
+}: Props) {
+  const { instances } = feature;
   const { isDeveloperMode } = useDeveloperMode();
   const listItems = useMemo(() => {
     const tags = feature.tags?.length ? feature.tags : [];
@@ -129,6 +142,68 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
           ))}
         </InfoPanel>
       </EuiFlexItem>
+      {instances.length > 1 && (
+        <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutSources">
+          <InfoPanel title={SOURCES_LABEL}>
+            <EuiText size="xs" color="subdued">
+              {SOURCES_HINT}
+            </EuiText>
+            <EuiHorizontalRule margin="s" />
+            {instances.map((instance, index) => {
+              const isViewed = instance.uuid === feature.uuid;
+              const sourceTitle = getSourceTitle(instance.source_id);
+              return (
+                <React.Fragment key={instance.uuid}>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    data-test-subj={`significantEventsAppFeatureDetailsFlyoutSource-${instance.uuid}`}
+                    aria-current={isViewed ? 'true' : undefined}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={isViewed ? 'check' : 'empty'}
+                        size="s"
+                        aria-label={isViewed ? VIEWING_SOURCE_LABEL : undefined}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        {isViewed ? (
+                          <strong>{sourceTitle}</strong>
+                        ) : (
+                          <EuiButtonEmpty
+                            size="xs"
+                            flush="left"
+                            data-test-subj="nightshiftKnowledgeIndicatorFeatureDetailsContentLink"
+                            onClick={() => onSelectInstance(instance.uuid)}
+                            {...getEbtProps({
+                              action: NIGHTSHIFT_EBT_ACTIONS.VIEW_KNOWLEDGE_INDICATOR_SOURCE,
+                              element: NIGHTSHIFT_EBT_ELEMENTS.KNOWLEDGE_INDICATOR_FLYOUT,
+                            })}
+                          >
+                            {sourceTitle}
+                          </EuiButtonEmpty>
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiHealth color={getConfidenceColor(instance.confidence)}>
+                        {instance.confidence}
+                      </EuiHealth>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <DurabilityBadge expiresAt={instance.expires_at} compact />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  {index < instances.length - 1 && <EuiHorizontalRule margin="s" />}
+                </React.Fragment>
+              );
+            })}
+          </InfoPanel>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <InfoPanel title={DESCRIPTION_LABEL}>
           <EuiText>{feature.description || NO_DESCRIPTION_AVAILABLE}</EuiText>
@@ -238,6 +313,24 @@ const DETAILS_UPDATED_AT_LABEL = i18n.translate(
   'xpack.nightshift.knowledge.featureDetailsFlyout.updatedAtLabel',
   {
     defaultMessage: 'Updated',
+  }
+);
+
+const SOURCES_LABEL = i18n.translate(
+  'xpack.nightshift.knowledge.featureDetailsFlyout.sourcesLabel',
+  {
+    defaultMessage: 'Sources',
+  }
+);
+
+const SOURCES_HINT = i18n.translate('xpack.nightshift.knowledge.featureDetailsFlyout.sourcesHint', {
+  defaultMessage: 'This feature was identified in several sources. Select one to view its details.',
+});
+
+const VIEWING_SOURCE_LABEL = i18n.translate(
+  'xpack.nightshift.knowledge.featureDetailsFlyout.viewingSourceLabel',
+  {
+    defaultMessage: 'Currently viewing',
   }
 );
 
