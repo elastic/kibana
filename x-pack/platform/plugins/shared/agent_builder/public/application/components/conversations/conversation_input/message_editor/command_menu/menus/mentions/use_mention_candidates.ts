@@ -10,9 +10,9 @@ import {
   EventActorType,
   isPublicConversation,
   isSharedConversation,
+  isUserMessageEvent,
   isUserProfileId,
   normalizeConversationAccessControl,
-  TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { useDebouncedValue } from '@kbn/react-hooks';
@@ -33,16 +33,9 @@ const getChatPersonIds = (conversation: Conversation | undefined, isPublic: bool
   }
   const ids = [conversation.user.id];
   if (isPublic) {
-    // Authors from an external system (`origin` set) have no profile uid
-    conversation.rounds.forEach(({ author, origin }) => {
-      if (author && !origin) {
-        ids.push(author.id);
-      }
-    });
-    // A "Post to team" message is a user message event without a round
-    conversation.events?.forEach(({ type, actor }) => {
-      if (type === TimelineEventType.userMessage && actor.type === EventActorType.user) {
-        ids.push(actor.id);
+    conversation.events?.forEach((event) => {
+      if (isUserMessageEvent(event) && event.actor.type === EventActorType.user) {
+        ids.push(event.actor.id);
       }
     });
   } else {

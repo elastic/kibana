@@ -58,8 +58,6 @@ const pierre = profile('pierre', 'Pierre Gayvallet');
 const zoe = profile('zoe', 'Zoe Adams');
 const knownProfiles = [julian, andrew, pierre, zoe, profile('me', 'Me Myself')];
 
-const round = (author?: { id: string }, origin?: { type: 'slack' }) => ({ author, origin });
-
 const userMessageEvent = (actor: EventActor): ConversationEvent => ({
   id: `event-${actor.id}`,
   created_at: '2026-10-28T00:00:00.000Z',
@@ -78,9 +76,11 @@ const makeConversation = (overrides: Partial<Conversation>): { conversation: Con
   } as Conversation,
 });
 
-const publicChat = (rounds: unknown[] = []) =>
+const posted = (id: string) => userMessageEvent({ type: EventActorType.user, id });
+
+const publicChat = (events: ConversationEvent[] = []) =>
   makeConversation({
-    rounds: rounds as Conversation['rounds'],
+    events,
     access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
   });
 
@@ -115,7 +115,7 @@ describe('useMentionCandidates', () => {
   describe('public chat', () => {
     it('lists the agent, then people in the chat, then everyone else, without duplicates', () => {
       mockUseConversation.mockReturnValue(
-        publicChat([round({ id: 'andrew' }), round({ id: 'julian' }), round({ id: 'me' })])
+        publicChat([posted('andrew'), posted('julian'), posted('me')])
       );
       mockUseSuggestUsers.mockReturnValue({
         data: [zoe, julian, pierre, andrew, knownProfiles[4]],
@@ -132,7 +132,7 @@ describe('useMentionCandidates', () => {
     });
 
     it('never lists the current user', () => {
-      mockUseConversation.mockReturnValue(publicChat([round({ id: 'me' })]));
+      mockUseConversation.mockReturnValue(publicChat([posted('me')]));
       mockUseSuggestUsers.mockReturnValue({ data: [knownProfiles[4], zoe], isFetching: false });
 
       expect(names('')).not.toContain('Me Myself');
@@ -140,36 +140,16 @@ describe('useMentionCandidates', () => {
 
     it('does not ask for profiles of authors that come from an external system', () => {
       mockUseConversation.mockReturnValue(
-        publicChat([round({ id: 'U123SLACK' }, { type: 'slack' }), round({ id: 'andrew' })])
+        publicChat([
+          userMessageEvent({ type: EventActorType.external, id: 'U123SLACK' }),
+          posted('andrew'),
+        ])
       );
 
       renderHook(() => useMentionCandidates(''));
 
       expect(mockUseUserProfiles).toHaveBeenCalledWith(
         expect.objectContaining({ uids: ['julian', 'andrew'] })
-      );
-    });
-
-    it('lists people who only posted to the team among the people in the chat', () => {
-      mockUseConversation.mockReturnValue({
-        conversation: {
-          ...publicChat().conversation,
-          events: [
-            userMessageEvent({ type: EventActorType.user, id: 'pierre' }),
-            userMessageEvent({ type: EventActorType.external, id: 'U123SLACK' }),
-          ],
-        },
-      });
-      mockUseSuggestUsers.mockReturnValue({ data: [zoe, pierre], isFetching: false });
-
-      expect(names('')).toEqual([
-        'Elastic AI Agent',
-        'Julian Rosado',
-        'Pierre Gayvallet',
-        'Zoe Adams',
-      ]);
-      expect(mockUseUserProfiles).toHaveBeenCalledWith(
-        expect.objectContaining({ uids: ['julian', 'pierre'] })
       );
     });
 
@@ -182,7 +162,7 @@ describe('useMentionCandidates', () => {
     });
 
     it('filters people in the chat by name, username or email while typing', () => {
-      mockUseConversation.mockReturnValue(publicChat([round({ id: 'andrew' })]));
+      mockUseConversation.mockReturnValue(publicChat([posted('andrew')]));
 
       expect(names('andrew.br')).toEqual(['Andrew Brown']);
       expect(names('julian@elastic')).toEqual(['Julian Rosado']);
@@ -227,7 +207,7 @@ describe('useMentionCandidates', () => {
     it('skips an owner that has no user profile', () => {
       mockUseConversation.mockReturnValue({
         conversation: {
-          ...publicChat([round({ id: 'andrew' })]).conversation,
+          ...publicChat([posted('andrew')]).conversation,
           user: { id: 'service_account:bot', username: 'bot', type: 'service_account' },
         },
       });
@@ -282,7 +262,7 @@ describe('useMentionCandidates', () => {
 
   describe('the agent row', () => {
     beforeEach(() => {
-      mockUseConversation.mockReturnValue(publicChat([round({ id: 'andrew' })]));
+      mockUseConversation.mockReturnValue(publicChat([posted('andrew')]));
     });
 
     it('shows when the typed text is empty', () => {
