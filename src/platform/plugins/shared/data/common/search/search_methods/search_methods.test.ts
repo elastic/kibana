@@ -189,6 +189,18 @@ describe('SearchMethodsService', () => {
         });
       });
 
+      it('passes inspector id to inspector.adapter.start', async () => {
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const inspector = { ...createMockInspector(createMockRequestResponder()), id: 'request-1' };
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          id: 'request-1',
+          description: 'Test description',
+        });
+      });
+
       it('calls requestResponder.json with ES|QL request params', async () => {
         const mockResponse = { columns: [], values: [] };
         mockSearch.mockReturnValue(createMockResponse(mockResponse));
