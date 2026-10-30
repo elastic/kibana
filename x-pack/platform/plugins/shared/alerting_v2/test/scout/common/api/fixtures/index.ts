@@ -63,6 +63,7 @@ export {
   buildV1RuleTemplateAttributes,
   buildWorkflowYaml,
   buildHttpConnectorWorkflowYaml,
+  buildDefaultEmailWorkflowYaml,
   getSnoozeDate,
 } from '../../builders';
 export {

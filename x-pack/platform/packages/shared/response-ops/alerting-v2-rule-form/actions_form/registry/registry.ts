@@ -6,45 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  DEFAULT_EMAIL_PARAMS_TEMPLATE,
+  DEFAULT_SLACK2_PARAMS_TEMPLATE,
+} from '@kbn/alerting-v2-constants';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
 import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
 import { EMAIL_PARAMS_SCHEMA, SLACK2_PARAMS_SCHEMA } from './params_schemas';
-
-const EMAIL_PARAMS_TEMPLATE = `to: 
-  - ""
-subject: ""
-message: |
-  {%- assign alert_count = inputs.payload.alerts | size -%}
-  {%- if alert_count > 1 -%}
-  **{{ alert_count }} alerts**
-
-  {% endif -%}
-  {%- for alert in inputs.payload.alerts -%}
-  **{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}** — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}\\
-  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC" }} · [View in app]({{ alert.alert_url }})\\
-  Alert id: {{ alert.alert_id }}
-  {% unless forloop.last %}
-  {% endunless -%}
-  {%- endfor -%}
-`;
-
-// ToDo: add a channel selector to the Slack (v2) step form
-const SLACK2_PARAMS_TEMPLATE = `channel: ""
-text: |
-  {%- assign alert_count = inputs.payload.alerts | size -%}
-  {%- if alert_count > 1 -%}
-  *{{ alert_count }} alerts*
-
-  {% endif -%}
-  {%- for alert in inputs.payload.alerts -%}
-  *{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}* — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}
-  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC" }} · <{{ alert.alert_url }}|View in app>
-  Alert id: {{ alert.alert_id }}
-  {% unless forloop.last %}
-  {% endunless -%}
-  {%- endfor -%}
-`;
 
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
   {
@@ -60,9 +29,10 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     ),
     iconType: 'mail',
     connectorTypeId: '.email',
-    paramsTemplate: EMAIL_PARAMS_TEMPLATE,
+    paramsTemplate: DEFAULT_EMAIL_PARAMS_TEMPLATE,
     paramsSchema: EMAIL_PARAMS_SCHEMA,
   },
+  // ToDo: add a channel selector to the Slack (v2) step form
   {
     id: 'slack2.sendMessage',
     label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.label', {
@@ -77,7 +47,7 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     iconType: 'logoSlack',
     connectorTypeId: '.slack2',
     connectorTypeSubAction: 'sendMessage',
-    paramsTemplate: SLACK2_PARAMS_TEMPLATE,
+    paramsTemplate: DEFAULT_SLACK2_PARAMS_TEMPLATE,
     paramsSchema: SLACK2_PARAMS_SCHEMA,
     CustomComponent: SlackChannelSelectorWrapper,
   },
