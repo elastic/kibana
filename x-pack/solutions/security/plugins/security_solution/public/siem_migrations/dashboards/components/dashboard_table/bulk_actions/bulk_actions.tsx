@@ -25,6 +25,12 @@ const ReprocessFailedDashboardsButton = WithMissingPrivilegesTooltip(
   'all'
 );
 
+const InstallTranslatedDashboardsButton = WithMissingPrivilegesTooltip(
+  InstallTranslatedButton,
+  'dashboard',
+  'all'
+);
+
 export interface BulkActionsProps {
   isTableLoading: boolean;
   installTranslatedDashboards?: () => void;
@@ -86,7 +92,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
         )}
         {showInstallSelectedDashboardsButton && (
           <EuiFlexItem grow={false}>
-            <InstallTranslatedButton
+            <InstallTranslatedDashboardsButton
               disableInstallTranslatedItemsButton={isTableLoading}
               installSelectedItem={installSelectedDashboardsCallback}
               installTranslatedItems={installTranslatedDashboardsCallback}

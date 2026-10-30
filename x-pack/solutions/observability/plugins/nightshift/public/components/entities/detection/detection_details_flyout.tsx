@@ -28,6 +28,8 @@ import { useDetectionHistory } from '../../../data/detections/use_detection_hist
 import { ChangePointLensChart } from './change_point_lens_chart';
 import { formatPValue, getChangePointLabel } from '../../../common/change_point';
 import { useOpenDetectionInChat } from './use_open_detection_in_chat';
+import { DetectionDiscoveryStatus, getDetectionDiscoveryBadge } from './detection_discovery_status';
+import { SkippedDetectionReason } from './skipped_detection';
 
 const ACTIONS_LABEL = i18n.translate('xpack.nightshift.detectionDetailsFlyout.actionsLabel', {
   defaultMessage: 'Actions',
@@ -56,12 +58,6 @@ const HISTORY_TITLE = i18n.translate('xpack.nightshift.detectionDetailsFlyout.hi
 const NO_HISTORY = i18n.translate('xpack.nightshift.detectionDetailsFlyout.noHistory', {
   defaultMessage: 'No history available.',
 });
-const PROCESSED_LABEL = i18n.translate('xpack.nightshift.detectionDetailsFlyout.processedLabel', {
-  defaultMessage: 'Processed',
-});
-const PENDING_LABEL = i18n.translate('xpack.nightshift.detectionDetailsFlyout.pendingLabel', {
-  defaultMessage: 'Pending',
-});
 const HISTORY_KEY = Symbol('nightshiftDetectionDetailsFlyout');
 
 export const DetectionDetailsFlyout = ({
@@ -77,6 +73,7 @@ export const DetectionDetailsFlyout = ({
   const historyQuery = useDetectionHistory(detection.rule_uuid);
   const openInChat = useOpenDetectionInChat(detection);
   const title = detection.rule_name ?? detection.rule_uuid;
+  const discoveryBadge = getDetectionDiscoveryBadge(detection);
   const getShareUrl = useCallback(
     () => buildNightshiftSignalFlyoutShareUrl(detection.detection_id),
     [detection.detection_id]
@@ -133,8 +130,13 @@ export const DetectionDetailsFlyout = ({
         <FlyoutTemplate.Header.Badge color="hollow">
           {getChangePointLabel(detection.change_point_type)}
         </FlyoutTemplate.Header.Badge>
-        <FlyoutTemplate.Header.Badge color={detection.processed ? 'success' : 'hollow'}>
-          {detection.processed ? PROCESSED_LABEL : PENDING_LABEL}
+        <FlyoutTemplate.Header.Badge
+          color={discoveryBadge.color}
+          toolTipContent={
+            detection.skip ? <SkippedDetectionReason skip={detection.skip} /> : undefined
+          }
+        >
+          {discoveryBadge.label}
         </FlyoutTemplate.Header.Badge>
         <FlyoutTemplate.Header.Badge color="hollow">
           {getSourceTitle(detection.source_id)}
@@ -172,9 +174,7 @@ export const DetectionDetailsFlyout = ({
                         <EuiBadge color="hollow">{changePointLabel}</EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color={entry.processed ? 'success' : 'hollow'}>
-                          {entry.processed ? PROCESSED_LABEL : PENDING_LABEL}
-                        </EuiBadge>
+                        <DetectionDiscoveryStatus detection={entry} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs" color="subdued">
