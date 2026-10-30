@@ -31,61 +31,6 @@ import { ProposalDismissFailedError } from './proposal_dismiss_failed_error';
 export { MissingDismissReasonError, CloseTargetsChangedError, ProposalDismissFailedError };
 
 /**
- * Determines how to classify a `releaseGate` failure for a single proposal.
- *
- * - `ProposalNotFoundError` → the proposal is gone; skip it.
- * - `ProposalConflictError` → ambiguous: could be "already decided or expired" (skippable) or an
- *   Optimistic Concurrency Control (OCC) / execution race where the proposal is still `pending` (retry-able).
- *   We re-read the proposal to find out.
- * - Anything else → treat as a real failure.
- *
- * We match by `error.name` because cross-plugin class imports are forbidden and the proposals
- * plugin sets `this.name` explicitly on every custom error.
- *
- * @returns
- *   - `'skipped'` — the proposal was already decided, expired, or not found
- *   - `'retry'`   — a conflict but the proposal is still pending; caller should retry once
- *   - `'failed'`  — a non-recoverable failure
- */
-async function classifyReleaseGateError(
-  err: unknown,
-  proposalId: string,
-  proposalsService: {
-    get: (
-      id: string,
-      spaceId: string,
-      request: KibanaRequest
-    ) => Promise<{ decision?: unknown; status: string }>;
-  },
-  spaceId: string,
-  request: KibanaRequest
-): Promise<'skipped' | 'retry' | 'failed'> {
-  if (!(err instanceof Error)) return 'failed';
-
-  if (err.name === 'ProposalNotFoundError') {
-    return 'skipped';
-  }
-
-  if (err.name === 'ProposalConflictError') {
-    // Re-read the proposal to determine its actual state.
-    let proposal: { decision?: unknown; status: string };
-    try {
-      proposal = await proposalsService.get(proposalId, spaceId, request);
-    } catch (readErr) {
-      if (readErr instanceof Error && readErr.name === 'ProposalNotFoundError') {
-        return 'skipped';
-      }
-      return 'failed';
-    }
-    // `expired` is itself a non-`pending` status, so the status check alone already covers it.
-    const isSettled = proposal.decision !== undefined || proposal.status !== 'pending';
-    return isSettled ? 'skipped' : 'retry';
-  }
-
-  return 'failed';
-}
-
-/**
  * Checks that no pending proposal is unknown to the caller.
  *
  * Proposals that were in `expectedIds` but are no longer pending are fine — they were
@@ -329,54 +274,31 @@ export class InvestigationStatusService {
           // assertCanManage throws a Kibana forbidden error (403) if not allowed.
           await proposals.getProposalPrivileges().assertCanManage(request);
 
-          const proposalsService = proposals.getProposalsService();
-          const releaseParams = {
-            approved: false as const,
-            dismissReason: body.dismiss_reason as DismissReason,
-            rationale: body.rationale,
-            spaceId,
-            request,
-          };
+          const { released, skipped, failed } = await proposals
+            .getProposalsService()
+            .bulkDismiss(
+              {
+                ids: pending.map(({ id }) => id),
+                dismissReason: body.dismiss_reason as DismissReason,
+                rationale: body.rationale,
+              },
+              { spaceId, request }
+            )
+            .catch((error: unknown) => {
+              // A rejection comes before any gate is released, so every one is still pending.
+              this.logger.error(
+                `Failed to dismiss the pending proposals of investigation ${conversationId}: ${error}`
+              );
+              throw new ProposalDismissFailedError(pending.map(({ id }) => id));
+            });
 
-          const dismissOutcomes = await Promise.all(
-            pending.map(async (p) => {
-              try {
-                await proposalsService.releaseGate(p.id, releaseParams);
-                return { id: p.id, outcome: 'dismissed' as const };
-              } catch (firstErr) {
-                const classification = await classifyReleaseGateError(
-                  firstErr,
-                  p.id,
-                  proposalsService,
-                  spaceId,
-                  request
-                );
-                if (classification === 'skipped') {
-                  return { id: p.id, outcome: 'skipped' as const };
-                }
-                if (classification === 'retry') {
-                  // Proposal is still pending — retry once.
-                  try {
-                    await proposalsService.releaseGate(p.id, releaseParams);
-                    return { id: p.id, outcome: 'dismissed' as const };
-                  } catch {
-                    return { id: p.id, outcome: 'failed' as const };
-                  }
-                }
-                return { id: p.id, outcome: 'failed' as const };
-              }
-            })
-          );
-
-          for (const { id: proposalId, outcome } of dismissOutcomes) {
-            if (outcome === 'dismissed') {
-              dismissedProposalIds.push(proposalId);
-            } else if (outcome === 'skipped') {
-              this.logger.debug(`Proposal ${proposalId} was already decided or expired, skipping`);
-            } else {
-              this.logger.error(`Failed to dismiss proposal ${proposalId}`);
-              failedProposalIds.push(proposalId);
-            }
+          dismissedProposalIds.push(...released);
+          for (const { id: proposalId, reason } of skipped) {
+            this.logger.debug(`Proposal ${proposalId} was not dismissed (${reason}), skipping`);
+          }
+          for (const { id: proposalId, error } of failed) {
+            this.logger.error(`Failed to dismiss proposal ${proposalId}: ${error}`);
+            failedProposalIds.push(proposalId);
           }
 
           // Do not mark the investigation closed when proposals could not be dismissed.
