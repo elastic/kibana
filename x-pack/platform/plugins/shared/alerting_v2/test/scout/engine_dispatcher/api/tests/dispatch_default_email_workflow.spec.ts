@@ -13,6 +13,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import {
   ALERTING_V2_ACTION_POLICY_CONNECTOR_DISPATCH_ROLE,
   apiTest,
@@ -39,11 +40,13 @@ interface DispatchedAlert {
   alert_url: string;
 }
 
-// The email connector's `__json` service builds the email and returns it instead of sending
-// it. The spec only runs locally because this connector setup has not been checked on Cloud.
+// Running the workflow needs the dispatcher to mint a UIAM API key, which requires
+// `xpack.task_manager.grant_uiam_api_keys=true`. MKI sets it, so this runs on cloud
+// serverless; the default Scout serverless config does not, so local serverless is
+// excluded (hence `@cloud-serverless-observability_complete`, not the local tag).
 apiTest.describe(
   'Dispatcher runs the default email workflow of a simple workflow',
-  { tag: ['@local-stateful-classic'] },
+  { tag: [...tags.stateful.all, '@cloud-serverless-observability_complete'] },
   () => {
     let connectorId: string;
     let workflowId: string;
