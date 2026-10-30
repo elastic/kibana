@@ -40,6 +40,41 @@ describe('getAggregationConfigChanges', () => {
         metric_type: 'histogram',
         previous_aggregation: 'p95',
         new_aggregation: 'p99',
+        previous_visualization: 'lnsXY',
+        new_visualization: 'lnsXY',
+      },
+    ]);
+  });
+
+  it('reports the chart change and keeps the percentile as the type', () => {
+    expect(
+      getAggregationConfigChanges(gridSettings, {
+        histogramVisualization: 'lnsHeatmap',
+      })
+    ).toEqual([
+      {
+        metric_type: 'histogram',
+        previous_aggregation: 'p95',
+        new_aggregation: 'p95',
+        previous_visualization: 'lnsXY',
+        new_visualization: 'lnsHeatmap',
+      },
+    ]);
+  });
+
+  it('reports a percentile fallback change while the heatmap stays selected', () => {
+    expect(
+      getAggregationConfigChanges(
+        { ...gridSettings, histogramVisualization: 'lnsHeatmap' },
+        { histogramPercentile: 'p50' }
+      )
+    ).toEqual([
+      {
+        metric_type: 'histogram',
+        previous_aggregation: 'p95',
+        new_aggregation: 'p50',
+        previous_visualization: 'lnsHeatmap',
+        new_visualization: 'lnsHeatmap',
       },
     ]);
   });

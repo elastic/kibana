@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useImperativeHandle } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import { createTextFragment, NON_BREAKING_SPACE } from './utils';
@@ -61,6 +61,18 @@ const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCo
       </button>
     </div>
   )
+);
+
+const mockMenuHandleKeyDown = jest.fn();
+
+const KeyboardMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  (_props, ref) => {
+    useImperativeHandle(ref, () => ({
+      isKeyDownEventHandled: (event) => event.key === 'Enter',
+      handleKeyDown: mockMenuHandleKeyDown,
+    }));
+    return <div />;
+  }
 );
 
 const mockOnSubmit = jest.fn();
@@ -184,6 +196,22 @@ describe('MessageEditor', () => {
     expect(editor).toHaveAttribute('aria-disabled', 'true');
   });
 
+  it('renders as a plain text editor when enabled', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    expect(screen.getByTestId('messageEditor')).toHaveAttribute(
+      'contentEditable',
+      'plaintext-only'
+    );
+  });
+
   it('does not submit form during IME composition', () => {
     const { messageEditor } = createMockMessageEditor();
     render(
@@ -255,6 +283,52 @@ describe('MessageEditor', () => {
       shiftKey: false,
     });
     expect(mockOnSubmit).toHaveBeenCalled();
+  });
+
+  describe('Enter with an active command', () => {
+    const renderWithActiveCommand = (hasVisibleContent: boolean) => {
+      const { messageEditor } = createMockMessageEditor();
+      messageEditor.commandMatch = {
+        isActive: true,
+        activeCommand: {
+          command: {
+            id: CommandId.Skill,
+            sequence: '/',
+            name: 'Skill',
+            scheme: 'skill',
+            menuComponent: KeyboardMenuComponent,
+          },
+          commandStartOffset: 0,
+          query: 'foo bar',
+        },
+        hasVisibleContent,
+      };
+      render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          data-test-subj="messageEditor"
+        />
+      );
+    };
+
+    it('lets the visible menu handle Enter', () => {
+      renderWithActiveCommand(true);
+
+      fireEvent.keyDown(screen.getByTestId('messageEditor'), { key: 'Enter' });
+
+      expect(mockMenuHandleKeyDown).toHaveBeenCalled();
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits on Enter when the menu is hidden', () => {
+      renderWithActiveCommand(false);
+
+      fireEvent.keyDown(screen.getByTestId('messageEditor'), { key: 'Enter' });
+
+      expect(mockMenuHandleKeyDown).not.toHaveBeenCalled();
+      expect(mockOnSubmit).toHaveBeenCalled();
+    });
   });
 
   it('calls dismissCommand when Escape is pressed', () => {
@@ -340,7 +414,7 @@ describe('MessageEditor', () => {
     expect(screen.getByTestId('commandMenuPopover-content')).toBeInTheDocument();
   });
 
-  it('preserves line breaks when pasting plain text', () => {
+  it('leaves plain text paste to the browser so it stays in the native undo history', () => {
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -351,33 +425,16 @@ describe('MessageEditor', () => {
     );
 
     const editor = screen.getByTestId('messageEditor');
+    const text = ['first line', '', 'third line'].join('\n');
 
-    editor.focus();
-    const range = document.createRange();
-    range.setStart(editor, 0);
-    range.collapse(true);
-    const sel = window.getSelection()!;
-    sel.removeAllRanges();
-    sel.addRange(range);
-
-    const text = [
-      'Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.',
-      '',
-      'You can review and edit everything before enabling the rule. ',
-      'Desired behavior or activity to detect:',
-      '',
-      '==== YOUR DESCRIPTION HERE====',
-    ].join('\n');
-
-    fireEvent.paste(editor, {
+    const notPrevented = fireEvent.paste(editor, {
       clipboardData: {
         getData: (type: string) => (type === 'text/plain' ? text : ''),
       },
     });
 
-    expect(editor.querySelectorAll('br').length).toBe(5);
-    expect(editor.textContent).toContain('Create ES|QL SIEM detection rule');
-    expect(editor.textContent).toContain('==== YOUR DESCRIPTION HERE====');
+    expect(notPrevented).toBe(true);
+    expect(editor.innerHTML).toBe('');
   });
 
   it('preserves a valid command badge when pasting HTML', () => {
@@ -651,7 +708,7 @@ describe('MessageEditor', () => {
     expect(editor.querySelector('[data-image-placeholder]')).toBeNull();
   });
 
-  it('plain-text paste still works when an image paste handler is registered', () => {
+  it('leaves plain-text paste to the browser when an image paste handler is registered', () => {
     const onPasteFile = jest.fn();
     const { messageEditor } = createMockMessageEditor();
     render(
@@ -671,7 +728,7 @@ describe('MessageEditor', () => {
     window.getSelection()!.removeAllRanges();
     window.getSelection()!.addRange(range);
 
-    fireEvent.paste(editor, {
+    const notPrevented = fireEvent.paste(editor, {
       clipboardData: {
         getData: (type: string) => (type === 'text/plain' ? 'hello world' : ''),
         items: [],
@@ -679,7 +736,7 @@ describe('MessageEditor', () => {
     });
 
     expect(onPasteFile).not.toHaveBeenCalled();
-    expect(editor.textContent).toContain('hello world');
+    expect(notPrevented).toBe(true);
   });
 
   it('clicking the cross icon removes the chip and fires onChange and onAfterInput', () => {

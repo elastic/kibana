@@ -6,7 +6,6 @@
  */
 
 export const SERVICE_MAP_EBT_ELEMENTS = {
-  CONNECTION_POPOVER: 'serviceMapConnectionPopover',
   SECTION_HEADER_LINK: 'serviceMapSectionHeaderLink',
   AGENT_ATTACHMENT_LINK: 'serviceMapAgentAttachmentLink',
 } as const;
