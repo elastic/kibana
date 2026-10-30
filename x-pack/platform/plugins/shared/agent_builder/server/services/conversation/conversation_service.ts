@@ -18,6 +18,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
+import { createAgentExecutionClient } from '../execution/persistence';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
 import type { ConversationEventsServiceStart } from '../conversation_events';
@@ -29,6 +30,8 @@ export interface ConversationService {
   getScopedClientAsUser(options: {
     request: KibanaRequest;
     user: CurrentUser;
+    /** Service account the execution runs as; see `GetAgentOptions.runAs`. */
+    runAs?: string;
   }): Promise<ConversationClient>;
 }
 
@@ -90,19 +93,23 @@ export class ConversationServiceImpl implements ConversationService {
   async getScopedClientAsUser({
     request,
     user,
+    runAs,
   }: {
     request: KibanaRequest;
     user: CurrentUser;
+    runAs?: string;
   }): Promise<ConversationClient> {
-    return this.createScopedClient({ request, user });
+    return this.createScopedClient({ request, user, runAs });
   }
 
   private async createScopedClient({
     request,
     user,
+    runAs,
   }: {
     request: KibanaRequest;
     user: CurrentUser;
+    runAs?: string;
   }): Promise<ConversationClient> {
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
@@ -112,7 +119,9 @@ export class ConversationServiceImpl implements ConversationService {
 
     return createClient({
       user,
+      runAs,
       esClient,
+      executionClient: createAgentExecutionClient({ logger: this.logger, esClient }),
       logger: this.logger,
       space,
       agentRegistry,

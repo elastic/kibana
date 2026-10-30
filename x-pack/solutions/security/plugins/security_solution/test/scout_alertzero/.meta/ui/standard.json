@@ -1,5 +1,5 @@
 {
-  "sha1": "e6d48145a015e6c3d2c619aedcd523999eae7018",
+  "sha1": "60e4b7639dd966bd9a0f52d98a7b617c3380107a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 63,
-        "column": 30
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 77,
+        "line": 44,
         "column": 29
       }
     },
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 101,
-        "column": 20
+        "line": 71,
+        "column": 32
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 36,
-        "column": 27
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 57,
-        "column": 33
+        "line": 50,
+        "column": 27
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 90,
-        "column": 31
+        "line": 78,
+        "column": 77
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 143,
-        "column": 29
+        "line": 125,
+        "column": 32
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_intro.spec.ts",
-        "line": 56,
-        "column": 31
+        "line": 54,
+        "column": 77
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 50,
-        "column": 52
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 65,
-        "column": 33
+        "line": 44,
+        "column": 77
       }
     },
     {
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 80,
-        "column": 26
+        "line": 61,
+        "column": 11
       }
     },
     {
@@ -196,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 100,
-        "column": 52
+        "line": 81,
+        "column": 65
       }
     },
     {
@@ -210,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 118,
-        "column": 32
+        "line": 98,
+        "column": 19
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
-        "line": 53,
-        "column": 32
+        "line": 25,
+        "column": 9
       }
     },
     {
@@ -238,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
-        "line": 98,
-        "column": 29
+        "line": 61,
+        "column": 30
       }
     },
     {
@@ -252,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 45,
-        "column": 26
+        "line": 43,
+        "column": 16
       }
     },
     {
@@ -266,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 61,
-        "column": 33
+        "line": 57,
+        "column": 77
       }
     },
     {
@@ -280,8 +280,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 117,
-        "column": 33
+        "line": 88,
+        "column": 27
+      }
+    },
+    {
+      "id": "12e1f9dc0a1a5b4-20dcfefc21169df",
+      "title": "AlertZero queue page width keeps the trend charts within the window and resizes them when it narrows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/queue_page_width.spec.ts",
+        "line": 54,
+        "column": 26
       }
     },
     {
@@ -294,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
-        "line": 34,
-        "column": 1
+        "line": 31,
+        "column": 19
       }
     },
     {
@@ -308,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 45,
+        "column": 35
       }
     }
   ]

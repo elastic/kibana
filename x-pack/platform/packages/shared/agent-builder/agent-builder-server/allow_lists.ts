@@ -15,7 +15,7 @@ import {
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { chatAgentTypeId, relevantSkillsHookId } from '@kbn/agent-builder-common';
 import type { SkillDefinition } from './skills/type_definition';
 import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
@@ -246,7 +246,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
   'significant-events-assessment',
-  'streams-investigation-management',
   'knowledge-indicators-management',
   'nightshift-sources-management',
   'ki-identification-management',
@@ -473,7 +472,10 @@ export const isAllowedBuiltinAttachment = (
  * This is a manually maintained list of all cycle hooks registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
  */
-export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+export const AGENT_BUILDER_CYCLE_HOOKS = [
+  // Platform
+  relevantSkillsHookId,
+] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
 

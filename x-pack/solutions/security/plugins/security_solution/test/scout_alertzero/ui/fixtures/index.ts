@@ -5,24 +5,35 @@
  * 2.0.
  */
 
-import { spaceTest as spaceBaseTest, apiTest, tags } from '@kbn/scout-security';
-import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
+import { spaceTest as spaceBaseTest, test as baseTest, apiTest, tags } from '@kbn/scout-security';
+import type {
+  ScoutPage,
+  SecurityPageObjects,
+  SecurityTestFixtures,
+  SecurityWorkerFixtures,
+} from '@kbn/scout-security';
 import { extendPageObjects, type AlertZeroPageObjects } from './page_objects';
 
 export interface AlertZeroTestFixtures {
   pageObjects: AlertZeroPageObjects;
 }
 
-export const spaceTest = spaceBaseTest.extend<AlertZeroTestFixtures>({
-  pageObjects: async (
-    { pageObjects, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
-    use: (pageObjects: AlertZeroPageObjects) => Promise<void>
-  ) => {
-    await use(extendPageObjects(pageObjects, page));
-  },
-});
+const pageObjects = async (
+  { pageObjects: base, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
+  use: (pageObjects: AlertZeroPageObjects) => Promise<void>
+) => {
+  await use(extendPageObjects(base, page));
+};
+
+export const test = baseTest.extend<
+  SecurityTestFixtures & AlertZeroTestFixtures,
+  SecurityWorkerFixtures
+>({ pageObjects });
+
+export const spaceTest = spaceBaseTest.extend<AlertZeroTestFixtures>({ pageObjects });
 
 export { apiTest, tags };
+export * as testData from './constants';
 export { ALERTZERO_READ_ONLY_ROLE, TI_HEADERS } from './constants';
 export {
   createApi,
