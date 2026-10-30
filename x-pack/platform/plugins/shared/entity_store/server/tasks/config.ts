@@ -50,7 +50,8 @@ export const TasksConfig = {
   [EntityStoreTaskType.enum.statusReport]: {
     title: 'Entity Store - Status Report Task',
     type: 'entity_store:v2:status_report_task',
-    timeout: '5m',
+    // Runs every 12h. Isolated metadata queries get their own timeouts inside this budget.
+    timeout: '10m',
     interval: '12h',
   },
   [EntityStoreTaskType.enum.legacySecurityAssetsMigration]: {
