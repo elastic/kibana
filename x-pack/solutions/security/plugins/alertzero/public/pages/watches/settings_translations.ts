@@ -49,7 +49,7 @@ export const THREAT_INTEL_SUPPLY_INGEST_LABEL = i18n.translate(
 
 export const THREAT_INTEL_SUPPLY_ENRICH_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.enrichLabel',
-  { defaultMessage: 'Enrich' }
+  { defaultMessage: 'Enrich threat report' }
 );
 
 export const THREAT_INTEL_SUPPLY_ATTRIBUTE_LABEL = i18n.translate(
