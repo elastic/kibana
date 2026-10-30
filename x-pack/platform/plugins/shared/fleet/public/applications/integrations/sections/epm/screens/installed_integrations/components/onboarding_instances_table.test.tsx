@@ -1,0 +1,464 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { screen, act, within, waitFor } from '@testing-library/react';
+
+import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
+import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
+
+import { OnboardingInstancesTable } from './onboarding_instances_table';
+
+const mockNavigateToApp = jest.fn();
+const mockAddSuccess = jest.fn();
+const mockAddError = jest.fn();
+
+jest.mock('../../../../../../../hooks', () => {
+  const originalModule = jest.requireActual('../../../../../../../hooks');
+  return {
+    ...originalModule,
+    useStartServices: jest.fn(() => ({
+      application: { navigateToApp: mockNavigateToApp },
+      notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
+    })),
+    useAuthz: jest.fn(),
+    useLink: jest.fn(() => ({
+      getHref: (page: string, values?: { kuery?: string }) =>
+        `/app/fleet/${page}?kuery=${encodeURIComponent(values?.kuery ?? '')}`,
+    })),
+    sendDeleteCloudOnboardingDeployment: jest.fn(),
+  };
+});
+
+jest.mock('./onboarding_instance_agent_flyout', () => ({
+  OnboardingInstanceAgentFlyout: (props: {
+    agentPolicyId: string;
+    packagePolicy: { name: string };
+  }) => (
+    <div data-test-subj="instanceAgentFlyout">
+      {props.agentPolicyId} {props.packagePolicy.name}
+    </div>
+  ),
+}));
+
+jest.mock('../hooks/use_onboarding_instances_agents', () => ({
+  useOnboardingInstancesAgents: jest.fn(),
+}));
+
+import { sendDeleteCloudOnboardingDeployment, useAuthz } from '../../../../../../../hooks';
+import { useOnboardingInstancesAgents } from '../hooks/use_onboarding_instances_agents';
+
+const mockUseAuthz = useAuthz as jest.Mock;
+const mockSendDelete = sendDeleteCloudOnboardingDeployment as jest.Mock;
+
+const mockUseOnboardingInstancesAgents = useOnboardingInstancesAgents as jest.Mock;
+
+const authzWith = ({
+  allAgentPolicies = false,
+  allIntegrations = false,
+  readAgents = false,
+} = {}) => ({
+  fleet: { allAgentPolicies, readAgents },
+  integrations: { all: allIntegrations },
+});
+
+const makeOnboardingInstance = (
+  overrides: Partial<CloudOnboardingDeploymentListItem> = {}
+): CloudOnboardingDeploymentListItem => ({
+  id: 'deployment-1',
+  provider: 'aws',
+  mechanisms: ['managed_integration', 'ecf'],
+  integrationName: 'AWS-collection-1',
+  services: ['cloudtrail', 'vpcflow', 'elb_logs'],
+  serviceNames: {
+    cloudtrail: 'AWS CloudTrail',
+    vpcflow: 'AWS VPC Flow Logs',
+    elb_logs: 'AWS ELB',
+  },
+  status: 'succeeded',
+  attemptCount: 1,
+  packageNames: ['aws', 'aws_bedrock'],
+  updatedBy: 'elastic',
+  updatedAt: '2026-10-20T10:00:00.000Z',
+  packages: [
+    { name: 'aws', title: 'AWS', version: '8.11.0' },
+    { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.2.0' },
+  ],
+  servicesByMethod: { managed_integration: ['cloudtrail', 'vpcflow'], ecf: ['elb_logs'] },
+  agentCount: 5,
+  ...overrides,
+});
+
+describe('OnboardingInstancesTable', () => {
+  const renderTable = (
+    onboardingInstances: CloudOnboardingDeploymentListItem[],
+    packageName = 'aws',
+    {
+      totalItemCount = onboardingInstances.length,
+      onPageChange = jest.fn(),
+    }: { totalItemCount?: number; onPageChange?: (pageIndex: number) => void } = {}
+  ) =>
+    createIntegrationsTestRendererMock().render(
+      <OnboardingInstancesTable
+        onboardingInstances={onboardingInstances}
+        packageName={packageName}
+        pagination={{ pageIndex: 0, pageSize: 20, totalItemCount }}
+        onPageChange={onPageChange}
+      />
+    );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAuthz.mockReturnValue(authzWith({ allAgentPolicies: true }));
+    mockSendDelete.mockResolvedValue({ id: 'deployment-1' });
+    mockUseOnboardingInstancesAgents.mockReturnValue({
+      agentsByOnboardingInstance: new Map(),
+      agentPolicyIdsByOnboardingInstance: new Map(),
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  it('renders one row per instance with its name, user and agents', () => {
+    renderTable([
+      makeOnboardingInstance(),
+      makeOnboardingInstance({ id: 'deployment-2', integrationName: 'Two' }),
+    ]);
+
+    expect(screen.getAllByTestId('instancesTableRow')).toHaveLength(2);
+    expect(screen.getByText('AWS-collection-1')).toBeInTheDocument();
+    expect(screen.getByText('Two')).toBeInTheDocument();
+    expect(screen.getAllByText('elastic')).toHaveLength(2);
+  });
+
+  it('falls back to the deployment name, then the id, without an integration name', () => {
+    renderTable([
+      makeOnboardingInstance({ integrationName: undefined, deploymentName: 'stack-name' }),
+      makeOnboardingInstance({ id: 'deployment-2', integrationName: undefined }),
+    ]);
+
+    expect(screen.getByText('stack-name')).toBeInTheDocument();
+    expect(screen.getByText('deployment-2')).toBeInTheDocument();
+  });
+
+  it('shows a service count per deployment method', () => {
+    renderTable([makeOnboardingInstance()]);
+
+    const row = screen.getByTestId('instancesTableRow');
+    expect(within(row).getByText('2')).toBeInTheDocument();
+    expect(within(row).getByText('1')).toBeInTheDocument();
+  });
+
+  it('shows the service titles by method in a tooltip', async () => {
+    renderTable([makeOnboardingInstance()]);
+
+    const row = screen.getByTestId('instancesTableRow');
+    await act(async () => {
+      within(row).getByText('2').focus();
+    });
+
+    expect(
+      await screen.findByText('Managed integration: AWS CloudTrail, AWS VPC Flow Logs')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the version of the package being viewed', () => {
+    renderTable([makeOnboardingInstance()], 'aws_bedrock');
+
+    const row = screen.getByTestId('instancesTableRow');
+    expect(within(row).getByText('1.2.0')).toBeInTheDocument();
+    expect(within(row).queryByText('8.11.0')).not.toBeInTheDocument();
+  });
+
+  it('shows the version of another package of the instance when that one is viewed', () => {
+    renderTable([makeOnboardingInstance()], 'aws');
+
+    const row = screen.getByTestId('instancesTableRow');
+    expect(within(row).getByText('8.11.0')).toBeInTheDocument();
+    expect(within(row).queryByText('1.2.0')).not.toBeInTheDocument();
+  });
+
+  it('shows a dash when the instance has no policy of the package being viewed', () => {
+    renderTable([makeOnboardingInstance({ packages: [] })], 'aws');
+
+    const row = screen.getByTestId('instancesTableRow');
+    expect(within(row).queryByText('8.11.0')).not.toBeInTheDocument();
+    expect(within(row).getAllByText('-').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it.each([
+    [4, 'Elastic Cloud Forwarder: A, B, C and 1 more service'],
+    [6, 'Elastic Cloud Forwarder: A, B, C and 3 more services'],
+  ])('names up to 3 of %i services in a tooltip and counts the rest', async (count, tooltip) => {
+    const ids = ['a', 'b', 'c', 'd', 'e', 'f'].slice(0, count);
+    renderTable([
+      makeOnboardingInstance({
+        services: ids,
+        serviceNames: Object.fromEntries(ids.map((id) => [id, id.toUpperCase()])),
+        servicesByMethod: { ecf: ids },
+      }),
+    ]);
+
+    const row = screen.getByTestId('instancesTableRow');
+    await act(async () => {
+      within(row).getByText(String(count)).focus();
+    });
+
+    expect(await screen.findByText(tooltip)).toBeInTheDocument();
+  });
+
+  it('shows dashes where an instance has no policies, like an ECF-only instance', () => {
+    renderTable([
+      makeOnboardingInstance({
+        mechanisms: ['ecf'],
+        packages: [],
+        servicesByMethod: { ecf: ['elb_logs'] },
+        agentCount: 0,
+        updatedBy: undefined,
+        updatedAt: undefined,
+      }),
+    ]);
+
+    const row = screen.getByTestId('instancesTableRow');
+    expect(within(row).getAllByText('-').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('opens the instance in the onboarding app without starting a new session', async () => {
+    renderTable([makeOnboardingInstance()]);
+
+    await act(async () => {
+      screen.getByTestId('instanceLink').click();
+    });
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
+      path: '/aws?deploymentId=deployment-1',
+    });
+  });
+
+  describe('delete action', () => {
+    const openDeleteModal = async () => {
+      await act(async () => {
+        screen.getByTestId('deleteInstanceAction').click();
+      });
+      return screen.getByTestId('deleteInstanceModal');
+    };
+
+    it.each([
+      ['agent policies', { allAgentPolicies: true }],
+      ['integrations', { allIntegrations: true }],
+    ])('is offered with write access to %s', (_, access) => {
+      mockUseAuthz.mockReturnValue(authzWith(access));
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.getByTestId('deleteInstanceAction')).toBeInTheDocument();
+    });
+
+    it('is not offered without write access', () => {
+      mockUseAuthz.mockReturnValue(authzWith());
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.queryByTestId('deleteInstanceAction')).not.toBeInTheDocument();
+    });
+
+    it('asks for confirmation and explains what is kept', async () => {
+      renderTable([makeOnboardingInstance()]);
+
+      const modal = await openDeleteModal();
+
+      expect(within(modal).getByText('Delete instance AWS-collection-1?')).toBeInTheDocument();
+      expect(
+        within(modal).getByText(/are not removed and keep collecting data/)
+      ).toBeInTheDocument();
+      expect(mockSendDelete).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when cancelled', async () => {
+      renderTable([makeOnboardingInstance()]);
+      const modal = await openDeleteModal();
+
+      await act(async () => {
+        within(modal).getByTestId('confirmModalCancelButton').click();
+      });
+
+      expect(screen.queryByTestId('deleteInstanceModal')).not.toBeInTheDocument();
+      expect(mockSendDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes the instance on confirm and closes the modal', async () => {
+      renderTable([makeOnboardingInstance()]);
+      const modal = await openDeleteModal();
+
+      await act(async () => {
+        within(modal).getByTestId('confirmModalConfirmButton').click();
+      });
+
+      expect(mockSendDelete).toHaveBeenCalledWith('deployment-1');
+      expect(mockAddSuccess).toHaveBeenCalledWith('Deleted instance AWS-collection-1');
+      await waitFor(() =>
+        expect(screen.queryByTestId('deleteInstanceModal')).not.toBeInTheDocument()
+      );
+    });
+
+    it('shows an error and keeps the modal open when the delete fails', async () => {
+      const error = new Error('boom');
+      mockSendDelete.mockRejectedValue(error);
+      renderTable([makeOnboardingInstance()]);
+      const modal = await openDeleteModal();
+
+      await act(async () => {
+        within(modal).getByTestId('confirmModalConfirmButton').click();
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(error, {
+        title: 'Could not delete instance AWS-collection-1',
+      });
+      expect(screen.getByTestId('deleteInstanceModal')).toBeInTheDocument();
+    });
+  });
+
+  describe('status column', () => {
+    const packagePolicy = {
+      id: 'pp1',
+      name: 'aws-1',
+      policy_ids: ['agentless-1'],
+      package: { name: 'aws', version: '8.11.0' },
+      inputs: [],
+    };
+
+    beforeEach(() => {
+      mockUseAuthz.mockReturnValue(authzWith({ readAgents: true }));
+      mockUseOnboardingInstancesAgents.mockReturnValue({
+        agentsByOnboardingInstance: new Map([
+          [
+            'deployment-1',
+            [
+              {
+                agent: { id: 'a1', status: 'online', local_metadata: { host: { hostname: 'h1' } } },
+                agentPolicyId: 'agentless-1',
+                packagePolicy,
+              },
+            ],
+          ],
+        ]),
+        agentPolicyIdsByOnboardingInstance: new Map([
+          ['deployment-1', ['agentless-1', 'agentless-2']],
+        ]),
+        isLoading: false,
+        error: null,
+      });
+    });
+
+    it('is shown to users who can read agents', () => {
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByTestId('instanceAgentStatus')).toBeInTheDocument();
+      expect(mockUseOnboardingInstancesAgents).toHaveBeenCalledWith(expect.any(Array), {
+        enabled: true,
+      });
+    });
+
+    it('is hidden from users who cannot read agents', () => {
+      mockUseAuthz.mockReturnValue(authzWith());
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.queryByText('Status')).not.toBeInTheDocument();
+      expect(mockUseOnboardingInstancesAgents).toHaveBeenCalledWith(expect.any(Array), {
+        enabled: false,
+      });
+    });
+
+    it('opens the status flyout of the shown agent', async () => {
+      renderTable([makeOnboardingInstance()]);
+
+      await act(async () => {
+        screen.getByTestId('instanceAgentStatus').click();
+      });
+
+      expect(screen.getByTestId('instanceAgentFlyout')).toHaveTextContent('agentless-1 aws-1');
+    });
+
+    it('reports an agent loading error', () => {
+      const error = new Error('boom');
+      mockUseOnboardingInstancesAgents.mockReturnValue({
+        agentsByOnboardingInstance: new Map(),
+        agentPolicyIdsByOnboardingInstance: new Map(),
+        isLoading: false,
+        error,
+      });
+      renderTable([makeOnboardingInstance()]);
+
+      expect(mockAddError).toHaveBeenCalledWith(error, {
+        title: 'Could not load the agent status of the instances',
+      });
+    });
+
+    it('links the agent count of an agent-based instance to the Fleet agent list of its agent policies', () => {
+      renderTable([makeOnboardingInstance({ mechanisms: ['agent_based'] })]);
+
+      const link = screen.getByTestId('instanceAgentsLink');
+      expect(link).toHaveTextContent('5');
+      const href = decodeURIComponent(link.getAttribute('href') ?? '');
+      expect(href).toContain('agentless-1');
+      expect(href).toContain('agentless-2');
+    });
+
+    it('shows the agent count of a managed instance without a link, since Fleet hides agentless agents', () => {
+      renderTable([makeOnboardingInstance({ mechanisms: ['managed_integration'] })]);
+
+      expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    it('warns when not every agent could be loaded', () => {
+      mockUseOnboardingInstancesAgents.mockReturnValue({
+        agentsByOnboardingInstance: new Map(),
+        agentPolicyIdsByOnboardingInstance: new Map(),
+        isTruncated: true,
+        isLoading: false,
+        error: null,
+      });
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.getByTestId('instancesAgentsTruncated')).toBeInTheDocument();
+    });
+
+    it('does not warn when every agent was loaded', () => {
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.queryByTestId('instancesAgentsTruncated')).not.toBeInTheDocument();
+    });
+
+    it('hides the agent count from users who cannot read agents', () => {
+      mockUseAuthz.mockReturnValue(authzWith());
+      renderTable([makeOnboardingInstance({ mechanisms: ['agent_based'] })]);
+
+      expect(screen.queryByText('Agents')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
+      expect(screen.queryByText('5')).not.toBeInTheDocument();
+    });
+
+    it('shows a dash instead of a link without agents', () => {
+      renderTable([makeOnboardingInstance({ agentCount: 0 })]);
+
+      expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('pagination', () => {
+    it('asks for another page from the pagination controls', async () => {
+      const onPageChange = jest.fn();
+      renderTable([makeOnboardingInstance()], 'aws', { totalItemCount: 25, onPageChange });
+
+      await act(async () => {
+        screen.getByTestId('pagination-button-1').click();
+      });
+
+      expect(onPageChange).toHaveBeenCalledWith(1);
+    });
+  });
+});

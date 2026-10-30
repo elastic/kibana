@@ -149,6 +149,141 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('list', () => {
+    const attributePath = (name: string) =>
+      `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.${name}`;
+
+    it('lists deployments newest first with their update time', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            ...makeSOResponse('deploy-1', makeAttributes({ packageNames: ['aws'] })),
+            updated_at: '2026-10-20T10:00:00.000Z',
+            score: 1,
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      const result = await cloudOnboardingDeploymentService.list(soClient);
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          page: 1,
+          perPage: 20,
+        })
+      );
+      expect(soClient.find.mock.calls[0][0].filter).toBeUndefined();
+      expect(result).toEqual({
+        items: [
+          expect.objectContaining({
+            id: 'deploy-1',
+            packageNames: ['aws'],
+            updatedAt: '2026-10-20T10:00:00.000Z',
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 20,
+      });
+    });
+
+    it('filters by package name and provider and passes pagination through', async () => {
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 2, per_page: 5 });
+
+      const result = await cloudOnboardingDeploymentService.list(soClient, {
+        packageName: 'aws_bedrock',
+        provider: 'aws',
+        page: 2,
+        perPage: 5,
+      });
+
+      const { filter, page, perPage } = soClient.find.mock.calls[0][0];
+      expect(page).toBe(2);
+      expect(perPage).toBe(5);
+      expect(JSON.stringify(filter)).toContain(attributePath('packageNames'));
+      expect(JSON.stringify(filter)).toContain('aws_bedrock');
+      expect(JSON.stringify(filter)).toContain(attributePath('provider'));
+      expect(result).toEqual({ items: [], total: 0, page: 2, perPage: 5 });
+    });
+
+    it('lists a deployment saved before packageNames existed', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [{ ...makeSOResponse('old', makeAttributes()), score: 1 }],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      const { items } = await cloudOnboardingDeploymentService.list(soClient, {
+        packageName: 'aws',
+      });
+
+      expect(items[0].packageNames).toBeUndefined();
+    });
+  });
+
+  describe('getCountsByPackage', () => {
+    const findResult = (buckets: Array<{ key: string; doc_count: number }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { by_package: { buckets } },
+      } as any);
+
+    it('counts the deployments of each package with a terms aggregation and no documents', async () => {
+      soClient.find.mockResolvedValue(
+        findResult([
+          { key: 'aws', doc_count: 3 },
+          { key: 'aws_bedrock', doc_count: 1 },
+        ])
+      );
+
+      const counts = await cloudOnboardingDeploymentService.getCountsByPackage(soClient);
+
+      expect(counts).toEqual({ aws: 3, aws_bedrock: 1 });
+      const options = soClient.find.mock.calls[0][0];
+      expect(options).toEqual(
+        expect.objectContaining({
+          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          aggs: {
+            by_package: {
+              terms: {
+                field: `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.packageNames`,
+                size: 1000,
+              },
+            },
+          },
+        })
+      );
+      expect(options.filter).toBeUndefined();
+    });
+
+    it('filters by provider', async () => {
+      soClient.find.mockResolvedValue(findResult([]));
+
+      await cloudOnboardingDeploymentService.getCountsByPackage(soClient, { provider: 'aws' });
+
+      expect(JSON.stringify(soClient.find.mock.calls[0][0].filter)).toContain(
+        `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.provider`
+      );
+    });
+
+    it('returns no counts without deployments', async () => {
+      soClient.find.mockResolvedValue({ ...findResult([]), aggregations: undefined });
+
+      expect(await cloudOnboardingDeploymentService.getCountsByPackage(soClient)).toEqual({});
+    });
+  });
+
   describe('getByConnectorId', () => {
     it('returns all deployments for a connector using soClient PIT finder', async () => {
       const attrs1 = makeAttributes({ mechanisms: ['managed_integration'] });
@@ -288,6 +423,40 @@ describe('cloudOnboardingDeploymentService', () => {
       // Not stored as null: the saved object schema has no null for it.
       expect(writtenAttributes()).not.toHaveProperty('description');
       expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
+  describe('updatedBy', () => {
+    it('stores the user on create', async () => {
+      const attrs = makeAttributes({ updatedBy: 'elastic' });
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+      mockGetByType(soClient, 'deploy-1', attrs);
+
+      await cloudOnboardingDeploymentService.create(
+        soClient,
+        { provider: 'aws', mechanisms: ['managed_integration'], services: ['cloudtrail'] },
+        'elastic'
+      );
+
+      expect(soClient.create.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'elastic' })
+      );
+    });
+
+    it('replaces the user on update and keeps the stored one without a user', async () => {
+      const existing = makeAttributes({ updatedBy: 'first' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {}, 'second');
+      expect(soClient.create.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'second' })
+      );
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {});
+      expect(soClient.create.mock.calls[1][1]).toEqual(
+        expect.objectContaining({ updatedBy: 'first' })
+      );
     });
   });
 
