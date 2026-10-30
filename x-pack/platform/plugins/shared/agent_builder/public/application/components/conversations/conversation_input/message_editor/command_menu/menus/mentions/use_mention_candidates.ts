@@ -94,10 +94,12 @@ export const useMentionCandidates = (
 
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
   const isSearchPending = Boolean(query) && query !== debouncedQuery;
-  const { data: suggestedProfiles, isFetching: isFetchingSuggestions } = useSuggestUsers(
-    query ? debouncedQuery : '',
-    { enabled: isPublic }
-  );
+  const {
+    data: suggestedProfiles,
+    isFetching: isFetchingSuggestions,
+    isPreviousData: isShowingPreviousSuggestions,
+  } = useSuggestUsers(query ? debouncedQuery : '', { enabled: isPublic });
+  const areSuggestionsStale = isSearchPending || isShowingPreviousSuggestions;
 
   const candidates = useMemo(() => {
     if (!isShared) {
@@ -128,10 +130,22 @@ export const useMentionCandidates = (
         .sort(byName)
     );
     if (isPublic) {
-      addUsers((suggestedProfiles ?? []).map(toUserCandidate));
+      const suggestions = (suggestedProfiles ?? []).filter(
+        (profile) => !areSuggestionsStale || profileMatchesQuery(profile, lowerQuery)
+      );
+      addUsers(suggestions.map(toUserCandidate));
     }
     return result;
-  }, [isShared, isPublic, query, agent, currentUser, chatProfiles, suggestedProfiles]);
+  }, [
+    isShared,
+    isPublic,
+    query,
+    agent,
+    currentUser,
+    chatProfiles,
+    suggestedProfiles,
+    areSuggestionsStale,
+  ]);
 
   const isLoading =
     isShared && (isLoadingChatProfiles || (isPublic && (isSearchPending || isFetchingSuggestions)));

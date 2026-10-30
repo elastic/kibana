@@ -19,6 +19,7 @@ import { useMentionCandidates } from './use_mention_candidates';
 const mockUseConversation = jest.fn();
 const mockUseUserProfiles = jest.fn();
 const mockUseSuggestUsers = jest.fn();
+const mockUseDebouncedValue = jest.fn(<T>(value: T) => value);
 
 jest.mock('../../../../../../../hooks/use_conversation', () => ({
   useConversation: () => mockUseConversation(),
@@ -37,7 +38,7 @@ jest.mock('../../../../../../../hooks/use_suggest_users', () => ({
   useSuggestUsers: (...args: unknown[]) => mockUseSuggestUsers(...args),
 }));
 jest.mock('@kbn/react-hooks', () => ({
-  useDebouncedValue: <T>(value: T) => value,
+  useDebouncedValue: (value: unknown) => mockUseDebouncedValue(value),
 }));
 
 const profile = (uid: string, fullName: string): UserProfileWithAvatar => ({
@@ -108,6 +109,7 @@ describe('useMentionCandidates', () => {
       isInitialLoading: false,
     }));
     mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false });
+    mockUseDebouncedValue.mockImplementation((value) => value);
   });
 
   describe('public chat', () => {
@@ -185,6 +187,41 @@ describe('useMentionCandidates', () => {
       expect(names('andrew.br')).toEqual(['Andrew Brown']);
       expect(names('julian@elastic')).toEqual(['Julian Rosado']);
       expect(names('nobody')).toEqual([]);
+    });
+
+    describe('while the suggestions are for an earlier query', () => {
+      beforeEach(() => {
+        mockUseConversation.mockReturnValue(publicChat());
+        // Andrew is listed before Zoe, like the suggestions for the empty query
+        mockUseSuggestUsers.mockReturnValue({ data: [andrew, zoe], isFetching: false });
+      });
+
+      it('drops people that do not match the typed text while the search is debounced', () => {
+        mockUseDebouncedValue.mockReturnValue('');
+
+        expect(names('zo')).toEqual(['Zoe Adams']);
+      });
+
+      it('drops people that do not match the typed text while the search is running', () => {
+        mockUseSuggestUsers.mockReturnValue({
+          data: [andrew, zoe],
+          isFetching: true,
+          isPreviousData: true,
+        });
+
+        expect(names('zo')).toEqual(['Zoe Adams']);
+      });
+
+      it('keeps what the server returns once the search is done', () => {
+        // The server matches more loosely than the typed text
+        mockUseSuggestUsers.mockReturnValue({
+          data: [andrew, zoe],
+          isFetching: false,
+          isPreviousData: false,
+        });
+
+        expect(names('zo')).toEqual(['Andrew Brown', 'Zoe Adams']);
+      });
     });
 
     it('skips an owner that has no user profile', () => {
