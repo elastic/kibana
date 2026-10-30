@@ -13,14 +13,37 @@ import type {
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import {
+  ANNOTATION_CONVERSION_RUNTIME_FIELD,
+  ANNOTATION_CONVERSION_SCRIPTED_FIELD,
   ANNOTATION_CONVERSION_TIME_FIELD,
   buildAnnotationConversionCases,
+  buildAnnotationNonConvertibleCases,
+  type AnnotationConversionInput,
 } from '@kbn/lens-test-helpers';
-import type { IndexPattern, IndexPatternMap } from '../types';
+import type { IndexPattern, IndexPatternField, IndexPatternMap } from '../types';
 import { convertQueryAnnotationsToEsql } from './convert_annotations_to_esql';
 
+const createIndexPattern = ({
+  id,
+  title,
+  timeFieldName,
+  fields = [],
+}: {
+  id: string;
+  title: string;
+  timeFieldName: string;
+  fields?: IndexPatternField[];
+}): IndexPattern =>
+  ({
+    id,
+    title,
+    timeFieldName,
+    fields,
+    getFieldByName: (name: string) => fields.find((field) => field.name === name),
+  } as IndexPattern);
+
 const indexPatterns = {
-  logs: { id: 'logs', title: 'logs-*', timeFieldName: '@timestamp' } as IndexPattern,
+  logs: createIndexPattern({ id: 'logs', title: 'logs-*', timeFieldName: '@timestamp' }),
 } as IndexPatternMap;
 
 const manualAnnotation: PointInTimeEventAnnotationConfig = {
@@ -126,37 +149,49 @@ const MATRIX_INDEX = 'logstash-*';
 
 describe('annotation conversion case matrix (query assertions)', () => {
   const matrixIndexPatterns = {
-    logstash: {
+    logstash: createIndexPattern({
       id: 'logstash',
       title: MATRIX_INDEX,
       timeFieldName: ANNOTATION_CONVERSION_TIME_FIELD,
-    } as IndexPattern,
+      fields: [
+        { name: ANNOTATION_CONVERSION_RUNTIME_FIELD, runtime: true } as IndexPatternField,
+        { name: ANNOTATION_CONVERSION_SCRIPTED_FIELD, scripted: true } as IndexPatternField,
+      ],
+    }),
   } as IndexPatternMap;
+
+  const convertMatrixAnnotation = ({
+    filter,
+    extraFields,
+    ...annotation
+  }: AnnotationConversionInput) =>
+    convertQueryAnnotationsToEsql(
+      {
+        layers: [
+          annotationLayer(
+            [
+              {
+                id: 'annotation',
+                type: 'query',
+                key: { type: 'point_in_time' },
+                label: 'Annotation',
+                ...annotation,
+                ...(filter ? { filter: { type: 'kibana_query', ...filter } } : {}),
+                ...(extraFields ? { extraFields: [...extraFields] } : {}),
+              },
+            ],
+            { indexPatternId: 'logstash' }
+          ),
+        ],
+      },
+      matrixIndexPatterns
+    );
 
   for (const conversionCase of buildAnnotationConversionCases({ index: MATRIX_INDEX })) {
     it(`converts: ${conversionCase.description}`, () => {
-      const { filter, extraFields, ...annotation } = conversionCase.annotation;
-      const state = convertQueryAnnotationsToEsql(
-        {
-          layers: [
-            annotationLayer(
-              [
-                {
-                  id: 'annotation',
-                  type: 'query',
-                  key: { type: 'point_in_time' },
-                  label: 'Annotation',
-                  ...annotation,
-                  ...(filter ? { filter: { type: 'kibana_query', ...filter } } : {}),
-                  ...(extraFields ? { extraFields: [...extraFields] } : {}),
-                },
-              ],
-              { indexPatternId: 'logstash' }
-            ),
-          ],
-        },
-        matrixIndexPatterns
-      ) as { layers: Array<{ annotations: EsqlEventAnnotationConfig[] }> };
+      const state = convertMatrixAnnotation(conversionCase.annotation) as {
+        layers: Array<{ annotations: EsqlEventAnnotationConfig[] }>;
+      };
       const [converted] = state.layers[0].annotations;
 
       expect(converted.query.esql).toBe(conversionCase.expectedEsql);
@@ -164,6 +199,12 @@ describe('annotation conversion case matrix (query assertions)', () => {
       expect(converted.timeField).toBe(conversionCase.expectedTimeColumn);
       expect(converted.textColumn).toBe(conversionCase.expectedTextColumn);
       expect(converted.extraColumns).toEqual(conversionCase.expectedExtraColumns);
+    });
+  }
+
+  for (const nonConvertibleCase of buildAnnotationNonConvertibleCases()) {
+    it(`does not convert: ${nonConvertibleCase.description}`, () => {
+      expect(convertMatrixAnnotation(nonConvertibleCase.annotation)).toBeUndefined();
     });
   }
 });
