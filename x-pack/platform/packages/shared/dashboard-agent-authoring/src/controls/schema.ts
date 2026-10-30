@@ -28,7 +28,7 @@ const dataControlFields = {
       .min(1)
       .max(256)
       .describe(
-        'Index, alias, or datastream to query for values. Use the same index as the panels the control filters (e.g. "logs-*").'
+        'Index, alias, data stream, or pattern to query for values. Use the same index as the panels the control filters (e.g. "logs-*").'
       )
   ),
 };
@@ -47,7 +47,7 @@ const userRequestedFields = {
       .boolean()
       .optional()
       .describe(
-        'True only when the user asked explicitly for the controls. A control that cannot be added is then reported in `failures` instead of left out silently.'
+        'True when the user asked for this control: if it cannot be added, it is then reported in `failures` instead of left out silently.'
       )
   ),
 };
@@ -60,7 +60,7 @@ const controlIdFields = {
       .max(256)
       .optional()
       .describe(
-        'Control id. An existing control id replaces that control in place with this definition, so omitted fields take their defaults; a new id adds a control with this id. Omit it to add a control with a generated readable id, shown in the result.'
+        'Control id. An existing id replaces that control in place with this definition, so omitted fields take their defaults; a new id adds one. Omit it to add a control with a generated readable id, shown in the result.'
       )
   ),
 };

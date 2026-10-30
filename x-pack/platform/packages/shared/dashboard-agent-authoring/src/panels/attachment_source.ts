@@ -18,7 +18,7 @@ export const attachmentPanelInputSchema = lazySchema(() =>
       .string()
       .max(256)
       .describe(
-        "ID of a visualization attachment in this conversation, as returned by create_visualization. The panel is built from the attachment's latest version, so its renderer (Lens, Vega or custom content) determines the panel type."
+        "Id of a visualization attachment in this Agent Builder conversation, as returned by create_visualization. The panel takes the attachment's latest version; its renderer (Lens, Vega or custom content) sets the panel kind."
       ),
   })
 );

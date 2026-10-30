@@ -52,7 +52,7 @@ export const anomalyChartsPanelConfigSchema = lazySchema(() =>
       ])
       .optional()
       .describe(
-        'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
+        'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted.'
       ),
   })
 );
@@ -62,7 +62,7 @@ export const anomalyChartsPanelContentSchema = lazySchema(() =>
     source: z.literal('config'),
     type: z.literal('ml_anomaly_charts'),
     config: anomalyChartsPanelConfigSchema.describe(
-      'Anomaly charts panel configuration. Provide job_ids obtained from prior ML tool results or conversation context. On an existing panel, fully replaces its config.'
+      'Anomaly charts panel config. job_ids are existing anomaly detection job or group ids from earlier results or the user; never guess them. On an existing panel, it replaces the current config in full.'
     ),
   })
 );
@@ -98,7 +98,7 @@ export const anomalySwimlanePanelContentSchema = lazySchema(() =>
     source: z.literal('config'),
     type: z.literal('ml_anomaly_swimlane'),
     config: anomalySwimlaneConfigSchema.describe(
-      'Anomaly swim lane configuration. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity. On an existing panel, fully replaces its config.'
+      'Anomaly swim lane config. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity. On an existing panel, it replaces the current config in full.'
     ),
   })
 );
@@ -127,7 +127,7 @@ export const singleMetricViewerPanelContentSchema = lazySchema(() =>
     source: z.literal('config'),
     type: z.literal('ml_single_metric_viewer'),
     config: singleMetricViewerConfigSchema.describe(
-      'Single metric viewer configuration. job_ids must contain exactly one job ID. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity. On an existing panel, fully replaces its config.'
+      'Single metric viewer config. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity. On an existing panel, it replaces the current config in full.'
     ),
   })
 );

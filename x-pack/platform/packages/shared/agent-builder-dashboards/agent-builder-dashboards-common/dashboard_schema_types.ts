@@ -95,7 +95,7 @@ export const timeRangeSchema = lazySchema(() =>
       .union([z.literal('absolute'), z.literal('relative')])
       .optional()
       .describe(
-        'Optional mode hint. Use "relative" when from/to use date math expressions, "absolute" when using exact ISO 8601 timestamps.'
+        '"relative" when from/to use date math, "absolute" when they are ISO 8601 timestamps.'
       ),
   })
 );

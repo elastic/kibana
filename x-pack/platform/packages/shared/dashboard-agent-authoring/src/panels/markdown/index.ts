@@ -31,7 +31,7 @@ const markdownPanelContentSchema = lazySchema(() =>
     source: z.literal('config'),
     type: z.literal('markdown'),
     config: markdownPanelConfigSchema.describe(
-      'Markdown panel config (e.g. { content }). On an existing panel, fully replaces its config.'
+      'Markdown panel config. On an existing panel, it replaces the current config in full.'
     ),
   })
 );

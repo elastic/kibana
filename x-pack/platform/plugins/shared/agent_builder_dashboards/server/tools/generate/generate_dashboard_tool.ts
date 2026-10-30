@@ -58,7 +58,7 @@ const generateDashboardSchema = lazySchema(() =>
       .max(256)
       .optional()
       .describe(
-        '(optional) The id of the dashboard to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in. An unknown id is an error.'
+        'Id of the dashboard to edit, e.g. the id an earlier call returned; pass the same id on every later edit. Omit it to create a new dashboard. The current dashboard is read from it, so send only the changes. An unknown id is an error.'
       ),
     ...upsertDashboardSchema.shape,
     layout: z
@@ -67,7 +67,7 @@ const generateDashboardSchema = lazySchema(() =>
       .max(1000)
       .optional()
       .describe(
-        'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
+        'Arrangement or size changes the user asked for, in plain words, naming panels by title or id, e.g. "make the table full width" or "re-plan the whole layout". Omit it otherwise: added, moved, and removed panels and sections are placed automatically, so do not describe where your changes go. It can reorder sections and resize or reorder panels within their section or the top level; to move a panel into or out of a section, set its `section` in `panels`.'
       ),
   })
 );
@@ -151,18 +151,11 @@ export const generateDashboardTool = ({
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Create or update a dashboard by describing the desired changes, keyed by id.
+    description: `Create or update a dashboard by sending only the changes. Panels, sections and controls are keyed by id: an existing id updates that item, a new id creates it, and everything you leave out stays unchanged. Make all changes in one call when possible. Each field's description says how to use it well.
 
-Returns the dashboard's id plus a compact summary. Pass that id as \`dashboardId\` to edit the dashboard later.
+Visualization panels are generated server-side from a plain-words \`query\`; do not write ES|QL yourself. Positions and sizes are set automatically.
 
-- \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
-- \`sections\`: sections to create or update.
-- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id.
-- \`controls\`: filters pinned above the dashboard, to add or to replace by id.
-- \`remove\`: ids of panels, sections, or controls to remove.
-- \`layout\`: the user's own arrangement or size request. Omit it otherwise.
-
-Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). Panel positions and sizes are set automatically. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel is visible.`,
+Returns the dashboard's id plus a compact summary. Pass that id as \`dashboardId\` to edit the dashboard later. Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). A new dashboard needs \`title\`, and nothing is created when none of its requested panels and controls can be added. The result lists the ids created, updated and removed, so a mistyped id that created a new panel is visible.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardId: previousAttachmentId, layout, ...upsert },

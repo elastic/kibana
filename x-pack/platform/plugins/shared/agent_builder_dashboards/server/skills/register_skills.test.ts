@@ -57,9 +57,7 @@ describe('registerSkills', () => {
     expect(enhanceGuidance()).toContain('keep by-reference panels');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
-    expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Panel Layout');
+  it('keeps the primary trend phrasing in the skill body', () => {
     expect(skill.content).toContain('show avg/min/max in the legend');
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
@@ -122,6 +120,9 @@ describe('registerSkills', () => {
     expect(guidance).toContain(
       'replace non-ES|QL panels with new ES|QL Lens panels without asking again'
     );
+    expect(guidance).toContain(
+      '3 to 5 `options_list_control` controls on useful categorical fields'
+    );
     expect(guidance).toContain('Keep the existing time range');
     expect(guidance).toContain('In content mode, confirm the resulting panel set');
   });
@@ -131,5 +132,15 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Available chart types');
     expect(skill.content).toContain('- region_map:');
     expect(skill.content).toContain('only when the terms are short strings');
+  });
+
+  it('asks before replacing a panel the tool cannot edit', () => {
+    expect(skill.content).toContain('wait for explicit confirmation before replacing it');
+  });
+
+  it('does not refer to composition guidelines that now live in the tool descriptions', () => {
+    expect(skill.content).not.toContain('Composition Guidelines');
+    expect(enhanceGuidance()).not.toContain('Composition Guidelines');
+    expect(enhanceGuidance()).toContain('as the `sections` description says');
   });
 });
