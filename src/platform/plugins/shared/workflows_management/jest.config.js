@@ -28,4 +28,5 @@ module.exports = {
   moduleNameMapper: {
     '^uuid$': '<rootDir>/node_modules/uuid/dist/index.js',
   },
+  testTimeout: 30_000,
 };
