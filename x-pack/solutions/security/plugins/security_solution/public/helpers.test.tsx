@@ -14,6 +14,8 @@ import {
   getField,
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isRuleCreationPath,
+  isRuleEditPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -297,4 +299,30 @@ describe('isDashboardViewPath', () => {
   it('returns false for dashboard listing path', () => {
     expect(isDashboardViewPath('/dashboards')).toEqual(false);
   });
+});
+
+describe('isRuleCreationPath', () => {
+  it('returns true for the rule creation path', () => {
+    expect(isRuleCreationPath('/rules/create')).toEqual(true);
+  });
+
+  it.each(['/rules', '/rules/management', '/rules/id/123/edit'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleCreationPath(pathname)).toEqual(false);
+    }
+  );
+});
+
+describe('isRuleEditPath', () => {
+  it('returns true for the rule editing path', () => {
+    expect(isRuleEditPath('/rules/id/123/edit')).toEqual(true);
+  });
+
+  it.each(['/rules/id/123', '/rules/id/123/alerts', '/rules/create'])(
+    'returns false for %s',
+    (pathname) => {
+      expect(isRuleEditPath(pathname)).toEqual(false);
+    }
+  );
 });

@@ -60,14 +60,15 @@ import { extractValidationMessages } from '../../../rule_creation/logic/extract_
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
-import { CustomHeaderPageMemo } from '..';
+import { RuleFormAppHeader } from '..';
 import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAddRuleAttachmentToChatMenuItem } from '../../components/add_rule_attachment_to_chat_button';
+import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { PAGE_TITLE as RULE_DETAILS_PAGE_TITLE } from '../../../rule_details_ui/pages/rule_details/translations';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 import { EditRuleFormButtons } from './edit_rule_form_buttons';
@@ -85,7 +86,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     investigationGuide: { edit: canEditInvestigationGuides },
     customHighlightedFields: { edit: canEditCustomHighlightedFields },
   } = useUserPrivileges().rulesPrivileges;
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const hasRulePermissionsForEditPage =
     canEditRules ||
     (canReadRules && canEditInvestigationGuides) ||
@@ -114,14 +114,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
 
-  const backOptions = useMemo(
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
     () => ({
-      path: getRuleDetailsUrl(ruleId ?? ''),
-      text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-      pageId: SecurityPageName.rules,
-      dataTestSubj: 'ruleEditBackToRuleDetails',
+      label: rule?.name ?? RULE_DETAILS_PAGE_TITLE,
+      href: getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsUrl(ruleId ?? ''),
+      }),
     }),
-    [rule?.name, ruleId]
+    [getSecuritySolutionUrl, rule?.name, ruleId]
   );
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
@@ -528,29 +530,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ),
   });
 
-  const addToChatButton = useMemo(
-    () =>
-      isAgentChatExperienceEnabled ? (
-        <AddRuleAttachmentToChatButton
-          defineStepData={defineStepData}
-          aboutStepData={aboutStepData}
-          scheduleStepData={scheduleStepData}
-          actionsStepData={actionsStepData}
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          existingRuleId={rule?.id}
-          pathway="rule_editing"
-        />
-      ) : null,
-    [
-      isAgentChatExperienceEnabled,
-      defineStepData,
-      aboutStepData,
-      scheduleStepData,
-      actionsStepData,
-      triggersActionsUi.actionTypeRegistry,
-      rule?.id,
-    ]
-  );
+  const addToChatMenuItem = useAddRuleAttachmentToChatMenuItem({
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    existingRuleId: rule?.id,
+    pathway: 'rule_editing',
+  });
+
+  const toggleRulePreview = useCallback(() => {
+    collapseFn.current?.();
+    setIsRulePreviewVisible((isVisible) => !isVisible);
+  }, []);
 
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
@@ -594,6 +587,14 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     <>
       {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
+        <RuleFormAppHeader
+          title={i18n.PAGE_TITLE}
+          back={back}
+          isRulePreviewVisible={isRulePreviewVisible}
+          onToggleRulePreview={toggleRulePreview}
+          addToChatMenuItem={addToChatMenuItem}
+        />
+        <EuiSpacer size="l" />
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
             collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
@@ -619,15 +620,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                           />
                         )}
 
-                      <CustomHeaderPageMemo
-                        backOptions={backOptions}
-                        isLoading={isLoading}
-                        title={i18n.PAGE_TITLE}
-                        isRulePreviewVisible={isRulePreviewVisible}
-                        setIsRulePreviewVisible={setIsRulePreviewVisible}
-                        togglePanel={togglePanel}
-                        addToChatButton={addToChatButton}
-                      />
                       {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
                         <EuiCallOut

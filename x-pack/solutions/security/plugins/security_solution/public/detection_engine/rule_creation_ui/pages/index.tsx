@@ -5,54 +5,46 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { EuiResizableContainerActions } from '@elastic/eui/src/components/resizable_container/types';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { AppHeaderBack, AppHeaderMenu } from '@kbn/app-header';
+import type { AppMenuItemType } from '@kbn/app-menu';
+import { SecurityAppHeader } from '../../../common/components/app_header';
 import * as i18n from './translations';
-import { HeaderPage } from '../../../common/components/header_page';
-import type { HeaderPageProps } from '../../../common/components/header_page';
 
-const CustomHeaderPage: React.FC<
-  HeaderPageProps & {
-    togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
-    isRulePreviewVisible: boolean;
-    setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
-    addToChatButton?: React.ReactNode;
-  }
-> = ({
-  backOptions,
-  isLoading,
+interface RuleFormAppHeaderProps {
+  title: string;
+  back: AppHeaderBack;
+  isRulePreviewVisible: boolean;
+  onToggleRulePreview: () => void;
+  addToChatMenuItem?: AppMenuItemType;
+}
+
+/** App header shared by the rule creation and rule editing pages. */
+const RuleFormAppHeaderComponent: React.FC<RuleFormAppHeaderProps> = ({
   title,
-  togglePanel,
+  back,
   isRulePreviewVisible,
-  setIsRulePreviewVisible,
-  backComponent,
-  addToChatButton,
-}) => (
-  <HeaderPage
-    backOptions={backOptions}
-    isLoading={isLoading}
-    title={title}
-    backComponent={backComponent}
-  >
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      {addToChatButton && <EuiFlexItem grow={false}>{addToChatButton}</EuiFlexItem>}
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="preview-container"
-          isSelected={isRulePreviewVisible}
-          fill={isRulePreviewVisible}
-          iconType="chartBarVerticalStack"
-          onClick={() => {
-            togglePanel?.('preview', { direction: 'left' });
-            setIsRulePreviewVisible((isVisible) => !isVisible);
-          }}
-        >
-          {i18n.RULE_PREVIEW_TITLE}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </HeaderPage>
-);
+  onToggleRulePreview,
+  addToChatMenuItem,
+}) => {
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'rulePreview',
+          label: i18n.RULE_PREVIEW_TITLE,
+          iconType: 'chartBarVerticalStack',
+          isSelected: isRulePreviewVisible,
+          run: onToggleRulePreview,
+          testId: 'preview-container',
+        },
+        ...(addToChatMenuItem ? [addToChatMenuItem] : []),
+      ],
+    }),
+    [addToChatMenuItem, isRulePreviewVisible, onToggleRulePreview]
+  );
 
-export const CustomHeaderPageMemo = memo(CustomHeaderPage);
+  return <SecurityAppHeader title={title} back={back} menu={menu} spacing="largeBleed" />;
+};
+
+export const RuleFormAppHeader = memo(RuleFormAppHeaderComponent);
