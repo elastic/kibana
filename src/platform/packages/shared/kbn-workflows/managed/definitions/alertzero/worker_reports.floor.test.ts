@@ -31,9 +31,9 @@ describe('Alert Triage close reports', () => {
     closeReports: [
       {
         closeReason: 'other',
-        closeStep: 'close_no_fp',
+        closeStep: 'close_batch_investigation',
         definition: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW,
-        reportStep: 'report_investigation_closed_no_fp',
+        reportStep: 'report_batch_investigation_closed',
       },
       {
         closeReason: 'false_positive',
@@ -46,6 +46,12 @@ describe('Alert Triage close reports', () => {
         closeStep: 'close_investigation_after_dismissal',
         definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_after_dismissal',
+      },
+      {
+        closeReason: 'other',
+        closeStep: 'close_investigation_after_join',
+        definition: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW,
+        reportStep: 'report_investigation_closed_after_join',
       },
       {
         closeReason: 'other',
@@ -72,7 +78,7 @@ describe('Alert Triage outcome reports', () => {
       steps,
       'report_batch_classified',
       'alert_triage_batch_classified',
-      'attach_impact_gate'
+      'compute_below_floor_fp_ids'
     );
 
     it('reports the batch once its counts and false-positive candidates are known', () => {
@@ -96,12 +102,14 @@ describe('Alert Triage outcome reports', () => {
     const batchContext = ({
       alerts,
       fpCandidates = 0,
-      reviewDispatch,
+      startedAlerts = 0,
+      alertsJoined = 0,
       verdicts,
     }: {
       alerts: number;
       fpCandidates?: number;
-      reviewDispatch?: 'started';
+      startedAlerts?: number;
+      alertsJoined?: number;
       verdicts: { fp: number; inconclusive: number; tp: number };
     }): Record<string, unknown> => ({
       steps: {
@@ -112,17 +120,19 @@ describe('Alert Triage outcome reports', () => {
             true_positive_count: verdicts.tp,
           },
         },
-        create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
+        group_fp_candidates_call: {
+          output: { alerts_joined: alertsJoined },
+        },
       },
       variables: {
         alert_count: alerts,
         fp_candidate_count: fpCandidates,
         verdict_count: verdicts.fp + verdicts.inconclusive + verdicts.tp,
-        ...(reviewDispatch ? { review_dispatch: reviewDispatch } : {}),
+        started_alert_count: startedAlerts,
       },
     });
 
-    it('renders a classified batch', () => {
+    it('renders a classified batch without an Investigation id, since a batch has none', () => {
       expect(
         renderReport(
           batchReport,
@@ -137,7 +147,6 @@ describe('Alert Triage outcome reports', () => {
         alerts_without_verdict: 2,
         fp_below_floor: 3,
         fp_candidates: 20,
-        investigation_id: INVESTIGATION_ID,
         verdicts_false_positive: 23,
         verdicts_inconclusive: 5,
         verdicts_true_positive: 10,
@@ -166,13 +175,30 @@ describe('Alert Triage outcome reports', () => {
         {
           alerts: 40,
           fpCandidates: 20,
-          reviewDispatch: 'started' as const,
+          startedAlerts: 20,
           verdicts: { fp: 20, inconclusive: 10, tp: 10 },
         },
         {
           candidates_found: 40,
           degraded_reason: 'none',
           items_dispatched: 40,
+          items_failed: 0,
+          items_in_flight: '20',
+          run_outcome: 'produced',
+        },
+      ],
+      [
+        'a batch whose candidates all joined a waiting proposal',
+        {
+          alerts: 20,
+          fpCandidates: 20,
+          alertsJoined: 20,
+          verdicts: { fp: 20, inconclusive: 0, tp: 0 },
+        },
+        {
+          candidates_found: 20,
+          degraded_reason: 'none',
+          items_dispatched: 20,
           items_failed: 0,
           items_in_flight: '20',
           run_outcome: 'produced',
@@ -257,11 +283,13 @@ describe('Alert Triage outcome reports', () => {
     const reviewContext = ({
       autonomy = 'manual',
       failedRetag,
+      liveRevision,
       outcome,
       readFailed = false,
     }: {
       autonomy?: string;
       failedRetag?: number;
+      liveRevision?: number;
       outcome: string;
       readFailed?: boolean;
     }): Record<string, unknown> => ({
@@ -273,6 +301,7 @@ describe('Alert Triage outcome reports', () => {
         fp_candidate_count: 12,
         proposal_outcome: outcome,
         ...(failedRetag === undefined ? {} : { failed_retag_count: failedRetag }),
+        ...(liveRevision === undefined ? {} : { live_revision: liveRevision }),
       },
     });
 
@@ -293,6 +322,11 @@ describe('Alert Triage outcome reports', () => {
         { outcome: 'dismissed', proposal_read_failed: true },
       ],
       ['an expired proposal', { outcome: 'expired' }, { outcome: 'expired' }],
+      [
+        'a proposal that alerts joined',
+        { liveRevision: 4, outcome: 'approved' },
+        { outcome: 'approved', revisions: 4 },
+      ],
       ['an unknown gate state', { outcome: 'unknown' }, { outcome: 'unknown' }],
       ['a value outside the vocabulary', { outcome: 'failed' }, { outcome: 'unknown' }],
     ])('renders %s', (_scenario, scenario, expected) => {
@@ -302,6 +336,7 @@ describe('Alert Triage outcome reports', () => {
         auto_approve_requested: false,
         investigation_id: INVESTIGATION_ID,
         proposal_read_failed: false,
+        revisions: 1,
         ...expected,
       });
     });
@@ -313,12 +348,12 @@ describe('Alert Triage managed versions', () => {
     [
       ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.id,
       ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW.version,
-      7,
+      11,
     ],
     [
       ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.id,
       ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW.version,
-      8,
+      11,
     ],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
