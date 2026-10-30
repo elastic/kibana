@@ -14,6 +14,17 @@ apply_to:
   - "x-pack/platform/plugins/shared/sandbox/**"
   - "x-pack/platform/packages/shared/kbn-nightshift-ai/**"
   - "x-pack/platform/packages/shared/kbn-significant-events-schema/**"
+  # Code Nightshift owns alone outside its plugins and packages (per CODEOWNERS)
+  - "x-pack/platform/plugins/shared/actions/server/lib/relay/**"
+  - "src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events/**"
+  - "src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/**"
+  - "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/**"
+  - "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/**"
+  - "packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-automation/**"
+  - "packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-source/**"
+  - "packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/relay-app-connection/**"
+  - "packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/significant-events-maintenance-state/**"
+  - "x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/**"
 can_block: false
 ---
 

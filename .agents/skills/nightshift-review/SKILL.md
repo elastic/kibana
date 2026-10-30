@@ -5,13 +5,13 @@ description: Review guidance for Nightshift changes. Defines risk tiers by what 
 
 # Nightshift review
 
-Use this when reviewing changes to the Nightshift plugins and packages (investigations, sources, significant events, the sandbox plugin, and the shared Nightshift packages).
+Use this when reviewing changes to the Nightshift plugins and packages (investigations, sources, significant events, the sandbox plugin, and the shared Nightshift packages), and to the code Nightshift owns alone elsewhere: the Relay client in the actions plugin, the Nightshift managed workflow definitions in `kbn-workflows`, Nightshift API and Scout test suites, and Nightshift saved-object migration fixtures.
 
 ## Risk tiers
 
 A change's tier is the highest tier of any file it touches. Risk means how much damage a mistake does, how hard it is to undo, and how quickly someone would notice. It is not the size of the change.
 
-A change that also touches files outside the Nightshift plugins and packages is never Low. Judge those files by their own area, and don't apply these tiers to them.
+A change that also touches code Nightshift doesn't own alone is never Low, even in the same product area, because that code's owners review it anyway. Judge those files by their own area, and don't apply these tiers to them.
 
 ### High
 
@@ -19,8 +19,9 @@ A change that also touches files outside the Nightshift plugins and packages is 
 - **Sandbox:** isolation, credentials passed into containers, network access, and command execution (`x-pack/platform/plugins/shared/sandbox`).
 - **Secrets and credentials.**
 - **Prompts and guardrails:** `**/instructions/*.md.text` and the prompts and submission guardrails in `kbn-nightshift-decision-trees`.
-- **Outbound messages** to external systems (for example Slack), which cannot be unsent. This includes `significant_events/server/lib/slack_app/**`, `significant_events/server/routes/internal/apps/slack/**`, and in `nightshift_investigations`: `server/lib/notifications/**`, `server/step_definitions/send_notifications.ts`, `server/step_definitions/render_slack_message.ts`, `server/lib/automations/generate_workflow_yaml.ts` and `server/routes/find_or_create_slack_thread_investigation.ts`.
-- **Data migrations** and changes to stored data.
+- **Outbound messages** to external systems (for example Slack), which cannot be unsent. This includes `significant_events/server/lib/slack_app/**`, `significant_events/server/routes/internal/apps/slack/**`, the Relay client in `actions/server/lib/relay/**`, and in `nightshift_investigations`: `server/lib/notifications/**`, `server/step_definitions/send_notifications.ts`, `server/step_definitions/render_slack_message.ts`, `server/lib/automations/generate_workflow_yaml.ts` and `server/routes/find_or_create_slack_thread_investigation.ts`.
+- **Managed workflows:** the definitions in `kbn-workflows/managed/definitions/significant_events/**` and `.../nightshift_investigations/**`. They decide which identity each step runs as and what a run sends, so apply the identity and outbound checks.
+- **Data migrations** and changes to stored data. A change to the Nightshift fixtures in `kbn-check-saved-objects-cli/src/migrations/__fixtures__/` means a saved-object type changed.
 
 ### Medium
 
@@ -34,7 +35,7 @@ A change that also touches files outside the Nightshift plugins and packages is 
 
 - Documentation.
 - Tests that add or change cases without skipping, focusing or deleting any, plus mocks and Storybook stories.
-- Eval suite data that doesn't change how results are scored, such as datasets and snapshot run IDs, in `kbn-evals-suite-nightshift-*` and `kbn-evals-suite-significant-events`.
+- Eval suite data that doesn't change how results are scored, such as datasets and snapshot run IDs, in `kbn-evals-suite-nightshift-*`, `kbn-evals-suite-significant-events` and `kbn-evals-suite-observability-ai`.
 
 ## Checks for High changes
 
