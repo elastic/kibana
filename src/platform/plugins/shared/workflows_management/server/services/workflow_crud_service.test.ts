@@ -4529,3 +4529,113 @@ describe('managed orphan cleanup without a request', () => {
     });
   });
 });
+
+describe('switching a bound workflow off without a user', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  const boundDefinition = {
+    version: '1' as const,
+    name: 'Bound',
+    enabled: true,
+    triggers: [{ type: 'scheduled' as const, with: { every: '5m' } }],
+    steps: [],
+    settings: { run_as: 'account-a' },
+  };
+
+  const setup = () => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: false,
+      username: 'editor',
+      cluster: { manage_security: false },
+      index: {},
+      application: {},
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+    });
+    const service = new WorkflowCrudService(deps);
+    // Another space than the request's: a sweep over every space writes into each of them.
+    const enabled = makeSource({ spaceId: 'space-b', definition: boundDefinition });
+    const disabled = {
+      ...enabled,
+      enabled: false,
+      definition: { ...boundDefinition, enabled: false },
+    };
+    const write = (
+      document: WorkflowProperties,
+      previousDocument: WorkflowProperties,
+      request: IndexWorkflowDocumentOptions['request']
+    ) => service.indexWorkflowDocument('bound', document, { request, previousDocument });
+    const systemRequest = { ...httpServerMock.createKibanaRequest(), isFakeRequest: true };
+    return { core, bindings, client, enabled, disabled, write, systemRequest };
+  };
+
+  it('writes the change without binding, authorizing or a user', async () => {
+    const { core, bindings, client, enabled, disabled, write, systemRequest } = setup();
+
+    await write(disabled, enabled, systemRequest);
+
+    expect(client.index).toHaveBeenCalledWith(expect.objectContaining({ id: 'bound' }));
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(
+      core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges
+    ).not.toHaveBeenCalled();
+  });
+
+  it('refuses switching the workflow on', async () => {
+    const { client, enabled, disabled, write, systemRequest } = setup();
+
+    await expect(write(enabled, disabled, systemRequest)).rejects.toThrow('manage_security');
+
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('refuses a change to the definition that comes with the switch off', async () => {
+    const { client, enabled, disabled, write, systemRequest } = setup();
+    const renamed = { ...disabled, definition: { ...disabled.definition, name: 'Renamed' } };
+
+    await expect(write(renamed, enabled, systemRequest)).rejects.toThrow('manage_security');
+
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('refuses moving the workflow to another account', async () => {
+    const { client, enabled, disabled, write, systemRequest } = setup();
+    const moved = {
+      ...disabled,
+      definition: { ...disabled.definition, settings: { run_as: 'account-b' } },
+    };
+
+    await expect(write(moved, enabled, systemRequest)).rejects.toThrow('manage_security');
+
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('still needs manage_security when a user is behind the request', async () => {
+    const { core, client, enabled, disabled, write, systemRequest } = setup();
+    core.security.authc.getCurrentUser.mockReturnValue(securityMock.createMockAuthenticatedUser());
+
+    await expect(write(disabled, enabled, systemRequest)).rejects.toThrow('manage_security');
+
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('still needs manage_security for a request that is not a system one', async () => {
+    const { client, enabled, disabled, write } = setup();
+
+    await expect(write(disabled, enabled, httpServerMock.createKibanaRequest())).rejects.toThrow(
+      'manage_security'
+    );
+
+    expect(client.index).not.toHaveBeenCalled();
+  });
+});
