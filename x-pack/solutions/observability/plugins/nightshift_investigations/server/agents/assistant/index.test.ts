@@ -85,6 +85,22 @@ describe('Nightshift assistant agent type', () => {
     });
   });
 
+  it('allows every configured telemetry target, like the investigator', async () => {
+    const telemetryOptions: NightshiftAgentTypeOptions = {
+      ...options,
+      telemetryConnectorId: undefined,
+      telemetryConfig: {
+        telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
+      } as NightshiftAgentTypeOptions['telemetryConfig'],
+    };
+
+    const assistant = await configurationFor(getAssistantAgentType(telemetryOptions));
+    const investigator = await configurationFor(getInvestigationAgentType(telemetryOptions));
+
+    expect(assistant.connector_ids).toEqual(['c0', 'orca']);
+    expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+  });
+
   it('points to the workspace files instead of embedding their guidance', () => {
     for (const path of [
       '/workspace/connectors.md',

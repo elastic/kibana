@@ -32,7 +32,7 @@ const createSetupDeps = () =>
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
-  it('keeps the assistant connector while registering named investigation targets', async () => {
+  it('registers every telemetry target for both the investigator and the assistant', async () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const plugin = new NightshiftInvestigationsPlugin(
       coreMock.createPluginInitializerContext({
@@ -72,7 +72,13 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       'c0',
       'orca',
     ]);
-    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual(['legacy']);
+    // Before start there is no Agent Builder to read the investigator from, so the assistant
+    // lists the telemetry connectors only.
+    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([
+      'legacy',
+      'c0',
+      'orca',
+    ]);
   });
 
   it('registers the investigation locator on the server', async () => {
