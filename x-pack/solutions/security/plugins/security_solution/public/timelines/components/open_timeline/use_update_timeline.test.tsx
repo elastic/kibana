@@ -62,6 +62,11 @@ jest.mock('../../../common/utils/default_date_settings', () => {
 
 jest.mock('../../containers/api');
 
+const mockSelectDataView = jest.fn();
+jest.mock('../../../data_view_manager/hooks/use_select_data_view', () => ({
+  useSelectDataView: () => mockSelectDataView,
+}));
+
 describe('dispatchUpdateTimeline', () => {
   const anchor = '2020-03-27T20:34:51.337Z';
   const unix = moment(anchor).valueOf();
@@ -102,6 +107,29 @@ describe('dispatchUpdateTimeline', () => {
     expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
       from: '2020-03-26T14:35:56.356Z',
       to: '2020-03-26T14:41:56.356Z',
+    });
+  });
+
+  it('it selects the timeline data view with the fallback time field', async () => {
+    const { result } = renderHook(() => useUpdateTimeline(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    const timeFieldSpec = { timeFieldName: 'event.ingested' };
+
+    act(() => {
+      result.current({
+        ...defaultArgs,
+        timeline: { ...mockTimelineModel, dataViewId: null, indexNames: ['logs-*'] },
+        timeFieldSpec,
+      });
+    });
+
+    expect(mockSelectDataView).toHaveBeenCalledWith({
+      id: null,
+      fallbackPatterns: ['logs-*'],
+      fallbackTimeFieldSpec: timeFieldSpec,
+      scope: 'timeline',
     });
   });
 
