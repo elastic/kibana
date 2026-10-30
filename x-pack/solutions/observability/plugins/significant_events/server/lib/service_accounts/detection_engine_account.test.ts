@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import {
   assertCanChangeBoundWorkflows,
   asDetectionEngineAccount,
+  reassignRulesToAccount,
 } from './detection_engine_account';
 
 const request = httpServerMock.createKibanaRequest();
@@ -138,5 +139,99 @@ describe('assertCanChangeBoundWorkflows', () => {
 
     await expect(result).rejects.toMatchObject({ statusCode: 503 });
     expect(hasPrivileges).not.toHaveBeenCalled();
+  });
+});
+
+describe('reassignRulesToAccount', () => {
+  const setupRules = ({
+    links,
+    enabledStates,
+    bulkUpdateApiKey,
+  }: {
+    links: string[];
+    enabledStates: Array<[string, boolean]>;
+    bulkUpdateApiKey: jest.Mock;
+  }) => {
+    const accountRequest = httpServerMock.createKibanaRequest();
+    const core = {
+      security: {
+        serviceAccounts: {
+          isEnabled: jest.fn(() => true),
+          getWorkloadBinding: jest.fn(async () => ({ serviceAccountId: 'account-id' })),
+          withScopedRequestForWorkload: jest.fn(
+            async (_: unknown, fn: (scopedRequest: typeof accountRequest) => Promise<unknown>) =>
+              fn(accountRequest)
+          ),
+        },
+        authc: { getPrincipal: jest.fn(() => ({ type: 'user' })) },
+      },
+    };
+    const alertingV2RulesClient = {
+      bulkUpdateApiKey,
+      bulkDisableRules: jest.fn(),
+      bulkEnableRules: jest.fn(),
+    };
+    const getScopedClients = jest.fn(async () => ({
+      getSignificantEventsAlertingContext: async () => ({
+        rulesClient: { findRuleEnabledStates: jest.fn(async () => new Map(enabledStates)) },
+        alertingV2RulesClient,
+      }),
+      getKnowledgeIndicatorClient: async () => ({
+        getRuleBackedQueryLinks: async () => links.map((ruleId) => ({ rule_id: ruleId })),
+      }),
+    }));
+    const run = () =>
+      reassignRulesToAccount({
+        core: core as never,
+        spaceId: 'space-a',
+        getScopedClients: getScopedClients as never,
+      });
+    return { run, alertingV2RulesClient, getScopedClients, accountRequest };
+  };
+
+  it('replaces the keys of the enabled rules as the account, and never switches a rule off', async () => {
+    const { run, alertingV2RulesClient, getScopedClients, accountRequest } = setupRules({
+      links: ['on-1', 'off', 'on-2', 'on-1'],
+      enabledStates: [
+        ['on-1', true],
+        ['off', false],
+        ['on-2', true],
+      ],
+      bulkUpdateApiKey: jest.fn(async () => ({ affected_count: 2, errors: [] })),
+    });
+
+    await expect(run()).resolves.toEqual({ reassigned: 2, failedIds: [] });
+
+    expect(getScopedClients).toHaveBeenCalledWith({ request: accountRequest });
+    expect(alertingV2RulesClient.bulkUpdateApiKey).toHaveBeenCalledWith({ ids: ['on-1', 'on-2'] });
+    expect(alertingV2RulesClient.bulkDisableRules).not.toHaveBeenCalled();
+    expect(alertingV2RulesClient.bulkEnableRules).not.toHaveBeenCalled();
+  });
+
+  it('reports a rule whose key could not be replaced, which is still on, so a retry picks it up', async () => {
+    const { run } = setupRules({
+      links: ['on-1', 'on-2'],
+      enabledStates: [
+        ['on-1', true],
+        ['on-2', true],
+      ],
+      bulkUpdateApiKey: jest.fn(async () => ({
+        affected_count: 1,
+        errors: [{ id: 'on-2', error: { code: 'rule_running', message: 'The rule is running' } }],
+      })),
+    });
+
+    await expect(run()).resolves.toEqual({ reassigned: 1, failedIds: ['on-2'] });
+  });
+
+  it('does nothing when no rule is enabled', async () => {
+    const { run, alertingV2RulesClient } = setupRules({
+      links: ['off'],
+      enabledStates: [['off', false]],
+      bulkUpdateApiKey: jest.fn(async () => ({ affected_count: 0, errors: [] })),
+    });
+
+    await expect(run()).resolves.toEqual({ reassigned: 0, failedIds: [] });
+    expect(alertingV2RulesClient.bulkUpdateApiKey).not.toHaveBeenCalled();
   });
 });

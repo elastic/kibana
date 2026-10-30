@@ -180,9 +180,10 @@ export const asDetectionEngineAccount = async <T>({
 };
 
 /**
- * Turns the space's enabled rule-backed rules off and on again as the account, so their executor
- * tasks run on keys the account owns. Alerting only replaces a rule's key when the rule is enabled
- * again; disabled rules are left as they are.
+ * Replaces the keys of the space's enabled rule-backed rules with keys the account owns, so their
+ * executor tasks run as it. The rules stay on throughout: one whose key cannot be replaced keeps its
+ * old key and is still enabled, so calling this again picks it up. Disabled rules are left as they
+ * are.
  */
 export const reassignRulesToAccount = ({
   core,
@@ -208,15 +209,9 @@ export const reassignRulesToAccount = ({
       const enabledStates = await rulesClient.findRuleEnabledStates(ruleIds);
       const enabledIds = ruleIds.filter((id) => enabledStates.get(id) === true);
 
-      const disabled = await runRulesInBatches(enabledIds, (ids) =>
-        alertingV2RulesClient.bulkDisableRules({ ids })
+      const { toggledIds, failedIds } = await runRulesInBatches(enabledIds, (ids) =>
+        alertingV2RulesClient.bulkUpdateApiKey({ ids })
       );
-      const enabled = await runRulesInBatches(disabled.toggledIds, (ids) =>
-        alertingV2RulesClient.bulkEnableRules({ ids })
-      );
-      return {
-        reassigned: enabled.toggledIds.length,
-        failedIds: [...disabled.failedIds, ...enabled.failedIds],
-      };
+      return { reassigned: toggledIds.length, failedIds };
     },
   });

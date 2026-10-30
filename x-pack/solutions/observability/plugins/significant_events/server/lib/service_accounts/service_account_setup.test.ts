@@ -141,7 +141,7 @@ const setup = ({
     },
     getSignificantEventsAlertingContext: async () => ({
       rulesClient: { findRuleEnabledStates: jest.fn(async () => new Map()) },
-      alertingV2RulesClient: { bulkDisableRules: jest.fn(), bulkEnableRules: jest.fn() },
+      alertingV2RulesClient: { bulkUpdateApiKey: jest.fn() },
     }),
     getKnowledgeIndicatorClient: async () => ({ getRuleBackedQueryLinks: async () => [] }),
   }));
