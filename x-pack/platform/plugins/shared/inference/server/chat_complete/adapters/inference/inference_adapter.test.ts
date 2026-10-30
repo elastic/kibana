@@ -373,7 +373,10 @@ describe('inferenceAdapter', () => {
           })
           .subscribe(noop);
 
-        return executorMock.invoke.mock.calls[0]?.[0].subActionParams?.body.tools;
+        const body = executorMock.invoke.mock.calls[0]?.[0].subActionParams?.body as
+          | OpenAI.ChatCompletionCreateParams
+          | undefined;
+        return body?.tools;
       };
 
       const strictConnectors: Array<[string, Record<string, unknown>]> = [
