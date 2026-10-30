@@ -60,6 +60,7 @@ export const isExportProfileImplicitLocal = (
 };
 
 interface VaultConfig {
+  evaluationConnectorId?: string;
   evaluationsKbn?: { url?: string; apiKey?: string };
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
@@ -201,6 +202,18 @@ export const loadVaultConfig = (repoRoot: string, profile?: string): VaultConfig
   }
 
   return readVaultConfigFromFile(repoRoot, profile);
+};
+
+/**
+ * Default judge connector: the profile's `evaluationConnectorId` (dev Vault, or a
+ * `config.<profile>.json` synced from Vault). Undefined when the profile does not set one.
+ */
+export const resolveDefaultJudgeConnectorId = (
+  repoRoot: string,
+  profile?: string
+): string | undefined => {
+  const value = loadVaultConfig(repoRoot, profile)?.evaluationConnectorId;
+  return isNonEmptyString(value) && !isPlaceholder(value) ? value : undefined;
 };
 
 export const envFromDatasetsProfile = (

@@ -7,6 +7,3 @@
 
 /* EmptyState */
 export const PANEL_TEST_ID = 'tiIndicatorsTableEmptyState';
-
-/* Layout */
-export const TITLE_TEST_ID = 'tiDefaultPageLayoutTitle';

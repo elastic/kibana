@@ -1,0 +1,10 @@
+in: path
+name: attachmentId
+description: >
+  The ID of the attachment, which is its `id` field, not `attachmentId`. To get it, use the find
+  case attachments API.
+required: true
+schema:
+  type: string
+  maxLength: 512
+  example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2

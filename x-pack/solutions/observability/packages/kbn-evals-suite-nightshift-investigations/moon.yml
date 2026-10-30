@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/config'
   - '@kbn/config-schema'
+  - '@kbn/std'
 tags:
   - functional-tests
   - package

@@ -52,6 +52,10 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
+        if (artifact.detection_alerts_influencer_allowlist !== undefined) {
+          filterList.detectionAlertsInfluencerAllowlist =
+            artifact.detection_alerts_influencer_allowlist;
+        }
         await taskMetricsService.end(trace);
         return 0;
       } catch (error) {

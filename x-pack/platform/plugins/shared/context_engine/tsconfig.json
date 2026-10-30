@@ -83,6 +83,7 @@
     "@kbn/esql-utils",
     "@kbn/ebt-click",
     "@kbn/std",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/unsaved-changes-prompt"
   ]
 }

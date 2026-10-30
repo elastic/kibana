@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/projects-solutions-groups'
   - '@kbn/ci-stats-reporter'
   - '@kbn/std'
+  - '@kbn/monaco'
+  - '@kbn/vega-sandbox'
 tags:
   - shared-server
   - package
@@ -37,6 +39,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - src/**/*

@@ -14,7 +14,13 @@ export const normalizeCanvasQuery = (query: string | null | undefined): string |
 };
 
 const getNodeSearchText = (node: ClassicCanvasNode): string =>
-  [node.data.title, node.data.subtitle, node.data.streamName]
+  [
+    node.data.title,
+    node.data.subtitle,
+    node.data.streamName,
+    ...(Array.isArray(node.data.signals) ? node.data.signals : []),
+    ...(Array.isArray(node.data.targetedIndexNames) ? node.data.targetedIndexNames : []),
+  ]
     .filter((text): text is string => typeof text === 'string')
     .join(' ')
     .toLowerCase();
@@ -33,10 +39,7 @@ export const resolveCanvasSearch = (
   return getConnectedFlow(matchingNodeIds, graph.edges);
 };
 
-/**
- * Hides everything outside the matched flows. Unconfigured placeholders stay
- * visible so a node added while searching does not vanish.
- */
+/** Hides everything outside the matched flows. */
 export const applyCanvasSearch = <
   NodeType extends ClassicCanvasNode,
   EdgeType extends ClassicCanvasEdge
@@ -51,7 +54,7 @@ export const applyCanvasSearch = <
   return {
     nodes: nodes.map((node) => ({
       ...node,
-      hidden: !flow.nodeIds.has(node.id) && !node.data.unconfiguredNodeId,
+      hidden: !flow.nodeIds.has(node.id),
     })),
     edges: edges.map((edge) => ({ ...edge, hidden: !flow.edgeIds.has(edge.id) })),
   };
