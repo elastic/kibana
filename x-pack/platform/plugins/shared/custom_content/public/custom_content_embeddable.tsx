@@ -61,6 +61,7 @@ import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from '@kbn/custom-content-common';
 import {
@@ -137,6 +138,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
+    // Only a hand-edited panel has these. They are kept and saved as they are, never edited here.
+    const additionalEsqlQueries$ = new BehaviorSubject<string[]>(
+      readAdditionalEsqlQueries(initialState)
+    );
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -170,7 +175,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
-      esql_query: toEsqlQueryState(esqlQuery$.getValue()),
+      esql_query: toEsqlQueryState(esqlQuery$.getValue(), additionalEsqlQueries$.getValue()),
       template: template$.getValue(),
     });
 
@@ -190,6 +195,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           skip(1),
           map(() => undefined)
         ),
+        additionalEsqlQueries$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
         template$.pipe(
           skip(1),
           map(() => undefined)
@@ -205,6 +214,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});
         esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
+        additionalEsqlQueries$.next(lastSaved ? readAdditionalEsqlQueries(lastSaved) : []);
         template$.next(lastSaved?.template);
       },
     });
@@ -268,6 +278,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
                     esqlQuery: draftEsqlQuery,
+                    // The editor does not change the other queries yet, so the chat gets the panel's own.
+                    additionalEsqlQueries: additionalEsqlQueries$.getValue(),
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),
@@ -302,6 +314,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               return (
                 <EditCustomContentFlyout
                   esqlQuery={esqlQuery$.getValue()}
+                  additionalEsqlQueries={additionalEsqlQueries$.getValue()}
                   template={template$.getValue()}
                   timeRange={timeRange}
                   isApproximate={isApproximate}
@@ -353,23 +366,61 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       )
       .subscribe(esql$);
 
-    // Important for unified search support — KQL bar and filter builder suggestions.
-    const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
+    // Important for unified search support: KQL bar and filter builder suggestions, and whether the
+    // dashboard offers its time picker. Every query counts, since every query is fetched with the
+    // dashboard's time range, so a data view is published for each one.
+    const dataViewsSubscription = combineLatest([
+      esqlQuery$,
+      additionalEsqlQueries$,
+      projectRouting$,
+    ])
       .pipe(
-        distinctUntilChanged(([q1, r1], [q2, r2]) => q1 === q2 && r1 === r2),
-        switchMap(([esqlQueryValue, routingValue]) => {
-          if (!esqlQueryValue) return of(undefined);
+        map(([esqlQueryValue, additionalQueries, routingValue]) => ({
+          queries: esqlQueryValue ? [esqlQueryValue, ...additionalQueries] : [],
+          routingValue,
+        })),
+        distinctUntilChanged(
+          (a, b) =>
+            a.routingValue === b.routingValue &&
+            a.queries.length === b.queries.length &&
+            a.queries.every((query, index) => query === b.queries[index])
+        ),
+        switchMap(({ queries, routingValue }) => {
+          if (queries.length === 0) return of(undefined);
           return from(
-            getESQLAdHocDataview({
-              dataViewsService: dataViews,
-              query: esqlQueryValue,
-              http: core.http,
-              projectRouting: routingValue,
-            })
-          ).pipe(catchError(() => of(undefined)));
+            Promise.all(
+              queries.map(async (query) => {
+                // One query that cannot be resolved must not hide the data views of the others, or
+                // end the subscription.
+                try {
+                  return await getESQLAdHocDataview({
+                    dataViewsService: dataViews,
+                    query,
+                    http: core.http,
+                    projectRouting: routingValue,
+                  });
+                } catch {
+                  return undefined;
+                }
+              })
+            )
+          );
         })
       )
-      .subscribe((dataView) => dataSources$.next(dataView ? [dataView] : undefined));
+      .subscribe((resolved) => {
+        // Queries that resolve to the same data view publish it once. The identity is the whole
+        // ad-hoc data view (index pattern, project routing and time field), not just the index:
+        // two queries on one index can resolve different time fields, and the one that has a time
+        // field is what makes the dashboard offer its time picker.
+        const byIdentity = new Map<string, DataView>();
+        (resolved ?? []).forEach((dataView) => {
+          if (!dataView) return;
+          const identity =
+            dataView.id ?? `${dataView.getIndexPattern()}|${dataView.timeFieldName ?? ''}`;
+          if (!byIdentity.has(identity)) byIdentity.set(identity, dataView);
+        });
+        dataSources$.next(byIdentity.size ? Array.from(byIdentity.values()) : undefined);
+      });
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {
       isApproximate$.next(ctx.isApproximate);
@@ -390,6 +441,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       Component: function CustomContentEmbeddableComponent() {
         const [
           esqlQuery,
+          additionalEsqlQueries,
           savedTemplate,
           panelTitle,
           isApproximate,
@@ -403,6 +455,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
+          additionalEsqlQueries$,
           template$,
           titleManager.api.title$,
           isApproximate$,
@@ -436,6 +489,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             registerPanelPreviewHandler(uuid, (data) => {
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
+              additionalEsqlQueries$.next(data.additional_esql_queries ?? []);
             }),
           []
         );
@@ -475,6 +529,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
+              additionalEsqlQueries$.next(data.additional_esql_queries ?? []);
               if (isGenerating$.getValue()) isGenerating$.next(false);
               getTelemetry().trackAgentUpdateApplied({
                 hasEsqlQuery: Boolean(data.esql_query),
@@ -529,6 +584,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               services={rendererServices}
               embeddableId={uuid}
               esqlQuery={esqlQuery}
+              additionalEsqlQueries={additionalEsqlQueries}
               timeRange={timeRange}
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}

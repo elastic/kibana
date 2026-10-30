@@ -8,12 +8,14 @@
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from './schema';
 
@@ -56,10 +58,17 @@ describe('customContentStateSchema', () => {
     ).toBe(false);
   });
 
-  it('rejects more than one esql_query', () => {
-    expect(customContentStateSchema.safeParse({ esql_query: ['FROM a', 'FROM b'] }).success).toBe(
-      false
+  it('accepts several esql_query entries up to the cap', () => {
+    const queries = Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES }, (_, i) => `FROM a${i}`);
+    expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(true);
+  });
+
+  it('rejects more esql_query entries than the cap', () => {
+    const queries = Array.from(
+      { length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 },
+      (_, i) => `FROM a${i}`
     );
+    expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(false);
   });
 
   it('accepts an empty esql_query array', () => {
@@ -184,5 +193,24 @@ describe('esql_query accessors', () => {
   it('reads undefined from a panel with no query', () => {
     expect(readEsqlQuery({})).toBeUndefined();
     expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
+  });
+
+  it('reads the main query and the additional ones separately', () => {
+    const state = { esql_query: ['FROM a', 'FROM b', 'FROM c'] };
+    expect(readEsqlQuery(state)).toBe('FROM a');
+    expect(readAdditionalEsqlQueries(state)).toEqual(['FROM b', 'FROM c']);
+  });
+
+  it('reads no additional queries from a single-query or empty panel', () => {
+    expect(readAdditionalEsqlQueries({ esql_query: ['FROM a'] })).toEqual([]);
+    expect(readAdditionalEsqlQueries({})).toEqual([]);
+  });
+
+  it('keeps the additional queries after the main one when building state', () => {
+    expect(toEsqlQueryState('FROM a', ['FROM b'])).toEqual(['FROM a', 'FROM b']);
+  });
+
+  it('drops the additional queries when there is no main query', () => {
+    expect(toEsqlQueryState(undefined, ['FROM b'])).toBeUndefined();
   });
 });

@@ -315,3 +315,113 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     );
   });
 });
+
+// A panel's other queries are treated like its main one: a query that is not changing is not run, since
+// the template that already reads it describes it. They are given only so the model knows what
+// `queries[n]` is, and keeps the references to them when it refines the template.
+describe('createCustomContentTemplateResolver — additional queries', () => {
+  const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
+
+  const columnsFor = (name: string) => ({ columns: [{ name, type: 'long' }], values: [[1]] });
+
+  beforeEach(() => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+  });
+
+  it('does not run the additional queries when refining a template whose queries are not changing', async () => {
+    await resolve({
+      prompt: 'Restyle',
+      existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+      hasExistingQuery: true,
+      additionalEsqlQueries: ['FROM a', 'FROM b'],
+    });
+
+    expect(mockEsqlQuery).not.toHaveBeenCalled();
+    expect(mockChatComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs only the main query when it is the one changing, not the additional ones', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('total'));
+
+    await resolve({
+      prompt: 'Show it',
+      esqlQuery: 'FROM main',
+      additionalEsqlQueries: ['FROM a', 'FROM b'],
+    });
+
+    expect(mockEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain('FROM main');
+  });
+
+  it('does not describe the additional queries to the model beyond what queries[n] is', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('total'));
+
+    await resolve({
+      prompt: 'Show it',
+      esqlQuery: 'FROM main',
+      additionalEsqlQueries: ['FROM a'],
+    });
+
+    const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
+    expect(content).toContain('total (long)');
+    expect(content).not.toContain('read by the template as queries[1]');
+  });
+
+  it('teaches the model about queries[n] only when the panel has additional queries', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+
+    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main' });
+    expect(mockChatComplete.mock.calls[0][0].system).not.toContain('MULTIPLE QUERIES');
+
+    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main', additionalEsqlQueries: ['FROM a'] });
+    const system: string = mockChatComplete.mock.calls[1][0].system;
+    expect(system).toContain('MULTIPLE QUERIES');
+    expect(system).toContain('queries[1]');
+    expect(system).toContain('Keep every existing reference to queries[n]');
+  });
+
+  it('gives the guidance to a style-only refinement too, which is what keeps the references', async () => {
+    await resolve({
+      prompt: 'Restyle',
+      existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+      hasExistingQuery: true,
+      additionalEsqlQueries: ['FROM a'],
+    });
+
+    expect(mockChatComplete.mock.calls[0][0].system).toContain('MULTIPLE QUERIES');
+    const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
+    expect(content).toContain('Current template');
+  });
+
+  it('ignores additional queries for a panel that has no main query', async () => {
+    await resolve({ prompt: 'Show a banner', additionalEsqlQueries: ['FROM a'] });
+
+    expect(mockEsqlQuery).not.toHaveBeenCalled();
+    const system: string = mockChatComplete.mock.calls[0][0].system;
+    expect(system).toContain('Output ONLY valid HTML');
+    expect(system).not.toContain('MULTIPLE QUERIES');
+  });
+
+  // The prompt of a panel with one query must stay what it was: nothing about `queries` until the
+  // panel actually has more than one.
+  it('does not mention queries[n] in the system prompt of a single-query panel', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+
+    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main' });
+    await resolve({ prompt: 'Restyle', existingTemplate: '<div/>', hasExistingQuery: true });
+
+    for (const [{ system }] of mockChatComplete.mock.calls) {
+      expect(system).not.toContain('queries');
+    }
+  });
+
+  it('does not change what a single-query panel sends to the model', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+
+    await resolve({ prompt: 'Show it', esqlQuery: 'FROM main' });
+
+    const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
+    expect(content).not.toContain('further queries');
+    expect(content).toContain('Data schema:');
+  });
+});

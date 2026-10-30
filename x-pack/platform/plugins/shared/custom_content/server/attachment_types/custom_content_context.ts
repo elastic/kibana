@@ -18,6 +18,13 @@ const formatPanelContext = (data: CustomContentContextAttachmentData): string =>
   if (data.esql_query) {
     parts.push(`\nES|QL Query:\n\`\`\`esql\n${data.esql_query}\n\`\`\``);
   }
+  (data.additional_esql_queries ?? []).forEach((query, index) => {
+    parts.push(
+      `\nAdditional ES|QL query, read by the template as queries[${
+        index + 1
+      }]:\n\`\`\`esql\n${query}\n\`\`\``
+    );
+  });
 
   const templateDisplay = data.panel_template
     ? `\`\`\`html\n${data.panel_template}\n\`\`\``
@@ -47,6 +54,6 @@ export const createCustomContentContextAttachmentType = (): AttachmentTypeDefini
     }),
   }),
   getAgentDescription: () =>
-    'A custom content panel context containing the current HTML template and optional ES|QL query. Each panel shows its embeddable_id in its context header. Use the custom_content_update_panel tool to propose refined templates or query changes, passing the embeddable_id of the panel you are updating — this is required to target the correct panel when multiple panels are in the conversation. After every successful update, render the attachment inline as the last part of your response with `<render_attachment id="{attachment_id}" version="{version}" />`, using the ids returned by the tool — this is what gives the user the preview and version history for the panel.',
+    'A custom content panel context containing the current HTML template and optional ES|QL query. A panel can hold further ES|QL queries, which its template reads as queries[1], queries[2], ...; they are listed after the main query and are kept when you update the panel. Each panel shows its embeddable_id in its context header. Use the custom_content_update_panel tool to propose refined templates or query changes, passing the embeddable_id of the panel you are updating — this is required to target the correct panel when multiple panels are in the conversation. After every successful update, render the attachment inline as the last part of your response with `<render_attachment id="{attachment_id}" version="{version}" />`, using the ids returned by the tool — this is what gives the user the preview and version history for the panel.',
   getTools: () => ['custom_content_update_panel'],
 });

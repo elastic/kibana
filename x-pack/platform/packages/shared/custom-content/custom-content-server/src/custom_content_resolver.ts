@@ -127,6 +127,13 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
   return `${header}\n${separator}\n${dataRows}`;
 }
 
+const MULTI_QUERY_DATA_MODEL_GUIDANCE = `MULTIPLE QUERIES — this panel has more than one ES|QL query:
+- \`rows\` and \`max\` are the results of the FIRST query, exactly as above; they are the same as queries[0].
+- The other queries are read by position: queries[1] is the second query, queries[2] the third, and so on. Each one has its own \`rows\` and \`max\`, in the same shape as above, e.g. {% for row in queries[1].rows %}...{% endfor %} and queries[1].max["column name"]. A column's .pct is relative to that query's own max.
+- Every query has its own columns. Use each query for the data it returns and never look for one query's column in another.
+- A query's rows can be empty on their own; give each section its own empty state where it makes sense.
+- Keep every existing reference to queries[n] in a template you are refining, unless the user asks to remove it.`;
+
 function colorSection(): string {
   return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
 - The panel sits on a dashboard beside Lens and Vega charts: same type scale, same spacing rhythm, same corner rounding.
@@ -158,12 +165,12 @@ CONTENT RULES:
 - For status indicators: use colored badges/pills with CSS background-color.`;
 }
 
-function buildSystemPromptTemplate(): string {
+function buildSystemPromptTemplate(hasAdditionalQueries: boolean): string {
   return `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
 Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
-${LIQUID_DATA_MODEL_GUIDANCE}
+${LIQUID_DATA_MODEL_GUIDANCE}${hasAdditionalQueries ? `\n\n${MULTI_QUERY_DATA_MODEL_GUIDANCE}` : ''}
 
 OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
@@ -205,6 +212,13 @@ export type CustomContentTemplateResolver = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
   hasExistingQuery?: boolean;
+  /**
+   * The panel's queries after the main one, which its template reads as `queries[1]`, `queries[2]`,
+   * ... They are not sampled: like the main query, a query that is not changing is described by the
+   * template that already reads it. Giving them only tells the model what `queries[n]` is, so a
+   * refinement keeps the references to them.
+   */
+  additionalEsqlQueries?: readonly string[];
   /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
   esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
@@ -214,7 +228,14 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery, esqlVariables }) => {
+  return async ({
+    prompt,
+    esqlQuery,
+    existingTemplate,
+    hasExistingQuery,
+    additionalEsqlQueries = [],
+    esqlVariables,
+  }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
@@ -235,7 +256,9 @@ export const createCustomContentTemplateResolver = ({
     }
 
     const systemPrompt =
-      esqlQuery || hasExistingQuery ? buildSystemPromptTemplate() : buildSystemPromptStatic();
+      esqlQuery || hasExistingQuery
+        ? buildSystemPromptTemplate(additionalEsqlQueries.length > 0)
+        : buildSystemPromptStatic();
 
     let userContent: string;
     if (esqlQuery) {

@@ -9,6 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 
@@ -16,25 +17,42 @@ import {
  * Persisted content of a custom content panel. No `prompt`: on an edit the prompt is a delta
  * ("remove the background color"), not a description, so the template is the source of truth.
  *
- * `esql_query` is an array so the persisted shape can grow to several queries per panel without a
- * migration, but is capped at one until the rest of the feature supports more. Read and write it
- * through {@link readEsqlQuery} / {@link toEsqlQueryState} rather than indexing directly, so
- * lifting the cap is a change in one place.
+ * `esql_query` holds one or more queries. The first is the panel's main query and the template reads
+ * it as `rows`; the template reads the n-th as `queries[n]`. Read and write it through
+ * {@link readEsqlQuery} / {@link readAdditionalEsqlQueries} / {@link toEsqlQueryState} rather than
+ * indexing directly. The editor does not change the others yet, and neither do the agent tools; they
+ * are kept as they are.
  */
-export const customContentStateSchema = z.object({
-  esql_query: z.array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)).max(1).optional(),
-  template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
-});
+export const customContentStateSchema = lazySchema(() =>
+  z.object({
+    esql_query: z
+      .array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH))
+      .max(CUSTOM_CONTENT_MAX_ESQL_QUERIES)
+      .optional(),
+    template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
+  })
+);
 
 export type CustomContentState = z.output<typeof customContentStateSchema>;
 
-/** The panel's single active ES|QL query, or `undefined` when it has none. */
+/** The panel's main ES|QL query, or `undefined` when it has none. */
 export const readEsqlQuery = (state: Pick<CustomContentState, 'esql_query'>): string | undefined =>
   state.esql_query?.[0];
 
-/** Builds the persisted `esql_query` field from a single query, omitting it when there is none. */
-export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | undefined =>
-  esqlQuery === undefined ? undefined : [esqlQuery];
+/** The queries after the main one, which the template reads as `queries[1]`, `queries[2]`, ... */
+export const readAdditionalEsqlQueries = (
+  state: Pick<CustomContentState, 'esql_query'>
+): string[] => state.esql_query?.slice(1) ?? [];
+
+/**
+ * Builds the persisted `esql_query` field from the main query and any additional ones, omitting it
+ * when there is no main query: additional queries are meaningless without it.
+ */
+export const toEsqlQueryState = (
+  esqlQuery: string | undefined,
+  additionalEsqlQueries: readonly string[] = []
+): string[] | undefined =>
+  esqlQuery === undefined ? undefined : [esqlQuery, ...additionalEsqlQueries];
 
 /**
  * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation

@@ -300,6 +300,75 @@ describe('createUpdateCustomContentTool handler', () => {
     });
   });
 
+  describe('panels with additional queries', () => {
+    const existing = {
+      panel_template: '<p>{{ queries[1].rows.size }}</p>',
+      esql_query: 'FROM logs',
+      additional_esql_queries: ['FROM metrics'],
+      panel_title: 'My Panel',
+      embeddable_id: 'p1',
+    };
+
+    it('gives the additional queries to the template resolver on a style edit', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Make colors more vivid' }, existing);
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined, additionalEsqlQueries: ['FROM metrics'] })
+      );
+    });
+
+    it('keeps the additional queries in the updated attachment and the UI event', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Make colors more vivid' },
+        existing
+      );
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+      expect(ctx.sendUiEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        })
+      );
+    });
+
+    it('keeps them when the main query is replaced', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show revenue', esqlQuery: 'FROM revenue' },
+        existing
+      );
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            esql_query: 'FROM revenue',
+            additional_esql_queries: ['FROM metrics'],
+          }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('drops them, and does not sample them, when the main query is removed', async () => {
+      const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
+      const updated = ctx.update.mock.calls[0][1].data;
+      expect(updated.esql_query).toBeUndefined();
+      expect(updated).not.toHaveProperty('additional_esql_queries');
+    });
+
+    it('does not add the field to a single-query panel', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Restyle' },
+        { ...existing, additional_esql_queries: undefined }
+      );
+      expect(ctx.update.mock.calls[0][1].data).not.toHaveProperty('additional_esql_queries');
+    });
+  });
+
   describe('query-only path', () => {
     const existing = {
       panel_template: '<p>old</p>',
