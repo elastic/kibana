@@ -5,39 +5,14 @@
  * 2.0.
  */
 
-import { difference, first, values } from 'lodash';
-import { colorVis } from '@elastic/eui-theme-borealis';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { Color } from './color';
+import type { Palette } from './color';
 
-export enum Color {
-  color0 = 'color0',
-  color1 = 'color1',
-  color2 = 'color2',
-  color3 = 'color3',
-  color4 = 'color4',
-  color5 = 'color5',
-  color6 = 'color6',
-  color7 = 'color7',
-  color8 = 'color8',
-  color9 = 'color9',
-}
+export { Color, sampleColor } from './color';
+export type { Palette } from './color';
 
-export type Palette = {
-  [K in keyof typeof Color]: string;
-};
-
-// Same values as EUI's euiPaletteColorBlind(), without importing @elastic/eui
-const euiPalette = [
-  colorVis.euiColorVis0,
-  colorVis.euiColorVis1,
-  colorVis.euiColorVis2,
-  colorVis.euiColorVis3,
-  colorVis.euiColorVis4,
-  colorVis.euiColorVis5,
-  colorVis.euiColorVis6,
-  colorVis.euiColorVis7,
-  colorVis.euiColorVis8,
-  colorVis.euiColorVis9,
-];
+const euiPalette = euiPaletteColorBlind();
 
 export const defaultPalette: Palette = {
   // TODO: Waiting for the designer input on the colors mapping
@@ -58,8 +33,3 @@ export const defaultPalette: Palette = {
 export const createPaletteTransformer = (palette: Palette) => (color: Color) => palette[color];
 
 export const colorTransformer = createPaletteTransformer(defaultPalette);
-
-export const sampleColor = (usedColors: Color[] = []): Color => {
-  const available = difference(values(Color) as Color[], usedColors);
-  return first(available) || Color.color0;
-};
