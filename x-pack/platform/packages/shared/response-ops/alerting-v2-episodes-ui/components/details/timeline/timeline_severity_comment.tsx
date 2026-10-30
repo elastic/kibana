@@ -9,16 +9,20 @@ import React from 'react';
 import { EuiAvatar, EuiComment, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertEpisodeSeverityBadge } from '../../severity/episode_severity_badge';
 import { getEpisodeSeverityLabel } from '../../severity/severity_utils';
+import { AlertEpisodeCollapsedEventsWarning } from '../collapsed_events_warning';
 import type { SeverityChangeEntry } from './entries';
 import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineSeverityCommentProps {
   entry: SeverityChangeEntry;
+  /** When set, the change is between collapsed phases and a warning names this event limit. */
+  collapsedEventLimit?: number;
 }
 
 export const AlertEpisodeTimelineSeverityComment = ({
   entry,
+  collapsedEventLimit,
 }: AlertEpisodeTimelineSeverityCommentProps) => {
   const isInitial = entry.prevSeverity === undefined;
   const verb = isInitial ? i18n.SET_SEVERITY_TO : i18n.CHANGED_SEVERITY_TO;
@@ -49,6 +53,11 @@ export const AlertEpisodeTimelineSeverityComment = ({
                 entry.prevEventCount,
                 getEpisodeSeverityLabel(entry.prevSeverity)
               )}
+            </EuiFlexItem>
+          )}
+          {entry.prevSeverity !== undefined && collapsedEventLimit !== undefined && (
+            <EuiFlexItem grow={false}>
+              <AlertEpisodeCollapsedEventsWarning eventLimit={collapsedEventLimit} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

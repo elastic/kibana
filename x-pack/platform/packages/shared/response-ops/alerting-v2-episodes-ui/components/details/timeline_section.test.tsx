@@ -12,16 +12,34 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import type { EpisodeEvents } from '../../hooks/use_fetch_episode_events_query';
+import type {
+  EpisodeCollapsedEvents,
+  UseFetchEpisodeCollapsedEventsQueryOptions,
+} from '../../hooks/use_fetch_episode_collapsed_events_query';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 
-jest.mock('../../hooks/use_fetch_episode_events_query');
+const mockUseFetchEvents = jest.fn<
+  { data: EpisodeEvents | undefined; isLoading: boolean; isError: boolean },
+  []
+>();
+const mockUseFetchCollapsedEvents = jest.fn<
+  { data: EpisodeCollapsedEvents | undefined; isInitialLoading: boolean },
+  [UseFetchEpisodeCollapsedEventsQueryOptions]
+>();
+
+jest.mock('../../hooks/use_fetch_episode_events_query', () => ({
+  useFetchEpisodeEventsQuery: () => mockUseFetchEvents(),
+}));
+jest.mock('../../hooks/use_fetch_episode_collapsed_events_query', () => ({
+  useFetchEpisodeCollapsedEventsQuery: (options: UseFetchEpisodeCollapsedEventsQueryOptions) =>
+    mockUseFetchCollapsedEvents(options),
+}));
 jest.mock('../../hooks/use_fetch_episode_actions_history_query');
 jest.mock('../../hooks/use_bulk_get_profiles');
 
-const mockUseFetchEvents = jest.mocked(useFetchEpisodeEventsQuery);
 const mockUseFetchActionsHistory = jest.mocked(useFetchEpisodeActionsHistoryQuery);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
@@ -76,8 +94,17 @@ const renderSection = () => {
   );
 };
 
-const mockEvents = (eventRows: EpisodeEventRow[], isLoading = false) =>
-  mockUseFetchEvents.mockReturnValue({ data: eventRows, isLoading } as never);
+const mockEvents = (eventRows: EpisodeEventRow[], isLoading = false, totalEventCount?: number) =>
+  mockUseFetchEvents.mockReturnValue({
+    data: isLoading
+      ? undefined
+      : { eventRows, totalEventCount: totalEventCount ?? eventRows.length },
+    isLoading,
+    isError: false,
+  });
+
+const mockCollapsedEvents = (collapsedEvents?: EpisodeCollapsedEvents, isInitialLoading = false) =>
+  mockUseFetchCollapsedEvents.mockReturnValue({ data: collapsedEvents, isInitialLoading });
 
 const mockActions = (
   actions: EpisodeActionHistoryEntry[],
@@ -101,6 +128,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockUseBulkGetProfiles.mockReturnValue({ data: [], isLoading: false } as never);
   mockEvents(mockEventRows);
+  mockCollapsedEvents();
   mockActions([]);
 });
 
@@ -195,5 +223,83 @@ describe('AlertEpisodeTimelineSection', () => {
     mockActions([mockAction], false, { hasNextPage: true, isFetchingNextPage: true });
     renderSection();
     expect(screen.getByTestId('alertingV2TimelineLoadMore')).toBeDisabled();
+  });
+
+  describe('when the events query is truncated', () => {
+    const collapsedEvents: EpisodeCollapsedEvents = {
+      statusRows: [
+        {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          'episode.id': 'ep-1',
+          'episode.status': ALERT_EPISODE_STATUS.PENDING,
+          group_hash: 'hash-1',
+          event_count: 2,
+        },
+        {
+          '@timestamp': '2024-01-01T00:01:00.000Z',
+          'episode.id': 'ep-1',
+          'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+          group_hash: 'hash-1',
+          event_count: 5000,
+        },
+        {
+          '@timestamp': '2024-01-02T00:00:00.000Z',
+          'episode.id': 'ep-1',
+          'episode.status': ALERT_EPISODE_STATUS.RECOVERING,
+          group_hash: 'hash-1',
+          event_count: 3,
+        },
+      ],
+      severityRows: [
+        { '@timestamp': '2024-01-01T00:00:30.000Z', severity: 'high', event_count: 5004 },
+      ],
+    };
+
+    it('does not use the collapsed query when every event was returned', () => {
+      renderSection();
+      expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('enables the collapsed query when fewer rows than the event count came back', () => {
+      mockEvents(mockEventRows, false, 5005);
+      renderSection();
+      expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ episodeId: 'ep-1', enabled: true })
+      );
+    });
+
+    it('shows a skeleton while loading the collapsed events', () => {
+      mockEvents(mockEventRows, false, 5005);
+      mockCollapsedEvents(undefined, true);
+      renderSection();
+      expect(screen.getByTestId('alertingV2EpisodeTimelineSectionLoading')).toBeInTheDocument();
+    });
+
+    it('renders entries from the collapsed rows instead of the truncated events', () => {
+      mockEvents(mockEventRows, false, 5005);
+      mockCollapsedEvents(collapsedEvents);
+      renderSection();
+      // 3 state-change entries + 1 severity-change entry
+      const comments = screen.getAllByTestId('alertingV2TimelineEntry');
+      expect(comments).toHaveLength(4);
+      expect(comments[0]).toHaveAttribute('data-timestamp', '2024-01-02T00:00:00.000Z');
+    });
+
+    it('shows the collapsed warning on each change between collapsed phases', () => {
+      mockEvents(mockEventRows, false, 5005);
+      mockCollapsedEvents(collapsedEvents);
+      renderSection();
+      // pending -> active -> recovering: 2 status changes; the single severity is only an initial set
+      expect(screen.getAllByTestId('alertingV2EpisodeCollapsedEventsWarning')).toHaveLength(2);
+    });
+
+    it('does not show the collapsed warning when every event was returned', () => {
+      renderSection();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')
+      ).not.toBeInTheDocument();
+    });
   });
 });
