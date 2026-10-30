@@ -295,7 +295,7 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'inspect',
-          disabled: !authz.fleet.readAgentPolicies || !agent.policy_id,
+          disabled: !authz.integrations.readIntegrationPolicies || !agent.policy_id,
           onClick: () => {
             callbacks.onViewAgentPolicyClick();
           },
@@ -445,7 +445,7 @@ export function useSingleAgentMenuItems({
     agentHasValidRollback,
     licenseService,
     isUnenrolling,
-    authz.fleet.readAgentPolicies,
+    authz.integrations.readIntegrationPolicies,
     isRestartAgentActionEnabled,
   ]);
 

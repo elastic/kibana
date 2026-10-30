@@ -340,6 +340,50 @@ describe('AgentPolicyActionMenu', () => {
     });
   });
 
+  describe('view policy', () => {
+    it('is enabled if user can read integration policies', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          readAgentPolicies: true,
+        },
+        integrations: {
+          readIntegrationPolicies: true,
+        },
+      } as any);
+
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={baseAgentPolicy} />);
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      const viewPolicyButton = result.getByTestId('agentPolicyActionMenuViewPolicyButton');
+      expect(viewPolicyButton).not.toHaveAttribute('disabled');
+    });
+
+    it('is disabled if user cannot read integration policies', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: {
+          readAgentPolicies: true,
+        },
+        integrations: {
+          readIntegrationPolicies: false,
+        },
+      } as any);
+
+      const testRenderer = createFleetTestRendererMock();
+
+      const result = testRenderer.render(<AgentPolicyActionMenu agentPolicy={baseAgentPolicy} />);
+
+      const agentActionsButton = result.getByTestId('agentActionsBtn');
+      await userEvent.click(agentActionsButton);
+
+      const viewPolicyButton = result.getByTestId('agentPolicyActionMenuViewPolicyButton');
+      expect(viewPolicyButton).toHaveAttribute('disabled');
+    });
+  });
+
   describe('add fleet server', () => {
     const fleetServerPolicy: AgentPolicy = {
       ...baseAgentPolicy,

@@ -89,6 +89,53 @@ const READ_SCENARIOS_FULL_POLICIES = [
   },
 ];
 
+const READ_SCENARIOS_COMPILED_POLICY = [
+  {
+    user: testUsers.fleet_all_int_read,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_int_read,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agent_policies_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.integr_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agents_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_no_access,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_settings_read_only,
+    statusCode: 403,
+  },
+];
+
 const ALL_SCENARIOS = [
   {
     user: testUsers.fleet_all_only,
@@ -164,10 +211,13 @@ export default function (providerContext: FtrProviderContext) {
     },
     {
       method: 'GET',
+      path: '/api/fleet/agent_policies/policy-test-privileges-1/full',
+      scenarios: READ_SCENARIOS_COMPILED_POLICY,
+    },
+    {
+      method: 'GET',
       path: '/api/fleet/agent_policies/policy-test-privileges-1/download',
-      scenarios: READ_SCENARIOS.filter(
-        (scenario) => scenario.user.username !== testUsers.fleet_agents_read_only.username
-      ),
+      scenarios: READ_SCENARIOS_COMPILED_POLICY,
     },
     {
       method: 'GET',
