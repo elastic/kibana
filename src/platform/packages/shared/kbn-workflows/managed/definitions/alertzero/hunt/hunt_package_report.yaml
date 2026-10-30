@@ -355,7 +355,7 @@ steps:
         {% assign alreadyOpen = packaged.alreadyOpenCount | default: 0 -%}
         {% assign coveredCount = convergedCount | plus: alreadyOpen -%}
         {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
-        Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open{% if inputs.huntStatus == 'partial' %}; a later sweep hunts this report again{% else %} for a retry{% endif %}.
+        Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open{% if inputs.huntStatus == 'partial' and inputs.hasConfirmedHit != true %}; a later sweep hunts this report again{% else %} for a retry{% endif %}.
         {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
         No confirmed hits, but packaging could not close this Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
         {% elsif packaged.dismissHold == 'open_proposal' -%}

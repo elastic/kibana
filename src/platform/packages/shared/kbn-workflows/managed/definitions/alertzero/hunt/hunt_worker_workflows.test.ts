@@ -1433,3 +1433,27 @@ describe('Hunt Watch packaging summary for a settled no-hit run', () => {
     );
   });
 });
+
+describe('Hunt Watch packaging summary for an incomplete run', () => {
+  const template = (
+    stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
+  ).package_summary;
+  const summary = (hasConfirmedHit: boolean) =>
+    createWorkflowLiquidEngine()
+      .parseAndRenderSync(template, {
+        inputs: { huntStatus: 'partial', hasConfirmedHit },
+        steps: { decide_and_package: { output: { status: 'run_incomplete' } } },
+        variables: { package_status: 'run_incomplete', package_reason: 'no attachment' },
+      })
+      .trim();
+
+  it('promises a later sweep for a partial run with no confirmed hit', () => {
+    expect(summary(false)).toContain('a later sweep hunts this report again');
+  });
+
+  it('does not promise a re-hunt when the run had a confirmed hit', () => {
+    const message = summary(true);
+    expect(message).not.toContain('later sweep');
+    expect(message).toContain('stays open for a retry');
+  });
+});

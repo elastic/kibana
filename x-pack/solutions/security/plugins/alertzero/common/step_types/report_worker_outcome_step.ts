@@ -302,7 +302,9 @@ const ruleCoverageReviewCompletedInputSchema = lazySchema(() =>
 const huntReportCompletedInputSchema = lazySchema(() =>
   z.strictObject({
     event: z.literal('hunt_report_completed'),
-    closed_clean: flag('Whether a clean run closed the Investigation as benign'),
+    closed_clean: flag(
+      'Whether a run with no confirmed hit closed the Investigation as benign. True for a `retired_incomplete` run too, which closed as benign although part of the report was never searched'
+    ),
     coverage_kis_skipped: count('Coverage knowledge items packaging did not write'),
     coverage_kis_written: count('Coverage knowledge items packaging wrote for Detection Watch'),
     has_confirmed_hit: flag('Whether the hunt cleared the confirmed-hit bar'),
