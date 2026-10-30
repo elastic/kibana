@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 
 export const RECORD_RECOVERY_OUTCOME_TOOL_ID = 'nightshift_record_recovery_outcome';
@@ -30,32 +30,34 @@ export const RECOVERY_HYPOTHESIS_OUTCOMES = ['supported', 'contradicted', 'not_t
 const MAX_TEXT_LENGTH = 2048;
 const MAX_HYPOTHESES = 50;
 
-export const recoveryOutcomeSchema = z.object({
-  verdict: z
-    .enum(RECOVERY_VERDICTS)
-    .describe('How the recovery bears on the root cause reported before this round.'),
-  resolved_by: z.enum(RECOVERY_RESOLVERS).describe('What made the alert recover.'),
-  resolution: z
-    .string()
-    .min(1)
-    .max(MAX_TEXT_LENGTH)
-    .describe('One sentence naming what resolved the alert, with the evidence.'),
-  hypotheses: z
-    .array(
-      z.object({
-        candidate: z
-          .string()
-          .min(1)
-          .max(MAX_TEXT_LENGTH)
-          .describe('The hypothesis, in the same words as in set_hypotheses.'),
-        outcome: z
-          .enum(RECOVERY_HYPOTHESIS_OUTCOMES)
-          .describe('Whether the recovery supported, contradicted, or did not test it.'),
-      })
-    )
-    .max(MAX_HYPOTHESES)
-    .describe('One entry per hypothesis that existed before this round.'),
-});
+export const recoveryOutcomeSchema = lazySchema(() =>
+  z.object({
+    verdict: z
+      .enum(RECOVERY_VERDICTS)
+      .describe('How the recovery bears on the root cause reported before this round.'),
+    resolved_by: z.enum(RECOVERY_RESOLVERS).describe('What made the alert recover.'),
+    resolution: z
+      .string()
+      .min(1)
+      .max(MAX_TEXT_LENGTH)
+      .describe('One sentence naming what resolved the alert, with the evidence.'),
+    hypotheses: z
+      .array(
+        z.object({
+          candidate: z
+            .string()
+            .min(1)
+            .max(MAX_TEXT_LENGTH)
+            .describe('The hypothesis, in the same words as in set_hypotheses.'),
+          outcome: z
+            .enum(RECOVERY_HYPOTHESIS_OUTCOMES)
+            .describe('Whether the recovery supported, contradicted, or did not test it.'),
+        })
+      )
+      .max(MAX_HYPOTHESES)
+      .describe('One entry per hypothesis that existed before this round.'),
+  })
+);
 
 export type RecoveryOutcome = z.infer<typeof recoveryOutcomeSchema>;
 

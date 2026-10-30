@@ -47,9 +47,7 @@ describe('buildCausalCheckTranscript', () => {
       'Human message: Slack user <@U1> wrote: it was the inventory 2.14.0 deploy'
     );
     expect(transcript).toContain('- nightshift_sandbox_bash {"command":"esql"}');
-    expect(transcript).toContain(
-      "Investigator's answer: Errors stopped right after the rollback."
-    );
+    expect(transcript).toContain("Investigator's answer: Errors stopped right after the rollback.");
   });
 
   it('drops the oldest rounds first when the investigation is long', () => {

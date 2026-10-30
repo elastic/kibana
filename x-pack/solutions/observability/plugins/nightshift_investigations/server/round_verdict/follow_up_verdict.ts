@@ -5,29 +5,39 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isInvestigationRoundKind } from '../client/round_kind';
 
 /** The post-round steps' inputs that carry nightshift.classifyFollowUp's verdict. */
 export const followUpVerdictInputsSchema = {
-  round_kind: z
-    .string()
-    .max(64)
-    .optional()
-    .describe('The kind of round (initial, follow_up, or alert_recovery), labelled when it started.'),
-  is_feedback: z
-    .boolean()
-    .optional()
-    .describe('From nightshift.classifyFollowUp: the round speaks to the earlier root cause.'),
-  causal_confirmed: z
-    .boolean()
-    .optional()
-    .describe('From nightshift.classifyFollowUp: the round proved the root cause.'),
-  causal_summary: z
-    .string()
-    .max(16_384)
-    .optional()
-    .describe('From nightshift.classifyFollowUp: what was confirmed or what was wrong.'),
+  round_kind: lazySchema(() =>
+    z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'The kind of round (initial, follow_up, or alert_recovery), labelled when it started.'
+      )
+  ),
+  is_feedback: lazySchema(() =>
+    z
+      .boolean()
+      .optional()
+      .describe('From nightshift.classifyFollowUp: the round speaks to the earlier root cause.')
+  ),
+  causal_confirmed: lazySchema(() =>
+    z
+      .boolean()
+      .optional()
+      .describe('From nightshift.classifyFollowUp: the round proved the root cause.')
+  ),
+  causal_summary: lazySchema(() =>
+    z
+      .string()
+      .max(16_384)
+      .optional()
+      .describe('From nightshift.classifyFollowUp: what was confirmed or what was wrong.')
+  ),
 };
 
 /** The verdict on a follow-up round, as Cortex and Memory see it. */

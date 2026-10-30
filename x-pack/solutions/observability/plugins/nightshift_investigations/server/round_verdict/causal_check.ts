@@ -179,7 +179,8 @@ export const createLlmCausalCheck = ({
         typeof output.causal_summary === 'string'
           ? truncate(output.causal_summary, MAX_SUMMARY_CHARS)
           : '',
-      learning: typeof output.learning === 'string' ? truncate(output.learning, MAX_LEARNING_CHARS) : '',
+      learning:
+        typeof output.learning === 'string' ? truncate(output.learning, MAX_LEARNING_CHARS) : '',
     };
   };
 };

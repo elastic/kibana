@@ -56,7 +56,9 @@ describe('verdictFromRecoveryOutcome', () => {
       source: 'recovery_outcome',
     });
     expect(verdict.causalSummary).toContain('Rolling back inventory 2.14.0 ended the errors.');
-    expect(verdict.causalSummary).toContain('Supported by the recovery:\n- inventory 2.14.0 rollout');
+    expect(verdict.causalSummary).toContain(
+      'Supported by the recovery:\n- inventory 2.14.0 rollout'
+    );
     expect(verdict.causalSummary).toContain(
       'Contradicted by the recovery:\n- payment processor outage'
     );

@@ -18,10 +18,7 @@ import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { isSeededWorkspaceAccess } from '../investigation_round';
-import {
-  describeFollowUpVerdict,
-  type FollowUpVerdict,
-} from '../round_verdict/follow_up_verdict';
+import { describeFollowUpVerdict, type FollowUpVerdict } from '../round_verdict/follow_up_verdict';
 import type { CortexPageStore } from './page_store';
 import {
   canonicalizeSlug,

@@ -2112,7 +2112,9 @@ describe('optimizeMemory', () => {
         causalSummary: 'Errors stopped while the rollout was still running.',
       });
 
-      expect(transcript).toContain('A recalled memory that supported the contradicted cause is harmful.');
+      expect(transcript).toContain(
+        'A recalled memory that supported the contradicted cause is harmful.'
+      );
       expect(store.applyCounterUpdates).toHaveBeenCalledWith([
         { id: 'memory_a', addImp: 1, addConv: 0 },
       ]);

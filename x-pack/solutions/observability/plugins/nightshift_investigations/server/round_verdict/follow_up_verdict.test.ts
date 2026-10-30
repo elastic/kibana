@@ -50,9 +50,14 @@ describe('describeFollowUpVerdict', () => {
         { isFeedback: true, causalConfirmed: false, causalSummary: 'Contradicted.' },
         advice
       )
-    ).toContain('did not confirm the earlier root cause.\nContradicted.\nArchive what rests on it.');
+    ).toContain(
+      'did not confirm the earlier root cause.\nContradicted.\nArchive what rests on it.'
+    );
     expect(
-      describeFollowUpVerdict({ isFeedback: false, causalConfirmed: false, causalSummary: '' }, advice)
+      describeFollowUpVerdict(
+        { isFeedback: false, causalConfirmed: false, causalSummary: '' },
+        advice
+      )
     ).toContain('neither confirmed nor contradicted');
   });
 });

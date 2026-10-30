@@ -648,7 +648,10 @@ describe('optimizeCortex', () => {
         title: 'Cart',
       },
     ];
-    const optimize = (store: CortexPageStore, verdict: Parameters<typeof optimizeCortex>[0]['verdict']) => {
+    const optimize = (
+      store: CortexPageStore,
+      verdict: Parameters<typeof optimizeCortex>[0]['verdict']
+    ) => {
       const proposeEdits = jest.fn().mockResolvedValue({ edits });
       return optimizeCortex({
         store,

@@ -15,10 +15,7 @@ import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { extractWorkspaceReads, extractWorkspaceReadsFromToolCalls } from '../investigation_round';
-import {
-  describeFollowUpVerdict,
-  type FollowUpVerdict,
-} from '../round_verdict/follow_up_verdict';
+import { describeFollowUpVerdict, type FollowUpVerdict } from '../round_verdict/follow_up_verdict';
 import { hasToolEvidence, renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {

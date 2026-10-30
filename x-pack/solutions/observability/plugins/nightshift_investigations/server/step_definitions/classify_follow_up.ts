@@ -36,7 +36,10 @@ export type CreateCausalCheck = (options: {
   signal: AbortSignal;
 }) => Promise<RunCausalCheck | undefined>;
 
-const toOutput = (verdict: RoundVerdict, roundKind?: (typeof INVESTIGATION_ROUND_KINDS)[number]) => ({
+const toOutput = (
+  verdict: RoundVerdict,
+  roundKind?: (typeof INVESTIGATION_ROUND_KINDS)[number]
+) => ({
   output: {
     ...(roundKind ? { round_kind: roundKind } : {}),
     is_feedback: verdict.isFeedback,
