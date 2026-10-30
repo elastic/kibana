@@ -9,6 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
+  CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
@@ -16,11 +17,16 @@ import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
+import {
+  createClassicToUniversalRuleMigrationSkill,
+  type ClassicToUniversalRuleMigrationSkillDeps,
+} from './classic_to_universal_rule_migration_skill';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps &
   AttachRuleToolDeps &
-  ManageActionPolicyToolDeps & {
+  ManageActionPolicyToolDeps &
+  ClassicToUniversalRuleMigrationSkillDeps & {
     availability: AvailabilityConfig;
   };
 
@@ -41,6 +47,10 @@ export const registerSkills = (
     {
       id: ACTION_POLICY_AUTHORING_SKILL_ID,
       create: () => createActionPolicyAuthoringSkill(deps),
+    },
+    {
+      id: CLASSIC_TO_UNIVERSAL_RULE_MIGRATION_SKILL_ID,
+      create: () => createClassicToUniversalRuleMigrationSkill(deps),
     },
   ] as const;
 

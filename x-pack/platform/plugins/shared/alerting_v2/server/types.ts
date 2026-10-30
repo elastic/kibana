@@ -28,6 +28,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AlertingServerStart as ClassicAlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -114,6 +115,7 @@ export interface AlertingServerSetupDependencies {
 }
 
 export interface AlertingServerStartDependencies {
+  alerting: ClassicAlertingServerStart;
   taskManager: TaskManagerStartContract;
   features: FeaturesPluginStart;
   spaces: SpacesPluginStart;

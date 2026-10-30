@@ -232,6 +232,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Alerting
   'rule-authoring',
   'action-policy-authoring',
+  'classic-to-universal-rule-migration',
 
   // Platform – Dashboard
   'dashboards',

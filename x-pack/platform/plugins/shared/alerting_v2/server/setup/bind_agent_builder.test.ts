@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { Container, ContainerModule } from 'inversify';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { OnSetup, OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
@@ -78,6 +81,7 @@ describe('bindAgentBuilder', () => {
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
   let agentBuilderSml: { registerType: jest.Mock };
   let uiSettingsClient: { get: jest.Mock };
+  let classicAlerting: ReturnType<typeof alertsMock.createStart>;
   let workflowsManagementApi: {
     getClient: jest.Mock;
     getWorkflow: jest.Mock;
@@ -104,6 +108,7 @@ describe('bindAgentBuilder', () => {
       getAvailableConnectors: jest.fn(),
     };
     ({ loggerService } = createLoggerService());
+    classicAlerting = alertsMock.createStart();
 
     createRuleAttachmentTypeMock.mockReset();
     createActionPolicyAttachmentTypeMock.mockReset();
@@ -124,6 +129,9 @@ describe('bindAgentBuilder', () => {
     container
       .bind(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
       .toConstantValue(spacesMock.createStart());
+    container
+      .bind(PluginStart<AlertingServerStartDependencies['alerting']>('alerting'))
+      .toConstantValue(classicAlerting);
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
     container.bind(UiSettingsClientToken).toConstantValue(uiSettingsClient as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);
@@ -235,6 +243,22 @@ describe('bindAgentBuilder', () => {
         'space-1',
         request
       );
+    });
+
+    it('wires the migration skill to the classic alerting plugin', async () => {
+      bindAgentBuilderPlugin();
+      const request = httpServerMock.createKibanaRequest();
+      classicAlerting.getType.mockImplementation(() => {
+        throw Boom.badRequest('Rule type ".unknown" is not registered.');
+      });
+
+      runOnStart();
+
+      const deps = registerSkillsMock.mock.calls[0][1];
+      await deps.getClassicRulesClient(request);
+      expect(classicAlerting.getRulesClientWithRequest).toHaveBeenCalledWith(request);
+      expect(deps.getClassicRuleTypeMigration('.unknown')).toBeUndefined();
+      expect(classicAlerting.getType).toHaveBeenCalledWith('.unknown');
     });
 
     it('wires the serverless project type into skill availability', async () => {
