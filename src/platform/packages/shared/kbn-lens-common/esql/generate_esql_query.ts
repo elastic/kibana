@@ -32,7 +32,10 @@ import {
   buildOuterTopNOtherRemap,
 } from './build_outer_top_n_other_remap';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import { getTermsConversionFailure } from './get_terms_conversion_failure';
+import {
+  getTermsConversionFailure,
+  type TermsConversionContext,
+} from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
@@ -452,14 +455,13 @@ export function generateEsqlQuery(
 
   // Fail fast on terms blockers before building bucket expressions; metric
   // failures above still take precedence. One reason per terms column; take the first.
+  const termsConversionContext: TermsConversionContext = {
+    hasUnsupportedDateHistogramNesting,
+    termsBucketCount: termsBuckets.length,
+    supportsOtherBucket: supportsSingleTermsOtherBucket,
+  };
   const termsFailureReason = termsBuckets
-    .map(({ col }) =>
-      getTermsConversionFailure(col, {
-        hasUnsupportedDateHistogramNesting,
-        termsBucketCount: termsBuckets.length,
-        supportsOtherBucket: supportsSingleTermsOtherBucket,
-      })
-    )
+    .map(({ col }) => getTermsConversionFailure(col, termsConversionContext))
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
   if (termsFailureReason) {
     return getEsqlQueryFailedResult(termsFailureReason);
