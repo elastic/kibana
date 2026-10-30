@@ -44,6 +44,14 @@ describe('<NoDataViewsPromptComponent />', () => {
     expect(button).toBeDisabled();
   });
 
+  test('disables "Try ES|QL" button if isTryESQLDisabled is true', () => {
+    render(
+      <NoDataViewsPrompt canCreateNewDataView={false} onTryESQL={jest.fn()} isTryESQLDisabled />
+    );
+
+    expect(screen.getByTestId('tryESQLLink')).toBeDisabled();
+  });
+
   test('onClickCreate', async () => {
     const user = userEvent.setup();
     const onClickCreate = jest.fn();

@@ -2,15 +2,15 @@
 
 exports[`needs attention tile queries over 24h without entity filters builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .alerts-security.alerts-default
-| WHERE @timestamp >= NOW() - 1 days
+FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA _index
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
-    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL AND (((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")) OR (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\") OR ((service.name IS NOT NULL AND service.name != \\"\\")))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -62,24 +62,30 @@ FROM .alerts-security.alerts-default
      _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
      entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
     | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL user_euid = CASE(((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")), user_euid), host_euid = CASE((host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\"), host_euid), service_euid = CASE(((service.name IS NOT NULL AND service.name != \\"\\")), service_euid)
     | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
       COALESCE(user_euid, host_euid, service_euid),
       COALESCE(host_euid, service_euid, user_euid)),
       COALESCE(service_euid, user_euid, host_euid)))
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
+  (
+    WHERE _index == \\".entities.v2.latest.default-00001\\"
+    | EVAL _ea_entity_id = \`entity.relationships.resolution.resolved_to\`, alias_watchlisted = entity.attributes.watchlists IS NOT NULL
+    | KEEP _ea_entity_id, alias_watchlisted
+  )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | EVAL is_severe_alert = \`kibana.alert.severity\` IN (\\"high\\", \\"critical\\")
-| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id
+| EVAL is_alert_row = \`kibana.alert.severity\` IS NOT NULL
+| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id
 | RENAME _ea_entity_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
-| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
+| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL
+| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id
 | EVAL severe_id = CASE(has_severe_alert, effective_id, null)
-| EVAL watchlisted_id = CASE(is_watchlisted, effective_id, null)
+| EVAL watchlisted_id = CASE(has_alert AND COALESCE(group_on_watchlist, false), effective_id, null)
 | STATS
     severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
@@ -230,15 +236,15 @@ FROM (
 
 exports[`needs attention tile queries over 30d with a criticality filter builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .alerts-security.alerts-default
-| WHERE @timestamp >= NOW() - 30 days
+FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA _index
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
-    WHERE \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL AND (((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")) OR (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\") OR ((service.name IS NOT NULL AND service.name != \\"\\")))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -290,25 +296,33 @@ FROM .alerts-security.alerts-default
      _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
      entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
     | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL user_euid = CASE(((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")), user_euid), host_euid = CASE((host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\"), host_euid), service_euid = CASE(((service.name IS NOT NULL AND service.name != \\"\\")), service_euid)
     | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
       COALESCE(user_euid, host_euid, service_euid),
       COALESCE(host_euid, service_euid, user_euid)),
       COALESCE(service_euid, user_euid, host_euid)))
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
+  (
+    WHERE _index == \\".entities.v2.latest.default-00001\\"
+    | EVAL _ea_entity_id = \`entity.relationships.resolution.resolved_to\`, alias_watchlisted = entity.attributes.watchlists IS NOT NULL
+    | KEEP _ea_entity_id, alias_watchlisted
+  )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | EVAL is_severe_alert = \`kibana.alert.severity\` IN (\\"high\\", \\"critical\\")
-| STATS has_severe_alert = MAX(is_severe_alert) BY _ea_entity_id
+| EVAL is_alert_row = \`kibana.alert.severity\` IS NOT NULL
+| STATS has_severe_alert = MAX(is_severe_alert), has_alert = MAX(is_alert_row), alias_watchlisted = MAX(alias_watchlisted) BY _ea_entity_id
 | RENAME _ea_entity_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
+| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL
+| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id
+| EVAL entity.id = effective_id
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
-| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| EVAL is_watchlisted = entity.attributes.watchlists IS NOT NULL
-| STATS has_severe_alert = MAX(has_severe_alert), is_watchlisted = MAX(is_watchlisted) BY effective_id
 | EVAL severe_id = CASE(has_severe_alert, effective_id, null)
-| EVAL watchlisted_id = CASE(is_watchlisted, effective_id, null)
+| EVAL watchlisted_id = CASE(has_alert AND COALESCE(group_on_watchlist, false), effective_id, null)
 | STATS
     severe_alerts_count      = COUNT(severe_id),
     severe_alerts_entity_ids = VALUES(severe_id),
@@ -381,9 +395,11 @@ TRUE, _euid_branch_2_formula, NULL))
 | RENAME derived_euids AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | STATS BY effective_id
+| EVAL entity.id = effective_id
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 

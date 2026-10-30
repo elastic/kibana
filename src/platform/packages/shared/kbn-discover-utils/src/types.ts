@@ -77,6 +77,7 @@ export interface LogDocumentOverview
     Partial<OtelExceptionLogFields> {
   '@timestamp': string;
   'log.level'?: string;
+  severity_text?: string;
   message?: string;
   'body.text'?: string;
   'error.message'?: string;

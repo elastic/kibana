@@ -7,12 +7,56 @@
 
 import React from 'react';
 import { EuiBadge, EuiPanel, EuiText, EuiTextArea } from '@elastic/eui';
+import {
+  formatChannelValue,
+  useAllRelayAppBindings,
+} from '../../../../../settings/components/apps_section/use_relay_app_bindings';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
+import { findUnconnectedChannels, SlackChannelComboBox } from '../../slack_channel_combo_box';
 import { ListPill } from '../pills/list_pill';
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
 import { triggerLabels, slackTriggerLeads } from '../translations';
+
+const ChannelPill = ({
+  channels,
+  onChange,
+  readOnly,
+}: {
+  channels: string[];
+  onChange: (channels: string[]) => void;
+  readOnly: boolean;
+}) => {
+  const connected = useAllRelayAppBindings();
+  const label =
+    channels.map((value) => formatChannelValue(value, connected.bindings)).join(', ') ||
+    triggerLabels.selectChannels;
+
+  if (readOnly) return <EuiBadge>{label}</EuiBadge>;
+  return (
+    <PillPopover
+      ariaLabel={triggerLabels.selectChannels}
+      label={label}
+      isInvalid={findUnconnectedChannels(channels, connected).length > 0}
+      testSubject="automationSlackTriggerChannels"
+    >
+      {() => (
+        <EuiPanel paddingSize="s" hasShadow={false} color="transparent" css={{ width: 300 }}>
+          <SlackChannelComboBox
+            autoFocus
+            warnUnconnected
+            values={channels}
+            onChange={onChange}
+            ariaLabel={triggerLabels.selectChannels}
+            placeholder={actionLabels.searchChannels}
+            testSubject="automationSlackTriggerChannelsInput"
+          />
+        </EuiPanel>
+      )}
+    </PillPopover>
+  );
+};
 
 export const SlackTriggerEditor = ({
   trigger,
@@ -29,13 +73,9 @@ export const SlackTriggerEditor = ({
       <strong>{slackTriggerLeads[trigger.kind]}</strong>
     </EuiText>
     <EuiText size="s">{triggerLabels.slackIn}</EuiText>
-    <ListPill
-      ariaLabel={triggerLabels.selectChannels}
-      emptyLabel={triggerLabels.selectChannels}
-      placeholder={actionLabels.searchChannels}
-      values={trigger.channels}
+    <ChannelPill
+      channels={trigger.channels}
       onChange={(channels) => onChange({ ...trigger, channels })}
-      testSubject="automationSlackTriggerChannels"
       readOnly={readOnly}
     />
     {readOnly ? (
@@ -79,6 +119,16 @@ export const SlackTriggerEditor = ({
       values={trigger.users}
       onChange={(users) => onChange({ ...trigger, users })}
       testSubject="automationSlackTriggerUsers"
+      readOnly={readOnly}
+    />
+    <EuiText size="s">{triggerLabels.via}</EuiText>
+    <ListPill
+      ariaLabel={triggerLabels.anyApp}
+      emptyLabel={triggerLabels.anyApp}
+      placeholder={triggerLabels.searchApps}
+      values={trigger.bots}
+      onChange={(bots) => onChange({ ...trigger, bots })}
+      testSubject="automationSlackTriggerBots"
       readOnly={readOnly}
     />
   </Sentence>

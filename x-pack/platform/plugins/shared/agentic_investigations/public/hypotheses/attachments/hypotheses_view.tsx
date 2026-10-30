@@ -25,6 +25,7 @@ import type {
   InvestigationHypotheses,
 } from '../../../common/hypotheses/hypotheses';
 import { EvidenceView } from '../../evidence/evidence_view';
+import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from './translations';
 import type {
   InvestigationAttachmentContentProps,
   InvestigationAttachmentVariant,
@@ -42,18 +43,6 @@ const NO_REASON = i18n.translate('xpack.agenticInvestigations.hypotheses.noReaso
   defaultMessage: 'No reasoning recorded yet.',
 });
 
-const HYPOTHESIS_STATUS_LABELS: Record<HypothesisStatus, string> = {
-  investigating: i18n.translate('xpack.agenticInvestigations.hypotheses.status.investigating', {
-    defaultMessage: 'Investigating',
-  }),
-  dismissed: i18n.translate('xpack.agenticInvestigations.hypotheses.status.dismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  confirmed: i18n.translate('xpack.agenticInvestigations.hypotheses.status.confirmed', {
-    defaultMessage: 'Confirmed',
-  }),
-};
-
 const HYPOTHESIS_STATUS_ICONS: Record<Exclude<HypothesisStatus, 'investigating'>, string> = {
   dismissed: 'dashedCircle',
   confirmed: 'checkCircle',
@@ -63,12 +52,6 @@ const confidenceBadgeLabel = (confidence: number): string =>
   i18n.translate('xpack.agenticInvestigations.hypotheses.confidenceBadge', {
     defaultMessage: '{confidence, number, percent}',
     values: { confidence },
-  });
-
-const confidenceLabel = (confidence: number): string =>
-  i18n.translate('xpack.agenticInvestigations.hypotheses.confidence', {
-    defaultMessage: '{confidence}% confidence',
-    values: { confidence: Math.round(confidence * 100) },
   });
 
 const HypothesisStatusIcon = ({ status }: { status: HypothesisStatus }) =>
@@ -86,6 +69,32 @@ const HypothesisStatusIcon = ({ status }: { status: HypothesisStatus }) =>
       data-test-subj={`investigationHypothesisStatus-${status}`}
     />
   );
+
+/** A hypothesis's reason and, when given, its evidence charts. */
+export const HypothesisDetail = ({
+  reason,
+  evidence,
+}: Pick<Hypothesis, 'reason' | 'evidence'>): React.ReactElement => (
+  <>
+    <div data-test-subj="investigationHypothesisReason">
+      {reason?.trim() ? (
+        <EuiMarkdownFormat textSize="xs" color="subdued">
+          {reason}
+        </EuiMarkdownFormat>
+      ) : (
+        <EuiText size="xs" color="subdued">
+          <p>{NO_REASON}</p>
+        </EuiText>
+      )}
+    </div>
+    {evidence?.map((item, index) => (
+      <React.Fragment key={index}>
+        <EuiSpacer size="s" />
+        <EvidenceView evidence={item} />
+      </React.Fragment>
+    ))}
+  </>
+);
 
 const HypothesisItem = ({
   hypothesis: { candidate, confidence, status, reason, evidence = [] },
@@ -123,24 +132,7 @@ const HypothesisItem = ({
         </EuiBadge>
       }
     >
-      <div data-test-subj="investigationHypothesisReason">
-        {reason?.trim() ? (
-          <EuiMarkdownFormat textSize="xs" color="subdued">
-            {reason}
-          </EuiMarkdownFormat>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            <p>{NO_REASON}</p>
-          </EuiText>
-        )}
-      </div>
-      {variant === 'details' &&
-        evidence.map((item, index) => (
-          <React.Fragment key={index}>
-            <EuiSpacer size="s" />
-            <EvidenceView evidence={item} />
-          </React.Fragment>
-        ))}
+      <HypothesisDetail reason={reason} evidence={variant === 'details' ? evidence : []} />
     </EuiAccordion>
   );
 };

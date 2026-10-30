@@ -62,7 +62,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connector/{connectorId}',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -130,7 +130,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -167,7 +167,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           description: schema.string({ maxLength: 10_000 }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -204,7 +204,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           index_name: schema.string({ maxLength: 255 }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -242,7 +242,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           service_type: schema.string({ maxLength: 512 }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -274,7 +274,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -307,7 +307,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           ),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -337,7 +337,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/sync',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -365,12 +365,12 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       path: '/internal/serverless_search/connectors/{connectorId}/sync_jobs',
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
         query: schema.object({
           from: schema.maybe(schema.number()),
           size: schema.maybe(schema.number()),
-          type: schema.maybe(schema.string()),
+          type: schema.maybe(schema.string({ maxLength: 512 })),
         }),
       },
       security: {
@@ -415,7 +415,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {
@@ -446,7 +446,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
           service_type: schema.string({ maxLength: 512 }),
         }),
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
       security: {

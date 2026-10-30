@@ -56,7 +56,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       completions: z.array(automationCompletionSchema).max(10).optional(),
       runtime: z
         .object({
-          dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
+          dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
           timeoutSeconds: z.number().int().min(1).optional(),
           dedupeWindowSeconds: z.number().int().min(0).optional(),
           overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
@@ -64,7 +64,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         .optional(),
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -73,6 +80,11 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     const spaceId =
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const existing = await soClient.get<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
@@ -104,7 +116,13 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       try {
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
-          { yaml: generateWorkflowYaml(params.path.id, merged) },
+          {
+            yaml: generateWorkflowYaml({
+              automationId: params.path.id,
+              automation: merged,
+              serviceAccountId,
+            }),
+          },
           spaceId,
           request
         );

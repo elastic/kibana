@@ -420,6 +420,13 @@ export interface ConsoleProps extends CommonProps {
   apiRef?: MutableRefObject<ConsoleApi | undefined>;
 
   /**
+   * If provided, it will be called with the console's API as soon as that API becomes usable
+   * (once the console has mounted). Prefer this over `apiRef` when the API needs to be used right
+   * after showing the console, because `apiRef` is only populated after the console has rendered.
+   */
+  onApiAvailable?: (api: ConsoleApi) => void;
+
+  /**
    * If defined, certain console data (ex. command input history) will be persisted to localstorage
    * using this prefix as part of the storage key. That data will then be retrieved and reused
    * across all console windows

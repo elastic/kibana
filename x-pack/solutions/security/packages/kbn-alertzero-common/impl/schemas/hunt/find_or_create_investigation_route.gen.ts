@@ -40,11 +40,11 @@ export type FindOrCreateInvestigationRequestBodyInput = z.input<
 export const FindOrCreateInvestigationResponse = lazySchema(() =>
   z.object({
     /**
-     * uuidv5(hunt:report:{reportId}); minted or verified existing.
+     * uuidv5(hunt:report:{spaceId}|{reportId}); minted or verified existing.
      */
     investigationConversationId: z
       .string()
-      .describe('uuidv5(hunt:report:{reportId}); minted or verified existing.'),
+      .describe('uuidv5(hunt:report:{spaceId}|{reportId}); minted or verified existing.'),
     /**
      * trigger-{sha256(space|reportId)}; the security.threat attachment id the caller attaches to name this Investigation's report.
      */

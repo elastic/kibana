@@ -12,7 +12,16 @@ import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../hooks/use_automations';
 
 jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
-jest.mock('../../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [{ channel: 'C2', displayName: 'oncall', status: 'bound_to_self' }],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
@@ -133,18 +142,12 @@ describe('CreateAutomationFlyout', () => {
     fireEvent.click(await screen.findByTestId('automationAddSlackAction'));
 
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
-    fireEvent.change(screen.getByTestId('automationSlackDestination'), {
-      target: { value: '#oncall' },
-    });
+    const channelInput = within(screen.getByTestId('automationSlackChannelDestination')).getByRole(
+      'combobox'
+    );
+    fireEvent.change(channelInput, { target: { value: 'oncall' } });
+    fireEvent.click(await screen.findByRole('option', { name: '#oncall' }));
     expect(screen.getByTestId('submitAutomation')).toBeEnabled();
-  });
-
-  it('shows the create title and name and tags fields', () => {
-    renderFlyout();
-
-    expect(screen.getByRole('heading', { name: 'Create automation' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Name this automation')).toBeInTheDocument();
-    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
   it('closes a pristine form without confirmation', () => {

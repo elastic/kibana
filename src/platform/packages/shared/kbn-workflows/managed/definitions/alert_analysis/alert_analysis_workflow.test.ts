@@ -390,15 +390,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
-      'connector-id-by-feature': string;
+      'connector-id-by-feature': string[];
       'create-conversation': string;
     };
 
     expect(agentStep).toBeDefined();
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
-    // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
-    // "" for the unused variable so exactly one is non-empty at execution time.
-    expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
+    // The template row leads. Liquid renders "" for the unused tier variable, and a blank
+    // entry is ignored, so exactly one of connector-id and the tier is set at execution time.
+    expect(agentStep['connector-id-by-feature']).toEqual([
+      'alertzero_template_models',
+      '{{ variables.connector_id_by_feature }}',
+    ]);
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
@@ -2671,6 +2674,55 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       expect(runtime.with.use_prompt).toBe('${{ steps.fetch_runtime_config.output.usePrompt }}');
     });
 
+    it('keeps shared context in the template input and drops the static preamble', () => {
+      const templateStep = findStepByName(workflow.steps, 'template_alerts_text') as {
+        with: { alerts_text: string };
+      };
+      const message = [
+        '<role>static instructions</role>',
+        '<batch_protocol>one verdict per id</batch_protocol>',
+        '## Shared Context',
+        '### Rule: Suspicious process',
+        '- Severity: high',
+        '## Alerts to classify (1)',
+        '<alert id="alert-1">',
+        '- event.code: behavior',
+        '</alert>',
+      ].join('\n');
+
+      const rendered = engine.parseAndRenderSync(templateStep.with.alerts_text, {
+        inputs: { calledByWorker: false },
+        steps: { build_agent_message: { output: { message } } },
+      });
+
+      expect(rendered).toContain('## Shared Context');
+      expect(rendered).toContain('### Rule: Suspicious process');
+      expect(rendered).toContain('- Severity: high');
+      expect(rendered).toContain('## Alerts to classify (1)');
+      expect(rendered).toContain('<alert id="alert-1">');
+      expect(rendered).not.toContain('<role>');
+      expect(rendered).not.toContain('<batch_protocol>');
+      expect(rendered).not.toContain('batch_summary');
+    });
+
+    it('appends the worker batch summary after the shared context', () => {
+      const templateStep = findStepByName(workflow.steps, 'template_alerts_text') as {
+        with: { alerts_text: string };
+      };
+      const rendered = engine.parseAndRenderSync(templateStep.with.alerts_text, {
+        inputs: { calledByWorker: true },
+        steps: {
+          build_agent_message: {
+            output: { message: '<role>preamble</role>\n## Shared Context\n### Rule: R' },
+          },
+        },
+      });
+
+      expect(rendered.trim().startsWith('## Shared Context')).toBe(true);
+      expect(rendered).toContain('batch_summary');
+      expect(rendered).not.toContain('<role>');
+    });
+
     it('lists both connector fields on the prompt, like the agent, so either path can set one', () => {
       const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<
         string,
@@ -2678,7 +2730,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       >;
 
       expect(promptStep['connector-id']).toBe('{{ variables.connector_id }}');
-      expect(promptStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
+      expect(promptStep['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        '{{ variables.connector_id_by_feature }}',
+      ]);
+      expect(promptStep.with).toEqual(
+        expect.objectContaining({
+          template_id: '.alert-triage',
+          template_version: 1,
+          template_variables: {
+            alerts_text: '{{ steps.template_alerts_text.output.alerts_text }}',
+          },
+        })
+      );
     });
 
     describe('token usage attribution', () => {

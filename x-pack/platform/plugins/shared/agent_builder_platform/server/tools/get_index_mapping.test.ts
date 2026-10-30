@@ -16,12 +16,20 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import { getIndexMappingsTool } from './get_index_mapping';
+import { resolveToolSchema } from './test_utils';
 
 const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
 
-const runTool = async (indices: string[], raw: boolean, includeFrozen?: boolean) => {
-  const result = (await getIndexMappingsTool().handler(
-    { indices, raw, include_frozen: includeFrozen },
+const runTool = async (
+  indices: string[],
+  raw: boolean,
+  includeFrozen?: boolean,
+  includeFrozenByDefault = false
+) => {
+  const tool = getIndexMappingsTool();
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
+  const result = (await tool.handler(
+    schema.parse({ indices, raw, include_frozen: includeFrozen }),
     agentBuilderMocks.tools.createHandlerContext()
   )) as ToolHandlerStandardReturn;
 
@@ -99,6 +107,22 @@ describe('getIndexMappingsTool', () => {
 
       expect(getIndexFieldsMock).toHaveBeenCalledWith(
         expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      await runTool(['logs-*'], false, undefined, true);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('lets the agent override the default', async () => {
+      await runTool(['logs-*'], false, false, true);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
       );
     });
   });

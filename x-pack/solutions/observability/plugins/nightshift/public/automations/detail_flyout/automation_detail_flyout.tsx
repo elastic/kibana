@@ -128,6 +128,7 @@ export const AutomationDetailFlyout = ({
   automations,
   automation,
   canManage,
+  editDisabledReason,
   usedToday,
   runRange,
   rangeLabel,
@@ -138,6 +139,8 @@ export const AutomationDetailFlyout = ({
   automations: Automation[];
   automation: Automation;
   canManage: boolean;
+  /** Why editing is not possible, shown on the disabled controls instead of hiding them. */
+  editDisabledReason?: string;
   usedToday: number;
   runRange: RunRange;
   rangeLabel: string;
@@ -415,20 +418,22 @@ export const AutomationDetailFlyout = ({
                       {
                         title: labels.enabled,
                         value: (
-                          <EuiSwitch
-                            compressed
-                            showLabel={false}
-                            label={labels.enabled}
-                            checked={automation.isEnabled}
-                            disabled={!canManage}
-                            onChange={(event) =>
-                              toggleAutomation.mutate({
-                                id: automation.id,
-                                name: automation.name,
-                                isEnabled: event.target.checked,
-                              })
-                            }
-                          />
+                          <EuiToolTip content={editDisabledReason}>
+                            <EuiSwitch
+                              compressed
+                              showLabel={false}
+                              label={labels.enabled}
+                              checked={automation.isEnabled}
+                              disabled={!canManage}
+                              onChange={(event) =>
+                                toggleAutomation.mutate({
+                                  id: automation.id,
+                                  name: automation.name,
+                                  isEnabled: event.target.checked,
+                                })
+                              }
+                            />
+                          </EuiToolTip>
                         ),
                       },
                       {
@@ -617,6 +622,17 @@ export const AutomationDetailFlyout = ({
                       </EuiButton>
                     </EuiToolTip>
                   </>
+                ) : editDisabledReason ? (
+                  <EuiToolTip content={editDisabledReason}>
+                    <EuiButton
+                      data-test-subj="automationEditButton"
+                      size="s"
+                      iconType="pencil"
+                      isDisabled
+                    >
+                      {labels.edit}
+                    </EuiButton>
+                  </EuiToolTip>
                 ) : (
                   canManage && (
                     <>

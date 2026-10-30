@@ -7,10 +7,9 @@
 
 import { useMemo } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import type { TimeRange, EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import {
   buildAlertBasedTilesSeriesQuery,
   severeAlertsSeriesColumn,
@@ -31,6 +30,9 @@ interface AlertBasedTilesSeriesOptions {
   /** The live counts, which replace the newest dot so the line ends on the number shown. */
   severeAlertsCount: number;
   watchlistedCount: number;
+  /** From the alert tiles' delta hook (their `previous` counts): the deltas' baselines, which start the lines. */
+  severeAlertsBaseline: number | undefined;
+  watchlistedBaseline: number | undefined;
 }
 
 /**
@@ -50,26 +52,26 @@ export const useAlertBasedTilesSeries = ({
   reachesBack,
   severeAlertsCount,
   watchlistedCount,
+  severeAlertsBaseline,
+  watchlistedBaseline,
 }: AlertBasedTilesSeriesOptions): {
   alertsTrend: number[] | undefined;
   watchlistedTrend: number[] | undefined;
   isTrendLoading: boolean;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
     () =>
       index
-        ? buildAlertBasedTilesSeriesQuery(
-            index,
-            spaceId,
-            timeRange,
-            buildEntityFilterClauses(entityFilters)
-          )
+        ? buildAlertBasedTilesSeriesQuery(index, spaceId, timeRange, entityFilterClauses)
         : null,
-    [index, spaceId, timeRange, entityFilters]
+    [index, spaceId, timeRange, entityFilterClauses]
   );
 
   const severeGate = getSeriesGate({ isReady, reachesBack, count: severeAlertsCount });
@@ -95,12 +97,14 @@ export const useAlertBasedTilesSeries = ({
     ...state,
     dots: series?.severe,
     liveCount: severeAlertsCount,
+    deltaBaseline: severeAlertsBaseline,
     isHidden: severeGate.isHidden,
   });
   const watchlisted = getTileTrend({
     ...state,
     dots: series?.watchlisted,
     liveCount: watchlistedCount,
+    deltaBaseline: watchlistedBaseline,
     isHidden: watchlistedGate.isHidden,
   });
 

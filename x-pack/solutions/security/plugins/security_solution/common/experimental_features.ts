@@ -98,13 +98,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
-   * Release: TBD
    *
-   * Ships disabled: this skill dispatches destructive endpoint response actions,
-   * so it must not be enabled by default on any branch. Enable it explicitly via
-   * config (or a Scout evals config) for local/CI testing.
+   * Release: 9.6.0
    */
-  endpointResponseActionsSkill: false,
+  endpointResponseActionsSkill: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -237,7 +234,7 @@ export const allowedExperimentalValues = Object.freeze({
    * the Attacks page and the attack flyout, and registers the `security.attack` unified
    * cases attachment type on the server.
    */
-  attackAttachmentsEnabled: false,
+  attackAttachments: true,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -381,7 +378,21 @@ export const allowedExperimentalValues = Object.freeze({
    * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
-  linuxRansomwareProtection: false,
+  linuxRansomwareProtection: true,
+
+  /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: true,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: true,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's

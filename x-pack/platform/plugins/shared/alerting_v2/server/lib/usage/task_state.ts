@@ -140,6 +140,42 @@ const stateSchemaV4 = stateSchemaV3.extends({
   ),
 });
 
+// The agent-builder-assisted rule tag is no longer written, so neither counter
+// has a source. `action_policies_count_agent_builder_assisted` was stored but
+// never collected.
+const stateSchemaV5 = stateSchemaV4.extends({
+  count_agent_builder_assisted: undefined,
+  action_policies_count_agent_builder_assisted: undefined,
+});
+
+const countSchema = schema.maybe(schema.number());
+
+const stateSchemaV6 = stateSchemaV5.extends({
+  action_policies_count_by_status: schema.maybe(
+    schema.object({ enabled: countSchema, disabled: countSchema, snoozed: countSchema })
+  ),
+  action_policies_count_by_grouping_mode: schema.maybe(
+    schema.object({ per_alert: countSchema, per_field: countSchema, all: countSchema })
+  ),
+  action_policies_count_by_throttle_strategy: schema.maybe(
+    schema.object({
+      on_status_change: countSchema,
+      per_status_interval: countSchema,
+      time_interval: countSchema,
+      every_time: countSchema,
+      none: countSchema,
+    })
+  ),
+  action_policies_workflows_per_policy: schema.maybe(
+    schema.object({
+      p50: schema.nullable(schema.number()),
+      p99: schema.nullable(schema.number()),
+      avg: schema.nullable(schema.number()),
+    })
+  ),
+  action_policies_count_with_multiple_workflows: schema.maybe(schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -210,9 +246,28 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV4,
   },
+  5: {
+    up: (state: Record<string, unknown>) =>
+      omit(state, ['count_agent_builder_assisted', 'action_policies_count_agent_builder_assisted']),
+    schema: stateSchemaV5,
+  },
+  6: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      action_policies_count_by_status: state.action_policies_count_by_status ?? undefined,
+      action_policies_count_by_grouping_mode:
+        state.action_policies_count_by_grouping_mode ?? undefined,
+      action_policies_count_by_throttle_strategy:
+        state.action_policies_count_by_throttle_strategy ?? undefined,
+      action_policies_workflows_per_policy: state.action_policies_workflows_per_policy ?? undefined,
+      action_policies_count_with_multiple_workflows:
+        state.action_policies_count_with_multiple_workflows ?? undefined,
+    }),
+    schema: stateSchemaV6,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[4].schema;
+const latestTaskStateSchema = stateSchemaByVersion[6].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

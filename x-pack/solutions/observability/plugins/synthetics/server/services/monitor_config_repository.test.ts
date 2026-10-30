@@ -9,6 +9,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { MonitorConfigRepository } from './monitor_config_repository';
 import type { SyntheticsMonitor } from '../../common/runtime_types';
 import { ConfigKey } from '../../common/runtime_types';
+import { fullHttpMonitor } from '../../common/runtime_types/test_helpers/monitor_fixtures';
+import { monitorCreateSchema } from '../saved_objects/synthetics_monitor/monitor_attribute_schema';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -438,6 +440,44 @@ describe('MonitorConfigRepository', () => {
       });
       expect(result).toBe(mockCreated);
     });
+
+    it('passes the create schema when a space change recreates the monitor', async () => {
+      const id = 'test-id';
+      const previousSpaces = ['default'];
+      const nextSpaces = ['space-2'];
+      const data = {
+        ...fullHttpMonitor(),
+        spaces: nextSpaces,
+      };
+      const decryptedPreviousMonitor = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        namespaces: previousSpaces,
+        attributes: { ...data, spaces: previousSpaces },
+        references: [],
+      } as any;
+
+      soClient.delete.mockResolvedValue({} as any);
+      soClient.create.mockResolvedValue({
+        id,
+        attributes: data,
+        type: syntheticsMonitorSavedObjectType,
+      } as any);
+
+      await repository.update(id, data as any, decryptedPreviousMonitor);
+
+      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id, {
+        force: true,
+      });
+      expect(soClient.create).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, data, {
+        id,
+        initialNamespaces: nextSpaces,
+        references: undefined,
+      });
+      // Validate what the repository handed to the saved-object client, not the test input.
+      const [, createdAttributes] = soClient.create.mock.calls[0];
+      expect(monitorCreateSchema.validate(createdAttributes)).toEqual(createdAttributes);
+    });
   });
 
   describe('bulkUpdate', () => {
@@ -720,6 +760,50 @@ describe('MonitorConfigRepository', () => {
           },
         ],
       });
+    });
+
+    it('passes the create schema when a space change recreates the monitor', async () => {
+      const id = 'test-id';
+      const previousSpaces = ['default'];
+      const nextSpaces = ['space-2'];
+      const attributes = {
+        ...fullHttpMonitor(),
+        spaces: nextSpaces,
+      };
+      soClient.bulkDelete.mockResolvedValue({} as any);
+      soClient.bulkCreate.mockResolvedValue({ saved_objects: [] } as any);
+
+      await repository.bulkUpdate({
+        monitors: [
+          {
+            id,
+            attributes: attributes as any,
+            previousMonitor: {
+              id,
+              type: syntheticsMonitorSavedObjectType,
+              namespaces: previousSpaces,
+              attributes: {},
+              references: [],
+            } as any,
+          },
+        ],
+      });
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id, type: syntheticsMonitorSavedObjectType }],
+        { force: true }
+      );
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          id,
+          type: syntheticsMonitorSavedObjectType,
+          attributes,
+          initialNamespaces: nextSpaces,
+        },
+      ]);
+      const [createdObjects] = soClient.bulkCreate.mock.calls[0];
+      const createdAttributes = createdObjects[0].attributes;
+      expect(monitorCreateSchema.validate(createdAttributes)).toEqual(createdAttributes);
     });
   });
 

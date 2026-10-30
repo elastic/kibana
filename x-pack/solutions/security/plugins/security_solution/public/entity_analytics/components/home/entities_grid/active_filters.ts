@@ -16,6 +16,8 @@ import { RESOLVED_TO_FIELD } from './common';
 import { joinAnd } from './queries/esql';
 import type { EntityFilters, QueryArgs, RowsMode } from './common';
 import { buildEntityFiltersExpression, buildEntityFiltersQuery } from './queries/entity_filters';
+import { applyResolvedEntityFilterOverridesToQuery } from './queries/resolved_entities';
+import type { ResolvedEntityFilterOverrides } from './queries/resolved_entities';
 
 /**
  * Everything that narrows the entities on the page: the search bar, the filter dropdowns,
@@ -49,17 +51,21 @@ export const toEsql = ({
   ),
 });
 
-/** The grouping query: every filter, and only target docs for resolved rows. */
-export const toDsl = ({
-  search,
-  entityFilters,
-  tileEntityIds,
-  rowsMode,
-}: ActiveFilters): ESBoolQuery | undefined => {
+/**
+ * The grouping query: every filter, and only target docs for resolved rows. The overrides judge
+ * resolved entities by their group's values, as the grid does with the same entity filters and tile.
+ */
+export const toDsl = (
+  { search, entityFilters, tileEntityIds, rowsMode }: ActiveFilters,
+  overrides?: Partial<ResolvedEntityFilterOverrides>
+): ESBoolQuery | undefined => {
+  const entityFilter = [
+    ...buildEntityFiltersQuery(entityFilters, rowsMode),
+    tileEntityIds == null ? undefined : buildTileFilter(tileEntityIds, rowsMode),
+  ].filter(isDefined);
   const filter: QueryDslQueryContainer[] = [
     search.dsl,
-    ...buildEntityFiltersQuery(entityFilters),
-    tileEntityIds == null ? undefined : buildTileFilter(tileEntityIds, rowsMode),
+    ...applyResolvedEntityFilterOverridesToQuery(entityFilter, overrides),
   ].filter(isDefined);
   const mustNot = rowsMode === 'resolved' ? [{ exists: { field: RESOLVED_TO_FIELD } }] : [];
   return filter.length || mustNot.length
