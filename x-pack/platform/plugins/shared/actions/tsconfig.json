@@ -66,6 +66,7 @@
     "@kbn/core-security-common",
     "@kbn/core-security-server",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/core-security-server-mocks",
   ],
   "exclude": [
     "target/**/*",
