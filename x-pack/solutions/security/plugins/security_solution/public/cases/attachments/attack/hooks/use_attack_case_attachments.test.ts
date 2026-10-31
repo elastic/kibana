@@ -138,6 +138,128 @@ describe('useAttackCaseAttachments', () => {
     });
   });
 
+  describe('attacks already on the case', () => {
+    const CASE_UPDATED_AT = '2026-10-29T10:00:00.000Z';
+    const theCase = { totalAlerts: 0, updatedAt: CASE_UPDATED_AT } as CaseUI;
+
+    const attackComment = (attachmentId: string, createdAt: string) => ({
+      id: `comment-${attachmentId}`,
+      type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+      attachmentId,
+      metadata: { index: ATTACK_INDEX, title: 'A multi-stage attack', alertCount: 2 },
+      createdAt,
+    });
+
+    const updatedCaseWith = (...comments: Array<ReturnType<typeof attackComment>>) =>
+      ({ ...theCase, comments } as unknown as CaseUI);
+
+    it('warns when a posted attack was already on the case', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(attackComment('attack-1', '2026-10-29T09:00:00.000Z'))
+      );
+
+      expect(appToasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: '1 attack was already attached to this case and was not added again.',
+      });
+    });
+
+    it('treats an attack created at the case update time as already attached', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(attackComment('attack-1', CASE_UPDATED_AT))
+      );
+
+      expect(appToasts.addWarning).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not warn when the posted attack was newly attached', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(attackComment('attack-1', '2026-10-29T11:00:00.000Z'))
+      );
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('ignores attacks on the case that were not posted', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(attackComment('other-attack', '2026-10-29T09:00:00.000Z'))
+      );
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('does not warn when the case had never been updated', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+      const neverUpdatedCase = { totalAlerts: 0, updatedAt: null } as CaseUI;
+
+      result.current?.onAttached(
+        neverUpdatedCase,
+        updatedCaseWith(attackComment('attack-1', '2026-10-29T09:00:00.000Z'))
+      );
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('counts only the posted attacks that were already attached', () => {
+      const { result } = renderHook(() =>
+        useAttackCaseAttachments([
+          attack({ id: 'attack-1' }),
+          attack({ id: 'attack-2' }),
+          attack({ id: 'attack-3' }),
+        ])
+      );
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(
+          attackComment('attack-1', '2026-10-29T09:00:00.000Z'),
+          attackComment('attack-2', '2026-10-29T09:30:00.000Z'),
+          attackComment('attack-3', '2026-10-29T11:00:00.000Z')
+        )
+      );
+
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: '2 attacks were already attached to this case and were not added again.',
+      });
+    });
+
+    it('counts an attack attached more than once as one attack', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(attackComment('attack-1', '2026-10-29T09:00:00.000Z'), {
+          ...attackComment('attack-1', '2026-10-29T09:30:00.000Z'),
+          id: 'comment-attack-1-dup',
+        })
+      );
+
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: '1 attack was already attached to this case and was not added again.',
+      });
+    });
+
+    it('only reports truncation when there is no updated case', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(theCase);
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
+  });
+
   it('does not warn while building the attachments, even when they are truncated', () => {
     const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
 

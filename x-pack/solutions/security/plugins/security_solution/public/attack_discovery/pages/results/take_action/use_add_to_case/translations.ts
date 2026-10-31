@@ -14,6 +14,21 @@ export const ADD_TO_CASE_SUCCESS = i18n.translate(
   }
 );
 
+export const ALREADY_ATTACHED_TO_CASE_TITLE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.alreadyAttachedToCaseTitle',
+  {
+    defaultMessage: 'Already attached to the case',
+  }
+);
+
+export const ALREADY_ATTACHED_TO_CASE_CONTENT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.alreadyAttachedToCaseContent',
+  {
+    defaultMessage:
+      'The attacks and alerts that fit in this case are already attached to it, so nothing was added.',
+  }
+);
+
 export const CREATE_A_CASE_FOR_ATTACK_DISCOVERY = (title: string) =>
   i18n.translate(
     'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.createACaseForAttackDiscoveryHeaderText',

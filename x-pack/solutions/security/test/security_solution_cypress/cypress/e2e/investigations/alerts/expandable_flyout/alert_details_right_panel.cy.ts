@@ -57,6 +57,8 @@ import {
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createCase } from '../../../../tasks/api_calls/cases';
+import { getCase1 } from '../../../../objects/case';
 import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -153,9 +155,9 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   });
 
   it('should add to existing case', () => {
+    // An empty case, as Cases drops an alert that is already on the case.
+    createCase(getCase1());
     expandAlertAtIndexExpandableFlyout();
-    openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_CASE);
-    fillOutFormToCreateNewCase();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_CASE);
 
     cy.get(EXISTING_CASE_SELECT_BUTTON).contains('Select').click();

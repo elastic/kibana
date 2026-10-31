@@ -250,6 +250,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
       selectedColumns,
       disabledCases,
+      isLoadingDisabledCases: isLoadingCaseAttachments,
     });
 
     const activeFilterDimensions = useMemo(
