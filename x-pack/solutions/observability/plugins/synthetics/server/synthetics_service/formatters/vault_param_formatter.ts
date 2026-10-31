@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { VAULT_REFERENCE_CONTENT_REGEX } from '../../../common/lib/vault_reference';
+
 /**
  * HashiCorp Vault reference support.
  *
@@ -40,11 +42,6 @@
 // character outside [A-Za-z0-9+.-].
 const VAULT_TOKEN_SOURCE = '(^|[^A-Za-z0-9+.\\-])vault://([A-Za-z0-9._~%@/#\\-]*)';
 
-// The strict grammar a token must follow to be accepted.
-const VAULT_REF_CONTENT = /^(?:([A-Za-z0-9._-]+)@)?([A-Za-z0-9._/-]+)#([A-Za-z0-9._-]+)$/;
-
-export const SECRET_CONNECTION_NAME_REGEX = /^[A-Za-z0-9._-]+$/;
-
 interface VaultReference {
   connection?: string;
   path: string;
@@ -56,7 +53,7 @@ const tokenContents = (strVal: string): string[] =>
 
 const matchAll = (strVal: string): VaultReference[] =>
   tokenContents(strVal).flatMap((content) => {
-    const m = VAULT_REF_CONTENT.exec(content);
+    const m = VAULT_REFERENCE_CONTENT_REGEX.exec(content);
     return m ? [{ connection: m[1] || undefined, path: m[2], field: m[3] }] : [];
   });
 
@@ -96,7 +93,7 @@ export const referencedConnectionNames = (value: unknown): Set<string | undefine
  */
 export const findMalformedVaultReferences = (value: unknown): string[] =>
   tokenContents(toText(value))
-    .filter((content) => !VAULT_REF_CONTENT.test(content))
+    .filter((content) => !VAULT_REFERENCE_CONTENT_REGEX.test(content))
     .map((content) => `vault://${content}`);
 
 const MAX_TOKEN_PREVIEW = 64;

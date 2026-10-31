@@ -251,16 +251,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const anomalyPrivilegesQuery = useAnomalyPrivileges();
   const {
     detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
+    timelinePrivileges: { read: canReadTimeline },
   } = useUserPrivileges();
-  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
-    useAlertsPrivileges();
+  // `hasAlertsRead` needs both the Security > Alerts feature privilege and read on the alerts
+  // index; `hasIndexRead` is null until the index privileges are known.
+  const {
+    hasIndexRead: hasAlertsIndexRead,
+    hasAlertsRead,
+    loading: isAlertsPrivilegesLoading,
+  } = useAlertsPrivileges();
   const { cases } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+
+  // Index read without `hasAlertsRead` can only mean the Alerts feature privilege is missing. When
+  // the index privilege is missing too, the callout already lists the index.
+  const alertsFeatureMissing = hasAlertsIndexRead === true && hasAlertsRead === false;
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
     isError: alertsPrivilegesError != null,
-    canRead: hasAlertsIndexRead ?? undefined,
+    canRead: hasAlertsIndexRead == null ? undefined : hasAlertsRead,
   });
   const risk = getReadAccess({
     isLoading: riskEngineReadPrivileges.isLoading,
@@ -308,6 +318,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           entityEnginePrivileges={entityEnginePrivilegesQuery.data}
           anomalyPrivileges={anomalyPrivilegesQuery.data}
           alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          alertsFeatureMissing={alertsFeatureMissing}
           id="entity-analytics-home"
         />
       </div>
@@ -324,15 +335,19 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
         </>
       ) : (
-        <EntityAnalyticsNewHomePageContent readAccess={readAccess} />
+        <EntityAnalyticsNewHomePageContent
+          readAccess={readAccess}
+          canReadTimeline={canReadTimeline}
+        />
       )}
     </>
   );
 };
 
-const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = ({
-  readAccess,
-}) => {
+const EntityAnalyticsNewHomePageContent: React.FC<{
+  readAccess: ReadAccess;
+  canReadTimeline: boolean;
+}> = ({ readAccess, canReadTimeline }) => {
   const spaceId = useSpaceId();
   const {
     dataView,
@@ -358,6 +373,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     setTimeRange,
     entityFilters,
     setEntityFilters,
+    groupsSelected,
+    setGroupsSelected,
     rowsMode,
     setRowsMode,
     sortField,
@@ -438,25 +455,27 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   const rowActions = useMemo<RowActions>(
     () => ({
-      onInvestigateInTimeline: (row) => {
-        const entity = getRowEntity(row);
-        if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
-        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
-          euidApi.getBuiltInEntityDefinition(entity.entityType),
-          row
-        );
-        if (kqlFilter) {
-          investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
-          return;
-        }
-        const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
-        const dataProviders = createDataProviders({
-          contextId: scopeId,
-          field,
-          values: entity.entityName,
-        });
-        if (dataProviders?.length) investigateInTimeline({ dataProviders });
-      },
+      onInvestigateInTimeline: canReadTimeline
+        ? (row) => {
+            const entity = getRowEntity(row);
+            if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
+            const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+              euidApi.getBuiltInEntityDefinition(entity.entityType),
+              row
+            );
+            if (kqlFilter) {
+              investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
+              return;
+            }
+            const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
+            const dataProviders = createDataProviders({
+              contextId: scopeId,
+              field,
+              values: entity.entityName,
+            });
+            if (dataProviders?.length) investigateInTimeline({ dataProviders });
+          }
+        : undefined,
       onOpenEntityGraph: (row) => {
         const entity = getRowEntity(row);
         if (!entity) return;
@@ -502,6 +521,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     }),
     [
       agentBuilder,
+      canReadTimeline,
       euidApi,
       investigateInTimeline,
       isAgentChatExperienceEnabled,
@@ -530,7 +550,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     return map;
   }, [watchlistsData]);
 
-  const [groupsSelected, setGroupsSelected] = useState<string[]>(['none']);
   const [groupingPageIndex, setGroupingPageIndex] = useState(0);
   const [groupingPageSize, setGroupingPageSize] = useState(25);
 
@@ -560,6 +579,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     severeAlertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
+    hasCount: alertBasedHasCount,
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
@@ -573,6 +593,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
+    hasCount: anomaliesHasCount,
     isLoading: anomaliesLoading,
     isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
@@ -587,6 +608,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
+    hasCount: newEntityHasCount,
     isLoading: newEntityLoading,
     isCountPending: newEntityPending,
     isTimedOut: newEntityTimedOut,
@@ -600,6 +622,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
+    hasCount: riskMoversHasCount,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isCountPending: riskMoversPending,
@@ -614,6 +637,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
+    hasCount: newlyHCHasCount,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isCountPending: newlyHCPending,
@@ -940,6 +964,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
         entityIds: severeAlertsEntityIds,
         isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
@@ -975,6 +1000,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        hasCount: anomaliesHasCount,
         entityIds: anomaliesEntityIds,
         // Without ML jobs the tile shows 0, which isn't a real count.
         isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
@@ -1016,6 +1042,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        hasCount: riskMoversHasCount,
         entityIds: riskMoversEntityIds,
         isUnavailable: Boolean(riskMoversError),
         noDataMessage: !canReadRisk
@@ -1055,6 +1082,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        hasCount: newlyHCHasCount,
         entityIds: newlyHCEntityIds,
         isUnavailable: Boolean(newlyHCError),
         noDataMessage: !canReadRisk
@@ -1096,6 +1124,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
         entityIds: watchlistedEntityIds,
         isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
@@ -1127,6 +1156,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        hasCount: newEntityHasCount,
         entityIds: newEntityEntityIds,
         isUnavailable: Boolean(newEntityError),
         noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
@@ -1201,35 +1231,24 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       newEntityLoading,
       newEntityTimedOut,
       riskMoversMissingIndex,
+      alertBasedHasCount,
+      anomaliesHasCount,
+      riskMoversHasCount,
+      newlyHCHasCount,
+      newEntityHasCount,
       timeRange,
     ]
   );
 
-  const onGroupChange = useCallback((key: string) => {
-    // Grouping unmounts the grid, and EUI doesn't report leaving full screen when it unmounts.
-    if (key !== 'none') setIsGridFullScreen(false);
-    setGroupsSelected((prev) => {
-      if (key === 'none') return ['none'];
-      const cleaned = prev.filter((g) => g !== 'none');
-      if (cleaned.includes(key)) {
-        const next = cleaned.filter((g) => g !== key);
-        return next.length ? next : ['none'];
-      }
-      return [...cleaned, key];
-    });
-  }, []);
-
-  const onRowsModeChange = useCallback(
-    (next: RowsMode) => {
-      setRowsMode(next);
-      if (next === 'resolved') {
-        setGroupsSelected((prev) => {
-          const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
-          return filtered.length ? filtered : ['none'];
-        });
-      }
+  const onGroupChange = useCallback(
+    (key: string) => {
+      if (key === 'none') return setGroupsSelected(['none']);
+      const cleaned = groupsSelected.filter((g) => g !== 'none');
+      setGroupsSelected(
+        cleaned.includes(key) ? cleaned.filter((g) => g !== key) : [...cleaned, key]
+      );
     },
-    [setRowsMode]
+    [groupsSelected, setGroupsSelected]
   );
 
   const groupByOptions = useMemo(() => {
@@ -1256,7 +1275,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             title={ROWS_SELECTOR_TITLE}
             options={ROWS_OPTIONS}
             selectedKey={rowsMode}
-            onChange={onRowsModeChange}
+            onChange={setRowsMode}
             data-test-subj={ROWS_MODE_SELECTOR_TEST_ID}
           />
         </EuiFlexItem>
@@ -1274,7 +1293,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [rowsMode, onRowsModeChange, groupsSelected, onGroupChange, groupByOptions, groupByFields]
+    [rowsMode, setRowsMode, groupsSelected, onGroupChange, groupByOptions, groupByFields]
   );
 
   const dataViewContextValue = useMemo(
