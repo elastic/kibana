@@ -9,6 +9,8 @@ import { CasesIncrementalIdService } from '.';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createCasesEventBusMock } from '../../client/mocks';
+import { INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS } from '../../../common/constants/incremental_id';
 
 describe('CasesIncrementalIdService', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -349,6 +351,110 @@ describe('CasesIncrementalIdService', () => {
 
       // Only called once, when it rejected
       expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('incrementCaseIds events', () => {
+    const HOUR = 60 * 60 * 1000;
+    const createdAt = new Date(Date.now() - HOUR).toISOString();
+    const caseSo = (id: string, namespace = 'default', created = createdAt) => ({
+      id,
+      attributes: { created_at: created },
+      namespaces: [namespace],
+    });
+    let casesEventBus: ReturnType<typeof createCasesEventBusMock>;
+    let eventService: CasesIncrementalIdService;
+
+    beforeEach(() => {
+      casesEventBus = createCasesEventBusMock();
+      eventService = new CasesIncrementalIdService(savedObjectsClient, mockLogger, casesEventBus);
+      eventService.getOrCreateCaseIdIncrementerSo = jest
+        .fn()
+        .mockResolvedValue({ attributes: { last_id: 0 } });
+      eventService.applyIncrementalIdToCaseSo = jest.fn().mockResolvedValue(null);
+      eventService.incrementCounterSO = jest.fn().mockResolvedValue(null);
+    });
+
+    it('emits a single event for the whole batch', async () => {
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([caseSo('a'), caseSo('b'), caseSo('c', 'other')]);
+
+      expect(casesEventBus.emitIncrementalIdsAssigned).toHaveBeenCalledTimes(1);
+      expect(casesEventBus.emitIncrementalIdsAssigned).toHaveBeenCalledWith({
+        caseIds: ['a', 'b', 'c'],
+      });
+    });
+
+    it('only reports cases created within the trigger TTL, but still assigns IDs to all', async () => {
+      const old = new Date(
+        Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS - HOUR
+      ).toISOString();
+
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([caseSo('old', 'default', old), caseSo('recent')]);
+
+      expect(eventService.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(2);
+      expect(casesEventBus.emitIncrementalIdsAssigned).toHaveBeenCalledWith({
+        caseIds: ['recent'],
+      });
+    });
+
+    it('does not emit when only old cases were assigned', async () => {
+      const old = new Date(
+        Date.now() - INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS - HOUR
+      ).toISOString();
+
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([caseSo('old', 'default', old)]);
+
+      expect(casesEventBus.emitIncrementalIdsAssigned).not.toHaveBeenCalled();
+    });
+
+    it('does not emit caseUpdated', async () => {
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([caseSo('a')]);
+
+      expect(casesEventBus.emitCaseUpdated).not.toHaveBeenCalled();
+    });
+
+    it('does not emit when nothing was assigned', async () => {
+      await eventService.incrementCaseIds([]);
+
+      expect(casesEventBus.emitIncrementalIdsAssigned).not.toHaveBeenCalled();
+    });
+
+    it('skips cases without a namespace', async () => {
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([{ id: 'no-ns', attributes: {} }, caseSo('a')]);
+
+      expect(casesEventBus.emitIncrementalIdsAssigned).toHaveBeenCalledWith({
+        caseIds: ['a'],
+      });
+    });
+
+    it('only reports the cases that were assigned before an error stopped the loop', async () => {
+      eventService.applyIncrementalIdToCaseSo = jest
+        .fn()
+        .mockResolvedValueOnce(null)
+        .mockRejectedValueOnce(new Error('boom'));
+
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([caseSo('a'), caseSo('b'), caseSo('c')]);
+
+      expect(casesEventBus.emitIncrementalIdsAssigned).toHaveBeenCalledWith({
+        caseIds: ['a'],
+      });
+    });
+
+    it('does not report a case whose ID was reset because the service was stopped', async () => {
+      eventService.applyIncrementalIdToCaseSo = jest.fn().mockImplementationOnce(() => {
+        eventService.stopService();
+        return Promise.resolve();
+      });
+
+      // @ts-expect-error: case SO types are not correct
+      await eventService.incrementCaseIds([caseSo('a')]);
+
+      expect(casesEventBus.emitIncrementalIdsAssigned).not.toHaveBeenCalled();
     });
   });
 });
