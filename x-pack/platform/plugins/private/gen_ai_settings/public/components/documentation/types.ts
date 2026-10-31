@@ -21,11 +21,28 @@ export interface DocumentationItem {
    */
   resourceType: ResourceType;
   updateAvailable?: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
+  /** Major.minor stack version of that artifact, when it is a versioned zip. */
+  availableStackVersion?: string;
   isTechPreview?: boolean;
   isStubbed?: boolean;
   icon?: string;
   failureReason?: string;
   inferenceId?: string;
+  /** ISO 8601 time the documentation was last installed. Present when status is `installed`. */
+  installedAt?: string;
+  /**
+   * ISO 8601 LastModified of the installed zip. Shown with `installedStackVersion`
+   * as the installed release, for example `9.6 | Sep 28, 2026`.
+   */
+  artifactLastModified?: string;
+  /**
+   * Installed release version shown on the version badge.
+   * Product docs use a major.minor stack version. Security labs uses its content version.
+   * Omitted when the artifact is identified only by its last-modified date.
+   */
+  installedStackVersion?: string;
 }
 
 export const ELASTIC_DOCS_ID = 'elastic_documents';

@@ -24,6 +24,7 @@ import {
   getConcreteWriteIndex,
   getInferenceIdFromWriteIndex,
 } from './knowledge_base_service/get_inference_id_from_write_index';
+import { resolveObservabilityProductDocInferenceId } from './resolve_product_doc_inference_id';
 import { isReIndexInProgress } from './knowledge_base_service/reindex_knowledge_base';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
@@ -145,6 +146,32 @@ export async function getKbModelStatus({
   const concreteWriteIndex = await getConcreteWriteIndex(esClient, logger);
   const isReIndexing = await isReIndexInProgress({ esClient, logger, core });
   const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+  const productDocStatusByInferenceId = new Map<string, InstallationStatus>();
+  const readProductDocStatus = async (
+    candidateInferenceId: string
+  ): Promise<InstallationStatus> => {
+    const cached = productDocStatusByInferenceId.get(candidateInferenceId);
+    if (cached) {
+      return cached;
+    }
+    const { status } = await productDoc.getStatus({ inferenceId: candidateInferenceId });
+    productDocStatusByInferenceId.set(candidateInferenceId, status);
+    return status;
+  };
+  const installedProductDocInferenceId = await resolveObservabilityProductDocInferenceId({
+    esClient,
+    logger,
+    isDocumentationAvailable: async (candidateInferenceId) => {
+      const status = await readProductDocStatus(candidateInferenceId);
+      return status === 'installed' || status === 'installing' || status === 'uninstalling';
+    },
+  });
+  let productDocInstallationStatus: InstallationStatus = 'uninstalled';
+  if (installedProductDocInferenceId) {
+    productDocInstallationStatus = await readProductDocStatus(installedProductDocInferenceId);
+  } else if (currentInferenceId) {
+    productDocInstallationStatus = await readProductDocStatus(currentInferenceId);
+  }
 
   if (!inferenceId) {
     if (!currentInferenceId) {
@@ -155,16 +182,13 @@ export async function getKbModelStatus({
         inferenceModelState: InferenceModelState.NOT_INSTALLED,
         concreteWriteIndex,
         isReIndexing,
-        productDocStatus: 'uninstalled',
+        productDocStatus: productDocInstallationStatus,
       };
     }
 
     inferenceId = currentInferenceId;
   }
 
-  const productDocStatus = await productDoc.getStatus({
-    inferenceId,
-  });
   // check if inference ID is an EIS inference ID
   const isPreConfiguredInferenceIdInEIS = EIS_PRECONFIGURED_INFERENCE_IDS.includes(inferenceId);
 
@@ -186,7 +210,7 @@ export async function getKbModelStatus({
         currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
-        productDocStatus: productDocStatus.status,
+        productDocStatus: productDocInstallationStatus,
       };
     }
   } catch (error) {
@@ -202,7 +226,7 @@ export async function getKbModelStatus({
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
-      productDocStatus: productDocStatus.status,
+      productDocStatus: productDocInstallationStatus,
     };
   }
 
@@ -226,7 +250,7 @@ export async function getKbModelStatus({
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
-      productDocStatus: productDocStatus.status,
+      productDocStatus: productDocInstallationStatus,
     };
   }
 
@@ -271,7 +295,7 @@ export async function getKbModelStatus({
     concreteWriteIndex,
     currentInferenceId,
     isReIndexing,
-    productDocStatus: productDocStatus.status,
+    productDocStatus: productDocInstallationStatus,
   };
 }
 
