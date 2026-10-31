@@ -945,7 +945,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Add options to include frozen tier data in Agent Builder tools: an `include_frozen` parameter for built-in tools, an **Include frozen tier data** option for custom {{esql}} and index search tools, and the `agentBuilder:includeFrozenByDefault` advanced setting to include it by default in a space. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
 
 **Data ingestion and {{fleet}}**:
-* Sort agent policies alphabetically in the **Assign new agent policy** modal [#296067]({{kib-pull}}296067).
+* Sort agent policies alphabetically in the **Assign new policy to agent** modal [#296067]({{kib-pull}}296067).
 
 **{{es}} solution**:
 * Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record [#297728]({{kib-pull}}297728).
