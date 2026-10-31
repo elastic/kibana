@@ -29,10 +29,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     'header',
     'networkEvents',
     'expandedFlyoutGraph',
+    'entityFlyout',
     'timeline',
   ]);
   const networkEventsPage = pageObjects.networkEvents;
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
+  const entityFlyout = pageObjects.entityFlyout;
   const timelinePage = pageObjects.timeline;
 
   describe('Security Network Page - Graph visualization', function () {
@@ -62,13 +64,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory and entity store v2 settings.
-      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
-      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
+      // Enable asset inventory and entity store v2 settings
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
-        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -92,7 +91,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
-      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -290,7 +288,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertIpsPopoverIsOpen();
       await expandedFlyoutGraph.assertIpsPopoverContainsIps(['10.0.0.1', '10.0.0.3']);
       await expandedFlyoutGraph.clickOnFirstIpInPopover();
-      await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
+      await expandedFlyoutGraph.assertNetworkFlyoutIsOpen();
     });
 
     it('show related alerts', async () => {
@@ -314,7 +312,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(1)oa(0)'
       );
-      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      // An alert is always coupled with an event, so we open the grouped node panel instead of the alert flyout
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
@@ -361,7 +359,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
           // Both actors are enriched, so their titles render as links to the entity flyout.
           await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
-          await expandedFlyoutGraph.closePreviewSection();
+          await expandedFlyoutGraph.goBackToGraph();
 
           const storageBucketNodeId =
             '1abcf2b7cb329695e152ab9f1838188e0f61f5796fd20518c73488748e05b935';
@@ -376,7 +374,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.showEntityDetails(storageBucketNodeId);
           await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
           await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
-          await expandedFlyoutGraph.closePreviewSection();
+          await expandedFlyoutGraph.goBackToGraph();
 
           const serviceNodeId = 'service:TargetMultiService1';
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
@@ -727,9 +725,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.showEntityDetails(
               'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp'
             );
-            await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
+            await entityFlyout.assertEntityPanelIsOpen('user');
 
-            await expandedFlyoutGraph.closePreviewSection();
+            await expandedFlyoutGraph.goBackToGraph();
 
             await expandedFlyoutGraph.showEntityRelationships(
               'user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp'
@@ -923,12 +921,12 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             );
 
             await expandedFlyoutGraph.showEntityDetails(communicatesWithIdRelationshipTargetNodeId);
-            // check the preview panel grouped items rendered correctly
+            // check the grouped node panel items rendered correctly
             await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
             await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
             await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
 
-            await expandedFlyoutGraph.closePreviewSection();
+            await expandedFlyoutGraph.goBackToGraph();
 
             const communicatesWithHostRelationshipNodeId =
               'rel(host:rel-hierarchy-host-1-communicates_with)';

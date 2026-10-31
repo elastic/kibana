@@ -3139,8 +3139,8 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/urls @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-investigations
 
-/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-investigations
-/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/document_flyout.ts @elastic/security-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/document_flyout.ts @elastic/security-investigations
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/timeline.ts @elastic/security-investigations
 
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-investigations
