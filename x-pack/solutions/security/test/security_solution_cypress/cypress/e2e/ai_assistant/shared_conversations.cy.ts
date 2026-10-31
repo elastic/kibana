@@ -7,7 +7,7 @@
 
 import type { Message, MessageRole } from '@kbn/elastic-assistant-common';
 import { closeToast } from '../../tasks/common/toast';
-import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../../env_var_names_constants';
 import {
   assertCalloutState,
   assertConversationTitle,
@@ -52,10 +52,14 @@ const userRole: MessageRole = 'user';
 const assistantRole: MessageRole = 'assistant';
 describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
-  // The secondary identity comes from the same authentication mechanism as the primary one: a
-  // mock IdP SAML session in serverless, basic auth in ESS. Both roles hold every Kibana
-  // application privilege, which the share modal requires of the users it suggests.
-  const secondaryRole = isServerless ? 'system_indices_superuser' : 'elastic';
+  const isCloudServerless = Cypress.env(CLOUD_SERVERLESS);
+  // Local serverless uses the mock IdP, where system_indices_superuser exists. MKI only has the
+  // vault org users, and platform_engineer holds the assistant privilege the share modal suggests.
+  const secondaryRole = isCloudServerless
+    ? 'platform_engineer'
+    : isServerless
+      ? 'system_indices_superuser'
+      : 'elastic';
   let primaryUser: string;
   let secondaryUser: string;
   let secondaryUserFullName: string;
