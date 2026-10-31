@@ -16,10 +16,12 @@ export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
   skillName,
+  tracesUnavailableForSuiteMode,
 }: {
   traceEsClient: EsClient;
   log: ToolingLog;
   skillName: string;
+  tracesUnavailableForSuiteMode?: boolean;
 }): Evaluator {
   if (!VALID_SKILL_NAME.test(skillName)) {
     throw new Error(
@@ -32,6 +34,7 @@ export function createSkillInvocationEvaluator({
     log,
     config: {
       name: `Skill Invoked (${skillName})`,
+      tracesUnavailableForSuiteMode,
       direction: 'maximize',
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
