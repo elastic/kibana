@@ -8,9 +8,9 @@
 import type { Logger } from '@kbn/core/server';
 import { withTimeout } from '@kbn/std';
 import type { InvestigationQuotaCallback, InvestigationQuotaResult } from '../types';
+import { InvestigationUnavailableError } from './errors';
 
 const INVESTIGATION_QUOTA_TIMEOUT_MS = 10_000;
-const ALLOWED: InvestigationQuotaResult = { allowed: true };
 
 export const evaluateInvestigationQuota = async ({
   callback,
@@ -19,32 +19,39 @@ export const evaluateInvestigationQuota = async ({
   callback?: InvestigationQuotaCallback;
   logger: Logger;
 }): Promise<InvestigationQuotaResult> => {
+  const unavailable = (reason: string) => {
+    logger.warn(`Investigation quota check ${reason}; denying the automatic investigation`);
+    return new InvestigationUnavailableError('The investigation quota check is unavailable');
+  };
+
   if (!callback) {
-    logger.warn(
-      'Investigation quota callback is unavailable; allowing the automatic investigation'
-    );
-    return ALLOWED;
+    throw unavailable('is unavailable');
   }
 
-  try {
-    const result = await withTimeout({
-      promise: Promise.resolve().then(callback),
-      timeoutMs: INVESTIGATION_QUOTA_TIMEOUT_MS,
-    });
+  const pending = Promise.resolve().then(callback);
+  const result = await withTimeout({
+    promise: pending,
+    timeoutMs: INVESTIGATION_QUOTA_TIMEOUT_MS,
+  }).catch((error) => {
+    throw unavailable(`failed: ${error instanceof Error ? error.message : String(error)}`);
+  });
 
-    if (result.timedout) {
-      logger.warn(
-        `Investigation quota check timed out after ${INVESTIGATION_QUOTA_TIMEOUT_MS}ms; allowing the automatic investigation`
-      );
-      return ALLOWED;
-    }
-
-    return result.value;
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    logger.warn(
-      `Investigation quota check failed; allowing the automatic investigation: ${reason}`
+  if (result.timedout) {
+    pending.then(
+      (late) =>
+        late.allowed
+          ? Promise.resolve(late.release?.()).catch((error) =>
+              logger.warn(
+                `Could not release the late investigation quota slot: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              )
+            )
+          : undefined,
+      () => undefined
     );
-    return ALLOWED;
+    throw unavailable(`timed out after ${INVESTIGATION_QUOTA_TIMEOUT_MS}ms`);
   }
+
+  return result.value;
 };

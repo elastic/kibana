@@ -29,11 +29,15 @@ creates no investigation and appears as skipped in automation history: with reas
 when the automation limit denies it, and with reason `investigation_limit` when the global quota
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
-it back when the attempt loses the subject claim to a concurrent start and continues that
-investigation instead; the global quota has no refund, so that case still counts against it. An
+back both slots when the attempt loses the subject claim to a concurrent start and continues that
+investigation instead. The global quota check fails closed:
+a missing callback, a timeout after ten seconds, or an error denies the attempt. An
 attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
-its own slot, so the investigation counts once. A failure while the investigation runs does not give
+its own slot, so the investigation counts once. An attempt whose claim fails part way also keeps
+both slots. The claims it wrote are removed, but a concurrent start can join them before the
+removal, and a failed removal leaves them live. Keeping the slots means the count never falls below
+the number of investigations; a retry after such a failure is charged again. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
 To stop an automation from opening investigations, disable it. Changing the limit takes effect on
 the next attempt.

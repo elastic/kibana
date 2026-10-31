@@ -51,6 +51,9 @@ import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maint
 import {
   consumeRunQuota,
   createRunQuotaInternalRepository,
+  dayKey,
+  releaseRunQuota,
+  resolveDailyWindow,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
 } from './lib/run_quotas';
@@ -189,10 +192,17 @@ export class SignificantEventsPlugin
       if (!this.server?.core) {
         throw new Error('Significant Events start services are unavailable');
       }
-      return consumeRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
+      const internalRepository = createRunQuotaInternalRepository(this.server);
+      const date = dayKey(resolveDailyWindow());
+      const { allowed } = await consumeRunQuota({
+        internalRepository,
         group: 'investigation',
+        date,
       });
+      return {
+        allowed,
+        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
+      };
     });
 
     core.dataStreams.registerDataStream(detectionsDataStream);
