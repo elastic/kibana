@@ -13,6 +13,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import type { PersistenceAPI } from '../types';
 import { DataViewLazy } from './data_view_lazy';
 import { DEFAULT_DATA_VIEW_ID } from '../constants';
@@ -42,6 +43,35 @@ import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
+
+const ALL_NAMESPACES_STRING = '*';
+
+/**
+ * Picks the namespaces to try when deleting a duplicate that is about to be overwritten. Only spaces
+ * the caller is creating the data view in are used, since those are the ones they are known to be
+ * able to write to. Undefined means the current space.
+ */
+const getDeleteNamespaces = (
+  requestedNamespaces: string[],
+  duplicateNamespaces: string[] = []
+): string[] | undefined => {
+  if (!requestedNamespaces.length) {
+    return undefined;
+  }
+
+  const isConcrete = (namespace: string) =>
+    namespace !== UNKNOWN_SPACE && namespace !== ALL_NAMESPACES_STRING;
+
+  // A duplicate shared with all spaces exists in every requested space
+  const candidates = duplicateNamespaces.includes(ALL_NAMESPACES_STRING)
+    ? requestedNamespaces
+    : requestedNamespaces.includes(ALL_NAMESPACES_STRING)
+    ? duplicateNamespaces
+    : duplicateNamespaces.filter((namespace) => requestedNamespaces.includes(namespace));
+
+  const namespaces = candidates.filter(isConcrete);
+  return namespaces.length ? namespaces : undefined;
+};
 
 const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string }) =>
   i18n.translate('dataViews.fetchFieldErrorTitle', {
@@ -1275,11 +1305,12 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByName(this.savedObjectsClient, dataView.getName());
+    const dupe = await findByName(this.savedObjectsClient, dataView.getName(), dataView.namespaces);
 
     if (dupe) {
       if (overwrite) {
-        await this.delete(dupe.id);
+        const deleteNamespaces = getDeleteNamespaces(dataView.namespaces, dupe.namespaces);
+        await this.delete(dupe.id, deleteNamespaces);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
       }
@@ -1408,14 +1439,15 @@ export class DataViewsService {
   /**
    * Deletes an index pattern from .kibana index.
    * @param indexPatternId: Id of kibana Index Pattern to delete
+   * @param namespaces: Namespaces the index pattern lives in, defaults to the current one
    */
-  async delete(indexPatternId: string) {
+  async delete(indexPatternId: string, namespaces?: string[]) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
     this.dataViewCache.delete(indexPatternId);
     this.dataViewLazyCache.delete(indexPatternId);
-    return this.savedObjectsClient.delete(indexPatternId);
+    return this.savedObjectsClient.delete(indexPatternId, namespaces);
   }
 
   private async getDefaultDataViewId() {

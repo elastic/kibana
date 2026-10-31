@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   DataViewAttributes,
   PersistenceAPI,
@@ -65,7 +65,29 @@ export class SavedObjectsClientWrapper implements PersistenceAPI {
   async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
     return await this.savedObjectClient.create(DATA_VIEW_SAVED_OBJECT_TYPE, attributes, options);
   }
-  async delete(id: string) {
-    await this.savedObjectClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
+  async delete(id: string, namespaces?: string[]) {
+    if (!namespaces?.length) {
+      await this.savedObjectClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
+      return;
+    }
+
+    // `namespace` can't be passed per call when the spaces extension is enabled, so a client
+    // scoped to the target space is used instead. Deleting is only authorized against that
+    // space, so fall through the candidates until one is writable by the user.
+    let forbiddenError: Error | undefined;
+    for (const namespace of namespaces) {
+      try {
+        await this.savedObjectClient
+          .asScopedToNamespace(namespace)
+          .delete(DATA_VIEW_SAVED_OBJECT_TYPE, id, { force: true });
+        return;
+      } catch (error) {
+        if (!SavedObjectsErrorHelpers.isForbiddenError(error)) {
+          throw error;
+        }
+        forbiddenError = error;
+      }
+    }
+    throw forbiddenError;
   }
 }
