@@ -101,7 +101,12 @@ triggers:
           type: object
         size:
           default: 150
-          description: Maximum number of alerts to retrieve
+          description: |
+            Maximum number of alerts to retrieve. This input is read but not
+            acted upon by this workflow, and is not passed to the generate step
+            (whose own `size` is the maximum number of discoveries to generate).
+            The pipeline endpoint applies it when it runs alert retrieval,
+            before this workflow receives the alerts in `additional_alerts`.
           type: integer
         start:
           description: Time range start (e.g., "now-24h")
