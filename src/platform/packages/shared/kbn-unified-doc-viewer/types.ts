@@ -10,6 +10,7 @@
 export type { ElasticRequestState } from '.';
 export type {
   DocViewFilterFn,
+  DocViewFindSimilarValuesFn,
   DocViewRenderProps,
   DocViewRestorableStateProps,
   DocView,

@@ -19,7 +19,8 @@ import { EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DocViewFilterFn, DocViewFindSimilarValuesFn } from '@kbn/unified-doc-viewer/types';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -63,6 +64,8 @@ export interface TableGridProps {
   rows: FieldRow[];
   isEsqlMode: boolean;
   filter?: DocViewFilterFn;
+  dataView?: DataView;
+  onFindSimilarValues?: DocViewFindSimilarValuesFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
   columns?: string[];
@@ -90,6 +93,8 @@ export function TableGrid({
   rows,
   isEsqlMode,
   filter,
+  dataView,
+  onFindSimilarValues,
   onAddColumn,
   onRemoveColumn,
   columns,
@@ -105,6 +110,18 @@ export function TableGrid({
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
   const { toasts } = getUnifiedDocViewerServices();
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
+  // The cell popover stays open after the action runs, e.g. when it opens a flyout
+  const onFindSimilarValuesAndClosePopover = useMemo<DocViewFindSimilarValuesFn | undefined>(
+    () =>
+      onFindSimilarValues &&
+      ((fieldName, value) => {
+        onFindSimilarValues(fieldName, value);
+        dataGridRef.current?.closeCellPopover();
+      }),
+    [onFindSimilarValues]
+  );
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -138,9 +155,19 @@ export function TableGrid({
         isEsqlMode,
         toasts,
         onFilter: filter,
+        dataView,
+        onFindSimilarValues: onFindSimilarValuesAndClosePopover,
         hideFilteringOnComputedColumns,
       }),
-    [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns]
+    [
+      rows,
+      isEsqlMode,
+      toasts,
+      filter,
+      dataView,
+      onFindSimilarValuesAndClosePopover,
+      hideFilteringOnComputedColumns,
+    ]
   );
 
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
@@ -221,8 +248,6 @@ export function TableGrid({
     },
     [rows, filter, hideFilteringOnComputedColumns]
   );
-
-  const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const leadingControlColumns = useMemo(() => {
     if (!onTogglePinned || hidePinColumn) {

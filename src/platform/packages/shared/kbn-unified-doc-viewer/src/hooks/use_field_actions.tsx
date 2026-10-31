@@ -13,6 +13,10 @@ import type { IconType } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '../types';
+import {
+  getFindSimilarValuesValue,
+  shouldShowFieldFindSimilarValuesAction,
+} from '../../utils/should_show_field_find_similar_values_action';
 import type { FieldMapping } from '../services/types';
 
 interface WithFieldParam {
@@ -37,10 +41,17 @@ export interface TFieldAction {
 
 export type UseFieldActionsDeps = Pick<
   DocViewRenderProps,
-  'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
+  'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'dataView' | 'onFindSimilarValues'
 >;
 
-const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFieldActionsDeps) => {
+const useFieldActions = ({
+  columns,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  dataView,
+  onFindSimilarValues,
+}: UseFieldActionsDeps) => {
   return useMemo(
     () => ({
       addColumn: onAddColumn,
@@ -61,8 +72,20 @@ const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFi
           onAddColumn(field);
         }
       },
+      canFindSimilarValues: ({ field }: WithFieldParam) =>
+        shouldShowFieldFindSimilarValuesAction({
+          dataView,
+          dataViewField: dataView?.fields.getByName(field),
+          onFindSimilarValues,
+        }),
+      findSimilarValues: ({ field, value }: WithFieldParam & WithValueParam) => {
+        const fieldValue = getFindSimilarValuesValue(value);
+        if (fieldValue !== undefined) {
+          onFindSimilarValues?.(field, fieldValue);
+        }
+      },
     }),
-    [columns, filter, onAddColumn, onRemoveColumn]
+    [columns, filter, onAddColumn, onRemoveColumn, dataView, onFindSimilarValues]
   );
 };
 
@@ -102,6 +125,16 @@ export const useUIFieldActions = ({
         label: toggleColumnLabel,
         onClick: () => actions.toggleFieldColumn({ field }),
       },
+      ...(actions.canFindSimilarValues({ field }) && getFindSimilarValuesValue(value) !== undefined
+        ? [
+            {
+              id: 'findSimilarValuesAction',
+              iconType: 'search',
+              label: findSimilarValuesLabel,
+              onClick: () => actions.findSimilarValues({ field, value }),
+            },
+          ]
+        : []),
       {
         id: 'copyToClipboardAction',
         iconType: 'copy',
@@ -128,6 +161,10 @@ const filterForFieldPresentLabel = i18n.translate(
 
 const toggleColumnLabel = i18n.translate('unifiedDocViewer.fieldActions.toggleColumn', {
   defaultMessage: 'Toggle column in table',
+});
+
+const findSimilarValuesLabel = i18n.translate('unifiedDocViewer.fieldActions.findSimilarValues', {
+  defaultMessage: 'Find similar values',
 });
 
 const copyToClipboardLabel = i18n.translate('unifiedDocViewer.fieldActions.copyToClipboard', {

@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   getFieldCellActions,
   getFieldValueCellActions,
@@ -20,7 +21,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { copyToClipboard } from '@elastic/eui';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
@@ -532,5 +533,144 @@ describe('TableActions', () => {
       });
       expect(warning).toBeUndefined();
     });
+  });
+});
+
+describe('find similar values action', () => {
+  const createDataView = (timeFieldName?: string): DataView =>
+    buildDataViewMock({
+      name: 'find-similar-values',
+      timeFieldName,
+      fields: [
+        new DataViewField({
+          name: 'message',
+          type: 'string',
+          esTypes: ['text'],
+          scripted: false,
+          searchable: true,
+          aggregatable: false,
+        }),
+        new DataViewField({
+          name: 'extension',
+          type: 'string',
+          esTypes: ['keyword'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        }),
+        new DataViewField({
+          name: '@timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        }),
+      ] as unknown as DataView['fields'],
+    });
+
+  const getRows = (dataView: DataView, fieldName: string, fieldValue: unknown): FieldRow[] => [
+    new FieldRow({
+      name: fieldName,
+      flattenedValue: fieldValue,
+      hit: buildDataTableRecord(
+        { _index: 'test', _id: '1', _source: { [fieldName]: fieldValue } },
+        dataView
+      ),
+      dataView,
+      fieldFormats: {} as FieldFormatsStart,
+      isPinned: false,
+      dataSource: undefined,
+    }),
+  ];
+
+  const renderActions = ({
+    dataView,
+    fieldName,
+    fieldValue,
+    onFindSimilarValues,
+  }: {
+    dataView: DataView;
+    fieldName: string;
+    fieldValue: unknown;
+    onFindSimilarValues?: jest.Mock;
+  }) => {
+    const actions = getFieldValueCellActions({
+      rows: getRows(dataView, fieldName, fieldValue),
+      isEsqlMode: false,
+      toasts: toastsMock,
+      dataView,
+      onFindSimilarValues,
+    }).map((Action, i) => (
+      <Action
+        key={i}
+        Component={(props: any) => <button {...props}>{props.children}</button>}
+        rowIndex={0}
+        colIndex={0}
+        columnId="test"
+        isExpanded={false}
+      />
+    ));
+    render(<>{actions}</>);
+  };
+
+  it('should call onFindSimilarValues with the field name and value', async () => {
+    const onFindSimilarValues = jest.fn();
+    renderActions({
+      dataView: createDataView('@timestamp'),
+      fieldName: 'message',
+      fieldValue: 'connection refused',
+      onFindSimilarValues,
+    });
+
+    await userEvent.setup().click(screen.getByText('Find similar values'));
+
+    expect(onFindSimilarValues).toHaveBeenCalledWith('message', 'connection refused');
+  });
+
+  it('should use the first value of a multi-valued field', async () => {
+    const onFindSimilarValues = jest.fn();
+    renderActions({
+      dataView: createDataView('@timestamp'),
+      fieldName: 'message',
+      fieldValue: ['first', 'second'],
+      onFindSimilarValues,
+    });
+
+    await userEvent.setup().click(screen.getByText('Find similar values'));
+
+    expect(onFindSimilarValues).toHaveBeenCalledWith('message', 'first');
+  });
+
+  it('should not render without a callback', () => {
+    renderActions({
+      dataView: createDataView('@timestamp'),
+      fieldName: 'message',
+      fieldValue: 'connection refused',
+    });
+
+    expect(screen.queryByText('Find similar values')).not.toBeInTheDocument();
+  });
+
+  it('should not render for non text fields', () => {
+    renderActions({
+      dataView: createDataView('@timestamp'),
+      fieldName: 'extension',
+      fieldValue: 'png',
+      onFindSimilarValues: jest.fn(),
+    });
+
+    expect(screen.queryByText('Find similar values')).not.toBeInTheDocument();
+  });
+
+  it('should not render for a data view that is not time based', () => {
+    renderActions({
+      dataView: createDataView(),
+      fieldName: 'message',
+      fieldValue: 'connection refused',
+      onFindSimilarValues: jest.fn(),
+    });
+
+    expect(screen.queryByText('Find similar values')).not.toBeInTheDocument();
   });
 });
