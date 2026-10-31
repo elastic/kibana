@@ -153,6 +153,9 @@ function buildNamespaceTemplate({
 /**
  * Creates namespace-scoped index templates for every `(dataStream, namespace)` pair
  * and tracks them in `installed_es`. Returns the created template names.
+ *
+ * A template Elasticsearch rejects is skipped with a warning, unless `strict` is set: then
+ * the rejection is thrown, so a caller that must apply a change everywhere can roll it back.
  */
 async function createNamespaceTemplatesForPackage({
   soClient,
@@ -163,6 +166,7 @@ async function createNamespaceTemplatesForPackage({
   namespaces,
   logContext,
   signal,
+  strict = false,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -172,6 +176,7 @@ async function createNamespaceTemplatesForPackage({
   namespaces: string[];
   logContext: string;
   signal?: AbortSignal;
+  strict?: boolean;
 }): Promise<string[]> {
   if (dataStreams.length === 0 || namespaces.length === 0) {
     return [];
@@ -202,6 +207,7 @@ async function createNamespaceTemplatesForPackage({
           updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
         } catch (err) {
           if (
+            !strict &&
             isResponseError(err) &&
             err.statusCode === 400 &&
             err.body?.error?.type === 'illegal_argument_exception'
@@ -356,6 +362,8 @@ async function deleteNamespaceTemplatesForPackage({
  * final step so namespace templates survive reinstalls and upgrades.
  *
  * On first install the opt-in list is empty, so this is a no-op.
+ *
+ * With `strict`, a namespace template Elasticsearch rejects is thrown instead of skipped.
  */
 export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   soClient,
@@ -363,12 +371,14 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   packageName,
   packageInfo,
   dataStreams,
+  strict = false,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
+  strict?: boolean;
 }) {
   if (dataStreams.length === 0) {
     return;
@@ -391,6 +401,7 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
     dataStreams,
     namespaces,
     logContext: 'handleNamespaceTemplateRestoreAfterPackageInstall',
+    strict,
   });
 
   await handleIlmSettingsRestoreAfterPackageInstall({

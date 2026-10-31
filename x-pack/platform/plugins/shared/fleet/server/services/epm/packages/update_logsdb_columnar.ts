@@ -143,13 +143,16 @@ export async function setLogsdbColumnarChoice({
   const switched = templates.map((template) =>
     withIndexMode(template, enabled ? LOGSDB_COLUMNAR_INDEX_MODE : undefined)
   );
-  const restoreNamespaceTemplates = () =>
+  // Strict on the way forward: a namespace template Elasticsearch rejects must fail the change,
+  // or that namespace would silently stay on the other mode while the choice is stored.
+  const restoreNamespaceTemplates = (strict: boolean) =>
     handleNamespaceTemplateRestoreAfterPackageInstall({
       soClient: savedObjectsClient,
       esClient,
       packageName: pkgName,
       packageInfo,
       dataStreams: packageInfo.data_streams ?? [],
+      strict,
     });
 
   let written = 0;
@@ -158,7 +161,7 @@ export async function setLogsdbColumnarChoice({
       await putIndexTemplate(esClient, logger, template);
       written++;
     }
-    await restoreNamespaceTemplates();
+    await restoreNamespaceTemplates(true);
     await updateCurrentWriteIndices(esClient, logger, switched, { rolloverOnIndexModeReset: true });
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -176,7 +179,7 @@ export async function setLogsdbColumnarChoice({
         logger.error(`Could not put ${template.templateName} back: ${restoreErr}`)
       );
     }
-    await restoreNamespaceTemplates().catch((restoreErr) =>
+    await restoreNamespaceTemplates(false).catch((restoreErr) =>
       logger.error(`Could not put the namespace templates of ${pkgName} back: ${restoreErr}`)
     );
     throw err;

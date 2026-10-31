@@ -110,6 +110,9 @@ describe('setLogsdbColumnarChoice', () => {
       ['logs-custom.ds', { lifecycle: { name: 'logs' }, mode: 'logsdb_columnar' }],
     ]);
     expect(handleNamespaceTemplateRestoreAfterPackageInstall).toHaveBeenCalledTimes(1);
+    expect(handleNamespaceTemplateRestoreAfterPackageInstall).toHaveBeenCalledWith(
+      expect.objectContaining({ strict: true })
+    );
     expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'pkg', {
       logsdb_columnar_enabled: true,
     });
@@ -179,6 +182,28 @@ describe('setLogsdbColumnarChoice', () => {
     ]);
     // Once to follow the change, once to follow the restored templates.
     expect(handleNamespaceTemplateRestoreAfterPackageInstall).toHaveBeenCalledTimes(2);
+  });
+
+  it('puts the index templates back and stores nothing when a namespace template is rejected', async () => {
+    jest
+      .mocked(handleNamespaceTemplateRestoreAfterPackageInstall)
+      .mockRejectedValueOnce(new Error('namespace template rejected'));
+
+    await expect(setChoice(true)).rejects.toThrow('namespace template rejected');
+
+    expect(writtenModes().slice(-3)).toEqual([
+      ['logs-pkg.ds', { lifecycle: { name: 'logs' } }],
+      ['logs-pkg.error', { lifecycle: { name: 'logs' } }],
+      ['logs-custom.ds', { lifecycle: { name: 'logs' } }],
+    ]);
+    // Strict on the way forward, best effort when putting the namespace templates back.
+    expect(
+      jest
+        .mocked(handleNamespaceTemplateRestoreAfterPackageInstall)
+        .mock.calls.map(([args]) => args.strict)
+    ).toEqual([true, false]);
+    expect(templateModule.updateCurrentWriteIndices).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 
   it('puts the index templates back and stores nothing when the write indices cannot be updated', async () => {
