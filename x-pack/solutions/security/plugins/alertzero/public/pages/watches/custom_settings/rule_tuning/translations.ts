@@ -25,8 +25,15 @@ export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
 export const ANALYSIS_WINDOW_DAYS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.analysisWindowDays.help',
   {
-    defaultMessage:
-      'How many days of alerts Rule Tuning analyses. Applies to this Worker only. Between {min} and {max}.',
+    defaultMessage: 'How many days of alerts Rule Tuning analyses. Applies to this Worker only.',
+  }
+);
+
+/** Range shown under the analysis-window field, not in the row description. */
+export const ANALYSIS_WINDOW_DAYS_RANGE = i18n.translate(
+  'xpack.alertzero.watches.settings.analysisWindowDays.range',
+  {
+    defaultMessage: 'Between {min} and {max}.',
     values: { min: ANALYSIS_WINDOW_DAYS_MIN, max: ANALYSIS_WINDOW_DAYS_MAX },
   }
 );

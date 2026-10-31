@@ -173,9 +173,14 @@ describe('RuleTuningSettings', () => {
     const windowGroup = expectRowWiring(
       'alertZeroAnalysisWindowRow',
       'Analysis window (days)',
-      /Between 1 and 30/
+      /How many days of alerts Rule Tuning analyses/
     );
-    expect(windowGroup).toContainElement(screen.getByTestId('alertZeroAnalysisWindowDays'));
+    const windowField = screen.getByTestId('alertZeroAnalysisWindowDays');
+    const windowRange = screen.getByTestId('alertZeroAnalysisWindowDaysRange');
+    expect(windowGroup).toContainElement(windowField);
+    expect(windowGroup).toContainElement(windowRange);
+    expect(windowRange).toHaveTextContent('Between 1 and 30.');
+    expect(windowField).toHaveAttribute('aria-describedby', windowRange.id);
 
     expectRowWiring(
       'alertZeroQualifyingThresholdsRow',

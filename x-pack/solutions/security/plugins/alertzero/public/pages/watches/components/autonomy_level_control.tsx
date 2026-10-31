@@ -76,6 +76,17 @@ function FactParts({ parts }: { parts: LevelCardFactPart[] }) {
  */
 const FACT_LABEL_GAP_PX = 12;
 
+/**
+ * The radio column is a clickable panel. In dark mode its hover shadow is a floating
+ * border, and the right edge of that border reads as a divider beside the card body.
+ */
+const radioColumnHoverStyles = css`
+  & > :first-child:hover::after,
+  & > :first-child:focus::after {
+    border-color: transparent;
+  }
+`;
+
 function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -206,6 +217,7 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
           disabled={true}
           onChange={() => {}}
           data-test-subj={`alertZeroAutonomyCard-${fixedLevel}`}
+          css={radioColumnHoverStyles}
         >
           {/* The same explanation the level carries inside a choice. */}
           {fixedCard ? <LevelCardBody card={fixedCard} /> : null}
@@ -254,6 +266,7 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
               disabled={isDisabled}
               onChange={() => onChange(card.level)}
               data-test-subj={`alertZeroAutonomyCard-${card.level}`}
+              css={radioColumnHoverStyles}
             >
               <LevelCardBody card={card} />
             </EuiCheckableCard>
