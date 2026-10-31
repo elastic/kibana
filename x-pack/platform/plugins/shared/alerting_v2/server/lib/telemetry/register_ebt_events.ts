@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { actionPolicyChangeTelemetryEvents } from './action_policy_ebt_event';
+import { actionPolicyTestSentTelemetryEvent } from './action_policy_test_ebt_event';
 import { ruleChangeTelemetryEvents } from './rule_ebt_event';
 
 /** Registers every alerting v2 EBT event type with Core analytics. */
@@ -15,4 +16,5 @@ export const registerTelemetryEvents = (analytics: AnalyticsServiceSetup): void 
   actionPolicyChangeTelemetryEvents.forEach((eventConfig) =>
     analytics.registerEventType(eventConfig)
   );
+  analytics.registerEventType(actionPolicyTestSentTelemetryEvent);
 };

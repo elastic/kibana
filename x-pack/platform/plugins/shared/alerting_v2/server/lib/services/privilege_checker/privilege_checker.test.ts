@@ -34,13 +34,19 @@ const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
   jest
     .mocked(security.authz.actions.api.actionFromRouteTag)
     .mockImplementation((tag: string) => apiActions.actionFromRouteTag(tag));
+  jest
+    .mocked(security.authz.actions.api.get)
+    .mockImplementation((operation: string) => apiActions.get(operation));
 
   security.authz.checkPrivilegesWithRequest.mockImplementation((req: KibanaRequest) => ({
     globally: jest.fn(),
     atSpace: jest.fn().mockImplementation((_sid: string, { kibana }: { kibana: string[] }) => {
       const granted = privilegesByRequest.get(req) ?? [];
       const hasAllRequested = kibana.every((action) => granted.includes(action));
-      return Promise.resolve({ hasAllRequested });
+      const privileges = {
+        kibana: kibana.map((privilege) => ({ privilege, authorized: granted.includes(privilege) })),
+      };
+      return Promise.resolve({ hasAllRequested, privileges });
     }),
     atSpaces: jest.fn(),
   }));
@@ -268,6 +274,19 @@ describe('PrivilegeChecker', () => {
       await checker.canRead('rules');
 
       expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(rulesAll.request);
+    });
+
+    it('checks the workflows read and execute API privileges independently', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const testSecurity = createSecurity(
+        new Map([[request, [apiActions.get('workflowsManagement:execute')]]])
+      );
+      const checker = new PrivilegeChecker(request, spaceId, testSecurity);
+
+      await expect(checker.getWorkflowPrivileges()).resolves.toEqual({
+        read: false,
+        execute: true,
+      });
     });
 
     it('passes the spaceId to atSpace', async () => {

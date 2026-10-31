@@ -15,12 +15,12 @@ interface Props {
   policy: ActionPolicyResponse;
   onViewDetails?: (policy: ActionPolicyResponse) => void;
   onEdit?: (id: string) => void;
-  onClone: (policy: ActionPolicyResponse) => void;
-  onDelete: (policy: ActionPolicyResponse) => void;
+  onClone?: (policy: ActionPolicyResponse) => void;
+  onDelete?: (policy: ActionPolicyResponse) => void;
   onEnable?: (id: string) => void;
   onDisable?: (id: string) => void;
   isStateLoading?: boolean;
-  onUpdateApiKey: (id: string) => void;
+  onUpdateApiKey?: (id: string) => void;
   isDisabled?: boolean;
   onSnooze?: (id: string, snoozedUntil: string) => void;
   onCancelSnooze?: (id: string) => void;
@@ -64,6 +64,10 @@ export const ActionPolicyActionsMenu = ({
     isSnoozeLoading,
     closeMenu: closePopover,
   });
+
+  if (panels.length === 0) {
+    return <>{modal}</>;
+  }
 
   return (
     <>
