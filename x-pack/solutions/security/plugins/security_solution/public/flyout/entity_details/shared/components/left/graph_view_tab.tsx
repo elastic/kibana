@@ -6,7 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   GraphGroupedNodePreviewPanelKey,
@@ -22,6 +23,11 @@ import {
   EVENT_PREVIEW_BANNER,
 } from '../../../../document_details/preview/constants';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
+import {
+  GraphViewSubTab,
+  GraphViewSubTabs,
+} from '../../../../../flyout_v2/entity/shared/tools/graph_view/graph_view_sub_tabs';
+import { BlastRadiusSubTab } from '../../../../../flyout_v2/entity/shared/tools/graph_view/blast_radius';
 
 export interface GraphViewTabProps {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
@@ -31,11 +37,32 @@ export interface GraphViewTabProps {
 }
 
 /**
- * Graph view tab content for entity detail left panels. Renders the shared {@link GraphVisualization}
- * centered on the given entity, supplying the node-click handlers that open previews via the legacy
- * expandable flyout API.
+ * Graph view tab content for entity detail left panels: the entity graph centered on the entity,
+ * and the on-demand blast radius traversal, switched with a button group.
  */
 export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) => {
+  const [subTab, setSubTab] = useState<GraphViewSubTab>(GraphViewSubTab.ENTITY_GRAPH);
+
+  return (
+    <>
+      <GraphViewSubTabs selected={subTab} onChange={setSubTab} />
+      <EuiSpacer size="s" />
+      {subTab === GraphViewSubTab.ENTITY_GRAPH ? (
+        <EntityGraphSubTab entityId={entityId} scopeId={scopeId} />
+      ) : (
+        <BlastRadiusSubTab entityId={entityId} />
+      )}
+    </>
+  );
+});
+
+GraphViewTab.displayName = 'GraphViewTab';
+
+/**
+ * The entity graph centered on the given entity, supplying the node-click handlers that open
+ * previews via the legacy expandable flyout API.
+ */
+const EntityGraphSubTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onShowDocument = useCallback(
@@ -112,4 +139,4 @@ export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) 
   );
 });
 
-GraphViewTab.displayName = 'GraphViewTab';
+EntityGraphSubTab.displayName = 'EntityGraphSubTab';

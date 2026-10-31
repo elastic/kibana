@@ -26,6 +26,12 @@ import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 import { getAlertEntitiesStepDefinition } from './get_alert_entities_step';
+import {
+  loadEntityGraphTraversalScenarioStepDefinition,
+  resolveEntityGraphTraversalNodesStepDefinition,
+  traceEntityGraphTraversalRoutesStepDefinition,
+  runEntityGraphTraversalHopStepDefinition,
+} from './entity_graph_traversal';
 import { matchAttackFingerprintsStepDefinition } from './match_attack_fingerprints';
 
 /**
@@ -54,5 +60,9 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(createRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(patchRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(getAlertEntitiesStepDefinition);
+  workflowsExtensions.registerStepDefinition(loadEntityGraphTraversalScenarioStepDefinition);
+  workflowsExtensions.registerStepDefinition(runEntityGraphTraversalHopStepDefinition);
+  workflowsExtensions.registerStepDefinition(resolveEntityGraphTraversalNodesStepDefinition);
+  workflowsExtensions.registerStepDefinition(traceEntityGraphTraversalRoutesStepDefinition);
   workflowsExtensions.registerStepDefinition(matchAttackFingerprintsStepDefinition);
 };

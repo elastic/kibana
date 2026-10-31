@@ -1,0 +1,39 @@
+version: '1'
+id: aws-cloudtrail-observed-activity
+name: AWS CloudTrail observed activity
+description: >
+  What an AWS principal actually did, from CloudTrail events as the aws integration pipeline
+  enriches them: roles it assumed (AssumeRole), instances it opened sessions on (Session
+  Manager, EC2 Instance Connect) and objects it read or wrote (S3 data events). Each hop
+  follows the pipeline's actor field to its target fields, so the walk continues from the
+  reached role or instance. Observed edges only; nothing here says what the principal could
+  have done.
+seed:
+  type: role
+  description: The actor as the pipeline writes user.entity.id, usually an IAM role ARN
+limits:
+  max_hops: 4
+  max_nodes: 2000
+  max_frontier: 500
+  max_edges_per_hop: 5000
+  max_edges_total: 5000
+  hub_degree: 500
+hops:
+  - name: cloudtrail_actor_to_target
+    index: logs-aws.cloudtrail-*
+    match_field: user.entity.id
+    target_fields:
+      - field: user.target.entity.id
+        relation: acted_on_identity
+      - field: host.target.entity.id
+        relation: acted_on_host
+      - field: entity.target.id
+        relation: acted_on_resource
+    payload_fields:
+      - event.action
+    filter: >-
+      event.action IN ("AssumeRole", "AssumeRoleWithSAML", "StartSession", "SendCommand", "SendSSHPublicKey", "GetObject", "PutObject", "ListObjects")
+    time_field: '@timestamp'
+    source_type: principal
+    target_type: resource
+    repeat: 4

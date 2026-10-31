@@ -1,0 +1,62 @@
+version: '1'
+id: endpoint-shared-indicator-spread
+name: Endpoint shared indicator spread
+description: >
+  Hosts that share a compromised host's malicious artifacts, from Elastic Defend telemetry.
+  Odd hops read the hashes a host executed or dropped and the external addresses it connected
+  to; even hops read every host on which one of those indicators was seen, as its entity
+  store EUID. The pair is listed three times so the walk alternates host, indicator, host.
+  Private destination addresses are left out of the indicator set, since an internal peer is
+  a lateral-movement target rather than a shared artifact.
+seed:
+  type: host
+  description: The entity store EUID of the compromised host, for example host:WKSTN-RECV01
+limits:
+  max_hops: 6
+  max_nodes: 2000
+  max_frontier: 500
+  max_edges_per_hop: 5000
+  max_edges_total: 5000
+  hub_degree: 200
+hops:
+  - &host_to_indicators
+    name: host_to_indicators
+    description: Hashes the host ran or wrote and external addresses it connected to
+    index: logs-endpoint.events.*,logs-endpoint.alerts-*
+    match_euid: host
+    target_fields:
+      - field: process.hash.sha256
+        relation: executed
+      - field: file.hash.sha256
+        relation: dropped
+      - field: destination.ip
+        relation: connected_to
+    payload_fields:
+      - process.name
+      - event.action
+    filter: >-
+      destination.ip IS NULL OR NOT CIDR_MATCH(destination.ip, "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+    time_field: '@timestamp'
+    source_type: host
+    target_type: indicator
+  - &indicators_to_hosts
+    name: indicators_to_hosts
+    description: Hosts that executed, wrote or connected to one of the indicators
+    index: logs-endpoint.events.*,logs-endpoint.alerts-*
+    match_fields:
+      - process.hash.sha256
+      - file.hash.sha256
+      - field: destination.ip
+        value_type: ip
+    target_euid: host
+    relation: observed_on
+    payload_fields:
+      - process.name
+      - event.action
+    time_field: '@timestamp'
+    source_type: indicator
+    target_type: host
+  - *host_to_indicators
+  - *indicators_to_hosts
+  - *host_to_indicators
+  - *indicators_to_hosts

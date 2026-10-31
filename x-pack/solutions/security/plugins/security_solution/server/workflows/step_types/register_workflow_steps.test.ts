@@ -36,7 +36,7 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(21);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(25);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
