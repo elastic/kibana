@@ -97,6 +97,7 @@ interface YamlWorkflow {
           additionalProperties?: boolean;
         }
       >;
+      required?: string[];
     };
   }>;
 }
@@ -333,6 +334,23 @@ describe('Attack Discovery worker chain', () => {
 
     it('caps retrieval at the prorated alert count, defaulting to a full day', () => {
       expect(asInputs(run).max_alerts).toBe('${{ inputs.max_alerts | default: 10000 }}');
+    });
+
+    it('looks back over the schedule interval', () => {
+      expect(asInputs(run).lookback).toBe('{{ inputs.schedule_interval }}');
+    });
+
+    it('reads one minute past the lookback so a tick covers the seam', () => {
+      const generation = parse(
+        ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml
+      ) as YamlWorkflow;
+      const retrieve = stepIn(flatten(generation.steps), 'retrieve_alert_ids');
+      expect(retrieve?.with?.query).toContain('NOW() - {{ inputs.lookback }} - 1m');
+    });
+
+    it('requires the schedule interval so a hand run cannot omit the lookback', () => {
+      const manual = worker.triggers?.find((trigger) => trigger.type === 'manual');
+      expect(manual?.inputs?.required).toContain('schedule_interval');
     });
 
     it('leaves failure propagation alone so a failed generation fails the run', () => {
@@ -758,6 +776,7 @@ describe('Attack Discovery worker chain', () => {
       ['close_attack_false_positive', 'security.setAttackStatus'],
       ['record_analysis_failure', 'ai.conversation.metadata.patch'],
       ['escalation_gate', 'workflow.execute'],
+      ['record_gate_failed', 'ai.conversation.metadata.patch'],
       ['read_proposal_decision', 'kibana.request'],
       ['close_investigation_declined', 'ai.conversation.metadata.patch'],
       ['close_attack_declined', 'security.setAttackStatus'],
@@ -976,15 +995,42 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // Impact reads the correlated alerts through the Security step, and nothing reads the
-      // attack from Elasticsearch. The only direct read is the one that verifies the
-      // correlated alerts were retired, and it reads the detection alerts index.
-      it('reads Elasticsearch only to verify the retired alerts', () => {
+      // attack from Elasticsearch. The direct reads are the fingerprint, for continuation
+      // alert ids, and the detection alerts index, to verify the retirement.
+      it('reads Elasticsearch only for the fingerprint and the retired alerts', () => {
         const reads = reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'));
 
-        expect(reads.map((step) => step.name)).toEqual(['verify_alerts_retired']);
+        expect(reads.map((step) => step.name)).toEqual([
+          'read_fingerprint_alerts',
+          'verify_alerts_retired',
+          'read_fingerprint_alerts_after_gate',
+        ]);
         expect(new Set(reads.map((step) => step.with?.index))).toEqual(
-          new Set(['.alerts-security.alerts-{{ workflow.spaceId }}'])
+          new Set([
+            'ai-index-idx-security-attack-fingerprints',
+            '.alerts-security.alerts-{{ workflow.spaceId }}',
+          ])
         );
+      });
+
+      // The fingerprint index is shared, and the Investigation id has no space
+      // component. Both reads have to name this space or they can return another
+      // space's alert ids.
+      it('limits both fingerprint reads to the executing space', () => {
+        for (const name of ['read_fingerprint_alerts', 'read_fingerprint_alerts_after_gate']) {
+          const filters = (
+            stepIn(reviewSteps, name)?.with?.query as {
+              bool?: { filter?: Array<{ term?: Record<string, string> }> };
+            }
+          )?.bool?.filter;
+
+          expect(filters).toEqual(
+            expect.arrayContaining([
+              { term: { type: 'security.attack_fingerprint' } },
+              { term: { 'attributes.space_id': '{{ workflow.spaceId }}' } },
+            ])
+          );
+        }
       });
 
       it('does not run an agent against the Investigation', () => {
@@ -2099,11 +2145,12 @@ describe('Attack Discovery worker chain', () => {
     });
   });
 
-  // The alerts behind an escalated attack leave the Worker's queue: acknowledged, and
-  // tagged with the tag batched generation excludes. Without it, every Worker run
-  // while the gate is parked correlates the same alerts into a near-duplicate attack.
+  // A false positive leaves the Worker's queue at the verdict: acknowledged, and
+  // tagged `az:ad_fp_chain`. A true positive or inconclusive waits for the gate,
+  // because that decision picks the tag. Generation looks back one schedule
+  // interval plus a minute, so a parked gate is not re-read.
   describe('retiring the correlated alerts', () => {
-    // Every step in order, between `resolve_escalation` and `escalation_gate`.
+    // Every write, in order, between `resolve_alert_retirement` and `escalation_gate`.
     const retireSteps = [
       'tag_correlated_alerts',
       'acknowledge_correlated_alerts',
@@ -2139,10 +2186,32 @@ describe('Attack Discovery worker chain', () => {
         context
       );
 
-    const escalationContext = (escalate: boolean, alertIds?: string[]) => ({
-      steps: { resolve_escalation: { output: { escalate } } },
+    const retireFlagContext = (retire: boolean) => ({
+      steps: { resolve_alert_retirement: { output: { retire } } },
+    });
+
+    const retirementContext = (verdict: string, escalate: boolean, alertIds?: string[]) => ({
+      steps: {
+        resolve_analysis: { output: { verdict } },
+        resolve_escalation: { output: { escalate } },
+      },
       inputs: alertIds === undefined ? {} : { alert_ids: alertIds },
     });
+
+    const evaluateRetire = (context: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        stripExpression(stepIn(reviewSteps, 'resolve_alert_retirement')?.with?.retire),
+        context
+      );
+
+    const renderRetirementTag = (verdict: string): Promise<string> =>
+      createWorkflowLiquidEngine().parseAndRender(
+        String(stepIn(reviewSteps, 'resolve_alert_retirement')?.with?.tag),
+        {
+          consts: review.consts,
+          steps: { resolve_analysis: { output: { verdict } } },
+        }
+      );
 
     const evaluateResolved = (field: string, context: Record<string, unknown>): unknown =>
       createWorkflowLiquidEngine().evalValueSync(
@@ -2150,13 +2219,19 @@ describe('Attack Discovery worker chain', () => {
         context
       );
 
-    const renderJournal = (retired: Record<string, unknown>): Promise<string> =>
+    const renderJournal = (
+      retired: Record<string, unknown>,
+      tag = 'az:ad_correlated'
+    ): Promise<string> =>
       createWorkflowLiquidEngine().parseAndRender(
         asInputs(stepIn(reviewSteps, 'journal_alerts_retired')).message,
         {
           consts: review.consts,
           execution: { id: 'review-exec-1' },
-          steps: { resolve_alerts_retired: { output: retired } },
+          steps: {
+            resolve_alert_retirement: { output: { tag } },
+            resolve_alerts_retired: { output: retired },
+          },
         }
       );
 
@@ -2164,17 +2239,23 @@ describe('Attack Discovery worker chain', () => {
       ((stepIn(reviewSteps, name)?.with?.query as { bool?: { filter?: unknown[] } })?.bool
         ?.filter ?? []) as unknown[];
 
-    it('uses the az:ad_correlated tag', () => {
+    it('uses the az:ad_correlated and az:ad_fp_chain tags', () => {
       expect(review.consts?.ad_correlated_tag).toBe('az:ad_correlated');
+      expect(review.consts?.ad_fp_chain_tag).toBe('az:ad_fp_chain');
     });
 
-    it('tags with the tag batched generation excludes', () => {
+    it('tags with the tags batched generation excludes', () => {
       const retrieve = stepIn(flatten(generation.steps), 'retrieve_alert_ids');
       const mustNot = (retrieve?.with?.filter as { bool?: { must_not?: unknown[] } })?.bool
         ?.must_not;
 
       expect(mustNot).toContainEqual({
-        terms: { 'kibana.alert.workflow_tags': [review.consts?.ad_correlated_tag] },
+        terms: {
+          'kibana.alert.workflow_tags': [
+            review.consts?.ad_correlated_tag,
+            review.consts?.ad_fp_chain_tag,
+          ],
+        },
       });
     });
 
@@ -2188,51 +2269,83 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(reviewSteps, name)?.type).toBe(type);
     });
 
-    // The gate can park the run for up to 168h, so retiring the alerts after the
-    // decision would leave them in the queue for every Worker run in that window. The
-    // tag comes first, because it is what keeps the alerts out of the next run and so
-    // must not depend on the status write.
+    // A false positive retires here, before the gate it does not take. The tag
+    // comes first, because it is what keeps the alerts out of the next run and so
+    // must not depend on the status write. A true positive or inconclusive skips
+    // these steps and is tagged when the gate ends.
     it('runs in order after the escalation is resolved and before the gate', () => {
-      const order = ['resolve_escalation', ...retireSteps, 'escalation_gate'].map((name) =>
-        topLevelNames.indexOf(name)
-      );
+      const order = [
+        'resolve_escalation',
+        'resolve_alert_retirement',
+        ...retireSteps,
+        'escalation_gate',
+      ].map((name) => topLevelNames.indexOf(name));
 
       expect(order).not.toContain(-1);
       expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
 
-    // False positives are handled separately, and a failed analysis is not a verdict
-    // about the attack, so neither touches the alerts.
-    it('writes to the alerts nowhere else', () => {
+    // The false-positive verdict write, then the gate: a false-positive dismissal,
+    // any other dismissal, and an approved handoff.
+    it('writes to the alerts only at a false-positive verdict and when the gate ends', () => {
       expect(
         reviewSteps.filter((step) => alertWriteTypes.includes(step.type)).map((step) => step.name)
-      ).toEqual([...writes]);
+      ).toEqual([
+        ...writes,
+        'tag_dismissed_false_positive',
+        'tag_dismissed_other',
+        'acknowledge_dismissed',
+        'tag_approved_handoff',
+        'acknowledge_approved_handoff',
+      ]);
     });
 
-    it.each(retireSteps)('runs %s for an escalated attack with alerts', (name) => {
-      expect(evaluateIf(name, escalationContext(true, ['alert-1']))).toBe(true);
+    it.each(retireSteps)('runs %s when the alerts are retired', (name) => {
+      expect(evaluateIf(name, retireFlagContext(true))).toBe(true);
     });
 
-    it.each(retireSteps)('skips %s when the verdict does not escalate', (name) => {
-      expect(evaluateIf(name, escalationContext(false, ['alert-1']))).toBe(false);
+    it.each(retireSteps)('skips %s when the alerts are not retired', (name) => {
+      expect(evaluateIf(name, retireFlagContext(false))).toBe(false);
+    });
+
+    it.each(['true_positive', 'inconclusive'])('leaves an escalated %s for the gate', (verdict) => {
+      expect(evaluateRetire(retirementContext(verdict, true, ['alert-1']))).toBe(false);
+    });
+
+    it('retires a false positive that has alerts', () => {
+      expect(evaluateRetire(retirementContext('false_positive', false, ['alert-1']))).toBe(true);
+    });
+
+    it.each(['failed', 'unexpected'])('does not retire a %s verdict', (verdict) => {
+      expect(evaluateRetire(retirementContext(verdict, false, ['alert-1']))).toBe(false);
     });
 
     // The tag write rejects an empty id list.
-    it.each(retireSteps)('skips %s when the review was given no alerts', (name) => {
-      expect(evaluateIf(name, escalationContext(true, []))).toBe(false);
-      expect(evaluateIf(name, escalationContext(true))).toBe(false);
+    it.each([
+      ['an escalation', 'true_positive', true],
+      ['a false positive', 'false_positive', false],
+    ] as const)('does not retire %s given no alerts', (_label, verdict, escalate) => {
+      expect(evaluateRetire(retirementContext(verdict, escalate, []))).toBe(false);
+      expect(evaluateRetire(retirementContext(verdict, escalate))).toBe(false);
     });
 
-    it('tags every correlated alert, adding the tag without removing any', () => {
+    it('tags the review alerts and the fingerprint continuations', () => {
       const tagStep = asWith(stepIn(reviewSteps, 'tag_correlated_alerts')) as Record<
         string,
         unknown
       >;
 
-      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}');
-      expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
+      expect(tagStep.alert_ids).toBe('${{ steps.resolve_retire_alert_ids.output.alert_ids }}');
+      expect(tagStep.tags_to_add).toEqual(['{{ steps.resolve_alert_retirement.output.tag }}']);
       expect(tagStep.tags_to_remove).toBeUndefined();
     });
+
+    it.each(['false_positive', 'true_positive', 'inconclusive'])(
+      'resolves the verdict tag to az:ad_fp_chain for %s',
+      async (verdict) => {
+        expect(await renderRetirementTag(verdict)).toBe('az:ad_fp_chain');
+      }
+    );
 
     // The status script drops `workflow_reason`, so acknowledging a closed alert would
     // reopen it and lose its close reason. By query, the status check and the write are
@@ -2249,7 +2362,7 @@ describe('Attack Discovery worker chain', () => {
 
       it('targets exactly the correlated alerts', () => {
         expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
-          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
+          ids: { values: '${{ steps.resolve_retire_alert_ids.output.alert_ids }}' },
         });
       });
 
@@ -2279,12 +2392,12 @@ describe('Attack Discovery worker chain', () => {
       it('reads back exactly the correlated alerts', () => {
         expect(asWith(verify).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
         expect(verify?.with?.query).toEqual({
-          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
+          ids: { values: '${{ steps.resolve_retire_alert_ids.output.alert_ids }}' },
         });
       });
 
       it.each([
-        ['tagged', 'kibana.alert.workflow_tags', '{{ consts.ad_correlated_tag }}'],
+        ['tagged', 'kibana.alert.workflow_tags', '{{ steps.resolve_alert_retirement.output.tag }}'],
         ['open', 'kibana.alert.workflow_status', 'open'],
         ['acknowledged', 'kibana.alert.workflow_status', 'acknowledged'],
         ['closed', 'kibana.alert.workflow_status', 'closed'],
@@ -2305,6 +2418,7 @@ describe('Attack Discovery worker chain', () => {
               },
             },
           },
+          resolve_retire_alert_ids: { output: { alert_ids: ['a', 'b', 'c', 'd'] } },
         },
         inputs: { alert_ids: ['a', 'b', 'c', 'd'] },
       };
@@ -2323,9 +2437,23 @@ describe('Attack Discovery worker chain', () => {
       it('counts the sibling attacks in the retirement', () => {
         expect(
           evaluateResolved('requested', {
-            inputs: { alert_ids: ['a', 'b'], sibling_alert_ids: ['c'] },
+            steps: {
+              resolve_retire_alert_ids: { output: { alert_ids: ['a', 'b', 'c'] } },
+            },
           })
         ).toBe(3);
+      });
+
+      it('unions the review alerts with the fingerprint continuations', () => {
+        expect(
+          createWorkflowLiquidEngine().evalValueSync(
+            stripExpression(stepIn(reviewSteps, 'resolve_retire_alert_ids')?.with?.alert_ids),
+            {
+              inputs: { alert_ids: ['a', 'b'], sibling_alert_ids: ['c'] },
+              steps: { resolve_chain_alert_ids: { output: { alert_ids: ['b', 'd'] } } },
+            }
+          )
+        ).toEqual(['a', 'b', 'c', 'd']);
       });
 
       it('marks a failed read-back as unread', () => {
@@ -2371,6 +2499,15 @@ describe('Attack Discovery worker chain', () => {
         );
         expect(rendered).toContain('Acknowledged: 4.');
         expect(rendered).not.toContain('review-exec-1');
+      });
+
+      it('names the false-positive chain tag', async () => {
+        const rendered = await renderJournal(retired(), 'az:ad_fp_chain');
+
+        expect(rendered).toContain(
+          'Tagged 4 of 4 correlated detection alert(s) az:ad_fp_chain, so later Worker runs skip them.'
+        );
+        expect(rendered).toContain('Acknowledged: 4.');
       });
 
       it('says later runs may correlate the untagged alerts again', async () => {
@@ -2600,17 +2737,47 @@ describe('Attack Discovery worker chain', () => {
       );
     });
 
-    it('renders the closed false-positive note when the link has no built-in reason', () => {
+    it.each([
+      [
+        'false_positive',
+        'This attack matches closed false-positive Investigation inv-1. It is reviewed on its own.',
+      ],
+      ['closed', 'This attack matches closed Investigation inv-1. It is reviewed on its own.'],
+      [
+        'proposal_expired',
+        'This attack matches Investigation inv-1, whose forensics proposal expired with no decision. It is reviewed on its own.',
+      ],
+      [
+        'analysis_failed',
+        'This attack matches Investigation inv-1, whose analysis failed. It is reviewed on its own.',
+      ],
+    ] as const)(
+      'renders the %s link without claiming the alerts are unshared',
+      (reason, expected) => {
+        const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+          | { message?: string }
+          | undefined;
+        const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+          inputs: { related_link_reason: reason, related_investigation_id: 'inv-1' },
+        });
+
+        expect(rendered.replace(/\s+/g, ' ').trim()).toBe(expected);
+        expect(rendered).not.toContain('does not share its alerts');
+      }
+    );
+
+    it('renders a missed attach without calling the earlier investigation a false positive', () => {
       const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
         | { message?: string }
         | undefined;
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
-        inputs: { related_link_reason: '', related_investigation_id: 'inv-1' },
+        inputs: { related_link_reason: 'investigation_missing', related_investigation_id: 'inv-1' },
       });
 
       expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
-        'This attack shares entities with closed false-positive Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+        'Failed to attach this attack to Investigation inv-1. That Investigation was not available after waiting 15 minutes, so this attack is reviewed on its own.'
       );
+      expect(rendered).not.toContain('false positive');
     });
 
     it('calls the journal helper at each agreed inflection', () => {
@@ -3027,8 +3194,14 @@ describe('Attack Discovery worker chain', () => {
       ).toEqual([true, true, true, true, true]);
     });
 
-    it('leaves the escalation gate failure behavior unchanged', () => {
-      expect(stepIn(reviewSteps, 'escalation_gate')?.['on-failure']).toBeUndefined();
+    it('records a failed gate and lets the review continue', () => {
+      expect(stepIn(reviewSteps, 'escalation_gate')?.['on-failure']).toEqual({ continue: true });
+      const marker = stepIn(reviewSteps, 'record_gate_failed');
+      expect(marker?.type).toBe('ai.conversation.metadata.patch');
+      expect(marker?.if).toBe(
+        '${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error != blank }}'
+      );
+      expect(JSON.stringify(marker?.with)).toContain('GATE FAILED');
     });
 
     describe('run_completed', () => {
@@ -3388,9 +3561,12 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // `record_decision` is an unconditional `data.set`, so without this guard every
-      // non-escalated review would report a handoff that never happened.
-      it('reports only for an escalated review', () => {
-        expect(report?.if).toBe('${{ steps.resolve_escalation.output.escalate == true }}');
+      // non-escalated review would report a handoff that never happened. A failed
+      // gate has no decision to report.
+      it('reports only for an escalated review whose gate finished', () => {
+        expect(report?.if).toBe(
+          '${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error == blank }}'
+        );
       });
 
       it('reports the verdict that escalated', () => {
@@ -3517,6 +3693,15 @@ describe('Attack Discovery worker chain', () => {
           ]);
         });
 
+        // The acknowledge and tag counts are the shared journal after the switch.
+        // This note only records the lifecycle: the alerts were not closed.
+        it('does not claim the detection alerts were left open', () => {
+          const message = asInputs(stepIn(reviewSteps, 'journal_fp_closed')).message;
+
+          expect(message).toContain('Detection alerts are not closed.');
+          expect(message).not.toContain('left open');
+        });
+
         // A human can close the Investigation while the analysis runs. The patch then
         // succeeds without changing `status`, and that close is already reported by
         // Agentic Investigations, so reporting it here would count it twice.
@@ -3629,17 +3814,30 @@ describe('Attack Discovery worker chain', () => {
           'resolve_context',
           'apply_verdict',
           'resolve_escalation',
+          'read_fingerprint_alerts',
+          'resolve_chain_alert_ids',
+          'resolve_retire_alert_ids',
+          'resolve_alert_retirement',
           'tag_correlated_alerts',
           'acknowledge_correlated_alerts',
           'verify_alerts_retired',
           'resolve_alerts_retired',
           'journal_alerts_retired',
           'escalation_gate',
+          'record_gate_failed',
           'read_proposal_decision',
           'record_decision',
           'journal_decision_recorded',
           'record_forensics_handoff',
           'close_investigation_declined',
+          'read_fingerprint_alerts_after_gate',
+          'resolve_gate_chain_alert_ids',
+          'resolve_gate_alert_ids',
+          'tag_dismissed_false_positive',
+          'tag_dismissed_other',
+          'acknowledge_dismissed',
+          'tag_approved_handoff',
+          'acknowledge_approved_handoff',
           'close_attack_declined',
           'journal_attack_status_declined',
           'record_decision_lapsed',
@@ -3650,8 +3848,12 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 12 so the billable flag reconciles', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(12);
+      it('bumps the runner to version 22 so a failed read does not retarget the fingerprint', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(22);
+      });
+
+      it('bumps batched generation to version 13 so the worker passes generation_source', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(13);
       });
 
       it('continues when fingerprint matching fails', () => {
@@ -3668,8 +3870,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the review to version 16 so impact is journaled as separate host and user counts', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(16);
+      it('bumps the review to version 25 so a failed attack close still retires alerts', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(25);
       });
     });
 
@@ -3713,7 +3915,130 @@ describe('Attack Discovery worker chain', () => {
       it('retries that read for the 15 minutes a missing investigation stays in flight', () => {
         expect(stepIn(attachSteps, 'wait_for_investigation')?.['on-failure']).toEqual({
           retry: { 'max-attempts': 30, delay: '30s' },
+          continue: true,
         });
+      });
+
+      it('reviews the attack when the investigation never appears', () => {
+        const fallbackReview = stepIn(attachSteps, 'review_when_investigation_missing');
+
+        expect(fallbackReview?.type).toBe('workflow.executeAsync');
+        expect(fallbackReview?.if).toBe('${{ steps.wait_for_investigation.error != blank }}');
+        expect(fallbackReview?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID
+        );
+        expect(asInputs(fallbackReview).related_investigation_id).toBe(
+          '{{ inputs.investigation_id }}'
+        );
+        expect(asInputs(fallbackReview).related_link_reason).toBe('investigation_missing');
+        expect(asInputs(fallbackReview).autonomy).toBe(
+          "${{ inputs.autonomy | default: 'manual' }}"
+        );
+      });
+
+      it('retargets the pending fingerprint before the fallback review starts', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+
+        expect(names.indexOf('retarget_pending_fingerprint')).toBeGreaterThan(
+          names.indexOf('wait_for_investigation')
+        );
+        expect(names.indexOf('retarget_pending_fingerprint')).toBeLessThan(
+          names.indexOf('review_when_investigation_missing')
+        );
+        expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.type).toBe(
+          'elasticsearch.update'
+        );
+        expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.if).toContain(
+          'inputs.retarget_if_missing != false'
+        );
+        expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.if).toContain(
+          'steps.wait_for_investigation.error != blank'
+        );
+        const script = stepIn(attachSteps, 'retarget_pending_fingerprint')?.with?.script as {
+          source?: string;
+          params?: {
+            expected?: { investigation_id?: string };
+            next?: { expires_at?: string; last_alert_at?: string };
+            alerts?: { values?: string };
+          };
+        };
+        expect(script.source).toContain("ctx.op = 'noop'");
+        expect(script.source).toContain('params.expected.investigation_id');
+        expect(script.source).toContain('params.alerts.values');
+        expect(script.params?.expected?.investigation_id).toBe('{{ inputs.investigation_id }}');
+        expect(script.params?.next?.expires_at).toBe('{{ inputs.expires_at }}');
+        expect(script.params?.next?.last_alert_at).toBe('{{ inputs.last_alert_at }}');
+        expect(script.params?.alerts?.values).toBe(
+          '${{ inputs.alert_ids | default: consts.no_alert_ids }}'
+        );
+      });
+
+      it('leaves a fingerprint younger than 15 minutes to its review', () => {
+        const script = stepIn(attachSteps, 'retarget_pending_fingerprint')?.with?.script as {
+          source?: string;
+          params?: { expected?: { pending_ms?: number } };
+        };
+
+        expect(script.source).toContain('params.expected.pending_ms');
+        expect(script.source).toContain("ctx._source['@timestamp']");
+        expect(script.params?.expected?.pending_ms).toBe(15 * 60 * 1000);
+      });
+
+      it('writes this attack its own fingerprint when a failed read never clears', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        const write = stepIn(attachSteps, 'write_own_fingerprint_when_unreadable');
+
+        expect(names.indexOf('write_own_fingerprint_when_unreadable')).toBeGreaterThan(
+          names.indexOf('retarget_pending_fingerprint')
+        );
+        expect(names.indexOf('write_own_fingerprint_when_unreadable')).toBeLessThan(
+          names.indexOf('review_when_investigation_missing')
+        );
+        expect(write?.type).toBe('elasticsearch.index');
+        expect(write?.with?.op_type).toBe('create');
+        expect(write?.if).toContain('inputs.retarget_if_missing == false');
+        expect(write?.if).toContain('inputs.fingerprint_pending == true');
+        expect(write?.if).toContain('steps.wait_for_investigation.error != blank');
+        expect(write?.with?.document).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              investigation_id: '{{ steps.resolve_own_investigation_id.output.investigation_id }}',
+              attack_discovery_id: '{{ inputs.attack_discovery_id }}',
+            }),
+          })
+        );
+      });
+
+      it('adds the continuation alert ids only after the investigation appears', () => {
+        const extend = stepIn(attachSteps, 'extend_pending_fingerprint');
+        const script = extend?.with?.script as { source?: string } | undefined;
+
+        expect(extend?.type).toBe('elasticsearch.update');
+        expect(extend?.if).toContain('steps.wait_for_investigation.error == blank');
+        expect(extend?.if).toContain('inputs.fingerprint_pending == true');
+        expect(extend?.if).toContain("steps.resolve_attach_row.output.row != 'review'");
+        expect(script?.source).toContain('params.alert_ids.values');
+      });
+
+      it('re-reads the investigation before attaching and reviews it when that read has changed', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+
+        expect(names.indexOf('reread_investigation')).toBeGreaterThan(
+          names.indexOf('wait_for_investigation')
+        );
+        expect(names.indexOf('reread_investigation')).toBeLessThan(
+          names.indexOf('journal_attach_started')
+        );
+        expect(stepIn(attachSteps, 'write_own_fingerprint')?.with?.op_type).toBe('create');
+        expect(
+          asInputs(stepIn(attachSteps, 'review_when_investigation_changed')).related_link_reason
+        ).toBe('{{ steps.resolve_attach_row.output.reason }}');
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).own_fingerprint_id).toBe(
+          '{{ foreach.item.own_fingerprint_id }}'
+        );
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).expires_at).toBe(
+          '{{ foreach.item.expires_at }}'
+        );
       });
 
       it('does not create the investigation', () => {
@@ -3749,6 +4074,16 @@ describe('Attack Discovery worker chain', () => {
       it('journals the match, then the attachment attempt, then alert tagging', () => {
         expect(attach.steps?.map((step) => step.name)).toEqual([
           'wait_for_investigation',
+          'resolve_own_investigation_id',
+          'find_pending_fingerprint',
+          'retarget_pending_fingerprint',
+          'write_own_fingerprint_when_unreadable',
+          'review_when_investigation_missing',
+          'reread_investigation',
+          'resolve_attach_row',
+          'write_own_fingerprint',
+          'review_when_investigation_changed',
+          'extend_pending_fingerprint',
           'journal_attach_started',
           'attach_discovery',
           'attach_alerts',
@@ -3756,8 +4091,11 @@ describe('Attack Discovery worker chain', () => {
           'collect_impact_entities',
           'attach_impact',
           'journal_impact_recorded',
+          'resolve_alert_tag',
           'tag_correlated_alerts',
           'acknowledge_correlated_alerts',
+          'verify_alerts_retired',
+          'resolve_alerts_retired',
           'journal_alerts_retired',
         ]);
       });
@@ -3773,6 +4111,29 @@ describe('Attack Discovery worker chain', () => {
         expect(asInputs(stepIn(attachSteps, 'journal_attach_started')).message).toContain(
           'FP/TP analysis was skipped because this attack matches one already under investigation.'
         );
+      });
+
+      it('says a closed false positive is already closed', async () => {
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(
+          asInputs(stepIn(attachSteps, 'journal_attach_started')).message,
+          {
+            inputs: {
+              attack_discovery_id: 'attack-1',
+              title: 'Lateral movement',
+              alert_ids: ['a1', 'a2'],
+              tag_fp_chain_alerts: true,
+              parent_run_id: 'run-1',
+            },
+            execution: { id: 'attach-exec-1' },
+            consts: attach.consts,
+          }
+        );
+
+        expect(rendered).toContain(
+          'FP/TP analysis was skipped because this Investigation is already closed as a false positive.'
+        );
+        expect(rendered).not.toContain('already under investigation');
+        expect(rendered).not.toContain('correlated detection alert');
       });
 
       it('does not claim the attachments landed in the opening note', () => {
@@ -3794,9 +4155,63 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('journals alert retirement only for a handed-off true positive or inconclusive', () => {
+      it('journals alert retirement when the re-read says the handoff is approved', () => {
         expect(stepIn(attachSteps, 'journal_alerts_retired')?.if).toBe(
-          '${{ inputs.journal_alerts_retired == true and inputs.alert_ids != blank }}'
+          "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}"
+        );
+        expect(stepIn(attachSteps, 'verify_alerts_retired')?.if).toBe(
+          stepIn(attachSteps, 'journal_alerts_retired')?.if
+        );
+      });
+
+      it('journals the read-back counts, including zero', async () => {
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(
+          asInputs(stepIn(attachSteps, 'journal_alerts_retired')).message,
+          {
+            execution: { id: 'attach-exec-1' },
+            steps: {
+              resolve_alert_tag: { output: { tag: 'az:ad_correlated' } },
+              resolve_alerts_retired: {
+                output: {
+                  read: true,
+                  requested: 3,
+                  tagged: 0,
+                  open: 3,
+                  acknowledged: 0,
+                  closed: 0,
+                },
+              },
+            },
+          }
+        );
+
+        expect(rendered).toContain('Tagged 0 of 3 detection alert(s) az:ad_correlated');
+        expect(rendered).not.toContain('error');
+      });
+
+      it('passes the false-positive tag flag through as a typed boolean', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).tag_fp_chain_alerts).toBe(
+          '${{ foreach.item.tag_fp_chain_alerts }}'
+        );
+      });
+
+      it('does not pass an in-review tag flag', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).tag_in_review_alerts).toBeUndefined();
+      });
+
+      it('passes the worker autonomy through so a fallback review keeps it', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).autonomy).toBe('${{ inputs.autonomy }}');
+      });
+
+      it('passes the pending flag through as a typed boolean', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).fingerprint_pending).toBe(
+          '${{ foreach.item.fingerprint_pending }}'
+        );
+      });
+
+      it('passes the confirmed-missing flag through as a typed boolean', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).retarget_if_missing).toBe(
+          '${{ foreach.item.retarget_if_missing }}'
         );
       });
 
@@ -3812,18 +4227,44 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 7 so impact is journaled as separate host and user counts', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(7);
+      it('bumps the attach workflow to version 19 so a young fingerprint is not retargeted', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(19);
       });
 
-      it('acknowledges the open alerts it tags', () => {
+      it('keeps its alert tags in sync with the review', () => {
+        expect(attach.consts?.ad_correlated_tag).toBe(review.consts?.ad_correlated_tag);
+        expect(attach.consts?.ad_fp_chain_tag).toBe(review.consts?.ad_fp_chain_tag);
+      });
+
+      const renderAttachTag = (inputs: Record<string, boolean>): Promise<string> =>
+        createWorkflowLiquidEngine().parseAndRender(
+          String(stepIn(attachSteps, 'resolve_alert_tag')?.with?.tag),
+          { consts: attach.consts, inputs }
+        );
+
+      it('tags a handed-off continuation az:ad_correlated', async () => {
+        expect(await renderAttachTag({ tag_correlated_alerts: true })).toBe('az:ad_correlated');
+        expect(
+          await renderAttachTag({ tag_fp_chain_alerts: true, tag_correlated_alerts: true })
+        ).toBe('az:ad_correlated');
+      });
+
+      it('retries the tag write and then continues', () => {
+        const onFailure = stepIn(attachSteps, 'tag_correlated_alerts')?.['on-failure'];
+
+        expect(onFailure?.retry?.['max-attempts']).toBe(3);
+        expect(onFailure?.continue).toBe(true);
+      });
+
+      it('tags and acknowledges only after the re-read says the handoff is approved', () => {
         const acknowledge = stepIn(attachSteps, 'acknowledge_correlated_alerts');
+        const when =
+          "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}";
 
         expect(acknowledge?.type).toBe('kibana.SetAlertsStatus');
         expect(acknowledge?.with?.status).toBe('acknowledged');
-        expect(acknowledge?.if).toBe(
-          '${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}'
-        );
+        expect(acknowledge?.if).toBe(when);
+        expect(stepIn(attachSteps, 'tag_correlated_alerts')?.if).toBe(when);
         expect(acknowledge?.with?.query).toEqual({
           bool: {
             filter: [
