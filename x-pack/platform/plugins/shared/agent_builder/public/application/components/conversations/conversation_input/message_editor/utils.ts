@@ -88,16 +88,14 @@ export const placeCursorAfter = (node: Node, sel: Selection): void => {
 
 export const placeCursorAtEnd = (editorElement: HTMLDivElement) => {
   const selection = window.getSelection();
-  if (selection && editorElement.childNodes.length > 0) {
-    const lastChild = editorElement.lastChild;
-    if (lastChild) {
-      const newRange = document.createRange();
-      newRange.setStartAfter(lastChild);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-    }
+  if (!selection) {
+    return;
   }
+  const newRange = document.createRange();
+  newRange.selectNodeContents(editorElement);
+  newRange.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
 };
 
 /**

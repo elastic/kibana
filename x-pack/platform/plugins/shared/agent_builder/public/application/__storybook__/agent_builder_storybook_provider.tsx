@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NEVER } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,12 +18,15 @@ import { FakeConversationProvider } from './fake_conversation_provider';
 import { createStorybookKibanaServices } from './kibana_services';
 import { createStorybookAgentBuilderServices } from './agent_builder_services';
 import type { AgentBuilderInternalService } from '../../services/types';
+import type { StartServices } from '../hooks/use_kibana';
+
+const createQueryClient = () =>
+  new QueryClient({
+    defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
+  });
 
 const defaultKibanaServices = createStorybookKibanaServices();
 const defaultAgentBuilderServices = createStorybookAgentBuilderServices();
-const defaultQueryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
-});
 const storybookStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,
   getStreamEnded$: () => NEVER,
@@ -36,6 +39,7 @@ export interface AgentBuilderStorybookProviderProps {
   agentId?: string;
   initialAttachments?: ConversationAttachment[];
   services?: Partial<AgentBuilderInternalService>;
+  kibanaServices?: Partial<StartServices>;
 }
 
 export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProviderProps> = ({
@@ -44,14 +48,20 @@ export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProvid
   agentId,
   initialAttachments,
   services,
+  kibanaServices,
 }) => {
   const mergedServices = services
     ? createStorybookAgentBuilderServices(services)
     : defaultAgentBuilderServices;
+  const mergedKibanaServices = kibanaServices
+    ? { ...defaultKibanaServices, ...kibanaServices }
+    : defaultKibanaServices;
+  // One cache per story, so data does not leak between stories
+  const [queryClient] = useState(createQueryClient);
 
   return (
-    <QueryClientProvider client={defaultQueryClient}>
-      <KibanaContextProvider services={defaultKibanaServices}>
+    <QueryClientProvider client={queryClient}>
+      <KibanaContextProvider services={mergedKibanaServices}>
         <AgentBuilderServicesContext.Provider value={mergedServices}>
           <StreamingProvider conversationStreamService={storybookStreamService}>
             <FakeConversationProvider
