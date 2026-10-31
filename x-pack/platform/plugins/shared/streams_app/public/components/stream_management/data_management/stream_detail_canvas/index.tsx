@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useSelector } from '@xstate/react';
 import {
   useEdgesState,
@@ -53,6 +54,7 @@ import { applyLayout } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
+import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
 import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
@@ -118,6 +120,8 @@ import {
 import { GRAPH_ENDPOINT_KIND } from '../../../../services/unit_graph';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
+import { STATS_POLL_INTERVAL_MS } from '../../../unit_stats/state_management/constants';
+import { StatsManagerProvider } from '../../../unit_stats/state_management/use_stats_manager';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 const canvasColumnStyles = css`
@@ -170,12 +174,18 @@ export function StreamsCanvas() {
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
     >
-      <StreamsCanvasInner />
+      <StatsManagerProvider
+        unitId={STREAMS_DEFAULT_UNIT_ID}
+        pollIntervalMs={STATS_POLL_INTERVAL_MS}
+      >
+        <StreamsCanvasInner />
+      </StatsManagerProvider>
     </CanvasStateContextProvider>
   );
 }
 
 function StreamsCanvasInner() {
+  useSyncStatsWithSavedUnit();
   const { euiTheme } = useEuiTheme();
   const { flyoutName, flyoutKind, flyoutTab, query } = useCanvasUrlRef();
   const {
@@ -917,6 +927,7 @@ export const buildConfiguredDestinationNode = (
           }),
       data: {
         destinationId: destination.id,
+        destinationType: destination.type,
         signals: destination.signals,
         title: destination.name,
         subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
@@ -949,6 +960,7 @@ export const buildConfiguredDestinationNode = (
         }),
     data: {
       destinationId: destination.id,
+      destinationType: destination.type,
       signals: destination.signals,
       streamName: destination.index,
       indexCount: targetedIndexNames.length,
