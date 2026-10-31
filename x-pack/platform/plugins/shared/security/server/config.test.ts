@@ -70,6 +70,12 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
+          "bindingCleanup": Object {
+            "dryRun": false,
+            "gracePeriod": "PT24H",
+            "interval": "PT1H",
+            "unregisteredTypeGracePeriod": "P7D",
+          },
           "enabled": true,
           "requestLifetime": "PT10M",
         },
@@ -132,6 +138,12 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
+          "bindingCleanup": Object {
+            "dryRun": false,
+            "gracePeriod": "PT24H",
+            "interval": "PT1H",
+            "unregisteredTypeGracePeriod": "P7D",
+          },
           "enabled": true,
           "requestLifetime": "PT10M",
         },
@@ -193,6 +205,12 @@ describe('config schema', () => {
         "public": Object {},
         "secureCookies": false,
         "serviceAccounts": Object {
+          "bindingCleanup": Object {
+            "dryRun": false,
+            "gracePeriod": "PT24H",
+            "interval": "PT1H",
+            "unregisteredTypeGracePeriod": "P7D",
+          },
           "enabled": true,
           "requestLifetime": "PT10M",
         },
@@ -258,6 +276,12 @@ describe('config schema', () => {
         "roleManagementEnabled": true,
         "secureCookies": false,
         "serviceAccounts": Object {
+          "bindingCleanup": Object {
+            "dryRun": false,
+            "gracePeriod": "PT24H",
+            "interval": "PT1H",
+            "unregisteredTypeGracePeriod": "P7D",
+          },
           "enabled": false,
           "requestLifetime": "PT10M",
         },

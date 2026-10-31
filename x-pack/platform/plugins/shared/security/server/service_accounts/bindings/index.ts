@@ -19,3 +19,9 @@ export type {
   ServiceAccountWorkloadBindingsApi,
   ServiceAccountWorkloadBindingsOptions,
 } from './workload_bindings';
+export { StaleBindingReaper } from './stale_binding_reaper';
+export type { StaleBindingReaperOptions, StaleBindingReaperState } from './stale_binding_reaper';
+export {
+  SERVICE_ACCOUNT_BINDING_CLEANUP_TASK_TYPE,
+  StaleBindingCleanupTask,
+} from './stale_binding_reaper_task';

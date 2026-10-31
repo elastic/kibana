@@ -882,6 +882,51 @@ describe('UiamServiceAccounts', () => {
     });
   });
 
+  describe('#getAccountFactsAsInternalUser', () => {
+    const signal = new AbortController().signal;
+    const account = {
+      ...validResponse,
+      revoked: false,
+      creator: { type: 'user' as const, id: 'user-id' },
+    };
+
+    it('looks the account up as Kibana and passes the signal on', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue(account);
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+      ).resolves.toEqual({ status: 'present' });
+      expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id', { signal });
+    });
+
+    it('reports a revoked account as missing', async () => {
+      mockUiam.getServiceAccount.mockResolvedValue({ ...account, revoked: true });
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+      ).resolves.toEqual({ status: 'missing' });
+    });
+
+    it('reports an account UIAM does not know as missing', async () => {
+      mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+      ).resolves.toEqual({ status: 'missing' });
+    });
+
+    it.each([
+      ['an account Kibana may not assume', uiamRefusal('0x93B121', 403)],
+      ['an outage', new Error('connect ECONNREFUSED')],
+    ])('reports unknown for %s', async (_, error) => {
+      mockUiam.getServiceAccount.mockRejectedValue(error);
+
+      await expect(
+        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+      ).resolves.toEqual({ status: 'unknown' });
+    });
+  });
+
   describe('#get', () => {
     const retrievedAccount = {
       ...validResponse,

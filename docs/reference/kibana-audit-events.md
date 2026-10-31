@@ -399,6 +399,7 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 | | `failure` | Failed attempt to bind service account [id=x] to workload [plugin/type/id]: the user is not authorized. |
 | `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
 | | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
+| | `success` | Kibana has unbound service account [id=x] from workload [plugin/type/id], because the workload no longer exists. Logged by the background task that removes stale bindings, after it removes one. The reason at the end is one of: the service account no longer exists, the service account was deleted and created again since the bind, the workload no longer exists, or no plugin registers the workload type any more. The event has no user, and `kibana.space_id` is the space of the binding. |
 
 #### Type: deletion
 
@@ -410,7 +411,7 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 ::::{note}
 Following ECS, every event in this category has two values in `event.type`: the type it is listed under and `user`, for example `[user, creation]`. An `ignore_filters` rule that matches on `types` has to list both.
 
-Across the `service_account_create`, `service_account_workload_bind`, `service_account_workload_unbind`, and `service_account_delete` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding and delete events follow the convention for writes: `unknown` is logged once the user is authorized and before the write, so it records the attempt, not the result. It is also written when an unbind matches no binding or a delete names no account, and a write that later fails or is refused leaves no further event. Refer to the {{kib}} server logs for write errors. A delete refused because workloads are still bound to the account leaves no event. `service_account_create` is logged after the operation instead, because the backend assigns the id.
+Across the `service_account_create`, `service_account_workload_bind`, `service_account_workload_unbind`, and `service_account_delete` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding and delete events follow the convention for writes: `unknown` is logged once the user is authorized and before the write, so it records the attempt, not the result. It is also written when an unbind matches no binding or a delete names no account, and a write that later fails or is refused leaves no further event. Refer to the {{kib}} server logs for write errors. A delete refused because workloads are still bound to the account leaves no event. `service_account_create` is logged after the operation instead, because the backend assigns the id. The `success` unbind events of the stale binding cleanup are also logged after the binding is removed.
 ::::
 
 ### Category: web
