@@ -271,6 +271,18 @@ describe('CommandMenuList', () => {
       expect(ref.current!.isKeyDownEventHandled({ key: 'Tab' } as React.KeyboardEvent)).toBe(true);
     });
 
+    it('does not claim Enter or Tab when there are no options', () => {
+      const ref = createRef<CommandMenuHandle>();
+      renderWithProvider(
+        <CommandMenuList ref={ref} options={[]} isLoading={false} onSelect={jest.fn()} />
+      );
+
+      expect(ref.current!.isKeyDownEventHandled({ key: 'Enter' } as React.KeyboardEvent)).toBe(
+        false
+      );
+      expect(ref.current!.isKeyDownEventHandled({ key: 'Tab' } as React.KeyboardEvent)).toBe(false);
+    });
+
     it('returns false for unhandled keys', () => {
       const ref = createRef<CommandMenuHandle>();
       renderWithProvider(
