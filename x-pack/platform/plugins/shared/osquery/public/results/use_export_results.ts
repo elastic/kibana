@@ -8,6 +8,7 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import { buildPath } from '@kbn/core-http-browser';
 
 import { useKibana } from '../common/lib/kibana';
 import { API_VERSIONS } from '../../common/constants';
@@ -45,8 +46,14 @@ export const useExportResults = ({
       try {
         const path =
           isLive || !scheduleId || executionCount == null
-            ? `/api/osquery/live_queries/${liveQueryId ?? actionId}/results/${actionId}/_export`
-            : `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/_export`;
+            ? buildPath('/api/osquery/live_queries/{liveQueryId}/results/{actionId}/_export', {
+                liveQueryId: liveQueryId ?? actionId,
+                actionId,
+              })
+            : buildPath('/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export', {
+                scheduleId,
+                executionCount,
+              });
 
         loadingToastId = notifications.toasts.addInfo({
           title: i18n.translate('xpack.osquery.exportResults.loadingToast', {

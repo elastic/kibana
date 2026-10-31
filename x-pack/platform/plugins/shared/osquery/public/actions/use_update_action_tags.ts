@@ -8,6 +8,7 @@
 import type { QueryKey } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -35,7 +36,7 @@ export const useUpdateActionTags = () => {
     UpdateTagsMutationContext
   >(
     ({ actionId, tags }) =>
-      http.put(`/api/osquery/history/${actionId}/tags`, {
+      http.put(buildPath('/api/osquery/history/{actionId}/tags', { actionId }), {
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({ tags }),
       }),
