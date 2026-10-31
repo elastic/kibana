@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense } from '@kbn/licensing-types';
@@ -36,15 +36,23 @@ export interface ApplicationLinksUpdateParams {
 class ApplicationLinksUpdater {
   private readonly linksSubject$ = new BehaviorSubject<AppLinkItems>([]);
   private readonly normalizedLinksSubject$ = new BehaviorSubject<NormalizedLinks>({});
+  private readonly initializedSubject$ = new BehaviorSubject<boolean>(false);
 
   /** Observable that stores the links recursive hierarchy */
   public readonly links$: Observable<AppLinkItems>;
   /** Observable that stores all the links indexed by `SecurityPageName` */
   public readonly normalizedLinks$: Observable<NormalizedLinks>;
+  /**
+   * Observable that emits `true` once `update` has been called for the first time.
+   * Before that the links observables only contain the empty placeholder values they are
+   * created with, which are indistinguishable from an actual empty set of links.
+   */
+  public readonly initialized$: Observable<boolean>;
 
   constructor() {
     this.links$ = this.linksSubject$.asObservable();
     this.normalizedLinks$ = this.normalizedLinksSubject$.asObservable();
+    this.initialized$ = this.initializedSubject$.pipe(distinctUntilChanged());
   }
 
   /**
@@ -54,6 +62,7 @@ class ApplicationLinksUpdater {
     const processedAppLinks = this.processAppLinks(appLinksToUpdate, params);
     this.linksSubject$.next(Object.freeze(processedAppLinks));
     this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(processedAppLinks)));
+    this.initializedSubject$.next(true);
   }
 
   /**
