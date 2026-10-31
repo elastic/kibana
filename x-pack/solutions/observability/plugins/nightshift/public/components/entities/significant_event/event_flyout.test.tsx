@@ -19,7 +19,6 @@ import type {
   SignificantEventResponse,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../../../data/query_keys';
-import { clearPendingInvestigationCompletionsForTests } from '../../../hooks/use_fetch_significant_events';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -53,13 +52,13 @@ const investigationDetails = {
 const mockOpenConversationDetails = jest.fn();
 const mockReportEvent = jest.fn();
 
-jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
+jest.mock('../../../data/investigations/use_fetch_investigation_statuses', () => ({
   useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
 }));
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
-jest.mock('../../../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../data/knowledge_indicators/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => ({
     features: [],
     failedSourceIds: [],
@@ -74,7 +73,7 @@ jest.mock('../detection/change_point_lens_chart', () => ({
   ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
 }));
 
-jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
+jest.mock('../../../data/detections/use_fetch_detection_occurrences', () => ({
   useFetchDetectionOccurrences: () => ({
     data: new Map([
       [
@@ -91,7 +90,7 @@ jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
+jest.mock('../../../data/significant_events/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
       detections: [
@@ -190,7 +189,6 @@ const mockEvent: SignificantEventResponse = {
 describe('EventFlyout', () => {
   beforeEach(() => {
     queryClient.clear();
-    clearPendingInvestigationCompletionsForTests();
     mockOpenChat.mockClear();
     mockFocusedSignificantEventService.setFocusedEvent.mockClear();
     mockFocusedSignificantEventService.clearFocusedEvent.mockClear();
@@ -366,106 +364,6 @@ describe('EventFlyout', () => {
     expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
   });
 
-  it('waits for the event outcome before completing each investigation round', () => {
-    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'follow-up'];
-    const firstRound: SignificantEventResponse = {
-      ...mockEvent,
-      investigations: [
-        {
-          workflow_execution_id: 'conv-1',
-          started_at: new Date(Date.now() - 60_000).toISOString(),
-        },
-      ],
-    };
-    queryClient.setQueryData(key, { hits: [firstRound] });
-    mockUseInvestigation.mockReturnValue({
-      status: 'running',
-      investigation: investigationDetails,
-    });
-    const onClose = jest.fn();
-    const { rerender } = renderFlyout({ event: firstRound, onClose });
-
-    mockUseInvestigation.mockReturnValue({
-      status: 'complete',
-      investigation: investigationDetails,
-    });
-    rerender(<EventFlyout event={firstRound} onClose={onClose} />);
-    expect(queryClient.getQueryData(key)).toEqual({ hits: [firstRound] });
-
-    const followUp: SignificantEventResponse = {
-      ...firstRound,
-      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
-    };
-    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    expect(
-      queryClient.getQueryData<{ hits: SignificantEventResponse[] }>(key)?.hits[0]
-        .investigations?.[0].completed_at
-    ).toBeUndefined();
-
-    mockUseInvestigation.mockReturnValue({
-      status: 'running',
-      investigation: investigationDetails,
-    });
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    mockUseInvestigation.mockReturnValue({
-      status: 'complete',
-      investigation: investigationDetails,
-    });
-    rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
-
-    const finishedFollowUp: SignificantEventResponse = {
-      ...followUp,
-      investigations: followUp.investigations?.map((investigation) => ({
-        ...investigation,
-        completed_at: new Date().toISOString(),
-        outcome: 'failed',
-      })),
-    };
-    act(() => queryClient.setQueryData(key, { hits: [finishedFollowUp] }));
-    rerender(<EventFlyout event={finishedFollowUp} onClose={onClose} />);
-    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
-      'Investigation · Failed'
-    );
-  });
-
-  it.each([
-    { phase: 'the initial read', minutesAgo: 1, wasRunning: false },
-    { phase: 'a running investigation', minutesAgo: 1, wasRunning: true },
-    { phase: 'the polling cutoff', minutesAgo: 66, wasRunning: false },
-  ])(
-    'does not complete an investigation after a read error during $phase',
-    ({ minutesAgo, wasRunning }) => {
-      const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'read-error'];
-      const event: SignificantEventResponse = {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'conv-1',
-            started_at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
-          },
-        ],
-      };
-      const readError: UseInvestigationResult = {
-        status: 'unavailable',
-        error: 'Internal Server Error',
-      };
-      queryClient.setQueryData(key, { hits: [event] });
-      mockUseInvestigation.mockReturnValue(wasRunning ? { status: 'running' } : readError);
-      const onClose = jest.fn();
-      const { rerender } = renderFlyout({ event, onClose });
-
-      mockUseInvestigation.mockReturnValue(readError);
-      rerender(<EventFlyout event={event} onClose={onClose} />);
-
-      expect(queryClient.getQueryData(key)).toEqual({ hits: [event] });
-      expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
-        'Investigation · In progress'
-      );
-    }
-  );
-
   it('shows a failed outcome and clears it when a follow-up starts', () => {
     const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'failed-follow-up'];
     const failedEvent: SignificantEventResponse = {
@@ -541,14 +439,6 @@ describe('EventFlyout', () => {
     expect(screen.getByText('Show more')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Show more'));
     expect(screen.getByText('Show less')).toBeInTheDocument();
-  });
-
-  it('renders the detections section', () => {
-    renderFlyout();
-
-    expect(screen.getByText('Detections')).toBeInTheDocument();
-    expect(screen.getByText('latency-p95-spike')).toBeInTheDocument();
-    expect(screen.getByText('Spike')).toBeInTheDocument();
   });
 
   it('hides the investigation section when the event has no investigation', () => {

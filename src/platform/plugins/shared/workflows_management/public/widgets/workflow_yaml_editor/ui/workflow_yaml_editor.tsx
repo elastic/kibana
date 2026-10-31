@@ -20,7 +20,7 @@ import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
-import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
+import { WORKFLOW_MONACO_LAYOUT_OPTIONS, workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -326,7 +326,6 @@ export const WorkflowYAMLEditor = ({
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
-  useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
 
   // Lifecycle
@@ -390,11 +389,21 @@ export const WorkflowYAMLEditor = ({
     [customValidationResults, interceptorValidationErrors]
   );
 
+  // The executions tab shows a historical snapshot. Publishing "no errors" from that
+  // snapshot turns the enable switch on for a workflow whose saved YAML is invalid.
+  const workflowValidationErrors = useMemo(
+    () => (isExecutionYaml ? [] : validationErrors),
+    [isExecutionYaml, validationErrors]
+  );
+
   // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
   useEffect(() => {
+    if (isExecutionYaml) {
+      return;
+    }
     const hasErrors = validationErrors.some((e) => e.severity === 'error');
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
-  }, [validationErrors, dispatch]);
+  }, [validationErrors, dispatch, isExecutionYaml]);
 
   const workflowTabYaml = useSelector(selectYamlString);
 
@@ -404,7 +413,7 @@ export const WorkflowYAMLEditor = ({
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
-    validationErrors,
+    validationErrors: workflowValidationErrors,
     readOnlyReason,
     // The store catches up with the URL tab one render later, so wait for both.
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
@@ -974,7 +983,7 @@ export const WorkflowYAMLEditor = ({
           >
             <WorkflowStepMinimap
               editor={mountedEditor}
-              validationErrors={validationErrors}
+              validationErrors={workflowValidationErrors}
               scrollContainerRef={minimapContainerRef}
             />
           </div>
@@ -992,6 +1001,7 @@ export const WorkflowYAMLEditor = ({
             onChange={onChange}
             onSyncStateChange={onSyncStateChange}
             options={options}
+            chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
             value={workflowYaml}
             enableFindAction={true}
@@ -1005,7 +1015,7 @@ export const WorkflowYAMLEditor = ({
             isMounted={isEditorMounted}
             isLoading={isLoadingValidation}
             error={errorValidating}
-            validationErrors={validationErrors}
+            validationErrors={workflowValidationErrors}
             onErrorClick={handleErrorClick}
             onFixWithAi={onFixWithAi}
             extraAction={hideEditorTools ? undefined : extraActionElement}

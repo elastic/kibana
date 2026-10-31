@@ -33,17 +33,18 @@ import type { KibanaResponseFactory } from './response_factory';
  *     // defines a validation schema for a named segment of the route path
  *     validate: {
  *       params: schema.object({
- *         id: schema.string(),
+ *         id: schema.savedObjectId(),
  *       }),
  *     },
+ *     security: { authz: { requiredPrivileges: ['my-app'] } },
  *   },
  *   // function to execute to create a responses
  *   async (context, request, response) => {
- *     const data = await context.findObject(request.params.id);
+ *     const data = await findObject(request.params.id);
  *     // creates a command to respond with 'not found' error
  *     if (!data) return response.notFound();
  *     // creates a command to send found data to the client
- *     return response.ok(data);
+ *     return response.ok({ body: data });
  *   }
  * );
  * ```

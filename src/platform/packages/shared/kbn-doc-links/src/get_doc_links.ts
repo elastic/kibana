@@ -1079,6 +1079,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     endpoints: {
       troubleshooting: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend#ts-transform-failed`,
     },
+    osquery: {
+      guide: `${ELASTIC_DOCS}solutions/security/investigate/osquery`,
+    },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
       generalPrivacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,

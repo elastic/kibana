@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
+import { DIGITAL_EXPERIENCE_FEATURE_ID, DIGITAL_EXPERIENCE_UI_PRIVILEGES } from '../common/feature';
 
 /**
  * Also requires APM access because the Classic RUM data is read through its routes; drop that check
@@ -14,3 +14,9 @@ import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
  */
 export const hasDigitalExperienceAccess = (capabilities: Capabilities): boolean =>
   Boolean(capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.show && capabilities.apm?.show);
+
+/** Whether the user can set up sessions, a sub-feature privilege granted apart from `all`. */
+export const canManageSessions = (capabilities: Capabilities): boolean =>
+  Boolean(
+    capabilities[DIGITAL_EXPERIENCE_FEATURE_ID]?.[DIGITAL_EXPERIENCE_UI_PRIVILEGES.manageSessions]
+  );
