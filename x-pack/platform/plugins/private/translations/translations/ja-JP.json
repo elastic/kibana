@@ -8526,7 +8526,6 @@
     "securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell": "事前構築済みルールをカスタマイズするには、{requiredLicense} {licenseKind}が必要です",
     "securitySolutionPackages.sideNav.betaBadge.label": "ベータ",
     "securitySolutionPackages.sideNav.togglePanel": "パネルナビゲーションを切り替える",
-    "securitySolutionPackages.siemMigration.pageTitle": "ルールを変換",
     "securitySolutionPackages.upselling.graphVisualization.description": "この機能には{subscription}が必要です。",
     "securitySolutionPackages.upselling.graphVisualization.subscriptionLink": "プラチナサブスクリプション",
     "securitySolutionPackages.upselling.pages.attackDiscovery.pageTitle.pageTitle": "Attack discovery",
