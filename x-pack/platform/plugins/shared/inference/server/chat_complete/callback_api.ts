@@ -294,6 +294,7 @@ function createChatCompletePipeline({
             getContext: () =>
               buildTokenUsageContext({
                 connectorId,
+                spaceId: namespace,
                 model: callbackContext.model,
                 modelName,
                 featureId: featureId ?? metadata?.connectorTelemetry?.pluginId,
