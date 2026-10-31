@@ -152,7 +152,7 @@ Dashboards and Visualizations::
 * Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension ({kibana-pull}297429[#297429]).
 Data ingestion and Fleet::
 * Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause ({kibana-pull}300189[#300189]).
-* Fix {fleet} running {es} transforms from uploaded integration packages with {kib}'s internal system identity. Transforms in uploaded packages are now bound to the user who installed them ({kibana-pull}297771[#297771]).
+* Fix {fleet} running {es} transforms from uploaded integration packages with {kib}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package ({kibana-pull}297771[#297771]).
 // !!DEFERRED!! Not in the latest BC (8.19.24-2548a7de, built from 0b1457c9); the backport merged after the BC was cut. Re-verify against the next BC.
 // * Fix {fleet} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters ({kibana-pull}299837[#299837]).
 // !!DEFERRED!! Not in the latest BC (8.19.24-2548a7de, built from 0b1457c9); the backport merged after the BC was cut. Re-verify against the next BC.
