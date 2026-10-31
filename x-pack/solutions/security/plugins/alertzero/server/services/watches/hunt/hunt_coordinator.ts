@@ -142,6 +142,11 @@ export interface HuntCoordinatorCoreResult {
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
   /**
+   * Why Tier 2 was skipped when the reason alone is ambiguous. Set only when `no_inference` means
+   * the dataset-match model call failed on a model that was selected, not that none was configured.
+   */
+  tier2_skip_detail?: string;
+  /**
    * Tiers whose consumers had no model on this run, in tier order; absent when every
    * consumer resolved. A Cyber domain model covers the consumers it is selected for, so a
    * missing Efficient tier is not listed when that model ran dataset matching and
@@ -860,6 +865,7 @@ const huntCoordinatorCore = async (
     message,
     nextStep,
     skipDetail,
+    surfaceSkipDetail = false,
     // True only where Tier 2 was handed the report text before this run gave up on it.
     readReportText = false,
   }: {
@@ -867,6 +873,8 @@ const huntCoordinatorCore = async (
     message: string;
     nextStep: string;
     skipDetail?: string;
+    /** Carries `skipDetail` onto the result so the narrative can tell why `no_inference` happened. */
+    surfaceSkipDetail?: boolean;
     readReportText?: boolean;
   }): HuntCoordinatorCoreResult => {
     // Tier 2 never ran on any of these paths, so nothing it could have executed
@@ -894,6 +902,7 @@ const huntCoordinatorCore = async (
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: reason,
+      ...(surfaceSkipDetail && skipDetail ? { tier2_skip_detail: skipDetail } : {}),
       message,
       next_step: nextStep,
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
@@ -965,7 +974,21 @@ const huntCoordinatorCore = async (
   // Efficient tier unless a Cyber domain model is saved. Either one counts: a saved Cyber
   // model that found nothing is `no_tier2_targets`, not a missing Efficient tier. A call
   // that never ran stays retryable, and is not a report to retire.
+  //
+  // The same holds for a call that ran and failed: no answer is not an empty answer, so it stays
+  // retryable too. Only a call that answered and found nothing retires the report.
   if (targets.tier2_targets.length === 0) {
+    if (targets.dataset_match?.status === 'failed') {
+      const failure = targets.dataset_match.message ?? 'the model call failed';
+      return tier1Only({
+        reason: 'no_inference',
+        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (the dataset-match model call failed: ${failure}).`,
+        nextStep:
+          'Tier 2 could not choose where to hunt because the dataset-match model call failed. Check the connector for the model that tier uses; the next sweep retries.',
+        skipDetail: failure,
+        surfaceSkipDetail: true,
+      });
+    }
     if (
       !datasetMatchModel &&
       needsModelDatasetMatch({ scope, tier1: tier1Raw, report: scopeReport })
