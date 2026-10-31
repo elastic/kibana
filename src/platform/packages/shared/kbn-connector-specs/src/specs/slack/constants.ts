@@ -19,6 +19,7 @@ export const SLACK_FILE_PUBLIC_EVENT_KEY = 'file_public' as const;
 export const SLACK_CHANNEL_CREATED_EVENT_KEY = 'channel_created' as const;
 export const SLACK_TEAM_JOIN_EVENT_KEY = 'team_join' as const;
 export const SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY = 'member_joined_channel' as const;
+export const SLACK_SLASH_COMMAND_EVENT_KEY = 'slash_command' as const;
 
 export const SLACK_MESSAGE_EVENT_ID = buildEventId(
   SLACK_CONNECTOR_TYPE_ID,
@@ -51,4 +52,8 @@ export const SLACK_TEAM_JOIN_EVENT_ID = buildEventId(
 export const SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID = buildEventId(
   SLACK_CONNECTOR_TYPE_ID,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY
+);
+export const SLACK_SLASH_COMMAND_EVENT_ID = buildEventId(
+  SLACK_CONNECTOR_TYPE_ID,
+  SLACK_SLASH_COMMAND_EVENT_KEY
 );
