@@ -317,6 +317,29 @@ describe('SearchMethodsService', () => {
       });
     });
 
+    it('nextPage() reports no further page once every hit has been loaded', async () => {
+      const page = (ids: string[]) => ({
+        hits: {
+          hits: ids.map((id) => ({ _id: id, sort: [Number(id)] })),
+          total: { value: 5 },
+        },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+        .mockReturnValueOnce(createMockResponse(page(['3', '4'])))
+        .mockReturnValueOnce(createMockResponse(page(['5'])));
+
+      const first = await service.dslPaginated({
+        index: 'logs-*',
+        sort: [{ timestamp: 'desc' }],
+      });
+      const second = await first.pagination.nextPage();
+      const third = await second?.pagination.nextPage();
+
+      expect(second?.pagination.hasNextPage).toBe(true);
+      expect(third?.pagination.hasNextPage).toBe(false);
+    });
+
     describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },
@@ -1138,6 +1161,190 @@ describe('SearchMethodsService', () => {
       const nextPage = await result.pagination.nextPage();
 
       expect(nextPage).toBeNull();
+    });
+
+    describe('nextPage() options', () => {
+      const paginatedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+      };
+
+      const mockTwoPages = () => {
+        const page = (ids: string[]) => ({
+          hits: {
+            hits: ids.map((id) => ({ _id: id, sort: [Number(id) * 1000] })),
+            total: { value: 100 },
+          },
+        });
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+          .mockReturnValueOnce(createMockResponse(page(['3'])));
+      };
+
+      const executionContext = {
+        type: 'application' as const,
+        name: 'discover',
+        description: 'fetch documents',
+      };
+
+      it('does not carry over the session id or abort signal of the first page', async () => {
+        mockTwoPages();
+
+        const result = await service.dslPaginated(paginatedParams, {
+          sessionId: 'original-session-id',
+          abortSignal: new AbortController().signal,
+        });
+        await result.pagination.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ sessionId: undefined, abortSignal: undefined })
+        );
+      });
+
+      it('inherits the execution context of the first page by default', async () => {
+        mockTwoPages();
+
+        const result = await service.dslPaginated(paginatedParams, { executionContext });
+        await result.pagination.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ executionContext })
+        );
+      });
+
+      it('allows overriding the abort signal and execution context', async () => {
+        mockTwoPages();
+        const abortSignal = new AbortController().signal;
+        const overrideContext = { ...executionContext, description: 'fetch more documents' };
+
+        const result = await service.dslPaginated(paginatedParams, { executionContext });
+        await result.pagination.nextPage({ abortSignal, executionContext: overrideContext });
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ abortSignal, executionContext: overrideContext })
+        );
+      });
+    });
+
+    describe('inspector', () => {
+      const paginatedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+      };
+
+      const mockTwoPages = () => {
+        const page = (ids: string[]) => ({
+          hits: {
+            hits: ids.map((id) => ({ _id: id, sort: [Number(id) * 1000] })),
+            total: { value: 100 },
+          },
+        });
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+          .mockReturnValueOnce(createMockResponse(page(['3'])));
+      };
+
+      it('logs the first page with the session id it belongs to', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.dslPaginated(paginatedParams, { inspector, sessionId: 'session-1' });
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(1);
+        expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
+          description: 'Test description',
+          searchSessionId: 'session-1',
+        });
+        expect(requestResponder.json).toHaveBeenCalled();
+        expect(requestResponder.ok).toHaveBeenCalled();
+      });
+
+      it('logs request stats before the request body so the Inspector opens on Statistics', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const getRequestStats = jest.fn().mockReturnValue({});
+
+        await service.dslPaginated(paginatedParams, {
+          inspector: { ...inspector, getRequestStats },
+        });
+
+        const [statsOrder] = requestResponder.stats.mock.invocationCallOrder;
+        const [jsonOrder] = requestResponder.json.mock.invocationCallOrder;
+        expect(statsOrder).toBeLessThan(jsonOrder);
+      });
+
+      it('logs each page with the same adapter, without the session id after the first', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(paginatedParams, {
+          inspector,
+          sessionId: 'session-1',
+        });
+        await result.pagination.nextPage();
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(2);
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Test Request', {
+          description: 'Test description',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('allows overriding the inspector title and description per page', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(paginatedParams, { inspector });
+        await result.pagination.nextPage({
+          inspectorTitle: 'Page 2 Request',
+          inspectorDescription: 'Fetching second page',
+        });
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Page 2 Request', {
+          description: 'Fetching second page',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('falls back to the original title and description for a page without overrides', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        const result = await service.dslPaginated(paginatedParams, { inspector });
+        await result.pagination.nextPage({ inspectorTitle: 'Only the title' });
+
+        expect(inspector.adapter.start).toHaveBeenNthCalledWith(2, 'Only the title', {
+          description: 'Test description',
+          searchSessionId: undefined,
+        });
+      });
+
+      it('logs an error when a page fails', async () => {
+        mockSearch.mockReturnValue(throwError(() => new Error('Search failed')));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(service.dslPaginated(paginatedParams, { inspector })).rejects.toThrow(
+          'Search failed'
+        );
+
+        expect(requestResponder.error).toHaveBeenCalledWith({
+          json: { message: 'Search failed' },
+        });
+      });
     });
   });
 });

@@ -13,6 +13,10 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewSource, type EsqlSource } from '@kbn/data-source';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -150,6 +154,7 @@ export function fetchAll(
           esqlHeaderWarning,
           dataSource: fetchedDataSource,
           approximationApplied,
+          pagination,
         }) => {
           fetchAllRequestsOnlyTracker.reportEvent({
             requestAdapter: inspectorAdapters.requests,
@@ -204,6 +209,7 @@ export function fetchAll(
             interceptedWarnings,
             approximationApplied,
             query,
+            pagination,
           });
 
           checkHitCount(dataSubjects.main$, records.length);
@@ -249,12 +255,11 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, services, searchSource: originalSearchSource, getCurrentTab } = params;
+  const { dataSubjects, searchSource, getCurrentTab, scopedProfilesManager, abortController } =
+    params;
 
   try {
-    const searchSource = originalSearchSource.createChild();
-    const dataView = searchSource.getField('index')!;
-    const { query, sort } = getCurrentTab().appState;
+    const { query } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {
@@ -262,37 +267,61 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       return;
     }
 
-    const lastDocuments = dataSubjects.documents$.getValue().result || [];
-    const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
+    const currentDocs = dataSubjects.documents$.getValue();
+    const pagination = currentDocs.pagination;
 
-    if (!lastDocumentSort) {
-      return;
+    if (!pagination?.hasNextPage) {
+      return; // No more pages available
     }
-
-    searchSource.setField('searchAfter', lastDocumentSort);
 
     // Mark as loading
     sendLoadingMoreMsg(dataSubjects.documents$);
 
-    // Update the searchSource
-    updateVolatileSearchSource(searchSource, {
-      dataView,
-      services,
-      sort: sort as SortOrder[],
+    const nextPageResult = await pagination.nextPage({
+      abortSignal: abortController.signal,
+      executionContext: { description: 'fetch more documents' },
+      inspectorTitle: i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
+        defaultMessage: 'More documents',
+      }),
     });
 
-    // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, params);
+    if (!nextPageResult) {
+      sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+        moreRecords: [],
+        interceptedWarnings: undefined,
+      });
+      return;
+    }
+
+    const dataView = searchSource.getField('index')!;
+    const moreRecords = buildDataTableRecordList({
+      records: nextPageResult.rawResponse.hits.hits as unknown as EsHitRecord[],
+      dataView,
+      processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+    });
+
+    // Intercept warnings from pagination request
+    const adapter = params.inspectorAdapters.requests;
+    const interceptedWarnings: SearchResponseWarning[] = [];
+    if (adapter) {
+      params.services.data.search.showWarnings(adapter, (warning) => {
+        interceptedWarnings.push(warning);
+        return true; // suppress the default behaviour
+      });
+    }
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
-      moreRecords: records,
+      moreRecords,
       interceptedWarnings,
+      pagination: nextPageResult.pagination,
     });
   } catch (error) {
+    const currentDocs = dataSubjects.documents$.getValue();
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
       moreRecords: [],
       interceptedWarnings: undefined,
+      pagination: currentDocs.pagination,
     });
     sendErrorTo(dataSubjects.main$)(error);
   }

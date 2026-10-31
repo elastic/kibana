@@ -10,6 +10,7 @@
 import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { IDslPagination } from '@kbn/search-types';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,
@@ -78,9 +79,11 @@ export function sendLoadingMoreFinishedMsg(
   {
     moreRecords,
     interceptedWarnings,
+    pagination,
   }: {
     moreRecords: DataTableRecord[];
     interceptedWarnings: SearchResponseWarning[] | undefined;
+    pagination?: IDslPagination;
   }
 ) {
   const currentValue = documents$.getValue();
@@ -92,6 +95,7 @@ export function sendLoadingMoreFinishedMsg(
         ? [...(currentValue.result || []), ...moreRecords]
         : currentValue.result,
       interceptedWarnings,
+      pagination,
     });
   }
 }

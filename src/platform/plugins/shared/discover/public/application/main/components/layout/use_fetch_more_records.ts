@@ -10,7 +10,6 @@
 import { useMemo } from 'react';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 
 /**
@@ -31,17 +30,11 @@ export const useFetchMoreRecords = (): UseFetchMoreRecordsResult => {
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const documentState = useDataState(documents$);
   const totalHitsState = useDataState(totalHits$);
-  const isEsqlMode = useIsEsqlMode();
 
-  const rows = documentState.result || [];
   const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
 
   const totalHits = totalHitsState.result || 0;
-  const canFetchMoreRecords =
-    !isEsqlMode &&
-    rows.length > 0 &&
-    totalHits > rows.length &&
-    Boolean(rows[rows.length - 1].raw.sort?.length);
+  const canFetchMoreRecords = Boolean(documentState.pagination?.hasNextPage);
 
   const onFetchMoreRecords = useMemo(
     () =>

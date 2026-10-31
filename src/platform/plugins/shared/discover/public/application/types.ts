@@ -9,6 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { IDslPagination } from '@kbn/search-types';
 import type { EsqlSource } from '@kbn/data-source';
 
 export enum FetchStatus {
@@ -25,6 +26,7 @@ export interface RecordsFetchResponse {
   dataSource?: EsqlSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  pagination?: IDslPagination;
   approximationApplied?: boolean;
 }
 
