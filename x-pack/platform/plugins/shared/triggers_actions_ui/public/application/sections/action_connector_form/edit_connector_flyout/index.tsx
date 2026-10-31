@@ -707,7 +707,6 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
             <KbnInfoCallout
               announceOnMount
               size="s"
-              iconType="lock"
               data-test-subj="connectorReadOnlyAccessCallout"
               title={i18n.translate(
                 'xpack.triggersActionsUI.sections.editConnectorForm.readOnlyAccess',

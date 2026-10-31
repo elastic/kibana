@@ -51,6 +51,7 @@ const STRICT_READONLY_METHOD_CLASSIFICATION: Record<
   updateObjectsSpaces: 'blocked',
   changeOwnership: 'blocked',
   changeAccessMode: 'blocked',
+  changeAcl: 'blocked',
   createPointInTimeFinder: 'blocked',
   asScopedToNamespace: 'wrapped',
   checkConflicts: 'read',

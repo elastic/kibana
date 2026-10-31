@@ -1570,23 +1570,6 @@ describe('access control lists', () => {
   });
 
   describe('#savedObjectToRaw', () => {
-    test('writes an ACL document as is', () => {
-      const aclDocument = {
-        version: 1 as const,
-        owner: { type: 'user' as const, id: 'u_owner' },
-        general_access: 'none' as const,
-        entries: [],
-      };
-      const actual = multiNamespaceSerializer.savedObjectToRaw({
-        type: 'foo',
-        id: 'bar',
-        attributes: {},
-        references: [],
-        acl: aclDocument,
-      });
-      expect(actual._source.acl).toEqual(aclDocument);
-    });
-
     test('writes a canonical ACL back as a source value that indexes to the same values', () => {
       const actual = multiNamespaceSerializer.savedObjectToRaw({
         type: 'foo',

@@ -131,7 +131,6 @@ export const ObjectAccessPanel = ({
       <KbnInfoCallout
         announceOnMount
         size="s"
-        iconType="info"
         data-test-subj="accessPanelDisabled"
         title={i18n.translate('accessControlUi.panel.disabled', {
           defaultMessage: 'Object-level access control is turned off.',
@@ -163,7 +162,6 @@ export const ObjectAccessPanel = ({
         <>
           <KbnDangerCallout
             announceOnMount
-            iconType="error"
             data-test-subj="accessPanelInvalidAcl"
             title={i18n.translate('accessControlUi.panel.invalidAcl', {
               defaultMessage:
@@ -178,7 +176,6 @@ export const ObjectAccessPanel = ({
           <KbnInfoCallout
             announceOnMount
             size="s"
-            iconType="lockOpen"
             data-test-subj="accessPanelRecovery"
             title={i18n.translate('accessControlUi.panel.recovery', {
               defaultMessage:
@@ -193,7 +190,6 @@ export const ObjectAccessPanel = ({
         <>
           <KbnInfoCallout
             announceOnMount
-            iconType="user"
             data-test-subj="accessPanelClaimCallout"
             title={i18n.translate('accessControlUi.panel.claimTitle', {
               defaultMessage: 'This {objectNoun} has no owner',
@@ -323,7 +319,6 @@ const ErrorCallout = ({
     return (
       <KbnWarningCallout
         announceOnMount
-        iconType="refresh"
         data-test-subj="accessPanelConflict"
         title={i18n.translate('accessControlUi.panel.conflict', {
           defaultMessage: 'Access changed since you opened it.',
@@ -341,7 +336,6 @@ const ErrorCallout = ({
 
   return (
     <KbnDangerCallout
-      iconType="error"
       data-test-subj="accessPanelError"
       title={
         error?.statusCode === 404

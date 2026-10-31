@@ -61,6 +61,10 @@ const RUN_ONLY_ACL = { version: 1, owner: OWNER, general_access: 'use', entries:
 /** Not restricted: everybody can edit the object. */
 const PUBLIC_ACL = { version: 1, owner: OWNER, general_access: 'edit', entries: [] };
 
+/** The stored form of an ACL, which has no `entries` when there are none. */
+const toStored = ({ entries, ...acl }: AclDocument) =>
+  entries?.length ? { ...acl, entries } : acl;
+
 const createRawDoc = (
   type: string,
   id: string,
@@ -396,7 +400,7 @@ describe('object-level security in the repository', () => {
       });
       expect(client.index).not.toHaveBeenCalled();
       expect(client.create).toHaveBeenCalledTimes(1);
-      expect(client.create.mock.calls[0][0].document).toMatchObject({ acl: initialAcl });
+      expect(client.create.mock.calls[0][0].document).toMatchObject({ acl: toStored(initialAcl) });
     });
 
     it('rejects initial access for an unregistered type', async () => {
@@ -766,7 +770,7 @@ describe('object-level security in the repository', () => {
       expect([...writes.keys()].sort()).toEqual([`${ACL_TYPE}:new`, `${OTHER_TYPE}:other`]);
       expect(writes.get(`${ACL_TYPE}:new`)).toMatchObject({
         method: 'create',
-        source: { acl: initialAcl },
+        source: { acl: toStored(initialAcl) },
       });
       expect(writes.get(`${OTHER_TYPE}:other`)?.method).toBe('create');
       expect(writes.get(`${OTHER_TYPE}:other`)?.source).not.toHaveProperty('acl');
@@ -815,7 +819,7 @@ describe('object-level security in the repository', () => {
       // A new object is never written over one created concurrently, even with overwrite.
       expect(writes.get(`${ACL_TYPE}:new`)).toMatchObject({
         method: 'create',
-        source: { acl: initialAcl },
+        source: { acl: toStored(initialAcl) },
       });
       expect(aclExtension.getInitialAcl).toHaveBeenCalledTimes(1);
     });
@@ -903,7 +907,7 @@ describe('object-level security in the repository', () => {
         requested: undefined,
       });
       expect(client.create).toHaveBeenCalledTimes(1);
-      expect(client.create.mock.calls[0][0].document).toMatchObject({ acl: initialAcl });
+      expect(client.create.mock.calls[0][0].document).toMatchObject({ acl: toStored(initialAcl) });
     });
   });
 

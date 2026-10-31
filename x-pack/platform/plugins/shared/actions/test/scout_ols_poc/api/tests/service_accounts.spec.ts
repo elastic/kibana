@@ -22,6 +22,8 @@ interface WorkflowExecution {
   effectiveIdentity?: { type: string; id: string };
 }
 
+// A workflow run is scheduled as a task, so it can take a while to finish.
+const WORKFLOW_RUN_TIMEOUT = 60_000;
 const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
 
 /**
@@ -122,7 +124,7 @@ steps:
       ).body as WorkflowExecution;
     await expect
       .poll(async () => TERMINAL_STATUSES.includes((await getExecution()).status), {
-        timeout: 60_000,
+        timeout: WORKFLOW_RUN_TIMEOUT,
       })
       .toBe(true);
     return getExecution();

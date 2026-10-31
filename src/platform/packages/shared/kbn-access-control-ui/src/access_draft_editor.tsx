@@ -101,7 +101,6 @@ export const AccessDraftEditor = ({
           <KbnInfoCallout
             announceOnMount
             size="s"
-            iconType="info"
             data-test-subj="accessPanelRetainedGrants"
             title={i18n.translate('accessControlUi.draftEditor.retainedGrants', {
               defaultMessage:

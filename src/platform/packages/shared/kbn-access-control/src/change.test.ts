@@ -9,7 +9,7 @@
 
 import { AclChangeError, MAX_ACL_ENTRIES, prepareAclChange, prepareInitialAcl } from './change';
 import { evaluateAcl } from './evaluate';
-import { FIXTURE_POLICY as policy, FIXTURE_PROBES } from './fixtures/shapes';
+import { FIXTURE_POLICY as policy, FIXTURE_PROBES } from './contract/shapes';
 import type { AclChange, CanonicalAcl, Principal } from './types';
 
 const NOW = '2026-10-30T00:00:00.000Z';

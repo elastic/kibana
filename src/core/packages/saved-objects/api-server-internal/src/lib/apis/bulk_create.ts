@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { normalizeAclSource, type AclDocument, type CanonicalAcl } from '@kbn/access-control';
+import { normalizeAclSource, type CanonicalAcl } from '@kbn/access-control';
 import type { Payload } from '@hapi/boom';
 import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -310,7 +310,7 @@ export const performBulkCreate = async <T>(
         const accessControlToWrite = accessControl ? accessControl : object.accessControl;
 
         // An overwrite always keeps the stored access, and only access changes can replace it.
-        let aclToWrite: AclDocument | CanonicalAcl | undefined = existingAcl;
+        let aclToWrite: CanonicalAcl | undefined = existingAcl;
         if (!isOverwrite && (object.initialAcl || aclHelper.isEnforced(object.type))) {
           try {
             aclToWrite = await aclHelper.getInitialAcl(object.type, namespace, object.initialAcl);

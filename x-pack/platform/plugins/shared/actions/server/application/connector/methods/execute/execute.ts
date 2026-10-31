@@ -27,6 +27,7 @@ export async function execute(
   const { actionId, params, source, relatedSavedObjects, signal } = connectorExecuteParams;
   let actionTypeId: string | undefined;
   let acl: CanonicalAcl | undefined;
+  let lookupError: Error | undefined;
   const isInMemory = isPreconfigured(context, actionId) || isSystemAction(context, actionId);
 
   try {
@@ -47,11 +48,7 @@ export async function execute(
     }
   } catch (err) {
     log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
-    // A stored connector the caller cannot view must not reach the executor, which would only
-    // report a failed execution instead of the missing connector.
-    if (!isInMemory && getConnectorAccessControl(context)) {
-      throw err;
-    }
+    lookupError = err;
   }
 
   const additionalPrivileges = getActionKibanaPrivileges(
@@ -60,11 +57,19 @@ export async function execute(
     params,
     source?.type
   );
+  // Feature privileges are checked first, so that a caller without them learns nothing about
+  // which connectors exist.
   await context.authorization.ensureAuthorized({
     operation: 'execute',
     additionalPrivileges,
     actionTypeId,
   });
+
+  // A stored connector the caller cannot view must not reach the executor, which would only
+  // report a failed execution instead of the missing connector.
+  if (lookupError && !isInMemory && getConnectorAccessControl(context)) {
+    throw lookupError;
+  }
 
   if (!isInMemory) {
     await ensureConnectorOperation(context, { id: actionId, acl, operation: 'use' });

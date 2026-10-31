@@ -101,7 +101,6 @@ export const TransferModal = ({
             <KbnWarningCallout
               announceOnMount
               size="s"
-              iconType="warning"
               title={i18n.translate('accessControlUi.transfer.selfWarning', {
                 defaultMessage: "You won't be able to manage access to this {objectNoun} anymore.",
                 values: { objectNoun: copy.objectNoun },

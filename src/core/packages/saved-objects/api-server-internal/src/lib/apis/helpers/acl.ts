@@ -9,6 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import {
+  ACL_FIELD,
   normalizeAclSource,
   type AclChange,
   type AclInput,
@@ -163,7 +164,9 @@ export class AclHelper {
       return;
     }
 
-    return await this.aclExtension.getInitialAcl({ type, namespace, requested });
+    // Documents always carry the canonical form, the same as documents read from Elasticsearch.
+    const acl = await this.aclExtension.getInitialAcl({ type, namespace, requested });
+    return normalizeAclSource({ [ACL_FIELD]: acl });
   }
 
   /**

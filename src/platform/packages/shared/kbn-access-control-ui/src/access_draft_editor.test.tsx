@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -88,8 +88,8 @@ describe('AccessDraftEditor', () => {
   it('adds a picked user with the first entry level of the policy', async () => {
     render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
 
-    await userEvent.type(getPickerInput(), 'bob');
-    await userEvent.click(await screen.findByRole('option', { name: /Bob Builder/ }));
+    fireEvent.change(getPickerInput(), { target: { value: 'bob' } });
+    await userEvent.click(await screen.findByTestId('accessPanelPrincipalPickerOption-u_bob'));
 
     expect(onChange).toHaveBeenLastCalledWith({
       general_access: 'use',
@@ -154,8 +154,8 @@ describe('AccessDraftEditor', () => {
   it('warns when a picked user cannot use the level of the new entry', async () => {
     render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
 
-    await userEvent.type(getPickerInput(), 'victor');
-    await userEvent.click(await screen.findByRole('option', { name: /Victor Viewer/ }));
+    fireEvent.change(getPickerInput(), { target: { value: 'victor' } });
+    await userEvent.click(await screen.findByTestId('accessPanelPrincipalPickerOption-u_viewer'));
 
     expect(screen.getByTestId('accessPanelEntryWarning-u_viewer')).toBeInTheDocument();
   });
