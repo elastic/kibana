@@ -87,8 +87,12 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     }),
   },
   proposedAction: {
-    needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
-      defaultMessage: 'Needs review',
+    restrictedCaption: i18n.translate(
+      'xpack.alertzero.detailsFlyout.proposedAction.restrictedCaption',
+      { defaultMessage: "You don't have permissions to act" }
+    ),
+    noTypeCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.noType', {
+      defaultMessage: 'No action type',
     }),
     reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
       defaultMessage: 'Reversible',

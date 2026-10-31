@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
 import { ApprovalContentHeader } from './approval_content_header';
-import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { DeclineReasonForm } from './decline_reason_form';
 import { ApprovalContentBody } from './approval_content_body';
 import { ApprovalStatusCallouts } from './approval_status_callouts';
 import { ApprovalContentFooter } from './approval_content_footer';
-import {
-  getApprovalOutcomeBadge,
-  getApprovalOutcomeBanner,
-  type ApprovalPhase,
-} from './approval_outcome';
+import { getApprovalOutcomeBanner } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+import { getProposalBadge } from './proposal_badge';
 import {
+  formatDateTime,
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
+  isProposalReplaced,
+  getExpiredCaption,
+  getProposalPhase,
 } from './proposal_helpers';
 import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
@@ -47,9 +47,11 @@ export interface ApprovalContentProps {
    * proposal (the flyout row this modal opened from, for instance).
    */
   isSubmitting?: 'applying' | 'declining';
+  /** ISO timestamp the host started the in-flight approve/decline at, if it knows it. */
+  submittedAt?: string;
   /**
-   * Who is submitting right now, for the "Applying"/"Declining" phase's live caption. Falls back
-   * to a generic "You" when omitted, so a host that has not wired a profile lookup still gets a
+   * Who is submitting right now, for the Applying and Declining banners. Falls back to a
+   * generic "You" when omitted, so a host that has not wired a profile lookup still gets a
    * coherent transient state.
    */
   currentActorName?: string;
@@ -61,7 +63,7 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("I've applied" for a
+   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("Mark as applied" for a
    * to-do proposal, see `isTodoProposal`), disabled once the
    * proposal has expired — both derived here rather than supplied by the caller, so every host's
    * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
@@ -75,8 +77,8 @@ export interface ApprovalContentProps {
    * button; clicking it swaps the body for `DeclineReasonForm` and the footer for Cancel/Decline,
    * entirely within this component — so a host never renders `DeclineReasonForm` itself or tracks
    * its own declining mode. The same flow renders identically whether this is placed inside a
-   * modal or an Agent Builder chat card. Disabled whenever the Approve button is. Not offered
-   * for a to-do proposal (`isTodoProposal`), whose only decision is "I've applied".
+   * modal or an Agent Builder chat card. Disabled whenever the Approve button is. A to-do
+   * proposal (`isTodoProposal`) offers it next to "Mark as applied".
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
   /**
@@ -117,6 +119,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     proposal,
     titleId,
     isSubmitting,
+    submittedAt,
     currentActorName,
     alwaysAllow,
     readOnly,
@@ -132,24 +135,28 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const [mode, setMode] = useState<'view' | 'declining'>('view');
     const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
     const [rationale, setRationale] = useState('');
-    // Only for the live "Xs ago" caption below — not for the phase itself, which reads `isSubmitting`
-    // directly. Resets whenever this component (re)mounts while already submitting, so a modal
-    // reopened mid-submission restarts the counter rather than reading the true elapsed time; the
-    // phase it is captioning is still correct either way.
-    const [since, setSince] = useState<string | undefined>(undefined);
-
+    // When a decision started, for the in-progress banners' "Name on {time}", as the host knows it
+    // (`submittedAt`) or, failing that, from watching it start here. A modal that opens after the
+    // submission began cannot know the true start, so it shows no time rather than a wrong one.
+    const [watchedStart, setWatchedStart] = useState<string | undefined>(undefined);
+    const previousSubmitting = useRef(isSubmitting);
     useEffect(() => {
-      setSince(isSubmitting ? new Date().toISOString() : undefined);
+      // Only a start seen here counts; mounting while already submitting is not one.
+      if (isSubmitting && !previousSubmitting.current) {
+        setWatchedStart(new Date().toISOString());
+      } else if (!isSubmitting) {
+        setWatchedStart(undefined);
+      }
+      previousSubmitting.current = isSubmitting;
     }, [isSubmitting]);
-
-    const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
+    const since = submittedAt ?? watchedStart;
     const isExpired = isProposalExpired(proposal);
-    const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
+    const isReplaced = isProposalReplaced(proposal);
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
-    // A to-do is the analyst's to carry out, so there is nothing to approve or decline: the one
-    // decision left is the human confirming they did it.
+    // A to-do is the analyst's to carry out, so there is nothing to approve: confirming they did
+    // it takes the place of Approve. They can still decline it.
     const isTodo = isTodoProposal(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
@@ -216,7 +223,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           ]
         : [
             ...(secondaryActions ?? []),
-            ...(onDismiss && !isTodo
+            ...(onDismiss
               ? [
                   {
                     label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
@@ -241,22 +248,57 @@ export const ApprovalContent = memo<ApprovalContentProps>(
       }
     }, []);
 
-    const approvalPhase: ApprovalPhase = isReplaced
-      ? 'pending'
-      : decision
-      ? decision.status
-      : isSubmitting ?? 'pending';
+    const approvalPhase = getProposalPhase(proposal, isSubmitting);
 
-    // A replaced card stays 'pending' for the footer and banner (see `approvalPhase`), but a failed
-    // attempt still has to say how it ended; replaced revisions keep no badge, since their
-    // successor carries the live state.
+    // A replaced proposal shows no outcome banner and no footer, since its successor carries the
+    // live state, but a failed attempt still has to say how it ended.
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
-    const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
+    // An undecided proposal this user has no permission to decide: the same restricted state the
+    // flyout row shows, so the row and its modal agree.
+    const isRestricted = !!readOnly && !isReplaced && approvalPhase === 'pending' && !isExpired;
+    // Shared with the flyout row, so the badge outside and the badge inside always agree.
+    const badge = getProposalBadge(proposal, { readOnly, isSubmitting });
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason;
+    // A decision in flight has no reason to give yet, only what it is waiting on.
+    const startedBy = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
+    const startedAt = since ? formatDateTime(since) : undefined;
+    // A decision still in flight keeps the state's own title (Applying, Declining), then
+    // who asked and when as the description.
+    const applyingSince = decision?.decidedAt ?? since;
+    const inFlightDescription =
+      approvalPhase === 'declining'
+        ? APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(startedBy, startedAt)
+        : approvalPhase === 'applying'
+        ? // The click still in flight (the current user's) or the approval running (the saved
+          // decision's).
+          APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
+            decision?.actorName ?? startedBy,
+            applyingSince ? formatDateTime(applyingSince) : undefined
+          )
+        : undefined;
+    // A settled decision: who decided it and when, then the reason if there is one.
+    const settledDescription =
+      approvalPhase === 'applied' ||
+      approvalPhase === 'marked_applied' ||
+      approvalPhase === 'no_action' ||
+      approvalPhase === 'declined' ||
+      approvalPhase === 'failed'
+        ? [
+            APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
+              decision?.actorName ?? APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback,
+              decision?.decidedAt ? formatDateTime(decision.decidedAt) : undefined
+            ),
+            typeof decision?.reason === 'string' ? decision.reason : undefined,
+          ]
+            .filter(Boolean)
+            // Two plain sentences: who and when, a full stop, then the reason.
+            .join('. ')
+        : undefined;
+    // Every phase with a banner is one of the two above; the others have no banner to describe.
+    const bannerReason = inFlightDescription ?? settledDescription;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    // Only a human's own "I've applied" can be taken back: nothing ran, so nothing is undone.
+    // Only a human's own "Mark as applied" can be taken back: nothing ran, so nothing is undone.
     const canReopen =
       Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
     const reopenAction: ApprovalAction | undefined =
@@ -281,26 +323,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           }
         : undefined;
 
-    const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
-    const headerCaption = decision?.actorName ? (
-      <>
-        {hasReplacedCaption && (
-          <>
-            <ProposalCaption proposal={proposal} /> •{' '}
-          </>
-        )}
-        <ApprovalActorTime
-          actorName={decision.actorName}
-          at={decision.decidedAt}
-          executed={decision.status === 'failed'}
-        />
-      </>
-    ) : !isReplaced && isSubmitting && since ? (
-      <ApprovalActorTime actorName={actorName} at={since} live />
-    ) : (
-      getProposalCaption(proposal, { includeRiskDetails: !isReplaced }) && (
-        <ProposalCaption proposal={proposal} includeRiskDetails={!isReplaced} />
-      )
+    // The header always names the action itself — type, reversibility and impact, whichever of
+    // them the proposal has — in every state. The banner says what is happening or happened, and
+    // by whom.
+    const headerCaption = getProposalCaption(proposal, { includeRiskDetails: true }) && (
+      <ProposalCaption proposal={proposal} includeRiskDetails />
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
@@ -313,23 +340,25 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // "Declining", and the footer with Cancel/Decline is gone too (via `isSettledOrTransient`) —
     // showing the form alongside a banner that says the decision is already in flight would be
     // confusing.
-    const showDeclineForm = displayMode === 'declining' && isSubmitting !== 'declining';
+    const showDeclineForm =
+      displayMode === 'declining' && isSubmitting !== 'declining' && !isRestricted;
 
     return (
       <>
         <ApprovalContentHeader
           badge={badge}
-          showStatusBadge={!isReplaced || isReplacedFailure}
           caption={headerCaption}
           title={proposal.title}
           titleId={titleId ?? generatedTitleId}
         />
 
         <ApprovalContentBody
-          mode={displayMode}
+          // A user who loses the permission mid-decline has no Cancel to come back with, so the body
+          // returns to its view mode and shows the proposal again.
+          mode={isRestricted ? 'view' : displayMode}
           comment={proposal.comment}
           banner={banner}
-          bannerSuffix={bannerSuffix}
+          bannerReason={bannerReason}
           actionError={actionError}
           data-test-subj={dataTestSubj}
         />
@@ -342,15 +371,25 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         )}
 
         {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
-            live successor. */}
-        <ApprovalStatusCallouts
-          isPending={!isReplaced && approvalPhase === 'pending'}
-          previousExecutionError={proposal.previousExecutionError}
-          failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
-          isExpired={!isReplaced && isExpired}
-          expiredReason={proposal.rationale}
-          data-test-subj={dataTestSubj}
-        />
+            live successor. Hidden while declining: the reason form takes its place. */}
+        {!showDeclineForm && (
+          <ApprovalStatusCallouts
+            isPending={!isReplaced && !isRestricted && approvalPhase === 'pending'}
+            previousExecutionError={proposal.previousExecutionError}
+            failedAttemptError={
+              isReplacedFailure ? settledDescription ?? proposal.executionError : undefined
+            }
+            isExpired={isExpired}
+            expiredCaption={isExpired ? getExpiredCaption(proposal) : undefined}
+            expiresAt={proposal.expiresAt}
+            upcomingExpiry={
+              !isReplaced && approvalPhase === 'pending' ? proposal.expiresAt : undefined
+            }
+            isRestricted={isRestricted}
+            isReplaced={isReplaced}
+            data-test-subj={dataTestSubj}
+          />
+        )}
 
         {showDeclineForm && (
           <DeclineReasonForm
@@ -362,9 +401,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
+        {/* A restricted user has nothing to submit (the callout above says why), and neither does a
+            replaced proposal: its successor is the one to decide. */}
         {/* Decided/transient states name their actor in the header caption already — no need
             to repeat it here, so there is nothing left in the footer to show. */}
-        {!isSettledOrTransient && hasFooter && (
+        {!isSettledOrTransient && hasFooter && !isRestricted && !isReplaced && (
           <ApprovalContentFooter
             secondaryActions={resolvedSecondaryActions}
             primaryAction={resolvedPrimaryAction}

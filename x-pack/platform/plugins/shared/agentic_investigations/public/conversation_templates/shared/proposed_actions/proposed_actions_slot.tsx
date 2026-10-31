@@ -8,12 +8,12 @@
 import React, { useCallback } from 'react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useConversationProposals } from '@kbn/proposals-plugin/public';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -108,7 +108,15 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   // Distinct from the empty state below: the API could not be reached at all, so there may be
   // proposed actions this analyst just cannot see right now — telling them "none" would be wrong.
   if (isError) {
-    return <KbnDangerCallout size="s" title={PROPOSED_ACTIONS_LOAD_ERROR_LABEL} />;
+    return (
+      // eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="danger"
+        title={PROPOSED_ACTIONS_LOAD_ERROR_LABEL}
+      />
+    );
   }
 
   // Deduplicated because the pages are offset windows over a list a decision can move rows

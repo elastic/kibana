@@ -32,7 +32,6 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
     "@kbn/core-http-browser",
-    "@kbn/ui-callout",
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
     "@kbn/proposals-common",
