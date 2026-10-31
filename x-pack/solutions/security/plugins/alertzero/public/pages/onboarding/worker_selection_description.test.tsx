@@ -14,14 +14,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
 import { WorkerSelectionDescription } from './worker_selection_description';
 
-const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
-
 describe('WorkerSelectionDescription', () => {
   const renderDescription = (onWatchSettingsClick = jest.fn(), isSaving = false) => {
     const core = coreMock.createStart();
-    core.application.getUrlForApp.mockImplementation((appId, options) =>
-      options?.deepLinkId === 'model_settings' ? FEATURE_SETTINGS_URL : `/app/${appId}`
-    );
     render(
       <I18nProvider>
         <EuiProvider>
@@ -39,18 +34,23 @@ describe('WorkerSelectionDescription', () => {
 
   it('explains what a Watch is', () => {
     renderDescription();
-    expect(screen.getByText(/A Watch is a small team of Workers/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Each Worker belongs to a Watch, a team of Workers with one area of expertise/
+      )
+    ).toBeInTheDocument();
   });
 
-  it('says Workers use the models set up in Feature settings, linking there in a new tab', () => {
+  it('tells users to enable the settings their Workers need', () => {
     renderDescription();
-    const link = screen.getByTestId('alertZeroOnboardingFeatureSettingsLink');
-    expect(link).toHaveTextContent('Feature settings');
-    expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
-    expect(link).toHaveAttribute('target', '_blank');
-    expect(link.closest('p')).toHaveTextContent(
-      'They use the AI models set up in Feature settings'
-    );
+    expect(
+      screen.getByText(/To start using AlertZero, enable the settings your Workers need/)
+    ).toBeInTheDocument();
+  });
+
+  it('names the Enable and run button in bold', () => {
+    renderDescription();
+    expect(screen.getByText('Enable and run').tagName).toBe('STRONG');
   });
 
   it('calls onWatchSettingsClick from the Watch settings link', () => {
