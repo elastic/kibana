@@ -958,6 +958,13 @@ Object {
         "enableNativeFunctionCalling": Object {
           "type": "boolean",
         },
+        "extraBody": Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
         "headers": Object {
           "additionalProperties": Object {
             "type": "string",
