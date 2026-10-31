@@ -14,7 +14,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard_esql'],
   }),
-  dashboardName: 'Web Logs Dashboard',
-  dashboardLinkSubj: 'dashboardListingTitleLink-Logs-dashboard-with-ES|QL',
+  dashboardTitle: 'Logs dashboard with ES|QL',
   visualizationCount: 11,
 });

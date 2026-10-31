@@ -20,6 +20,7 @@
     "@kbn/streams-plugin",
     "@kbn/content-packs-schema",
     "@kbn/streams-schema",
-    "@kbn/streamlang"
+    "@kbn/streamlang",
+    "@kbn/content-list-common"
   ]
 }

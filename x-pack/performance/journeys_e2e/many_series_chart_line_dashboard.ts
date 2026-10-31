@@ -14,7 +14,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_large'],
     kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_many_series_line_dashboard.json'],
   }),
-  dashboardName: 'Many series line',
-  dashboardLinkSubj: 'dashboardListingTitleLink-Many-series-line',
+  dashboardTitle: 'Many series line',
   visualizationCount: 1,
 });
