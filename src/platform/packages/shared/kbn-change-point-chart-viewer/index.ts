@@ -16,6 +16,7 @@ export {
 } from './src/utils/get_pvalue_impact';
 export type { PvalueImpactLevel } from './src/utils/get_pvalue_impact';
 export { ChangePointChartForRow } from './src/change_point_chart_for_row';
+export { ChangePointLensChart } from './src/components/change_point_lens_chart';
 export {
   buildChangePointCards,
   formatAnnotationTimestamp,
