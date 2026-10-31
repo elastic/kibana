@@ -35,6 +35,13 @@ const globsOverlap = (left: string, right: string): boolean => {
 };
 
 /**
+ * True when every index matching `logs-endpoint.events.*` also matches `pattern`.
+ * `logs-*` does. `logs-endpoint.events.network-*` does not.
+ */
+const coversAllEndpointEvents = (pattern: string): boolean =>
+  globMatches(pattern, ENDPOINT_EVENTS_INDEX);
+
+/**
  * A concrete cluster is covered when the exclusion glob matches it. A wildcard
  * cluster is covered only by that same pattern, so `remote_*` is not dropped
  * because one concrete cluster under it was excluded.
@@ -49,19 +56,28 @@ const appendTarget = (targets: string[], next: string): void => {
   targets.push(next);
 };
 
+interface EndpointExclusion {
+  cluster: string;
+  /** Pattern after `-cluster:`. Full covers use the endpoint pattern; narrower ones stay as written. */
+  index: string;
+  coversAll: boolean;
+}
+
 /**
  * Search target for the FP/TP raw-event check. Always the local endpoint pattern.
  * Each positive cluster alias in the space's default data view adds
- * `{alias}:logs-endpoint.events.*`. A remote exclusion whose index covers endpoint
- * events does not add an alias; it is rewritten as `-cluster:logs-endpoint.events.*`
- * so a wildcard include cannot search that cluster. Local exclusions, and ES|QL
- * mode prefixes (`_any:`, `_remote:`, `_coordinator:`), add nothing. The data
- * view's own streams are not searched: this check only reads endpoint fields.
+ * `{alias}:logs-endpoint.events.*`. A remote exclusion that covers every endpoint
+ * event does not add that alias; it is rewritten as `-cluster:logs-endpoint.events.*`
+ * so a wildcard include cannot search that cluster. A narrower exclusion is passed
+ * through as `-cluster:<index>` and the cluster stays in the search. Local
+ * exclusions, and ES|QL mode prefixes (`_any:`, `_remote:`, `_coordinator:`), add
+ * nothing. The data view's own streams are not searched: this check only reads
+ * endpoint fields.
  */
 export const endpointEventIndices = (patterns: readonly string[]): string => {
   const targets = [ENDPOINT_EVENTS_INDEX];
   const included = new Set<string>();
-  const excluded: string[] = [];
+  const excluded: EndpointExclusion[] = [];
   const list = Array.isArray(patterns) ? patterns.slice(0, MAX_PATTERNS) : [];
 
   for (const raw of list) {
@@ -73,10 +89,14 @@ export const endpointEventIndices = (patterns: readonly string[]): string => {
     if (cluster === undefined || cluster.startsWith('_') || !CLUSTER_ALIAS.test(cluster)) continue;
 
     // A positive entry names a cluster the space searches, whatever stream it names.
-    // An exclusion drops endpoint events only when its own pattern covers them.
+    // An exclusion is kept only when it can match an endpoint event.
     if (exclude) {
       if (!globsOverlap(index, ENDPOINT_EVENTS_INDEX)) continue;
-      if (!excluded.includes(cluster)) excluded.push(cluster);
+      const coversAll = coversAllEndpointEvents(index);
+      const emitted = coversAll ? ENDPOINT_EVENTS_INDEX : index;
+      if (!excluded.some((item) => item.cluster === cluster && item.index === emitted)) {
+        excluded.push({ cluster, index: emitted, coversAll });
+      }
       continue;
     }
     if (included.has(cluster)) continue;
@@ -84,11 +104,14 @@ export const endpointEventIndices = (patterns: readonly string[]): string => {
   }
 
   for (const cluster of included) {
-    if (excluded.some((exclusion) => exclusionCoversCluster(exclusion, cluster))) continue;
+    const fullyExcluded = excluded.some(
+      (exclusion) => exclusion.coversAll && exclusionCoversCluster(exclusion.cluster, cluster)
+    );
+    if (fullyExcluded) continue;
     appendTarget(targets, `${cluster}:${ENDPOINT_EVENTS_INDEX}`);
   }
-  for (const cluster of excluded) {
-    appendTarget(targets, `-${cluster}:${ENDPOINT_EVENTS_INDEX}`);
+  for (const exclusion of excluded) {
+    appendTarget(targets, `-${exclusion.cluster}:${exclusion.index}`);
   }
 
   return targets.join(',');

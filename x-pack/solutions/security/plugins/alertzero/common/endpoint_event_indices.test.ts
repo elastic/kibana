@@ -55,6 +55,14 @@ describe('endpointEventIndices', () => {
     );
   });
 
+  it('passes a narrower endpoint exclusion through and keeps the cluster', () => {
+    expect(
+      endpointEventIndices(['remote_a:logs-*', '-remote_a:logs-endpoint.events.network-*'])
+    ).toBe(
+      `${ENDPOINT_EVENTS_INDEX},remote_a:${ENDPOINT_EVENTS_INDEX},-remote_a:logs-endpoint.events.network-*`
+    );
+  });
+
   it('does not treat a :: selector as a cluster separator', () => {
     expect(endpointEventIndices(['logs-*::failures'])).toBe(ENDPOINT_EVENTS_INDEX);
     expect(endpointEventIndices(['remote_a:logs-*::data'])).toBe(
