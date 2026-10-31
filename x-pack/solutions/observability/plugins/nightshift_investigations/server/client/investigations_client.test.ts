@@ -2730,6 +2730,85 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
+  describe('getActiveRoundKind()', () => {
+    const withRun = (status: ExecutionStatus, inputs: Record<string, unknown>) =>
+      mockManagement.getWorkflowExecution.mockResolvedValue({
+        effectiveIdentity: INVESTIGATOR_IDENTITY,
+        id: 'exec-2',
+        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+        status,
+        context: { inputs: { investigation_id: 'inv-1', ...inputs } },
+      });
+
+    beforeEach(() => {
+      withConversations(
+        makeConversation({ id: 'inv-1', workflowExecutionIds: ['exec-1', 'exec-2'] })
+      );
+    });
+
+    it.each(['initial', 'follow_up', 'alert_recovery'])(
+      'reads %s from the run in progress',
+      async (roundKind) => {
+        withRun(ExecutionStatus.RUNNING, { round_kind: roundKind });
+
+        await expect(makeClient().getActiveRoundKind('inv-1')).resolves.toBe(roundKind);
+        expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith('exec-2', SPACE_ID, {
+          includeOutput: false,
+          request: mockRequest,
+        });
+      }
+    );
+
+    // Nothing is running the investigation, so a person wrote the round in Agent Builder.
+    it('reads a follow-up when the latest run is over', async () => {
+      withRun(ExecutionStatus.COMPLETED, { round_kind: 'initial' });
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).resolves.toBe('follow_up');
+    });
+
+    it('reads a follow-up when no run was ever recorded', async () => {
+      withConversations(makeConversation({ id: 'inv-1' }));
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).resolves.toBe('follow_up');
+      expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    // The Slack thread workflow only continues an existing investigation and omits round_kind.
+    it('reads a follow-up when a later run on the investigation omits round_kind', async () => {
+      withRun(ExecutionStatus.RUNNING, {});
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).resolves.toBe('follow_up');
+    });
+
+    it.each([
+      ['the first run declares no kind', ['exec-2'], {}],
+      ['a run declares an unknown kind', ['exec-1', 'exec-2'], { round_kind: 'recovery' }],
+    ])('fails when %s', async (_case, workflowExecutionIds, inputs) => {
+      withConversations(makeConversation({ id: 'inv-1', workflowExecutionIds }));
+      withRun(ExecutionStatus.RUNNING, inputs);
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).rejects.toThrow(
+        'Investigation run "exec-2" of "inv-1" declares no round_kind'
+      );
+    });
+
+    it('fails for a run of another investigation', async () => {
+      withRun(ExecutionStatus.RUNNING, { investigation_id: 'inv-2', round_kind: 'initial' });
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).rejects.toThrow(
+        InvestigationNotFoundError
+      );
+    });
+
+    it('fails for an investigation that cannot be read', async () => {
+      withConversations();
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).rejects.toThrow(
+        InvestigationNotFoundError
+      );
+    });
+  });
+
   describe('getInvestigationExecutionContext()', () => {
     const withExecution = (
       inputs: Record<string, unknown>,
@@ -2949,6 +3028,7 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
         investigation_id: 'inv-1',
         message: expect.stringContaining('An alert in this investigation has recovered.'),
         context: { source: 'alert', follow_up: 'alert_recovered' },
+        round_kind: 'alert_recovery',
       },
       mockRequest,
       'nightshift-investigations'

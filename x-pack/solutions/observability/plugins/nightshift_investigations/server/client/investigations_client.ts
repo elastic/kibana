@@ -83,6 +83,7 @@ import {
   InvestigationUnavailableError,
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
+import { isInvestigationRoundKind, type InvestigationRoundKind } from './round_kind';
 import {
   findInvestigationConversation,
   findInvestigationConversations,
@@ -585,6 +586,7 @@ export class NightshiftInvestigationsClient {
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
       investigation_id: investigationId,
+      round_kind: isFollowUp ? 'follow_up' : 'initial',
       subjects: newSubjects,
       ...(parsedNotificationDestinations?.length
         ? { notificationDestinations: parsedNotificationDestinations }
@@ -1083,6 +1085,49 @@ export class NightshiftInvestigationsClient {
     };
   }
 
+  /**
+   * The kind of round the investigation's current run adds, as the caller that started the run
+   * declared it. Read as the round starts, while that run waits on it. A round with no run in
+   * progress was written straight into the conversation, by a person following up in Agent
+   * Builder, so it is a follow-up. The Slack thread workflow only continues existing
+   * investigations (`find_investigation` runs with `create: false`) and omits `round_kind`, so a
+   * run without `round_kind` on an investigation that already has an earlier run is a follow-up.
+   * Throws when the investigation or its run cannot be read, or when the first run declares no
+   * kind, rather than guess.
+   */
+  async getActiveRoundKind(investigationId: string): Promise<InvestigationRoundKind> {
+    const { agentBuilder } = this.requireWriteDeps();
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const investigation = await findInvestigationConversation(conversations, investigationId);
+    if (!investigation) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+    // `_ensure` records each run as it starts, and runs of one investigation never overlap.
+    const latestExecutionId = investigation.workflowExecutionIds.at(-1);
+    if (!latestExecutionId) {
+      return 'follow_up';
+    }
+    const { execution, inputs } = await this.readInvestigationExecution(
+      investigationId,
+      latestExecutionId
+    );
+    if (TerminalExecutionStatuses.includes(execution.status)) {
+      return 'follow_up';
+    }
+    const roundKind = inputs?.round_kind;
+    if (roundKind === undefined && investigation.workflowExecutionIds.length > 1) {
+      return 'follow_up';
+    }
+    if (!isInvestigationRoundKind(roundKind)) {
+      throw new Error(
+        `Investigation run "${latestExecutionId}" of "${investigationId}" declares no round_kind`
+      );
+    }
+    return roundKind;
+  }
+
   /** Resolves the telemetry retained by an investigation's conversation, without applying defaults. */
   async getTelemetryTarget(conversationId: string): Promise<TelemetryTarget> {
     const { agentBuilder } = this.requireWriteDeps();
@@ -1330,6 +1375,7 @@ export class NightshiftInvestigationsClient {
     const executionId = await this.runInvestigationWorkflow(workflow, spaceId, {
       investigation_id: existing.id,
       message,
+      round_kind: 'alert_recovery',
       context: { source: 'alert', follow_up: ALERT_RECOVERED_FOLLOW_UP },
     });
     this.logger.info(

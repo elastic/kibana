@@ -136,6 +136,21 @@ describe('nightshift sandbox materialize workspace workflow', () => {
               }),
             ],
           }),
+          // Read while the round's run is still in progress; the post-round workflow starts
+          // after the round, when that run may be over.
+          expect.objectContaining({
+            name: 'round_label',
+            steps: [
+              expect.objectContaining({
+                name: 'label_round',
+                type: 'nightshift.labelRound',
+                with: {
+                  conversation_id: '{{ inputs.conversation_id }}',
+                  agent_id: '{{ inputs.agent_id }}',
+                },
+              }),
+            ],
+          }),
         ],
       }),
       expect.objectContaining({
@@ -161,6 +176,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
             },
           ],
           recalled_ids: '${{ steps.memory_materialize_to_sandbox.output.recalled_ids }}',
+          round_kind: '{{ steps.label_round.output.round_kind }}',
         },
       }),
     ]);
@@ -231,6 +247,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
       'compose_prompt',
       'hydrate_cortex',
       'hydrate_decision_trees',
+      'label_round',
       'memory_materialize_to_sandbox',
       'obtain_sandbox',
     ]);

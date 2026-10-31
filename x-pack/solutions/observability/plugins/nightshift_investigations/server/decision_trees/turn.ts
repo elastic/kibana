@@ -11,25 +11,14 @@ import {
   symptomSlugFromTreeId,
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeTurnKind, LearningRecord } from '@kbn/nightshift-decision-trees';
+import type { InvestigationRoundKind } from '../client/round_kind';
 import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools';
 import type { DecisionTreeSummary } from './store';
 import { workspacePathForTree } from './materialize';
 
-/**
- * A confirmed hypothesis in the investigator's structured output is what makes a path causal, and
- * therefore what separates reinforcing a branch from merely extending the tree.
- */
-const CONFIRMED_HYPOTHESIS_RE = /"status"\s*:\s*"confirmed"|\bstatus:\s*['"]?confirmed\b/i;
-
-export const deriveCausalConfirmed = (response: string): boolean =>
-  CONFIRMED_HYPOTHESIS_RE.test(response);
-
-/**
- * Decides whether this round seeds the tree or builds on it, using only trees the investigator
- * actually opened. A first version is still being established; a later version is a follow-up.
- */
-export const deriveTurnKind = (trees: DecisionTreeSummary[]): DecisionTreeTurnKind =>
-  trees.some((tree) => tree.version > 1) ? 'feedback_reinforcement' : 'initial_investigation';
+/** Only the round that starts an investigation seeds trees; every later round builds on them. */
+export const turnKindForRound = (roundKind: InvestigationRoundKind): DecisionTreeTurnKind =>
+  roundKind === 'initial' ? 'initial_investigation' : 'feedback_reinforcement';
 
 /**
  * Assembles the closing message handed to the reinforcement agent for one round. The
@@ -39,19 +28,19 @@ export const buildReinforcementPrompt = ({
   trees,
   learnings,
   connectorNames,
-  response,
+  turnKind,
 }: {
   trees: DecisionTreeSummary[];
   learnings: LearningRecord[];
   connectorNames: string[];
-  response: string;
-}): { message: string; turnKind: DecisionTreeTurnKind } => {
-  const turnKind = deriveTurnKind(trees);
+  turnKind: DecisionTreeTurnKind;
+}): string => {
   const script = selectTurnScript({
     turnKind,
-    causalConfirmed: deriveCausalConfirmed(response),
-    // True only when the investigator read at least one tree file this round. Callers must pass
-    // that accessed subset — not every tree in the index.
+    // Nothing tells yet whether a follow-up confirmed the root cause, so a follow-up extends the
+    // tree and never reinforces a path as causal.
+    causalConfirmed: false,
+    // Callers pass only the trees this investigation used, never every tree in the index.
     hasExistingTrees: trees.length > 0,
     tools: DECISION_TREE_PROMPT_TOOLS,
   });
@@ -64,7 +53,7 @@ export const buildReinforcementPrompt = ({
     return trees.some((tree) => learningSlug === tree.symptom);
   });
 
-  const message = buildTurnPrompt({
+  return buildTurnPrompt({
     editableTreePaths: trees.map(
       (tree) => `${tree.tree_id} — ${workspacePathForTree(tree.tree_id)}`
     ),
@@ -80,6 +69,4 @@ export const buildReinforcementPrompt = ({
     connectorNames,
     script,
   });
-
-  return { message, turnKind };
 };

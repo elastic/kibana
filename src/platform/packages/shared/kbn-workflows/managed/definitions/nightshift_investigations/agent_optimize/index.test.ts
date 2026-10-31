@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW, NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '.';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 import { convertToWorkflowGraph } from '../../../../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../../../../spec/schema';
 
@@ -175,6 +176,29 @@ describe('nightshift agent optimize workflow', () => {
     const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
     expect(prepare?.with?.tool_calls).toBe('${{ inputs.tool_calls }}');
     expect(prepare?.with?.conversation_id).toBe('{{ inputs.conversation_id }}');
+  });
+
+  // A follow-up reads the trees opened in the investigation's earlier rounds, which needs the
+  // round being reinforced to tell them apart.
+  it('forwards the round id into the prepare step', () => {
+    const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
+    expect(prepare?.with?.round_id).toBe('{{ inputs.round_id }}');
+  });
+
+  // The materialize workflow labels the round as it starts. A slip in this path renders '' and
+  // fails every reinforcement, so the rendering is checked too.
+  it('hands the prepare step the round kind the round was labelled with', () => {
+    const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
+    const template = prepare?.with?.round_kind as string;
+    const render = (workflowContext: unknown) =>
+      createWorkflowLiquidEngine().parseAndRenderSync(template, {
+        inputs: { workflow_context: workflowContext },
+      });
+
+    expect(render({ 'nightshift.round': { version: 1, data: { round_kind: 'follow_up' } } })).toBe(
+      'follow_up'
+    );
+    expect(render({})).toBe('');
   });
 
   // Only the eligible investigator rounds may rewrite the trees, so the agent and the

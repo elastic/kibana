@@ -155,10 +155,10 @@ describe('formatHydrateNotification', () => {
 describe('composeHydrateNotificationsStepDefinition', () => {
   const definition = composeHydrateNotificationsStepDefinition();
 
-  const run = (writers: unknown[], recalledIds: string[] = []) =>
+  const run = (writers: unknown[], recalledIds: string[] = [], roundKind?: string) =>
     definition.handler({
-      input: { writers, recalled_ids: recalledIds },
-      rawInput: { writers, recalled_ids: recalledIds },
+      input: { writers, recalled_ids: recalledIds, round_kind: roundKind },
+      rawInput: { writers, recalled_ids: recalledIds, round_kind: roundKind },
       contextManager: {
         getContext: jest.fn(),
         getFakeRequest: jest.fn(),
@@ -212,6 +212,26 @@ describe('composeHydrateNotificationsStepDefinition', () => {
       formatIncompleteMaterializationNotice('/workspace/memories')
     );
   });
+
+  // The post-round workflow decides from this whether the round may seed a new decision tree.
+  it('carries the round kind into the workflow context', async () => {
+    const result = await run([writer()], [], 'alert_recovery');
+
+    expect(result.output?.workflow_context).toEqual({
+      'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: [] } },
+      'nightshift.round': { version: 1, data: { round_kind: 'alert_recovery' } },
+    });
+  });
+
+  // Liquid renders the output of a skipped or empty label step as ''.
+  it.each(['', 'recovery', undefined])(
+    'leaves the round kind out when it is %p',
+    async (roundKind) => {
+      const result = await run([writer()], [], roundKind);
+
+      expect(result.output?.workflow_context).not.toHaveProperty(['nightshift.round']);
+    }
+  );
 
   it('accepts a writer with no notification at all (branch-timeout shape)', async () => {
     const parsed = definition.inputSchema.safeParse({
