@@ -51,7 +51,7 @@ const sourceSchema = lazySchema(() =>
  * identity uses `fingerprint` or `rule_id` instead.
  *
  * Display name / backlink are not first-class request fields — callers who
- * want them put `rule_name` / `alert_url` inside `data`. The UI reads those
+ * want them put `rule_name` / `source_url` inside `data`. The UI reads those
  * keys when present.
  */
 const createAlertEventBodyBaseObjectSchema = lazySchema(() =>

@@ -282,8 +282,8 @@ export const AlertEpisodeDetailsFlyout = ({
   const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
-    typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
-      ? episodeData.alert_url
+    typeof episodeData.source_url === 'string' && episodeData.source_url.length > 0
+      ? episodeData.source_url
       : undefined;
   const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 

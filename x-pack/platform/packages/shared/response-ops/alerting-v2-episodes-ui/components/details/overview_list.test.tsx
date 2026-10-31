@@ -304,14 +304,14 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.queryByText('Snoozed until')).not.toBeInTheDocument();
   });
 
-  it('renders View in source system for an absolute http(s) data.alert_url', () => {
+  it('renders View in source system for an absolute http(s) data.source_url', () => {
     render(
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: 'https://monitoring.example/alerts/1',
+            source_url: 'https://monitoring.example/alerts/1',
           }}
         />
       </I18nProvider>
@@ -321,7 +321,7 @@ describe('AlertEpisodeOverviewList', () => {
     expect(link).toHaveAttribute('href', 'https://monitoring.example/alerts/1');
   });
 
-  it('does not render a link for javascript: or data: alert_url values', () => {
+  it('does not render a link for javascript: or data: source_url values', () => {
     // Built dynamically so eslint no-script-url does not flag the XSS fixture string.
     const javascriptAlertUrl = ['java', 'script:alert(document.domain)'].join('');
     const { rerender } = render(
@@ -330,7 +330,7 @@ describe('AlertEpisodeOverviewList', () => {
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: javascriptAlertUrl,
+            source_url: javascriptAlertUrl,
           }}
         />
       </I18nProvider>
@@ -345,7 +345,7 @@ describe('AlertEpisodeOverviewList', () => {
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: 'data:text/html,<script>alert(1)</script>',
+            source_url: 'data:text/html,<script>alert(1)</script>',
           }}
         />
       </I18nProvider>

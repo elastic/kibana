@@ -51,7 +51,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
     severity: "high"
     data:
       rule_name: "{{ inputs.payload.monitor_name }}"
-      alert_url: "{{ inputs.payload.url }}"
+      source_url: "{{ inputs.payload.url }}"
 \`\`\``,
     ],
   },
