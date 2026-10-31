@@ -4023,6 +4023,9 @@ describe('Attack Discovery worker chain', () => {
           'steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != inputs.investigation_id'
         );
         expect(write?.if).toContain(
+          'steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != steps.resolve_own_investigation_id.output.investigation_id'
+        );
+        expect(write?.if).toContain(
           'steps.find_pending_fingerprint.output.hits.hits[0]._id == blank'
         );
         expect(
@@ -4058,6 +4061,20 @@ describe('Attack Discovery worker chain', () => {
                 output: {
                   result: 'noop',
                   get: { _source: { attributes: { investigation_id: 'investigation-a' } } },
+                },
+              },
+            })
+          )
+        ).toBe(false);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context({
+              ...found,
+              retarget_pending_fingerprint: {
+                output: {
+                  result: 'noop',
+                  get: { _source: { attributes: { investigation_id: 'investigation-b' } } },
                 },
               },
             })

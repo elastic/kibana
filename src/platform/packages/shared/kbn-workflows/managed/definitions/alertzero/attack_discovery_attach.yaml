@@ -308,13 +308,14 @@ steps:
 
   # A confirmed 404 whose retarget did not update the document. A search that
   # no longer finds the fingerprint, or a no-op whose returned Investigation id
-  # is no longer the one this run waited on, means another attack claimed it.
-  # A no-op that still returns that id is the 15-minute age check: the
-  # fingerprint stays, and this review does not write a second one. A missing
-  # source is not treated as a lost race.
+  # belongs to another attack, means that attack claimed it. A no-op that still
+  # returns the id this run waited on is the 15-minute age check. A no-op that
+  # returns this attack's own id means a retry already rewrote the shared
+  # document. Both of those leave the fingerprint in place. A missing source
+  # is not treated as a lost race.
   - name: write_own_fingerprint_when_retarget_lost
     type: elasticsearch.index
-    if: "${{ steps.wait_for_investigation.error != blank and inputs.fingerprint_pending == true and inputs.retarget_if_missing != false and inputs.own_fingerprint_id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank and ((steps.find_pending_fingerprint.error == blank and steps.find_pending_fingerprint.output.hits.hits[0]._id == blank) or (steps.retarget_pending_fingerprint.output.result == 'noop' and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != blank and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != inputs.investigation_id)) }}"
+    if: "${{ steps.wait_for_investigation.error != blank and inputs.fingerprint_pending == true and inputs.retarget_if_missing != false and inputs.own_fingerprint_id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank and ((steps.find_pending_fingerprint.error == blank and steps.find_pending_fingerprint.output.hits.hits[0]._id == blank) or (steps.retarget_pending_fingerprint.output.result == 'noop' and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != blank and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != inputs.investigation_id and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != steps.resolve_own_investigation_id.output.investigation_id)) }}"
     on-failure:
       continue: true
     with:
