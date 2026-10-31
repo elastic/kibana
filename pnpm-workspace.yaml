@@ -1295,6 +1295,7 @@ packages:
   - 'x-pack/platform/packages/shared/ingest-pipelines'
   - 'x-pack/platform/packages/shared/isomer/isomer'
   - 'x-pack/platform/packages/shared/isomer/isomer-components'
+  - 'x-pack/platform/packages/shared/isomer/isomer-lowering'
   - 'x-pack/platform/packages/shared/isomer/isomer-theme'
   - 'x-pack/platform/packages/shared/isomer/studio'
   - 'x-pack/platform/packages/shared/kbn-agentic-investigations-common'
