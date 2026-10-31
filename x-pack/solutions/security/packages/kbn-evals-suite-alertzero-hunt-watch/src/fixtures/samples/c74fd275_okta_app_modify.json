@@ -1,0 +1,75 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "c74fd275-ab2c-4d49-8890-e2943fa65c09"
+  },
+  "chain": "okta-cloud",
+  "step": "jordan.park modifies an Okta application",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-okta.system",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "application.lifecycle.update",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "user": {
+            "name": "jordan.park@corp.example.com",
+            "email": "jordan.park@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.90"
+          },
+          "okta": {
+            "actor": {
+              "alternate_id": "jordan.park@corp.example.com"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Event is a membership add, not an application update",
+    "docs": [
+      {
+        "stream": "logs-okta.system",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "change"
+            ],
+            "action": "application.user_membership.add",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "user": {
+            "name": "jordan.park@corp.example.com",
+            "email": "jordan.park@corp.example.com"
+          },
+          "source": {
+            "ip": "198.51.100.90"
+          },
+          "okta": {
+            "actor": {
+              "alternate_id": "jordan.park@corp.example.com"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

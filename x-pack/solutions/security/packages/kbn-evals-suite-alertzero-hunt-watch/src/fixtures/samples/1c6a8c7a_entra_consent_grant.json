@@ -1,0 +1,153 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "1c6a8c7a-5cb6-4a82-ba27-d5a5b8a40a38"
+  },
+  "chain": "entra-cloud",
+  "step": "karen.d consent grant to an unverified app",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-azure.auditlogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "Consent to application",
+            "outcome": "success",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "karen.d@corp.example.com"
+          },
+          "azure": {
+            "auditlogs": {
+              "operation_name": "Consent to application",
+              "properties": {
+                "initiated_by": {
+                  "user": {
+                    "userPrincipalName": "karen.d@corp.example.com",
+                    "ipAddress": "198.51.100.88"
+                  }
+                },
+                "additional_details": [
+                  {
+                    "key": "AppId",
+                    "value": "4b1c0c1e-7f3a-4d55-9a31-2f6f0a9e1b11"
+                  }
+                ],
+                "target_resources": {
+                  "0": {
+                    "display_name": "Mail Sync Pro",
+                    "id": "sp-azqa-0001",
+                    "modified_properties": {
+                      "0": {
+                        "new_value": "True"
+                      },
+                      "1": {
+                        "new_value": "False"
+                      },
+                      "2": {
+                        "new_value": "False"
+                      },
+                      "3": {
+                        "new_value": "WindowsAzureActiveDirectoryIntegratedApp"
+                      },
+                      "4": {
+                        "new_value": "Mail.Read offline_access"
+                      },
+                      "5": {
+                        "new_value": "Admin consent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Consent attempt failed (event.outcome=failure)",
+    "docs": [
+      {
+        "stream": "logs-azure.auditlogs",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "iam"
+            ],
+            "type": [
+              "info"
+            ],
+            "action": "Consent to application",
+            "outcome": "failure",
+            "kind": "event"
+          },
+          "cloud": {
+            "provider": "azure"
+          },
+          "user": {
+            "name": "karen.d@corp.example.com"
+          },
+          "azure": {
+            "auditlogs": {
+              "operation_name": "Consent to application",
+              "properties": {
+                "initiated_by": {
+                  "user": {
+                    "userPrincipalName": "karen.d@corp.example.com",
+                    "ipAddress": "198.51.100.88"
+                  }
+                },
+                "additional_details": [
+                  {
+                    "key": "AppId",
+                    "value": "4b1c0c1e-7f3a-4d55-9a31-2f6f0a9e1b11"
+                  }
+                ],
+                "target_resources": {
+                  "0": {
+                    "display_name": "Mail Sync Pro",
+                    "id": "sp-azqa-0001",
+                    "modified_properties": {
+                      "0": {
+                        "new_value": "True"
+                      },
+                      "1": {
+                        "new_value": "False"
+                      },
+                      "2": {
+                        "new_value": "False"
+                      },
+                      "3": {
+                        "new_value": "WindowsAzureActiveDirectoryIntegratedApp"
+                      },
+                      "4": {
+                        "new_value": "Mail.Read offline_access"
+                      },
+                      "5": {
+                        "new_value": "Admin consent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

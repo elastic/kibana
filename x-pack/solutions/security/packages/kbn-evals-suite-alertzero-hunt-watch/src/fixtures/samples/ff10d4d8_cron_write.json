@@ -1,0 +1,97 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "ff10d4d8-fea7-422d-afb1-e5a2702369a9"
+  },
+  "chain": "linux-curl",
+  "step": "cron write by www-data",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.file",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "file"
+            ],
+            "type": [
+              "creation"
+            ],
+            "action": "creation",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "file": {
+            "path": "/var/spool/cron/crontabs/www-data",
+            "name": "www-data",
+            "extension": ""
+          },
+          "process": {
+            "name": "bash",
+            "executable": "/usr/bin/bash",
+            "entity_id": "azqa-bash-cron",
+            "pid": 4242
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Package manager (dpkg) writes the crontab; rule excludes package-manager executables",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.file",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "file"
+            ],
+            "type": [
+              "creation"
+            ],
+            "action": "creation",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "root",
+            "id": "0"
+          },
+          "file": {
+            "path": "/var/spool/cron/crontabs/www-data",
+            "name": "www-data",
+            "extension": ""
+          },
+          "process": {
+            "name": "dpkg",
+            "executable": "/usr/bin/dpkg",
+            "entity_id": "azqa-dpkg-cron",
+            "pid": 4243
+          }
+        }
+      }
+    ]
+  }
+}

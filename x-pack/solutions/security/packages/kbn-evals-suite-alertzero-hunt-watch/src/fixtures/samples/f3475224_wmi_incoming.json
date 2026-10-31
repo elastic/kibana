@@ -1,0 +1,201 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "f3475224-b179-4f78-8877-c2bd64c26b88"
+  },
+  "chain": "wmi-lateral",
+  "step": "WMI incoming lateral movement on dc-fs-09 (target side)",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_accepted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "svchost.exe",
+            "executable": "C:\\Windows\\System32\\svchost.exe",
+            "pid": 912,
+            "entity_id": "azqa-svchost-wmi-in"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 51877
+          },
+          "destination": {
+            "ip": "10.20.0.5",
+            "port": 135
+          },
+          "network": {
+            "direction": "ingress",
+            "transport": "tcp"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c whoami",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "whoami"
+            ],
+            "entity_id": "azqa-cmd-wmi-in",
+            "parent": {
+              "name": "WmiPrvSE.exe",
+              "executable": "C:\\Windows\\System32\\WmiPrvSE.exe",
+              "entity_id": "azqa-WmiPrvSE.exe-318822"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "The inbound connection is SMB (445), not the RPC endpoint mapper (135), so the sequence never starts",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.network",
+        "at": -125,
+        "doc": {
+          "event": {
+            "category": [
+              "network"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "connection_accepted",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d"
+          },
+          "process": {
+            "name": "svchost.exe",
+            "executable": "C:\\Windows\\System32\\svchost.exe",
+            "pid": 912,
+            "entity_id": "azqa-svchost-wmi-in"
+          },
+          "source": {
+            "ip": "10.20.0.16",
+            "port": 51877
+          },
+          "destination": {
+            "ip": "10.20.0.5",
+            "port": 445
+          },
+          "network": {
+            "direction": "ingress",
+            "transport": "tcp"
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "dc-fs-09",
+            "id": "azqa-dc-fs-09",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "dc-fs-09"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c whoami",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "whoami"
+            ],
+            "entity_id": "azqa-cmd-wmi-in",
+            "parent": {
+              "name": "WmiPrvSE.exe",
+              "executable": "C:\\Windows\\System32\\WmiPrvSE.exe",
+              "entity_id": "azqa-WmiPrvSE.exe-318822"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

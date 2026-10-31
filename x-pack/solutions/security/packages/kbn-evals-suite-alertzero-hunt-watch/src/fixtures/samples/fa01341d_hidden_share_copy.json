@@ -1,0 +1,113 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "fa01341d-6662-426b-9d0c-6d81e33c8a9d"
+  },
+  "chain": "encoded-powershell",
+  "step": "ADMIN$ copy to srv-files-02",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-alice-01",
+            "id": "azqa-wks-alice-01",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-alice-01"
+          },
+          "user": {
+            "name": "alice.chen",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c copy payload.exe \\\\srv-files-02\\ADMIN$\\payload.exe",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "copy",
+              "payload.exe",
+              "\\\\srv-files-02\\ADMIN$\\payload.exe"
+            ],
+            "entity_id": "azqa-cmd.exe-270815",
+            "parent": {
+              "name": "powershell.exe",
+              "executable": "C:\\Windows\\System32\\powershell.exe",
+              "entity_id": "azqa-powershell.exe-350288"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "Copy targets an ordinary share (no hidden $ share)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-alice-01",
+            "id": "azqa-wks-alice-01",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-alice-01"
+          },
+          "user": {
+            "name": "alice.chen",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "cmd.exe",
+            "executable": "C:\\Windows\\System32\\cmd.exe",
+            "command_line": "cmd.exe /c copy report.xlsx \\\\srv-files-02\\finance\\report.xlsx",
+            "args": [
+              "cmd.exe",
+              "/c",
+              "copy",
+              "report.xlsx",
+              "\\\\srv-files-02\\finance\\report.xlsx"
+            ],
+            "entity_id": "azqa-cmd.exe-377140",
+            "parent": {
+              "name": "powershell.exe",
+              "executable": "C:\\Windows\\System32\\powershell.exe",
+              "entity_id": "azqa-powershell.exe-350288"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

