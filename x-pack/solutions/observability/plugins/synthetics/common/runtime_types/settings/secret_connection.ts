@@ -27,6 +27,9 @@ export interface HashiCorpVaultConfig {
   tlsSkipVerify?: boolean;
   // approle: the role id is not a secret (the secret_id is).
   roleId?: string;
+  // Hosts that monitors using this connection may connect to. Delivered to Heartbeat as
+  // `allowed_hosts`; empty or omitted means any host. Not the Vault server allow-list.
+  allowedMonitorHosts?: string[];
 }
 
 /** Secret, provider-specific settings. Encrypted at rest as one blob. */
@@ -69,6 +72,23 @@ export interface SecretConnectionStatus {
   config?: HashiCorpVaultConfig;
   hasSecret?: boolean;
 }
+
+export type AffectedMonitorReason = 'monitor_type' | 'redirects' | 'host';
+
+/** A monitor Heartbeat will refuse to run with a connection once it has allowed monitor hosts. */
+export interface AffectedMonitor {
+  name: string;
+  reason: AffectedMonitorReason;
+}
+
+/** Monitors that Heartbeat would refuse to run with a connection, capped, plus the full count. */
+export interface AffectedMonitorsResult {
+  monitors: AffectedMonitor[];
+  total: number;
+}
+
+/** Per connection name, for the saved connections that have allowed monitor hosts. */
+export type SecretConnectionAffectedMonitors = Record<string, AffectedMonitorsResult>;
 
 /** Outcome of `POST /_test`: whether Kibana could reach Vault and authenticate. */
 export interface SecretConnectionTestResult {

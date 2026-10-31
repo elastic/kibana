@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
+  AffectedMonitorsResult,
+  SecretConnectionAffectedMonitors,
   SecretConnectionStatus,
   SecretConnectionTestResult,
   SecretProviderType,
@@ -17,6 +19,7 @@ import type {
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { normalizeAllowedMonitorHosts } from '../../../../common/lib/allowed_monitor_hosts';
 import { SECRET_CONNECTION_WRITE_API } from '../../../feature';
 import {
   getSecretConnectionEncryptedClient,
@@ -30,6 +33,7 @@ import {
   toStatus,
   whenSecretConnectionsEnabled,
 } from './connection_utils';
+import { findAffectedMonitors } from './affected_monitors';
 import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
 import {
   getAllowedHosts,
@@ -38,8 +42,8 @@ import {
   isLoopbackHost,
   LOOPBACK_NOT_TESTABLE_MESSAGE,
 } from './address_guard';
-import type { SaveBody, TestBody } from './schemas';
-import { SaveBodySchema, TestBodySchema } from './schemas';
+import type { AffectedMonitorsBody, SaveBody, TestBody } from './schemas';
+import { AffectedMonitorsBodySchema, SaveBodySchema, TestBodySchema } from './schemas';
 import { testHashiCorpVault } from './vault_client';
 
 /** GET: list all Vault connections (secret-free). */
@@ -50,6 +54,42 @@ export const getSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION,
   validate: {},
   handler: whenSecretConnectionsEnabled(async (routeContext) => listConnections(routeContext)),
+});
+
+/**
+ * GET /_affected_monitors: for each saved connection with allowed monitor hosts, the monitors
+ * Heartbeat refuses to run with it. Advisory: nothing is scanned unless a connection has a
+ * restriction, and one pass answers for all of them.
+ */
+export const getAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionAffectedMonitors
+> = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
+  validate: {},
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const restricted = (await listConnections(routeContext)).flatMap(({ name, config }) =>
+      name && config?.allowedMonitorHosts?.length
+        ? [{ name, allowedMonitorHosts: config.allowedMonitorHosts }]
+        : []
+    );
+    return restricted.length ? findAffectedMonitors(routeContext, restricted) : {};
+  }),
+});
+
+/** POST /_affected_monitors: the same for hosts that are being edited. Never persists anything. */
+export const previewAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
+  AffectedMonitorsResult
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
+  validate: { body: AffectedMonitorsBodySchema },
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const { name, allowedMonitorHosts } = routeContext.request.body as AffectedMonitorsBody;
+    const results = await findAffectedMonitors(routeContext, [{ name, allowedMonitorHosts }]);
+    return results[name];
+  }),
 });
 
 /** PUT: create or update a connection (keyed by name). Blank secrets are kept. */
@@ -63,6 +103,12 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
   handler: whenSecretConnectionsEnabled(
     async ({ request, response, savedObjectsClient, server, spaceId }) => {
       const body = request.body as SaveBody;
+      // Stored as Heartbeat compares them: lowercase, without a trailing dot or duplicates.
+      const { allowedMonitorHosts: submittedHosts, ...baseConfig } = body.config;
+      const allowedMonitorHosts = normalizeAllowedMonitorHosts(submittedHosts);
+      const config = allowedMonitorHosts.length
+        ? { ...baseConfig, allowedMonitorHosts }
+        : baseConfig;
       if (!isAddressHostAllowed(body.config.address, getAllowedHosts(server.config))) {
         return response.badRequest({
           body: { message: hostNotAllowedMessage(body.config.address) },
@@ -101,7 +147,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
       const providedSecret =
         body.config.authMethod === 'token' ? body.secrets?.token : body.secrets?.secretId;
       const credentialSensitiveChange =
-        !!existing && isCredentialSensitiveChange(existing.config, body.config);
+        !!existing && isCredentialSensitiveChange(existing.config, config);
       if (credentialSensitiveChange && !providedSecret) {
         return response.badRequest({ body: { message: SECRET_REENTRY_REQUIRED_MESSAGE } });
       }
@@ -134,7 +180,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
       const attributes: SyntheticsSecretConnection = {
         name: body.name,
         type,
-        config: body.config,
+        config,
         refreshedAt: new Date().toISOString(),
         secrets,
         hasSecret,
@@ -146,6 +192,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
         { id, overwrite: true, initialNamespaces: [spaceId] }
       );
       await propagate(server, spaceId);
+
       return toStatus(attributes);
     }
   ),

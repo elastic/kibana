@@ -12,6 +12,7 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
   EuiConfirmModal,
   EuiFieldPassword,
   EuiFieldText,
@@ -29,6 +30,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -45,14 +47,25 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
   HashiCorpVaultConfig,
   HashiCorpVaultSecrets,
+  SecretConnectionAffectedMonitors,
   SecretConnectionStatus,
   SecretConnectionTestResult,
   SecretProviderType,
   VaultAuthMethod,
 } from '../../../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../../../common/runtime_types';
+import {
+  isAllowedMonitorHostShape,
+  MAX_ALLOWED_MONITOR_HOSTS,
+  normalizeAllowedMonitorHost,
+} from '../../../../../../common/lib/allowed_monitor_hosts';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
-import { testSecretConnection } from '../../../state/settings/api';
+import { getAffectedMonitors, testSecretConnection } from '../../../state/settings/api';
+import {
+  AffectedMonitorsBadge,
+  AffectedMonitorsPreview,
+  useAffectedMonitorsPreview,
+} from './affected_monitors';
 
 // Selectable secret-provider backends. Only HashiCorp Vault is implemented today;
 // adding a provider means adding an option here and a matching field section below.
@@ -73,6 +86,7 @@ interface FormState {
   token: string;
   secretId: string;
   tlsSkipVerify: boolean;
+  allowedMonitorHosts: string[];
   isNew: boolean;
   hasSecret: boolean;
 }
@@ -88,6 +102,7 @@ const blankForm = (): FormState => ({
   token: '',
   secretId: '',
   tlsSkipVerify: false,
+  allowedMonitorHosts: [],
   isNew: true,
   hasSecret: false,
 });
@@ -103,6 +118,7 @@ const toForm = (c: SecretConnectionStatus): FormState => ({
   token: '',
   secretId: '',
   tlsSkipVerify: c.config?.tlsSkipVerify ?? false,
+  allowedMonitorHosts: c.config?.allowedMonitorHosts ?? [],
   isNew: false,
   hasSecret: c.hasSecret ?? false,
 });
@@ -119,6 +135,8 @@ const toConnectionPayload = (
       namespace: form.namespace.trim() || undefined,
       kvMount: form.kvMount.trim() || undefined,
       tlsSkipVerify: form.tlsSkipVerify,
+      // An empty list is sent as such so a saved restriction can be removed.
+      allowedMonitorHosts: form.allowedMonitorHosts,
       ...(!isToken && { roleId: form.roleId.trim() }),
     },
     // Blank = keep the stored value (handled server-side).
@@ -128,17 +146,34 @@ const toConnectionPayload = (
   };
 };
 
+/**
+ * The hosts the impact preview covers: the confirmed ones plus a host that was typed but not
+ * confirmed with Enter yet, which Save also counts.
+ */
+const hostsToPreview = (confirmed: string[], typed: string): string[] => {
+  const pending = normalizeAllowedMonitorHost(typed);
+  // An IPv6 literal is left out: only the server can tell it from a half-typed one.
+  const isPreviewable = isAllowedMonitorHostShape(pending) && !pending.includes(':');
+  return isPreviewable && !confirmed.includes(pending) ? [...confirmed, pending] : confirmed;
+};
+
 export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
   const canManage = (application?.capabilities.uptime.canManageSecretConnections ??
     false) as boolean;
 
   const [connections, setConnections] = useState<SecretConnectionStatus[]>([]);
+  const [affectedBySaved, setAffectedBySaved] = useState<SecretConnectionAffectedMonitors>({});
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<SecretConnectionTestResult | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [hostError, setHostError] = useState<string | undefined>();
+  // Text typed into the allowed hosts field that was not turned into a host yet.
+  const [hostInput, setHostInput] = useState('');
+  const hostsForPreview = hostsToPreview(editing?.allowedMonitorHosts ?? [], hostInput);
+  const affectedPreview = useAffectedMonitorsPreview(editing?.name.trim() ?? '', hostsForPreview);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
@@ -155,13 +190,35 @@ export const SecretConnectionPanel = () => {
 
   const closeFlyout = () => {
     invalidateTest();
+    setHostError(undefined);
+    setHostInput('');
     setEditing(null);
+  };
+
+  /** Returns false for an invalid host, which keeps the typed text visible next to the error. */
+  const addAllowedMonitorHost = (value: string): boolean => {
+    const host = normalizeAllowedMonitorHost(value);
+    if (!isAllowedMonitorHostShape(host)) {
+      setHostError(ALLOWED_MONITOR_HOSTS_INVALID);
+      return false;
+    }
+    setHostError(undefined);
+    setEditing((f) => {
+      if (!f || f.allowedMonitorHosts.includes(host)) return f;
+      if (f.allowedMonitorHosts.length >= MAX_ALLOWED_MONITOR_HOSTS) return f;
+      return { ...f, allowedMonitorHosts: [...f.allowedMonitorHosts, host] };
+    });
+    return true;
   };
 
   const load = useCallback(async () => {
     try {
       const res = await http.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION);
       setConnections(Array.isArray(res) ? res : []);
+      // Advisory and slower than the list, so it fills in when it arrives.
+      getAffectedMonitors()
+        .then(setAffectedBySaved)
+        .catch(() => setAffectedBySaved({}));
     } catch (e) {
       // Surface the failure rather than showing an empty list (which reads as
       // "no connections configured").
@@ -205,16 +262,26 @@ export const SecretConnectionPanel = () => {
 
   const onSave = async () => {
     if (!editing) return;
+    // A host typed but not confirmed with Enter still counts: dropping it would save the
+    // connection without the restriction the admin asked for.
+    const pendingHost = normalizeAllowedMonitorHost(hostInput);
+    if (pendingHost && !isAllowedMonitorHostShape(pendingHost)) {
+      setHostError(ALLOWED_MONITOR_HOSTS_INVALID);
+      return;
+    }
+    const allowedMonitorHosts = [...new Set([...editing.allowedMonitorHosts, pendingHost])].filter(
+      Boolean
+    );
     setSaving(true);
     try {
       const body = {
         name: editing.name.trim(),
         type: editing.type,
-        ...toConnectionPayload(editing),
+        ...toConnectionPayload({ ...editing, allowedMonitorHosts }),
       };
       await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);
-      setEditing(null);
+      closeFlyout();
       await load();
     } catch (e) {
       notifications?.toasts.addError(e as Error, { title: SAVE_ERROR_TOAST });
@@ -255,6 +322,39 @@ export const SecretConnectionPanel = () => {
       render: (c: SecretConnectionStatus) => c.config?.authMethod ?? '',
     },
     {
+      name: ALLOWED_MONITOR_HOSTS_LABEL,
+      render: (c: SecretConnectionStatus) => {
+        const hosts = c.config?.allowedMonitorHosts ?? [];
+        if (hosts.length === 0) {
+          return (
+            <EuiText size="s" color="subdued" data-test-subj="syntheticsVaultAnyHost">
+              {ANY_MONITOR_HOST_LABEL}
+            </EuiText>
+          );
+        }
+        const affected = c.name ? affectedBySaved[c.name] : undefined;
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={hosts.join(', ')}>
+                <EuiBadge color="hollow" tabIndex={0} data-test-subj="syntheticsVaultHostsBadge">
+                  {i18n.translate('xpack.synthetics.secretConnection.hostsBadge', {
+                    defaultMessage: '{count, plural, one {# host} other {# hosts}}',
+                    values: { count: hosts.length },
+                  })}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+            {affected && affected.total > 0 && (
+              <EuiFlexItem grow={false}>
+                <AffectedMonitorsBadge result={affected} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
+    },
+    {
       name: ACTIONS_LABEL,
       actions: [
         {
@@ -262,6 +362,7 @@ export const SecretConnectionPanel = () => {
           description: EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
+          'data-test-subj': 'syntheticsVaultEditConnection',
           onClick: (c: SecretConnectionStatus) => {
             setTestResult(null);
             setEditing(toForm(c));
@@ -486,6 +587,40 @@ export const SecretConnectionPanel = () => {
                     onChange={(e) => set('tlsSkipVerify', e.target.checked)}
                   />
                 </EuiFormRow>
+                <EuiSpacer size="l" />
+                <EuiFormRow
+                  fullWidth
+                  label={ALLOWED_MONITOR_HOSTS_LABEL}
+                  helpText={ALLOWED_MONITOR_HOSTS_HELP}
+                  isInvalid={Boolean(hostError)}
+                  error={hostError}
+                >
+                  <EuiComboBox
+                    fullWidth
+                    noSuggestions
+                    data-test-subj="syntheticsVaultAllowedMonitorHosts"
+                    placeholder={ALLOWED_MONITOR_HOSTS_PLACEHOLDER}
+                    isInvalid={Boolean(hostError)}
+                    selectedOptions={editing.allowedMonitorHosts.map((host) => ({ label: host }))}
+                    onCreateOption={addAllowedMonitorHost}
+                    onChange={(options) => {
+                      setHostError(undefined);
+                      setEditing((f) =>
+                        f ? { ...f, allowedMonitorHosts: options.map(({ label }) => label) } : f
+                      );
+                    }}
+                    onSearchChange={(value) => {
+                      setHostInput(value);
+                      setHostError(undefined);
+                    }}
+                  />
+                </EuiFormRow>
+                {hostsForPreview.length > 0 && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <AffectedMonitorsPreview state={affectedPreview} />
+                  </>
+                )}
                 {testResult && (
                   <>
                     <EuiSpacer size="l" />
@@ -621,6 +756,35 @@ const TLS_SKIP_LABEL = i18n.translate('xpack.synthetics.secretConnection.tlsSkip
 const TLS_SKIP_HELP = i18n.translate('xpack.synthetics.secretConnection.tlsSkipHelp', {
   defaultMessage: 'Disables certificate validation. Use only against development Vault servers.',
 });
+const ALLOWED_MONITOR_HOSTS_LABEL = i18n.translate(
+  'xpack.synthetics.secretConnection.allowedMonitorHosts',
+  {
+    defaultMessage: 'Allowed monitor hosts',
+  }
+);
+const ANY_MONITOR_HOST_LABEL = i18n.translate('xpack.synthetics.secretConnection.anyMonitorHost', {
+  defaultMessage: 'Any host',
+});
+const ALLOWED_MONITOR_HOSTS_PLACEHOLDER = i18n.translate(
+  'xpack.synthetics.secretConnection.allowedMonitorHostsPlaceholder',
+  {
+    defaultMessage: 'api.example.com',
+  }
+);
+const ALLOWED_MONITOR_HOSTS_HELP = i18n.translate(
+  'xpack.synthetics.secretConnection.allowedMonitorHostsHelp',
+  {
+    defaultMessage:
+      'Optional. Only HTTP, TCP and ICMP monitors whose targets and proxies are all on this list can use this connection, so secrets are only sent to these hosts. Monitors that target another host, follow redirects or run in a browser report down without sending the secret. Leave empty to allow any host. Enter host names or IP addresses without a scheme, port, path or wildcard.',
+  }
+);
+const ALLOWED_MONITOR_HOSTS_INVALID = i18n.translate(
+  'xpack.synthetics.secretConnection.allowedMonitorHostsInvalid',
+  {
+    defaultMessage:
+      'Enter a host name or IP address without a scheme, port, path or wildcard. Use the punycode form for international names.',
+  }
+);
 const SECRET_SAVED_HELP = i18n.translate('xpack.synthetics.secretConnection.secretSaved', {
   defaultMessage: 'A secret is already stored. Leave blank to keep it.',
 });
