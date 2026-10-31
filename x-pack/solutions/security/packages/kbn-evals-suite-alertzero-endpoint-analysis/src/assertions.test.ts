@@ -1,0 +1,603 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  assertBenignAnalysis,
+  assertPersistedProposal,
+  assertStructuredEvidence,
+  assertAnalysisExecution,
+  assertEndpointForensicToolCall,
+  assertPersistedAttachments,
+} from './assertions';
+import {
+  analysisInputValidator,
+  analysisOutputValidator,
+  assertAlertZeroContracts,
+  flattenSteps,
+  gateWorkflowId,
+  proposalBridgeDefinition,
+  workerWorkflowId,
+} from './contracts';
+import { getCompleteWorkerSettingsSchema } from '@kbn/alertzero-common';
+import { getToolCallSteps } from '@kbn/evals';
+import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/http_api/attachments';
+
+const expected = {
+  host: 'AZ-EVAL-01',
+  eventIds: ['az-1', 'az-2'],
+  command: 'powershell.exe -EncodedCommand SQBFAFgA',
+  endpointId: 'az-endpoint',
+  conclusive: true,
+};
+const findings = () => ({
+  verdict: 'unclear',
+  propose: false,
+  rationale: 'Encoded PowerShell follows a document process.',
+  timeline: {
+    window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
+    events: [
+      {
+        timestamp: '2026-01-01T00:00:00Z',
+        host: expected.host,
+        category: 'process',
+        description: 'Document launched',
+        is_malicious: false,
+      },
+      {
+        timestamp: '2026-01-01T00:01:00Z',
+        host: expected.host,
+        category: 'process',
+        description: 'Encoded PowerShell launched',
+        is_malicious: true,
+      },
+    ],
+  },
+  iocs: {
+    shas: [],
+    ips: [],
+    file_paths: [],
+    malicious_commands: [{ value: expected.command }],
+    affected_hosts: [{ value: expected.host }],
+    ransom_note: [],
+    encryption_marker: [],
+    compromised_identities: [],
+  },
+  recommendedActions: [],
+});
+const isolateAction = (endpointId: string) => ({
+  actionWorkflowId: 'system-alertzero-action-isolate-host',
+  title: 'Isolate host',
+  comment: 'Isolate the host.',
+  actionInput: { endpoint_ids: [endpointId] },
+  confidence: 'high',
+});
+// What a conclusive run must produce: a confirmed incident with containment of the seeded host.
+const containedFindings = () => ({
+  ...findings(),
+  verdict: 'confirmed_incident',
+  propose: true,
+  recommendedActions: [isolateAction(expected.endpointId)],
+});
+// Production `forensic_analysis` runs with `create-conversation: false`: the real ai.agent step
+// output is {metadata:{usage}, structured_output, message} and never carries a conversation_id.
+const agentUsage = (overrides: Record<string, unknown> = {}) => ({
+  usage: {
+    connectorId: 'az-connector',
+    inputTokens: 1032367,
+    outputTokens: 4096,
+    cachedTokens: 0,
+    totalTokens: 1036463,
+    ...overrides,
+  },
+});
+const proposal = () => ({
+  id: 'az-proposal',
+  spaceId: 'default',
+  conversationId: 'az-investigation',
+  title: 'Review endpoint evidence',
+  comment: 'Review endpoint evidence',
+  origin: 'alertzero',
+  category: 'endpoint_analysis',
+  impact: 'medium',
+  confidence: 'high',
+  status: 'pending',
+  createdAt: '2026-01-01T00:00:00Z',
+  expiresAt: '2026-01-02T00:00:00Z',
+  workflowExecutionId: 'az-execution',
+  stepId: 'proposal_gate',
+});
+const proposalExpectation = {
+  conversationId: 'az-investigation',
+  workflowExecutionId: 'az-execution',
+  status: 'pending' as const,
+};
+
+describe('AlertZero L0 production contracts', () => {
+  it('uses the registered sweep, child workflow and proposal gate', () =>
+    assertAlertZeroContracts());
+  it('bridge forwards to the gate and stamps origin: alertzero', () => {
+    // Regression for the L4 gap: the live suite starts the gate directly (the bridge's
+    // run-as-mode: inherit is unreachable for an API caller), so the bridge's own origin
+    // stamping is only guarded here. A bridge that forwards without the stamp would hide
+    // the worker's proposals from AlertZero's origin-filtered queue.
+    const forward = flattenSteps(proposalBridgeDefinition.steps).find(
+      (step) => step.name === 'create_proposal'
+    );
+    expect(forward?.type).toBe('workflow.execute');
+    expect(forward?.with?.['workflow-id']).toBe(gateWorkflowId);
+    expect((forward?.with?.inputs as { origin?: string } | undefined)?.origin).toBe('alertzero');
+  });
+  it('accepts declared worker settings and rejects unsupported autonomy', () => {
+    expect(() =>
+      getCompleteWorkerSettingsSchema(workerWorkflowId).parse({
+        workerId: workerWorkflowId,
+        autonomy: 'manual',
+      })
+    ).not.toThrow();
+    expect(() =>
+      getCompleteWorkerSettingsSchema(workerWorkflowId).parse({
+        workerId: workerWorkflowId,
+        autonomy: 'assisted',
+      })
+    ).toThrow();
+  });
+  it.each([
+    { ki_id: '', ai_index_id: 'valid' },
+    { ki_id: 'ki', ai_index_id: '../unsafe' },
+    { ki_id: 'ki' },
+  ])('rejects invalid production inputs %p', (input) => {
+    expect(() => analysisInputValidator.parse(input)).toThrow();
+  });
+});
+describe('AlertZero L2 deterministic evidence', () => {
+  it('accepts schema-valid grounded evidence', () =>
+    expect(assertStructuredEvidence(findings(), expected)).toBeDefined());
+  it.each(['rationale', 'timeline', 'iocs', 'recommendedActions'])('rejects missing %s', (key) => {
+    const value: Record<string, unknown> = findings();
+    delete value[key];
+    expect(() => assertStructuredEvidence(value, expected)).toThrow();
+  });
+  it('rejects unsupported actions through the production schema', () => {
+    expect(() =>
+      assertStructuredEvidence(
+        { ...findings(), recommendedActions: [{ type: 'delete_host', reason: 'malicious' }] },
+        expected
+      )
+    ).toThrow();
+  });
+  it.each([
+    'fabricated',
+    'empty',
+    'unordered',
+    'invalid_date',
+    'wrong_host',
+    'wrong_command',
+    'token_only_command',
+  ])('rejects %s evidence', (mutation) => {
+    const value = findings();
+    if (mutation === 'fabricated') value.timeline.events[0].host = 'made-up';
+    if (mutation === 'empty') value.timeline.events = [];
+    if (mutation === 'unordered') value.timeline.events.reverse();
+    if (mutation === 'invalid_date') value.timeline.events[0].timestamp = 'not-a-date';
+    if (mutation === 'wrong_host') value.iocs.affected_hosts = [{ value: 'another-host' }];
+    if (mutation === 'wrong_command') value.iocs.malicious_commands = [{ value: 'benign' }];
+    if (mutation === 'token_only_command') {
+      value.iocs.malicious_commands = [{ value: 'fabricated -EncodedCommand AAAA' }];
+    }
+    expect(() => assertStructuredEvidence(value, expected)).toThrow();
+  });
+  it('rejects missing, failed and synthetic agent execution output', () => {
+    expect(() => assertAnalysisExecution([], expected)).toThrow();
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: { structured_output: findings() },
+    };
+    expect(() => assertAnalysisExecution([step], expected)).toThrow(/no model usage/);
+    expect(() =>
+      assertAnalysisExecution([{ ...step, status: ExecutionStatus.FAILED }], expected)
+    ).toThrow();
+    const real = {
+      ...step,
+      output: { metadata: agentUsage(), structured_output: containedFindings() },
+    };
+    // Production shape: real usage, no conversation_id.
+    expect(assertAnalysisExecution([real], expected)).toBeDefined();
+    expect(() => assertAnalysisExecution([real, real], expected)).toThrow();
+  });
+  it('rejects an agent step that never ran a model, whatever else its output carries', () => {
+    const base: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+    };
+    const run = (output: unknown) =>
+      assertAnalysisExecution([{ ...base, output: output as never }], expected);
+    // Skipped / empty-output step.
+    expect(() => run(undefined)).toThrow(/no model usage/);
+    expect(() => run({})).toThrow(/no model usage/);
+    // Valid-looking findings but zero tokens: nothing ran (e.g. a synthetic or replayed output).
+    expect(() =>
+      run({ metadata: agentUsage({ inputTokens: 0 }), structured_output: findings() })
+    ).toThrow(/no model usage/);
+    // Missing connector.
+    expect(() =>
+      run({ metadata: agentUsage({ connectorId: '' }), structured_output: findings() })
+    ).toThrow(/no model usage/);
+    expect(() =>
+      run({ metadata: agentUsage({ connectorId: undefined }), structured_output: findings() })
+    ).toThrow(/no model usage/);
+    // Model ran but produced no structured output (error path emits message: '').
+    expect(() => run({ message: '', metadata: agentUsage() })).toThrow(/no structured output/);
+  });
+  it('always enforces action safety against the seeded endpoint id', () => {
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: {
+        metadata: agentUsage(),
+        structured_output: {
+          ...findings(),
+          propose: true,
+          recommendedActions: [
+            {
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
+              actionInput: { endpoint_ids: ['some-other-endpoint'] },
+              confidence: 'high',
+            },
+          ],
+        },
+      },
+    };
+    expect(() => assertAnalysisExecution([step], expected)).toThrow(/wrong_host/);
+  });
+  it('collects evidence and action-safety failures instead of short-circuiting', () => {
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: {
+        metadata: agentUsage(),
+        structured_output: {
+          ...findings(),
+          // Evidence failure: empty timeline.
+          timeline: {
+            window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
+            events: [],
+          },
+          propose: true,
+          recommendedActions: [
+            {
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
+              actionInput: { endpoint_ids: ['some-other-endpoint'] },
+              confidence: 'high',
+            },
+          ],
+        },
+      },
+    };
+    // Both failures are reported: the safety violation does not hide behind the
+    // evidence failure, nor the other way round.
+    expect(() => assertAnalysisExecution([step], expected)).toThrow(
+      /timeline.*wrong_host|wrong_host.*timeline/
+    );
+  });
+  it('enforces fixture ground truth on disruptive actions', () => {
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: {
+        metadata: agentUsage(),
+        structured_output: containedFindings(),
+      },
+    };
+    // Agent concluded malicious and targets the right host, but the fixture is benign.
+    expect(() => assertAnalysisExecution([step], { ...expected, conclusive: false })).toThrow(
+      /disruptive_action_on_inconclusive_investigation/
+    );
+    expect(() => assertAnalysisExecution([step], { ...expected, conclusive: true })).not.toThrow();
+  });
+  it('fails closed when the fixture omits conclusive', () => {
+    const step: WorkflowStepExecutionDto = {
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: {
+        metadata: agentUsage(),
+        structured_output: {
+          ...findings(),
+          propose: true,
+          recommendedActions: [
+            {
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
+              title: 'Isolate host',
+              comment: 'Isolate the host.',
+              actionInput: { endpoint_ids: ['az-endpoint'] },
+              confidence: 'high',
+            },
+          ],
+        },
+      },
+    };
+    const { conclusive, ...withoutConclusive } = expected;
+    expect(conclusive).toBe(true);
+    expect(() =>
+      assertAnalysisExecution([step], withoutConclusive as unknown as typeof expected)
+    ).toThrow(/disruptive_action_on_inconclusive_investigation/);
+  });
+  describe('containment on a conclusive fixture', () => {
+    const stepWith = (structuredOutput: unknown): WorkflowStepExecutionDto => ({
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: { metadata: agentUsage(), structured_output: structuredOutput } as never,
+    });
+    it('passes a confirmed incident that isolates the seeded host', () => {
+      expect(assertAnalysisExecution([stepWith(containedFindings())], expected)).toBeDefined();
+    });
+    it.each([
+      ['propose:false with confirmed_incident', { ...containedFindings(), propose: false }],
+      ['zero recommended actions', { ...containedFindings(), recommendedActions: [] }],
+      [
+        'an action on a different host',
+        { ...containedFindings(), recommendedActions: [isolateAction('another-endpoint')] },
+      ],
+      ['a verdict other than confirmed_incident', { ...containedFindings(), verdict: 'unclear' }],
+    ])('fails %s', (_label, structuredOutput) => {
+      expect(() => assertAnalysisExecution([stepWith(structuredOutput)], expected)).toThrow(
+        /proposed no containment/
+      );
+    });
+    it('reports containment together with evidence failures', () => {
+      const noEvidence = {
+        ...containedFindings(),
+        recommendedActions: [],
+        timeline: {
+          window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
+          events: [],
+        },
+      };
+      expect(() => assertAnalysisExecution([stepWith(noEvidence)], expected)).toThrow(
+        /timeline.*no containment|no containment.*timeline/
+      );
+    });
+    it('does not require containment on a benign fixture', () => {
+      expect(() =>
+        assertAnalysisExecution([stepWith(findings())], { ...expected, conclusive: false })
+      ).not.toThrow();
+    });
+    it('reports a schema-invalid output once, not once per sub-assertion', () => {
+      const { rationale, ...invalid } = containedFindings();
+      expect(rationale).toBeDefined();
+      const schemaMessage = analysisOutputValidator.safeParse(invalid).error?.message ?? '';
+      expect(schemaMessage).not.toBe('');
+      let thrown = '';
+      try {
+        assertAnalysisExecution([stepWith(invalid)], expected);
+      } catch (error) {
+        thrown = (error as Error).message;
+      }
+      expect(thrown.split(schemaMessage)).toHaveLength(2);
+      expect(thrown).toBe(schemaMessage);
+    });
+  });
+  describe('assertBenignAnalysis', () => {
+    const benign = { ...findings(), verdict: 'not_an_incident' };
+    it('passes a benign verdict with no disruptive action', () => {
+      expect(() => assertBenignAnalysis(benign, [expected.endpointId])).not.toThrow();
+    });
+    it('fails a confirmed_incident verdict', () => {
+      expect(() =>
+        assertBenignAnalysis({ ...benign, verdict: 'confirmed_incident' }, [expected.endpointId])
+      ).toThrow(/Benign host labelled as an incident/);
+    });
+    it('fails a disruptive action on the benign fixture', () => {
+      expect(() =>
+        assertBenignAnalysis(
+          { ...benign, propose: true, recommendedActions: [isolateAction(expected.endpointId)] },
+          [expected.endpointId]
+        )
+      ).toThrow(/disruptive_action_on_inconclusive_investigation/);
+    });
+    it('reports the verdict failure together with the disruptive action', () => {
+      expect(() => assertBenignAnalysis(containedFindings(), [expected.endpointId])).toThrow(
+        /disruptive_action_on_inconclusive_investigation.*Benign host labelled as an incident/s
+      );
+    });
+  });
+});
+describe('AlertZero L4 durable proposal evidence', () => {
+  it('validates a pending proposal and its later dismissed state', () => {
+    expect(assertPersistedProposal(proposal(), proposalExpectation).id).toBe('az-proposal');
+    expect(
+      assertPersistedProposal(
+        { ...proposal(), status: 'no_action', decision: 'dismissed' },
+        { ...proposalExpectation, status: 'no_action', decision: 'dismissed' }
+      ).decision
+    ).toBe('dismissed');
+  });
+  it.each([
+    { origin: 'unrelated' },
+    { category: 'rule_management' },
+    { conversationId: 'other' },
+    { workflowExecutionId: 'other' },
+    { status: 'succeeded' },
+    { decision: 'approved' },
+    { id: '' },
+  ])('rejects unrelated or malformed proposal %p', (mutation) => {
+    expect(() =>
+      assertPersistedProposal({ ...proposal(), ...mutation }, proposalExpectation)
+    ).toThrow();
+  });
+});
+
+describe('AlertZero persisted forensic attachments', () => {
+  // The list route answers ListAttachmentsResponse: { results, total_token_estimate }.
+  const response = (ids: string[]) =>
+    ({ results: ids.map((id) => ({ id })), total_token_estimate: 0 } as ListAttachmentsResponse);
+
+  it('requires both the timeline and the IoC attachment for the investigation', () => {
+    expect(() =>
+      assertPersistedAttachments(response(['forensic-timeline-ki-1', 'forensic-iocs-ki-1']), 'ki-1')
+    ).not.toThrow();
+  });
+
+  it.each([
+    [['forensic-timeline-ki-1']],
+    [['forensic-iocs-ki-1']],
+    [['forensic-timeline-other', 'forensic-iocs-ki-1']],
+    [[]],
+  ])('rejects a response missing a persisted attachment %p', (ids) => {
+    expect(() => assertPersistedAttachments(response(ids), 'ki-1')).toThrow(
+      /Missing persisted forensic attachments/
+    );
+  });
+});
+
+describe('AlertZero L1 endpoint forensic routing', () => {
+  const converseResponse = {
+    message: 'done',
+    steps: [
+      { type: 'reasoning', reasoning: 'use the skill' },
+      {
+        type: 'tool_call',
+        tool_id: 'security.endpoint_forensic.discover_telemetry',
+        results: [
+          { type: 'other', data: { recommended_indices: ['logs-endpoint.events.process-*'] } },
+        ],
+      },
+    ],
+  };
+
+  it('accepts a successful discover_telemetry call from the whole converse response', () => {
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(converseResponse))).not.toThrow();
+  });
+
+  it('rejects a call that returned no results', () => {
+    const empty = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.endpoint_forensic.discover_telemetry',
+          results: [],
+        },
+      ],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(empty))).toThrow(
+      /No successful production endpoint forensic tool call \(saw: security\.endpoint_forensic\.discover_telemetry\)/
+    );
+  });
+
+  it('rejects a call whose only result is an error', () => {
+    const failed = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.endpoint_forensic.discover_telemetry',
+          results: [{ type: 'error', data: { message: 'index_not_found_exception' } }],
+        },
+      ],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(failed))).toThrow(
+      /No successful production endpoint forensic tool call/
+    );
+  });
+
+  it('accepts a call that returned an error result alongside a successful one', () => {
+    const mixed = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.endpoint_forensic.discover_telemetry',
+          results: [
+            { type: 'error', data: {} },
+            { type: 'other', data: { ok: true } },
+          ],
+        },
+      ],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(mixed))).not.toThrow();
+  });
+
+  it('names the tools it did see when the skill was never used', () => {
+    const wrongTool = {
+      steps: [{ type: 'tool_call', tool_id: 'platform.core.search', results: [{}] }],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(wrongTool))).toThrow(
+      /saw: platform\.core\.search/
+    );
+  });
+
+  it('documents why the whole response is required: the bare steps array yields no calls', () => {
+    expect(getToolCallSteps(converseResponse.steps)).toEqual([]);
+    expect(getToolCallSteps(converseResponse)).toHaveLength(1);
+  });
+});

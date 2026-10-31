@@ -388,6 +388,21 @@
       ]
     },
     {
+      "id": "alertzero-endpoint-analysis",
+      "name": "AlertZero Endpoint Analysis",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis/playwright.config.ts",
+      "tags": [
+        "security",
+        "alertzero",
+        "endpoint-analysis"
+      ],
+      "ciLabels": [
+        "evals:alertzero-endpoint-analysis"
+      ],
+      "serverConfigSet": "evals_alertzero_endpoint_analysis"
+    },
+    {
       "id": "agent-builder-dashboards",
       "name": "Agent Builder Dashboards",
       "slackChannel": "#kibana-presentation-reminders",
