@@ -6,46 +6,40 @@
  */
 
 import {
+  buildCustomContentConfig,
   buildLensConfig,
-  generateCustomContentEsql,
 } from '@kbn/agent-builder-visualizations-server';
-import { ESQLVariableType } from '@kbn/esql-types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createPanelResolver } from './panel_resolver';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
+  buildCustomContentConfig: jest.fn(),
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
-  generateCustomContentEsql: jest.fn(),
-}));
-
-jest.mock('@kbn/custom-content-server', () => ({
-  createCustomContentTemplateResolver: jest.fn(),
 }));
 
 const mockedBuildLensConfig = jest.mocked(buildLensConfig);
-const mockedGenerateCustomContentEsql = jest.mocked(generateCustomContentEsql);
-const mockedCreateTemplateResolver = jest.mocked(createCustomContentTemplateResolver);
+const mockedBuildCustomContentConfig = jest.mocked(buildCustomContentConfig);
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };
 
 describe('createPanelResolver', () => {
-  const resolveTemplate = jest.fn();
   let resolve: ReturnType<typeof createPanelResolver>;
 
   beforeEach(() => {
     mockedBuildLensConfig.mockReset();
-    resolveTemplate.mockReset();
+    mockedBuildCustomContentConfig.mockReset();
     mockedBuildLensConfig.mockResolvedValue({
       validatedConfig: { type: 'metric' },
     } as Awaited<ReturnType<typeof buildLensConfig>>);
-    resolveTemplate.mockResolvedValue({ template: '<div>resolved</div>', height: 320 });
-    mockedCreateTemplateResolver.mockReturnValue(resolveTemplate);
+    mockedBuildCustomContentConfig.mockResolvedValue({
+      template: '<div>resolved</div>',
+      height: 320,
+    });
     resolve = createPanelResolver({
       logger: {
         debug: jest.fn(),
@@ -69,34 +63,18 @@ describe('createPanelResolver', () => {
       panelContent: { type: LENS_EMBEDDABLE_TYPE },
     });
     expect(mockedBuildLensConfig).toHaveBeenCalledTimes(1);
-    expect(resolveTemplate).not.toHaveBeenCalled();
+    expect(mockedBuildCustomContentConfig).not.toHaveBeenCalled();
   });
 
-  it('gives the query generator the values of the dashboard controls of a custom_content request', async () => {
-    mockedGenerateCustomContentEsql.mockResolvedValue('FROM logs | WHERE host.name == ?host');
-    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
-
-    await resolve({
-      renderer: 'custom_content',
-      nlQuery: 'hits for the selected host',
-      hasData: true,
-      resolveEsqlVariables: jest.fn().mockResolvedValue(esqlVariables),
-    });
-
-    expect(mockedGenerateCustomContentEsql).toHaveBeenCalledWith(
-      expect.objectContaining({ nlQuery: 'hits for the selected host', esqlVariables })
-    );
-  });
-
-  it('routes a custom_content request to the template resolver', async () => {
+  it('routes a custom_content request to the custom content builder', async () => {
     const result = await resolve({
       renderer: 'custom_content',
       nlQuery: 'change the title',
       existingPanel: { id: 'cc-1', type: CUSTOM_CONTENT_EMBEDDABLE_TYPE, config: {}, grid },
     });
 
-    expect(resolveTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({ prompt: 'change the title' })
+    expect(mockedBuildCustomContentConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ nlQuery: 'change the title' })
     );
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
     expect(result).toMatchObject({

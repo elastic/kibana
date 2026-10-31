@@ -10,12 +10,8 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import {
-  customContentPanelUpdateSchema,
-  resolveCustomContentQuery,
-} from '@kbn/custom-content-common';
-import { generateCustomContentEsql } from '@kbn/agent-builder-visualizations-server';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
+import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
+import { customContentPanelUpdateSchema } from '@kbn/custom-content-common';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
@@ -108,75 +104,41 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 
     const currentData = readPanelContextData(contextAttachment);
 
-    let resolved: Awaited<ReturnType<typeof resolveCustomContentQuery>>;
+    let built: Awaited<ReturnType<typeof buildCustomContentConfig>>;
     try {
-      resolved = await resolveCustomContentQuery({
-        suppliedQuery: esqlQuery,
-        regenerate: regenerateEsql,
-        existingQuery: currentData?.esql_query,
-        isNewPanel: false,
-        generate: (existingQueries) =>
-          generateCustomContentEsql({
-            nlQuery: prompt ?? '',
-            index,
-            existingQueries,
-            modelProvider,
-            events,
-            logger,
-            esClient,
-            esqlVariables: currentData?.esql_variables,
-            noQueryHint:
-              'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
-          }),
+      built = await buildCustomContentConfig({
+        nlQuery: prompt,
+        index,
+        esql: esqlQuery,
+        regenerateESQL: regenerateEsql,
+        resolveEsqlVariables: currentData?.esql_variables?.length
+          ? async () => currentData.esql_variables
+          : undefined,
+        existing: {
+          esqlQuery: currentData?.esql_query,
+          template: currentData?.panel_template || undefined,
+        },
+        modelProvider,
+        logger,
+        events,
+        esClient,
       });
     } catch (err) {
-      logger.error(`custom_content_update_panel: query generation failed — ${err}`);
+      logger.error(`custom_content_update_panel: building the panel failed — ${err}`);
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.error,
-            data: {
-              message: err instanceof Error ? err.message : String(err),
-            },
+            data: { message: err instanceof Error ? err.message : String(err) },
           },
         ],
       };
     }
-    const { query: resolvedQuery, isChanging: isQueryChanging } = resolved;
-
-    let resolvedTemplate: string = currentData?.panel_template ?? '';
-    if (prompt !== undefined) {
-      try {
-        const resolver = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
-        ({ template: resolvedTemplate } = await resolver({
-          prompt,
-          esqlQuery: isQueryChanging ? resolvedQuery : undefined,
-          existingTemplate: currentData?.panel_template || undefined,
-          hasExistingQuery: !isQueryChanging && !!resolvedQuery,
-          esqlVariables: currentData?.esql_variables,
-        }));
-      } catch (err) {
-        logger.error(`custom_content_update_panel: template resolver failed — ${err}`);
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message: `Template generation failed: ${
-                  err instanceof Error ? err.message : String(err)
-                }`,
-              },
-            },
-          ],
-        };
-      }
-    }
 
     const newData: CustomContentContextAttachmentData = {
-      panel_template: resolvedTemplate,
-      esql_query: resolvedQuery,
+      panel_template: built.template,
+      esql_query: built.esqlQuery,
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
       // Carried over so a refined version still previews against the range the panel was
