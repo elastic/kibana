@@ -7,11 +7,13 @@
 
 import * as uuid from 'uuid';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { asOk, asErr } from '../lib/result_type';
+import { asOk, asErr, unwrap } from '../lib/result_type';
 import { TaskStatus, TaskTypeGroup } from '../task';
-import type { TaskManagerStats } from '../task_events';
+import type { ErroredTask, TaskManagerStats } from '../task_events';
 import { asTaskManagerStatEvent, asTaskRunEvent, TaskPersistence } from '../task_events';
 import { TaskRunResult } from '../task_running';
+import { createTaskRunError, TaskErrorSource } from '../task_running/errors';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
 const logger = loggingSystemMock.createLogger();
@@ -691,6 +693,61 @@ describe('TaskRunMetricsAggregator', () => {
           rescheduled_failures: 0,
         },
       },
+    });
+  });
+
+  describe('OTel telemetry', () => {
+    let recordTaskRunSpy: jest.SpyInstance;
+    beforeEach(() => {
+      recordTaskRunSpy = jest
+        .spyOn(taskManagerMetricsTelemetry, 'recordTaskRun')
+        .mockImplementation(() => {});
+    });
+    afterEach(() => {
+      recordTaskRunSpy.mockRestore();
+    });
+
+    test('records a successful run with the raw task type and group', () => {
+      taskRunMetricsAggregator.processTaskLifecycleEvent(
+        getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
+      );
+      expect(recordTaskRunSpy).toHaveBeenCalledTimes(1);
+      expect(recordTaskRunSpy).toHaveBeenCalledWith({
+        taskType: 'alerting:.index-threshold',
+        taskTypeGroup: TaskTypeGroup.Alerting,
+        success: true,
+        errorType: undefined,
+        timedOut: false,
+        rescheduledFailure: false,
+      });
+    });
+
+    test('records a framework error that was rescheduled and timed out', () => {
+      taskRunMetricsAggregator.processTaskLifecycleEvent(
+        getTaskRunFailedEvent('report', true, TaskRunResult.RetryScheduled)
+      );
+      expect(recordTaskRunSpy).toHaveBeenCalledWith({
+        taskType: 'report',
+        taskTypeGroup: undefined,
+        success: false,
+        errorType: 'framework',
+        timedOut: true,
+        rescheduledFailure: true,
+      });
+    });
+
+    test('records a user error', () => {
+      const event = getTaskRunFailedEvent('actions:.email', false, TaskRunResult.Failed);
+      createTaskRunError((unwrap(event.event) as ErroredTask).error, TaskErrorSource.USER);
+      taskRunMetricsAggregator.processTaskLifecycleEvent(event);
+      expect(recordTaskRunSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ success: false, errorType: 'user', rescheduledFailure: false })
+      );
+    });
+
+    test('does not record runs for task manager stat events', () => {
+      taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.2));
+      expect(recordTaskRunSpy).not.toHaveBeenCalled();
     });
   });
 });

@@ -8,6 +8,7 @@
 import { asOk } from '../lib/result_type';
 import type { TaskManagerBackpressureStats } from '../task_events';
 import { asTaskManagerBackpressureEvent } from '../task_events';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { TaskBackpressureMetricsAggregator } from './task_backpressure_metrics_aggregator';
 
 const backpressureEvent = (overrides: Partial<TaskManagerBackpressureStats> = {}) =>
@@ -66,5 +67,21 @@ describe('TaskBackpressureMetricsAggregator', () => {
     aggregator.reset();
     expect(aggregator.collect()).toEqual(beforeReset);
     expect(aggregator.collect().active).toBe(1);
+  });
+
+  test('records the backpressure state to OTel telemetry', () => {
+    const recordSpy = jest
+      .spyOn(taskManagerMetricsTelemetry, 'recordTaskBackpressure')
+      .mockImplementation(() => {});
+    try {
+      aggregator.processTaskLifecycleEvent(backpressureEvent());
+      aggregator.processTaskLifecycleEvent(backpressureEvent({ active: false, reason: null }));
+      expect(recordSpy.mock.calls).toEqual([
+        [{ active: true, reason: 'too_many_requests' }],
+        [{ active: false, reason: null }],
+      ]);
+    } finally {
+      recordSpy.mockRestore();
+    }
   });
 });
