@@ -68,16 +68,20 @@ export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
 
 /**
  * Builds a deterministic CODE evaluator that asserts the final assistant message contains every
- * string listed under `metadata[metadataKey]`. Returns score 1 when the metadata key is absent or
- * empty, so datasets that don't opt in are unaffected. Matching is case-insensitive, and `missing`
+ * string listed under `metadata[metadataKey]`. When `naWhenUnset` is true and the metadata key is
+ * absent or empty, returns a null score (N/A) so the row does not contribute a free 1 to aggregates;
+ * otherwise keeps the legacy free 1 so datasets that don't opt in are unaffected. Matching is
+ * case-insensitive, and `missing`
  * is derived with the same rule so the debug metadata never contradicts the score.
  */
 const createRequiredTermsEvaluator = ({
   name,
   metadataKey,
+  naWhenUnset = false,
 }: {
   name: string;
   metadataKey: string;
+  naWhenUnset?: boolean;
 }): Evaluator => ({
   name,
   kind: 'CODE',
@@ -87,7 +91,14 @@ const createRequiredTermsEvaluator = ({
     const required = Array.isArray(raw)
       ? (raw as unknown[]).filter((term): term is string => typeof term === 'string')
       : [];
-    if (required.length === 0) return { score: 1 };
+    if (required.length === 0) {
+      if (!naWhenUnset) return { score: 1 };
+      return {
+        score: null,
+        label: 'unavailable',
+        metadata: { reason: `${metadataKey} not set` },
+      };
+    }
 
     const answer = getFinalAssistantMessage(output as TaskOutput);
     const lowerAnswer = answer.toLowerCase();
@@ -109,11 +120,13 @@ function configureExperiment({
   chatClient,
   traceEsClient,
   log,
+  naWhenUnset = false,
 }: {
   evaluators: DefaultEvaluators;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
+  naWhenUnset?: boolean;
 }): {
   task: ExperimentTask<DatasetExample, TaskOutput>;
   evaluators: ReturnType<typeof selectEvaluators>;
@@ -182,7 +195,14 @@ function configureExperiment({
       direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedToolId = getStringMeta(metadata, 'expectedToolId');
-        if (!expectedToolId) return { score: 1 };
+        if (!expectedToolId) {
+          if (!naWhenUnset) return { score: 1 };
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: { reason: 'expectedToolId not set' },
+          };
+        }
 
         const toolCalls = getToolCallSteps(output as TaskOutput);
         if (toolCalls.length === 0) {
@@ -200,14 +220,21 @@ function configureExperiment({
     },
     // Asserts a tool was NOT invoked in the turn — used by mutating-skill evals to enforce
     // "no silent mutation" (e.g. start_rule_migration must not fire without user confirmation).
-    // Score 1 when the tool is absent; 0 when it was called. No-op when metadata is unset.
+    // Score 1 when the tool is absent; 0 when it was called. N/A when metadata is unset.
     {
       name: 'ShouldNotCallTool',
       kind: 'CODE' as const,
       direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const shouldNotCallToolId = getStringMeta(metadata, 'shouldNotCallToolId');
-        if (!shouldNotCallToolId) return { score: 1 };
+        if (!shouldNotCallToolId) {
+          if (!naWhenUnset) return { score: 1 };
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: { reason: 'shouldNotCallToolId not set' },
+          };
+        }
 
         const toolCalls = getToolCallSteps(output as TaskOutput);
         const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
@@ -225,7 +252,14 @@ function configureExperiment({
       direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
-        if (!expectedOnlyToolId) return { score: 1 };
+        if (!expectedOnlyToolId) {
+          if (!naWhenUnset) return { score: 1 };
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: { reason: 'expectedOnlyToolId not set' },
+          };
+        }
 
         // Exclude attachment/filestore/internal framework tools (see isInternalTool).
         const toolCalls = getToolCallSteps(output as TaskOutput);
@@ -253,7 +287,14 @@ function configureExperiment({
       kind: 'CODE' as const,
       direction: 'maximize',
       evaluate: async ({ output, metadata }) => {
-        if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) return { score: 1 };
+        if (!getBooleanMeta(metadata, 'requireVersionAndReleaseDate')) {
+          if (!naWhenUnset) return { score: 1 };
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: { reason: 'requireVersionAndReleaseDate not set' },
+          };
+        }
 
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         const toolCalls = getToolCallSteps(output as TaskOutput);
@@ -289,10 +330,15 @@ function configureExperiment({
     createRequiredTermsEvaluator({
       name: 'RequiredAlertIdsInResponse',
       metadataKey: 'requiredAlertIds',
+      naWhenUnset,
     }),
     // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
     // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
-    createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
+    createRequiredTermsEvaluator({
+      name: 'RequiredTermsInResponse',
+      metadataKey: 'requiredTerms',
+      naWhenUnset,
+    }),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...irEvaluators,
@@ -317,7 +363,14 @@ function configureExperiment({
         const expectedSkill = getStringMeta(metadata, 'expectedSkill');
         const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
         const skillName = expectedSkill ?? shouldNotActivate;
-        if (!skillName) return { score: 1 };
+        if (!skillName) {
+          if (!naWhenUnset) return { score: 1 };
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: { reason: 'expectedSkill/shouldNotActivateSkill not set' },
+          };
+        }
         if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
           return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
         }
@@ -395,12 +448,14 @@ export function createEvaluateDataset({
   chatClient,
   traceEsClient,
   log,
+  naWhenUnset = false,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
+  naWhenUnset?: boolean;
 }): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
@@ -422,6 +477,7 @@ export function createEvaluateDataset({
       chatClient,
       traceEsClient,
       log,
+      naWhenUnset,
     });
 
     await executorClient.runExperiment(
@@ -440,12 +496,14 @@ export function createEvaluateExternalDataset({
   chatClient,
   traceEsClient,
   log,
+  naWhenUnset = false,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
+  naWhenUnset?: boolean;
 }): EvaluateExternalDataset {
   return async function evaluateExternalDataset(datasetName: string) {
     const { task, evaluators: selectedEvaluators } = configureExperiment({
@@ -453,6 +511,7 @@ export function createEvaluateExternalDataset({
       chatClient,
       traceEsClient,
       log,
+      naWhenUnset,
     });
 
     await executorClient.runExperiment(
