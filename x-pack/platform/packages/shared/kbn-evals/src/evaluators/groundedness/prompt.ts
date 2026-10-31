@@ -103,7 +103,9 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
                   'explanation',
                 ],
               },
-              description: 'Detailed analysis of each claim in the agent response.',
+              minItems: 1,
+              description:
+                'Detailed analysis of each claim in the agent response. At least one claim is required: a response always contains at least one statement to assess.',
             },
             summary_verdict: {
               type: 'string',
