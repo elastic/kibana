@@ -8,7 +8,7 @@
 import type httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import type http from 'http';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
@@ -90,7 +90,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       serviceNowServer = await getServiceNowServer();
-      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      const availablePort = await getPort({ port: portNumbers(9000, 9100) });
       if (!serviceNowServer.listening) {
         serviceNowServer.listen(availablePort);
       }

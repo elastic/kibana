@@ -13,7 +13,7 @@
  */
 
 import type http from 'http';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import axios from 'axios';
 import type httpProxy from 'http-proxy';
 
@@ -37,7 +37,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     before(async () => {
       slackServer = await getSlackServer();
-      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      const availablePort = await getPort({ port: portNumbers(9000, 9100) });
       if (!slackServer.listening) {
         slackServer.listen(availablePort);
       }
