@@ -46,6 +46,7 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
       'populate indices with useful, relevant data.',
     avatar_icon: 'logoElastic',
     availability: contextEngineAgentAvailability,
+    hidden: true,
     configuration: {
       instructions,
       skill_ids: [
