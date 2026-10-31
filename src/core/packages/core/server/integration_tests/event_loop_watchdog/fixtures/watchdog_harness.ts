@@ -98,10 +98,11 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 2);
     await watchdog.stop();
   },
-  exhaust: async () => {
+  // Past ManagedWorker's default of 3 restarts; the watchdog never runs out of them.
+  restarts: async () => {
     const watchdog = create(Path.resolve(__dirname, 'throwing_entry.ts'));
     watchdog.start();
-    await waitForLogLine('exhausted', 60_000);
+    await waitForLogLine('restart 4 in', 60_000);
     await watchdog.stop();
   },
   oom: async () => {

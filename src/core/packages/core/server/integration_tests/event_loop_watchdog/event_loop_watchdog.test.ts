@@ -168,15 +168,18 @@ describe('event loop watchdog in a child process', () => {
     });
   });
 
-  it('stops the watchdog after the worker exhausts its restarts', async () => {
-    const result = await runHarness('exhaust');
+  it('keeps restarting a failing worker past the default restart limit', async () => {
+    const result = await runHarness('restarts');
     expectCleanExit(result);
     expect(result.mainLogLines).toContainEqual({
-      level: 'error',
+      level: 'warn',
       message: expect.stringMatching(
-        /^Worker event-loop-watchdog exited unexpectedly .* and exhausted 3 restarts/
+        /^Worker event-loop-watchdog exited unexpectedly .*; restart 4 in 8000ms$/
       ),
     });
+    expect(result.mainLogLines).not.toContainEqual(
+      expect.objectContaining({ message: expect.stringContaining('exhausted') })
+    );
   }, 120_000);
 
   it("stops a worker that runs out of heap at the watchdog's limit", async () => {

@@ -332,6 +332,106 @@ describe('createManagedWorker', () => {
     expect(MockWorker.instances).toHaveLength(0);
   });
 
+  describe('with a capped backoff', () => {
+    const warnings = () => logger.warn.mock.calls.map(([message]) => String(message));
+    const advance = (...delays: number[]) =>
+      delays.forEach((delay) => jest.advanceTimersByTime(delay));
+
+    it('doubles the delay up to maxDelayMs', async () => {
+      const handle = createManagedWorker(
+        options({ restart: { maxAttempts: 10, initialDelayMs: 100, maxDelayMs: 300 } })
+      );
+      MockWorker.failNextConstruction = 4;
+      handle.start();
+      advance(100, 200, 300);
+      expect(warnings()).toEqual([
+        'Worker diagnostic failed to start (cannot start worker); restart 1/10 in 100ms',
+        'Worker diagnostic failed to start (cannot start worker); restart 2/10 in 200ms',
+        'Worker diagnostic failed to start (cannot start worker); restart 3/10 in 300ms',
+        'Worker diagnostic failed to start (cannot start worker); restart 4/10 in 300ms',
+      ]);
+      await handle.stop();
+    });
+
+    it('caps the delay at 5 minutes by default', async () => {
+      const handle = createManagedWorker(
+        options({ restart: { maxAttempts: Infinity, initialDelayMs: 100_000 } })
+      );
+      MockWorker.failNextConstruction = 4;
+      handle.start();
+      advance(100_000, 200_000, 300_000);
+      expect(warnings().map((message) => message.split('; ')[1])).toEqual([
+        'restart 1 in 100000ms',
+        'restart 2 in 200000ms',
+        'restart 3 in 300000ms',
+        'restart 4 in 300000ms',
+      ]);
+      await handle.stop();
+    });
+
+    it('never exhausts with unlimited attempts', async () => {
+      const opts = options({
+        restart: { maxAttempts: Infinity, initialDelayMs: 100, maxDelayMs: 300 },
+      });
+      const handle = createManagedWorker(opts);
+      MockWorker.failNextConstruction = 10;
+      handle.start();
+      advance(100, 200, 300, 300, 300, 300, 300, 300, 300);
+      expect(handle.status()).toMatchObject({ state: 'restarting', restarts: 10 });
+      expect(warnings().at(-1)).toBe(
+        'Worker diagnostic failed to start (cannot start worker); restart 10 in 300ms'
+      );
+      expect(opts.onExhausted).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+
+      advance(300);
+      expect(MockWorker.instances).toHaveLength(1);
+      expect(handle.status().state).toBe('starting');
+      await handle.stop();
+    });
+
+    it('goes back to the initial delay after stable uptime', async () => {
+      const handle = createManagedWorker(
+        options({
+          readyTimeoutMs: 5_000,
+          restart: {
+            maxAttempts: Infinity,
+            initialDelayMs: 100,
+            maxDelayMs: 300,
+            stableUptimeMs: 1_000,
+          },
+        })
+      );
+      MockWorker.failNextConstruction = 3;
+      handle.start();
+      advance(100, 200, 300);
+      const [worker] = MockWorker.instances;
+      worker.ready();
+      advance(1_000);
+      worker.emit('exit', 1);
+      expect(handle.status().restarts).toBe(1);
+      expect(warnings().at(-1)).toBe(
+        'Worker diagnostic exited unexpectedly (exit, code 1); restart 1 in 100ms'
+      );
+      await handle.stop();
+    });
+
+    it('cancels a pending capped restart on stop', async () => {
+      const handle = createManagedWorker(
+        options({ restart: { maxAttempts: Infinity, initialDelayMs: 100, maxDelayMs: 300 } })
+      );
+      MockWorker.failNextConstruction = 10;
+      handle.start();
+      advance(100, 200);
+      expect(jest.getTimerCount()).toBe(1);
+      await handle.stop();
+      expect(jest.getTimerCount()).toBe(0);
+      advance(300);
+      expect(MockWorker.instances).toHaveLength(0);
+      expect(handle.status().state).toBe('stopped');
+    });
+  });
+
   it('clears the ready timer when stopped while starting', async () => {
     const opts = options();
     const handle = createManagedWorker(opts);
