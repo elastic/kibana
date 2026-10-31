@@ -10,22 +10,64 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
+export const cascadeToolbarPortalNodeTestSubjAttribute = 'discoverCascadeToolbarPortalNode';
+
 export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
   wrapper: css({
     overflow: 'hidden',
     position: 'relative',
     height: '100%',
     contain: 'content',
+
     '& .euiDataGridHeader': {
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
+
     '& .euiDataGridRow': {
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
-    '.unifiedDataTableToolbar:has(+ .euiDataGrid__content &)': {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+
+    [`[data-test-subj="${cascadeToolbarPortalNodeTestSubjAttribute}"]:has(+ .euiDataGrid__content &)`]:
+      {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+
+    [`[data-test-subj="${cascadeToolbarPortalNodeTestSubjAttribute}"]:has(+ .euiDataGrid__content &) .unifiedDataTableToolbarControlButton`]:
+      {
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+      },
+
+    [`[data-test-subj="${cascadeToolbarPortalNodeTestSubjAttribute}"]:has(+ .euiDataGrid__content &) .unifiedDataTableToolbarControlGroup`]:
+      {
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+      },
+  }),
+  /**
+   * Since the container is a portalled, our previously defined styles would not match
+   * so we define a new one for the portalled grid header.
+   */
+  portalledGridHeaderContainer: css({
+    contain: 'content',
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    padding: `0 ${euiTheme.size.xs}`,
+
+    '& .euiDataGridHeader': {
+      width: '100%',
+      backgroundColor: 'unset',
+      border: 'none',
     },
-    '.unifiedDataTableToolbar:has(+ .euiDataGrid__content &) .unifiedDataTableToolbarControlGroup':
+
+    [`[data-test-subj="${cascadeToolbarPortalNodeTestSubjAttribute}"]:has(+ &) .unifiedDataTableToolbar`]:
+      {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+
+    [`[data-test-subj="${cascadeToolbarPortalNodeTestSubjAttribute}"]:has(+ &) .unifiedDataTableToolbarControlButton`]:
+      {
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+      },
+
+    [`[data-test-subj="${cascadeToolbarPortalNodeTestSubjAttribute}"]:has(+ &) .unifiedDataTableToolbarControlGroup`]:
       {
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
