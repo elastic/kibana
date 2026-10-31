@@ -70,7 +70,8 @@ export interface ServiceAccountsBackend {
    * facilities. The credential is transparently replaced after an Elasticsearch token-expiry
    * failure, within the configured
    * `xpack.security.serviceAccounts.requestLifetime`. Already-issued tokens keep their upstream
-   * expiration. Kibana self-client calls do not yet trigger renewal (#290877).
+   * expiration. Kibana self HTTP calls replace it too: before they are sent, when it would expire
+   * before the call can time out, and after an authentication-stage 401.
    * Performs no user authorization: callers must authorize their own users first.
    */
   createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
@@ -93,6 +94,28 @@ export interface ServiceAccountsBackend {
    * Kibana's to re-mint.
    */
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Replaces the credential of a service-account-bound fake request when it would expire within
+   * `validForMs`. Only meant to be called by Core's HTTP self client credential refresher, before a
+   * self call hands the credential to a route handler that cannot refresh it. Same credential-only
+   * result and ownership rules as {@link reauthenticateFakeRequest}. Has three outcomes:
+   *
+   * - The auth headers to send, when the current credential covers the call or was replaced.
+   * - `null` when the request is not this backend's, its `authorization` header no longer carries
+   *   the token issued for it, or a replacement failed for now (a backoff, an upstream 5xx).
+   * - A {@link ServiceAccountCredentialRefusedError} when the credential does not cover the call
+   *   and the request will never get a replacement: its binding is gone or was replaced, its
+   *   account was revoked, or its lease expired.
+   *
+   * A refusal is only noticed when a replacement is needed. While the current credential covers the
+   * call nothing re-checks the binding, so a workload keeps running for up to one token lifetime
+   * after it was unbound. A credential whose lifetime the backend did not report is never refused.
+   */
+  refreshFakeRequestBeforeUse(
+    request: KibanaRequest,
+    validForMs: number
+  ): Promise<{ authorization: string } | null>;
 
   /**
    * Drops a fake request from the refresh registry: transparent credential replacement is

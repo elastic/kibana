@@ -522,8 +522,8 @@ describe('HTTPAuthenticationProvider', () => {
       }));
       const mintToken = jest
         .fn()
-        .mockResolvedValueOnce('essu_service_account_initial')
-        .mockResolvedValueOnce('essu_service_account_replacement');
+        .mockResolvedValueOnce({ token: 'essu_service_account_initial' })
+        .mockResolvedValueOnce({ token: 'essu_service_account_replacement' });
       const registry = new ServiceAccountFakeRequests(logger, mintToken, 600_000);
       const fakeRequest = await registry.create({ serviceAccountId: 'service-account' });
       const scopedClient = elasticsearchServiceMock.createScopedClusterClient();

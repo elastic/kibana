@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
+import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
@@ -449,6 +450,66 @@ describe('Elasticsearch service account token exchange', () => {
       expect(JSON.stringify(logger.error.mock.calls)).not.toContain(credential.token);
     }
   );
+
+  describe('#refreshFakeRequestBeforeUse', () => {
+    it('replaces the token once Elasticsearch says it would expire within the call', async () => {
+      // A lease longer than the token, so only the token's own expiry is in play.
+      const { backend, exchange } = setup({ requestLifetimeMs: 3_600_000 });
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+      // @ts-expect-error not full SecurityGetTokenResponse
+      exchange.mockResponse({ ...exchangeResponse, access_token: 'new-token' });
+
+      // The token lives `expires_in` seconds, so it still covers a 5 minute call 15 minutes in.
+      jest.advanceTimersByTime((exchangeResponse.expires_in - 300) * 1000);
+      await expect(backend.refreshFakeRequestBeforeUse(request, 300_000)).resolves.toEqual({
+        authorization: 'Bearer short-lived-secret',
+      });
+      expect(exchange).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(1);
+      await expect(backend.refreshFakeRequestBeforeUse(request, 300_000)).resolves.toEqual({
+        authorization: 'Bearer new-token',
+      });
+      expect(exchange).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps sending a token that covers the call after the lease expired', async () => {
+      const { backend, exchange } = setup({ requestLifetimeMs: 1000 });
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+      jest.advanceTimersByTime(1000);
+
+      await expect(backend.refreshFakeRequestBeforeUse(request, 300_000)).resolves.toEqual({
+        authorization: 'Bearer short-lived-secret',
+      });
+      expect(exchange).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses a call the token cannot cover after the lease expired', async () => {
+      const { backend, exchange } = setup({ requestLifetimeMs: 1000 });
+      const request = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID });
+      jest.advanceTimersByTime((exchangeResponse.expires_in - 60) * 1000);
+
+      await expect(backend.refreshFakeRequestBeforeUse(request, 300_000)).rejects.toBeInstanceOf(
+        ServiceAccountCredentialRefusedError
+      );
+      expect(exchange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not refresh inbound or unrelated fake requests carrying the same bearer token', async () => {
+      const { backend, exchange } = setup();
+      for (const request of [
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: 'Bearer short-lived-secret' },
+        }),
+        httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer short-lived-secret' },
+        }),
+      ]) {
+        await expect(backend.refreshFakeRequestBeforeUse(request, 300_000)).resolves.toBeNull();
+      }
+      expect(exchange).not.toHaveBeenCalled();
+    });
+  });
 
   describe('#getFakeRequestPrincipal', () => {
     it('describes a request this backend minted as an Elasticsearch service account', async () => {
