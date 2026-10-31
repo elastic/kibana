@@ -1,5 +1,5 @@
 {
-  "sha1": "614f756ade5792d019541e18d4f00dec5b3a018d",
+  "sha1": "ffb0a76977d97e61d9cfb33345747ab0b2acf636",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -459,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 112,
-        "column": 13
+        "line": 109,
+        "column": 25
       }
     },
     {
