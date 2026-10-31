@@ -14,11 +14,10 @@ import Os from 'os';
 import Path from 'path';
 
 export const OTEL_DEMO_REPO_URL = 'https://github.com/open-telemetry/opentelemetry-demo.git';
-export const OTEL_DEMO_REPOSITORY = 'open-telemetry/opentelemetry-demo';
 
 // Cached outside the Kibana repo so it persists across branches and is never committed.
-export const SCS_CACHE_DIR = Path.join(Os.homedir(), '.kbn-otel-scs');
-export const SCS_REPOS_DIR = Path.join(SCS_CACHE_DIR, 'repos');
+const OTEL_DEMO_CACHE_DIR = Path.join(Os.homedir(), '.kbn-otel-scs');
+const OTEL_DEMO_REPOS_DIR = Path.join(OTEL_DEMO_CACHE_DIR, 'repos');
 
 async function cloneOtelDemoAtVersion(repoDir: string, version: string): Promise<void> {
   try {
@@ -39,21 +38,21 @@ async function cloneOtelDemoAtVersion(repoDir: string, version: string): Promise
 
 /**
  * Returns a local path to the OTel demo repo checked out at the given tag.
- * Cached per-version under SCS_CACHE_DIR so repeated runs skip the clone.
+ * Cached per-version under OTEL_DEMO_CACHE_DIR so repeated runs skip the clone.
  */
 export async function ensureOtelDemoAtVersion(version: string, log: ToolingLog): Promise<string> {
-  const repoDir = Path.join(SCS_REPOS_DIR, `opentelemetry-demo-${version}`);
+  const repoDir = Path.join(OTEL_DEMO_REPOS_DIR, `opentelemetry-demo-${version}`);
   if (Fs.existsSync(repoDir)) {
     log.info(`Using cached OTel demo source at ${repoDir}`);
     return repoDir;
   }
 
-  await Fs.promises.mkdir(SCS_REPOS_DIR, { recursive: true });
+  await Fs.promises.mkdir(OTEL_DEMO_REPOS_DIR, { recursive: true });
   log.info(`Cloning OTel demo at tag ${version} to ${repoDir} ...`);
   await cloneOtelDemoAtVersion(repoDir, version);
   return repoDir;
 }
 
 export function getCodeScenarioRepoDir(version: string, scenarioId: string): string {
-  return Path.join(SCS_REPOS_DIR, `opentelemetry-demo-${version}-scenario-${scenarioId}`);
+  return Path.join(OTEL_DEMO_REPOS_DIR, `opentelemetry-demo-${version}-scenario-${scenarioId}`);
 }
