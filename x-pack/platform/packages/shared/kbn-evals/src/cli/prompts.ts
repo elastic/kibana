@@ -212,7 +212,8 @@ export const promptForProject = async (
   return selected;
 };
 
-export const isTTY = (): boolean => Boolean(process.stdin.isTTY);
+// CI agents allocate a PTY (stdin.isTTY is true) but nobody answers prompts, so never prompt there.
+export const isTTY = (): boolean => Boolean(process.stdin.isTTY) && !process.env.CI;
 
 /**
  * Reads the first `elasticsearch.hosts` entry from config/kibana.dev.yml,
