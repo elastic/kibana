@@ -139,5 +139,73 @@ apiTest.describe(
         expect(dataView.namespaces).toStrictEqual([fooNamespace]);
       }
     );
+
+    apiTest('preserves shared spaces when overriding without namespaces', async ({ apiClient }) => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const namespaces = ['default', fooNamespace];
+      const headers = { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader };
+      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers,
+        responseType: 'json',
+        body: { [SERVICE_KEY]: { title, namespaces } },
+      });
+
+      expect(createResponse).toHaveStatusCode(200);
+      const id = createResponse.body[SERVICE_KEY].id;
+      createdDataViews.push({ id });
+
+      const overrideResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers,
+        responseType: 'json',
+        body: { override: true, [SERVICE_KEY]: { id, title, name: 'updated name' } },
+      });
+
+      expect(overrideResponse).toHaveStatusCode(200);
+      expect(overrideResponse.body[SERVICE_KEY].namespaces).toStrictEqual(namespaces);
+
+      const otherSpaceResponse = await apiClient.get(`s/${fooNamespace}/${DATA_VIEW_PATH}/${id}`, {
+        headers,
+        responseType: 'json',
+      });
+      expect(otherSpaceResponse).toHaveStatusCode(200);
+      expect(otherSpaceResponse.body[SERVICE_KEY].name).toBe('updated name');
+
+      const secondOverrideResponse = await apiClient.post(`s/${fooNamespace}/${DATA_VIEW_PATH}`, {
+        headers,
+        responseType: 'json',
+        body: { override: true, [SERVICE_KEY]: { id, title, name: 'updated again' } },
+      });
+      expect(secondOverrideResponse).toHaveStatusCode(200);
+      expect(secondOverrideResponse.body[SERVICE_KEY].namespaces).toStrictEqual(namespaces);
+    });
+
+    apiTest('uses explicitly provided spaces when overriding', async ({ apiClient }) => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const headers = { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader };
+      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers,
+        responseType: 'json',
+        body: { [SERVICE_KEY]: { title, namespaces: ['default', fooNamespace] } },
+      });
+
+      expect(createResponse).toHaveStatusCode(200);
+      const id = createResponse.body[SERVICE_KEY].id;
+      createdDataViews.push({ id });
+
+      const overrideResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers,
+        responseType: 'json',
+        body: { override: true, [SERVICE_KEY]: { id, title, namespaces: ['default'] } },
+      });
+
+      expect(overrideResponse).toHaveStatusCode(200);
+      expect(overrideResponse.body[SERVICE_KEY].namespaces).toStrictEqual(['default']);
+
+      const otherSpaceResponse = await apiClient.get(`s/${fooNamespace}/${DATA_VIEW_PATH}/${id}`, {
+        headers,
+        responseType: 'json',
+      });
+      expect(otherSpaceResponse).toHaveStatusCode(404);
+    });
   }
 );

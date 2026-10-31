@@ -3357,7 +3357,7 @@
           },
           "override": {
             "type": "boolean",
-            "description": "Override an existing data view if a data view with the provided title already exists.",
+            "description": "Override an existing data view if a data view with the provided name (or title, when no name is set) or ID already exists. Existing spaces are preserved unless `namespaces` is provided.",
             "default": false
           }
         }
