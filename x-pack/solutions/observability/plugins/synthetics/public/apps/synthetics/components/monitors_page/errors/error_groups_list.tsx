@@ -36,6 +36,7 @@ import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { ErrorPreviewFlyout } from './error_preview_flyout';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
