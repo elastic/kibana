@@ -665,8 +665,11 @@ describe('relayGetConversationReplies', () => {
     );
   });
 
-  it('stops paging when a page ends where it began', async () => {
-    const readThread = jest.fn().mockResolvedValue(page(true, PARENT_TS, '1699999200.000100'));
+  it.each([
+    ['ends where it began', [PARENT_TS, '1699999200.000100']],
+    ['holds only the parent', [PARENT_TS]],
+  ])('stops paging when a truncated page %s', async (_, tss) => {
+    const readThread = jest.fn().mockResolvedValue(page(true, ...tss));
 
     await expect(
       read({ channel: 'C123', cursor: '1699999200.000100:' }, readThread)

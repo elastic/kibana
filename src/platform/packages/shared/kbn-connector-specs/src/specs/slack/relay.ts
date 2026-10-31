@@ -521,9 +521,9 @@ export async function relayGetConversationReplies(
   }
 
   const last = page.messages.at(-1);
-  // A page that ends where it began made no progress, so stop instead of looping.
+  // Only a reply newer than the floor moves the window; anything else would loop.
   const nextCursor =
-    page.truncated && last && last.ts !== window.oldest
+    page.truncated && last && last.ts !== input.ts && last.ts !== window.oldest
       ? encodeReadCursor({ ...window, oldest: last.ts })
       : undefined;
   return { ...toReadResult(page, nextCursor), ts: input.ts };
