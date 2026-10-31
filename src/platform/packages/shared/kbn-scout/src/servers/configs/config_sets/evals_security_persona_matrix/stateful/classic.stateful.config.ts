@@ -10,6 +10,9 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 
+const MAX_PAYLOAD_ARG_PREFIX = '--server.maxPayload=';
+const MAX_PAYLOAD_BYTES = 50 * 1024 * 1024;
+
 /**
  * Custom Scout stateful server configuration for the Security Persona Matrix suite.
  *
@@ -43,6 +46,11 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * alert-analysis, alert-triage, workflow-authoring, entity-analytics (v1 path),
  * detection-rule-edit (base), find-security-ml-jobs.
  *
+ * `server.maxPayload` is raised to 50MB for this config set only: the judge's
+ * `/internal/inference/prompt` request carries the full agent trajectory, which on long
+ * multi-step examples exceeds Scout's default 1.6MB cap and fails with a 413. The inherited cap
+ * is filtered out and re-set here so the order of the CLI args cannot reintroduce it.
+ *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_security_persona_matrix
  */
@@ -51,7 +59,10 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsTracingConfig.kbnTestServer.serverArgs.filter(
+        (arg) => !arg.startsWith(MAX_PAYLOAD_ARG_PREFIX)
+      ),
+      `${MAX_PAYLOAD_ARG_PREFIX}${MAX_PAYLOAD_BYTES}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'automaticTroubleshootingSkill',
