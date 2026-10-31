@@ -41,11 +41,10 @@ export const waitUntilAssigned = async (
   adminHeaders: Record<string, string>,
   monitorIds: string[],
   enrolledIds: string[],
-  locationId: string,
-  timeoutMs = ASSIGNMENT_TIMEOUT_MS
+  locationId: string
 ): Promise<Map<string, string>> => {
   const assignment = new Map<string, string>();
-  await tryForTime(timeoutMs, async () => {
+  await tryForTime(ASSIGNMENT_TIMEOUT_MS, async () => {
     assignment.clear();
     for (const monitorId of monitorIds) {
       const agentId = await assignedAgentId(apiClient, adminHeaders, monitorId, locationId);
