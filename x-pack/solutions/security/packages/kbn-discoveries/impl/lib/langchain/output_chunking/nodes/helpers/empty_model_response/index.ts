@@ -10,6 +10,8 @@ import {
   isEmptyModelResponseError,
 } from '@kbn/langchain/server';
 
+import { getParseErrorSummary } from '../get_parse_error_summary';
+
 /**
  * Stable phrase written into the persisted `errors` entries of the generate and refine nodes when a
  * model returns no content. `throwIfErrorCountsExceeded` matches on it to report the real cause
@@ -41,10 +43,7 @@ export const getEmptyModelResponseError = ({
   llmType: string;
   nodeName: string;
 }): string => {
-  const causeMessage =
-    cause == null
-      ? ''
-      : ` Underlying error: ${cause instanceof Error ? cause.message : String(cause)}`;
+  const causeMessage = cause == null ? '' : ` Underlying error: ${getParseErrorSummary(cause)}`; // a real empty-response message is kept whole, anything else is sanitized
 
   return `${nodeName} node detected that ${EMPTY_MODEL_RESPONSE_ERROR_MARKER} (${llmType}) on attempt ${generationAttempts}; the response contained no content. This is a model or connector problem, not a prompt-size problem.${causeMessage}`;
 };

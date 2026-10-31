@@ -111,6 +111,36 @@ describe('getEmptyModelResponseError', () => {
     expect(error).toContain('prompt tokens: 128390');
   });
 
+  it('sanitizes a cause that carries the empty-response code but upstream text', () => {
+    const cause = new Error('upstream said "SECRET model output"');
+    Object.assign(cause, { code: EMPTY_MODEL_RESPONSE_ERROR_CODE });
+
+    const error = getEmptyModelResponseError({
+      cause,
+      generationAttempts: 1,
+      llmType: 'inference',
+      nodeName: 'generate',
+    });
+
+    expect(error).not.toContain('SECRET');
+    expect(error).toContain('upstream said');
+    expect(isEmptyModelResponseErrorEntry(error)).toBe(true);
+  });
+
+  it('does not throw, or persist anything, for a cause with a non-string message', () => {
+    const cause = new Error('placeholder');
+    (cause as { message: unknown }).message = { text: 'SECRET' };
+
+    const error = getEmptyModelResponseError({
+      cause,
+      generationAttempts: 1,
+      llmType: 'inference',
+      nodeName: 'generate',
+    });
+
+    expect(error).not.toContain('SECRET');
+  });
+
   it('serializes a non-Error cause', () => {
     const error = getEmptyModelResponseError({
       cause: 'upstream timeout',
