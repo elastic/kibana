@@ -519,4 +519,23 @@ describe('time_scale', () => {
     // @ts-ignore
     expect(moment.defaultZone?.name).toBe('Pacific/Honolulu');
   });
+
+  it('getTimeBounds should reset the default moment timezone when none was set before', () => {
+    // @ts-ignore the `defaultZone` property is injected by moment.timezone
+    const initialDefaultZone = moment.defaultZone?.name;
+    // simulate the server, where no default moment timezone is configured
+    moment.tz.setDefault();
+    // @ts-ignore
+    expect(moment.defaultZone).toBeNull();
+
+    getTimeBounds(
+      { from: '2023-04-01T00:00:00.000+02:00', to: '2023-04-02T00:00:00.000+02:00' },
+      'Europe/Lisbon',
+      () => new Date('2023-04-01T00:00:00.000Z')
+    );
+    // @ts-ignore
+    expect(moment.defaultZone).toBeNull();
+
+    moment.tz.setDefault(initialDefaultZone);
+  });
 });
