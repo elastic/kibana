@@ -13,6 +13,7 @@ import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constan
 import { MigrationRulesTable } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
@@ -267,6 +268,7 @@ describe('MigrationRulesTable', () => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        ...createStartServicesMock(),
         siemMigrations: {
           rules: { getMissingCapabilities: jest.fn().mockReturnValue([]) },
         },
@@ -483,6 +485,7 @@ describe('MigrationRulesTable', () => {
     it('should disable the flyout install button when the user lacks Rules: All privilege', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
+          ...createStartServicesMock(),
           siemMigrations: {
             rules: {
               getMissingCapabilities: jest.fn().mockReturnValue([
@@ -642,6 +645,7 @@ describe('MigrationRulesTable', () => {
       };
       (useKibana as jest.Mock).mockReturnValue({
         services: {
+          ...createStartServicesMock(),
           siemMigrations: {
             rules: { getMissingCapabilities: jest.fn().mockReturnValue([]) },
           },
