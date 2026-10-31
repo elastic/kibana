@@ -355,7 +355,59 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
           {
             type: ToolResultType.error,
             data: {
-              message: 'Error: Agent endpoint-2 not found',
+              message: expect.stringContaining('Error: Agent endpoint-2 not found. '),
+            },
+          },
+        ],
+      });
+    });
+
+    it('tells the model which IDs are accepted and not to retry when endpoint space validation fails', async () => {
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(new Error('Agent my-host-name not found'));
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['my-host-name'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: expect.stringMatching(
+                /Elastic Agent IDs \(`agent\.id`\).*host names, policy IDs, and artifact IDs are not accepted.*Do not call this tool again with guessed IDs/
+              ),
+            },
+          },
+        ],
+      });
+    });
+
+    it('returns the plain error when insight generation fails after endpoint validation', async () => {
+      mockGraph.invoke.mockRejectedValueOnce(new Error('model failure'));
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['endpoint-1'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Error: model failure',
             },
           },
         ],
@@ -535,11 +587,18 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
 
     it('has appropriate description for when to use the tool', () => {
       expect(tool.description).toContain('When to use:');
-      expect(tool.description).toContain('When a conclusion has been reached');
+      expect(tool.description).toContain(
+        'When a conclusion has been reached about specific endpoints'
+      );
     });
 
-    it('describes that the tool must be called', () => {
-      expect(tool.description).toContain('This tool MUST ALWAYS be called.');
+    it('describes that the tool must be called only when specific endpoints are involved', () => {
+      expect(tool.description).toContain(
+        'This tool MUST be called when the findings concern one or more specific endpoints.'
+      );
+      expect(tool.description).toContain('Do not call it when no specific endpoint is involved');
+      expect(tool.description).toContain('do not call it again after it returns an error');
+      expect(tool.description).not.toContain('MUST ALWAYS');
     });
   });
 });
