@@ -40,6 +40,8 @@ node scripts/evals start --suite smoke-tests
 | `<name>`          | Use `config.<name>.json`. If missing, runs an interactive wizard.                                        |
 | _(omitted)_       | Interactive prompt: local / golden-cluster / custom.                                                     |
 
+For every profile, `EVAL_KBN_URL`, `EVAL_KBN_API_KEY`, `TRACING_ES_URL`, `TRACING_ES_API_KEY`, `TRACING_EXPORTERS` and `GCS_CREDENTIALS` that you already exported win over the profile's values, one variable at a time.
+
 Config files live in `scripts/vault/config.<profile>.json`. The golden cluster profile reads secrets directly from Vault -- no local file required.
 
 #### Key flags

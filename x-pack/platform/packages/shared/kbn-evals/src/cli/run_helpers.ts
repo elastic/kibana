@@ -28,6 +28,7 @@ import {
   loadVaultConfig,
   readSuiteSecretFromDevVault,
   stripTrailingSlash,
+  redactUrlCredentials,
   probeHttp,
   isExportProfileImplicitLocal,
   resolveDefaultJudgeConnectorId,
@@ -109,6 +110,25 @@ export const promptForProfile = async (repoRoot: string, log: ToolingLog): Promi
   return resolvedProfile;
 };
 
+/**
+ * Restores `KIBANA_TESTING_INFERENCE_ENDPOINTS` from the EIS connector cache. Never overrides an
+ * endpoint list the caller already exported. Returns whether the cache was loaded.
+ */
+const loadEisConnectorsFromCache = (log: ToolingLog): boolean => {
+  if (process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS) {
+    return false;
+  }
+  const cached = readCachedEisConnectors();
+  if (!cached) {
+    return false;
+  }
+  process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
+    'base64'
+  );
+  log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
+  return true;
+};
+
 export const ensureEvalInit = async (
   repoRoot: string,
   log: ToolingLog,
@@ -140,6 +160,10 @@ export const ensureEvalInit = async (
         log.info('');
         await runConfigInit(repoRoot, log, { profile });
       }
+    }
+
+    if (getAllAvailableConnectors(repoRoot).length === 0) {
+      loadEisConnectorsFromCache(log);
     }
 
     if (getAllAvailableConnectors(repoRoot).length === 0) {
@@ -268,6 +292,9 @@ export const loadScoutHookConfig = (
   return loadVaultConfig(repoRoot, datasetsProfile) ?? {};
 };
 
+/** Read by the managed stack (EDOT host, Scout env and its staleness hash), so seeded from `process.env`. */
+const STACK_ENV_KEYS = ['TRACING_ES_URL', 'TRACING_EXPORTERS', 'GCS_CREDENTIALS'] as const;
+
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
   log,
@@ -279,23 +306,40 @@ export const resolveProfileEnvOverrides = async ({
   const exportProfile =
     flagsReader.string('export-profile') ?? profile ?? defaultExportProfile(repoRoot);
 
-  const profileEnvOverrides: Record<string, string> = {
-    ...envFromDatasetsProfile(repoRoot, datasetsProfile),
-    ...envFromExportProfile(repoRoot, exportProfile, {
-      defaultTracingExporters: exportProfile === 'local',
-    }),
-  };
+  // Profile values are defaults: a variable the caller already exported wins over them. The
+  // managed stack (`ensureEvalStack`, the Scout staleness hash) reads its config only from this map,
+  // never from `process.env`, so the variables it consumes are seeded even when the profile lacks
+  // them. The child process inherits `process.env` anyway, so this changes nothing it sees.
+  const profileEnvOverrides: Record<string, string> = Object.fromEntries(
+    Object.entries({
+      ...envFromDatasetsProfile(repoRoot, datasetsProfile),
+      ...envFromExportProfile(repoRoot, exportProfile, {
+        defaultTracingExporters: exportProfile === 'local',
+      }),
+    }).map(([key, profileValue]) => [key, process.env[key] || profileValue])
+  );
+  for (const key of STACK_ENV_KEYS) {
+    const exported = process.env[key];
+    if (exported) {
+      profileEnvOverrides[key] = exported;
+    }
+  }
 
-  if (!profile && isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+  // Only a URL taken from the auto-selected `local` profile is probed. An exported TRACING_ES_URL is a
+  // deliberate choice: it is neither probed nor dropped, so the map and the child's inherited
+  // `process.env` can't disagree about it.
+  if (
+    !profile &&
+    !process.env.TRACING_ES_URL &&
+    isExportProfileImplicitLocal(flagsReader, exportProfile)
+  ) {
     const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
-    const tracingReachable = tracingEsUrl
-      ? await probeHttp(stripTrailingSlash(tracingEsUrl))
-      : true;
-
-    if (!tracingReachable) {
+    if (tracingEsUrl && !(await probeHttp(stripTrailingSlash(tracingEsUrl)))) {
       log.warning(
-        `Export profile "local" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+        `Export profile "local" was auto-selected but TRACING_ES_URL is not reachable (${redactUrlCredentials(
+          tracingEsUrl
+        )}). ` +
           'Continuing without external trace queries. To require export, pass --export-profile local.'
       );
       delete profileEnvOverrides.TRACING_ES_URL;
@@ -398,14 +442,8 @@ export const resolveEvalRunContext = async ({
       ? projects.some(isEisConnectorId)
       : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
-  if (requiresEisCcm && !process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS) {
-    const cached = readCachedEisConnectors();
-    if (cached) {
-      process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS = Buffer.from(JSON.stringify(cached)).toString(
-        'base64'
-      );
-      log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
-    }
+  if (requiresEisCcm) {
+    loadEisConnectorsFromCache(log);
   }
 
   const { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv } =
@@ -462,7 +500,7 @@ export const buildEvalRunEnv = ({
   Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
   if (envOverrides.TRACING_ES_URL) {
-    log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
+    log.info('Trace evaluators will query the TRACING_ES_URL cluster');
   }
 
   const repetitions = flagsReader.string('repetitions');
@@ -581,6 +619,40 @@ export const resolveEvalScoutTarget = (
     domain: flagsReader.string('scout-domain'),
   });
 
+/**
+ * Reads `--skip-server`: bare `--skip-server` is true, `--skip-server=<true|false|1|0>` and
+ * `--no-skip-server` are honoured, and an unset flag is false. `--skip-server=` (empty) is rejected:
+ * getopts reports it exactly like the bare flag, so it is detected in `argv`. It is usually an unset
+ * shell variable (`--skip-server=$SKIP`), where silently skipping the server would be the wrong guess.
+ * Only the `=` form is detected: `--skip-server ""` (empty separate argument) still reads as the bare flag.
+ */
+export const readSkipServerFlag = (
+  flagsReader: FlagsReader,
+  argv: readonly string[] = process.argv.slice(2)
+): boolean => {
+  if (argv.includes('--skip-server=')) {
+    throw createFlagError('invalid --skip-server value "", expected true or false');
+  }
+  let raw: string | undefined;
+  try {
+    raw = flagsReader.string('skip-server');
+  } catch {
+    // getopts reports the default and `--no-skip-server` as the boolean `false`, which `string()` rejects.
+    return false;
+  }
+  if (raw === undefined) {
+    return true;
+  }
+  const normalized = raw.toLowerCase();
+  if (normalized === 'true' || normalized === '1') {
+    return true;
+  }
+  if (normalized === 'false' || normalized === '0') {
+    return false;
+  }
+  throw createFlagError(`invalid --skip-server value "${raw}", expected true or false`);
+};
+
 export const evalRunFlags: FlagOptions = {
   string: [
     'suite',
@@ -598,8 +670,10 @@ export const evalRunFlags: FlagOptions = {
     'evaluations-kbn-api-key',
     'scout-arch',
     'scout-domain',
+    // Read with readSkipServerFlag: getopts turns `--skip-server=false` into `true` for a boolean flag.
+    'skip-server',
   ],
-  boolean: ['skip-server', 'dry-run', 'skip-init'],
+  boolean: ['dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },
   default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
 };

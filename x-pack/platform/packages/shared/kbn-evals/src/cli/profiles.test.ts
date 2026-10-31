@@ -10,6 +10,7 @@ import { safeExec } from './utils';
 import {
   readSuiteSecretFromDevVault,
   readVaultConfigFromDevVault,
+  redactUrlCredentials,
   resetDevVaultConfigCache,
   resolveDefaultJudgeConnectorId,
 } from './profiles';
@@ -177,5 +178,33 @@ describe('resolveDefaultJudgeConnectorId', () => {
       encode({ ...VALID_CONFIG, evaluationConnectorId: 'REPLACE_ME' })
     );
     expect(resolveDefaultJudgeConnectorId(repoRoot, 'dev-vault')).toBeUndefined();
+  });
+});
+
+describe('redactUrlCredentials', () => {
+  it('removes the username and password but keeps the host', () => {
+    const redacted = redactUrlCredentials('https://elastic:s3cret@tracing.example.com:9243/path');
+
+    expect(redacted).toBe('https://tracing.example.com:9243/path');
+    expect(redacted).not.toContain('elastic');
+    expect(redacted).not.toContain('s3cret');
+  });
+
+  it('keeps the host of a URL without credentials', () => {
+    expect(redactUrlCredentials('http://localhost:9200')).toContain('localhost:9200');
+  });
+
+  it('does not mistake `user:pass@host` for a URL with a scheme', () => {
+    const redacted = redactUrlCredentials('elastic:s3cret@host:9200');
+
+    expect(redacted).toBe('[unparseable URL]');
+    expect(redacted).not.toContain('s3cret');
+  });
+
+  it('returns a placeholder for unparseable input without echoing it', () => {
+    const redacted = redactUrlCredentials('not a url with s3cret');
+
+    expect(redacted).toBe('[unparseable URL]');
+    expect(redacted).not.toContain('s3cret');
   });
 });
