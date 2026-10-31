@@ -175,13 +175,21 @@ steps:
             # and `validated_esql` from them.
             reportIntentTargets: "${{ steps.hunt.output.report_intent_targets | compact }}"
             behaviors: "${{ steps.hunt.output.behaviors | compact }}"
+            # What a `retired_incomplete` run could not search, for the coverage KI and the
+            # Investigation summary. Absent on a hunt that predates the output; packaging then
+            # writes the retired prose without a count.
+            coverageGaps: "${{ steps.hunt.output.coverage_gaps | compact }}"
             tier2_invoked: "${{ steps.hunt.output.tier2_invoked == true }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by
       # write_run_conclusion below no-op'ing on an empty conversation id).
       # Otherwise: hunt not succeeding is `failed`; packaging returning
-      # `run_incomplete` is `partial`; anything else is `completed`.
+      # `run_incomplete` is `partial`; anything else is `completed`. That includes `retired_incomplete`:
+      # the hunt stamped the report after a gap no rerun can close, packaging closed the Investigation,
+      # and nothing is left to retry, so the branch counts as completed (the conclusion says what was
+      # not searched). Only the unlisted-status fall-through is relied on, so a stale Worker degrades
+      # the same way.
       - name: resolve_run_outcome
         type: data.set
         with:
@@ -225,7 +233,13 @@ steps:
             author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             message: |-
-              {% if steps.resolve_run_outcome.output.outcome == 'completed' -%}
+              {% if steps.resolve_run_outcome.output.outcome == 'completed' and steps.hunt.output.status == 'retired_incomplete' -%}
+              ### Hunt Watch run completed: the report is retired without a full search
+              - **Report:** `{{ foreach.item }}`
+              - **Hunt:** {{ steps.hunt.output.headline }}. {{ steps.hunt.output.reason }}
+              - **Packaging:** {{ steps.package_report.output.summary | strip }}
+              - **What this means:** no confirmed hits, but part of the report could not be searched. The report will not be swept again on its own; a manual run targeting this report replays it.
+              {% elsif steps.resolve_run_outcome.output.outcome == 'completed' -%}
               ### Hunt Watch run completed
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}.

@@ -183,13 +183,13 @@ export const writeHuntEvidence = async (
     replayedWholeReport = false,
   }: WriteHuntEvidenceParams,
   logger: Logger
-): Promise<void> => {
+): Promise<{ settledByCap: boolean }> => {
   const stamp = shouldStampHunt({ hasConfirmedHit, completeness });
   // A retryable run that found nothing, searched nothing and left nothing pending (a blocked
   // scope, no model) has nothing to record: no stamp, and a ledger with no ids says nothing a
   // later run could use.
   if (!stamp && searchedTechniqueIds.length === 0 && (pendingTechniqueIds ?? []).length === 0) {
-    return;
+    return { settledByCap: false };
   }
 
   const coveragePending = completeness === 'incomplete_retryable';
@@ -219,10 +219,12 @@ export const writeHuntEvidence = async (
   });
 
   const stored = response.get?._source?.evidence?.find((element) => element.space_id === spaceId);
-  if (coveragePending && stored?.coverage_pending === false) {
+  const settledByCap = coveragePending && stored?.coverage_pending === false;
+  if (settledByCap) {
     logger.warn(
       `Hunt coverage ledger for report ${reportId} in space ${spaceId} holds more than ` +
         `${MAX_HUNT_TECHNIQUE_IDS} techniques, so coverage was settled with techniques still unsearched.`
     );
   }
+  return { settledByCap };
 };

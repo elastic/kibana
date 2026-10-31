@@ -53,7 +53,7 @@ triggers:
         # SSE attachment behind: without these, packaging cannot tell that from a run whose
         # state is genuinely missing, and reports every no-hit run as incomplete.
         #
-        # Deliberately a plain string rather than an enum of the three values the step
+        # Deliberately a plain string rather than an enum of the four values the step
         # accepts. A trigger input is validated before any step runs, so an unexpected value
         # here would abort the child ahead of its own on-failure handling and leave the
         # sweep with no conclusion at all -- the same failure the `technology` enum caused on
@@ -61,7 +61,7 @@ triggers:
         # `emit_package_failed` can still report it.
         huntStatus:
           type: string
-          description: Hunt child's result status, one of `success`, `partial` or `failed`; the latter two mean absence of a hit is not a clean verdict.
+          description: Hunt child's result status, one of `success`, `partial`, `retired_incomplete` or `failed`. `partial` and `failed` leave the report eligible for a later sweep; `retired_incomplete` means the report is retired after a gap no rerun can close, so the absence of a hit is settled but not a clean verdict.
         hasConfirmedHit:
           type: boolean
           description: Whether the hunt cleared the confirmed-hit bar.
@@ -97,6 +97,16 @@ triggers:
             type: object
             additionalProperties: true
           description: The coordinator's `tier2.behaviors` (the hunt child's `behaviors` output).
+        # What a `retired_incomplete` run could not search (hunt.yaml's `coverage_gaps` output).
+        # Not required, for the same reason as `expectedSseCount`: an already-installed Worker
+        # does not send it until its own `version` bumps, and the step packages a retired run
+        # with count-less prose when it is absent.
+        coverageGaps:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: The hunt child's `coverage_gaps` output, named in the coverage knowledge item and the Investigation summary for a `retired_incomplete` run.
         tier2_invoked:
           type: boolean
           description: Whether the hunt ran Tier 2, including a Tier 2 that failed. Read only for product telemetry. The Worker sends false when unknown, such as a hunt that never reached the coordinator.
@@ -144,6 +154,7 @@ steps:
       expectedSseCount: "${{ inputs.expectedSseCount }}"
       reportIntentTargets: "${{ inputs.reportIntentTargets }}"
       behaviors: "${{ inputs.behaviors }}"
+      coverageGaps: "${{ inputs.coverageGaps }}"
     on-failure:
       fallback:
         # `emit_package_failed` ends the run, so this report goes first.
@@ -154,7 +165,7 @@ steps:
           with:
             event: hunt_report_completed
             hunt_status: |-
-              {%- if inputs.huntStatus == 'success' or inputs.huntStatus == 'partial' or inputs.huntStatus == 'failed' -%}
+              {%- if inputs.huntStatus == 'success' or inputs.huntStatus == 'partial' or inputs.huntStatus == 'retired_incomplete' or inputs.huntStatus == 'failed' -%}
               {{ inputs.huntStatus }}
               {%- else -%}
               unknown
@@ -262,7 +273,7 @@ steps:
       conversation_id: "{{ inputs.investigationConversationId }}"
       updates:
         status: closed
-        close_reason: benign
+        close_reason: "{% if inputs.huntStatus == 'retired_incomplete' %}other{% else %}benign{% endif %}"
         summary: "{{ steps.decide_and_package.output.closureSummary }}"
     on-failure:
       continue: true
@@ -275,7 +286,7 @@ steps:
     with:
       event: worker_investigation_closed
       investigation_id: "{{ inputs.investigationConversationId }}"
-      close_reason: benign
+      close_reason: "{{ steps.dismiss_investigation_if_clean.output.metadata.close_reason }}"
 
   # The one place the dismiss outcome is read: status, reason and summary below key off this
   # flag so the three cannot drift apart. False when the step was skipped (no error entry).
@@ -319,7 +330,7 @@ steps:
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
         {%- elsif variables.dismiss_close_failed == true -%}
-        could not close the Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
+        could not close the Investigation{% if inputs.huntStatus != 'retired_incomplete' %} as benign{% endif %} ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
         {%- elsif variables.dispatch_failed_count > 0 -%}
         {{ variables.dispatch_failed_count }} of {{ steps.decide_and_package.output.proposals | size }} gate dispatch(es) failed to launch
         {%- endif -%}
@@ -346,15 +357,15 @@ steps:
         {% assign alreadyOpen = packaged.alreadyOpenCount | default: 0 -%}
         {% assign coveredCount = convergedCount | plus: alreadyOpen -%}
         {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
-        Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open for a retry.
+        Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open{% if inputs.huntStatus == 'partial' and inputs.hasConfirmedHit != true %}; a later sweep hunts this report again{% else %} for a retry{% endif %}.
         {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
-        No confirmed hits, but packaging could not close this Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
+        No confirmed hits, but packaging could not close this Investigation{% if inputs.huntStatus != 'retired_incomplete' %} as benign{% endif %} ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
         {% elsif packaged.dismissHold == 'open_proposal' -%}
-        No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it as benign. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismissHold == 'check_failed' -%}
         No confirmed hits this run, but packaging could not verify whether the Investigation has an open Proposal, so it left the Investigation open rather than risk closing it over one{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismiss == true -%}
-        No confirmed hits, so packaging closed this Investigation as benign{% if packaged.coverage.written != nil and packaged.coverage.written != empty %} and recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        No confirmed hits, so packaging closed this Investigation as {% if inputs.huntStatus == 'retired_incomplete' %}other rather than benign, because part of the report could not be searched and the report is retired without a full search{% else %}benign{% endif %}{% if inputs.huntStatus == 'retired_incomplete' %}{% if inputs.coverageGaps != nil and inputs.coverageGaps != empty %}; the Investigation summary names what was not searched{% endif %}{% endif %}{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}{% if inputs.huntStatus == 'retired_incomplete' %}; recorded{% else %} and recorded{% endif %} {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}
         This run found something mint-worthy, but packaging could not verify which Proposals already exist, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
         {% elsif packaged.proposals == empty and coveredCount > 0 -%}
@@ -386,7 +397,7 @@ steps:
     with:
       event: hunt_report_completed
       hunt_status: |-
-        {%- if inputs.huntStatus == 'success' or inputs.huntStatus == 'partial' or inputs.huntStatus == 'failed' -%}
+        {%- if inputs.huntStatus == 'success' or inputs.huntStatus == 'partial' or inputs.huntStatus == 'retired_incomplete' or inputs.huntStatus == 'failed' -%}
         {{ inputs.huntStatus }}
         {%- else -%}
         unknown

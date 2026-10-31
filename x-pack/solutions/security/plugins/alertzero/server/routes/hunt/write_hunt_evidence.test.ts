@@ -148,7 +148,27 @@ describe('registerWriteHuntEvidenceRoute', () => {
 
     await handler(context, requestFor(), response);
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { acknowledged: true, settledByCap: false },
+    });
+  });
+
+  it('reports settledByCap when the ledger cap settled a retryable run', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+    asInternalUser.update.mockResolvedValue({
+      get: { _source: { evidence: [{ space_id: 'default', coverage_pending: false }] } },
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      context,
+      requestFor({ completeness: 'incomplete_retryable', searchedTechniqueIds: ['T1001'] }),
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { acknowledged: true, settledByCap: true },
+    });
   });
 
   it('logs and returns a generic 500 when the write fails', async () => {
