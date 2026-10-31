@@ -30,7 +30,7 @@ import {
   validateApmIndices,
 } from '@kbn/apm-sources-access-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 
 const APM_INDEX_LABELS: ReadonlyArray<{ configurationName: keyof APMIndices; label: string }> = [
@@ -101,10 +101,17 @@ export function ApmIndices() {
   const [apmIndices, setApmIndices] = useState<Partial<Record<keyof APMIndices, string>>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, refetch } = useFetcher(
+  const {
+    data = INITIAL_STATE,
+    status,
+    refetch,
+  } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
     [services.apmSourcesAccess]
   );
+
+  // The fetched settings seed `apmIndices`, so editing before they land discards the input.
+  const isLoadingIndexSettings = isPending(status);
 
   const { data: space } = useFetcher(() => {
     return services.spaces?.getActiveSpace();
@@ -248,7 +255,7 @@ export function ApmIndices() {
                 >
                   <EuiFieldText
                     data-test-subj="apmApmIndicesFieldText"
-                    disabled={!canSave}
+                    disabled={!canSave || isLoadingIndexSettings}
                     fullWidth
                     isInvalid={Boolean(validationError)}
                     name={configurationName}
@@ -283,7 +290,7 @@ export function ApmIndices() {
                     fill
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}
-                    isDisabled={!canSave || hasInvalidChanges}
+                    isDisabled={!canSave || hasInvalidChanges || isLoadingIndexSettings}
                   >
                     {i18n.translate('xpack.apm.settings.apmIndices.applyButton', {
                       defaultMessage: 'Apply changes',
