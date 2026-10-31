@@ -7,6 +7,7 @@
 
 import path from 'path';
 
+import semverValidRange from 'semver/ranges/valid';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
@@ -272,6 +273,25 @@ export const config: PluginConfigDescriptor = {
           managedBulk: schema.maybe(
             schema.object({
               enabled: schema.boolean({ defaultValue: false }),
+            })
+          ),
+          // Serverless only. Keeps allowlisted packages and their agentless package policies on the
+          // newest version inside `versionRange`, never crossing the installed major version.
+          autoUpgrade: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+              dryRun: schema.boolean({ defaultValue: true }),
+              interval: schema.string({ defaultValue: '1h' }),
+              packages: schema.arrayOf(
+                schema.object({
+                  name: schema.string(),
+                  versionRange: schema.string({
+                    validate: (value) =>
+                      semverValidRange(value) ? undefined : `invalid semver range [${value}]`,
+                  }),
+                }),
+                { defaultValue: [], maxSize: 100 }
+              ),
             })
           ),
         })
