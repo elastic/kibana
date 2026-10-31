@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint @elastic/eui/href-or-on-click:0 */
-
 import * as React from 'react';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
@@ -38,17 +36,26 @@ export const OptInStatusNoticeBanner: React.FC<Props> = ({
   });
 
   return (
-    <EuiCallOut title={bannerTitle}>
+    <KbnInfoCallout
+      title={bannerTitle}
+      actionProps={{
+        primary: {
+          children: (
+            <FormattedMessage
+              id="telemetry.telemetryOptedInDismissMessage"
+              defaultMessage="Dismiss"
+            />
+          ),
+          onClick: onSeenBanner,
+        },
+      }}
+    >
       <OptInMessage
         telemetryConstants={telemetryConstants}
         telemetryService={telemetryService}
         addBasePath={addBasePath}
         onClick={onSeenBanner}
       />
-      <EuiSpacer size="s" />
-      <EuiButton size="s" onClick={onSeenBanner}>
-        <FormattedMessage id="telemetry.telemetryOptedInDismissMessage" defaultMessage="Dismiss" />
-      </EuiButton>
-    </EuiCallOut>
+    </KbnInfoCallout>
   );
 };
