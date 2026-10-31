@@ -82,6 +82,8 @@ export class IngestPipelinesPlugin
               coreStart.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
             canManage:
               coreStart.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
+            canRead:
+              coreStart.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.read] === true,
           },
         });
 
@@ -135,6 +137,7 @@ export class IngestPipelinesPlugin
               this.config.enableManageProcessors !== false &&
               application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
             canManage: application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manage] === true,
+            canRead: application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.read] === true,
           },
         };
 
