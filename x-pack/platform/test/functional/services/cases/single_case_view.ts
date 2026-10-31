@@ -17,7 +17,6 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
   const testSubjects = getService('testSubjects');
   const header = getPageObject('header');
   const find = getService('find');
-  const lensPage = getPageObject('lens');
   const appMenu = getPageObject('appMenu');
   const retry = getService('retry');
 
@@ -95,11 +94,18 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       });
       const sourceSubj = `savedObjectTitle${visName.replaceAll(' ', '-')}`;
       await testSubjects.click(sourceSubj);
-      await header.waitUntilLoadingHasFinished();
-      await lensPage.isLensPageOrFail();
 
-      // save and return to cases app, add comment
-      await lensPage.saveAndReturn();
+      // choosing a saved object inserts the lens block into the editor and closes the modal
+      await testSubjects.missingOrFail('savedObjectsFinderTable');
+      await retry.waitFor('lens block to be inserted into the markdown editor', async () => {
+        const editors = await find.allByCssSelector('textarea.euiMarkdownEditorTextArea');
+        for (const editor of editors) {
+          if ((await editor.getAttribute('value'))?.includes('!{lens')) {
+            return true;
+          }
+        }
+        return false;
+      });
     },
 
     async openVisualizationButtonTooltip() {

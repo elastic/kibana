@@ -30,6 +30,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
@@ -202,11 +204,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/207704
-    // TODO before unskipping: update stale selectors inside this block —
-    // case-view-status-action-button, header-page-supplements, and
-    // case-view-status-dropdown are absent from the redesign DOM.
-    describe.skip('draft comments', () => {
+    describe('draft comments', () => {
       createOneCaseBeforeEachDeleteAllAfterEach(getPageObject, getService);
 
       it('persists new comment when status is updated in dropdown', async () => {
@@ -221,10 +219,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector(
           '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
         );
-        // validates dropdown tag
-        await testSubjects.existOrFail(
-          'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
-        );
+        // validates the status badge in the app header
+        expect(await testSubjects.getVisibleText('case-view-status-badge')).to.be('In progress');
 
         await testSubjects.click('submit-comment');
 
@@ -247,21 +243,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-status-action-button');
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail(
-          'header-page-supplements > case-status-badge-popover-button-closed',
-          {
-            timeout: 5000,
-          }
-        );
+        await retry.waitFor('status badge to read Closed', async () => {
+          return (await testSubjects.getVisibleText('case-view-status-badge')) === 'Closed';
+        });
 
         // validate user action
         await find.byCssSelector(
           '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
         );
-        // validates dropdown tag
-        await testSubjects.existOrFail(
-          'case-view-status-dropdown >case-status-badge-popover-button-closed'
+        // validates the status badge in the app header
+        expect(await testSubjects.getVisibleText('case-view-status-badge')).to.be('Closed');
+
+        const draftArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
+        expect(await draftArea.getVisibleText()).equal('Test comment from automation');
 
         await testSubjects.click('submit-comment');
 
@@ -474,14 +470,28 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/288565
-    describe.skip('Lens visualization', () => {
+    describe('Lens visualization', () => {
       before(async () => {
-        await cases.testResources.installKibanaSampleData('logs');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
+        );
+        // The inserted lens block records the global time filter, and the
+        // chart only renders when that range holds data.
+        await kibanaServer.uiSettings.update({
+          'timepicker:timeDefaults':
+            '{ "from": "2015-09-19T06:31:44.000Z", "to": "2015-09-23T18:31:44.000Z"}',
+        });
       });
 
       after(async () => {
-        await cases.testResources.removeKibanaSampleData('logs');
+        await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
+        );
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       });
 
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -506,7 +516,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+        await cases.singleCase.findAndSaveVisualization('lnsXYvis');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -547,7 +557,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await addVisualizationButton.click();
 
-        await cases.singleCase.findAndSaveVisualization('[Logs] Bytes distribution');
+        await cases.singleCase.findAndSaveVisualization('lnsXYvis');
 
         await header.waitUntilLoadingHasFinished();
 
@@ -563,11 +573,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('adds lens visualization in new comment', async () => {
-        await cases.singleCase.addVisualizationToNewComment('[Logs] Bytes distribution');
+        await cases.singleCase.addVisualizationToNewComment('lnsXYvis');
 
         await header.waitUntilLoadingHasFinished();
 
-        const newComment = await find.byCssSelector('[data-test-subj*="comment-create-action"]');
+        const newComment = await find.byCssSelector('[data-test-subj="comment-comment-comment"]');
 
         await newComment.findByCssSelector('[data-test-subj="xyVisChart"]');
       });
