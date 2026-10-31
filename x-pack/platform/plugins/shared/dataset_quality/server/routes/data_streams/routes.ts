@@ -14,8 +14,6 @@ import type {
   DataStreamRolloverResponse,
   DataStreamSettings,
   DataStreamStat,
-  DatasetTypesPrivileges,
-  DatasetUserPrivileges,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
   DegradedFieldValues,
@@ -23,14 +21,14 @@ import type {
   UpdateFailureStoreResponse,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { datasetQualityPrivileges } from '../../services';
+import { dataStreamService, datasetQualityPrivileges } from '../../services';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityESClient } from '../../utils';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { checkAndLoadIntegration } from './check_and_load_integration';
 import { failedDocsRouteRepository } from './failed_docs/routes';
 import { getDataStreamDetails } from './get_data_stream_details';
-import { getDataStreams, getDatasetTypesPrivileges } from './get_data_streams';
+import { getDataStreams } from './get_data_streams';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
@@ -44,43 +42,6 @@ import { updateFieldLimit } from './update_field_limit';
 import { getDataStreamsCreationDate } from './get_data_streams_creation_date';
 import { updateFailureStore } from './update_failure_store';
 import { getDataStreamDefaultRetentionPeriod } from './get_data_streams_default_retention_period';
-
-const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/types_privileges',
-  params: t.type({
-    query: t.type({ types: typesRt }),
-  }),
-  options: {
-    tags: [],
-  },
-  security: {
-    authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-    },
-  },
-  async handler(resources): Promise<{
-    datasetTypesPrivileges: DatasetTypesPrivileges;
-  }> {
-    const { context, params, getIsSecurityEnabled } = resources;
-    const coreContext = await context.core;
-    const isSecurityEnabled = await getIsSecurityEnabled();
-
-    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    const { datasetsPrivilages } = await getDatasetTypesPrivileges({
-      esClient,
-      ...params.query,
-      isSecurityEnabled,
-    });
-
-    return {
-      datasetTypesPrivileges: datasetsPrivilages,
-    };
-  },
-});
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -106,7 +67,7 @@ const statsRoute = createDatasetQualityServerRoute({
     },
   },
   async handler(resources): Promise<{
-    datasetUserPrivileges: DatasetUserPrivileges;
+    canViewIntegrations: boolean;
     dataStreamsStats: DataStreamStat[];
   }> {
     const { context, params, getEsCapabilities, getIsSecurityEnabled } = resources;
@@ -122,12 +83,15 @@ const statsRoute = createDatasetQualityServerRoute({
       ? coreContext.elasticsearch.client.asSecondaryAuthUser
       : esClient;
 
-    const { dataStreams, datasetUserPrivileges } = await getDataStreams({
-      esClient,
-      ...params.query,
-      uncategorisedOnly: false,
-      isSecurityEnabled,
-    });
+    const [{ dataStreams }, canViewIntegrations] = await Promise.all([
+      getDataStreams({
+        esClient,
+        ...params.query,
+        uncategorisedOnly: false,
+        isSecurityEnabled,
+      }),
+      datasetQualityPrivileges.getCanViewIntegrations(esClient, isSecurityEnabled),
+    ]);
 
     const privilegedDataStreams = dataStreams.filter((dataStream) => {
       return dataStream.userPrivileges.canMonitor;
@@ -159,7 +123,7 @@ const statsRoute = createDatasetQualityServerRoute({
           esClient,
         });
     return {
-      datasetUserPrivileges,
+      canViewIntegrations,
       dataStreamsStats: dataStreams.map((dataStream: DataStreamStat) => {
         dataStream.size = dataStreamsStats[dataStream.name]?.size;
         dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
@@ -237,21 +201,29 @@ const totalDocsRoute = createDatasetQualityServerRoute({
     const isSecurityEnabled = await getIsSecurityEnabled();
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    await datasetQualityPrivileges.throwIfCannotReadDataset(
-      esClient,
-      isSecurityEnabled,
-      params.query.type
+    const { type, start, end } = params.query;
+    const dataStreams = await dataStreamService.getMatchingDataStreams(esClient, `${type}-*-*`);
+    const dataStreamNames = dataStreams.map(({ name }) => name);
+    const dataStreamPrivileges = dataStreamNames.length
+      ? await datasetQualityPrivileges.getHasIndexPrivileges(
+          esClient,
+          dataStreamNames,
+          ['read'],
+          isSecurityEnabled
+        )
+      : {};
+    const readableDataStreamNames = dataStreamNames.filter(
+      (dataStreamName) => dataStreamPrivileges[dataStreamName]?.read
     );
 
-    const { type, start, end } = params.query;
-
-    const totalDocs = await getAggregatedDatasetPaginatedResults({
-      esClient,
-      start,
-      end,
-      index: `${type}-*-*`,
-    });
+    const totalDocs = readableDataStreamNames.length
+      ? await getAggregatedDatasetPaginatedResults({
+          esClient,
+          start,
+          end,
+          index: readableDataStreamNames.join(','),
+        })
+      : [];
 
     return {
       totalDocs,
@@ -679,7 +651,6 @@ const updateFailureStoreRoute = createDatasetQualityServerRoute({
 });
 
 export const dataStreamsRouteRepository = {
-  ...datasetTypesPrivilegesRoute,
   ...statsRoute,
   ...degradedDocsRoute,
   ...totalDocsRoute,
