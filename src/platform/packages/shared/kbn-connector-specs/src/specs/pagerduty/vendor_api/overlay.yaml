@@ -1,0 +1,19 @@
+overlay: 1.0.0
+info:
+  title: PagerDuty REST API v2 corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/services'].get.parameters[?@['$ref'] == '#/components/parameters/header_Content-Type']
+    description: >-
+      Content-Type is only required on requests with a body: "Content-Type: required when making a
+      POST or PUT request" (https://docs.pagerduty.com/developer/rest-api-overview.md). The spec
+      reuses the required header_Content-Type parameter on GET /services, which has no body.
+    remove: true
+  - target: $.components.schemas.IncidentBody.properties.details
+    description: >-
+      The incident body details are free text: the spec's own POST /incidents request example sends
+      body.details as a string ("A disk is getting full on this machine. ...") in
+      https://github.com/PagerDuty/api-schema/blob/main/reference/REST/openapiv3.json, while the
+      schema declares it as an object.
+    update:
+      type: string

@@ -76,6 +76,8 @@ const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mp
 // conversations.invite accepts up to 1000 user IDs.
 const SLACK_MAX_ID_LENGTH = 64;
 const SLACK_MAX_TIMESTAMP_LENGTH = 32;
+// Unix timestamps in seconds, optionally with a fraction, as Slack's `ts` values ("1234567890.123456").
+const SLACK_UNIX_TIMESTAMP_PATTERN = /^\d+(\.\d+)?$/;
 const SLACK_MAX_CURSOR_LENGTH = 1024;
 const SLACK_MAX_EMAIL_LENGTH = 320;
 const SLACK_MAX_CHANNEL_NAME_LENGTH = 80;
@@ -317,6 +319,7 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
     oldest: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe(
         'Only messages after this Unix timestamp (inclusive). String form, e.g. "1234567890.123456".'
@@ -324,6 +327,7 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
     latest: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe('Only messages before this Unix timestamp. String form, e.g. "1234567890.123456".'),
     inclusive: z
@@ -587,11 +591,13 @@ export const SlackListFilesInputSchema = lazySchema(() =>
     tsFrom: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe('Only include files created after this Unix timestamp (string form, seconds).'),
     tsTo: z
       .string()
       .max(SLACK_MAX_TIMESTAMP_LENGTH)
+      .regex(SLACK_UNIX_TIMESTAMP_PATTERN)
       .optional()
       .describe('Only include files created before this Unix timestamp (string form, seconds).'),
     types: z

@@ -1,0 +1,23 @@
+overlay: 1.0.0
+info:
+  title: Zendesk Support API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v2/search'].get.parameters
+    description: >-
+      https://developer.zendesk.com/api-reference/ticketing/ticket-management/search/#pagination
+      says List Search Results supports "Offset pagination only" and "a maximum of 100 results
+      per page"; https://developer.zendesk.com/api-reference/introduction/pagination/ documents
+      offset pagination as the `page` and `per_page` query parameters. The spec declares neither.
+    update:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: per_page
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
