@@ -21,7 +21,7 @@ import type {
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
-import type { ObservablesStorageClient } from './observables';
+import type { ObservablesStorageClient, ObservablesStorageMode } from './observables';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
 import type { UserActionFinder } from './user_actions/operations/find';
@@ -52,6 +52,7 @@ export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
 export type ObservablesServiceMock = jest.Mocked<ObservablesService>;
+export type ObservablesStorageModeMock = jest.Mocked<ObservablesStorageMode>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -285,6 +286,19 @@ export const createObservablesServiceMock = (): ObservablesServiceMock => {
   });
 
   return service as unknown as ObservablesServiceMock;
+};
+
+/** Defaults to the case field being the source of truth, as on a node whose sync pass is still running. */
+export const createObservablesStorageModeMock = (): ObservablesStorageModeMock => {
+  const mode: PublicMethodsOf<ObservablesStorageMode> = lazyObject({
+    start: jest.fn().mockResolvedValue(undefined),
+    stop: jest.fn(),
+    refresh: jest.fn().mockResolvedValue(undefined),
+    isIndexFirst: jest.fn().mockReturnValue(false),
+    getReadSource: jest.fn().mockReturnValue('case'),
+  });
+
+  return mode as unknown as ObservablesStorageModeMock;
 };
 
 export const createObservablesStorageClientMock = (): jest.Mocked<ObservablesStorageClient> =>

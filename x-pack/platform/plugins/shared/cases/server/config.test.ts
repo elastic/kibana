@@ -134,6 +134,9 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "observables": Object {
+            "readSource": "index",
+          },
           "runWorkflows": Object {
             "enabled": true,
           },
@@ -145,6 +148,20 @@ describe('config validation', () => {
           },
         }
       `);
+    });
+
+    it('reads observables from the index by default', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.observables.readSource).toBe('index');
+    });
+
+    it('allows observables.readSource to be switched to the case', () => {
+      const config = ConfigSchema.validate({ observables: { readSource: 'case' } });
+      expect(config.observables.readSource).toBe('case');
+    });
+
+    it('rejects an unknown observables.readSource', () => {
+      expect(() => ConfigSchema.validate({ observables: { readSource: 'both' } })).toThrow();
     });
 
     it('sets attachments.enabled default to true', () => {

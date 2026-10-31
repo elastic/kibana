@@ -27,6 +27,7 @@ import type {
   TemplatesService,
   FieldDefinitionsService,
   ObservablesService,
+  ObservablesStorageMode,
 } from '../services';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { LicensingService } from '../services/licensing';
@@ -49,6 +50,7 @@ export interface CasesServices {
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
   observablesService: ObservablesService;
+  observablesStorageMode: ObservablesStorageMode;
 }
 
 /**

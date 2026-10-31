@@ -174,6 +174,17 @@ export const ConfigSchema = schema.object({
   runWorkflows: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  observables: schema.object({
+    /**
+     * Where observables are read from once the observables index is complete. It changes only where
+     * reads come from, never which store is the source of truth, so switching it loses nothing.
+     * `case` keeps reading the observables field of the case, which is complete while the limit is
+     * 50. Removed once cases can hold more observables than the case field keeps.
+     */
+    readSource: schema.oneOf([schema.literal('index'), schema.literal('case')], {
+      defaultValue: 'index',
+    }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

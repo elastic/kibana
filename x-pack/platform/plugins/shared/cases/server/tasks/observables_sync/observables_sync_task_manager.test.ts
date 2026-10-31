@@ -172,7 +172,9 @@ describe('ObservablesSyncTaskManager', () => {
       await runTask();
 
       expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Starting'));
-      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('pass 1 complete'));
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining(`pass ${OBSERVABLES_SYNC_PASS_VERSION} complete`)
+      );
     });
 
     it('syncs the cases the copy phase finds and counts them', async () => {
@@ -271,6 +273,42 @@ describe('ObservablesSyncTaskManager', () => {
       expect(shouldPause()).toBe(false);
       controller.abort();
       expect(shouldPause()).toBe(true);
+    });
+  });
+
+  describe('a pass of an earlier release', () => {
+    // Release A recorded pass 1. Only a pass that started when every node wrote to both stores can
+    // gate reading from the index, so a later release runs its own full pass.
+    const earlierRelease: ObservablesSyncState = {
+      completedPassVersion: OBSERVABLES_SYNC_PASS_VERSION - 1,
+      completedAt: '2026-01-01T00:00:00.000Z',
+    };
+
+    it('does not count as complete: a full pass runs again at the new pass version', async () => {
+      const result = await runTask({ state: earlierRelease });
+
+      expect(scanCasesMock).toHaveBeenCalledTimes(2);
+      expect(scanCasesMock.mock.calls[0][0]).toMatchObject({ filter: COPY_FILTER });
+      expect(result.state).toEqual({
+        completedPassVersion: OBSERVABLES_SYNC_PASS_VERSION,
+        completedAt: expect.any(String),
+      });
+    });
+
+    it('keeps the earlier completion record while the new pass is still running', async () => {
+      scanCasesMock.mockResolvedValueOnce({
+        outcome: 'paused',
+        scanned: 10,
+        cursor: { pitId: 'pit-1' },
+      });
+
+      const result = await runTask({ state: earlierRelease });
+
+      expect(result.state).toMatchObject({
+        ...earlierRelease,
+        passVersion: OBSERVABLES_SYNC_PASS_VERSION,
+        phase: 'copy',
+      });
     });
   });
 

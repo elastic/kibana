@@ -23,6 +23,8 @@ export type {
   ObservablesStorageClient,
 } from './observables_index';
 export { generateObservableDocumentId } from './observable_id';
+export { ObservablesStorageMode } from './storage_mode';
+export type { ObservablesReadSource } from './storage_mode';
 
 interface CaseScope {
   caseId: string;
