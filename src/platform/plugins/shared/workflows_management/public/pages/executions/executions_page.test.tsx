@@ -67,7 +67,9 @@ describe('WorkflowExecutionsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('workflowExecutionsPage')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowExecutionsExperimentalBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionsExperimentalBadge')).toHaveTextContent(
+      'Experimental'
+    );
     expect(screen.getByTestId('workflowExecutionsPageContent')).toBeInTheDocument();
     expect(
       screen.queryByText('Browse and filter workflow executions across your space.')
