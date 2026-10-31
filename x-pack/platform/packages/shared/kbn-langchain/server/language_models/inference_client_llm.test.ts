@@ -9,8 +9,10 @@ import { InferenceClientLlm } from './inference_client_llm';
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
+import { EMPTY_MODEL_RESPONSE_ERROR_CODE, EmptyModelResponseError } from '..';
 
 describe('InferenceClientLlm', () => {
+  const connectorId = 'test-connector';
   let mockInferenceClient: jest.Mocked<InferenceClient>;
   let mockLogger: jest.Mocked<Logger>;
 
@@ -116,5 +118,205 @@ describe('InferenceClientLlm', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(
       'InferenceClientLlm: chatComplete failed for connector test-connector: TEST_ERROR - test error'
     );
+  });
+
+  it('keeps a quoted payload of the error message out of the error log and logs it at debug', async () => {
+    const error = new Error(
+      'Failed to parse line "data: {"choices":[{"delta":{"content":"MODEL-OUTPUT-MARKER"}}]}"'
+    );
+    Object.assign(error, { code: 'internalError' });
+    mockInferenceClient.chatComplete.mockRejectedValueOnce(error);
+
+    const llm = new InferenceClientLlm({
+      connectorId: 'test-connector',
+      inferenceClient: mockInferenceClient,
+      logger: mockLogger,
+    });
+
+    await expect(llm._call('test prompt')).rejects.toBe(error);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'InferenceClientLlm: chatComplete failed for connector test-connector: internalError - Failed to parse line'
+    );
+    expect(JSON.stringify(mockLogger.error.mock.calls)).not.toContain('MODEL-OUTPUT-MARKER');
+
+    const debugMessages = mockLogger.debug.mock.calls.map(([message]) =>
+      typeof message === 'function' ? message() : message
+    );
+    expect(debugMessages.some((message) => message.includes('MODEL-OUTPUT-MARKER'))).toBe(true);
+  });
+
+  describe.each([
+    ['a string', 'plain string failure', 'plain string failure'],
+    ['undefined', undefined, 'undefined'],
+    ['a plain object without a message', { reason: 'boom' }, '[object Object]'],
+  ])('when chatComplete rejects with %s', (_label, rejection, expectedMessage) => {
+    it('logs the failure and rethrows the original rejection', async () => {
+      mockInferenceClient.chatComplete.mockRejectedValueOnce(rejection);
+
+      const llm = new InferenceClientLlm({
+        connectorId: 'test-connector',
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      let thrown: unknown = 'not thrown';
+      try {
+        await llm._call('test prompt');
+      } catch (e) {
+        thrown = e;
+      }
+
+      expect(thrown).toBe(rejection);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        `InferenceClientLlm: chatComplete failed for connector test-connector: undefined - ${expectedMessage}`
+      );
+    });
+  });
+
+  describe.each([
+    ['a prototype-less object', Object.create(null)],
+    ['a Symbol', Symbol('s')],
+    ['an Error with a Symbol message', Object.assign(new Error('x'), { message: Symbol('s') })],
+    [
+      'an Error with a prototype-less message',
+      Object.assign(new Error('x'), { message: Object.create(null) }),
+    ],
+  ])(
+    'when chatComplete rejects with a value that cannot be stringified: %s',
+    (_label, rejection) => {
+      it('rethrows the original rejection', async () => {
+        mockInferenceClient.chatComplete.mockRejectedValueOnce(rejection);
+
+        const llm = new InferenceClientLlm({
+          connectorId: 'test-connector',
+          inferenceClient: mockInferenceClient,
+          logger: mockLogger,
+        });
+
+        let thrown: unknown = 'not thrown';
+        try {
+          await llm._call('test prompt');
+        } catch (e) {
+          thrown = e;
+        }
+
+        expect(thrown).toBe(rejection);
+      });
+    }
+  );
+
+  describe('empty completions', () => {
+    it('rejects with an empty-response error when the model returns no content', async () => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content: '',
+        model: 'test-model',
+        tokens: { completion: 0, prompt: 128390, total: 128390 },
+        toolCalls: [],
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+        model: 'test-model',
+      });
+
+      const error = await llm._call('test prompt').catch((e) => e);
+
+      expect(error).toBeInstanceOf(EmptyModelResponseError);
+      expect(error.message).toContain('the model returned an empty response');
+      expect(error.message).toContain(connectorId);
+      expect(error.message).toContain('test-model');
+      expect(error.message).toContain('prompt tokens: 128390');
+      expect(error.message).toContain('completion tokens: 0');
+      expect(error).toEqual(
+        expect.objectContaining({
+          code: EMPTY_MODEL_RESPONSE_ERROR_CODE,
+          completionTokens: 0,
+          connectorId,
+          contentLength: 0,
+          model: 'test-model',
+          promptTokens: 128390,
+        })
+      );
+      // logged at `error` (persisted), not debug-only: serverless has no log-level switch
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to the configured model name when the response omits one', async () => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content: '',
+        toolCalls: [],
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+        model: 'configured-model',
+      });
+
+      const error = await llm._call('test prompt').catch((e) => e);
+
+      expect(error).toBeInstanceOf(EmptyModelResponseError);
+      expect(error.model).toBe('configured-model');
+      expect(error.message).toContain('configured-model');
+    });
+
+    it('treats a whitespace-only response as an empty response', async () => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content: '   \n',
+        toolCalls: [],
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      const error = await llm._call('test prompt').catch((e) => e);
+
+      expect(error).toBeInstanceOf(EmptyModelResponseError);
+      expect(error.contentLength).toBe(4);
+    });
+
+    it('does NOT treat a tool-call-only response as an empty response', async () => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content: '',
+        toolCalls: [{ function: { arguments: '{}', name: 'some_tool' }, id: 'tool-call-1' }],
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      const result = await llm._call('test prompt');
+
+      expect(result).toBe('');
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not report the empty response as a chatComplete transport failure', async () => {
+      (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+        content: '',
+        toolCalls: [],
+      });
+
+      const llm = new InferenceClientLlm({
+        connectorId,
+        inferenceClient: mockInferenceClient,
+        logger: mockLogger,
+      });
+
+      await llm._call('test prompt').catch(() => undefined);
+
+      // the transport-failure log line must not be emitted for a successful-but-empty completion
+      const errorLogCalls = mockLogger.error.mock.calls.map((call) => String(call[0]));
+      expect(errorLogCalls.some((message) => message.includes('chatComplete failed'))).toBe(false);
+    });
   });
 });

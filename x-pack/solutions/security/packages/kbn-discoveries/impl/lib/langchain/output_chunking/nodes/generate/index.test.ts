@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -22,6 +22,7 @@ import {
   ATTACK_DISCOVERY_REFINE,
 } from '../../../../../__mocks__/mock_prompts';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
+import { EMPTY_MODEL_RESPONSE_ERROR_MARKER } from '../helpers/empty_model_response';
 import { getAnonymizedDocsFromState } from './helpers/get_anonymized_docs_from_state';
 import { getGenerateNode } from '.';
 import { getAttackDiscoveriesGenerationSchema } from '../../../../../attack_discovery/graphs/default_attack_discovery_graph/schemas';
@@ -175,12 +176,19 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state).toEqual({
       ...initialGraphState,
       combinedGenerations: '{"key": "value"}',
-      errors: [
-        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "expected": "array",\n    "code": "invalid_type",\n    "path": [\n      "insights"\n    ],\n    "message": "Invalid input: expected array, received undefined"\n  }\n]',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 1,
       generations: ['{"key": "value"}'],
     });
+
+    // the parse failure is persisted without the model output:
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(
+      'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): the response does not match the expected schema ('
+    );
+    expect(state.errors[0]).not.toContain('"key"');
+    expect(state.errors[0]).not.toContain('value');
+    expect(state.errors[0]).not.toContain('here it is');
   });
 
   it('handles hallucinations', async () => {
@@ -294,12 +302,16 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state).toEqual({
       ...withPreviousGenerations,
       combinedGenerations: 'gen0gen1',
-      errors: [
-        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON',
-      ],
+      errors: [expect.any(String)],
       generationAttempts: 2,
       generations: ['gen0', 'gen1'],
     });
+
+    expect(state.errors[0]).toContain(
+      'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token; raw response length: 4 characters'
+    );
+    expect(state.errors[0]).not.toContain('gen0');
+    expect(state.errors[0]).not.toContain('gen1');
   });
 
   it('logs the raw response at debug when the response cannot be parsed', async () => {
@@ -332,6 +344,220 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     await generateNode(initialGraphState);
 
     expect(debugMessages.some((message) => message.includes(rawResponse))).toBe(true);
+  });
+
+  it('records an error for every empty response instead of discarding one as a repeated generation', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    // three empty responses in a row: previously the third one was classified as a repeated
+    // generation and discarded without an error entry, under-reporting the failed attempts:
+    let state = await generateNode(initialGraphState);
+    state = await generateNode(state);
+    state = await generateNode(state);
+
+    expect(state.generationAttempts).toBe(3);
+    expect(state.errors).toHaveLength(3);
+    expect(state.errors.every((error) => error.includes(EMPTY_MODEL_RESPONSE_ERROR_MARKER))).toBe(
+      true
+    );
+    expect(state.combinedGenerations).toBe('');
+    expect(mockResponseIsHallucinated).not.toHaveBeenCalled();
+  });
+
+  it('does not add an empty (or whitespace-only) response to the generations', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('   \n');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.generations).toEqual([]);
+    expect(state.generationAttempts).toBe(1);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('keeps the generations accumulated by earlier attempts when the model returns an empty response', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue('');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const withAccumulatedGenerations = {
+      ...initialGraphState,
+      combinedGenerations: '{"insights":[',
+      generationAttempts: 1,
+      generations: ['{"insights":['],
+    };
+
+    const state = await generateNode(withAccumulatedGenerations);
+
+    // an attempt that produced no content adds nothing and invalidates nothing: the partial results
+    // of the earlier attempts stay in state as the input for the next attempt
+    expect(state.combinedGenerations).toBe('{"insights":[');
+    expect(state.generations).toEqual(['{"insights":[']);
+    expect(state.generationAttempts).toBe(2);
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('keeps the generations accumulated by earlier attempts when an empty completion is thrown', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockRejectedValue(
+      new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+      })
+    );
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode({
+      ...initialGraphState,
+      combinedGenerations: '{"insights":[',
+      generationAttempts: 1,
+      generations: ['{"insights":['],
+    });
+
+    // same state as the empty-completion branch above, whether the guard threw or the node noticed
+    expect(state.combinedGenerations).toBe('{"insights":[');
+    expect(state.generations).toEqual(['{"insights":[']);
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+  });
+
+  it('keeps model output out of state.errors when the response cannot be parsed', async () => {
+    const rawResponse = `<html>ALERT-DERIVED-TEXT 502 Bad Gateway${'x'.repeat(500)}</html>`;
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(
+      `SyntaxError: Unexpected token; raw response length: ${rawResponse.length} characters`
+    );
+    expect(JSON.stringify(state.errors)).not.toContain('ALERT-DERIVED-TEXT');
+    expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
+    expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
+  });
+
+  it.each([
+    ['ServerSentEventError', 'internalError'],
+    ['Error', undefined],
+  ])(
+    'persists no model output when the chain throws a Failed to parse line error (%s)',
+    async (name, code) => {
+      const error = new Error(
+        'Failed to parse line "data: {"choices":[{"delta":{"content":"MODEL-OUTPUT-MARKER"}}]}": Unexpected token'
+      );
+      error.name = name;
+      if (code) {
+        Object.assign(error, { code });
+      }
+
+      const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+        .invoke as jest.Mock;
+      mockInvoke.mockRejectedValue(error);
+
+      const node = getGenerateNode({
+        llm: mockLlm,
+        logger: mockLogger,
+        getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+        responseIsHallucinated: mockResponseIsHallucinated,
+        generationSchema,
+      });
+
+      const state = await node(initialGraphState);
+
+      expect(state.errors).toHaveLength(1);
+      expect(state.errors[0]).toContain('Failed to parse line');
+      expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
+    }
+  );
+
+  it('classifies a thrown empty completion as an empty model response, keeping the connector details', async () => {
+    const emptyResponseError = new EmptyModelResponseError({
+      completionTokens: 0,
+      connectorId: 'test-connector-id',
+      contentLength: 0,
+      model: 'test-model',
+      promptTokens: 128390,
+      traceId: 'test-trace-id',
+    });
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+
+    mockInvoke.mockRejectedValue(emptyResponseError);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
+    expect(state.errors[0]).toContain('test-connector-id');
+    expect(state.errors[0]).toContain('test-model');
+    expect(state.errors[0]).toContain('prompt tokens: 128390');
   });
 
   it('returns unrefined results when combined responses pass validation', async () => {
@@ -420,5 +646,28 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       generations: [firstResponse, secondResponse],
       unrefinedResults: getParsedAttackDiscoveriesMock(attackDiscoveryTimestamp), // <-- generated from the combined response
     });
+  });
+
+  it('persists no model output when a connector error carries it in the error name', async () => {
+    const error = new Error('ActionsClientLlm: action result status is error: boom');
+    error.name = `Unexpected token 'd', "data: MODEL-OUTPUT-MARKER"... is not valid JSON`;
+
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValue(error);
+
+    const node = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('Error: ActionsClientLlm: action result status is error');
+    expect(JSON.stringify(state.errors)).not.toContain('MODEL-OUTPUT-MARKER');
   });
 });

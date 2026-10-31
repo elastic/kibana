@@ -7,7 +7,12 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
+import {
+  getEmptyModelResponseError,
+  getParseErrorSummary,
+  isEmptyModelResponseError,
+  type AttackDiscoveryTemplateCompletion,
+} from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../graphs';
@@ -15,10 +20,14 @@ import { discardPreviousGenerations } from './helpers/discard_previous_generatio
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from './helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+
+// the length only: the response can contain alert-derived text, so it never reaches `errors`
+const getRawResponseLength = (rawResponse: string): string =>
+  rawResponse === '' ? '' : `; raw response length: ${rawResponse.length} characters`;
 
 export const getGenerateNode = <T extends GraphInsightTypes>({
   llm,
@@ -58,6 +67,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
     let combinedResponse = ''; // mutable, because it must be accessed in the catch block
     let partialResponse = ''; // mutable, because it must be accessed in the catch block
+    let rawResponse = ''; // mutable, because it must be accessed in the catch block
 
     try {
       const query = getCombinedPromptFn({
@@ -76,7 +86,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const rawResponse = completeWithTemplate
+      rawResponse = completeWithTemplate
         ? await completeWithTemplate({
             alerts: anonymizedDocs,
             phase: combinedGenerations ? 'continue' : 'generate',
@@ -162,15 +172,29 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
-      const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = isEmptyModelResponseError(error)
+        ? getEmptyModelResponseError({
+            cause: error,
+            generationAttempts,
+            llmType: llm._llmType(),
+            nodeName: 'generate',
+          })
+        : `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
+            error
+          )}${getRawResponseLength(rawResponse)}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
 
       return {
         ...state,
-        combinedGenerations: combinedResponse,
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
+        combinedGenerations: getCombinedAfterFailedAttempt({
+          combinedGenerations,
+          combinedResponse,
+        }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        generations: [...generations, partialResponse],
+        generations:
+          partialResponse.trim().length > 0 ? [...generations, partialResponse] : generations,
       };
     }
   };

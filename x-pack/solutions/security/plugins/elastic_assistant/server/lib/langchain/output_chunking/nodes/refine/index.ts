@@ -9,6 +9,9 @@ import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
 import {
   attackDiscoveryRefineTemplateRequest,
+  getEmptyModelResponseError,
+  getParseErrorSummary,
+  isEmptyModelResponseError,
   type AttackDiscoveryTemplateCompletion,
 } from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
@@ -18,13 +21,17 @@ import { discardPreviousRefinements } from './helpers/discard_previous_refinemen
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from '../generate/helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_hallucination_failures_reached';
 import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+
+// the length only: the response can contain alert-derived text, so it never reaches `errors`
+const getRawResponseLength = (rawResponse: string): string =>
+  rawResponse === '' ? '' : `; raw response length: ${rawResponse.length} characters`;
 
 export const getRefineNode = <T extends GraphInsightTypes>({
   llm,
@@ -58,6 +65,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
 
     let combinedResponse = ''; // mutable, because it must be accessed in the catch block
     let partialResponse = ''; // mutable, because it must be accessed in the catch block
+    let rawResponse = ''; // mutable, because it must be accessed in the catch block
 
     try {
       const query = getCombinedRefinePrompt<T>({
@@ -77,7 +85,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         () => `refine node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const rawResponse = completeWithTemplate
+      rawResponse = completeWithTemplate
         ? await completeWithTemplate(
             attackDiscoveryRefineTemplateRequest({
               alerts: getAnonymizedDocsFromState(state),
@@ -150,7 +158,16 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
-      const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = isEmptyModelResponseError(error)
+        ? getEmptyModelResponseError({
+            cause: error,
+            generationAttempts,
+            llmType: llm._llmType(),
+            nodeName: 'refine',
+          })
+        : `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
+            error
+          )}${getRawResponseLength(rawResponse)}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
 
       const maxRetriesReached = getMaxRetriesReached({
@@ -179,10 +196,15 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        combinedRefinements: combinedResponse,
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
+        combinedRefinements: getCombinedAfterFailedAttempt({
+          combinedGenerations: combinedRefinements,
+          combinedResponse,
+        }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        refinements: [...refinements, partialResponse],
+        refinements:
+          partialResponse.trim().length > 0 ? [...refinements, partialResponse] : refinements,
       };
     }
   };

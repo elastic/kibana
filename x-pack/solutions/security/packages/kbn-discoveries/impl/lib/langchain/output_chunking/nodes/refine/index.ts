@@ -18,13 +18,22 @@ import {
   attackDiscoveryRefineTemplateRequest,
   type AttackDiscoveryTemplateCompletion,
 } from '../../../../../attack_discovery/graphs/template_completion';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_hallucination_failures_reached';
 import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
+import {
+  getEmptyModelResponseError,
+  isEmptyModelResponseError,
+} from '../helpers/empty_model_response';
+import { getParseErrorSummary } from '../helpers/get_parse_error_summary';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+
+// the length is a diagnostic for truncated responses; it is empty when the call failed before returning one
+const getRawResponseLength = (rawResponse: string): string =>
+  rawResponse === '' ? '' : `; raw response length: ${rawResponse.length} characters`;
 
 export const getRefineNode = <T extends GraphInsightTypes>({
   llm,
@@ -95,6 +104,47 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
 
+      // An empty completion is a model or connector failure, not a "refinement": record it as an
+      // error and do NOT add it to `refinements` (see getEmptyModelResponseError).
+      if (partialResponse.trim() === '') {
+        logger?.debug(
+          () =>
+            `refine node received an empty response (${llmType}) on attempt ${generationAttempts}; recording an error instead of treating it as a repeated generation`
+        );
+
+        const maxRetriesReached = getMaxRetriesReached({
+          generationAttempts: generationAttempts + 1,
+          maxGenerationAttempts,
+        });
+
+        const maxHallucinationFailuresReached = getMaxHallucinationFailuresReached({
+          hallucinationFailures,
+          maxHallucinationFailures,
+        });
+
+        // same fallback as the parse-error path below: when the attempts are exhausted, the
+        // unrefined results from the generate step are still the best answer we have:
+        const useUnrefinedResults = getUseUnrefinedResults({
+          maxHallucinationFailuresReached,
+          maxRetriesReached,
+        });
+
+        // keeps the accumulated text; same rule as the catch block (getCombinedAfterFailedAttempt)
+        return {
+          ...state,
+          insights: useUnrefinedResults ? unrefinedResults : null,
+          errors: [
+            ...state.errors,
+            getEmptyModelResponseError({
+              generationAttempts,
+              llmType,
+              nodeName: 'refine',
+            }),
+          ],
+          generationAttempts: generationAttempts + 1,
+        };
+      }
+
       // if the response is hallucinated, discard it:
       if (responseIsHallucinated(partialResponse)) {
         logger?.debug(
@@ -152,8 +202,19 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
-      const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = isEmptyModelResponseError(error)
+        ? getEmptyModelResponseError({
+            cause: error,
+            generationAttempts,
+            llmType: llm._llmType(),
+            nodeName: 'refine',
+          })
+        : `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
+            error
+          )}${getRawResponseLength(rawResponse)}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
+      // Raw model output can contain alert-derived text, so it is only ever logged at debug and is
+      // never added to `errors`, which reach persisted and telemetry sinks:
       logger?.debug(
         () =>
           `refine node raw response that failed to parse (${llm._llmType()}) from attempt ${generationAttempts}:\n${rawResponse}`
@@ -185,10 +246,14 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        combinedRefinements: combinedResponse,
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
+        combinedRefinements: getCombinedAfterFailedAttempt({
+          combinedGenerations: combinedRefinements,
+          combinedResponse,
+        }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        refinements: [...refinements, partialResponse],
+        refinements: partialResponse.length > 0 ? [...refinements, partialResponse] : refinements,
       };
     }
   };

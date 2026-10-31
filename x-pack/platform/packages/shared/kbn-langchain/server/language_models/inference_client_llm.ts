@@ -10,6 +10,9 @@ import type { BaseLanguageModelCallOptions } from '@langchain/core/language_mode
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
+import { EmptyModelResponseError } from './empty_model_response_error';
+import { safeToString } from '../utils/safe_to_string';
+import { sanitizeErrorMessage } from '../utils/sanitize_error_message';
 
 const LLM_TYPE = 'InferenceClientLlm';
 
@@ -91,8 +94,10 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
       () => `${LLM_TYPE}: calling chatComplete for connector ${this.#connectorId}`
     );
 
-    try {
-      const response = await this.#inferenceClient.chatComplete({
+    // The failure handler stays attached to the transport call itself: an empty *successful*
+    // completion is not a chatComplete error and must not be reported as one.
+    const response = await this.#inferenceClient
+      .chatComplete({
         connectorId: this.#connectorId,
         messages: [{ role: MessageRole.User, content: prompt }],
         temperature: this.#temperature,
@@ -100,17 +105,72 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         ...(this.#timeout ? { timeout: this.#timeout } : {}),
         ...(this.#systemPrompt ? { system: this.#systemPrompt } : {}),
         ...(this.#telemetryMetadata ? { metadata: this.#telemetryMetadata } : {}),
+      })
+      .catch((error: unknown) => {
+        // `chatComplete` can reject with any value; the original is always rethrown below.
+        const { code, message: errorMessage } = (error ?? {}) as {
+          code?: unknown;
+          message?: unknown;
+        };
+        const message = typeof errorMessage === 'string' ? errorMessage : safeToString(error);
+        // The message can quote the payload it failed on (`Failed to parse line "<SSE chunk>"`, which
+        // carries model output), so only its sanitized head is logged above debug level.
+        this.#logger.error(
+          `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${safeToString(
+            code
+          )} - ${sanitizeErrorMessage(message)}`
+        );
+        this.#logger.debug(
+          () =>
+            `${LLM_TYPE}: chatComplete failed for connector ${
+              this.#connectorId
+            }, full message: ${message}`
+        );
+        throw error;
       });
 
-      return response.content;
-    } catch (error: unknown) {
-      const err = error as Error & { code?: string };
-      this.#logger.error(
-        `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${err.code} - ${
-          err.message
-        }`
-      );
-      throw error;
+    this.#throwIfResponseIsEmpty({
+      completionTokens: response.tokens?.completion,
+      content: response.content,
+      model: response.model ?? this.#model,
+      promptTokens: response.tokens?.prompt,
+      toolCallCount: response.toolCalls?.length,
+    });
+
+    return response.content;
+  }
+
+  /** Throws EmptyModelResponseError (logged at error) for a successful completion with no content. */
+  #throwIfResponseIsEmpty({
+    completionTokens,
+    content,
+    model,
+    promptTokens,
+    toolCallCount,
+  }: {
+    completionTokens?: number;
+    content: string;
+    model?: string;
+    promptTokens?: number;
+    toolCallCount?: number;
+  }): void {
+    // a tool-call-only response is not empty; the guard must not trip for a future tool-using caller
+    if (content.trim().length > 0 || (toolCallCount ?? 0) > 0) {
+      return;
     }
+
+    // NOTE: unlike ActionsClientLlm there is no trace id in scope here — this class has never had
+    // one and the caller does not pass one, so the error is narrowed to what is actually known.
+    const error = new EmptyModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
   }
 }

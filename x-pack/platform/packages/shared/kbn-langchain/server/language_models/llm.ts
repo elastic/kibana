@@ -16,7 +16,9 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
+import { EmptyModelResponseError } from './empty_model_response_error';
 import { getMessageContentAndRole } from './helpers';
+import { safeToString } from '../utils/safe_to_string';
 import type { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
@@ -149,6 +151,14 @@ export class ActionsClientLlm extends LLM {
             `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${result.content}`
         );
 
+        this.#throwIfResponseIsEmpty({
+          completionTokens: result.tokens?.completion,
+          content: result.content,
+          model: result.model ?? this.model,
+          promptTokens: result.tokens?.prompt,
+          toolCallCount: result.toolCalls?.length,
+        });
+
         return result.content;
       } catch (error) {
         // .inference/EIS failure: the thrown message carries the upstream error body. This is the ONLY
@@ -157,7 +167,9 @@ export class ActionsClientLlm extends LLM {
         this.#logger.debug(
           () =>
             `${LLM_TYPE}#_call error\ntraceId: ${this.#traceId}\nerror:\n${
-              error instanceof Error ? error.message : String(error)
+              error instanceof Error && typeof error.message === 'string'
+                ? error.message
+                : safeToString(error)
             }`
         );
 
@@ -229,6 +241,14 @@ export class ActionsClientLlm extends LLM {
         () => `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${content}`
       );
 
+      this.#throwIfResponseIsEmpty({
+        content,
+        model: this.model,
+        toolCallCount: Array.isArray(get('data.choices[0].message.tool_calls', actionResult))
+          ? (get('data.choices[0].message.tool_calls', actionResult) as unknown[]).length
+          : undefined,
+      });
+
       return content; // per the contact of _call, return a string
     }
 
@@ -247,6 +267,47 @@ export class ActionsClientLlm extends LLM {
       () => `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${content}`
     );
 
+    // a tool-call-only response is not empty; the guard must not trip for a future tool-using caller:
+    this.#throwIfResponseIsEmpty({
+      content,
+      model: this.model,
+      toolCallCount: Array.isArray(get('data.toolCalls', actionResult))
+        ? (get('data.toolCalls', actionResult) as unknown[]).length
+        : undefined,
+    });
+
     return content; // per the contact of _call, return a string
+  }
+
+  /** Throws EmptyModelResponseError (logged at error) for a successful completion with no content. */
+  #throwIfResponseIsEmpty({
+    completionTokens,
+    content,
+    model,
+    promptTokens,
+    toolCallCount,
+  }: {
+    completionTokens?: number;
+    content: string;
+    model?: string;
+    promptTokens?: number;
+    toolCallCount?: number;
+  }): void {
+    if (content.trim().length > 0 || (toolCallCount ?? 0) > 0) {
+      return;
+    }
+
+    const error = new EmptyModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      traceId: this.#traceId,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
   }
 }

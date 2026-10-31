@@ -14,11 +14,20 @@ import { discardPreviousGenerations } from './helpers/discard_previous_generatio
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from './helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getCombined } from '../helpers/get_combined';
+import { getCombined, getCombinedAfterFailedAttempt } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
+import {
+  getEmptyModelResponseError,
+  isEmptyModelResponseError,
+} from '../helpers/empty_model_response';
+import { getParseErrorSummary } from '../helpers/get_parse_error_summary';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
+
+// the length is a diagnostic for truncated responses; it is empty when the call failed before returning one
+const getRawResponseLength = (rawResponse: string): string =>
+  rawResponse === '' ? '' : `; raw response length: ${rawResponse.length} characters`;
 
 export const getGenerateNode = <T extends GraphInsightTypes>({
   llm,
@@ -92,6 +101,29 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
 
+      // An empty completion is a model or connector failure, not a "generation": record it as an
+      // error and do NOT add it to `generations` (see getEmptyModelResponseError).
+      if (partialResponse.trim() === '') {
+        logger?.debug(
+          () =>
+            `generate node received an empty response (${llmType}) on attempt ${generationAttempts}; recording an error instead of treating it as a repeated generation`
+        );
+
+        // keeps the accumulated text; same rule as the catch block (getCombinedAfterFailedAttempt)
+        return {
+          ...state,
+          errors: [
+            ...state.errors,
+            getEmptyModelResponseError({
+              generationAttempts,
+              llmType,
+              nodeName: 'generate',
+            }),
+          ],
+          generationAttempts: generationAttempts + 1,
+        };
+      }
+
       // if the response is hallucinated, discard previous generations and start over:
       if (responseIsHallucinated(partialResponse)) {
         logger?.debug(
@@ -164,8 +196,19 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
-      const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+      const parsingError = isEmptyModelResponseError(error)
+        ? getEmptyModelResponseError({
+            cause: error,
+            generationAttempts,
+            llmType: llm._llmType(),
+            nodeName: 'generate',
+          })
+        : `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
+            error
+          )}${getRawResponseLength(rawResponse)}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
+      // Raw model output can contain alert-derived text, so it is only ever logged at debug and is
+      // never added to `errors`, which reach persisted and telemetry sinks:
       logger?.debug(
         () =>
           `generate node raw response that failed to parse (${llm._llmType()}) from attempt ${generationAttempts}:\n${rawResponse}`
@@ -173,10 +216,14 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        combinedGenerations: combinedResponse,
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
+        combinedGenerations: getCombinedAfterFailedAttempt({
+          combinedGenerations,
+          combinedResponse,
+        }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        generations: [...generations, partialResponse],
+        generations: partialResponse.length > 0 ? [...generations, partialResponse] : generations,
       };
     }
   };
