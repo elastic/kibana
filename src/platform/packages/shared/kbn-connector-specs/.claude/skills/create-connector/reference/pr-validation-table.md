@@ -7,12 +7,32 @@ still need manual verification before merge. It is a checklist, not just a repor
 
 ## Format
 
+An `## Actions` section comes first and says why the connector has these actions:
+
+```markdown
+## Actions
+
+<Whether the user confirmed the set, gave it, or it is the agent's unconfirmed proposal.>
+
+| Action         | Vendor operation(s)          | Scope  | Question it answers                         |
+| -------------- | ---------------------------- | ------ | -------------------------------------------- |
+| <actionName>   | <METHOD /path or MCP tool>   | read   | <e.g. "Which incidents are open for team X?"> |
+
+Left out: <notable operations not built, one line each with the reason (destructive, admin-only,
+deprecated, covered by another action, no agent use case)>.
+```
+
 ```markdown
 ## Validated
 
 <One sentence on how testing was performed, e.g. "Every action was exercised end-to-end against a live
 Sentry trial org" or "Live testing was deferred for this connector; the table below lists every action
 as a manual verification checklist.">
+
+**Vendor API contract:** <✅ the contract test passes, or ❌ what fails>, recorded against
+<source name, spec URL and API version for each source>. Overlay actions: <none, or one line each with
+its evidence>. Unmatched requests: <none, or one line each with its reason>. <Or: exempted, with the
+reason from `vendor_api_exemptions.json`.>
 
 | Action               | What was tested                                                   | Result                                    |
 | -------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
@@ -50,6 +70,11 @@ as a manual verification checklist.">
   `count: 2`". An asynchronous API accepts a request and can still fail the operation later.
 - **If an action failed and the failure is unresolved**, mark it `❌ Fail`, describe what broke, and link
   to a follow-up issue or note if it's a known limitation rather than silently dropping the row.
+- **Report the vendor API contract** in the line above the table. It is checked offline, so it is the
+  one result that holds even when live testing was deferred, and a reviewer needs the sources, overlay
+  actions and unmatched requests to judge whether they are evidence-backed corrections or workarounds.
+- **For a list action that pages**, say whether page 2 was fetched and whether the vendor paged as the
+  `pagination` descriptor in `vendor_api/manifest.json` declares.
 - Place the `## Validated` section directly above `## Test plan` in the PR body.
 
 ## When live testing is fully deferred
