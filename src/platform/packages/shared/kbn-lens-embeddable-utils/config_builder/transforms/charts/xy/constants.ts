@@ -32,6 +32,9 @@ export const AVAILABLE_XY_LAYER_TYPES = [
   ...XY_ANNOTATION_LAYER_TYPES,
 ];
 
+// Not the i18n `defaultAnnotationLabel`: persisted state must not depend on the server locale.
+export const DEFAULT_API_ANNOTATION_LABEL = 'Event';
+
 export const DEFAULT_AXIS_TICKS_VISIBLE = true;
 
 export const DEFAULT_AXIS_GRID_VISIBLE = true;

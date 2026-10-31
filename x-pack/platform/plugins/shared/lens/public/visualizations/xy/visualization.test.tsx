@@ -4069,6 +4069,43 @@ describe('xy_visualization', () => {
       `);
     });
 
+    it('round-trips ES|QL annotations through persisted state', () => {
+      const state = exampleState();
+      const layer: XYByValueAnnotationLayerConfig = {
+        layerId: 'layer-id',
+        layerType: 'annotations',
+        // ES|QL charts give annotation layers the chart's ad hoc data view
+        indexPatternId: 'esql-adhoc-data-view',
+        ignoreGlobalFilters: true,
+        annotations: [
+          {
+            id: 'deployments',
+            type: 'esql',
+            query: { esql: 'FROM deployments | KEEP @timestamp, version' },
+            timeField: '@timestamp',
+            timeColumn: '@timestamp',
+            textColumn: 'version',
+            key: { type: 'point_in_time' },
+            label: 'Deployments',
+            textVisibility: true,
+          },
+        ],
+      };
+      state.layers = [layer];
+
+      const { state: persistedState, references } = xyVisualization.getPersistableState!(state);
+      const restored = xyVisualization.initialize(
+        () => 'unused',
+        persistedState,
+        undefined,
+        {},
+        {},
+        references
+      );
+
+      expect(restored.layers).toEqual([expect.objectContaining(layer)]);
+    });
+
     it('should extract annotation group ids from by-reference annotation layers', () => {
       const state = exampleState();
       const layers: XYByReferenceAnnotationLayerConfig[] = (

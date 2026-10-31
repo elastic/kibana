@@ -141,9 +141,10 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     }
   ),
   query_annotations_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip',
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationsReason',
     {
-      defaultMessage: 'Query-based annotations will be supported in an upcoming update.',
+      defaultMessage:
+        'Annotation library groups and query-based annotations that apply global filters cannot be converted.',
     }
   ),
   reference_line_not_supported: i18n.translate(

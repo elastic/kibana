@@ -28601,7 +28601,6 @@
     "xpack.lens.config.experimentalLabelDataview.content": "内联编辑当前提供的配置选项数量有限。",
     "xpack.lens.config.experimentalLabelDataview.title": "技术预览",
     "xpack.lens.config.layersTableCaption": "可用于转换为查询模式的图层",
-    "xpack.lens.config.queryModeDescription": "查询模式使用 ES|QL 实现高级数据分析。",
     "xpack.lens.config.queryModeWarningDescription": "一旦您在切换到查询模式后保存了图表，就无法切换回去。",
     "xpack.lens.config.queryPreviewDescription": "查询预览",
     "xpack.lens.config.readMoreLinkText": "阅读更多内容。",

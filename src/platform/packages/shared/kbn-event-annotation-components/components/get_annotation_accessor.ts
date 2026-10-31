@@ -9,7 +9,11 @@
 
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { getResolvedAnnotationColor, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import {
+  getResolvedAnnotationColor,
+  isRangeAnnotationConfig,
+  isEsqlAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { resolveVisIcon } from '@kbn/chart-icons';
 import { annotationsIconSet } from './annotation_editor_controls/icon_set';
 
@@ -17,7 +21,10 @@ export const getAnnotationAccessor = (
   annotation: EventAnnotationConfig,
   isDarkMode = false
 ): AccessorConfig => {
-  const annotationIcon = !isRangeAnnotationConfig(annotation)
+  const isRange =
+    isRangeAnnotationConfig(annotation) ||
+    (isEsqlAnnotationConfig(annotation) && 'endTimeColumn' in annotation);
+  const annotationIcon = !isRange
     ? annotationsIconSet.find((option) => option.value === annotation?.icon) ||
       annotationsIconSet.find((option) => option.value === 'triangle')
     : undefined;
@@ -31,7 +38,7 @@ export const getAnnotationAccessor = (
     color: getResolvedAnnotationColor({
       color: annotation?.color,
       isDarkMode,
-      isRange: isRangeAnnotationConfig(annotation),
+      isRange,
     }),
   };
 };

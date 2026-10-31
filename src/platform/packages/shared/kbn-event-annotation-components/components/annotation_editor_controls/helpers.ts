@@ -17,7 +17,11 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { AUTO_ANNOTATION_COLOR, isAutoAnnotationColor } from '@kbn/event-annotation-common';
+import {
+  AUTO_ANNOTATION_COLOR,
+  isAutoAnnotationColor,
+  isEsqlAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 
 export const defaultAnnotationLabel = i18n.translate(
@@ -48,7 +52,34 @@ export const toLineAnnotationColor = (color?: string) => {
   return chroma(transparentize(color, 1)).hex().toUpperCase();
 };
 
-export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
+export const sanitizeProperties = (annotation: EventAnnotationConfig): EventAnnotationConfig => {
+  if (isEsqlAnnotationConfig(annotation)) {
+    const common = pick(annotation, [
+      'type',
+      'id',
+      'label',
+      'query',
+      'timeField',
+      'timeColumn',
+      'textColumn',
+      'extraColumns',
+      'color',
+      'isHidden',
+    ]);
+    if ('endTimeColumn' in annotation) {
+      return {
+        ...common,
+        key: { type: 'range' },
+        endTimeColumn: annotation.endTimeColumn,
+        outside: annotation.outside,
+      };
+    }
+    return {
+      ...common,
+      key: { type: 'point_in_time' },
+      ...pick(annotation, ['icon', 'lineStyle', 'lineWidth', 'textVisibility']),
+    };
+  }
   if (isRangeAnnotationConfig(annotation)) {
     const rangeAnnotation: RangeEventAnnotationConfig = pick(annotation, [
       'type',

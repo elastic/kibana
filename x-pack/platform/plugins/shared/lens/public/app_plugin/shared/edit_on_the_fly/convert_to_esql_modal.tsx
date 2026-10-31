@@ -140,7 +140,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           defaultMessage: 'Result',
         }),
         render: (layer: ConvertibleLayer) => {
-          if (layer.type !== layerTypes.DATA) {
+          if (layer.type !== layerTypes.DATA && !layer.isConvertibleToEsql) {
             return i18n.translate('xpack.lens.config.layerWillRemainUnchangedLabel', {
               defaultMessage: 'Will remain unchanged',
             });
@@ -169,7 +169,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
           </EuiScreenReaderOnly>
         ),
         render: (layer: ConvertibleLayer) => {
-          if (!layer.isConvertibleToEsql) {
+          // only data layers carry a single query preview
+          if (!layer.isConvertibleToEsql || layer.type !== layerTypes.DATA) {
             return null;
           }
 
@@ -237,9 +238,9 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       data-test-subj="lnsConvertToEsqlModal"
     >
       <p>
-        {i18n.translate('xpack.lens.config.queryModeDescription', {
+        {i18n.translate('xpack.lens.config.queryModeWithAnnotationsDescription', {
           defaultMessage:
-            'All data layers in this visualization will be converted to ES|QL. Annotation and reference line layers will remain unchanged.',
+            'All data layers and query-based annotations in this visualization will be converted to ES|QL. Static annotations and reference lines will remain unchanged.',
         })}{' '}
         {/* TODO: Add link to docs */}
         <EuiLink href="" target="_blank" external={false}>

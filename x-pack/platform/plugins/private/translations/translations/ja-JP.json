@@ -28594,7 +28594,6 @@
     "xpack.lens.config.experimentalLabelDataview.content": "現在、インライン編集では、構成オプションは限られています。",
     "xpack.lens.config.experimentalLabelDataview.title": "テクニカルプレビュー",
     "xpack.lens.config.layersTableCaption": "クエリモードへの変換が可能なレイヤー",
-    "xpack.lens.config.queryModeDescription": "クエリモードでは、ES|QLを使用した高度なデータ分析が可能になります。",
     "xpack.lens.config.queryModeWarningDescription": "一度クエリモードに切り替えてチャートを保存すると、元に戻すことはできません。",
     "xpack.lens.config.queryPreviewDescription": "クエリプレビュー",
     "xpack.lens.config.readMoreLinkText": "詳細をお読みください。",

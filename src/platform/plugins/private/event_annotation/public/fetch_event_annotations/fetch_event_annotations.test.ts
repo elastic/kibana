@@ -12,12 +12,17 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import type {
   AggsStart,
   DataViewsContract,
+  DataViewSpec,
   ExpressionValueSearchContext,
 } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { EventAnnotationService } from '..';
 import { getFetchEventAnnotations } from '.';
-import type { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../../common';
+import type {
+  FetchEventAnnotationsArgs,
+  QueryPointEventAnnotationOutput,
+  EsqlEventAnnotationOutput,
+} from '../../common';
 import type { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
@@ -80,7 +85,7 @@ jest.mock('../../common/fetch_event_annotations/handle_request', () => {
 });
 
 const dataView1 = {
-  type: 'index_pattern',
+  type: 'index_pattern' as const,
   value: {
     id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
     name: 'Kibana Sample Data eCommerce',
@@ -120,7 +125,7 @@ const startServices = [
       },
       dataViews: {
         ...dataMock.dataViews,
-        create: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockImplementation(async ({ id }: DataViewSpec) => ({ id })),
       } as DataViewsContract,
     },
   },
@@ -292,6 +297,153 @@ describe('getFetchEventAnnotations', () => {
       groups: [],
     });
     expect(result).toEqual({ columns: [], rows: [], type: 'datatable' });
+  });
+
+  describe('ES|QL annotations', () => {
+    const annotation: EsqlEventAnnotationOutput = {
+      id: 'esql-events',
+      type: 'esql_event_annotation',
+      query: 'FROM events | KEEP time',
+      timeColumn: 'time',
+      label: 'Events',
+    };
+    beforeEach(() => {
+      jest
+        .mocked(dataMock.search.esql)
+        .mockReset()
+        .mockResolvedValue({
+          rawResponse: { columns: [], values: [], is_running: false },
+          datatable: {
+            type: 'datatable',
+            columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],
+            rows: [{ 'time-id': '2022-07-05T08:00:00Z' }],
+          },
+        });
+    });
+
+    it('executes independent queries without data views and forwards search context without global filters', async () => {
+      const result = await runGetFetchEventAnnotations({
+        interval: '1h',
+        groups: [
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            annotations: [
+              annotation,
+              { ...annotation, id: 'other', query: 'FROM other | KEEP time' },
+              { ...annotation, id: 'hidden', isHidden: true },
+            ],
+          },
+        ],
+      });
+      expect(dataMock.search.esql).toHaveBeenCalledTimes(2);
+      expect(jest.mocked(dataMock.search.esql).mock.calls.map(([params]) => params.query)).toEqual([
+        'FROM events | KEEP time',
+        'FROM other | KEEP time',
+      ]);
+      expect(jest.mocked(dataMock.search.esql).mock.calls[0][0].kibanaQueryContext).toEqual({
+        timeRange: input.timeRange,
+        esqlVariables: undefined,
+      });
+      expect(jest.mocked(dataMock.search.esql).mock.calls[0][1]).toEqual(
+        expect.objectContaining({
+          abortSignal: mockHandlers.abortSignal,
+          sessionId: 'abc123',
+          includeDataTable: true,
+          inspector: expect.objectContaining({ title: 'Annotations' }),
+        })
+      );
+      expect(startServices[1].data.dataViews.create).not.toHaveBeenCalled();
+      expect(handleRequest).not.toHaveBeenCalled();
+      expect(result?.rows.map(({ id }) => id)).toEqual(['esql-events', 'other']);
+    });
+
+    it('merges ES|QL events with manual and DSL-query events in time order', async () => {
+      const result = await runGetFetchEventAnnotations({
+        interval: '1h',
+        groups: [
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            annotations: [
+              annotation,
+              {
+                id: 'manual',
+                type: 'manual_point_event_annotation',
+                time: '2022-07-05T11:12:00Z',
+                label: 'Manual',
+              },
+            ],
+          },
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            dataView: dataView1,
+            annotations: [queryAnnotationSamples.noExtraFields],
+          },
+        ],
+      });
+      expect(result?.rows.map(({ id }) => id)).toEqual(['esql-events', 'manual', 'ann1']);
+      expect(startServices[1].data.dataViews.create).toHaveBeenCalledTimes(1);
+      expect(handleRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('starts DSL requests without waiting for ES|QL requests to finish', async () => {
+      let resolveEsql: (value: Awaited<ReturnType<typeof dataMock.search.esql>>) => void = () => {};
+      jest.mocked(dataMock.search.esql).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveEsql = resolve;
+          })
+      );
+      const resultPromise = runGetFetchEventAnnotations({
+        interval: '1h',
+        groups: [
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            annotations: [annotation],
+          },
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            dataView: dataView1,
+            annotations: [queryAnnotationSamples.noExtraFields],
+          },
+        ],
+      });
+
+      // A macrotask lets every already-resolvable promise in the DSL path settle
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(handleRequest).toHaveBeenCalledTimes(1);
+
+      resolveEsql({
+        rawResponse: { columns: [], values: [], is_running: false },
+        datatable: {
+          type: 'datatable',
+          columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],
+          rows: [{ 'time-id': '2022-07-05T08:00:00Z' }],
+        },
+      });
+      const result = await resultPromise;
+      expect(result?.rows.map(({ id }) => id)).toEqual(['esql-events', 'ann1']);
+    });
+
+    it('does not swallow query failures', async () => {
+      jest.mocked(dataMock.search.esql).mockRejectedValueOnce(new Error('Query failed'));
+      await expect(
+        runGetFetchEventAnnotations({
+          interval: '1h',
+          groups: [
+            {
+              type: 'event_annotation_group',
+              ignoreGlobalFilters: false,
+              annotations: [annotation],
+            },
+          ],
+        })
+      ).rejects.toThrow('Query failed');
+    });
   });
 
   describe('Manual annotations', () => {

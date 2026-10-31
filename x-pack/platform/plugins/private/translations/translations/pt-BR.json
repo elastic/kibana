@@ -28580,7 +28580,6 @@
     "xpack.lens.config.experimentalLabelDataview.content": "A edição inline atualmente oferece opções de configuração limitadas.",
     "xpack.lens.config.experimentalLabelDataview.title": "Prévia técnica",
     "xpack.lens.config.layersTableCaption": "Camadas disponíveis para conversão ao modo de consulta",
-    "xpack.lens.config.queryModeDescription": "O modo de consulta permite análises de dados avançadas com ES|QL.",
     "xpack.lens.config.queryModeWarningDescription": "Depois de salvar o gráfico após alternar para o modo de consulta, não será possível voltar.",
     "xpack.lens.config.queryPreviewDescription": "Pré-visualização da consulta",
     "xpack.lens.config.readMoreLinkText": "Leia mais.",

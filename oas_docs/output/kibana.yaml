@@ -194374,16 +194374,208 @@ components:
         - group_id
       title: Annotation Layer (By Reference)
       type: object
+    Kibana_HTTP_APIs_visXyAnnotationEsqlPoint:
+      additionalProperties: false
+      description: Point annotations from the rows of an ES|QL query
+      type: object
+      properties:
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+        data_source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+        extra_columns:
+          description: Additional result columns for the annotation tooltip
+          items:
+            description: Result column to include in the tooltip
+            type: string
+          maxItems: 100
+          type: array
+        icon:
+          anyOf:
+            - enum:
+                - asterisk
+              type: string
+            - enum:
+                - alert
+              type: string
+            - enum:
+                - bell
+              type: string
+            - enum:
+                - bolt
+              type: string
+            - enum:
+                - bug
+              type: string
+            - enum:
+                - circle
+              type: string
+            - enum:
+                - editor_comment
+              type: string
+            - enum:
+                - flag
+              type: string
+            - enum:
+                - heart
+              type: string
+            - enum:
+                - map_marker
+              type: string
+            - enum:
+                - pin_filled
+              type: string
+            - enum:
+                - star_empty
+              type: string
+            - enum:
+                - star_filled
+              type: string
+            - enum:
+                - tag
+              type: string
+            - enum:
+                - triangle
+              type: string
+          description: Icon to display at the annotation point
+        label:
+          description: Label text for the annotation
+          type: string
+        line:
+          additionalProperties: false
+          description: Vertical line configuration for point annotation
+          type: object
+          properties:
+            stroke_dash:
+              anyOf:
+                - enum:
+                    - solid
+                  type: string
+                - enum:
+                    - dashed
+                  type: string
+                - enum:
+                    - dotted
+                  type: string
+              description: Vertical line style
+            stroke_width:
+              description: Vertical line width in pixels
+              maximum: 10
+              minimum: 1
+              type: number
+          required:
+            - stroke_width
+            - stroke_dash
+        text:
+          additionalProperties: false
+          description: Annotation text label configuration
+          type: object
+          properties:
+            column:
+              description: Result column used as the text label
+              type: string
+            visible:
+              description: Show text label on the annotation
+              type: boolean
+          required:
+            - visible
+        time_column:
+          description: Result column containing event timestamps
+          type: string
+        time_field:
+          description: Source field used to apply the chart time range. When omitted, the time range is only applied through ?_tstart/?_tend query parameters.
+          type: string
+        type:
+          enum:
+            - esql
+          type: string
+        visible:
+          description: Show the annotation
+          type: boolean
+      required:
+        - data_source
+        - time_column
+        - type
+    Kibana_HTTP_APIs_visXyAnnotationEsqlRange:
+      additionalProperties: false
+      description: Range annotations from the rows of an ES|QL query
+      type: object
+      properties:
+        color:
+          anyOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+          default:
+            type: auto
+        data_source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+        end_time_column:
+          description: Result column containing range end timestamps
+          type: string
+        extra_columns:
+          description: Additional result columns for the annotation tooltip
+          items:
+            description: Result column to include in the tooltip
+            type: string
+          maxItems: 100
+          type: array
+        fill:
+          anyOf:
+            - enum:
+                - inside
+              type: string
+            - enum:
+                - outside
+              type: string
+          default: inside
+          description: Fill direction for range
+        label:
+          description: Label text for the annotation
+          type: string
+        text:
+          additionalProperties: false
+          description: Annotation text label configuration
+          type: object
+          properties:
+            column:
+              description: Result column used as the text label
+              type: string
+          required:
+            - column
+        time_column:
+          description: Result column containing event timestamps
+          type: string
+        time_field:
+          description: Source field used to apply the chart time range. When omitted, the time range is only applied through ?_tstart/?_tend query parameters.
+          type: string
+        type:
+          enum:
+            - esql
+          type: string
+        visible:
+          description: Show the annotation
+          type: boolean
+      required:
+        - data_source
+        - time_column
+        - type
+        - end_time_column
     Kibana_HTTP_APIs_visXyAnnotationLayerESQL:
       additionalProperties: false
-      description: Layer containing annotations (points and ranges)
+      description: Layer containing static and ES|QL annotations (points and ranges)
       properties:
         events:
-          description: Array of static annotation configurations
+          description: Array of static and ES|QL annotation configurations
           items:
             anyOf:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationManualEvent'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationManualRange'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationEsqlPoint'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationEsqlRange'
           maxItems: 100
           minItems: 1
           type: array

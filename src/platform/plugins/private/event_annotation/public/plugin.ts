@@ -23,6 +23,7 @@ import {
   manualPointEventAnnotation,
   manualRangeEventAnnotation,
   queryPointEventAnnotation,
+  esqlEventAnnotation,
   eventAnnotationGroup,
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
@@ -56,6 +57,7 @@ export class EventAnnotationPlugin
     dependencies.expressions.registerFunction(manualPointEventAnnotation);
     dependencies.expressions.registerFunction(manualRangeEventAnnotation);
     dependencies.expressions.registerFunction(queryPointEventAnnotation);
+    dependencies.expressions.registerFunction(esqlEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
     dependencies.expressions.registerFunction(
       getFetchEventAnnotations({ getStartServices: core.getStartServices })

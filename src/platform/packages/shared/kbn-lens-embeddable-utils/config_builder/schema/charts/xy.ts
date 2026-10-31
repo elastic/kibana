@@ -8,6 +8,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
+import { esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 import {
   axisTitleSchema,
   collapseBySchema,
@@ -899,6 +900,89 @@ const annotationManualRange = lazySchema(() =>
     })
 );
 
+const annotationEsqlShared = {
+  data_source: esqlDataSourceSchema,
+  time_column: lazySchema(() =>
+    z.string().meta({ description: 'Result column containing event timestamps' })
+  ),
+  time_field: lazySchema(() =>
+    z.string().optional().meta({
+      description:
+        'Source field used to apply the chart time range. When omitted, the time range is only applied through ?_tstart/?_tend query parameters.',
+    })
+  ),
+  label: lazySchema(() =>
+    z.string().optional().meta({ description: 'Label text for the annotation' })
+  ),
+  extra_columns: lazySchema(() =>
+    z
+      .array(z.string().meta({ description: 'Result column to include in the tooltip' }))
+      .max(100)
+      .optional()
+      .meta({ description: 'Additional result columns for the annotation tooltip' })
+  ),
+};
+
+/**
+ * Point annotations placed at timestamps returned by an ES|QL query
+ */
+const annotationEsqlPoint = lazySchema(() =>
+  z
+    .object({
+      ...annotationPointShared,
+      ...annotationEsqlShared,
+      type: z.literal('esql'),
+      text: z
+        .object({
+          visible: z.boolean().meta({ description: 'Show text label on the annotation' }),
+          column: z
+            .string()
+            .optional()
+            .meta({ description: 'Result column used as the text label' }),
+        })
+        .strict()
+        .optional()
+        .meta({ description: 'Annotation text label configuration' }),
+    })
+    .strict()
+    .meta({
+      id: 'visXyAnnotationEsqlPoint',
+      description: 'Point annotations from the rows of an ES|QL query',
+    })
+);
+
+/**
+ * Range annotations spanning start and end timestamps returned by an ES|QL query
+ */
+const annotationEsqlRange = lazySchema(() =>
+  z
+    .object({
+      ...annotationEventShared,
+      ...annotationEsqlShared,
+      type: z.literal('esql'),
+      end_time_column: z
+        .string()
+        .meta({ description: 'Result column containing range end timestamps' }),
+      fill: z
+        .union([z.literal('inside'), z.literal('outside')])
+        .default('inside')
+        .optional()
+        .meta({ description: 'Fill direction for range' }),
+      text: z
+        .object({
+          column: z.string().meta({ description: 'Result column used as the text label' }),
+        })
+        .strict()
+        .optional()
+        .meta({ description: 'Annotation text label configuration' }),
+    })
+    .strict()
+    .meta({
+      id: 'visXyAnnotationEsqlRange',
+      description: 'Range annotations from the rows of an ES|QL query',
+    })
+);
+
 /**
  * Annotation layer containing query-based, point, and range annotations (by-value)
  */
@@ -969,11 +1053,9 @@ const xyLayerUnionNoESQL = lazySchema(() =>
 );
 
 /**
- * Annotation layer for ES|QL charts: manual (point/range) annotations only.
- * Query-based annotations require a data view and are hidden in the ES|QL UI,
- * so the API surface matches. This is deliberately narrower than
- * `annotationLayerByValueSchema`; widening it later (e.g. adding an ES|QL-based
- * event type) is an additive, non-breaking change.
+ * Annotation layer for ES|QL charts: manual (point/range) and ES|QL annotations.
+ * DSL query annotations require a data view and are hidden in the ES|QL UI,
+ * so the API surface matches.
  */
 const annotationLayerESQLSchema = lazySchema(() =>
   z
@@ -983,16 +1065,23 @@ const annotationLayerESQLSchema = lazySchema(() =>
       // Lens XY runtime resolves the data view from the chart's data layers
       type: z.literal('annotations'),
       events: z
-        .array(z.union([annotationManualEvent, annotationManualRange]))
+        .array(
+          z.union([
+            annotationManualEvent,
+            annotationManualRange,
+            annotationEsqlPoint,
+            annotationEsqlRange,
+          ])
+        )
         .min(1)
         .max(100)
-        .meta({ description: 'Array of static annotation configurations' }),
+        .meta({ description: 'Array of static and ES|QL annotation configurations' }),
     })
     .strict()
     .meta({
       id: 'visXyAnnotationLayerESQL',
       title: 'Annotation Layer (ES|QL)',
-      description: 'Layer containing annotations (points and ranges)',
+      description: 'Layer containing static and ES|QL annotations (points and ranges)',
     })
 );
 
@@ -1054,8 +1143,9 @@ export const xyConfigSchemaNoESQL = lazySchema(() =>
 
 /**
  * XY chart state for ES|QL data layers. Annotation and reference line layers may
- * accompany ES|QL data layers; annotation layers never use the ES|QL datasource
- * (query annotations resolve their own data view, manual annotations need none).
+ * accompany ES|QL data layers; annotation layers never use the chart's ES|QL datasource
+ * (ES|QL annotations carry their own query, manual annotations need none). DSL query
+ * annotations and library annotation groups are DSL-only.
  */
 export const xyConfigSchemaESQL = lazySchema(() =>
   z
@@ -1093,13 +1183,16 @@ export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
 export type ReferenceLineLayerTypeESQL = z.output<typeof esqlReferenceLineLayerSchema>;
 export type ReferenceLineLayerTypeNoESQL = z.output<typeof referenceLineLayerSchemaNoESQL>;
 export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLineLayerTypeESQL;
-export type AnnotationLayerType = z.output<typeof annotationLayerSchema>;
+export type AnnotationLayerESQLType = z.output<typeof annotationLayerESQLSchema>;
+export type AnnotationLayerType = z.output<typeof annotationLayerSchema> | AnnotationLayerESQLType;
 export type AnnotationLayerByRefType = z.output<typeof annotationByRefLayerSchema>;
-export type AnnotationLayerByValueType = z.output<typeof annotationLayerByValueSchema>;
+export type AnnotationLayerByValueType =
+  | z.output<typeof annotationLayerByValueSchema>
+  | AnnotationLayerESQLType;
 /**
  * Layers whose data source is ES|QL. Annotation layers are intentionally excluded
- * even though ES|QL charts may contain them: they never use the ES|QL datasource
- * (query annotations carry their own data-view data source, manual annotations none).
+ * even though ES|QL charts may contain them: they never use the chart's ES|QL datasource
+ * (ES|QL annotations carry their own query, manual annotations none).
  */
 export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =

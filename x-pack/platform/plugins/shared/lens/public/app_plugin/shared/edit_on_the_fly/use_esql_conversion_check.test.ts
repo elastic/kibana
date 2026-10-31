@@ -79,7 +79,7 @@ describe('hasUnsupportedAnnotations', () => {
     ).toBe(false);
   });
 
-  it('returns true when any annotation layer contains a query-based annotation', () => {
+  it('returns false for query-based annotations, which are converted separately', () => {
     expect(
       hasUnsupportedAnnotations({
         layers: [
@@ -91,7 +91,7 @@ describe('hasUnsupportedAnnotations', () => {
           },
         ],
       })
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it.each([
