@@ -68,6 +68,26 @@ describe('CaseSettingsSchema', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual({ syncAlerts: false, extractObservables: false });
   });
+
+  it('accepts externalSync settings and strips their unknown fields', () => {
+    const result = CaseSettingsSchema.safeParse({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'kibana', foo: 'bar' },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+    });
+  });
+
+  it('rejects an unknown externalSync conflict strategy', () => {
+    const result = CaseSettingsSchema.safeParse({
+      syncAlerts: true,
+      externalSync: { autoPush: true, conflictStrategy: 'newest' },
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('CaseAttributesSchema', () => {

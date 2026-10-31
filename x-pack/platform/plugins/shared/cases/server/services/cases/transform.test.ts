@@ -735,6 +735,19 @@ describe('case transforms', () => {
       ).toBe(false);
     });
 
+    it('keeps externalSync when it is defined', () => {
+      const externalSync = { autoPush: true, conflictStrategy: 'kibana' as const };
+      const res = createCaseSavedObjectResponse({
+        overrides: { settings: { syncAlerts: true, externalSync } },
+      });
+
+      expect(transformSavedObjectToExternalModel(res).attributes.settings).toEqual({
+        syncAlerts: true,
+        extractObservables: false,
+        externalSync,
+      });
+    });
+
     it('does not return the total comments', () => {
       const resWithTotalComments = createCaseSavedObjectResponse({
         overrides: {
@@ -797,6 +810,22 @@ describe('case transforms', () => {
       expect(result.totalEvents).toBe(2);
       expect(result.severity).toBe(CaseSeverity.LOW);
       expect(result.status).toBe(CaseStatuses.open);
+    });
+
+    it('keeps externalSync settings', () => {
+      const externalSync = { autoPush: true, conflictStrategy: 'external' as const };
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        settings: { syncAlerts: false, externalSync },
+      };
+
+      const result = transformESModelToCase('case-1', caseData, createMockSearchHit([], 5, 1));
+
+      expect(result.settings).toEqual({
+        syncAlerts: false,
+        extractObservables: false,
+        externalSync,
+      });
     });
 
     it('transforms connector with reference correctly', () => {

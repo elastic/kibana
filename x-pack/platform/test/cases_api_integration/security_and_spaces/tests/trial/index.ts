@@ -35,6 +35,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/post_case'));
     loadTestFile(require.resolve('./cases/create_case_from_template'));
     loadTestFile(require.resolve('./cases/patch_case'));
+    // Inbound sync runs as a service account, which needs the security plugin.
+    loadTestFile(require.resolve('./cases/external_sync_notify'));
     // Public API — the fields a caller may apply to a case's `extended_fields`.
     loadTestFile(require.resolve('./cases/applicable_fields'));
     loadTestFile(require.resolve('./configure'));

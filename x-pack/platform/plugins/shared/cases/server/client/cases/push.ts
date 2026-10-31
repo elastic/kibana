@@ -34,6 +34,10 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
+import {
+  pushesToExternal,
+  resolveExternalSyncFieldRules,
+} from '../../../common/utils/external_sync_fields';
 
 import {
   createIncident,
@@ -52,6 +56,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
+import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
@@ -178,9 +183,21 @@ export const push = async (
       operation: Operations.pushCase,
     });
 
+    const ownerFilter = buildFilter({
+      filters: theCase.owner,
+      field: OWNER_FIELD,
+      operator: 'or',
+      type: Operations.findConfigurations.savedObjectType,
+    });
+
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-    const alerts = await getAlerts(alertsInfo, clientArgs);
-    const profiles = await getProfiles(theCase, securityStartPlugin);
+    const [alerts, profiles, myCaseConfigure, connectorSync] = await Promise.all([
+      getAlerts(alertsInfo, clientArgs),
+      getProfiles(theCase, securityStartPlugin),
+      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
+      getConnectorSyncSettings({ connectorId }, clientArgs),
+    ]);
+    const fieldRules = resolveExternalSyncFieldRules(connectorSync.externalSyncFields);
 
     const externalServiceIncident = await createIncident({
       theCase,
@@ -191,6 +208,8 @@ export const push = async (
       userProfiles: profiles,
       spaceId,
       publicBaseUrl,
+      fieldRules,
+      fieldMappings: connectorSync.externalSyncFieldMappings,
     });
 
     const pushRes = await actionsClient.execute({
@@ -217,19 +236,11 @@ export const push = async (
 
     /* End of push to external service */
 
-    const ownerFilter = buildFilter({
-      filters: theCase.owner,
-      field: OWNER_FIELD,
-      operator: 'or',
-      type: Operations.findConfigurations.savedObjectType,
-    });
-
     /* Start of update case with push information */
-    const [myCase, myCaseConfigure, comments] = await Promise.all([
+    const [myCase, comments] = await Promise.all([
       caseService.getCase({
         id: caseId,
       }),
-      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
       caseService.getAllCaseComments({
         id: caseId,
         options: {
@@ -290,7 +301,8 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        comments: comments.saved_objects
+        // Comments that were not sent must not be marked as pushed.
+        comments: (pushesToExternal(fieldRules.comments.direction) ? comments.saved_objects : [])
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
             savedObjectId: comment.id,

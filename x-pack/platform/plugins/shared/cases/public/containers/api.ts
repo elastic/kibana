@@ -53,6 +53,7 @@ import {
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
+  getCaseSyncUrl,
   getCaseFindUserActionsUrl,
   getCaseConnectorsUrl,
   getCaseUsersUrl,
@@ -751,4 +752,19 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+
+export const syncCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseSyncUrl(caseId), {
+    method: 'POST',
+    signal,
+  });
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };

@@ -76,6 +76,9 @@ export const CASE_FIND_ATTACHMENTS_URL = `${CASE_COMMENTS_URL}/_find` as const;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
+export const CASE_SYNC_URL = `${CASE_DETAILS_URL}/_sync` as const;
+export const CASE_EXTERNAL_SYNC_NOTIFY_URL =
+  `${CASES_URL}/external_sync/{connector_id}/_notify` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
@@ -113,6 +116,8 @@ export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
 export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
+export const INTERNAL_EXTERNAL_SYNC_SERVICE_ACCOUNT_URL =
+  `${CASES_INTERNAL_URL}/external_sync/{connector_id}/service_account` as const;
 export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
 export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;

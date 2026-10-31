@@ -224,4 +224,12 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
     });
   });
+
+  describe('Model version 11 to 12', () => {
+    it('does not add externalSync to the settings of existing cases', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 11, toVersion: 12 });
+      expect(migrated.attributes).toHaveProperty('settings', document.attributes.settings);
+    });
+  });
 });

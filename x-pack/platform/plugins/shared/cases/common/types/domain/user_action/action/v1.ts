@@ -33,6 +33,7 @@ export const UserActionTypes = {
   template: 'template',
   workflow: 'workflow',
   bulkAttachments: 'bulkAttachments',
+  sync: 'sync',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

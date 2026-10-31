@@ -9,7 +9,13 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseSeverity, UserActionTypes, CaseSchema } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  ConnectorTypes,
+  UserActionTypes,
+  CaseSchema,
+} from '../../../common/types/domain';
+import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
@@ -176,6 +182,17 @@ export const create = async (
           ),
         },
       };
+    }
+
+    // Precedence: caller > template > the connector's sync defaults.
+    if (query.settings.externalSync === undefined && query.connector.type !== ConnectorTypes.none) {
+      const { externalSync: connectorDefault } = await getConnectorSyncSettings(
+        { connectorId: query.connector.id },
+        clientArgs
+      );
+      if (connectorDefault != null) {
+        query = { ...query, settings: { ...query.settings, externalSync: connectorDefault } };
+      }
     }
 
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI

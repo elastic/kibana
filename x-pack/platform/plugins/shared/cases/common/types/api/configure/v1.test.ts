@@ -29,6 +29,10 @@ import {
   MAX_TITLE_LENGTH,
   MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
+import {
+  MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH,
+  MAX_EXTERNAL_SYNC_FIELD_MAPPINGS,
+} from '../../../utils/external_sync_fields';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
@@ -105,6 +109,84 @@ describe('configure', () => {
       const result = ConfigurationRequestSchema.safeParse({ ...defaultRequest, templates });
       expect(result.success).toBe(false);
     });
+
+    it('has expected attributes in request with externalSync', () => {
+      const request = {
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'kibana' },
+      };
+      const result = ConfigurationRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('rejects an unknown externalSync conflict strategy', () => {
+      const result = ConfigurationRequestSchema.safeParse({
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'newest' },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('has expected attributes in request with externalSyncFields', () => {
+      const request = {
+        ...defaultRequest,
+        externalSyncFields: [{ field: 'description', direction: 'push' }],
+      };
+      const result = ConfigurationRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('rejects an unknown externalSyncFields direction or field', () => {
+      expect(
+        ConfigurationRequestSchema.safeParse({
+          ...defaultRequest,
+          externalSyncFields: [{ field: 'title', direction: 'sideways' }],
+        }).success
+      ).toBe(false);
+      expect(
+        ConfigurationRequestSchema.safeParse({
+          ...defaultRequest,
+          externalSyncFields: [{ field: 'severity', direction: 'both' }],
+        }).success
+      ).toBe(false);
+    });
+
+    it(`does not accept externalSyncFieldMappings exceeding ${MAX_EXTERNAL_SYNC_FIELD_MAPPINGS}`, () => {
+      const externalSyncFieldMappings = new Array(MAX_EXTERNAL_SYNC_FIELD_MAPPINGS + 1).fill({
+        externalField: 'customfield_10010',
+        caseField: 'team',
+        direction: 'pull',
+      });
+      const result = ConfigurationRequestSchema.safeParse({
+        ...defaultRequest,
+        externalSyncFieldMappings,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it(`does not accept an externalField longer than ${MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH}`, () => {
+      const result = ConfigurationRequestSchema.safeParse({
+        ...defaultRequest,
+        externalSyncFieldMappings: [
+          {
+            externalField: 'x'.repeat(MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH + 1),
+            caseField: 'team',
+            direction: 'pull',
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('does not accept a blank externalField', () => {
+      const result = ConfigurationRequestSchema.safeParse({
+        ...defaultRequest,
+        externalSyncFieldMappings: [{ externalField: '   ', caseField: 'team', direction: 'pull' }],
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('ConfigurationPatchRequestSchema', () => {
@@ -128,6 +210,26 @@ describe('configure', () => {
 
     it('has expected attributes in request with extractObservables', () => {
       const request = { ...defaultRequest, extractObservables: false };
+      const result = ConfigurationPatchRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('has expected attributes in request with externalSync', () => {
+      const request = {
+        ...defaultRequest,
+        externalSync: { autoPush: false, conflictStrategy: 'external' },
+      };
+      const result = ConfigurationPatchRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
+
+    it('has expected attributes in request with externalSyncFields', () => {
+      const request = {
+        ...defaultRequest,
+        externalSyncFields: [{ field: 'status', direction: 'off' }],
+      };
       const result = ConfigurationPatchRequestSchema.safeParse(request);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(request);

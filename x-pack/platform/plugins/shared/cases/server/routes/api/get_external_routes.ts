@@ -14,6 +14,7 @@ import { getCaseRoute, resolveCaseRoute } from './cases/get_case';
 import { patchCaseRoute } from './cases/patch_cases';
 import { postCaseRoute } from './cases/post_case';
 import { pushCaseRoute } from './cases/push_case';
+import { syncCaseRoute } from './cases/sync_case';
 import { getReportersRoute } from './cases/reporters/get_reporters';
 import type { CaseRoute } from './types';
 import { getTagsRoute } from './cases/tags/get_tags';
@@ -79,5 +80,6 @@ export const getExternalRoutes = ({
     postAttachmentRoute,
     putAttachmentRoute,
     ...getPublicTemplateRoutes(config),
+    ...(config.bidirectionalSync.enabled ? [syncCaseRoute] : []),
     ...getPublicFieldDefinitionRoutes(config),
   ] as CaseRoute[];

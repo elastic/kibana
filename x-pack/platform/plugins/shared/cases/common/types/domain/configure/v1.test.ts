@@ -142,6 +142,16 @@ describe('configure', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
+
+    it('does not keep sync settings on the configuration attributes', () => {
+      const result = ConfigurationAttributesSchema.safeParse({
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'external' },
+        externalSyncFields: [{ field: 'title', direction: 'pull' }],
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ConfigurationSchema', () => {
@@ -189,6 +199,17 @@ describe('configure', () => {
       const result = ConfigurationSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('keeps the connector sync settings on the configuration response', () => {
+      const response = {
+        ...defaultRequest,
+        externalSync: { autoPush: true, conflictStrategy: 'external' },
+        externalSyncFields: [{ field: 'title', direction: 'pull', conflictStrategy: 'kibana' }],
+      };
+      const result = ConfigurationSchema.safeParse(response);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(response);
     });
   });
 

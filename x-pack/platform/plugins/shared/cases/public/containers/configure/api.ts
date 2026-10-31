@@ -126,6 +126,9 @@ const convertConfigureResponseToCasesConfigure = (
     owner,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     workflowTags,
   } = configuration;
 
@@ -140,6 +143,9 @@ const convertConfigureResponseToCasesConfigure = (
     owner,
     observableTypes,
     extractObservables,
+    externalSync,
+    externalSyncFields,
+    externalSyncFieldMappings,
     workflowTags,
   };
 };

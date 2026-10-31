@@ -1,0 +1,31 @@
+type: object
+description: >
+  Technical preview. Carries one external field of the configuration's connector onto a global case
+  field. `externalField` is the field key as the external system reports it; `caseField` is the storage
+  key of a global field definition. `direction` and `conflictStrategy` behave as for the built-in field
+  rules. Supported for Jira and ServiceNow connectors, up to 20 mappings per connector.
+required:
+  - externalField
+  - caseField
+  - direction
+properties:
+  externalField:
+    type: string
+    example: customfield_10021
+  caseField:
+    type: string
+    example: severity_tier_as_keyword
+  direction:
+    type: string
+    enum:
+      - both
+      - push
+      - pull
+      - off
+    example: both
+  conflictStrategy:
+    type: string
+    enum:
+      - external
+      - kibana
+    example: external

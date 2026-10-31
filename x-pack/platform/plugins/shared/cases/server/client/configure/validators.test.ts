@@ -8,6 +8,8 @@
 import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
+  validateExternalSyncFieldMappingsInRequest,
+  validateExternalSyncFieldsInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
 
@@ -401,6 +403,82 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
       );
+    });
+  });
+
+  describe('validateExternalSyncFieldsInRequest', () => {
+    it('accepts an empty or missing list', () => {
+      expect(() => validateExternalSyncFieldsInRequest(undefined)).not.toThrow();
+      expect(() => validateExternalSyncFieldsInRequest([])).not.toThrow();
+    });
+
+    it('accepts supported directions', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([
+          { field: 'title', direction: 'pull', conflictStrategy: 'kibana' },
+          { field: 'status', direction: 'off' },
+          { field: 'comments', direction: 'push' },
+        ])
+      ).not.toThrow();
+    });
+
+    it('throws when a field appears twice', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([
+          { field: 'title', direction: 'both' },
+          { field: 'title', direction: 'off' },
+        ])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value \\"title\\" supplied to \\"externalSyncFields\\": a field may appear only once"`
+      );
+    });
+
+    it('throws when a field asks for a direction it does not support', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([
+          { field: 'status', direction: 'push' },
+          { field: 'status', direction: 'both' },
+        ])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value \\"status\\" supplied to \\"externalSyncFields\\": a field may appear only once"`
+      );
+    });
+
+    it('reports every unsupported direction', () => {
+      expect(() =>
+        validateExternalSyncFieldsInRequest([{ field: 'status', direction: 'both' }])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid externalSyncFields: \\"status\\" cannot sync with direction \\"both\\" (allowed: pull, off)"`
+      );
+    });
+  });
+
+  describe('validateExternalSyncFieldMappingsInRequest', () => {
+    it('accepts an empty or missing list and valid mappings', () => {
+      expect(() => validateExternalSyncFieldMappingsInRequest(undefined)).not.toThrow();
+      expect(() => validateExternalSyncFieldMappingsInRequest([])).not.toThrow();
+      expect(() =>
+        validateExternalSyncFieldMappingsInRequest([
+          { externalField: 'priority', caseField: 'severity_tier_as_keyword', direction: 'both' },
+        ])
+      ).not.toThrow();
+    });
+
+    it('throws when an external field is mapped twice', () => {
+      expect(() =>
+        validateExternalSyncFieldMappingsInRequest([
+          { externalField: 'priority', caseField: 'a_as_keyword', direction: 'both' },
+          { externalField: 'priority', caseField: 'b_as_keyword', direction: 'pull' },
+        ])
+      ).toThrow('an external field may be mapped only once');
+    });
+
+    it('throws when the case field key is not a safe extended field key', () => {
+      expect(() =>
+        validateExternalSyncFieldMappingsInRequest([
+          { externalField: 'priority', caseField: 'Bad Key!', direction: 'both' },
+        ])
+      ).toThrow('does not name a valid case field');
     });
   });
 });

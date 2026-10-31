@@ -37,6 +37,9 @@ export const usePersistConfiguration = () => {
       connector,
       observableTypes,
       extractObservables,
+      externalSync,
+      externalSyncFields,
+      externalSyncFieldMappings,
       workflowTags,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
@@ -48,6 +51,9 @@ export const usePersistConfiguration = () => {
           owner: owner[0],
           observableTypes,
           extractObservables,
+          externalSync,
+          externalSyncFields,
+          externalSyncFieldMappings,
           workflowTags,
         });
       }
@@ -60,6 +66,9 @@ export const usePersistConfiguration = () => {
         templates: templates ?? [],
         observableTypes,
         extractObservables,
+        externalSync,
+        externalSyncFields,
+        externalSyncFieldMappings,
         workflowTags,
       });
     },

@@ -244,6 +244,35 @@ describe('useChangeAppliedTemplate', () => {
     expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
+  it('applies the template external sync defaults when declared', async () => {
+    const externalSync = { autoPush: true, conflictStrategy: 'external' as const };
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          settings: { externalSync },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            settings: { syncAlerts: false, extractObservables: false, externalSync },
+          }),
+        })
+      );
+    });
+  });
+
   it('turns settings off when the template declares none', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
