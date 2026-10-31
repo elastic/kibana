@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/securitysolution-io-ts-types'
   - '@kbn/utils'
+  - '@kbn/apm-utils'
   - '@kbn/logging-mocks'
   - '@kbn/utility-types'
   - '@kbn/core-elasticsearch-client-server-mocks'

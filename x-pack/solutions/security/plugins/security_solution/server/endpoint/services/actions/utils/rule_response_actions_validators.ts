@@ -34,6 +34,7 @@ import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 type RuleResponseActions = Pick<RuleResponse, 'response_actions'>;
 
@@ -385,43 +386,44 @@ export const validateRuleImportResponseActions = async <
   checkOsqueryResponseActionAuthz,
 }: ValidateRuleImportResponseActionsOptions<T>): Promise<
   ValidateRuleImportResponseActionsResult<T>
-> => {
-  const logger = endpointService.createLogger('validateRuleImportResponseActions');
-  const response: ValidateRuleImportResponseActionsResult<T> = { valid: [], errors: [] };
+> =>
+  withSecuritySpan('endpoint.validateRuleImportResponseActions', async () => {
+    const logger = endpointService.createLogger('validateRuleImportResponseActions');
+    const response: ValidateRuleImportResponseActionsResult<T> = { valid: [], errors: [] };
 
-  logger.debug(() => `Validating response actions for import of [${rulesToImport.length}] rules`);
+    logger.debug(() => `Validating response actions for import of [${rulesToImport.length}] rules`);
 
-  await pMap(
-    rulesToImport,
-    async (rule) => {
-      try {
-        await validateRuleResponseActions({
-          endpointAuthz,
-          endpointService,
-          spaceId,
-          rulePayload: rule,
-          checkOsqueryResponseActionAuthz,
-        });
+    await pMap(
+      rulesToImport,
+      async (rule) => {
+        try {
+          await validateRuleResponseActions({
+            endpointAuthz,
+            endpointService,
+            spaceId,
+            rulePayload: rule,
+            checkOsqueryResponseActionAuthz,
+          });
 
-        response.valid.push(rule);
-      } catch (error) {
-        response.errors.push({
-          id: rule.id ?? '',
-          rule_id: rule.rule_id ?? '',
-          error: { message: error.message, status_code: error.statusCode },
-        });
-      }
-    },
-    { concurrency: 20 }
-  );
+          response.valid.push(rule);
+        } catch (error) {
+          response.errors.push({
+            id: rule.id ?? '',
+            rule_id: rule.rule_id ?? '',
+            error: { message: error.message, status_code: error.statusCode },
+          });
+        }
+      },
+      { concurrency: 20 }
+    );
 
-  logger.debug(
-    () =>
-      `Validation done: valid rules [${response.valid.length}], errors [${response.errors.length}]`
-  );
+    logger.debug(
+      () =>
+        `Validation done: valid rules [${response.valid.length}], errors [${response.errors.length}]`
+    );
 
-  return response;
-};
+    return response;
+  });
 
 /** @private */
 const validateEndpointResponseActionAuthz = (

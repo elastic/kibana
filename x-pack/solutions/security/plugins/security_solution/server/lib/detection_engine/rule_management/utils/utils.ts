@@ -36,6 +36,7 @@ import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 import type { BulkActionError } from '../api/rules/bulk_actions/bulk_actions_response';
 import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids';
@@ -247,53 +248,57 @@ export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
   savedObjectsClient: SavedObjectsClientContract,
   actionsClient: ActionsClient
-): Promise<PromiseFromStreams[]> => {
-  const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
+): Promise<PromiseFromStreams[]> =>
+  withSecuritySpan('ruleManagement.migrateLegacyActionsIds', async () => {
+    const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
 
-  const toReturn = await pMap(
-    rules,
-    async (rule) => {
-      if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
-        // filter out system actions, since they were not part of any 7.x releases and do not need to be migrated
-        const [systemActions, extActions] = partition<RuleAction>((action) =>
-          actionsClient.isSystemAction(action.id)
-        )(rule.actions);
-        // can we swap the pre 8.0 action connector(s) id with the new,
-        // post-8.0 action id (swap the originId for the new _id?)
-        const newActions: Array<RuleAction | Error> = await pMap(
-          (extActions as RuleAction[]) ?? [],
-          (action: RuleAction) => swapActionIds(action, savedObjectsClient),
-          { concurrency: MAX_CONCURRENT_SEARCHES }
-        );
+    const toReturn = await pMap(
+      rules,
+      async (rule) => {
+        if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
+          // filter out system actions, since they were not part of any 7.x releases and do not need to be migrated
+          const [systemActions, extActions] = partition<RuleAction>((action) =>
+            actionsClient.isSystemAction(action.id)
+          )(rule.actions);
+          // can we swap the pre 8.0 action connector(s) id with the new,
+          // post-8.0 action id (swap the originId for the new _id?)
+          const newActions: Array<RuleAction | Error> = await pMap(
+            (extActions as RuleAction[]) ?? [],
+            (action: RuleAction) => swapActionIds(action, savedObjectsClient),
+            { concurrency: MAX_CONCURRENT_SEARCHES }
+          );
 
-        // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const [actionMigrationErrors, newlyMigratedActions] = partition<RuleAction | Error, Error>(
-          (item): item is Error => item instanceof Error
-        )(newActions);
+          // were there any errors discovered while trying to migrate and swap the action connector ids?
+          const [actionMigrationErrors, newlyMigratedActions] = partition<
+            RuleAction | Error,
+            Error
+          >((item): item is Error => item instanceof Error)(newActions);
 
-        if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
-          return { ...rule, actions: [...newlyMigratedActions, ...systemActions] };
+          if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
+            return { ...rule, actions: [...newlyMigratedActions, ...systemActions] };
+          }
+
+          return [
+            { ...rule, actions: [...newlyMigratedActions, ...systemActions] },
+            new Error(
+              JSON.stringify(
+                createBulkErrorObject({
+                  ruleId: rule.rule_id,
+                  statusCode: 409,
+                  message: `${actionMigrationErrors
+                    .map((error: Error) => error.message)
+                    .join(',')}`,
+                })
+              )
+            ),
+          ];
         }
-
-        return [
-          { ...rule, actions: [...newlyMigratedActions, ...systemActions] },
-          new Error(
-            JSON.stringify(
-              createBulkErrorObject({
-                ruleId: rule.rule_id,
-                statusCode: 409,
-                message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
-              })
-            )
-          ),
-        ];
-      }
-      return rule;
-    },
-    { concurrency: MAX_CONCURRENT_SEARCHES }
-  );
-  return toReturn.flat();
-};
+        return rule;
+      },
+      { concurrency: MAX_CONCURRENT_SEARCHES }
+    );
+    return toReturn.flat();
+  });
 
 /**
  * In ESS 8.10.x "investigation_fields" are mapped as string[].

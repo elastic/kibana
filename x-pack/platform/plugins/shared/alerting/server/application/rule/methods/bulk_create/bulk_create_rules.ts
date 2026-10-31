@@ -323,7 +323,14 @@ async function runBatch<Params extends RuleParams>({
 
   if (enabledRules.length > 0) {
     try {
-      const scheduledTasks = await bulkScheduleTask(context, enabledRules);
+      const scheduledTasks = await withSpan(
+        {
+          name: 'bulkCreateRules.runBatch.bulkScheduleTask',
+          type: 'rules',
+          labels: { count: String(enabledRules.length) },
+        },
+        () => bulkScheduleTask(context, enabledRules)
+      );
       scheduledTasks.forEach((t) => taskIds.add(t.id));
 
       // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` logs+skips
