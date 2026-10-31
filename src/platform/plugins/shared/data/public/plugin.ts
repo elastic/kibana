@@ -26,6 +26,7 @@ import type {
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import { DateRangePickerPresetsService } from './date_range_picker_presets';
+import { ReplayCache } from './replay_cache';
 import {
   setHttp,
   setIndexPatterns,
@@ -159,6 +160,12 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
+    const replayCache = new ReplayCache({
+      hasSession: (sessionId) => search.session.hasSession(sessionId),
+      hasResponseCacheForSession: (sessionId) => search.hasResponseCacheForSession(sessionId),
+      evictResponseCacheForSession: (sessionId) => search.evictResponseCacheForSession(sessionId),
+    });
+
     uiActions.addTriggerActionAsync(ON_SELECT_RANGE, 'ACTION_SELECT_RANGE', async () => {
       const { createSelectRangeActionDefinition } = await import('./actions');
       const rangeSelectAction = createSelectRangeActionDefinition(() => ({
@@ -208,6 +215,7 @@ export class DataPublicPlugin
       dataViews,
       query,
       search,
+      replayCache,
       dateRangePickerPresets,
       nowProvider: this.nowProvider,
     };
