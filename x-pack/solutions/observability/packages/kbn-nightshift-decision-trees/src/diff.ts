@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { decisionEdgeKey } from './edge_key';
 import type { DecisionEdgeView, DecisionNodeView, DecisionTreeView } from './types';
 
 /** Fields of a node that can change between versions, used to label a modification. */
@@ -30,14 +31,6 @@ export interface DecisionTreeDiff {
   edges_removed: DecisionEdgeView[];
   edges_modified: DecisionEdgeChange[];
 }
-
-/**
- * Edge identity is its source, target and condition, so an edge whose only change is whether it
- * was taken reads as a modification rather than an add plus a remove. That is what lets the diff
- * surface a newly-causal branch instead of a churn of unrelated edges.
- */
-const edgeKey = (edge: DecisionEdgeView): string =>
-  `${edge.source_node_id}\u0000${edge.target_node_id}\u0000${edge.condition}`;
 
 const nodeMetadataEqual = (
   before: DecisionNodeView['node_metadata'],
@@ -100,8 +93,8 @@ export const diffDecisionTrees = (
     }
   }
 
-  const beforeEdges = new Map(before.edges.map((edge) => [edgeKey(edge), edge]));
-  const afterEdges = new Map(after.edges.map((edge) => [edgeKey(edge), edge]));
+  const beforeEdges = new Map(before.edges.map((edge) => [decisionEdgeKey(edge), edge]));
+  const afterEdges = new Map(after.edges.map((edge) => [decisionEdgeKey(edge), edge]));
 
   const edgesAdded: DecisionEdgeView[] = [];
   const edgesRemoved: DecisionEdgeView[] = [];
