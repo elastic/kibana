@@ -1,6 +1,6 @@
 # @kbn/evals-suite-attack-discovery-fp-tp
 
-Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](https://github.com/elastic/security-team/issues/19285)). It seeds a world around one persisted Attack Discovery, runs the analysis workflow, and grades the workflow's execution output against the contract posted on [security-team#19280](https://github.com/elastic/security-team/issues/19280).
+Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](https://github.com/elastic/security-team/issues/19285)). It seeds a world around one persisted Attack Discovery, runs the analysis workflow, and grades the workflow's execution output against the contract posted on [security-team#19280](https://github.com/elastic/security-team/issues/19280). One deliberate departure: `entity_role` follows the shipped prompt, where a management server, MDM host, jump box, or service account is `neutral`, not `contradicts` as the contract reads it.
 
 ## What it runs
 
@@ -23,12 +23,12 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.tp-entities-missing` | U6 | TP twin, no entity documents | `true_positive` |
 | `encoded-powershell.fp-entities-missing` | U1 | FP twin, no entity documents | `inconclusive` |
 | `encoded-powershell.tp-events-missing` | U6 | TP twin, no raw events | `inconclusive` |
-| `encoded-powershell.mixed-world` | U1 | FP entities + TP events | `inconclusive` |
+| `encoded-powershell.mixed-world` | U6 | FP entities + TP events | `true_positive` |
 | `encoded-powershell.fp-events-truncated` | U1 | FP twin + 60 benign service starts on the cited host after its own events | `inconclusive` |
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
 
-`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
+`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 20 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
 
 `fp-events-truncated` reaches `inconclusive` deterministically. The analysis reads at most 50 raw events, oldest first, so the FP twin's own events stay on the page and the model still sees a false positive; the extra hits mark the page truncated, and `block_truncated_clear` rewrites `false_positive` to `inconclusive`. It has no `checks`, because the verdict rules do not model truncation.
 
@@ -141,7 +141,7 @@ node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/s
 - The script only seeds data. Then, in the space, enable the Attack Discovery Worker (AlertZero → Watches → Triage Watch → Attack Discovery: Enabled, Autonomy Manual, Save); saving binds the Worker's service account and starts its first run. Read the verdict in the `system-security-attack-discovery-fp-tp-analysis` and `system-security-attack-discovery-review` executions (Workflows, with Show managed workflows on) and in the Investigation's verdict card in Agent Builder. Do not run `system-security-attack-discovery-review` by hand: it fails without the Worker run's service-account parent. Re-running the Worker over the same seed generates no new review, because persistence de-duplicates the attack; seed a new space for each repetition.
 - The manifest (`--manifest`, default `target/ad_worker_fp_tp/<space>-<marker>.json` in this package) records the marker, the seeded ids, the expected outcome and the window deadline.
 
-Live results on a local 9.6 stack from `main` after [#298409](https://github.com/elastic/kibana/pull/298409) turned the ground-truth gate off for the Worker (2026-10-19, `alertzero_frontier` → `.anthropic-claude-5-opus-chat_completion` over EIS, one space per run), and again on an Elastic Cloud Hosted 9.6 deployment (2026-10-20): `--outcome fp`, `tp` and `inconclusive` each reached their expected verdict in 3 of 3 runs on both. Every run generated one attack citing all four seeded alerts. The FP attacks were closed with `workflow_reason: false_positive` and their detection alerts left open. In the inconclusive runs the model itself returned `inconclusive`, so `block_truncated_clear` did not have to downgrade a `false_positive`. Before #298409 the gate dropped the FP and inconclusive worlds during generation, and no review ran. `encoded-powershell.mixed-world` does reach the review, but the analysis returns `true_positive`, not its gold `inconclusive`: the prompt treats an MDM host as `neutral`, not `contradicts`. Do not use it for QA until its world or gold is fixed.
+Live results on a local 9.6 stack from `main` after [#298409](https://github.com/elastic/kibana/pull/298409) turned the ground-truth gate off for the Worker (2026-10-19, `alertzero_frontier` → `.anthropic-claude-5-opus-chat_completion` over EIS, one space per run), and again on an Elastic Cloud Hosted 9.6 deployment (2026-10-20): `--outcome fp`, `tp` and `inconclusive` each reached their expected verdict in 3 of 3 runs on both. Every run generated one attack citing all four seeded alerts. The FP attacks were closed with `workflow_reason: false_positive` and their detection alerts left open. In the inconclusive runs the model itself returned `inconclusive`, so `block_truncated_clear` did not have to downgrade a `false_positive`. Before #298409 the gate dropped the FP and inconclusive worlds during generation, and no review ran. `encoded-powershell.mixed-world` reached the review and the analysis returned `true_positive`, which was not its gold then (`inconclusive`): the prompt treats an MDM host as `neutral`, not `contradicts`. Its gold is now `true_positive`.
 
 Auth: `--username`/`--password` (default `elastic`/`changeme`), or an API key in the `FP_TP_API_KEY` environment variable (or `--apiKey`, which ends up in shell history). For an Elastic Cloud Hosted deployment, pass both URLs and use a key with the privileges of the `superuser` role: the script writes to the space's alerts index, creates rules and spaces, and changes Advanced Settings.
 
@@ -158,7 +158,7 @@ Serverless projects are supported with `--serverless` (ApiKey auth and a dedicat
 
 ## Reproducibility
 
-Run with `--repetitions 5` or more. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
+Run with `--repetitions 5` or more. The whole dataset runs for every repetition inside one Playwright test, so its timeout is 30 minutes per repetition with a 60 minute floor (150 minutes at 5 repetitions). Above 2 repetitions the test timeout exceeds the 60-minute CI step limit, so run them locally or on dedicated eval infrastructure. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
 
 ## Measured baseline (managed workflow)
 
@@ -171,18 +171,26 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 | `PayloadConformance` | 1.000 | 1.000 | 1.000 |
 | `UnsafeClose` | 1.000 | 1.000 | 1.000 |
 
+The gold of `encoded-powershell.mixed-world`, `mimicrat-clickfix.role-swap-sccm`, and `mimicrat-clickfix.role-swap-mdm` changed from `inconclusive` to `true_positive` after this baseline (their `entity_role` is `neutral` under the prompt), so the baseline will be re-measured against the corrected gold.
+
 `PayloadConformance` and `UnsafeClose` are constant at 1.000 (all models, all repetitions). `trajectory` is N/A: the managed agent declares no tools.
 
-What each evaluator checks after the #295393 tightening: `PayloadConformance` now also fails a run from contract-derived facts alone — a dropped world check (`entity_role`, `process_parent`, or `network_destination` missing from `checks`, except on a `block_truncated_clear` or `block_ungrounded_claims` downgrade, which emits `verdict: inconclusive` with `checks` omitted), a `false_positive` verdict while `coverage` shows a source with `seen: 0` or absent (missing evidence cannot clear an alert), a `false_positive` or `true_positive` verdict while completed world checks both support and contradict (rule 1 requires `inconclusive`; `alert_linkage` never decides), a `false_positive` without a completed world check contradicting and none supporting (rule 2), and a `true_positive` without `process_parent` or `network_destination` supporting, or with a world check contradicting (rule 3). `UnsafeClose` is unchanged: 0 only when the run predicts `false_positive` on a non-false-positive gold; no current scenario elicits that prediction other than the FP examples, so new discriminating scenarios remain follow-up work. The 2026-10-05 baseline numbers above predate this change; a re-baseline is pending.
+What each evaluator checks after the #295393 tightening: `PayloadConformance` now also fails a run from contract-derived facts alone — a dropped world check (`entity_role`, `process_parent`, or `network_destination` missing from `checks`, except on a `block_truncated_clear` or `block_ungrounded_claims` downgrade, which emits `verdict: inconclusive` with `checks` omitted), a `false_positive` verdict while `coverage` shows a source with `seen: 0` or absent (missing evidence cannot clear an alert), a `false_positive` or `true_positive` verdict while completed world checks both support and contradict (rule 1 requires `inconclusive`; `alert_linkage` never decides), a `false_positive` without a completed world check contradicting and none supporting (rule 2), and a `true_positive` without `process_parent` or `network_destination` supporting, or with a world check contradicting (rule 3). `UnsafeClose` is unchanged: 0 only when the run predicts `false_positive` on a non-false-positive gold; no current scenario elicits that prediction other than the FP examples, so a scenario that can move it is Follow-up 2. The 2026-10-05 baseline numbers above predate this change; the re-baseline is Follow-up 3.
 
-## Acceptance criteria (proposed)
+## Acceptance criteria
 
-- Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0. `PayloadConformance` now enforces the prompt's verdict rules 1-3, the missing-evidence rule, and world-check presence, so it can fail a wrong-but-well-formed answer; its threshold needs re-baselining against a new run. `UnsafeClose` is still saturated at 1.000 — no current scenario elicits a `false_positive` prediction on a non-FP gold, so it cannot detect a regression yet. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
-- `OutcomeAccuracy`: set the threshold against the baseline above, whose floor is gpt-5-5 at 0.754 (CI down to 0.580).
+Gates against the managed workflow, per core model, on a run with `--repetitions 5` or more:
 
-## Follow-ups (sample-workflow removal done)
+- `PayloadConformance` = 1.0. It enforces the prompt's verdict rules 1-3, the missing-evidence rule, and world-check presence, so it fails a wrong-but-well-formed answer.
+- `UnsafeClose` = 1.0. It is saturated: in the baseline no run predicted `false_positive` on a non-FP gold. The worlds whose activity reads as benign but whose gold is not `false_positive` (`fp-entities-missing`, `fp-events-missing`, `network-only-entities-missing`, `mixed-world`, `fp-events-truncated`) are the ones that can move it, by closing an attack on missing evidence; no scenario yet hides a real attack behind benign-looking evidence. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
+- `OutcomeAccuracy` ≥ 0.75, the floor of the managed-workflow baseline above (gpt-5-5 at 0.754). That baseline predates the `PayloadConformance` tightening and the U3/U4 worlds, so re-baseline before raising it.
+- Agreement: report the share of each example's repetitions that land on the same outcome (see Reproducibility). An example below 0.8 is unstable and is read separately, not gated.
 
-1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-2. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced). Tracked in #295393.
+## Follow-ups
+
+1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'` ([#295911](https://github.com/elastic/kibana/pull/295911)).
+2. Give `UnsafeClose` a scenario that hides a real attack behind benign-looking evidence, so a `false_positive` prediction on a non-FP gold can occur and the gate can leave the 1.0 ceiling.
+3. Re-baseline on the managed workflow with the current 29 examples.
+4. Keep the gold in step with the prompt's `entity_role` rule: the prompt reads a management server, MDM host, jump box, or service account as `neutral`, not `contradicts`, where the contract says `contradicts`. `entity_role_gold.test.ts` fails if either the prompt sentence or an example's gold moves alone. Action: update the contract's `entity_role` definition to match the prompt, or change the prompt and re-derive the gold.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.

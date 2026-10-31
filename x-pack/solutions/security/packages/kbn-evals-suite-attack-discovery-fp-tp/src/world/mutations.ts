@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { Ad2IndexedRawEvent } from '@kbn/evals-suite-attack-discovery-agent-builder';
+import {
+  ad2SeedId,
+  type Ad2IndexedAlert,
+  type Ad2IndexedRawEvent,
+} from '@kbn/evals-suite-attack-discovery-agent-builder';
 import type { FpTpChainDestination, FpTpChainParentProcess } from './chain';
 import { asRecord, withFieldMessage } from './event_message';
 import type { FpTpWorld } from './types';
@@ -133,6 +137,83 @@ export const withoutEventIds = (world: FpTpWorld, eventIds: readonly string[]): 
     throw new Error(`No raw event matches id ${missing.join(', ')}`);
   }
   return { ...world, events: world.events.filter(({ id }) => !eventIds.includes(id)) };
+};
+
+const citedEventIds = (alert: Ad2IndexedAlert): string[] => {
+  const ancestors = alert.source['kibana.alert.ancestors'];
+  return Array.isArray(ancestors) ? ancestors.map((ancestor) => String(asRecord(ancestor).id)) : [];
+};
+
+/**
+ * Gives the process of each alert, and of the raw events it cites, its own pid and
+ * `process.entity_id`, parent pids included, so no process tree or entity id joins two
+ * alerts. Host and user stay shared: identifiers without a bridge. A parent that ran in
+ * another alert's events is left with no process event, as when that telemetry is
+ * absent. Throws when a raw event is cited by no alert or by two, since either would
+ * keep a bridge.
+ */
+export const withoutAlertBridges = (world: FpTpWorld): FpTpWorld => {
+  const alertIndexOf = new Map<string, number>();
+  world.alerts.forEach((alert, index) => {
+    for (const eventId of citedEventIds(alert)) {
+      if (alertIndexOf.has(eventId)) {
+        throw new Error(`Raw event ${eventId} is cited by more than one alert`);
+      }
+      alertIndexOf.set(eventId, index);
+    }
+  });
+  const alertIndexOfEvent = (eventId: string): number => {
+    const index = alertIndexOf.get(eventId);
+    if (index === undefined) {
+      throw new Error(`No alert cites raw event ${eventId}`);
+    }
+    return index;
+  };
+
+  const pids = [
+    ...world.alerts.map(({ source }) => asRecord(source.process)),
+    ...world.events.map(({ source }) => asRecord(source.process)),
+  ]
+    .flatMap((process) => [Number(process.pid), Number(asRecord(process.parent).pid)])
+    .filter(Number.isFinite);
+  if (pids.length === 0) {
+    throw new Error('No process in the world has a numeric pid');
+  }
+  // Each alert gets its own band above every pid, and its own shift inside the band, so
+  // renumbered pids neither collide across alerts nor keep the original trailing digits.
+  const stride = 10 ** String(Math.max(...pids)).length;
+  const renumber = (pid: number, index: number): number =>
+    stride * (index + 1) + ((pid + 7919 * (index + 1)) % stride);
+  const separate = (value: unknown, index: number): Record<string, unknown> => {
+    const process = asRecord(value);
+    const pid = Number(process.pid);
+    return {
+      ...process,
+      ...(Number.isFinite(pid) ? { pid: renumber(pid, index) } : {}),
+      ...(process.entity_id !== undefined
+        ? { entity_id: ad2SeedId(String(process.entity_id), 'entity', 'no-bridge', index) }
+        : {}),
+    };
+  };
+  const separateWithParent = (value: unknown, index: number): Record<string, unknown> => {
+    const process = separate(value, index);
+    return process.parent ? { ...process, parent: separate(process.parent, index) } : process;
+  };
+
+  return {
+    ...world,
+    alerts: world.alerts.map((alert, index) => ({
+      ...alert,
+      source: { ...alert.source, process: separateWithParent(alert.source.process, index) },
+    })),
+    events: world.events.map((event) => ({
+      ...event,
+      source: {
+        ...event.source,
+        process: separateWithParent(event.source.process, alertIndexOfEvent(event.id)),
+      },
+    })),
+  };
 };
 
 /** Drops every raw event whose `event.category` includes `category`. */

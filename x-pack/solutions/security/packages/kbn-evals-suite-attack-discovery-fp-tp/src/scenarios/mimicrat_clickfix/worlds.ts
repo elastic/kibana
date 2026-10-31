@@ -104,6 +104,16 @@ export const withBenignActivity = (world: FpTpWorld, runMarker: string): FpTpWor
 };
 
 /**
+ * An administrative jump box running the mimic's Configuration Manager activity against
+ * Microsoft management services. No parents are recorded, so the role and the
+ * destinations, not the process tree, explain the activity.
+ */
+export const jumpBoxWorld = (runMarker: string): FpTpWorld =>
+  withManagementDestinations(
+    withoutChainParents(withBenignActivity(tpWorld(runMarker, 'jump_box'), runMarker))
+  );
+
+/**
  * The benign mimic: the same alerts and discovery on an SCCM distribution point, where
  * the Configuration Manager client runs compliance scripts and a cached package that
  * talk only to Microsoft management services.

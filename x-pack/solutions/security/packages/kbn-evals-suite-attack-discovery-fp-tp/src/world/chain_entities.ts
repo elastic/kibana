@@ -23,8 +23,10 @@ interface FpTpEntityRole {
 
 /**
  * What the entity store says the host and user are, which the `entity_role` check reads.
- * An ordinary workstation supports the alert; a management server contradicts it;
- * `unknown` has records with no role, so the check is neutral.
+ * An ordinary workstation supports the alert. A management server, MDM host, jump box, or
+ * service account is neutral, not contradicting: the shipped prompt treats the role as
+ * context, since those machines are also high-value targets, so gold must not
+ * declare `contradicts` for them. `unknown` has records with no role, so it is neutral too.
  */
 const FP_TP_ENTITY_ROLES = {
   employee_workstation: {
@@ -80,6 +82,26 @@ const FP_TP_ENTITY_ROLES = {
       criticality: 'low_impact',
       riskLevel: 'Moderate',
       riskScoreNorm: 41,
+    },
+  },
+  jump_box: {
+    host: {
+      subType: 'jump_box',
+      criticality: 'high_impact',
+      riskLevel: 'High',
+      riskScoreNorm: 68,
+      asset: {
+        owner: 'it-operations',
+        vendor: 'Microsoft',
+        model: 'Windows Server 2022 administrative jump host',
+        environment: 'management',
+      },
+    },
+    user: {
+      subType: 'it_admin',
+      criticality: 'high_impact',
+      riskLevel: 'Moderate',
+      riskScoreNorm: 44,
     },
   },
   unknown: {},

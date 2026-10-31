@@ -37,7 +37,7 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     expectedOutcome: 'false_positive',
     provenance: 'authored',
     checks: {
-      entityRole: 'contradicts',
+      entityRole: 'neutral',
       processParent: 'contradicts',
       networkDestination: 'contradicts',
     },
@@ -85,12 +85,12 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
   },
   {
     id: 'encoded-powershell.mixed-world',
-    situation: 'U1',
+    situation: 'U6',
     evidenceState: 'mixed',
-    expectedOutcome: 'inconclusive',
+    expectedOutcome: 'true_positive',
     provenance: 'authored',
     checks: {
-      entityRole: 'contradicts',
+      entityRole: 'neutral',
       processParent: 'supports',
       networkDestination: 'supports',
     },
