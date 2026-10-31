@@ -718,6 +718,44 @@ describe('huntCoordinator', () => {
     );
   });
 
+  it('widens what Tier 2 may read to linked projects when cross-project search is on', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockScope.mockClear();
+    mockScope.mockResolvedValueOnce({
+      ...okScope,
+      actionable_indices: ['logs-endpoint.events.process-default*'],
+    });
+    const mockModels = allTiers({} as ScopedModel);
+
+    await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModels, logger, {
+      spaceId: 'default',
+      indexPatterns: INDEX_PATTERNS,
+      crossProjectSearch: true,
+      trigger: 'scheduled',
+      run_id: 'run-tier2-cps',
+      text: 'report text',
+    });
+
+    expect(mockScope).toHaveBeenCalledWith(expect.objectContaining({ crossProjectSearch: true }));
+    expect(mockT2).toHaveBeenLastCalledWith(
+      expect.anything(),
+      logger,
+      expect.objectContaining({
+        allowed_indices: [
+          'logs-aws.cloudtrail-*',
+          '*:logs-aws.cloudtrail-*',
+          'logs-endpoint.events.process-default*',
+          '*:logs-endpoint.events.process-default*',
+        ],
+        cross_project_search: true,
+        excluded_indices: ['*elastic-cloud-logs-*'],
+      }),
+      esClient,
+      undefined
+    );
+  });
+
   describe('the techniques an earlier run already searched', () => {
     const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
@@ -828,6 +866,7 @@ describe('huntCoordinator', () => {
         esClient,
         spaceId: 'hunt-a',
         indexPatterns: INDEX_PATTERNS,
+        crossProjectSearch: false,
         report: {
           vendor: 'Fortinet',
           product: 'FortiOS',

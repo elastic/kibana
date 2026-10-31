@@ -42,7 +42,7 @@ import {
   HUNT_PROMPT_TEMPLATE_VERSION,
   clampHuntTemplateString,
 } from '../common/hunt_prompt_templates';
-import { prepareEsqlForExecute } from './prepare_esql_for_execute';
+import { addFromExclusions, prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
   HuntBehaviorParams,
@@ -263,6 +263,8 @@ const executeValidatedEsql = async ({
   window,
   row_limit,
   allowedIndices,
+  crossProjectSearch,
+  excludedIndices,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -271,6 +273,8 @@ const executeValidatedEsql = async ({
   window: { from: string; to: string };
   row_limit: number;
   allowedIndices: string[];
+  crossProjectSearch: boolean;
+  excludedIndices: string[];
 }): Promise<{
   execution: BehaviorExecution;
   affected_hosts?: string[];
@@ -283,8 +287,10 @@ const executeValidatedEsql = async ({
   const matchesRequired = buildMatchesRequired(allowedIndices);
 
   try {
-    const prepared = prepareEsqlForExecute(esql);
-    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices);
+    const prepared = prepareEsqlForExecute(esql, { excludedIndices });
+    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices, {
+      crossProjectSearch,
+    });
     if (!sourcesAllowed.ok) {
       logger.warn(
         `[hunt:esql] execute for ${techniqueId} refused — ${sourcesAllowed.reason}. ` +
@@ -530,6 +536,8 @@ const generateGroundedEsql = async ({
   excludedIocs,
   articleContext,
   allowedIndices,
+  crossProjectSearch,
+  excludedIndices,
   rowLimit,
 }: {
   esqlModel: ScopedModel;
@@ -541,6 +549,8 @@ const generateGroundedEsql = async ({
   excludedIocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
+  crossProjectSearch: boolean;
+  excludedIndices: string[];
   rowLimit: number;
 }): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
@@ -548,7 +558,10 @@ const generateGroundedEsql = async ({
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
-  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
+  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices, {
+    crossProjectSearch,
+    excludedIndices,
+  });
   const iocValues = (iocs ?? []).map((ioc) => ioc.value);
   const excludedIocValues = (excludedIocs ?? []).map((ioc) => ioc.value);
 
@@ -593,7 +606,8 @@ const generateGroundedEsql = async ({
         // `query_out_of_scope` exactly as today.
         const sourcesAllowed = assertEsqlSourcesAllowed(
           prepareEsqlForExecute(esql),
-          allowedIndices
+          allowedIndices,
+          { crossProjectSearch }
         );
         if (!sourcesAllowed.ok) {
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
@@ -757,6 +771,8 @@ export const huntBehavior = async (
     size,
     row_limit: rowLimitFromParams,
     allowed_indices: allowedIndices = [],
+    cross_project_search: crossProjectSearch = false,
+    excluded_indices: excludedIndices = [],
     already_searched_technique_ids: alreadySearchedIds = [],
     pending_technique_ids: pendingIds = [],
   } = params;
@@ -1081,7 +1097,9 @@ export const huntBehavior = async (
       // as one — it keeps the non-executable placeholder instead. The allowlist is
       // the one generation was steered by; an empty one allows nothing, so a caller
       // that passed no scope cannot reach `.kibana-*` or `*`.
-      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), allowedIndices);
+      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), allowedIndices, {
+        crossProjectSearch,
+      });
       if (!sourcesAllowed.ok) {
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
@@ -1120,8 +1138,10 @@ export const huntBehavior = async (
         );
         return undefined;
       }
-      behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
-      if (!canExecute) return esql;
+      // The hunt reads with the universe's exclusions, so the query handed on carries them too.
+      const published = addFromExclusions(esql, excludedIndices);
+      behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${published}`;
+      if (!canExecute) return published;
       const executed = await executeValidatedEsql({
         esClient,
         logger,
@@ -1130,6 +1150,8 @@ export const huntBehavior = async (
         window: window!,
         row_limit: rowLimit!,
         allowedIndices,
+        crossProjectSearch,
+        excludedIndices,
       });
       behavior.execution = executed.execution;
       const executeReason = executed.execution.inconclusive_reason;
@@ -1152,7 +1174,7 @@ export const huntBehavior = async (
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
       if (executed.hits) behavior.hits = executed.hits;
-      return esql;
+      return published;
     };
 
     const firstWave = await generateGroundedEsql({
@@ -1165,6 +1187,8 @@ export const huntBehavior = async (
       excludedIocs,
       articleContext,
       allowedIndices,
+      crossProjectSearch,
+      excludedIndices,
       rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
     });
     const published = new Map<string, string>();
@@ -1245,6 +1269,8 @@ export const huntBehavior = async (
         excludedIocs,
         articleContext,
         allowedIndices,
+        crossProjectSearch,
+        excludedIndices,
         rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
       });
       for (const behavior of validated) {
