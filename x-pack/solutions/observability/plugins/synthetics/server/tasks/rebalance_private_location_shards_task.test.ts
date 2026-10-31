@@ -17,6 +17,7 @@ import {
   DEFAULT_REBALANCE_SCHEDULE,
   MAX_PIN_CLEAR_ATTEMPTS,
   PIN_NUDGE_DELAY_MS,
+  PIN_QUICK_NUDGE_DELAY_MS,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
 import {
@@ -590,15 +591,37 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockRebalanceShards).toHaveBeenCalledWith(expect.objectContaining({ pinUnpinned }));
     });
 
-    it.each([
-      ['first pins', rebalanceResult({ newlyPinned: 2 }), { 'ap-1': NOW + PIN_NUDGE_DELAY_MS }],
-      ['moves between agents', rebalanceResult({ moved: 3, failedOver: 3 }), {}],
-    ])('schedules one agent policy nudge for %s only', async (_, rebalanced, nudges) => {
-      mockRebalanceShards.mockResolvedValue(rebalanced);
+    it('bumps the agent policy 15 s after first pins, and schedules a backup bump', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 2 }));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_QUICK_NUDGE_DELAY_MS - 1_000);
+      expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(1_000);
+      const result = await running;
+
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
+      expect(result.state.pinNudges).toEqual({ 'ap-1': NOW + PIN_NUDGE_DELAY_MS });
+    });
+
+    it('keeps the backup bump when the 15 s bump fails', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 1 }));
+      mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_QUICK_NUDGE_DELAY_MS);
+      const result = await running;
+
+      expect(result.state.pinNudges).toEqual({ 'ap-1': NOW + PIN_NUDGE_DELAY_MS });
+    });
+
+    it('does not bump for moves between agents', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ moved: 3, failedOver: 3 }));
 
       const result = await run();
 
-      expect(result.state.pinNudges).toEqual(nudges);
+      expect(result.state.pinNudges).toEqual({});
       expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
     });
 

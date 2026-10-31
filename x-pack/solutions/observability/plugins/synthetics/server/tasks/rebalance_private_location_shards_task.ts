@@ -53,6 +53,14 @@ import {
 export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+/**
+ * Pinning running monitors can stop them on the agents until a later agent policy
+ * revision arrives (elastic/elastic-agent#17714). The task bumps once in the same
+ * run, after the agents have applied the pins (shorter delays let Fleet deliver
+ * both revisions at once), and once more on the next run as a backup for agents
+ * that were slow to check in.
+ */
+export const PIN_QUICK_NUDGE_DELAY_MS = 15_000;
 /** Under the default interval: fires on the next scheduled run, not an immediate `runSoon`. */
 export const PIN_NUDGE_DELAY_MS = 45_000;
 
@@ -85,11 +93,7 @@ interface RebalanceTaskState extends Record<string, unknown> {
   snapshotAt?: Record<string, number>;
   /** Telemetry only: locations already reported as broken, so a persistent fault is reported once. */
   locationIssues?: Record<string, PrivateLocationRebalanceReason>;
-  /**
-   * Agent policy id → when its one revision bump after first pins is due.
-   * Pinning running monitors can stop them on the agents until a later revision
-   * arrives (elastic/elastic-agent#17714); this is that later revision.
-   */
+  /** Agent policy id → when its backup revision bump after first pins is due. */
   pinNudges?: Record<string, number>;
 }
 
@@ -190,6 +194,7 @@ export class RebalancePrivateLocationShardsTask {
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
       const pinNudges: Record<string, number> = { ...taskState.pinNudges };
+      const quickNudges = new Map<string, number>();
 
       for (const location of locations) {
         signal.throwIfAborted();
@@ -283,6 +288,7 @@ export class RebalancePrivateLocationShardsTask {
           );
           if (result.newlyPinned > 0) {
             pinNudges[location.agentPolicyId] ??= now + PIN_NUDGE_DELAY_MS;
+            quickNudges.set(location.agentPolicyId, Date.now() + PIN_QUICK_NUDGE_DELAY_MS);
           }
 
           const { evicted, recovered: recoveredByDiff } = diffHealthyAgents({
@@ -366,6 +372,7 @@ export class RebalancePrivateLocationShardsTask {
           }
         }
       }
+      await this.quickNudge(quickNudges, signal);
 
       return {
         state: await this.returnedState(taskInstance, {
@@ -426,6 +433,26 @@ export class RebalancePrivateLocationShardsTask {
     // must stay claimable so a disabled cycle can drain leftover agent pins.
     await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /** Waits for each quick nudge to come due, then bumps; failures are left to the backup nudge. */
+  private async quickNudge(dueAtByAgentPolicy: Map<string, number>, signal: AbortSignal) {
+    for (const [agentPolicyId, dueAt] of dueAtByAgentPolicy) {
+      const waitMs = dueAt - Date.now();
+      if (waitMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+      }
+      signal.throwIfAborted();
+      try {
+        await this.syntheticsMonitorClient.privateLocationAPI.bumpAgentPolicyRevision(
+          agentPolicyId
+        );
+      } catch (e) {
+        this.serverSetup.logger.warn(
+          `[RebalancePrivateLocationShardsTask] Failed to nudge agent policy ${agentPolicyId}: ${e.message}`
+        );
+      }
+    }
   }
 
   /** Bumps a due nudge once; a failed bump stays pending for the next run. */
