@@ -27,10 +27,9 @@ spec:
         FLAKY_TESTS_LOOKBACK_DAYS: '7'
         FLAKY_TESTS_CLASSIFICATIONS: 'flaky'
         # Repository .buildkite/scripts/steps/report_flaky_test_issues.sh files the suite issues in.
-        # The AppEx QA sandbox while the issues are being tried out; suites that a failed-test
-        # issue in elastic/kibana is already about get none there. Flip to elastic/kibana to go
-        # live, or to '' for a dry run against elastic/kibana that writes nothing.
-        FLAKY_TESTS_GITHUB_REPO: 'elastic/appex-qa-ai'
+        # '' for a dry run against elastic/kibana that writes nothing, or a sandbox such as
+        # elastic/appex-qa-ai to try changes out.
+        FLAKY_TESTS_GITHUB_REPO: 'elastic/kibana'
         # Suite issues created per run, worst suites first
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
         # Leave out flaky tests that were skipped since
