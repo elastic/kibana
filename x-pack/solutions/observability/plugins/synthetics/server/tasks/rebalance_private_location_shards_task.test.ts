@@ -17,7 +17,6 @@ import {
   DEFAULT_REBALANCE_SCHEDULE,
   MAX_PIN_CLEAR_ATTEMPTS,
   PIN_NUDGE_DELAY_MS,
-  PIN_QUICK_NUDGE_DELAY_MS,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
 import {
@@ -571,62 +570,41 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
     });
 
-    it('bumps the agent policy 15 s after first pins, and schedules a backup bump', async () => {
+    it('bumps the agent policy once, 15 s after first pins', async () => {
       mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 2 }));
 
       const running = run();
-      await jest.advanceTimersByTimeAsync(PIN_QUICK_NUDGE_DELAY_MS - 1_000);
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_DELAY_MS - 1_000);
       expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
       await jest.advanceTimersByTimeAsync(1_000);
-      const result = await running;
+      await running;
 
       expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
       expect(mockBumpAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
-      expect(result.state.pinNudges).toEqual({ 'ap-1': NOW + PIN_NUDGE_DELAY_MS });
     });
 
-    it('keeps the backup bump when the 15 s bump fails', async () => {
+    it('logs a failed bump and does not retry it', async () => {
       mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 1 }));
       mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
 
       const running = run();
-      await jest.advanceTimersByTimeAsync(PIN_QUICK_NUDGE_DELAY_MS);
-      const result = await running;
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_DELAY_MS);
+      await running;
+      mockRebalanceShards.mockResolvedValue(rebalanceResult());
+      await run();
 
-      expect(result.state.pinNudges).toEqual({ 'ap-1': NOW + PIN_NUDGE_DELAY_MS });
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to nudge agent policy ap-1: conflict')
+      );
     });
 
     it('does not bump for moves between agents', async () => {
       mockRebalanceShards.mockResolvedValue(rebalanceResult({ moved: 3, failedOver: 3 }));
 
-      const result = await run();
+      await run();
 
-      expect(result.state.pinNudges).toEqual({});
       expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
-    });
-
-    it('fires a due nudge once and keeps one not due yet', async () => {
-      jest
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue([location(), location({ id: 'loc-2', agentPolicyId: 'ap-2' })]);
-
-      const result = await run({ pinNudges: { 'ap-1': NOW - 1, 'ap-2': NOW + 1_000 } });
-
-      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
-      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
-      expect(result.state.pinNudges).toEqual({ 'ap-2': NOW + 1_000 });
-    });
-
-    it('drops a backup nudge whose bump failed instead of retrying it', async () => {
-      mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
-
-      const result = await run({ pinNudges: { 'ap-1': NOW - 1 } });
-
-      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
-      expect(result.state.pinNudges).toEqual({});
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to nudge agent policy ap-1: conflict')
-      );
     });
   });
 
