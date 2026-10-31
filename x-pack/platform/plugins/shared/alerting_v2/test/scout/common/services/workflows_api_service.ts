@@ -21,7 +21,21 @@ export interface WorkflowSummary {
 }
 
 interface WorkflowExecutionListResponse {
-  results: Array<{ triggeredBy?: string }>;
+  results: Array<{ id: string; triggeredBy?: string }>;
+}
+
+export interface WorkflowStepExecutionDetail {
+  stepId: string;
+  status: string;
+  input?: Record<string, unknown>;
+  output?: Record<string, unknown>;
+}
+
+export interface WorkflowExecutionDetail {
+  id: string;
+  status: string;
+  context?: Record<string, unknown>;
+  stepExecutions: WorkflowStepExecutionDetail[];
 }
 
 interface WorkflowsApiSpaceOptions {
@@ -46,11 +60,18 @@ const withSpace = (path: string, spaceId: string | undefined): string =>
 export interface WorkflowsApiService {
   create: (yaml: string, options?: WorkflowsApiSpaceOptions) => Promise<WorkflowSummary>;
   bulkDelete: (ids: string[], options?: WorkflowsApiSpaceOptions) => Promise<void>;
-  /** Polls until the workflow has at least one completed execution started by `triggeredBy`. */
+  /**
+   * Polls until the workflow has a completed execution started by `triggeredBy`, and
+   * resolves with its id.
+   */
   waitForSuccessfulExecution: (
     workflowId: string,
     filter: WaitForSuccessfulExecutionFilter
-  ) => Promise<void>;
+  ) => Promise<string>;
+  getExecution: (
+    executionId: string,
+    options?: WorkflowsApiSpaceOptions
+  ) => Promise<WorkflowExecutionDetail>;
 }
 
 export const getWorkflowsApiService = ({
@@ -87,7 +108,8 @@ export const getWorkflowsApiService = ({
 
   waitForSuccessfulExecution: (workflowId, { triggeredBy, spaceId }) =>
     measurePerformanceAsync(log, 'workflows.waitForSuccessfulExecution', async () => {
-      const countSuccessfulExecutions = async (): Promise<number> => {
+      let executionId: string | undefined;
+      const findSuccessfulExecution = async (): Promise<string | undefined> => {
         const response = await kbnClient.request<WorkflowExecutionListResponse>({
           method: 'GET',
           path: withSpace(
@@ -98,15 +120,36 @@ export const getWorkflowsApiService = ({
           query: { statuses: 'completed', size: EXECUTIONS_MAX_PAGE_SIZE },
           retries: 0,
         });
-        return response.data.results.filter((execution) => execution.triggeredBy === triggeredBy)
-          .length;
+        executionId = response.data.results.find(
+          (execution) => execution.triggeredBy === triggeredBy
+        )?.id;
+        return executionId;
       };
 
       await expect
-        .poll(() => countSuccessfulExecutions(), {
+        .poll(() => findSuccessfulExecution(), {
           timeout: POLL_TIMEOUT_MS,
           intervals: [POLL_INTERVAL_MS],
         })
-        .toBeGreaterThanOrEqual(1);
+        .toBeDefined();
+
+      if (!executionId) {
+        throw new Error(`Workflow ${workflowId} has no completed execution by ${triggeredBy}`);
+      }
+      return executionId;
+    }),
+
+  getExecution: (executionId, options) =>
+    measurePerformanceAsync(log, 'workflows.getExecution', async () => {
+      const response = await kbnClient.request<WorkflowExecutionDetail>({
+        method: 'GET',
+        path: withSpace(
+          `${WORKFLOWS_API_PATH}/executions/${encodeURIComponent(executionId)}`,
+          options?.spaceId
+        ),
+        headers: COMMON_HEADERS,
+        query: { includeInput: true, includeOutput: true },
+      });
+      return response.data;
     }),
 });
