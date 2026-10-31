@@ -18,7 +18,9 @@ pausing, resuming or resetting Significant Events are refused with a `503`
 - The caller holds the `manage_security` cluster privilege.
 - Stateful: the `nightshift_detection_engine` role exists. Create it first, with the privileges of
   `DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE` in [`common/service_account.ts`](./common/service_account.ts).
-- Serverless: the role is defined by the platform. Pending the elasticsearch-controller role change.
+  Kibana never creates it: `_enable` answers 400 and names the role when it is missing.
+- Serverless: the role is the reserved platform role `_nightshift_detection_engine`. Local stacks have it in
+  kbn-es `project_roles/oblt/roles.yml`; Cloud needs it in elasticsearch-controller (pending).
 
 ### Set a space up
 

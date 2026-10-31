@@ -74,6 +74,7 @@ const enableServiceAccountsRoute = createServerRoute({
       getScopedClients,
       maintenanceService,
       scheduledWorkflowsService: significantEventsScheduledWorkflowsService,
+      isServerless: server.isServerless,
     }).enable({
       request,
       spaceId: await getSpaceId(request),
@@ -115,6 +116,7 @@ const disableServiceAccountsRoute = createServerRoute({
       getScopedClients,
       maintenanceService,
       scheduledWorkflowsService: significantEventsScheduledWorkflowsService,
+      isServerless: server.isServerless,
     }).disable({ request, spaceId: await getSpaceId(request) });
   },
 });

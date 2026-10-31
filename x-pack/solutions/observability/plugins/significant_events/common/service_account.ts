@@ -10,8 +10,18 @@ import type { estypes } from '@elastic/elasticsearch';
 /** The service account the detection engine runs as, shared by every space. */
 export const DETECTION_ENGINE_SERVICE_ACCOUNT_NAME = 'nightshift_detection_engine';
 
+/** On Serverless the role is a reserved platform role, defined by the platform: underscore-prefixed. */
+export const getDetectionEngineServiceAccountRoleName = ({
+  isServerless,
+}: {
+  isServerless: boolean;
+}): string =>
+  isServerless
+    ? `_${DETECTION_ENGINE_SERVICE_ACCOUNT_NAME}`
+    : DETECTION_ENGINE_SERVICE_ACCOUNT_NAME;
+
 /**
- * The role of the detection engine service account, named like the account. It starts from the
+ * The role of the detection engine service account, named like the account on stateful. It starts from the
  * Nightshift privilege the detection engine routes require; a privilege is only added once a run
  * was refused without it.
  */

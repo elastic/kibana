@@ -40,6 +40,8 @@ const setup = ({
   scheduledDiscoveryOn = false,
   boundAccountId = ACCOUNT_ID,
   pauseFailures = [],
+  roleExists = true,
+  isServerless = false,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -50,6 +52,9 @@ const setup = ({
   boundAccountId?: string;
   /** What pausing the space could not stop. */
   pauseFailures?: Array<{ target: string; error: string }>;
+  /** Whether the account's role exists in Elasticsearch. */
+  roleExists?: boolean;
+  isServerless?: boolean;
 } = {}) => {
   // What happened, in order, across the services the setup touches.
   const calls: string[] = [];
@@ -71,6 +76,11 @@ const setup = ({
       async (_: unknown, fn: (accountRequest: typeof request) => Promise<unknown>) => fn(request)
     ),
   };
+  const queryRole = jest.fn(async () => ({
+    total: roleExists ? 1 : 0,
+    count: roleExists ? 1 : 0,
+    roles: [],
+  }));
   const core = {
     security: {
       serviceAccounts,
@@ -80,7 +90,10 @@ const setup = ({
       client: {
         asScoped: () => ({
           asCurrentUser: {
-            security: { hasPrivileges: async () => ({ has_all_requested: canManageSecurity }) },
+            security: {
+              hasPrivileges: async () => ({ has_all_requested: canManageSecurity }),
+              queryRole,
+            },
           },
         }),
       },
@@ -155,11 +168,13 @@ const setup = ({
     getScopedClients,
     maintenanceService,
     scheduledWorkflowsService: { rebind },
+    isServerless,
   } as never);
 
   return {
     service,
     calls,
+    queryRole,
     installed,
     install,
     rebind,
@@ -312,6 +327,63 @@ describe('createServiceAccountSetupService', () => {
         expect.objectContaining({ serviceAccountId: 'created-account-id' })
       );
       expect(result.serviceAccountIds).toEqual({ detectionEngine: 'created-account-id' });
+    });
+
+    it('does not create the account when its role does not exist, and says what to create', async () => {
+      const fixture = setup({ boundAccountId: '', roleExists: false });
+
+      await expect(fixture.service.enable({ request, spaceId: SPACE_ID })).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining('The role [nightshift_detection_engine]'),
+      });
+
+      expect(fixture.queryRole).toHaveBeenCalledWith({
+        query: { term: { name: 'nightshift_detection_engine' } },
+        size: 1,
+      });
+      expect(fixture.serviceAccounts.create).not.toHaveBeenCalled();
+      expect(fixture.serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+    });
+
+    it('creates the account when its role exists', async () => {
+      const fixture = setup({ boundAccountId: '' });
+
+      await fixture.service.enable({ request, spaceId: SPACE_ID });
+
+      expect(fixture.queryRole).toHaveBeenCalled();
+      expect(fixture.serviceAccounts.create).toHaveBeenCalled();
+    });
+
+    it('looks up and assigns the reserved platform role on Serverless', async () => {
+      const fixture = setup({ boundAccountId: '', isServerless: true });
+
+      await fixture.service.enable({ request, spaceId: SPACE_ID });
+
+      expect(fixture.queryRole).toHaveBeenCalledWith({
+        query: { term: { name: '_nightshift_detection_engine' } },
+        size: 1,
+      });
+      expect(fixture.serviceAccounts.create).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({
+          name: 'nightshift_detection_engine',
+          roles: ['_nightshift_detection_engine'],
+        })
+      );
+    });
+
+    it('does not look the role up when the account is given or the space is already bound', async () => {
+      const given = setup({ roleExists: false });
+      await given.service.enable({
+        request,
+        spaceId: SPACE_ID,
+        serviceAccountIds: { detectionEngine: ACCOUNT_ID },
+      });
+      const bound = setup({ roleExists: false });
+      await bound.service.enable({ request, spaceId: SPACE_ID });
+
+      expect(given.queryRole).not.toHaveBeenCalled();
+      expect(bound.queryRole).not.toHaveBeenCalled();
     });
 
     it('tells to pass the account id when an account of that name already exists', async () => {

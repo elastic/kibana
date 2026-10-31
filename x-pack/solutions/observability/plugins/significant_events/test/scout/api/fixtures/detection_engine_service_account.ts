@@ -20,12 +20,17 @@ const ENABLE_TIMEOUT_MS = 120_000;
 const ENABLE_RETRY_INTERVAL_MS = 5_000;
 
 /**
- * Serverless defines the account's role in elasticsearch-controller, which this stack does not
- * have yet, so the account holds a built-in project role there. Nothing in these suites runs a
- * detection as the account.
- * TODO: use the detection engine role once elasticsearch-controller defines it.
+ * The account's role on a local Serverless stack: a reserved platform role, defined in kbn-es
+ * `project_roles/oblt/roles.yml` like the other Nightshift ones.
  */
-const SERVERLESS_ROLE = 'admin';
+const LOCAL_SERVERLESS_ROLE = '_nightshift_detection_engine';
+
+/**
+ * On Cloud the role comes from elasticsearch-controller, which does not define it yet, so the
+ * account holds a built-in project role there.
+ * TODO: use `_nightshift_detection_engine` on Cloud too once elasticsearch-controller defines it.
+ */
+const CLOUD_SERVERLESS_ROLE = 'admin';
 
 /**
  * Local Serverless suites create their service accounts as the mock IdP's organization admin, as
@@ -72,6 +77,19 @@ const findDetectionEngineAccount = async (
     after = nextPage;
   } while (after !== undefined);
   return undefined;
+};
+
+const getAccountRole = ({
+  isServerless,
+  isCloud,
+}: {
+  isServerless: boolean;
+  isCloud: boolean;
+}): string => {
+  if (!isServerless) {
+    return DETECTION_ENGINE_SERVICE_ACCOUNT_NAME;
+  }
+  return isCloud ? CLOUD_SERVERLESS_ROLE : LOCAL_SERVERLESS_ROLE;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -153,7 +171,7 @@ export const setUpDetectionEngineServiceAccount = async ({
       body: JSON.stringify({
         name: DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
         description: 'The service account the Nightshift detection engine runs as.',
-        roles: [isServerless ? SERVERLESS_ROLE : DETECTION_ENGINE_SERVICE_ACCOUNT_NAME],
+        roles: [getAccountRole({ isServerless, isCloud })],
       }),
     }));
 

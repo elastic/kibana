@@ -49,7 +49,10 @@ import type { SignificantEventsScheduledWorkflowsService } from '../workflows/si
 import { resolveStoredScheduledConfig } from '../../routes/internal/scheduled_discovery/route';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
-import { DETECTION_ENGINE_SERVICE_ACCOUNT_NAME } from '../../../common/service_account';
+import {
+  DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
+  getDetectionEngineServiceAccountRoleName,
+} from '../../../common/service_account';
 
 /** The ids of the accounts a space is set up with, as the service accounts backend assigned them. */
 export interface DetectionEngineServiceAccountIds {
@@ -107,6 +110,7 @@ export const createServiceAccountSetupService = ({
   getScopedClients,
   maintenanceService,
   scheduledWorkflowsService,
+  isServerless,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
@@ -116,6 +120,7 @@ export const createServiceAccountSetupService = ({
   getScopedClients: GetScopedClients;
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState' | 'pause'>;
   scheduledWorkflowsService: Pick<SignificantEventsScheduledWorkflowsService, 'rebind'> | undefined;
+  isServerless: boolean;
 }) => {
   /** Refuses before anything is written: 400 when service accounts are off, 403, then 404. */
   const assertCanSetUp = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -176,6 +181,28 @@ export const createServiceAccountSetupService = ({
     );
 
   /**
+   * The account's role has to exist before the account does: an account holding a role that does not
+   * exist has no privileges, and every run would then be refused. Kibana never creates the role.
+   * Looked up with the query API: `getRole` answers 404 for the platform roles of Serverless.
+   */
+  const assertRoleExists = async (request: KibanaRequest, roleName: string): Promise<void> => {
+    const { total } = await core.elasticsearch.client
+      .asScoped(request)
+      .asCurrentUser.security.queryRole({
+        query: { term: { name: roleName } },
+        size: 1,
+      });
+    if (total === 0) {
+      throw new StatusError(
+        `The role [${roleName}] of the detection engine service account ` +
+          'does not exist. Create it with the privileges of DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE in ' +
+          'common/service_account.ts (see the README, "Setting up a space"), then call _enable again.',
+        400
+      );
+    }
+  };
+
+  /**
    * The account the space is already bound to, or a new `nightshift_detection_engine` account. The
    * account is shared by every space: another space passes its id, because an account of the same
    * name cannot be created again and there is no way to look one up by name.
@@ -191,11 +218,13 @@ export const createServiceAccountSetupService = ({
     if (boundAccountId !== undefined) {
       return boundAccountId;
     }
+    const roleName = getDetectionEngineServiceAccountRoleName({ isServerless });
+    await assertRoleExists(request, roleName);
     try {
       const account = await core.security.serviceAccounts.create(request, {
         name: DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
         description: 'The service account the Nightshift detection engine runs as.',
-        roles: [DETECTION_ENGINE_SERVICE_ACCOUNT_NAME],
+        roles: [roleName],
       });
       return account.id;
     } catch (error) {
