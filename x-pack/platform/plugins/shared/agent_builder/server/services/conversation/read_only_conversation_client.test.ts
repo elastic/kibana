@@ -81,6 +81,23 @@ describe('createConversationPublicClient', () => {
     expect(result).toEqual(searchResult);
   });
 
+  it('delegates count() to the internal conversation client', async () => {
+    const countResult = {
+      total: 3,
+      groups: [{ key: { 'metadata.status': 'open' }, count: 3 }],
+    };
+    internalClient.count.mockResolvedValue(countResult);
+
+    const options = {
+      filter: 'template_id: investigation',
+      groupBy: 'metadata.status',
+    } as const;
+    const result = await publicClient.count(options);
+
+    expect(internalClient.count).toHaveBeenCalledWith(options);
+    expect(result).toEqual(countResult);
+  });
+
   it('delegates bulkGet() to the internal conversation client', async () => {
     const conversations = new Map(
       [createEmptyConversation({ id: 'conv-1' }), createEmptyConversation({ id: 'conv-2' })].map(
@@ -197,6 +214,7 @@ describe('createConversationPublicClient', () => {
         'bulkGet',
         'list',
         'search',
+        'count',
         'create',
         'addAccessControlEntries',
         'removeAccessControlEntries',

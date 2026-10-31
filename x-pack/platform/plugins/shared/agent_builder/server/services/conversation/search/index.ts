@@ -7,3 +7,9 @@
 
 export { compileConversationFilter } from './compile_filter';
 export { buildSearchSort } from './build_sort';
+export { buildSearchQuery, buildTitleMatch } from './build_query';
+export {
+  buildCountAggregation,
+  parseCountGroups,
+  type ConversationCountEsAggregations,
+} from './build_count_aggregation';

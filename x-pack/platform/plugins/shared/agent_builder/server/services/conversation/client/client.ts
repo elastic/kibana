@@ -53,6 +53,8 @@ import {
   isExecutionTerminalEvent,
 } from '@kbn/agent-builder-common';
 import type {
+  ConversationCountOptions,
+  ConversationCountResult,
   ConversationSearchOptions,
   SerializedMetadataValue,
   MetadataFieldValue,
@@ -123,7 +125,15 @@ import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/
 import { reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
-import { buildSearchSort, compileConversationFilter } from '../search';
+import {
+  buildCountAggregation,
+  buildSearchQuery,
+  buildSearchSort,
+  buildTitleMatch,
+  compileConversationFilter,
+  parseCountGroups,
+  type ConversationCountEsAggregations,
+} from '../search';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -205,6 +215,11 @@ export interface ConversationClient {
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
   bulkGet(ids: string[]): Promise<Map<string, ConversationWithoutRoundsWithPermissions>>;
   search(options: ConversationSearchOptions): Promise<ConversationListResult>;
+  /**
+   * Counts the conversations `search` would match for the same `filter`, `query`, and `agentId`,
+   * optionally bucketed by 1 or 2 fields. The total is exact, not capped at the result window.
+   */
+  count(options?: ConversationCountOptions): Promise<ConversationCountResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -301,6 +316,14 @@ interface ConversationListEsResponse {
     total?: number | { value: number };
     hits: Array<Partial<Document>>;
   };
+}
+
+/** Minimal shape relied on when mapping a count response: the exact total and the buckets. */
+interface ConversationCountEsResponse {
+  hits: {
+    total?: number | { value: number };
+  };
+  aggregations?: ConversationCountEsAggregations;
 }
 
 export type OnConversationCreated = (params: { conversationId: string; agentId: string }) => void;
@@ -659,51 +682,23 @@ class ConversationClientImpl implements ConversationClient {
     const {
       query,
       filter,
+      ids,
       sort,
       agentId,
       page = 1,
       perPage = MAX_CONVERSATION_SEARCH_PER_PAGE,
     } = options;
 
+    // Validate caller input before resolving access, so bad requests never reach Elasticsearch.
     const compiledFilter = compileConversationFilter(filter);
+    const idsFilter = ids ? buildConversationIdsFilter(ids) : undefined;
 
     const agentIds = await this.resolveAccessibleAgentIds(agentId);
     if (agentIds.length === 0) {
       return { results: [], total: 0 };
     }
 
-    const trimmedQuery = query?.trim();
-    const titleMatch = trimmedQuery
-      ? [
-          {
-            bool: {
-              should: [
-                {
-                  match_bool_prefix: {
-                    title: { query: trimmedQuery, operator: 'and' as const },
-                  },
-                },
-                {
-                  prefix: {
-                    'title.keyword': { value: trimmedQuery, boost: 2, case_insensitive: true },
-                  },
-                },
-                // Trailing space asserts a word boundary, boosting clean whole-word prefix matches above partial-token ones.
-                {
-                  prefix: {
-                    'title.keyword': {
-                      value: trimmedQuery + ' ',
-                      boost: 5,
-                      case_insensitive: true,
-                    },
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ]
-      : [];
+    const titleMatch = buildTitleMatch(query);
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
@@ -713,15 +708,50 @@ class ConversationClientImpl implements ConversationClient {
       sort: buildSearchSort({ sort, hasQuery: titleMatch.length > 0 }),
       seq_no_primary_term: true,
       _source: CONVERSATION_LIST_SOURCE_FIELDS,
-      query: {
-        bool: {
-          filter: [...this.buildBaseFilters(agentIds), ...(compiledFilter ? [compiledFilter] : [])],
-          must: titleMatch,
-        },
-      },
+      query: buildSearchQuery({
+        baseFilters: this.buildBaseFilters(agentIds),
+        compiledFilter,
+        idsFilter,
+        titleMatch,
+      }),
     });
 
     return this.mapListResponse(response);
+  }
+
+  async count(options: ConversationCountOptions = {}): Promise<ConversationCountResult> {
+    const { query, filter, ids, agentId, groupBy, missing, size } = options;
+
+    // Validate caller input before resolving access, so bad requests never reach Elasticsearch.
+    const compiledFilter = compileConversationFilter(filter);
+    const idsFilter = ids ? buildConversationIdsFilter(ids) : undefined;
+    const aggregation = buildCountAggregation({ groupBy, missing, size });
+
+    const agentIds = await this.resolveAccessibleAgentIds(agentId);
+    if (agentIds.length === 0) {
+      return { total: 0, groups: [] };
+    }
+
+    const response: ConversationCountEsResponse = await this.storage.getClient().search({
+      // Counts are not paginated, so report the exact total instead of capping at the result window.
+      track_total_hits: true,
+      size: 0,
+      query: buildSearchQuery({
+        baseFilters: this.buildBaseFilters(agentIds),
+        compiledFilter,
+        idsFilter,
+        titleMatch: buildTitleMatch(query),
+      }),
+      ...(aggregation ? { aggs: aggregation.aggs } : {}),
+    });
+
+    const hitsTotal = response.hits.total;
+    const total = typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0;
+
+    return {
+      total,
+      groups: aggregation ? parseCountGroups(response.aggregations, aggregation.fields) : [],
+    };
   }
 
   /**
