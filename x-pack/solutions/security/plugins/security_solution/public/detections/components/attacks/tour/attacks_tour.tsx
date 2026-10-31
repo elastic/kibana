@@ -13,7 +13,7 @@ import {
   ATTACKS_TOUR_STEP_TEST_ID,
 } from './constants';
 import { useAttacksTour } from './attacks_tour_provider';
-import { useIsAnchorMounted } from './use_is_anchor_mounted';
+import { useIsAnchorMounted } from '../../../../common/hooks/use_is_anchor_mounted';
 import * as i18n from './translations';
 
 /**

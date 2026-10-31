@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import { useIsAnchorMounted } from '../../../../detections/components/attacks/tour/use_is_anchor_mounted';
+import { useIsAnchorMounted } from '../../../../common/hooks/use_is_anchor_mounted';
 import {
   ANCHOR_TIMEOUT_MS,
   PRODUCT_TOUR_CLOSE_TEST_ID,
