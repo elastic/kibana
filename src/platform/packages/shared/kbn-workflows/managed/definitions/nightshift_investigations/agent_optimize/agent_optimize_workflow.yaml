@@ -199,3 +199,22 @@ steps:
       connector_id: '{{ steps.resolve_model.output.connector_id }}'
       tool_calls: '${{ inputs.tool_calls }}'
       tool_results: '${{ inputs.tool_results }}'
+
+  - name: score_memory_online_evals
+    type: nightshift.onlineEvals.scoreMemory
+    on-failure: continue
+    timeout: 60s
+    with:
+      conversation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      agent_id: '{{ inputs.agent_id }}'
+      background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
+      recalled_ids: '${{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.recalled_ids }}'
+      cortex_opened_ids: '${{ steps.optimize_cortex.output.opened_ids }}'
+      memory_opened_ids: '${{ steps.optimize_memory.output.opened_ids }}'
+      decision_tree_opened_ids: '${{ steps.prepare_turn.output.opened_ids }}'
+      cortex_applied_writes: '${{ steps.optimize_cortex.output.applied_writes }}'
+      memory_applied_writes: '${{ steps.optimize_memory.output.applied_writes }}'
+      decision_tree_applied_writes: '${{ steps.reinforce_decision_trees.output.applied_writes }}'
+      tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'
