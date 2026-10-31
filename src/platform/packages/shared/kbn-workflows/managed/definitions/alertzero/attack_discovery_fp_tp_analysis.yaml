@@ -130,6 +130,9 @@ consts:
   # The template language has no empty-list literal, and `| default: []` returns
   # nothing. This constant is the empty-list fallback for optional sources.
   no_rows: []
+  # Local Elastic Defend events. The resolve step adds `{alias}:logs-endpoint.events.*`
+  # for each cluster in the space's default data view. A failed resolve keeps this.
+  endpoint_events_index: logs-endpoint.events.*
 steps:
   # Loaded rather than received, so a retry cannot reason over a copy that went
   # stale. `ids` works because a persisted discovery is indexed under its
@@ -298,23 +301,77 @@ steps:
             - terms:
                 user.name: "${{ steps.count_alerts.output.user_names }}"
 
+  # The space's Security default data view names the remote clusters whose
+  # endpoint events this check should read. A failed read keeps the local pattern.
+  - name: resolve_endpoint_event_index
+    type: alertzero.attackDiscovery.endpointEventIndex
+    on-failure:
+      continue: true
+
   # Optional. Raw endpoint events on the cited hosts, from 2 hours before the
   # earliest cited alert's `kibana.alert.original_time` to 2 hours after the
   # latest, one shared cap of 50. `host.id` is the host key. Alerts with no
   # `host.id` (the list is empty) are matched on `host.name` instead, so a name
   # is not added when an id exists and cannot pull in another host that happens
   # to share it. A truncated page does not fail the run; `block_truncated_clear`
-  # stops it from clearing the attack.
+  # stops it from clearing the attack. `ignore_unavailable` and partial results
+  # keep one missing remote from failing the search. If the whole request fails,
+  # the local fallback below still runs.
   - name: load_events_by_host_id
     type: elasticsearch.search
     if: "${{ (steps.count_alerts.output.host_ids | size) > 0 }}"
     on-failure:
       continue: true
     with:
-      index: logs-endpoint.events.*
+      index: "${{ steps.resolve_endpoint_event_index.output.index | default: consts.endpoint_events_index }}"
+      ignore_unavailable: true
+      allow_partial_search_results: true
       size: 50
       # The template caps this string at 200k characters. Endpoint documents
       # carry process and network trees the parent and destination checks do not use.
+      _source:
+        - '@timestamp'
+        - host.name
+        - host.id
+        - user.name
+        - process.name
+        - process.parent.name
+        - process.entity_id
+        - process.executable
+        - process.command_line
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - event.action
+        - event.category
+        - agent.id
+        - dns.question.name
+        - network.direction
+      sort:
+        - "@timestamp": asc
+      query:
+        bool:
+          filter:
+            - terms:
+                host.id: "${{ steps.count_alerts.output.host_ids }}"
+            - range:
+                "@timestamp":
+                  gte: "{{ steps.count_alerts.output.events_from }}||-2h"
+                  lte: "{{ steps.count_alerts.output.events_to }}||+2h"
+
+  # An authorization failure on a remote fails the whole multi-index request,
+  # which would hide events that are on this cluster. Search the local pattern
+  # alone when that happens.
+  - name: load_events_by_host_id_local
+    type: elasticsearch.search
+    if: "${{ steps.load_events_by_host_id.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      index: "{{ consts.endpoint_events_index }}"
+      ignore_unavailable: true
+      allow_partial_search_results: true
+      size: 50
       _source:
         - '@timestamp'
         - host.name
@@ -351,7 +408,9 @@ steps:
     on-failure:
       continue: true
     with:
-      index: logs-endpoint.events.*
+      index: "${{ steps.resolve_endpoint_event_index.output.index | default: consts.endpoint_events_index }}"
+      ignore_unavailable: true
+      allow_partial_search_results: true
       size: 50
       _source:
         - '@timestamp'
@@ -383,18 +442,58 @@ steps:
                   gte: "{{ steps.count_alerts.output.events_from }}||-2h"
                   lte: "{{ steps.count_alerts.output.events_to }}||+2h"
 
-  # One hit set for the rest of the workflow. Exactly one of the searches above
-  # runs. `default` takes the name search when the id search was skipped.
+  - name: load_events_by_host_name_local
+    type: elasticsearch.search
+    if: "${{ steps.load_events_by_host_name.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      index: "{{ consts.endpoint_events_index }}"
+      ignore_unavailable: true
+      allow_partial_search_results: true
+      size: 50
+      _source:
+        - '@timestamp'
+        - host.name
+        - host.id
+        - user.name
+        - process.name
+        - process.parent.name
+        - process.entity_id
+        - process.executable
+        - process.command_line
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - event.action
+        - event.category
+        - agent.id
+        - dns.question.name
+        - network.direction
+      sort:
+        - "@timestamp": asc
+      query:
+        bool:
+          filter:
+            - terms:
+                host.name: "${{ steps.count_alerts.output.host_names }}"
+            - range:
+                "@timestamp":
+                  gte: "{{ steps.count_alerts.output.events_from }}||-2h"
+                  lte: "{{ steps.count_alerts.output.events_to }}||+2h"
+
+  # One hit set for the rest of the workflow. The id search wins when it ran.
+  # A failed remote search falls through to its local retry, then to the name search.
   - name: load_events
     type: data.set
     with:
-      hits: "${{ steps.load_events_by_host_id.output.hits | default: steps.load_events_by_host_name.output.hits }}"
+      hits: "${{ steps.load_events_by_host_id.output.hits | default: steps.load_events_by_host_id_local.output.hits | default: steps.load_events_by_host_name.output.hits | default: steps.load_events_by_host_name_local.output.hits }}"
 
   - name: source_status
     type: data.set
     with:
       entities_failed: "${{ steps.load_entities.error != null }}"
-      events_failed: "${{ steps.load_events_by_host_id.error != null or steps.load_events_by_host_name.error != null }}"
+      events_failed: "${{ (steps.load_events_by_host_id.error != null and steps.load_events_by_host_id_local.error != null) or (steps.load_events_by_host_name.error != null and steps.load_events_by_host_name_local.error != null) }}"
 
   - name: analyze
     type: ai.agent
