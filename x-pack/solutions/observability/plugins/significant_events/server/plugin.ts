@@ -113,6 +113,7 @@ import {
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
+import { retryWithBackoff } from './lib/workflows/setup/retry_with_backoff';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
 import {
@@ -695,15 +696,11 @@ export class SignificantEventsPlugin
       });
     }
 
-    void this.ensureSignificantEventsInstalled(isAvailable).catch((error: unknown) => {
-      this.logManagedResourceError('startup', error);
-    });
+    void this.installManagedResources(isAvailable, 'startup');
 
     this.subscriptions.push(
       availabilityEnabled$.subscribe(() => {
-        void this.ensureSignificantEventsInstalled(isAvailable).catch((error: unknown) => {
-          this.logManagedResourceError('availability flag change', error);
-        });
+        void this.installManagedResources(isAvailable, 'availability flag change');
       })
     );
 
@@ -797,6 +794,26 @@ export class SignificantEventsPlugin
         .catch((err) => {
           this.logger.error(`Failed to register significant events skills: ${err.message}`);
         });
+    }
+  }
+
+  /**
+   * Installs the managed resources, retrying a failed pass with bounded backoff. Without the retry
+   * a single failure left the deployment without its managed workflow set for the life of the
+   * process — nothing uninstalls or reschedules them — so every later source creation answered
+   * `500 Workflow system-streams-ki-onboarding not found`.
+   */
+  private async installManagedResources(
+    isAvailable: () => Promise<boolean>,
+    context: string
+  ): Promise<void> {
+    try {
+      await retryWithBackoff(() => this.ensureSignificantEventsInstalled(isAvailable), {
+        logger: this.logger,
+        description: `install managed resources (${context})`,
+      });
+    } catch (error: unknown) {
+      this.logManagedResourceError(context, error);
     }
   }
 
