@@ -543,6 +543,8 @@ src/platform/packages/shared/esql/kbn-esql-utils @elastic/kibana-discover
 src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
+src/platform/packages/shared/kbn-access-control @elastic/kibana-security
+src/platform/packages/shared/kbn-access-control-ui @elastic/kibana-security
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/search-ml-ux
@@ -613,8 +615,6 @@ src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-edot-collector @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-signals-traces-team
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
-src/platform/packages/shared/kbn-access-control @elastic/kibana-security
-src/platform/packages/shared/kbn-access-control-ui @elastic/kibana-security
 src/platform/packages/shared/kbn-entity-access-control @elastic/workflows-eng
 src/platform/packages/shared/kbn-entity-access-control-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
