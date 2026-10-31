@@ -20,7 +20,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/solutions/security/test/osquery_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see the "Test data" section below), and then executes cypress against this stack. You can find this configuration in `x-pack/solutions/security/test/osquery_cypress`
 
 ### Test Execution: Examples
 
@@ -56,23 +56,27 @@ Note that you can select the browser you want to use on the top right side of th
 
 ## Folder Structure
 
-### integration/
+### e2e/
 
-Cypress convention. Contains the specs that are going to be executed.
+Contains the specs that are going to be executed (`e2e/all/` and `e2e/kibana_roles/`).
 
-### fixtures/
+### lib/
 
-Cypress convention. Fixtures are used as external pieces of static data when we stub responses.
+Shared helpers used by the specs and tasks, e.g. default HTTP headers and types.
 
 ### plugins/
 
-Cypress convention. As a convenience, by default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs.
+Cypress convention. Contains the Cypress plugin/setup code (e.g. the `cypress/plugins` hooks that run before specs).
 
 ### screens/
 
 Contains the elements we want to interact with in our tests.
 
 Each file inside the screens folder represents a screen in our application.
+
+### support/
+
+Cypress convention. Contains the support file (`e2e.ts`) that is loaded before every spec, plus related setup such as roles and data loader tasks.
 
 ### tasks/
 
@@ -85,7 +89,7 @@ Each file inside the tasks folder represents a screen of our application.
 The data the tests need:
 
 - Is generated on the fly using our application APIs (preferred way)
-- Is ingested on the ELS instance using the `es_archive` utility
+- Is ingested on the ELS instance using the `es_archive` utility (archives live under `x-pack/solutions/security/test/osquery_cypress/es_archives`, which may be empty)
 
 ### How to generate a new archive
 
@@ -98,13 +102,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/platform/plugins/shared/osquery`
 
 ```sh
-node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../solutions/security/test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../../../solutions/security/test/osquery_cypress/es_archives --config ../../../../../src/platform/test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../solutions/security/test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
+node ../../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../../../solutions/security/test/osquery_cypress/es_archives --config ../../../../../src/platform/test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.

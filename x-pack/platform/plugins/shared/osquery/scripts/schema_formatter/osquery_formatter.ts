@@ -16,7 +16,7 @@ const ELASTIC_OSQUERY_HOSTFS_TABLES = ['users', 'groups', 'processes'];
 
 run(
   async ({ flags }) => {
-    const schemaPath = path.resolve(`../../common/schemas/osquery/`);
+    const schemaPath = path.resolve(__dirname, '../../common/schemas/osquery');
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 
