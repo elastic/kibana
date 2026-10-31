@@ -858,4 +858,70 @@ describe('KibanaEvalsClient', () => {
       expect(exp.evaluationRuns).toHaveLength(4);
     });
   });
+
+  describe('evaluator failure isolation', () => {
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ id: 'ex-1', input: { q: 1 }, output: { expected: 1 } }],
+    };
+
+    const throwingEvaluator: Evaluator<EvaluationDataset['examples'][number], { value: number }> = {
+      name: 'Boom',
+      kind: 'LLM',
+      direction: 'maximize',
+      evaluate: async () => {
+        // Mirrors a judge call that fails every attempt (e.g. a 413 on an oversized prompt).
+        throw Object.assign(
+          new Error('Payload content length greater than maximum allowed: 1679958'),
+          {
+            statusCode: 413,
+          }
+        );
+      },
+    };
+
+    const healthyEvaluator: Evaluator<EvaluationDataset['examples'][number], { value: number }> = {
+      name: 'AlwaysOne',
+      kind: 'CODE',
+      direction: 'maximize',
+      evaluate: async () => ({ score: 1 }),
+    };
+
+    it('records the failing cell as unscored instead of dropping the run', async () => {
+      const client = createClient({ repetitions: 1 });
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const withCallback = createClient({ repetitions: 1, onEvaluationComplete });
+
+      const [exp] = await withCallback.runExperiment(
+        { datasets: [dataset], task: async () => ({ value: 1 }) },
+        [throwingEvaluator, healthyEvaluator]
+      );
+
+      // The run survives and both evaluators are exported — no hole in the denominator.
+      expect(Object.values(exp.runs)).toHaveLength(1);
+      expect(exp.evaluationRuns).toHaveLength(2);
+
+      const byName = Object.fromEntries(exp.evaluationRuns.map((run) => [run.name, run]));
+      expect(byName.Boom.result).toMatchObject({ score: null, label: 'unavailable' });
+      expect(byName.Boom.result?.explanation).toMatch(/Payload content length/);
+      expect(byName.AlwaysOne.result).toMatchObject({ score: 1 });
+
+      // The failing cell is still exported, so coverage stays visible.
+      expect(onEvaluationComplete).toHaveBeenCalledTimes(2);
+
+      expect(mockLog.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('recording the cell as unscored'),
+        })
+      );
+
+      // A second experiment on a fresh client also completes rather than rejecting.
+      await expect(
+        client.runExperiment({ datasets: [dataset], task: async () => ({ value: 1 }) }, [
+          throwingEvaluator,
+        ])
+      ).resolves.toHaveLength(1);
+    });
+  });
 });
