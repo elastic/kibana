@@ -29,6 +29,7 @@ import {
   getSourceDocument,
   getTransformedQuery,
   checkMissingIdFieldWarning,
+  removeReservedMetadataColumns,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -47,6 +48,7 @@ import {
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
+  getReservedMetadataColumnsWarning,
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -125,6 +127,7 @@ export const esqlExecutor = async ({
      */
     let iteration = 0;
     let totalEventsFound = 0;
+    const removedMetadataColumns = new Set<string>();
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
@@ -194,8 +197,11 @@ export const esqlExecutor = async ({
           `ES|QL query iteration\nIteration: ${iteration}. Search took: ${esqlSearchDuration}ms.`
         );
 
-        const results = response.values.map((row) => rowToDocument(response.columns, row));
+        const { documents: results, removedColumns } = removeReservedMetadataColumns(
+          response.values.map((row) => rowToDocument(response.columns, row))
+        );
         totalEventsFound += results.length;
+        removedColumns.forEach((column) => removedMetadataColumns.add(column));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -342,6 +348,11 @@ export const esqlExecutor = async ({
       }
       result.errors.push(error.message);
       result.success = false;
+    }
+
+    // a single warning with the columns removed in all iterations, also when the search failed midway
+    if (removedMetadataColumns.size > 0) {
+      result.warningMessages.push(getReservedMetadataColumnsWarning([...removedMetadataColumns]));
     }
 
     result.totalEventsFound = totalEventsFound;

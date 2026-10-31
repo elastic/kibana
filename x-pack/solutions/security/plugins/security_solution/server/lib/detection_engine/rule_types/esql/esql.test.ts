@@ -239,28 +239,28 @@ describe('esqlExecutor', () => {
     });
   });
 
-  describe('shard failures', () => {
-    const commonAlertFields: CommonAlertFieldsLatest = {
-      [ALERT_RULE_PARAMETERS]: {},
-      [ALERT_RULE_CATEGORY]: 'ES|QL Rule',
-      [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
-      [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',
-      [ALERT_RULE_NAME]: 'rule-name',
-      [ALERT_RULE_PRODUCER]: 'siem',
-      [ALERT_RULE_REVISION]: 0,
-      [ALERT_RULE_TYPE_ID]: 'siem.esqlRule',
-      [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
-      [SPACE_IDS]: ['default'],
-      [ALERT_RULE_TAGS]: [],
-      [TIMESTAMP]: '2020-04-20T21:27:45+0000',
-    };
-    const emptySearchResponse: estypes.SearchResponse = {
-      took: 0,
-      timed_out: false,
-      _shards: { total: 1, successful: 1, failed: 0 },
-      hits: { hits: [] },
-    };
+  const commonAlertFields: CommonAlertFieldsLatest = {
+    [ALERT_RULE_PARAMETERS]: {},
+    [ALERT_RULE_CATEGORY]: 'ES|QL Rule',
+    [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+    [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',
+    [ALERT_RULE_NAME]: 'rule-name',
+    [ALERT_RULE_PRODUCER]: 'siem',
+    [ALERT_RULE_REVISION]: 0,
+    [ALERT_RULE_TYPE_ID]: 'siem.esqlRule',
+    [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
+    [SPACE_IDS]: ['default'],
+    [ALERT_RULE_TAGS]: [],
+    [TIMESTAMP]: '2020-04-20T21:27:45+0000',
+  };
+  const emptySearchResponse: estypes.SearchResponse = {
+    took: 0,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, failed: 0 },
+    hits: { hits: [] },
+  };
 
+  describe('shard failures', () => {
     it('should add a warning and still create alerts when a non-aggregating query returns partial results', async () => {
       const shardFailure: estypes.EsqlEsqlShardFailure = {
         shard: 0,
@@ -322,6 +322,128 @@ describe('esqlExecutor', () => {
       expect(result.errors).toEqual([expect.stringContaining('script_exception')]);
       expect(result.warningMessages).toEqual([]);
       expect(ruleServices.alertWithPersistence).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reserved metadata columns', () => {
+    const mockEsqlResult = (columns: Array<{ name: string; type: string }>, values: string[][]) => {
+      (
+        ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock
+      ).mockResolvedValue({ id: 'QUERY-ID', is_running: false, columns, values });
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResponse(emptySearchResponse);
+      ruleServices.alertWithPersistence.mockResolvedValue({
+        createdAlerts: [
+          {
+            _id: 'alert-1',
+            _index: '.internal.alerts-security.alerts-default-000001',
+            ...commonAlertFields,
+          },
+        ],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+    };
+
+    it('should not copy reserved metadata columns into the alerts and should add a warning', async () => {
+      mockEsqlResult(
+        [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: '_source' },
+          { name: '_ignored', type: 'keyword' },
+          { name: 'host.name', type: 'keyword' },
+        ],
+        [['doc-1', '{"host":{"name":"host-1"}}', 'host.name', 'host-1']]
+      );
+
+      const result = await esqlExecutor(mockedArguments);
+
+      const [alertDocument] = ruleServices.alertWithPersistence.mock.calls[0][0];
+      expect(alertDocument._source).not.toHaveProperty('_source');
+      expect(alertDocument._source).not.toHaveProperty('_ignored');
+      expect(alertDocument._source).toMatchObject({ 'host.name': 'host-1' });
+      expect(result.success).toBe(true);
+      expect(result.errors).toEqual([]);
+      expect(result.createdSignalsCount).toBe(1);
+      expect(result.warningMessages).toEqual([
+        expect.stringContaining('metadata columns _source, _ignored'),
+      ]);
+    });
+
+    it('should not add a warning when the query does not return reserved metadata columns', async () => {
+      mockEsqlResult(
+        [
+          { name: '_id', type: 'keyword' },
+          { name: 'host.name', type: 'keyword' },
+        ],
+        [['doc-1', 'host-1']]
+      );
+
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.warningMessages).toEqual([]);
+      expect(result.success).toBe(true);
+    });
+
+    describe('when the search needs more than one iteration', () => {
+      const firstPage = {
+        id: 'QUERY-ID',
+        is_running: false,
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: '_source' },
+        ],
+        values: [
+          ['doc-1', '{"a":1}'],
+          ['doc-2', '{"a":2}'],
+        ],
+      };
+
+      beforeEach(() => {
+        // a page with maxSignals + 1 rows makes the executor request another one
+        mockedArguments.sharedParams = getSharedParamsMock({
+          ruleParams: getEsqlRuleParams({ maxSignals: 1 }),
+        });
+        ruleServices.scopedClusterClient.asCurrentUser.search.mockResponse(emptySearchResponse);
+        ruleServices.alertWithPersistence.mockResolvedValue({
+          createdAlerts: [],
+          errors: {},
+          alertsWereTruncated: false,
+        });
+      });
+
+      it('should add a single warning with the columns removed in all iterations', async () => {
+        (ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock)
+          .mockResolvedValueOnce(firstPage)
+          .mockResolvedValueOnce({
+            id: 'QUERY-ID-2',
+            is_running: false,
+            columns: [
+              { name: '_id', type: 'keyword' },
+              { name: '_ignored', type: 'keyword' },
+            ],
+            values: [['doc-3', 'host.name']],
+          });
+
+        const result = await esqlExecutor(mockedArguments);
+
+        expect(result.warningMessages).toEqual([
+          expect.stringContaining('metadata columns _source, _ignored'),
+        ]);
+      });
+
+      it('should keep the warning when a later iteration fails', async () => {
+        (ruleServices.scopedClusterClient.asCurrentUser.esql.asyncQuery as unknown as jest.Mock)
+          .mockResolvedValueOnce(firstPage)
+          .mockRejectedValueOnce(new Error('Error while performing ES|QL search: boom'));
+
+        const result = await esqlExecutor(mockedArguments);
+
+        expect(result.success).toBe(false);
+        expect(result.errors).toEqual([expect.stringContaining('boom')]);
+        expect(result.warningMessages).toEqual([
+          expect.stringContaining('metadata column _source'),
+        ]);
+      });
     });
   });
 
