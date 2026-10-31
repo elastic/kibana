@@ -266,6 +266,7 @@ export class AlertZeroPlugin
         stepsLogger
       ),
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
+      getCoreStart: () => this.requireCoreStart(),
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
       grouping: {

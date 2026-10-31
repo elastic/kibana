@@ -1218,6 +1218,11 @@ _alertzero_attack_discovery:
       allow_restricted_indices: false
     - names:
         - "logs-endpoint.events.*"
+      privileges:
+        - "read"
+        - "read_cross_cluster"
+      allow_restricted_indices: false
+    - names:
         - "entities-latest-*"
       privileges:
         - "read"
@@ -1233,6 +1238,15 @@ _alertzero_attack_discovery:
         - "winlogbeat-*"
       privileges:
         - "read"
+      allow_restricted_indices: false
+  remote_indices:
+    - clusters:
+        - "*"
+      names:
+        - "logs-endpoint.events.*"
+      privileges:
+        - "read"
+        - "read_cross_cluster"
       allow_restricted_indices: false
   applications:
     - application: "kibana-.kibana"

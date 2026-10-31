@@ -78,6 +78,10 @@ const outputProperties = analysis.outputs?.properties ?? {};
 const outputNames = Object.keys(outputProperties);
 
 describe('Attack Discovery FP/TP analysis workflow', () => {
+  it('bumps to version 4 for the cross-cluster event search', () => {
+    expect(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.version).toBe(4);
+  });
+
   it('registers under its expected id', () => {
     expect(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.id).toBe(
       ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
@@ -732,6 +736,33 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       ).toBe('2026-10-14T21:00:02.000Z');
     });
 
+    it('searches endpoint events on the clusters named by the space data view', () => {
+      expect(stepIn('resolve_endpoint_event_index')?.type).toBe(
+        'alertzero.attackDiscovery.endpointEventIndex'
+      );
+      expect(stepIn('resolve_endpoint_event_index')?.['on-failure']?.continue).toBe(true);
+      for (const name of ['load_events_by_host_id', 'load_events_by_host_name'] as const) {
+        expect(stepIn(name)?.with?.index).toBe(
+          '${{ steps.resolve_endpoint_event_index.output.index | default: consts.endpoint_events_index }}'
+        );
+        expect(stepIn(name)?.with?.ignore_unavailable).toBe(true);
+        expect(stepIn(name)?.with?.allow_partial_search_results).toBe(true);
+      }
+    });
+
+    it('retries the local endpoint pattern when a remote search fails', () => {
+      expect(stepIn('load_events_by_host_id_local')?.if).toBe(
+        '${{ steps.load_events_by_host_id.error != null }}'
+      );
+      expect(stepIn('load_events_by_host_name_local')?.if).toBe(
+        '${{ steps.load_events_by_host_name.error != null }}'
+      );
+      expect(stepIn('load_events_by_host_id_local')?.with?.index).toBe(
+        '{{ consts.endpoint_events_index }}'
+      );
+      expect(stepIn('load_events_by_host_name_local')?.['on-failure']?.continue).toBe(true);
+    });
+
     it('searches host.id when the cited alerts have one', () => {
       expect(stepIn('load_events_by_host_id')?.if).toBe(
         '${{ (steps.count_alerts.output.host_ids | size) > 0 }}'
@@ -778,6 +809,17 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       ).toEqual({ total: { value: 3 }, hits: [] });
     });
 
+    it('returns the local host.id hits when the remote search failed', () => {
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
+          steps: {
+            load_events_by_host_id_local: { output: { hits: { total: { value: 4 }, hits: [] } } },
+            load_events_by_host_name: { output: { hits: { total: { value: 9 }, hits: [] } } },
+          },
+        })
+      ).toEqual({ total: { value: 4 }, hits: [] });
+    });
+
     it('returns the host.name hits when the host.id search was skipped', () => {
       expect(
         createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
@@ -786,6 +828,37 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           },
         })
       ).toEqual({ total: { value: 2 }, hits: [] });
+    });
+
+    const eventsFailedExpression = String(stepIn('source_status')?.with?.events_failed)
+      .replace(/^\$\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+    const searchFailed = { message: 'search failed' };
+
+    const eventsFailed = (steps: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(eventsFailedExpression, { steps });
+
+    it('is false when the local retry succeeds', () => {
+      expect(
+        eventsFailed({
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: { output: { hits: { total: { value: 1 } } } },
+        })
+      ).toBe(false);
+    });
+
+    it('is true when the primary search and the local retry both fail', () => {
+      expect(
+        eventsFailed({
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: { error: searchFailed },
+        })
+      ).toBe(true);
+    });
+
+    it('is false when the host searches were skipped', () => {
+      expect(eventsFailed({})).toBe(false);
     });
   });
 

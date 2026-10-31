@@ -305,12 +305,14 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
  *
  * The version is the prompt version. Execution output echoes it as
  * `workflow_version`, so a result traces back to the prompt that produced it.
+ * Version 4 does not change the prompt. It searches `logs-endpoint.events.*` on
+ * the remote clusters named by the space's default data view, as well as locally.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;
