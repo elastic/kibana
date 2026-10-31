@@ -20,7 +20,7 @@ import {
 import { isUnauthorizedError } from '@kbn/es-errors';
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import { isRetryResult } from './retry_unauthorized';
 
@@ -30,7 +30,7 @@ import { isRetryResult } from './retry_unauthorized';
  */
 export interface TimingContext {
   startTime: number;
-  kibanaRequest: KibanaRequest;
+  measure?: RequestTiming['measure'];
 }
 
 /**

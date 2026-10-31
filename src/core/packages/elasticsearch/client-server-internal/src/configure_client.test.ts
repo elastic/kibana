@@ -20,11 +20,18 @@ import {
 } from './configure_client.test.mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ClusterConnectionPool } from '@elastic/elasticsearch';
+import {
+  ClusterConnectionPool,
+  errors,
+  type TransportRequestOptions,
+  type TransportResult,
+} from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { type AgentFactoryProvider, AgentManager } from './agent_manager';
+import { getTimingRequestHandler } from './timing/timing_request_handler';
 
 const kibanaVersion = '1.0.0';
 
@@ -240,6 +247,55 @@ describe('configureClient', () => {
     );
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
+
+  it.each([200, 503])(
+    'records Elasticsearch timing for a response with status %s',
+    (statusCode) => {
+      const request = httpServerMock.createKibanaRequest();
+      const measure = jest.spyOn(request.serverTiming, 'measure');
+      const client = configureClient(config, {
+        logger,
+        type: 'test',
+        scoped: true,
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequest,
+      });
+      const params = { method: 'GET', path: '/_search' };
+      const options: TransportRequestOptions = {
+        context: {
+          cpsRoutingContext: {
+            routingType: 'none',
+            routingAccepted: false,
+            cpsEnabled: false,
+            apiName: 'search',
+          },
+        },
+      };
+      getTimingRequestHandler(request)({ scoped: true }, params, options, logger);
+      const event: TransportResult = {
+        statusCode,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {
+          context: options.context,
+          name: 'test',
+          request: { params, options, id: 1 },
+          connection: null,
+          attempts: 0,
+          aborted: false,
+        },
+      };
+      const error = statusCode === 503 ? new errors.ResponseError(event) : null;
+
+      client.diagnostic.emit('response', error, event);
+
+      expect(measure).toHaveBeenCalledTimes(1);
+      expect(measure).toHaveBeenCalledWith('es-request', expect.any(Number), 'GET /_search');
+      expect(measure.mock.contexts[0]).toBe(request.serverTiming);
+    }
+  );
 
   it('calls instrumentEsQueryAndDeprecationLogger', () => {
     const client = configureClient(config, {
