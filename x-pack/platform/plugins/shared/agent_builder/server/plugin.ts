@@ -417,6 +417,7 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
       conversationEventBus: this.conversationEventBus,
     });
 

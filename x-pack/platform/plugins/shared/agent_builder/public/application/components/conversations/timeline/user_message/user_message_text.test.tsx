@@ -298,6 +298,14 @@ describe('UserMessageText', () => {
       }
     );
 
+    it('renders a badge whose label contains escaped brackets', () => {
+      renderWithProvider(
+        <UserMessageText text="[#dashboard/\[Elastic Security\] Rules](sml://dashboard%3Asec-dash)" />
+      );
+
+      expect(screen.getByText('#dashboard/[Elastic Security] Rules')).toBeInTheDocument();
+    });
+
     it('renders an image badge for image scheme links', () => {
       renderWithProvider(<UserMessageText text="[photo.png](image://photo.png)" />);
 

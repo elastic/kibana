@@ -39,6 +39,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
+  /** Replace the text typed after the command trigger and keep the menu open on it */
+  handleCommandReplaceText: (text: string) => void;
   /** Reports whether the active command's mounted menu has anything to show, for a given query */
   reportMenuContent: (hasVisibleContent: boolean, forQuery: string) => void;
 }
@@ -149,6 +151,30 @@ const useMessageEditorInstance = ({
         syncIsEmpty();
         dismissCommandMenu();
         onContentChange?.();
+      },
+      // Replace the text after the trigger (e.g. "dash" in "#dash") and re-evaluate the menu on it:
+      handleCommandReplaceText: (text: string) => {
+        if (!ref.current || !commandMatch.activeCommand) {
+          return;
+        }
+
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) {
+          return;
+        }
+
+        const commandRange = createCommandRange(ref.current, commandMatch.activeCommand);
+        commandRange.deleteContents();
+
+        const completed = document.createTextNode(
+          `${commandMatch.activeCommand.command.sequence}${text}`
+        );
+        commandRange.insertNode(completed);
+        placeCursorAfter(completed, sel);
+
+        syncIsEmpty();
+        onContentChange?.();
+        checkInputForCommand(ref.current);
       },
     }),
     [

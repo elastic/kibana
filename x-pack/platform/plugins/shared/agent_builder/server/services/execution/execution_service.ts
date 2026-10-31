@@ -37,7 +37,10 @@ import {
   roundUserMessageEventId,
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { decodeSmlLinkId, parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type {
   AbortExecutionOptions,
@@ -95,14 +98,38 @@ interface ParentExecution {
   agentId: string;
 }
 
+/** Looks up an SML type, to know the attachment type its items attach as. */
+export type GetSmlTypeDefinition = (
+  typeId: string
+) => Pick<SmlTypeDefinition, 'attachmentType'> | undefined;
+
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
+  getSmlTypeDefinition: GetSmlTypeDefinition;
   securityPlugin?: SecurityPluginStart;
 }
+
+// Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
+const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
+const MAX_LINK_LABEL_LENGTH = 300;
+
+// The label of the link whose text ends at `closeIndex`, read back to its unescaped `[`. Reading
+// back, and for a bounded length, keeps this linear on text with many brackets.
+const getLinkLabel = (message: string, closeIndex: number): string => {
+  const earliest = Math.max(0, closeIndex - MAX_LINK_LABEL_LENGTH);
+  for (let index = closeIndex - 1; index >= earliest; index--) {
+    if (message[index] === '[') {
+      let backslashes = 0;
+      while (message[index - 1 - backslashes] === '\\') backslashes++;
+      if (backslashes % 2 === 0) return message.slice(index + 1, closeIndex);
+    }
+  }
+  return '';
+};
 
 export const createAgentExecutionService = (
   deps: AgentExecutionServiceDeps
@@ -1122,10 +1149,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     params: T,
     request: KibanaRequest
   ): Promise<T> {
-    const validated = await this.deps.attachmentsService.validateAttachmentInputs(
+    const { attachmentsService } = this.deps;
+    const attached = await attachmentsService.validateAttachmentInputs(
       params.nextInput.attachments,
       request
     );
+
+    // Linked items are best effort: one that no longer resolves, for example a deleted dashboard,
+    // is left out so the message still sends.
+    const referenced: AttachmentInput[] = [];
+    for (const input of this.getReferencedAttachments(params.nextInput.message)) {
+      try {
+        referenced.push(
+          ...((await attachmentsService.validateAttachmentInputs([input], request)) ?? [])
+        );
+      } catch (error) {
+        this.logger.debug(
+          `Skipping linked ${input.type} '${input.origin}': ${(error as Error).message}`
+        );
+      }
+    }
+    const validated =
+      attached || referenced.length > 0 ? [...(attached ?? []), ...referenced] : undefined;
 
     // Trimmed once here so the receipt-time write and the round the completed run rewrites agree
     // on the text; `undefined` stays `undefined` for a purely attachment-driven message.
@@ -1140,6 +1185,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         ...(validated ? { attachments: validated } : {}),
       },
     };
+  }
+
+  /** The items linked in the message that can be attached, as by-reference attachment inputs. */
+  private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
+    const inputs = new Map<string, AttachmentInput>();
+    for (const match of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+      const [, encodedId] = match;
+      const entry = parseSmlEntryId(decodeSmlLinkId(encodedId));
+      const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
+      const key = entry && `${type}:${entry.originId}`;
+      if (entry && type && key && !inputs.has(key)) {
+        // The label, without its trigger, tells the agent which attachment a link in the message is.
+        const label = getLinkLabel(message ?? '', match.index ?? 0);
+        const description = label.replace(/\\([\\[\]])/g, '$1').replace(/^[#@]/, '');
+        inputs.set(key, {
+          type,
+          origin: entry.originId,
+          ...(description ? { description } : {}),
+        });
+      }
+    }
+    return Array.from(inputs.values());
   }
 
   private createExecutionClient(): AgentExecutionClient {
