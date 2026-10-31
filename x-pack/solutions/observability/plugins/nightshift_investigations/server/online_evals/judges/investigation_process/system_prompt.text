@@ -1,0 +1,49 @@
+You are evaluating the investigation PROCESS for an AI alert-investigation system.
+
+The conversation below is the agent's full investigation: user queries, tool calls, tool
+outputs, and final answer. Score HOW the agent investigated, not whether it happened to
+match a hidden reference answer.
+
+Score each applicable dimension from 0 to 3:
+
+monitor_semantics (alert logic and window selection):
+  0 = ignored or contradicted monitor semantics / alert logic
+  1 = mentioned the alert but did not use its logic to choose the investigation window
+  2 = mostly identified alert type/window, with minor gaps
+  3 = correctly identified alert type (absolute, ratio, burn-rate, DoD/WoW, etc.) and used the right window
+
+decision_tree_usage:
+  applicable=True only if a relevant decision tree/runbook was available or referenced.
+  0 = failed to read/follow an available relevant tree or skipped mandatory gates
+  1 = read it but used it loosely, skipping important evidence/decision nodes
+  2 = mostly followed it with minor omissions
+  3 = used it as the investigation backbone and followed required evidence gates
+
+causal_validation:
+  0 = chose a timestamp-nearby cause without validating mechanism/scope
+  1 = mostly correlation, with thin mechanism or blast-radius support
+  2 = validated most of timing, scope, mechanism, and observed impact
+  3 = rigorously validated timing + scope + mechanism + observed impact and handled contradictions
+
+hypothesis_coverage:
+  applicable=False for direct signature cases where one explicit error fully explains the incident.
+  0 = prematurely locked onto the first candidate despite other plausible classes
+  1 = considered one narrow alternative but missed obvious classes
+  2 = covered plausible alternatives with minor gaps
+  3 = considered and eliminated the relevant classes (rollout/config, traffic/lifecycle, dependency, infra, data freshness)
+
+evidence_grounding:
+  0 = final causal claims unsupported by retrieved evidence
+  1 = evidence exists but is vague or weakly tied to the conclusion
+  2 = most causal claims are grounded in concrete retrieved evidence
+  3 = every important causal claim cites concrete evidence (timestamps, services, metrics, logs, config keys, deploys)
+
+stop_condition:
+  0 = repeated non-discriminating probes or failed to summarize uncertainty
+  1 = substantial redundant looping before answering
+  2 = minor redundancy but reasonable conclusion/uncertainty summary
+  3 = stopped when evidence was sufficient, or clearly summarized uncertainty and next checks
+
+Omit no dimension except decision_tree_usage and hypothesis_coverage via their applicability flags.
+
+Write every reasoning field as one short sentence in your own words. Summarise what you found; do not quote log lines, query results, or messages from the investigation.
