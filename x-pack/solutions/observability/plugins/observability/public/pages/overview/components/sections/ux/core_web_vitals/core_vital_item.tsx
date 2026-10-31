@@ -31,13 +31,42 @@ import {
 } from './translations';
 
 export interface Thresholds {
+  /** Display label for the good boundary, e.g. '2.5s'. Rendered in the palette tooltips. */
   good: string;
+  /** Display label for the poor boundary, e.g. '4.0s'. Rendered in the palette tooltips. */
   bad: string;
+  /** Good boundary in the same unit as `rawValue` (ms for LCP/INP, unitless for CLS). */
+  goodValue: number;
+  /** Poor boundary in the same unit as `rawValue`. */
+  badValue: number;
 }
+
+/**
+ * Returns the status index (0 = good, 1 = needs improvement, 2 = poor) for the
+ * displayed value, or `null` when there is no value to classify.
+ */
+export const getValueStatusIndex = (
+  rawValue: number | null | undefined,
+  { goodValue, badValue }: Thresholds
+): number | null => {
+  if (rawValue === null || rawValue === undefined) {
+    return null;
+  }
+  if (rawValue <= goodValue) {
+    return 0;
+  }
+  if (rawValue >= badValue) {
+    return 2;
+  }
+  return 1;
+};
 
 interface Props {
   title: string;
+  /** Formatted value shown to the user, e.g. '1.94 s' or '0.010'. */
   value?: string | null;
+  /** Unformatted value used to classify the status, in the same unit as the thresholds. */
+  rawValue?: number | null;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
@@ -81,6 +110,7 @@ export function CoreVitalItem({
   loading,
   title,
   value,
+  rawValue,
   thresholds,
   ranks = [100, 0, 0],
   isCls,
@@ -95,6 +125,11 @@ export function CoreVitalItem({
   } = useEuiTheme();
 
   const colorsStatus = [colors.textSuccess, colors.textWarning, colors.textDanger];
+  // Colour the stat by the status of the value actually displayed (good/needs
+  // improvement/poor) so it matches the number shown. Fall back to the
+  // user-distribution bucket only when there is no value to classify.
+  const valueStatusIndex = getValueStatusIndex(rawValue, thresholds);
+  const titleColorIndex = valueStatusIndex ?? biggestValIndex;
   if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
@@ -113,7 +148,7 @@ export function CoreVitalItem({
           </>
         }
         isLoading={loading}
-        titleColor={colorsStatus[biggestValIndex]}
+        titleColor={colorsStatus[titleColorIndex]}
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup
