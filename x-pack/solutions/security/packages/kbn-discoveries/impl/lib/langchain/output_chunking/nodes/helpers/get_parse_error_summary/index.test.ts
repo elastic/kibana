@@ -279,6 +279,18 @@ describe('getParseErrorSummary', () => {
       });
     });
 
+    it('does not throw on a ZodError issue path segment that cannot be stringified', () => {
+      const error = {
+        issues: [{ code: 'invalid_type', path: [Object.create(null), Symbol('s')] }],
+      };
+
+      let summary = '';
+      expect(() => {
+        summary = getParseErrorSummary(error);
+      }).not.toThrow();
+      expect(summary).toContain('[unprintable]');
+    });
+
     it('stringifies a non-error without quoted content', () => {
       expect(getParseErrorSummary('plain "SECRET"')).toBe('plain');
     });

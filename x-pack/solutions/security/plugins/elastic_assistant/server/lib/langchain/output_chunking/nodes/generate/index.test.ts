@@ -637,4 +637,52 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       expect(message).not.toContain('Try sending fewer alerts');
     });
   });
+
+  describe.each([
+    ['the LLM', false],
+    ['the template completion', true],
+  ])(
+    'when %s throws an error that carries the empty-response code but is not the error class',
+    (_label, viaTemplate) => {
+      it('records an empty-response entry without the upstream text, and the route reports a model problem', async () => {
+        const error = Object.assign(new Error('upstream SECRET'), { code: 'EMPTY_MODEL_RESPONSE' });
+        const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+          .invoke as jest.Mock;
+        mockInvoke.mockRejectedValue(error);
+        const completeWithTemplate = jest.fn().mockRejectedValue(error);
+
+        const node = getGenerateNode({
+          ...(viaTemplate ? { completeWithTemplate } : {}),
+          llm: mockLlm,
+          logger: mockLogger,
+          getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+          responseIsHallucinated: mockResponseIsHallucinated,
+          generationSchema,
+        });
+
+        const state = await node({ ...initialGraphState });
+
+        expect(state.errors).toHaveLength(1);
+        expect(isEmptyModelResponseErrorEntry(state.errors[0])).toBe(true);
+        expect(state.errors[0]).not.toContain('SECRET');
+        expect(state.errors[0]).not.toContain('incomplete response from the model');
+
+        let message = '';
+        try {
+          throwIfErrorCountsExceeded({
+            errors: state.errors,
+            generationAttempts: state.generationAttempts,
+            hallucinationFailures: 0,
+            maxGenerationAttempts: state.generationAttempts,
+            maxHallucinationFailures: 5,
+          });
+        } catch (e) {
+          message = (e as Error).message;
+        }
+
+        expect(message).toContain('will not help');
+        expect(message).not.toContain('SECRET');
+      });
+    }
+  );
 });
