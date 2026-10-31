@@ -10,6 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntModels } from './types';
 import { huntCoordinator } from './hunt_coordinator';
+import type { HuntCoordinatorParams } from './hunt_coordinator';
 import { SUMMARIZE_HIT_SOURCE_FIELDS } from './common/summarize_hit';
 
 /** The universe the routes hand the coordinator: the space's default data view. */
@@ -379,6 +380,59 @@ describe('huntCoordinator', () => {
         expect(result.completed_successfully).toBe(false);
       });
 
+      it('retires as no_tier2_targets when the cyber model chose where to hunt and found nothing', async () => {
+        nothingElsePointsAnywhere();
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-no-targets',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockModelMatch.mock.calls[0][0].model).toBe(cyber);
+        expect(result.tier2_skipped_reason).toBe('no_tier2_targets');
+        expect(result.completeness).toBe('complete');
+      });
+
+      it('does not report Efficient as unavailable when the cyber model covers it', async () => {
+        mockT1.mockResolvedValueOnce(tier1(false));
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-tier2',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockT2.mock.calls[0][0].extraction).toBe(cyber);
+        expect(result.unavailable_model_tiers).toBeUndefined();
+      });
+
       it('still skips as no_tier2_targets, and completes, when the efficient model ran and found nothing', async () => {
         nothingElsePointsAnywhere();
 
@@ -596,6 +650,86 @@ describe('huntCoordinator', () => {
       esClient,
       undefined
     );
+  });
+
+  describe('the techniques an earlier run already searched', () => {
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const loaded = {
+      iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      techniques: ['T1078.004'],
+      text: 'report body text',
+      already_searched_technique_ids: ['T1078.004', 'T1566'],
+      pending_technique_ids: ['T1059'],
+    };
+
+    it("hands the report's ledger to huntBehavior on a report-driven run", async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+
+      await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-ledger',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(mockT2).toHaveBeenCalledWith(
+        expect.anything(),
+        logger,
+        expect.objectContaining({
+          already_searched_technique_ids: ['T1078.004', 'T1566'],
+          pending_technique_ids: ['T1059'],
+        }),
+        esClient,
+        undefined
+      );
+    });
+
+    it('does not apply the ledger to a manual run, which replays the whole report', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+
+      await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'manual',
+          run_id: 'run-ledger-manual',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('already_searched_technique_ids');
+      expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('pending_technique_ids');
+    });
+
+    it('does not apply the ledger to text the caller supplied, which is a different search', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+
+      await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'scheduled',
+          run_id: 'run-ledger-caller-text',
+          report_id: 'rpt-1',
+          text: 'a different report text',
+        }
+      );
+
+      expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('already_searched_technique_ids');
+    });
   });
 
   describe('what scope resolution is handed', () => {
@@ -1328,6 +1462,39 @@ describe('huntCoordinator', () => {
       expect(callerText.replayed_whole_report).toBe(false);
     });
 
+    it.each<[string, Pick<HuntCoordinatorParams, 'iocs' | 'techniques'>]>([
+      ['iocs', { iocs: [{ type: 'ip', value: '192.0.2.99' }] }],
+      ['techniques', { techniques: ['T1059'] }],
+    ])(
+      'does not call a manual run over caller-supplied %s a replay of the whole report',
+      async (_, callerInput) => {
+        const { loadReportHuntContext: mockLoad } = jest.requireMock(
+          './common/load_report_context'
+        );
+        mockLoad.mockResolvedValueOnce({
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          techniques: ['T1078.004'],
+          text: 'report body text',
+        });
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          allTiers({} as ScopedModel),
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'manual',
+            run_id: 'run-caller-inputs',
+            report_id: 'rpt-1',
+            ...callerInput,
+          }
+        );
+
+        expect(result.replayed_whole_report).toBe(false);
+      }
+    );
+
     it('omits the list when Tier 2 did not run', async () => {
       const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
         spaceId: 'default',
@@ -1341,6 +1508,142 @@ describe('huntCoordinator', () => {
       expect(result.searched_technique_ids).toBeUndefined();
       expect(result.pending_technique_ids).toBeUndefined();
       expect(result.replayed_whole_report).toBeUndefined();
+    });
+  });
+
+  describe('a pending technique the run did not get back', () => {
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const loaded = {
+      iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      techniques: ['T1078.004'],
+      text: 'report body text',
+      already_searched_technique_ids: ['T1078.004'],
+      pending_technique_ids: ['T1059', 'T1003'],
+    };
+    const budgetGap = (technique_id: string) => ({
+      reason: 'generation_budget' as const,
+      technique_id,
+      detail: `${technique_id} is still to be searched`,
+    });
+    const run = (run_id: string, trigger: 'scheduled' | 'manual' = 'scheduled') =>
+      huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        { spaceId: 'default', indexPatterns: INDEX_PATTERNS, trigger, run_id, report_id: 'rpt-1' }
+      );
+
+    it('settles the report when extraction returns none of the pending techniques', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_found',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [budgetGap('T1059'), budgetGap('T1003')],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-dropped');
+
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.pending_technique_ids).toEqual([]);
+      // The gaps are still reported, so the narrative names what was not searched.
+      expect(result.tier2?.incomplete).toEqual([budgetGap('T1059'), budgetGap('T1003')]);
+    });
+
+    it('keeps a pending technique the run extracted again but left over budget', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059' }],
+        indexed_behaviors: [],
+        incomplete: [budgetGap('T1059'), budgetGap('T1003')],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-extracted-again');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('stays retryable for a technique that still has a retryable gap, and drops only the missing one', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059', execution: { executed: false } }],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'execute_failed', technique_id: 'T1059', detail: 'failed' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-mixed');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('keeps a pending technique the model returned but whose quote did not ground', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_validated',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'quote_ungrounded', technique_id: 'T1059', detail: 'quote not in the report' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-quote-ungrounded');
+
+      // T1059 was named, so it keeps its retry; T1003 was not named at all and is given up on.
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('drops nothing on a manual run, which does not carry the earlier pending list', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_found',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [budgetGap('T1059')],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-manual-keeps', 'manual');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('drops nothing when extraction could not run at all', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_validated',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [{ reason: 'catalog_unavailable', detail: 'no MITRE data' }],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-no-catalog');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      // Extraction never ran, so the recorded pending list must be left alone, not replaced by [].
+      expect(result.pending_technique_ids).toBeUndefined();
     });
   });
 
@@ -1403,7 +1706,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('surfaces a budget-truncated Tier 2 without failing the run', async () => {
+  it('surfaces a budget-truncated Tier 2 as retryable, without failing the run', async () => {
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockResolvedValueOnce({
       status: 'behaviors_proposed',
@@ -1442,12 +1745,11 @@ describe('huntCoordinator', () => {
     expect(result.tier2?.incomplete).toHaveLength(2);
     expect(result.next_step).toContain('budget reached before T1059');
     expect(result.message).toContain('2 coverage gap(s)');
-    // A deterministic budget cut must not re-open the report: the next sweep would
-    // truncate it identically and re-spend the whole budget on the same techniques.
-    expect(result.completed_successfully).toBe(true);
-    // But it is not a clean environment either, which is the distinction the flag
-    // above cannot carry on its own.
-    expect(result.completeness).toBe('incomplete_final');
+    // A budget cut leaves techniques unsearched, and the next run skips the ones this run
+    // recorded as searched, so the report stays eligible to be resumed rather than retiring
+    // with part of it never hunted.
+    expect(result.completed_successfully).toBe(false);
+    expect(result.completeness).toBe('incomplete_retryable');
   });
 
   it('forwards the Tier 1 window into huntBehavior for execute', async () => {
@@ -2040,7 +2342,7 @@ describe('huntCoordinator', () => {
       );
       mockT2.mockResolvedValueOnce(
         tier2Result({
-          incomplete: [{ reason: 'generation_budget', technique_id: 'T1566', detail: 'cut' }],
+          incomplete: [{ reason: 'collapsed', technique_id: 'T1566', detail: 'cut' }],
         })
       );
 
