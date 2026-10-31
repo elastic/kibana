@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
   - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

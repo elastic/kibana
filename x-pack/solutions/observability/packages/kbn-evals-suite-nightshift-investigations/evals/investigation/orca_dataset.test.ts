@@ -157,7 +157,9 @@ describe('ORCA source preflight', () => {
   ])(
     'rejects unusable credentials, missing data or partial responses before investigations',
     async (response) => {
-      const request = jest.fn().mockImplementation(async () => response.clone());
+      // Each in-flight request needs its own body. Cancelling clones of one response deadlocks the tee.
+      const body = await response.text();
+      const request = jest.fn(async () => new Response(body, { status: response.status }));
       await expect(assertOrcaSource(request, env)).rejects.toThrow('ORCA');
     }
   );

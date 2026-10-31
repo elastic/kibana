@@ -10,6 +10,7 @@ import { createHash } from 'crypto';
 import stringify from 'safe-stable-stringify';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
+import { timeoutSignal } from '@kbn/std';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
 import { investigationExampleSchema } from './types';
@@ -165,22 +166,30 @@ export const assertOrcaSource = async (
   await Promise.all(
     Object.entries({ logs: 14268, traces: 11864, metrics: 117594 }).map(
       async ([signal, expected]) => {
-        const response = await request(`${url.replace(/\/$/, '')}/_query`, {
-          method: 'POST',
-          headers: { Authorization: `ApiKey ${apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: `FROM ${signal}-orcabench.otel-* | WHERE @timestamp >= "2026-04-19T16:22:00Z" AND @timestamp < "2026-04-19T16:50:00Z" | STATS documents = COUNT(*)`,
-          }),
-          signal: AbortSignal.timeout(30_000),
-        });
-        assert(response.ok, `ORCA ${signal} preflight returned HTTP ${response.status}`);
-        const result = z
-          .object({ values: z.array(z.array(z.number())), is_partial: z.boolean().optional() })
-          .parse(await response.json());
-        assert(
-          !result.is_partial && result.values.length === 1 && result.values[0][0] === expected,
-          `ORCA ${signal} preflight differs from the pinned snapshot`
-        );
+        const deadline = timeoutSignal(30_000);
+        try {
+          const response = await request(`${url.replace(/\/$/, '')}/_query`, {
+            method: 'POST',
+            headers: { Authorization: `ApiKey ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: `FROM ${signal}-orcabench.otel-* | WHERE @timestamp >= "2026-04-19T16:22:00Z" AND @timestamp < "2026-04-19T16:50:00Z" | STATS documents = COUNT(*)`,
+            }),
+            signal: deadline,
+          });
+          if (!response.ok) {
+            await response.body?.cancel();
+          }
+          assert(response.ok, `ORCA ${signal} preflight returned HTTP ${response.status}`);
+          const result = z
+            .object({ values: z.array(z.array(z.number())), is_partial: z.boolean().optional() })
+            .parse(await response.json());
+          assert(
+            !result.is_partial && result.values.length === 1 && result.values[0][0] === expected,
+            `ORCA ${signal} preflight differs from the pinned snapshot`
+          );
+        } finally {
+          deadline.dispose();
+        }
       }
     )
   );

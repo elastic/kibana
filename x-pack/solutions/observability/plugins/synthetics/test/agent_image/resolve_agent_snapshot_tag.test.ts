@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
+
 import { resolveAgentSnapshotTag } from './resolve_agent_snapshot_tag';
+
+jest.mock('@kbn/std', () => ({
+  timeoutSignal: jest.fn(),
+}));
 
 const AGENT = 'docker.elastic.co/elastic-agent/elastic-agent';
 const COMPLETE = 'docker.elastic.co/elastic-agent/elastic-agent-complete';
@@ -117,17 +123,16 @@ describe('resolveAgentSnapshotTag', () => {
   });
 
   it('bounds the artifacts API request with a timeout signal', async () => {
-    // jsdom has neither `fetch` nor `AbortSignal.timeout`, both exist in the Node runtime of the suite
+    // jsdom has no `fetch`; the suite runs that request on Node.
+    const dispose = jest.fn();
     const signal = new AbortController().signal;
-    const timeoutMock = jest.fn().mockReturnValue(signal);
+    Object.defineProperty(signal, 'dispose', { value: dispose });
+    jest.mocked(timeoutSignal).mockReturnValue(signal as ReturnType<typeof timeoutSignal>);
     const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ versions: ['9.6.0-SNAPSHOT'] }),
     });
-    const restores = [
-      defineProperty(globalThis, 'fetch', fetchMock),
-      defineProperty(AbortSignal, 'timeout', timeoutMock),
-    ];
+    const restoreFetch = defineProperty(globalThis, 'fetch', fetchMock);
 
     try {
       const tag = await resolveAgentSnapshotTag('9.7.0', createLog(), 'agent', {
@@ -135,10 +140,11 @@ describe('resolveAgentSnapshotTag', () => {
       });
 
       expect(tag).toBe('9.6.0-SNAPSHOT');
-      expect(timeoutMock).toHaveBeenCalledWith(10_000);
+      expect(timeoutSignal).toHaveBeenCalledWith(10_000);
       expect(fetchMock).toHaveBeenCalledWith(expect.any(String), { signal });
+      expect(dispose).toHaveBeenCalledTimes(1);
     } finally {
-      restores.forEach((restore) => restore());
+      restoreFetch();
     }
   });
 

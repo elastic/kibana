@@ -18,7 +18,8 @@
     "@kbn/repo-packages",
     "@kbn/projects-solutions-groups",
     "@kbn/ci-stats-reporter",
+    "@kbn/std",
     "@kbn/monaco",
-    "@kbn/vega-sandbox",
+    "@kbn/vega-sandbox"
   ]
 }

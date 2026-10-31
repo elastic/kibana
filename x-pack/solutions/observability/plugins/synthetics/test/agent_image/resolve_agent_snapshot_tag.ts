@@ -6,6 +6,7 @@
  */
 
 import semver from 'semver';
+import { timeoutSignal } from '@kbn/std';
 import type { ScoutLogger } from '@kbn/scout-oblt';
 
 export const ELASTIC_AGENT_IMAGE = 'docker.elastic.co/elastic-agent/elastic-agent';
@@ -28,14 +29,20 @@ const toSnapshotTag = (version: string): string =>
 const toReleaseVersion = (version: string): string => version.replace(/-SNAPSHOT$/, '');
 
 const fetchPublishedSnapshotVersions = async (): Promise<string[]> => {
-  const response = await fetch(ARTIFACTS_VERSIONS_URL, {
-    signal: AbortSignal.timeout(ARTIFACTS_FETCH_TIMEOUT_MS),
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} ${response.statusText}`);
+  const deadline = timeoutSignal(ARTIFACTS_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(ARTIFACTS_VERSIONS_URL, {
+      signal: deadline,
+    });
+    if (!response.ok) {
+      await response.body?.cancel();
+      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    }
+    const { versions } = (await response.json()) as { versions: string[] };
+    return versions.filter((version) => version.endsWith('-SNAPSHOT'));
+  } finally {
+    deadline.dispose();
   }
-  const { versions } = (await response.json()) as { versions: string[] };
-  return versions.filter((version) => version.endsWith('-SNAPSHOT'));
 };
 
 /**

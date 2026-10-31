@@ -6,6 +6,7 @@
  */
 
 import type { Client, estypes } from '@elastic/elasticsearch';
+import { timeoutSignal } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EvalFetch } from './scoring/ecs_fields';
 import type { AutomaticImportRunOutput, SimulatedLine } from './types';
@@ -180,12 +181,17 @@ export class AutomaticImportClient {
     return dataStreams.find((dataStream) => dataStream.dataStreamId === dataStreamId)?.status;
   }
 
-  private request(path: string, options: Record<string, unknown>): Promise<unknown> {
-    return this.fetch(path, {
-      ...options,
-      headers: VERSION_HEADERS,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+  private async request(path: string, options: Record<string, unknown>): Promise<unknown> {
+    const deadline = timeoutSignal(REQUEST_TIMEOUT_MS);
+    try {
+      return await this.fetch(path, {
+        ...options,
+        headers: VERSION_HEADERS,
+        signal: deadline,
+      });
+    } finally {
+      deadline.dispose();
+    }
   }
 
   /** Runs the pipeline on every line, the same way Automatic Import does, so outputs line up with inputs. */

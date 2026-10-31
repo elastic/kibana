@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { timeoutSignal } from '@kbn/std';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
@@ -20,7 +21,7 @@ export async function describeDataset({
   end,
   index,
   kql,
-  signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+  signal,
 }: {
   esClient: ElasticsearchClient;
   start: number;
@@ -29,46 +30,53 @@ export async function describeDataset({
   kql?: string;
   signal?: AbortSignal;
 }) {
-  const [columns, sampleDocs, total] = await Promise.all([
-    getEsqlColumnSchema({
-      esClient,
-      index,
-      start,
-      end,
-      signal,
-    }),
-    getSampleDocumentsEsql({
-      esClient,
-      index,
-      start,
-      end,
-      kql,
-      abortSignal: signal,
-    }),
-    runEsqlPopulationCount({
-      esClient,
-      index,
-      start,
-      end,
-      kql,
-      signal,
-    }),
-  ]);
+  const deadline = signal ? undefined : timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+  try {
+    // `deadline` is set exactly when the caller did not pass `signal`.
+    const requestSignal = signal ?? deadline!;
+    const [columns, sampleDocs, total] = await Promise.all([
+      getEsqlColumnSchema({
+        esClient,
+        index,
+        start,
+        end,
+        signal: requestSignal,
+      }),
+      getSampleDocumentsEsql({
+        esClient,
+        index,
+        start,
+        end,
+        kql,
+        abortSignal: requestSignal,
+      }),
+      runEsqlPopulationCount({
+        esClient,
+        index,
+        start,
+        end,
+        kql,
+        signal: requestSignal,
+      }),
+    ]);
 
-  const schema = columns.map((column) => {
-    return {
-      name: column.name,
-      types: column.originalTypes ?? [column.type],
-    };
-  });
+    const schema = columns.map((column) => {
+      return {
+        name: column.name,
+        types: column.originalTypes ?? [column.type],
+      };
+    });
 
-  const analysis = mergeSampleDocumentsWithSchema({
-    hits: sampleDocs.hits,
-    total,
-    schema,
-  });
+    const analysis = mergeSampleDocumentsWithSchema({
+      hits: sampleDocs.hits,
+      total,
+      schema,
+    });
 
-  return analysis;
+    return analysis;
+  } finally {
+    deadline?.dispose();
+  }
 }
 
 async function runEsqlPopulationCount({
