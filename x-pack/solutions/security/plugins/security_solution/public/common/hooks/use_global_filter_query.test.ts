@@ -100,6 +100,26 @@ describe('useGlobalFilterQuery', () => {
     });
   });
 
+  it('filters by the given filters instead of the global ones', () => {
+    const globalQuery = { match_phrase: { test: 'global' } };
+    const givenQuery = { match_phrase: { test: 'given' } };
+    mockGlobalFiltersQuerySelector.mockReturnValue([
+      { meta: { disabled: false }, query: globalQuery },
+    ]);
+
+    const { result } = renderHook(
+      () =>
+        useGlobalFilterQuery({
+          filtersOverride: [{ meta: { disabled: false }, query: givenQuery }],
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(result.current.filterQuery).toEqual({
+      bool: { must: [], filter: [givenQuery], should: [], must_not: [] },
+    });
+  });
+
   it('filters by extra filter', () => {
     const query = {
       match_phrase: {

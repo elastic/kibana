@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -532,8 +533,17 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     ]
   );
 
-  const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const searchExpression = useSearchBarExpression();
+  const {
+    searchExpression,
+    applicableFilters,
+    ignoredFields: ignoredFilterFields,
+  } = useSearchBarExpression(isDataViewLoading ? undefined : dataView);
+  // The DSL query takes the same filters as the ES|QL one: a filter on a field the entity docs lack
+  // matches nothing in DSL, which would empty the counts and the grouped views.
+  const { filterQuery: esFilter } = useGlobalFilterQuery({
+    dataView,
+    filtersOverride: applicableFilters,
+  });
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -1345,6 +1355,26 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             />
           </div>
 
+          {ignoredFilterFields.length > 0 && (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="warning"
+              title={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.home.filters.ignoredTitle',
+                {
+                  defaultMessage:
+                    'Entities have no {count, plural, one {field} other {fields}} {fields}, so the filters with {count, plural, one {it} other {them}} were ignored.',
+                  values: {
+                    count: ignoredFilterFields.length,
+                    fields: ignoredFilterFields.join(', '),
+                  },
+                }
+              )}
+            />
+          )}
+
           <EuiSpacer size="s" />
 
           <EntityFiltersBar
@@ -1353,6 +1383,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             spaceId={spaceId}
             rowsMode={rowsMode}
             esFilter={esFilter}
+            searchExpression={searchExpression}
             watchlistNames={watchlistNames}
           />
 
