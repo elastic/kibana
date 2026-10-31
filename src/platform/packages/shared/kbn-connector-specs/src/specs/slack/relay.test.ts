@@ -12,6 +12,7 @@ import type { ActionContext } from '../../connector_spec';
 import {
   getRelayConnection,
   relayGetConversationHistory,
+  relayGetConversationReplies,
   relayListChannels,
   relayResolveChannelId,
   relaySendMessage,
@@ -25,7 +26,7 @@ const createLogger = () =>
 
 const createContext = (
   secrets: Record<string, unknown>,
-  relay?: { trigger?: jest.Mock; listBindings?: jest.Mock }
+  relay?: Record<string, jest.Mock | undefined>
 ): ActionContext =>
   ({
     log: createLogger(),
@@ -623,6 +624,65 @@ describe('relayGetConversationHistory', () => {
   });
 });
 
+describe('relayGetConversationReplies', () => {
+  const PARENT_TS = '1699999000.000100';
+
+  const read = async (input: Record<string, unknown>, readThread: jest.Mock) =>
+    relayGetConversationReplies(
+      { client: { readThread } as never, tenantKey: 'team-A' },
+      createContext(relaySecrets, { readThread }),
+      { limit: 100, ts: PARENT_TS, ...input } as Parameters<typeof relayGetConversationReplies>[2]
+    );
+
+  const page = (truncated: boolean, ...tss: string[]) => ({
+    channel: { id: 'C123', name: 'alerts' },
+    messages: tss.map((ts) => ({ ts, author: { id: 'U1', isBot: false }, text: 'reply' })),
+    truncated,
+  });
+
+  it('reads the whole thread and pages forward from the newest message returned', async () => {
+    const readThread = jest
+      .fn()
+      .mockResolvedValue(page(true, PARENT_TS, '1699999100.000100', '1699999200.000100'));
+
+    await expect(read({ channel: 'C123', limit: 1000 }, readThread)).resolves.toMatchObject({
+      ok: true,
+      ts: PARENT_TS,
+      channelName: 'alerts',
+      nextCursor: '1699999200.000100:',
+      hasMore: true,
+    });
+    expect(readThread).toHaveBeenCalledWith({
+      tenantKey: 'team-A',
+      channelId: 'C123',
+      threadTs: PARENT_TS,
+      limit: 200,
+    });
+
+    await read({ channel: 'C123', cursor: '1699999200.000100:' }, readThread);
+    expect(readThread).toHaveBeenLastCalledWith(
+      expect.objectContaining({ oldest: '1699999200.000100' })
+    );
+  });
+
+  it('stops paging when a page ends where it began', async () => {
+    const readThread = jest.fn().mockResolvedValue(page(true, PARENT_TS, '1699999200.000100'));
+
+    await expect(
+      read({ channel: 'C123', cursor: '1699999200.000100:' }, readThread)
+    ).resolves.toMatchObject({ nextCursor: undefined, hasMore: false });
+  });
+
+  it('rejects a ts that is not a message timestamp before calling Relay', async () => {
+    const readThread = jest.fn();
+
+    await expect(read({ channel: 'C123', ts: '1699999000' }, readThread)).rejects.toThrow(
+      /parent message timestamp/
+    );
+    expect(readThread).not.toHaveBeenCalled();
+  });
+});
+
 describe('relayTest', () => {
   it('proves the Relay path by reading a single binding', async () => {
     const listBindings = jest.fn().mockResolvedValue({ bindings: [{ scope_id: 'C123' }] });
@@ -663,7 +723,7 @@ describe('slackRelay.assertNotSupported', () => {
         'searchMessages'
       )
     ).toThrow(
-      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId, getConversationHistory.'
+      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId, getConversationHistory, getConversationReplies.'
     );
   });
 });

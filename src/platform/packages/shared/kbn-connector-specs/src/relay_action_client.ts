@@ -35,6 +35,8 @@ export interface RelayActionClient {
   }>;
   /** A window of a bound public channel, newest first. */
   readMessages(input: RelayReadInput): Promise<RelayReadResult>;
+  /** One thread of a bound public channel, oldest first. */
+  readThread(input: RelayReadInput & { threadTs: string }): Promise<RelayReadResult>;
 }
 
 interface RelayReadInput {

@@ -12,6 +12,7 @@ import type { ActionContext } from '../../connector_spec';
 import type { RelayActionClient } from '../../relay_action_client';
 import type {
   SlackGetConversationHistoryInput,
+  SlackGetConversationRepliesInput,
   SlackListChannelsInput,
   SlackResolveChannelIdInput,
   SlackSendMessageInput,
@@ -304,6 +305,8 @@ const SLACK_CONVERSATION_ID = /^[CGD][A-Z0-9]+$/;
 // https://docs.slack.dev/reference/methods/conversations.history#arguments
 const SLACK_WINDOW_BOUND = /^\d{1,12}(\.\d{1,6})?$/;
 
+const SLACK_MESSAGE_TS = /^\d{1,12}\.\d{1,6}$/;
+
 const RELAY_MAX_READ_LIMIT = 200;
 
 /** The Relay's own default, made explicit so later pages keep the same floor. */
@@ -372,6 +375,66 @@ const decodeReadCursor = (cursor: string): ReadWindow => {
   return { ...(oldest ? { oldest } : {}), ...(latest ? { latest } : {}) };
 };
 
+type RelayReadPage = Awaited<ReturnType<RelayActionClient['readMessages']>>;
+
+const prepareRead = (
+  ctx: ActionContext,
+  action: string,
+  input: { channel: string; oldest?: string; latest?: string; inclusive?: boolean; raw?: boolean }
+): string => {
+  if (input.inclusive !== undefined || input.raw) {
+    ctx.log.debug(
+      `Slack ${action}: inclusive and raw are not supported through the Elastic Slack app and were ignored`
+    );
+  }
+  if ([input.oldest, input.latest].some((bound) => bound && !SLACK_WINDOW_BOUND.test(bound))) {
+    throw new Error('oldest and latest take Slack timestamps, e.g. "1700000000.000100".');
+  }
+  const channelId = input.channel.trim();
+  if (!SLACK_CONVERSATION_ID.test(channelId)) {
+    throw new Error(
+      `"${channelId}" is not a channel ID. Pass the channel ID (C...) from listChannels.`
+    );
+  }
+  return channelId;
+};
+
+const readPage = async (
+  ctx: ActionContext,
+  action: string,
+  channelId: string,
+  read: () => Promise<RelayReadPage>
+): Promise<RelayReadPage | RelayReadOutcome> => {
+  ctx.log.debug(`Slack ${action} request through relay: channel=${channelId}`);
+  try {
+    return await read();
+  } catch (error) {
+    const outcome = toReadOutcome(error, channelId);
+    if (outcome) {
+      return outcome;
+    }
+    ctx.log.error(`Slack ${action} through relay failed: ${(error as Error).message}`);
+    throw toReadError(error);
+  }
+};
+
+const toReadResult = (page: RelayReadPage, nextCursor: string | undefined) => ({
+  ok: true as const,
+  channel: page.channel.id,
+  channelName: page.channel.name,
+  messages: page.messages.map(({ ts, threadTs, replyCount, author, text }) => ({
+    ts,
+    user: author.id,
+    username: author.name,
+    is_bot: author.isBot,
+    text,
+    thread_ts: threadTs,
+    reply_count: replyCount,
+  })),
+  nextCursor,
+  hasMore: nextCursor !== undefined,
+});
+
 /**
  * Reads a connected public channel through the Relay, newest first. The Relay has no cursor, so
  * `nextCursor` encodes the next window: the same floor, ending just before the oldest message
@@ -384,22 +447,7 @@ export async function relayGetConversationHistory(
   ctx: ActionContext,
   input: SlackGetConversationHistoryInput
 ) {
-  if (input.inclusive !== undefined || input.raw) {
-    ctx.log.debug(
-      'Slack getConversationHistory: inclusive and raw are not supported through the Elastic Slack app and were ignored'
-    );
-  }
-
-  if ([input.oldest, input.latest].some((bound) => bound && !SLACK_WINDOW_BOUND.test(bound))) {
-    throw new Error('oldest and latest take Slack timestamps, e.g. "1700000000.000100".');
-  }
-
-  const channelId = input.channel.trim();
-  if (!SLACK_CONVERSATION_ID.test(channelId)) {
-    throw new Error(
-      `"${channelId}" is not a channel ID. Pass the channel ID (C...) from listChannels.`
-    );
-  }
+  const channelId = prepareRead(ctx, 'getConversationHistory', input);
 
   const window = input.cursor
     ? decodeReadCursor(input.cursor)
@@ -416,44 +464,69 @@ export async function relayGetConversationHistory(
         ...(input.latest ? { latest: input.latest } : {}),
       };
 
-  ctx.log.debug(`Slack getConversationHistory request through relay: channel=${channelId}`);
-
-  try {
-    const page = await connection.client.readMessages({
+  const page = await readPage(ctx, 'getConversationHistory', channelId, () =>
+    connection.client.readMessages({
       tenantKey: connection.tenantKey,
       channelId,
       ...window,
       limit: Math.min(input.limit, RELAY_MAX_READ_LIMIT),
-    });
-
-    const last = page.messages.at(-1);
-    const nextCursor =
-      page.truncated && last ? encodeReadCursor({ ...window, latest: last.ts }) : undefined;
-
-    return {
-      ok: true as const,
-      channel: page.channel.id,
-      channelName: page.channel.name,
-      messages: page.messages.map(({ ts, threadTs, replyCount, author, text }) => ({
-        ts,
-        user: author.id,
-        username: author.name,
-        is_bot: author.isBot,
-        text,
-        thread_ts: threadTs,
-        reply_count: replyCount,
-      })),
-      nextCursor,
-      hasMore: nextCursor !== undefined,
-    };
-  } catch (error) {
-    const outcome = toReadOutcome(error, channelId);
-    if (outcome) {
-      return outcome;
-    }
-    ctx.log.error(`Slack getConversationHistory through relay failed: ${(error as Error).message}`);
-    throw toReadError(error);
+    })
+  );
+  if ('ok' in page) {
+    return page;
   }
+
+  const last = page.messages.at(-1);
+  return toReadResult(
+    page,
+    page.truncated && last ? encodeReadCursor({ ...window, latest: last.ts }) : undefined
+  );
+}
+
+/**
+ * Reads one thread of a connected public channel through the Relay, oldest first with the parent
+ * message included. `nextCursor` encodes the next window, starting just after the newest message
+ * returned.
+ *
+ * `inclusive` and `raw` are ignored, and messages carry text only: no blocks, attachments or files.
+ */
+export async function relayGetConversationReplies(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackGetConversationRepliesInput
+) {
+  if (!SLACK_MESSAGE_TS.test(input.ts)) {
+    throw new Error('ts takes the parent message timestamp, e.g. "1700000000.000100".');
+  }
+  const channelId = prepareRead(ctx, 'getConversationReplies', input);
+
+  const window = input.cursor
+    ? decodeReadCursor(input.cursor)
+    : {
+        ...(input.oldest ? { oldest: input.oldest } : {}),
+        ...(input.latest ? { latest: input.latest } : {}),
+      };
+
+  const page = await readPage(ctx, 'getConversationReplies', channelId, () =>
+    connection.client.readThread({
+      tenantKey: connection.tenantKey,
+      channelId,
+      threadTs: input.ts,
+      ...window,
+      limit: Math.min(input.limit, RELAY_MAX_READ_LIMIT),
+    })
+  );
+  if ('ok' in page) {
+    return page;
+  }
+
+  const last = page.messages.at(-1);
+  // Slack can return the parent on every page, so a page that ends where it began is the last one.
+  const nextCursor =
+    page.truncated && last && last.ts !== window.oldest
+      ? encodeReadCursor({ ...window, oldest: last.ts })
+      : undefined;
+  return { ...toReadResult(page, nextCursor), ts: input.ts };
 }
 
 /**
@@ -492,5 +565,6 @@ export const slackRelay = {
     listChannels: relayListChannels,
     resolveChannelId: relayResolveChannelId,
     getConversationHistory: relayGetConversationHistory,
+    getConversationReplies: relayGetConversationReplies,
   },
 };
