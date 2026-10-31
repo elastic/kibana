@@ -12,6 +12,11 @@ export interface RebalanceShardsResult {
   moved: number;
   /** Moves that Fleet rejected; retried next cycle. */
   failed: number;
+  /**
+   * Package policies that had no agent condition and now carry a pin: inputs
+   * that may already be running get their first `${agent.id}` condition.
+   */
+  newlyPinned: number;
   /** Monitors pinned to an agent that is no longer healthy. */
   failedOver: number;
   /** Monitors with no agent pin yet (e.g. newly created). */
@@ -25,6 +30,7 @@ export const EMPTY_REBALANCE_RESULT: RebalanceShardsResult = {
   total: 0,
   moved: 0,
   failed: 0,
+  newlyPinned: 0,
   failedOver: 0,
   unpinned: 0,
   monitorsPerAgent: {},

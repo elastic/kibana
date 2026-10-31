@@ -45,7 +45,7 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { PackagePolicyService } from './package_policy_service';
+import { bumpAgentPolicyRevision, PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
 import {
   EMPTY_REBALANCE_RESULT,
@@ -1002,9 +1002,13 @@ export class SyntheticsPrivateLocation {
       browserAgentIds,
     });
     const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+    const unpinnedIds = new Set(
+      pkgPolicies.filter(({ condition }) => typeof condition !== 'string').map(({ id }) => id)
+    );
 
     let moved = 0;
     let failedMoves = 0;
+    let newlyPinned = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
       signal.throwIfAborted();
       // Update in the policy's own recorded space (grouped in toConditionUpdates),
@@ -1016,6 +1020,10 @@ export class SyntheticsPrivateLocation {
       // Count only successful moves (a failed bulkUpdate leaves the old pin).
       moved += policiesToUpdate.length - failed.length;
       failedMoves += failed.length;
+      const failedIds = new Set(failed.map(({ update }) => update.id));
+      newlyPinned += policiesToUpdate.filter(
+        ({ update: { id } }) => unpinnedIds.has(id) && !failedIds.has(id)
+      ).length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so
         // the next run re-attempts these same moves. warn (not error) — no
@@ -1032,6 +1040,7 @@ export class SyntheticsPrivateLocation {
       total: pkgPolicies.length,
       moved,
       failed: failedMoves,
+      newlyPinned,
       ...summarizeRebalance({ monitors, assignment, healthyAgentIds }),
     };
   }
@@ -1062,6 +1071,11 @@ export class SyntheticsPrivateLocation {
 
   async getAgentPolicyRevision(agentPolicyId: string): Promise<number | undefined> {
     return this.packagePolicyService.getAgentPolicyRevision(agentPolicyId);
+  }
+
+  /** Bumps the agent policy revision without changing it, so agents rebuild their components. */
+  async redeployAgentPolicy(agentPolicyId: string): Promise<void> {
+    await bumpAgentPolicyRevision(this.server, agentPolicyId);
   }
 
   /**

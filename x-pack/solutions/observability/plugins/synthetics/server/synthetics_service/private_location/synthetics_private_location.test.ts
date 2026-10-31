@@ -1618,6 +1618,40 @@ describe('SyntheticsPrivateLocation', () => {
         ],
       });
       expect(result.total).toBe(1);
+      expect(result.newlyPinned).toBe(1);
+    });
+
+    it('counts only successful first pins as newly pinned, not moves between agents', async () => {
+      const pkgPolicy = (id: string, condition?: string) => ({
+        id,
+        condition,
+        spaceIds: ['default'],
+        version: 'WzAsMV0=',
+        revision: 1,
+        name: id,
+        policy_ids: ['ap-1'],
+        inputs: [{ type: 'synthetics/http', enabled: true }],
+      });
+      jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue([
+          pkgPolicy('moved-loc-1', agentIdCondition('gone-agent')),
+          pkgPolicy('first-loc-1'),
+          pkgPolicy('rejected-loc-1'),
+        ]);
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([{ update: { id: 'rejected-loc-1' } }] as never);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(result.moved).toBe(2);
+      expect(result.newlyPinned).toBe(1);
     });
 
     it('creates the sentinel only when it is missing', async () => {
