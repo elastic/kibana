@@ -136,6 +136,10 @@ describe('matchAttackFingerprints', () => {
         op_type: 'create',
         document: expect.objectContaining({
           permissions: { kibana: { privileges: [{ space: 'default' }] } },
+          attributes: expect.objectContaining({
+            alert_ids: ['a1', 'a2'],
+            analyzed_alert_ids: ['a1', 'a2'],
+          }),
         }),
       }),
       expect.anything()
@@ -162,8 +166,130 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews).toEqual([]);
     expect(output.attachments[0]?.journal_alerts_retired).toBe(true);
     expect(output.attachments[0]?.tag_correlated_alerts).toBe(true);
+    expect(output.attachments[0]?.tag_fp_chain_alerts).toBe(false);
     expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
     expect(index).not.toHaveBeenCalled();
+  });
+
+  it('reviews a closed false positive continuation instead of tagging it', async () => {
+    const { esClient, contextManager, index, update } = createHarness({
+      hits: [fingerprintHit()],
+      conversation: { metadata: { status: 'closed', close_reason: 'false_positive', verdict: '' } },
+    });
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews[0]).toEqual(
+      expect.objectContaining({
+        attack_discovery_id: ATTACK_ID,
+        alert_ids: ['a1', 'a2'],
+        related_investigation_id: '11111111-1111-8111-8111-111111111111',
+        related_link_reason: 'false_positive',
+      })
+    );
+    expect(update).not.toHaveBeenCalled();
+    expect(index).toHaveBeenCalled();
+  });
+
+  it('attaches to a joinable fingerprint when a closed one overlaps more', async () => {
+    const fingerprint = (id: string, investigationId: string, alertIds: string[]) => ({
+      _id: id,
+      _source: {
+        id,
+        type: 'security.attack_fingerprint',
+        expires_at: '2026-10-22T12:00:00.000Z',
+        attributes: {
+          investigation_id: investigationId,
+          alert_ids: alertIds,
+          host_entity_ids: ['host-1'],
+          user_entity_ids: ['user-1'],
+          mitre_attack_tactics: ['TA0008'],
+          first_alert_at: '2026-10-21T10:00:00.000Z',
+          last_alert_at: '2026-10-21T10:30:00.000Z',
+        },
+      },
+    });
+    const { esClient, contextManager, index } = createHarness({
+      hits: [
+        fingerprint('closed-fp', 'closed-inv', ['a1', 'a2', 'a3', 'a4']),
+        fingerprint('open-fp', 'open-inv', ['a1', 'a2']),
+      ],
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockImplementation(
+      async (request: { path: string }) => ({
+        body: {
+          metadata: request.path.includes('closed-inv')
+            ? { status: 'closed', close_reason: 'false_positive', verdict: '' }
+            : { status: 'open', verdict: 'In analysis' },
+        },
+      })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2', 'a3', 'a4'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.reviews).toEqual([]);
+    expect(output.attachments[0]?.investigation_id).toBe('open-inv');
+    expect(output.attachments[0]?.tag_correlated_alerts).toBe(false);
+    expect(index).not.toHaveBeenCalled();
+  });
+
+  it('reviews a false-positive continuation that brings unjudged alerts', async () => {
+    const { esClient, contextManager, index, update } = createHarness({
+      hits: [
+        fingerprintHit({
+          alert_ids: ['a1', 'a2', 'already-stored'],
+          analyzed_alert_ids: ['a1', 'a2'],
+        }),
+      ],
+      conversation: { metadata: { status: 'closed', close_reason: 'false_positive', verdict: '' } },
+    });
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2', 'a3', 'a4'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews[0]).toEqual(
+      expect.objectContaining({
+        attack_discovery_id: ATTACK_ID,
+        alert_ids: ['a1', 'a2', 'a3', 'a4'],
+        related_investigation_id: '11111111-1111-8111-8111-111111111111',
+        related_link_reason: 'false_positive',
+      })
+    );
+    expect(update).not.toHaveBeenCalled();
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        op_type: 'create',
+        document: expect.objectContaining({
+          attributes: expect.objectContaining({
+            alert_ids: ['a1', 'a2', 'a3', 'a4'],
+            analyzed_alert_ids: ['a1', 'a2', 'a3', 'a4'],
+          }),
+        }),
+      }),
+      expect.anything()
+    );
   });
 
   it('returns an attachment for a later phase with new alerts and different tactics', async () => {
@@ -193,7 +319,8 @@ describe('matchAttackFingerprints', () => {
     });
 
     expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
-    expect(output.attachments[0]?.tag_correlated_alerts).toBe(true);
+    expect(output.attachments[0]?.tag_correlated_alerts).toBe(false);
+    expect(output.attachments[0]?.tag_fp_chain_alerts).toBe(false);
     expect(output.reviews).toEqual([]);
     expect(index).not.toHaveBeenCalled();
   });
@@ -327,6 +454,7 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews[0]?.sibling_attack_discovery_ids).toEqual([OTHER_ATTACK_ID]);
     expect(output.attachments[0]?.journal_alerts_retired).toBe(false);
     expect(output.attachments[0]?.tag_correlated_alerts).toBe(false);
+    expect(output.attachments[0]?.tag_fp_chain_alerts).toBe(false);
     expect(index).toHaveBeenCalledTimes(1);
   });
 
@@ -399,8 +527,11 @@ describe('matchAttackFingerprints', () => {
     expect(index).not.toHaveBeenCalled();
   });
 
-  it('returns an attachment when the fingerprint create conflicts', async () => {
-    const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });
+  it('reviews on its own when a closed investigation already owns the fingerprint id', async () => {
+    const index = jest
+      .fn()
+      .mockRejectedValueOnce({ statusCode: 409, message: 'conflict' })
+      .mockResolvedValue({ result: 'created' });
     const get = jest.fn().mockResolvedValue({
       _id: 'stored-fp',
       _source: {
@@ -431,8 +562,11 @@ describe('matchAttackFingerprints', () => {
       spaceId: 'default',
     });
 
-    expect(output.attachments[0]?.investigation_id).toBe('22222222-2222-8222-8222-222222222222');
-    expect(output.reviews).toEqual([]);
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews[0]?.related_link_reason).toBe('closed');
+    expect(output.reviews[0]?.related_investigation_id).toBe(
+      '22222222-2222-8222-8222-222222222222'
+    );
   });
 
   it('keeps attacks on different host names apart when they share one entity id', async () => {
@@ -784,7 +918,7 @@ describe('matchAttackFingerprints', () => {
   it('attaches when the winning run has not created the Investigation yet', async () => {
     const now = new Date('2026-10-21T12:00:00.000Z');
     const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });
-    const { esClient, contextManager } = createHarness({
+    const { esClient, contextManager, update } = createHarness({
       index,
       get: jest.fn().mockResolvedValue({
         _id: 'stored-fp',
@@ -818,7 +952,219 @@ describe('matchAttackFingerprints', () => {
 
     expect(output.reviews).toEqual([]);
     expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
+    expect(output.attachments[0]?.fingerprint_pending).toBe(true);
+    expect(output.attachments[0]?.retarget_if_missing).toBe(true);
     expect(index).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          attributes: expect.objectContaining({ alert_ids: ['old-1', 'old-2'] }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('retargets a fingerprint the matcher already knows is past the pending window', async () => {
+    const update = jest.fn().mockResolvedValue({ result: 'updated' });
+    const index = jest.fn().mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      index,
+      update,
+      hits: [
+        {
+          _id: 'stored-fp',
+          _source: {
+            id: 'stored-fp',
+            type: 'security.attack_fingerprint',
+            '@timestamp': '2026-10-21T10:00:00.000Z',
+            expires_at: '2026-10-22T10:30:00.000Z',
+            attributes: {
+              investigation_id: '11111111-1111-8111-8111-111111111111',
+              alert_ids: ['a1', 'a2'],
+              host_entity_ids: ['host-1'],
+              user_entity_ids: ['user-1'],
+              mitre_attack_tactics: ['TA0008'],
+              first_alert_at: '2026-10-21T10:00:00.000Z',
+              last_alert_at: '2026-10-21T10:30:00.000Z',
+            },
+          },
+        },
+      ],
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 404, headers: {}, body: {}, message: 'Not Found' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews[0]?.related_link_reason).toBe('investigation_missing');
+    expect(index).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'stored-fp',
+        retry_on_conflict: 3,
+        script: expect.objectContaining({
+          source: expect.stringContaining("ctx.op = 'noop'"),
+          params: expect.objectContaining({
+            expected: expect.objectContaining({ pending_ms: 15 * 60 * 1000 }),
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('waits when a young fingerprint cannot be read', async () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });
+    const { esClient, contextManager, update } = createHarness({
+      index,
+      get: jest.fn().mockResolvedValue({
+        _id: 'stored-fp',
+        _source: {
+          id: 'stored-fp',
+          '@timestamp': now.toISOString(),
+          attributes: {
+            investigation_id: '11111111-1111-8111-8111-111111111111',
+            alert_ids: ['old-1', 'old-2'],
+            host_entity_ids: ['host-1'],
+            user_entity_ids: ['user-1'],
+            mitre_attack_tactics: ['TA0008'],
+            first_alert_at: '2026-10-21T10:00:00.000Z',
+            last_alert_at: '2026-10-21T10:30:00.000Z',
+          },
+        },
+      }),
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 503, headers: {}, body: {}, message: 'unavailable' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['new-1', 'new-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now,
+      spaceId: 'default',
+    });
+
+    expect(output.reviews).toEqual([]);
+    expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
+    expect(output.attachments[0]?.fingerprint_pending).toBe(true);
+    expect(output.attachments[0]?.retarget_if_missing).toBe(false);
+    expect(index).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          attributes: expect.objectContaining({ alert_ids: ['old-1', 'old-2'] }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('does not retarget a fingerprint when the Investigation read fails', async () => {
+    const update = jest.fn().mockResolvedValue({ result: 'updated' });
+    const index = jest.fn().mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      index,
+      update,
+      hits: [
+        {
+          _id: 'stored-fp',
+          _source: {
+            id: 'stored-fp',
+            type: 'security.attack_fingerprint',
+            '@timestamp': '2026-10-21T10:00:00.000Z',
+            expires_at: '2026-10-22T10:30:00.000Z',
+            attributes: {
+              investigation_id: '11111111-1111-8111-8111-111111111111',
+              alert_ids: ['a1', 'a2'],
+              host_entity_ids: ['host-1'],
+              user_entity_ids: ['user-1'],
+              mitre_attack_tactics: ['TA0008'],
+              first_alert_at: '2026-10-21T10:00:00.000Z',
+              last_alert_at: '2026-10-21T10:30:00.000Z',
+            },
+          },
+        },
+      ],
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 503, headers: {}, body: {}, message: 'unavailable' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews).toHaveLength(1);
+    expect(output.reviews[0]?.related_investigation_id).toBe('');
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('writes its own fingerprint when the retarget finds the document already claimed', async () => {
+    const update = jest.fn().mockResolvedValue({ result: 'noop' });
+    const index = jest.fn().mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      index,
+      update,
+      hits: [
+        {
+          _id: 'stored-fp',
+          _source: {
+            id: 'stored-fp',
+            type: 'security.attack_fingerprint',
+            '@timestamp': '2026-10-21T10:00:00.000Z',
+            expires_at: '2026-10-22T10:30:00.000Z',
+            attributes: {
+              investigation_id: '11111111-1111-8111-8111-111111111111',
+              alert_ids: ['a1', 'a2'],
+              host_entity_ids: ['host-1'],
+              user_entity_ids: ['user-1'],
+              mitre_attack_tactics: ['TA0008'],
+              first_alert_at: '2026-10-21T10:00:00.000Z',
+              last_alert_at: '2026-10-21T10:30:00.000Z',
+            },
+          },
+        },
+      ],
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 404, headers: {}, body: {}, message: 'Not Found' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.reviews[0]?.related_link_reason).toBe('investigation_missing');
+    expect(update).toHaveBeenCalled();
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({ op_type: 'create' }),
+      expect.anything()
+    );
   });
 
   it('saves the host and user pairs read from the alerts', async () => {

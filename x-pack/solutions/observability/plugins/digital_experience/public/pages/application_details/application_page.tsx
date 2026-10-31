@@ -14,23 +14,52 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
+import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useApplicationsHref } from '../../hooks/use_applications_href';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL } from '../../labels';
+import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
+import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
 
 /** Tabs of the Application view, in display order. */
-const APPLICATION_TAB_IDS = ['overview'] as const;
+const APPLICATION_TAB_IDS = ['overview', 'sessions'] as const;
 
-type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
+export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
     defaultMessage: 'Overview',
   }),
+  sessions: SESSIONS_LABEL,
 };
+
+/** Sessions are built from EDOT Browser data only, so Classic RUM applications have none. */
+const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
+  source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
+
+const sessionsUnavailablePrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceSessionsUnavailable"
+    iconType="users"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.application.sessions.unavailableTitle', {
+          defaultMessage: 'No sessions for Classic RUM applications',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.application.sessions.unavailableDescription', {
+          defaultMessage:
+            'Sessions are built from EDOT Browser data. Instrument this application with EDOT Browser to see its sessions.',
+        })}
+      </p>
+    }
+  />
+);
 
 const overviewUnavailablePrompt = (
   <EuiEmptyPrompt
@@ -103,33 +132,54 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
 export function ApplicationPage({
   serviceName,
   source,
+  selectedTab,
 }: {
   serviceName: string;
   source: ApplicationSource;
+  selectedTab: ApplicationTabId;
 }) {
   const applicationsHref = useApplicationsHref();
+  const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, source);
+  const tabHrefs: Record<ApplicationTabId, string> = {
+    overview: overviewHref,
+    sessions: sessionsHref(),
+  };
 
-  const selectedTab: ApplicationTabId = 'overview';
+  useRouteBreadcrumb([
+    { text: serviceName, href: overviewHref },
+    { text: APPLICATION_TAB_LABELS[selectedTab] },
+  ]);
 
-  useRouteBreadcrumb([{ text: serviceName }, { text: APPLICATION_TAB_LABELS[selectedTab] }]);
+  const renderOverview = () =>
+    source === APPLICATION_SOURCE.otel ? (
+      withPagePadding(<OtelOverview serviceName={serviceName} />)
+    ) : (
+      <ClassicRumOverview serviceName={serviceName} />
+    );
+
+  const renderSessions = () =>
+    withPagePadding(
+      source === APPLICATION_SOURCE.otel ? (
+        <SessionsTab serviceName={serviceName} source={source} />
+      ) : (
+        sessionsUnavailablePrompt
+      )
+    );
 
   return (
     <>
       <AppHeader
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
-        tabs={APPLICATION_TAB_IDS.map((id) => ({
+        tabs={tabsOf(source).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],
           isSelected: id === selectedTab,
+          href: tabHrefs[id],
           'data-test-subj': `digitalExperienceTab-${id}`,
         }))}
       />
-      {source === APPLICATION_SOURCE.otel ? (
-        withPagePadding(<OtelOverview serviceName={serviceName} />)
-      ) : (
-        <ClassicRumOverview serviceName={serviceName} />
-      )}
+      {selectedTab === 'sessions' ? renderSessions() : renderOverview()}
     </>
   );
 }
