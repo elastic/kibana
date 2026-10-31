@@ -38,18 +38,21 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: jest.fn(),
     createWorkflow: jest.fn(),
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
 }));
 
 jest.mock('./automation_row', () => ({
   AutomationRow: ({
-    name,
+    workflowSummary,
     onDelete,
   }: {
-    name: string | undefined;
+    workflowSummary?: { name?: string };
     onDelete: () => Promise<void>;
   }) => (
     <div data-test-subj="contextAiIndexAutomationRow">
-      {name}
+      {workflowSummary?.name}
       <button type="button" data-test-subj="stubAutomationRowDelete" onClick={() => onDelete()}>
         Delete
       </button>
@@ -95,6 +98,7 @@ const summariesResult = (
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
@@ -189,11 +193,9 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No automations yet')).toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        'Create a Workflow to generate and refresh Knowledge Indicators from source data.'
-      )
+      screen.getByText('Automations keep Knowledge Indicators current as your sources change.')
     ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
@@ -202,10 +204,7 @@ describe('AutomationsPanel', () => {
     renderPanel({ isManaged: true });
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(
-      screen.getByText('No automations are configured for this AI index.')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('No automations yet')).not.toBeInTheDocument();
+    expect(screen.getByText('No automations configured.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAddAutomationButton')).not.toBeInTheDocument();
   });
 
@@ -331,7 +330,9 @@ describe('AutomationsPanel', () => {
       editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
     );
     mockUseWorkflowSummaries.mockReturnValue(
-      summariesResult([['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true }]])
+      summariesResult([
+        ['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true, definition: undefined }],
+      ])
     );
 
     renderPanel();

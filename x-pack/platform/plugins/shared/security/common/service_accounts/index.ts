@@ -23,6 +23,9 @@ export {
   serviceAccountNameSchema,
 } from './schemas';
 export type {
+  DeleteServiceAccountConflictAttributes,
+  DeleteServiceAccountResponse,
+  ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,

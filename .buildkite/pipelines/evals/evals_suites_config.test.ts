@@ -102,6 +102,24 @@ describe('evals.suites.json shards', () => {
   });
 });
 
+describe('evals.suites.json Scout arch/domain', () => {
+  it('only uses arches run_suite.sh and the evals CLI support, with a domain for serverless', () => {
+    const problems = suites.flatMap(({ id, scoutArch, scoutDomain }) => {
+      if (scoutArch === undefined) return [];
+      if (scoutArch !== 'stateful' && scoutArch !== 'serverless') {
+        return [`${id}: scoutArch "${scoutArch}" is not stateful or serverless`];
+      }
+      // `node scripts/evals start` refuses a serverless suite without a domain; catch it at PR time.
+      if (scoutArch === 'serverless' && !scoutDomain) {
+        return [`${id}: scoutArch "serverless" has no scoutDomain`];
+      }
+      return [];
+    });
+
+    expect(problems).toEqual([]);
+  });
+});
+
 interface WeeklyStep {
   env?: Record<string, string | undefined>;
   steps?: WeeklyStep[];
@@ -146,5 +164,24 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
       });
 
     expect(problems).toEqual([]);
+  });
+});
+
+describe('Nightshift CI coverage', () => {
+  it('keeps the existing label and Customer-0 specs alongside an isolated ORCA spec', () => {
+    const suite = suites.find(({ id }) => id === 'nightshift-investigations');
+    expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
+    expect(suite?.shards?.map(({ id }) => id)).toEqual(['customer0', 'orcabench']);
+    const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
+    expect(files).toEqual([
+      'evals/smoke/smoke.spec.ts',
+      'evals/investigation/investigation.spec.ts',
+      'evals/investigation/orcabench.spec.ts',
+    ]);
+    const configPath = suite?.configPath;
+    expect(configPath).toBeDefined();
+    if (!configPath) throw new Error('Nightshift config is missing');
+    const suiteRoot = Path.dirname(Path.resolve(__dirname, '../../..', configPath));
+    for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
   });
 });

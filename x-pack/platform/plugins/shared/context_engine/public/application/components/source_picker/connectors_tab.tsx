@@ -30,10 +30,11 @@ import { contextEngineQueryKeys } from '../../hooks/query_keys';
 import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useKibana } from '../../hooks/use_kibana';
-import { AiIndexDetailPanelEmptyPrompt } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
+import { AiIndexDetailPanelEmptyState } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
 interface ConnectorsTabProps {
   selectedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
+  disabled?: boolean;
 }
 
 interface ConnectorsTabContentProps {
@@ -47,6 +48,7 @@ interface ConnectorsTabContentProps {
   createConnectorButton: React.ReactNode;
   canCreateConnector: boolean;
   canReadConnectors: boolean;
+  disabled: boolean;
 }
 
 const ConnectorsTabContent = ({
@@ -60,6 +62,7 @@ const ConnectorsTabContent = ({
   createConnectorButton,
   canCreateConnector,
   canReadConnectors,
+  disabled,
 }: ConnectorsTabContentProps) => {
   if (isError) {
     return (
@@ -131,7 +134,7 @@ const ConnectorsTabContent = ({
           sortMatchesBy="startsWith"
           selectedOptions={[]}
           isClearable={false}
-          isDisabled={!canReadConnectors}
+          isDisabled={!canReadConnectors || disabled}
           noSuggestions={showEmptyPrompt}
           aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.comboAriaLabel', {
             defaultMessage: 'Select a connector',
@@ -156,11 +159,11 @@ const ConnectorsTabContent = ({
         </EuiFlexGroup>
       )}
       {canReadConnectors && showEmptyPrompt && (
-        <AiIndexDetailPanelEmptyPrompt
+        <AiIndexDetailPanelEmptyState
           paddingSize="none"
           iconType="plugs"
           dataTestSubj="contextConnectorsEmpty"
-          title={
+          message={
             canCreateConnector ? (
               <FormattedMessage
                 id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
@@ -179,7 +182,11 @@ const ConnectorsTabContent = ({
   );
 };
 
-export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabProps) => {
+export const ConnectorsTab = ({
+  selectedConnectorIds,
+  onToggle,
+  disabled = false,
+}: ConnectorsTabProps) => {
   const [isCreateFlyoutOpen, { on: openCreateFlyout, off: closeCreateFlyout }] = useBoolean(false);
   const [searchValue, setSearchValue] = useState('');
   const [hasFocused, setHasFocused] = useState(false);
@@ -282,6 +289,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
       <EuiButtonEmpty
         iconType="plusCircle"
         onClick={openCreateFlyout}
+        isDisabled={disabled}
         data-test-subj="contextCreateConnectorButton"
         {...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
@@ -308,6 +316,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
         createConnectorButton={createConnectorButton}
         canCreateConnector={canCreateConnector}
         canReadConnectors={canReadConnectors}
+        disabled={disabled}
       />
       {createConnectorFlyout}
     </>

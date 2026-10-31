@@ -13,7 +13,8 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { copyToClipboard, type EuiFlyoutProps } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -42,12 +43,14 @@ jest.mock('../../data_fetching/create_esql_source', () => ({
     query: 'FROM mock',
     title: 'mock',
     name: 'mock',
+    datasetId: 'esql-mock-dataset',
     timeFieldName: undefined,
     references: [],
     fields: [],
     resultColumns: [],
     getColumns: () => [],
     getColumn: () => undefined,
+    getFilterableFields: async () => [],
     isTimeBased: () => false,
     isPersisted: () => false,
   }),
@@ -142,6 +145,8 @@ const setup = async ({
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   });
+  // Freeze before rendering: the unawaited initial fetch emits LOADING without `result`, wiping the seed.
+  dataStateContainer.data$.documents$.next = jest.fn();
 
   await act(async () => {
     if (initialFlyout.type === 'restoreFromRef') {
@@ -191,9 +196,7 @@ describe('DiscoverDocumentFlyout', () => {
   });
 
   it('copies a document link from the flyout menu and ignores duplicate clicks', async () => {
-    const { services, toolkit } = await setup({ hits: esHitsMock });
-    // Freeze the seeded results so the unawaited main fetch can't remount the menu mid-click.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
+    const { services } = await setup({ hits: esHitsMock });
 
     const shareButton = await screen.findByRole('button', {
       name: 'Copy link',
@@ -387,8 +390,6 @@ describe('DiscoverDocumentFlyout', () => {
       searchResult: searchResponseFor(outOfResultsHit),
       hits: esHitsMock,
     });
-    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -488,8 +489,6 @@ describe('DiscoverDocumentFlyout', () => {
   it('keeps flyout pagination populated when the URL reference changes to another document already in the results (e.g. browser back navigation)', async () => {
     const { toolkit } = await setup({ hits: esHitsMock });
     const tabId = toolkit.getCurrentTab().id;
-    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
-    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
@@ -664,7 +663,6 @@ describe('DiscoverDocumentFlyout', () => {
     const tabId = toolkit.getCurrentTab().id;
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
     const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMock);
-    const cascadedColumnsMeta: DataTableColumnsMeta = { bytes: { type: 'number' } };
 
     toolkit.internalState.dispatch(
       internalStateActions.setExpandedDoc({
@@ -683,14 +681,8 @@ describe('DiscoverDocumentFlyout', () => {
         },
       })
     );
-    toolkit.internalState.dispatch(
-      internalStateActions.setCascadedDocumentsState({
-        tabId,
-        cascadedDocumentsState: {
-          ...toolkit.getCurrentTab().cascadedDocumentsState,
-          columnsMeta: cascadedColumnsMeta,
-        },
-      })
+    toolkit.runtimeStateManager.tabs.byId[tabId].cascadedLeafDataSource$.next(
+      createMockEsqlSource([{ name: 'bytes', type: 'number', source: 'index' }])
     );
 
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);

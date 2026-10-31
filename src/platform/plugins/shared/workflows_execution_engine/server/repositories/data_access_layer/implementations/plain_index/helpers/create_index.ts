@@ -40,10 +40,7 @@ export const createIndexWithMappings = async ({
 }: CreateIndexOptions): Promise<void> => {
   try {
     // Check if index already exists
-    const indexExists = await retryTransientEsErrors(
-      () => esClient.indices.exists({ index: indexName }),
-      { logger }
-    );
+    const indexExists = await esClient.indices.exists({ index: indexName });
 
     if (indexExists) {
       logger?.debug(`Index ${indexName} already exists`);
@@ -82,13 +79,9 @@ export const createOrUpdateIndex = async ({
   logger,
 }: CreateIndexOptions): Promise<void> => {
   try {
-    const indexExists = await retryTransientEsErrors(
-      () =>
-        esClient.indices.exists({
-          index: indexName,
-        }),
-      { logger }
-    );
+    const indexExists = await esClient.indices.exists({
+      index: indexName,
+    });
 
     if (!indexExists) {
       // Create new index

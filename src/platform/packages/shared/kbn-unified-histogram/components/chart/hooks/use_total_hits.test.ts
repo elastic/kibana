@@ -23,7 +23,6 @@ import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { DataViewType } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewSource } from '@kbn/data-source';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 
 jest.mock('react-use/lib/useDebounce', () => {
@@ -37,17 +36,6 @@ describe('useTotalHits', () => {
   const getDeps = () => ({
     services: {
       data: dataPluginMock.createStartContract(),
-      expressions: {
-        ...expressionsPluginMock.createStartContract(),
-        run: jest.fn(() =>
-          of({
-            partial: false,
-            result: {
-              rows: [{}, {}, {}],
-            },
-          })
-        ),
-      },
     } as any,
     hits: {
       status: UnifiedHistogramFetchStatus.uninitialized,
@@ -124,7 +112,7 @@ describe('useTotalHits', () => {
     });
   });
 
-  it('should not fetch total hits if isPlainRecord is true', async () => {
+  it('should not fetch total hits for an ES|QL data source', async () => {
     const onTotalHitsChange = jest.fn();
     EsqlSource.clearCache();
     const fetchParams = getFetchParamsMock({

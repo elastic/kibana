@@ -8,11 +8,11 @@
  */
 
 import { isEqual } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   internalStateActions,
   type InternalStateDispatch,
   type RuntimeStateManager,
+  getTabDataView,
   selectTabRuntimeState,
   type TabState,
   type DiscoverInternalState,
@@ -21,6 +21,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
+import { isNonEmptyEsqlQuery } from './is_non_empty_esql_query';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -89,28 +90,18 @@ export const buildStateSubscribe =
       }
     }
 
-    if (
-      isEsqlMode &&
-      queryChanged &&
-      isOfAggregateQueryType(nextState.query) &&
-      nextState.query.esql.trim() !== ''
-    ) {
+    if (isEsqlMode && queryChanged && isNonEmptyEsqlQuery(nextState.query)) {
       const tabId = getCurrentTab().id;
       const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const previousSource = currentDataSource$.getValue();
-      const { dataView } = await resolveEsqlSource({
+      const { esqlSource } = await resolveEsqlSource({
         esql: nextState.query.esql,
         services,
         esqlVariables: getCurrentTab().esqlVariables,
         timeRange: services.data.query.timefilter.timefilter.getTime(),
         previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
       });
-      dispatch(
-        internalStateActions.assignNextDataView({
-          tabId,
-          dataView,
-        })
-      );
+      dispatch(internalStateActions.assignNextDataSource({ tabId, dataSource: esqlSource }));
     }
 
     const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
@@ -130,10 +121,9 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        currentDataView: selectTabRuntimeState(
-          runtimeStateManager,
-          getCurrentTab().id
-        )?.currentDataView$.getValue(),
+        currentDataView: getTabDataView(
+          selectTabRuntimeState(runtimeStateManager, getCurrentTab().id)
+        ),
         isEsqlMode,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,

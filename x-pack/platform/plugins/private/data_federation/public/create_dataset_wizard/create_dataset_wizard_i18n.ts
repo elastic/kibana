@@ -188,14 +188,35 @@ export const createDatasetWizardStrings = {
   offLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.offLabel', {
     defaultMessage: 'Off',
   }),
-  saveDatasetButton: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.saveDatasetButtonLabel',
+  addDatasetButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.addDatasetButtonLabel',
     {
-      defaultMessage: 'Save dataset',
+      defaultMessage: 'Add dataset',
     }
   ),
   saveErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.saveErrorTitle', {
     defaultMessage: 'Could not save the dataset',
+  }),
+  dataSourceRefreshAfterSaveError: (savedName: string, reason: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.dataSourceRefreshAfterSaveError', {
+      defaultMessage:
+        'Data source "{savedName}" was saved, but the data sources list could not be refreshed: {reason}',
+      values: { savedName, reason },
+    }),
+  refreshAfterSaveErrorTitle: (savedName: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.refreshAfterSaveErrorTitle', {
+      defaultMessage:
+        'Dataset "{savedName}" was saved, but the datasets list could not be refreshed',
+      values: { savedName },
+    }),
+  backButton: i18n.translate('xpack.dataFederation.createDatasetWizard.backButtonLabel', {
+    defaultMessage: 'Back',
+  }),
+  nextButton: i18n.translate('xpack.dataFederation.createDatasetWizard.nextButtonLabel', {
+    defaultMessage: 'Next',
+  }),
+  savingButton: i18n.translate('xpack.dataFederation.createDatasetWizard.savingButtonLabel', {
+    defaultMessage: 'Saving...',
   }),
 
   // Form strings
@@ -255,6 +276,21 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.dataSourcePlaceholder',
     {
       defaultMessage: 'Select an existing data source or connect a new one',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
+    {
+      defaultMessage: 'Check data source permissions',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
+    {
+      defaultMessage:
+        'Make sure the selected data source has permission to read the data you want to query. You can update its permissions in your cloud provider.',
     }
   ),
 
@@ -659,6 +695,13 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsModePlaceholder',
     {
       defaultMessage: 'Select quote mode',
+    }
+  ),
+
+  comboBoxSelectValidOption: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.comboBoxSelectValidOption',
+    {
+      defaultMessage: 'Please select a valid option or clear your entry',
     }
   ),
 

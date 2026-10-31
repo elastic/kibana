@@ -11,7 +11,13 @@ import { z } from '@kbn/zod';
 // TypeScript domain model
 // -------------------------------------------------------------------------
 
-export type MitreFramework = 'enterprise';
+/**
+ * Frameworks carried by the managed MITRE data source. Every entity, saved object and
+ * API collection belongs to exactly one framework; consumers that need several
+ * frameworks query each one separately.
+ */
+export const MITRE_FRAMEWORKS = ['enterprise', 'atlas'] as const;
+export type MitreFramework = (typeof MITRE_FRAMEWORKS)[number];
 export type MitreEntityType = 'tactic' | 'technique' | 'subtechnique';
 
 interface MitreEntityBase {
@@ -48,7 +54,7 @@ export type MitreEntity = MitreTactic | MitreTechnique | MitreSubtechnique;
 // Zod schemas
 // -------------------------------------------------------------------------
 
-const mitreFrameworkSchema = z.enum(['enterprise']);
+export const mitreFrameworkSchema = z.enum(MITRE_FRAMEWORKS);
 
 const mitreEntityBaseSchema = z.object({
   framework: mitreFrameworkSchema,

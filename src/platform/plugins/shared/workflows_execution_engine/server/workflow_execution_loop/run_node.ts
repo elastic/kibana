@@ -112,10 +112,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
       await cancelWorkflowIfRequested(
-        params.workflowExecutionRepository,
         params.workflowExecutionState,
         stepExecutionRuntime,
-        params.workflowLogger,
         workflowExecutionCursor,
         stepExecutionRuntime.abortController
       );

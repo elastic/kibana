@@ -9,6 +9,7 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
+export type { RelayActionClient } from './src/relay_action_client';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
@@ -24,6 +25,7 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
 export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
@@ -33,6 +35,7 @@ export {
   connectorTypeIsInboundOnly,
 } from './src/is_inbound_only_connector_spec';
 export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
+export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
 export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,

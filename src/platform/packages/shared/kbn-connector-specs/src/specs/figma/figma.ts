@@ -24,7 +24,7 @@ export const FigmaConnector: ConnectorSpec = {
   metadata: {
     id: '.figma',
     displayName: 'Figma',
-    description: i18n.translate('core.kibanaConnectorSpecs.figma.metadata.description', {
+    description: i18n.translate('connectorSpecs.figma.metadata.description', {
       defaultMessage:
         'Browse Figma design files, inspect structure, render images, and explore team projects',
     }),
@@ -262,7 +262,7 @@ export const FigmaConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.figma.test.description', {
+    description: i18n.translate('connectorSpecs.figma.test.description', {
       defaultMessage: 'Verifies Figma API connectivity by fetching current user information',
     }),
     handler: async (ctx) => {

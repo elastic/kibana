@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Slack (v2) connectors support three authentication methods:
 
 Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
+:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 OAuth Authorization Code
 :   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
@@ -34,15 +34,17 @@ The **Search messages** action requires a user token and is not available when u
 
 ## Receive Slack events [slack-v2-inbound-events]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 
-The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
+The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector. After you save a new connector, {{kib}} shows the **Webhook URL** and the ingest token once, so copy them then. For an existing connector, save it, then select **Rotate ingest token**. A new token stops the previous one from working. This toggle appears when `xpack.actions.inboundEvents.enabled` is `true`.
+
+In {{kib}}, you need an Enterprise license and `server.publicBaseUrl` set to the host that Slack uses to reach {{kib}}. `xpack.actions.inboundEvents.enabled` defaults to `true`. Set it to `false` to turn receive events off.
 
 | Workflow event | Slack `event.type` | Fields |
 | --- | --- | --- |
-| `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId` |
+| `slack2.message` | `message` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text`, `subtype`, `botId`, `appId`, `botName` |
 | `slack2.app_mention` | `app_mention` | `workspace`, `channel`, `messageId`, `threadId`, `sender`, `text` |
 | `slack2.reaction_added` | `reaction_added` | `channel`, `messageId`, `fileId`, `fileCommentId`, `itemType`, `user`, `reaction` |
 | `slack2.file_shared` | `file_shared` | `fileId`, `user`, `channel` |
@@ -51,7 +53,9 @@ The connector can start a workflow from a Slack Events API `event_callback`. A s
 | `slack2.team_join` | `team_join` | `userId`, `name`, `realName`, `displayName`, `email` |
 | `slack2.member_joined_channel` | `member_joined_channel` | `userId`, `channelId`, `inviter` |
 
-`threadId`, `sender`, `text`, `subtype`, and `botId` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+`threadId`, `sender`, `text`, `subtype`, `botId`, `appId`, and `botName` are present only when Slack sends them. The same applies to `channel` on a shared file, `userId` on a file made public, and `inviter` on a channel join. A reaction includes `channel` and `messageId` when it is on a message, and `fileId` or `fileCommentId` when it is on a file or file comment. An event type that is not in this table does not start a workflow.
+
+For `slack2.message`, `text` also includes the text of the message's blocks and legacy attachments that the message text does not already contain, one line each. A bot post that carries its content only in attachments still has a body, and a message filter on the text also matches that content. Button labels appear in brackets, such as `[Ack]`. Uploaded files are not read.
 
 Slack's Request URL check sends `url_verification`. The connector responds with HTTP 200 and `{ "challenge": "<value>" }` and does not start a workflow.
 
@@ -185,14 +189,66 @@ Invite to conversation
 Send message
 :   Send a message to a Slack conversation ID.
     - `channel` (required): Conversation ID (for example, `C123...`). Use **List channels** to browse IDs, or **Resolve channel ID** if you know the channel name.
-    - `text` (required): Message text.
+    - `text` (required): Message text (up to 40,000 characters). When you also send `blocks`, this is the notification and fallback text.
+    - `blocks` (optional): Array of Slack Block Kit block objects (for example, `section`, `actions`, `image`). Maximum 50 blocks. This connector doesn't receive clicks, so don't rely on buttons or menus that expect a response. Link buttons with a `url` work.
     - `threadTs` (optional): Reply in a thread (timestamp of the parent message).
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
     - `unfurlMedia` (optional): Turn on unfurling of media content.
 
+Get conversation replies {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
+:   Fetch replies in a message thread using Slack `conversations.replies`. Returns the full thread in chronological order (oldest first), starting with the parent message. When the response includes `hasMore: true`, call **Get conversation replies** again with `nextCursor` from the previous response.
+    - `channel` (required): Conversation ID that contains the thread (for example, `C...` for channels, `G...` for private channels, `D...` for DMs).
+    - `ts` (required): Timestamp of the parent message that started the thread (for example, `"1234567890.123456"`). This is the `timestamp` (or `ts`) returned by **Send message**.
+    - `oldest` (optional): Only replies after this Unix timestamp (string form).
+    - `latest` (optional): Only replies before this Unix timestamp (string form).
+    - `inclusive` (optional): Include messages with the `oldest` or `latest` timestamps.
+    - `limit` (optional): Replies per page (1 to 1000). Defaults to `100`.
+    - `cursor` (optional): Pagination cursor from a previous response. Omit for the first page.
+    - `raw` (optional): If `true`, returns the full raw Slack response.
+
+Update message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Edit a message the connector posted earlier, using Slack `chat.update`. The new text replaces the old text, and Slack removes any blocks the message had, so a Block Kit or richly formatted message comes back as plain text.
+    - `channel` (required): Conversation ID that holds the message (for example, `C123...`). Slack does not accept a channel name here.
+    - `messageTs` (required): Timestamp of the message to edit, as returned in `ts` by **Send message**.
+    - `text` (required): New message text, at most 4,000 characters.
+
+Add reaction {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
+:   Add an emoji reaction to a Slack message using Slack `reactions.add`. Use this as a lightweight acknowledgement signal (for example, `eyes` when seen, `white_check_mark` when resolved) without posting a new message.
+    - `channel` (required): Conversation ID that contains the message to react to.
+    - `timestamp` (required): Timestamp of the message to react to (for example, `"1234567890.123456"`). Use the timestamp from a previous **Send message** response.
+    - `name` (required): Emoji name without surrounding colons (for example, `thumbsup`, `white_check_mark`, `eyes`).
+
+Upload file {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
+:   Upload a file to Slack and optionally share it into a channel using Slack `files.getUploadURLExternal`. Supports text and binary files up to approximately 2 MB.
+    - `filename` (required): Name of the file to upload (for example, `incident-report.txt`, `screenshot.png`).
+    - `content` (required): File content to upload. For text files (logs, reports, code), pass the raw text. For binary files, pass base64-encoded content and set `encoding` to `"base64"`. A `data:...;base64,` prefix and whitespace are removed, and invalid base64 is rejected. Maximum approximately 2 MB.
+    - `encoding` (optional): Encoding of the `content` field. Use `"utf8"` (default) for plain text; use `"base64"` for binary files.
+    - `channel` (optional): Conversation ID to share the uploaded file into (for example, `C...`). Omit to upload without sharing.
+    - `title` (optional): Display title for the file in Slack.
+    - `initialComment` (optional): Message text to accompany the file when it is shared into a channel.
+    - `threadTs` (optional): Thread timestamp to share the file into a thread.
+
+Ask question {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
+:   Post a human-in-the-loop prompt with response buttons to a Slack conversation or user using Slack `chat.postMessage`. Use this to prompt a person from a workflow.
+
+    ::::{important}
+    This connector posts the question but doesn't receive button clicks, so it can't return the response to the workflow. To act on a response, configure a Slack interactivity callback outside of this connector.
+    ::::
+    - `channel` (required): Conversation ID or user ID (`U...`) to post the question to. Use **Look up user by email** to get a user ID for direct-message delivery.
+    - `question` (required): The question or prompt text to display to the human respondent.
+    - `buttons` (required): Response options shown as buttons. Provide 1 to 10 buttons. Each button requires:
+      - `text` (required): Button label displayed in Slack (max 75 characters).
+      - `value` (required): Machine-readable value submitted when this button is clicked (max 200 characters).
+      - `style` (optional): Visual style — `"primary"` (green) for the preferred action, `"danger"` (red) for destructive actions. Omit for neutral.
+    - `threadTs` (optional): Timestamp of another message to post the question as a threaded reply.
+
 ## Connector networking configuration [slack-v2-connector-networking-configuration]
 
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list. To use **Upload file**, also include `files.slack.com`, which receives the file contents.
+
+## Get API credentials (Quick Connect OAuth 2.0) [slack-v2-api-credentials-quick-connect]
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Slack workspace. Your Slack workspace administrator might need to approve the app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 ## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
 
@@ -203,14 +259,16 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
 3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
    - `channels:read` — list and resolve public channel IDs
    - `channels:history` — read public channel history (for **Get conversation history**)
-   - `chat:write` — send messages
+   - `chat:write` — send messages and edit the messages you sent
    - `files:read` — access shared files (for **Get file info**, **List files**)
+   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` `files:write` — upload files (for **Upload file**)
    - `groups:read` — list private channels (including for **List channels** when `types` includes `private_channel`)
    - `groups:history` — read private channel history (for **Get conversation history** on private channels)
    - `im:read` — list direct messages (when `types` includes `im`)
    - `im:history` — read DM history (for **Get conversation history** on DMs)
    - `mpim:read` — list group direct messages (when `types` includes `mpim`)
    - `mpim:history` — read group DM history (for **Get conversation history** on group DMs)
+   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` `reactions:write` — add emoji reactions to messages (for **Add reaction**)
    - `search:read.files` — search files
    - `search:read.im` — search direct messages
    - `search:read.mpim` — search group direct messages
@@ -223,7 +281,7 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
 6. In {{kib}}, enter the Client ID and Client Secret when creating the Slack (v2) connector. You will be redirected to Slack to authorize access to your workspace.
 
 ::::{note}
-Additional scopes may be required for certain actions. For example, `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.
+Additional scopes may be required for certain actions. For example, `channels:write` is needed to create public channels or invite users, and `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.
 ::::
 
 ## Get API credentials (Bot Token) [slack-v2-api-credentials-bot-token]
@@ -235,14 +293,16 @@ To use Bot Token authentication, you need a Slack app with a bot token.
 3. Under **OAuth & Permissions**, add the following **Bot Token Scopes**:
    - `channels:read` — list public channels
    - `channels:history` — read public channel message history
-   - `chat:write` — send messages as the bot
+   - `chat:write` — send messages as the bot and edit the messages it sent
    - `files:read` — access file metadata
+   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` `files:write` — upload files (for **Upload file**)
    - `groups:read` — list private channels the bot is a member of
    - `groups:history` — read private channel history
    - `im:read` — list direct messages with the bot
    - `im:history` — read DM history
    - `mpim:read` — list group direct messages
    - `mpim:history` — read group DM history
+   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` `reactions:write` — add emoji reactions to messages (for **Add reaction**)
    - `users:read` — look up user information
    - `users:read.email` — look up users by email
 4. Under **OAuth & Permissions**, select **Install to Workspace** and authorize the app.

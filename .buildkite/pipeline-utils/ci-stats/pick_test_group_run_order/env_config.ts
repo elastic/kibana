@@ -8,13 +8,14 @@
  */
 
 import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL, PIPELINES } from './const.ts';
+import { parseOnMergeSelectiveMode } from '../../on-merge/selection.ts';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
 import {
   ftrTestChannel,
   ftrTestChannels,
 } from '#pipeline-utils/ci-stats/pick_test_group_run_order/test_channels';
 
-const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
+const VALID_SOLUTIONS = ['observability', 'search', 'security', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
 
 // Defaults mirror `.buildkite/scripts/common/env.sh` so this script can also run
@@ -36,6 +37,7 @@ const DEFAULT_TEST_GROUP_TYPE_FUNCTIONAL = 'Functional Tests';
 export function loadRunOrderConfig() {
   const pipelineSlug = getRequiredEnv('BUILDKITE_PIPELINE_SLUG');
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
+  const isOnMerge = pipelineSlug === PIPELINES.ON_MERGE;
 
   return {
     ownBranch: getRequiredEnv('BUILDKITE_BRANCH'),
@@ -85,6 +87,10 @@ export function loadRunOrderConfig() {
     envFromLabels: collectEnvFromLabels(),
 
     isMergeQueue,
+    isOnMerge,
+    onMergeSelectiveMode: isOnMerge
+      ? parseOnMergeSelectiveMode(process.env.ON_MERGE_SELECTIVE_MODE)
+      : 'off',
     useSelectiveTesting:
       (Boolean(process.env.GITHUB_PR_NUMBER) || isMergeQueue) &&
       !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),

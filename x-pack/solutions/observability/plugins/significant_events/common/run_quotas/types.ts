@@ -24,6 +24,16 @@ export interface RunQuotaSettings {
   limits: Record<RunQuotaGroup, number>;
 }
 
+export const isRunQuotaReached = ({
+  enabled,
+  limit,
+  count,
+}: {
+  enabled: boolean;
+  limit: number;
+  count: number;
+}): boolean => enabled && limit > MIN_RUN_LIMIT && count >= limit;
+
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,
   limits: DEFAULT_RUN_LIMITS,
@@ -43,10 +53,21 @@ export interface RunQuotasResponse {
   canManage: boolean;
 }
 
-export interface RunQuotaSettingsUpdate {
-  enabled?: boolean;
-  limits?: Partial<Record<RunQuotaGroup, number>>;
-}
+export type RunQuotaSettingsUpdate =
+  | {
+      enabled?: boolean;
+      limits?: Partial<Record<RunQuotaGroup, number>>;
+      activateLimits?: never;
+    }
+  | {
+      /**
+       * Atomically enables these categories, normalizing legacy globally disabled settings
+       * without overwriting categories activated by a concurrent request.
+       */
+      activateLimits: Partial<Record<RunQuotaGroup, number>>;
+      enabled?: never;
+      limits?: never;
+    };
 
 export type RunQuotaConsumeRequest =
   | { group: 'detection' }

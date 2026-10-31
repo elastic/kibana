@@ -5,12 +5,28 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
 import {
+  ENDPOINT_METADATA_CURRENT_PATTERN,
   makeResolveHostEnrollment,
   makeScopedResolveHostEnrollment,
 } from './resolve_host_enrollment';
+
+const agentClientWith = (agents: Array<{ id: string }>): AgentClient =>
+  ({
+    listAgents: jest.fn().mockResolvedValue({ agents, total: agents.length }),
+  } as unknown as AgentClient);
+
+const esClientWith = (
+  hits: Array<{ _source?: unknown }>,
+  hasPrivileges = jest.fn().mockResolvedValue({ has_all_requested: true })
+): ElasticsearchClient =>
+  ({
+    search: jest.fn().mockResolvedValue({ hits: { hits } }),
+    security: { hasPrivileges },
+  } as unknown as ElasticsearchClient);
 
 describe('makeResolveHostEnrollment', () => {
   it('returns enrolled: false for every host when no agent client is available', async () => {
@@ -22,7 +38,12 @@ describe('makeResolveHostEnrollment', () => {
     const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
     const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient);
 
-    await expect(resolve('host-a')).resolves.toEqual({ enrolled: true, agentId: 'agent-1' });
+    await expect(resolve('host-a')).resolves.toEqual({
+      enrolled: true,
+      agentId: 'agent-1',
+      capabilities: [],
+      capabilitiesSource: 'unavailable',
+    });
     expect(listAgents).toHaveBeenCalledWith({
       kuery: 'local_metadata.host.hostname:"host-a" or local_metadata.host.name:"host-a"',
       showInactive: false,
@@ -38,7 +59,11 @@ describe('makeResolveHostEnrollment', () => {
     const listAgents = jest
       .fn()
       .mockResolvedValue({ agents: [{ id: 'agent-1' }, { id: 'agent-2' }], total: 2 });
-    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient, logger);
+    const resolve = makeResolveHostEnrollment(
+      { listAgents } as unknown as AgentClient,
+      undefined,
+      logger
+    );
 
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
     expect(logger.warn).toHaveBeenCalledWith(
@@ -81,7 +106,11 @@ describe('makeResolveHostEnrollment', () => {
   it('treats the host as unenrolled when the Fleet lookup fails, rather than failing packaging', async () => {
     const logger = loggingSystemMock.createLogger();
     const listAgents = jest.fn().mockRejectedValue(new Error('Fleet unavailable'));
-    const resolve = makeResolveHostEnrollment({ listAgents } as unknown as AgentClient, logger);
+    const resolve = makeResolveHostEnrollment(
+      { listAgents } as unknown as AgentClient,
+      undefined,
+      logger
+    );
 
     await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Fleet unavailable'));
@@ -106,6 +135,209 @@ describe('makeResolveHostEnrollment', () => {
       })
     );
   });
+
+  describe('endpoint capabilities', () => {
+    it('reads Endpoint.capabilities from the metadata document keyed on the agent id', async () => {
+      const esClient = esClientWith([
+        { _source: { Endpoint: { capabilities: ['isolation', 'memdump_process'] } } },
+      ]);
+      const resolve = makeResolveHostEnrollment(agentClientWith([{ id: 'agent-1' }]), esClient);
+
+      await expect(resolve('host-a')).resolves.toEqual({
+        enrolled: true,
+        agentId: 'agent-1',
+        capabilities: ['isolation', 'memdump_process'],
+        capabilitiesSource: 'reported',
+      });
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ENDPOINT_METADATA_CURRENT_PATTERN,
+        size: 1,
+        _source: ['Endpoint.capabilities'],
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    { term: { 'agent.id': 'agent-1' } },
+                    { term: { 'HostDetails.agent.id': 'agent-1' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        sort: [
+          { 'event.created': { order: 'desc', unmapped_type: 'date' } },
+          { 'HostDetails.event.created': { order: 'desc', unmapped_type: 'date' } },
+        ],
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      });
+    });
+
+    it('yields [] marked reported when no metadata document exists for the agent', async () => {
+      const resolve = makeResolveHostEnrollment(
+        agentClientWith([{ id: 'agent-1' }]),
+        esClientWith([])
+      );
+
+      await expect(resolve('host-a')).resolves.toEqual({
+        enrolled: true,
+        agentId: 'agent-1',
+        capabilities: [],
+        capabilitiesSource: 'reported',
+      });
+    });
+
+    it('yields [] when the capabilities field is not a string array', async () => {
+      const resolve = makeResolveHostEnrollment(
+        agentClientWith([{ id: 'agent-1' }]),
+        esClientWith([{ _source: { Endpoint: { capabilities: 'isolation' } } }])
+      );
+
+      await expect(resolve('host-a')).resolves.toMatchObject({
+        capabilities: [],
+        capabilitiesSource: 'reported',
+      });
+    });
+
+    it('yields [] marked unavailable and logs a warning when the metadata search throws (e.g. the index is unreadable)', async () => {
+      const esClient = {
+        search: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
+        security: { hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: true }) },
+      } as unknown as ElasticsearchClient;
+      const logger = { warn: jest.fn() } as unknown as Logger;
+      const resolve = makeResolveHostEnrollment(
+        agentClientWith([{ id: 'agent-1' }]),
+        esClient,
+        logger
+      );
+
+      await expect(resolve('host-a')).resolves.toEqual({
+        enrolled: true,
+        agentId: 'agent-1',
+        capabilities: [],
+        capabilitiesSource: 'unavailable',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('capabilities lookup failed for agent agent-1')
+      );
+    });
+
+    it('never searches the metadata index for an unenrolled host', async () => {
+      const esClient = esClientWith([]);
+      const resolve = makeResolveHostEnrollment(agentClientWith([]), esClient);
+
+      await expect(resolve('host-a')).resolves.toEqual({ enrolled: false });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    describe('privilege self-check', () => {
+      const hasPrivilegesFor = (hasAllRequested: boolean) =>
+        jest.fn().mockResolvedValue({ has_all_requested: hasAllRequested });
+
+      // A search by an identity with no privilege on the pattern resolves to zero authorized
+      // indices and comes back empty, so only the self-check can tell this from "no document".
+      it('marks an empty result unavailable when the caller cannot read the whole pattern', async () => {
+        const logger = loggingSystemMock.createLogger();
+        const hasPrivileges = hasPrivilegesFor(false);
+        const esClient = esClientWith([], hasPrivileges);
+        const resolve = makeResolveHostEnrollment(
+          agentClientWith([{ id: 'agent-1' }]),
+          esClient,
+          logger
+        );
+
+        await expect(resolve('host-a')).resolves.toEqual({
+          enrolled: true,
+          agentId: 'agent-1',
+          capabilities: [],
+          capabilitiesSource: 'unavailable',
+        });
+        expect(hasPrivileges).toHaveBeenCalledWith({
+          index: [{ names: [ENDPOINT_METADATA_CURRENT_PATTERN], privileges: ['read'] }],
+        });
+        expect(esClient.search).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          `resolveHostEnrollment: caller lacks read privilege on ${ENDPOINT_METADATA_CURRENT_PATTERN}; a host with no readable metadata document in this run is treated as capabilities unknown`
+        );
+      });
+
+      // `has_privileges` on a wildcard is true only when the role covers the whole pattern, so a
+      // narrower grant reports false yet can still read the document.
+      it('still reports a document found under a narrower grant', async () => {
+        const esClient = esClientWith(
+          [{ _source: { Endpoint: { capabilities: ['isolation'] } } }],
+          hasPrivilegesFor(false)
+        );
+        const resolve = makeResolveHostEnrollment(agentClientWith([{ id: 'agent-1' }]), esClient);
+
+        await expect(resolve('host-a')).resolves.toEqual({
+          enrolled: true,
+          agentId: 'agent-1',
+          capabilities: ['isolation'],
+          capabilitiesSource: 'reported',
+        });
+      });
+
+      it('checks once per resolver, however many enrolled hosts it resolves', async () => {
+        const logger = loggingSystemMock.createLogger();
+        const hasPrivileges = hasPrivilegesFor(false);
+        const resolve = makeResolveHostEnrollment(
+          agentClientWith([{ id: 'agent-1' }]),
+          esClientWith([], hasPrivileges),
+          logger
+        );
+
+        await resolve('host-a');
+        await resolve('host-b');
+
+        expect(hasPrivileges).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+      });
+
+      it('searches when the caller can read the pattern', async () => {
+        const esClient = esClientWith(
+          [{ _source: { Endpoint: { capabilities: ['isolation'] } } }],
+          hasPrivilegesFor(true)
+        );
+        const resolve = makeResolveHostEnrollment(agentClientWith([{ id: 'agent-1' }]), esClient);
+
+        await expect(resolve('host-a')).resolves.toMatchObject({
+          capabilities: ['isolation'],
+          capabilitiesSource: 'reported',
+        });
+        expect(esClient.search).toHaveBeenCalledTimes(1);
+      });
+
+      it('logs at debug and falls through to the search when the check itself fails', async () => {
+        const logger = loggingSystemMock.createLogger();
+        const esClient = esClientWith(
+          [{ _source: { Endpoint: { capabilities: ['isolation'] } } }],
+          jest.fn().mockRejectedValue(new Error('security_exception'))
+        );
+        const resolve = makeResolveHostEnrollment(
+          agentClientWith([{ id: 'agent-1' }]),
+          esClient,
+          logger
+        );
+
+        await expect(resolve('host-a')).resolves.toMatchObject({
+          capabilities: ['isolation'],
+          capabilitiesSource: 'reported',
+        });
+        expect(logger.debug).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `privilege check for ${ENDPOINT_METADATA_CURRENT_PATTERN} failed; falling through to search — security_exception`
+          )
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+    });
+  });
 });
 
 describe('makeScopedResolveHostEnrollment', () => {
@@ -119,7 +351,12 @@ describe('makeScopedResolveHostEnrollment', () => {
     const { service, asInternalScopedUser } = agentService(listAgents);
 
     const resolve = makeScopedResolveHostEnrollment(() => service)('space-a');
-    await expect(resolve('host-a')).resolves.toEqual({ enrolled: true, agentId: 'agent-1' });
+    await expect(resolve('host-a')).resolves.toEqual({
+      enrolled: true,
+      agentId: 'agent-1',
+      capabilities: [],
+      capabilitiesSource: 'unavailable',
+    });
 
     expect(asInternalScopedUser).toHaveBeenCalledWith('space-a');
   });
@@ -146,7 +383,23 @@ describe('makeScopedResolveHostEnrollment', () => {
     await expect(scoped('space-a')('host-a')).resolves.toEqual({
       enrolled: true,
       agentId: 'agent-1',
+      capabilities: [],
+      capabilitiesSource: 'unavailable',
     });
+  });
+
+  it('uses the ES client passed per call, not one fixed at setup, for the capabilities lookup', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-1' }], total: 1 });
+    const { service } = agentService(listAgents);
+    const esClient = esClientWith([{ _source: { Endpoint: { capabilities: ['isolation'] } } }]);
+
+    const scoped = makeScopedResolveHostEnrollment(() => service);
+    await expect(scoped('space-a')('host-a')).resolves.toMatchObject({ capabilities: [] });
+
+    await expect(scoped('space-a', esClient)('host-a')).resolves.toMatchObject({
+      capabilities: ['isolation'],
+    });
+    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 
   it('treats every host as unenrolled when Fleet is absent', async () => {

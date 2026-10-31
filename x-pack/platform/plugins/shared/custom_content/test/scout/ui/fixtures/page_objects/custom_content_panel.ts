@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EsqlEditor, KibanaCodeEditorWrapper } from '@kbn/scout';
 
 const TEMPLATE_EDITOR_TEST_SUBJ = 'customContentTemplateEditorContainer';
 
@@ -25,6 +25,7 @@ export class CustomContentPanelPage {
   readonly chatSubmitButton: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly esqlEditor: EsqlEditor;
 
   constructor(page: ScoutPage) {
     this.addCustomPanelAction = page.testSubj.locator('create-action-Custom');
@@ -42,6 +43,7 @@ export class CustomContentPanelPage {
     this.chatInput = page.testSubj.locator('agentBuilderConversationInputEditor');
     this.chatSubmitButton = page.testSubj.locator('agentBuilderConversationInputSubmitButton');
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.esqlEditor = new EsqlEditor(page);
   }
 
   async openFromAddPanelFlyout() {
@@ -55,8 +57,7 @@ export class CustomContentPanelPage {
 
   async setEsqlQuery(query: string) {
     await this.esqlAccordionButton.click();
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
-    await this.codeEditor.setCodeEditorValue(query, 1);
+    await this.esqlEditor.setQuery(query);
   }
 
   async runPreview() {

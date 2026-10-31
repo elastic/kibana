@@ -64,7 +64,7 @@ export type NotificationSubmitInput<
   (NotificationKindOf<N, T> extends 'timeseries' ? TimeseriesSubmitIdParts : StateSubmitIdParts);
 
 /**
- * The exact document shape in the NC index: validated write payload (`severity` resolved) plus
+ * The exact document shape in the NC data stream: validated write payload (`severity` resolved) plus
  * the `@timestamp` generated during write by the NC plugin.
  */
 export type NotificationDocument = z.output<typeof notificationWriteSchema> & {

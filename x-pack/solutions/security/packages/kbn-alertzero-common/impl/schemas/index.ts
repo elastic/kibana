@@ -26,6 +26,7 @@ export {
 export {
   WatchAutonomyLevel,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -58,6 +59,7 @@ export {
 } from './workers/update_worker_route.gen';
 export {
   AffectedAsset,
+  HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
   HuntForThreatResult,
@@ -73,6 +75,7 @@ export {
 } from './components/hunt.gen';
 export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
 export { HuntIndexScopeResponse } from './hunt/hunt_index_scope_route.gen';
+export { HuntWorkerIndexCoverageResponse } from './hunt/hunt_worker_index_coverage_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -88,9 +91,15 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
 export {
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
 } from './hunt/find_or_create_investigation_route.gen';
+export {
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
+} from './hunt/write_hunt_evidence_route.gen';
+export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';

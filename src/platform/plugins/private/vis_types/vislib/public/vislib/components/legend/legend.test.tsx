@@ -96,6 +96,7 @@ const getWrapper = async (props?: Partial<VisLegendProps>) => {
           vislibVis={vislibVis}
           visData={visData}
           uiState={uiState}
+          isInteractive={true}
           {...props}
         />
       </EuiThemeProvider>
@@ -279,6 +280,30 @@ describe('VisLegend Component', () => {
       toggleButton.simulate('click');
 
       expect(wrapper.exists('.visLegend__list')).toBe(false);
+    });
+  });
+
+  describe('Preview mode (isInteractive)', () => {
+    it('should not render the toggle button when isInteractive is false', async () => {
+      wrapper = await getWrapper({ isInteractive: false });
+
+      expect(wrapper.exists('[data-test-subj="vislibToggleLegend"]')).toBe(false);
+    });
+
+    it('should render the toggle button when isInteractive is true', async () => {
+      wrapper = await getWrapper({ isInteractive: true });
+
+      expect(wrapper.exists('[data-test-subj="vislibToggleLegend"]')).toBe(true);
+    });
+
+    it('should not open color picker when a legend item is clicked and isInteractive is false', async () => {
+      mockState.set('vis.legendOpen', true);
+      wrapper = await getWrapper({ isInteractive: false });
+
+      const first = getLegendItems(wrapper).first();
+      first.simulate('click');
+
+      expect(wrapper.exists('.visColorPicker')).toBe(false);
     });
   });
 });

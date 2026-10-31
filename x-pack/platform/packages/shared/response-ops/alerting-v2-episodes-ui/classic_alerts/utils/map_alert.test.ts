@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
+import { ALERT_FLAPPING, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   mapClassicAlertToEpisode,
@@ -44,10 +44,12 @@ describe('mapClassicAlertToEpisode', () => {
     'kibana.alert.rule.uuid': 'rule-uuid-1',
     'kibana.alert.rule.name': 'My Rule',
     'kibana.alert.rule.category': 'Test',
+    'kibana.alert.rule.rule_type_id': 'apm.error_rate',
     'kibana.alert.workflow_tags': ['tag-a', 'tag-b'],
     'kibana.alert.workflow_status': 'open',
     'kibana.alert.duration.us': 7_200_000_000,
     'kibana.alert.severity': 'critical',
+    'kibana.alert.case_ids': ['case-1', 'case-2'],
   };
 
   it('maps all fields correctly', () => {
@@ -87,9 +89,19 @@ describe('mapClassicAlertToEpisode', () => {
       alertUuid: 'alert-uuid-1',
       instanceId: 'instance-1',
       ruleId: 'rule-uuid-1',
+      ruleTypeId: 'apm.error_rate',
       workflowStatus: 'open',
       workflowTags: ['tag-a', 'tag-b'],
+      caseIds: ['case-1', 'case-2'],
     });
+  });
+
+  it('defaults caseIds to an empty array when the alert is not attached to a case', () => {
+    const { 'kibana.alert.case_ids': _caseIds, ...withoutCaseIds } = baseSource;
+    const episode = mapClassicAlertToEpisode(withoutCaseIds, TEST_INDEX);
+    const ctx = episode.source_action_context as ClassicAlertActionContext;
+
+    expect(ctx.caseIds).toEqual([]);
   });
 
   it('handles missing optional fields gracefully', () => {
@@ -194,5 +206,20 @@ describe('mapClassicAlertToEpisode', () => {
   it('defaults is_flapping to false when kibana.alert.flapping is absent', () => {
     const episode = mapClassicAlertToEpisode(baseSource, TEST_INDEX);
     expect(episode.is_flapping).toBe(false);
+  });
+
+  it.each([
+    [
+      ['mw-1', 'mw-2'],
+      ['mw-1', 'mw-2'],
+    ],
+    ['mw-1', ['mw-1']],
+    [undefined, []],
+  ])('maps the maintenance window ids %p onto %p', (source, expected) => {
+    const episode = mapClassicAlertToEpisode(
+      { ...baseSource, [ALERT_MAINTENANCE_WINDOW_IDS]: source },
+      TEST_INDEX
+    );
+    expect(episode.maintenance_window_ids).toEqual(expected);
   });
 });

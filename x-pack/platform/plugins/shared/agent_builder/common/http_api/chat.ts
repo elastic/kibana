@@ -68,3 +68,34 @@ export type ChatResponse = Omit<
 };
 
 export type ChatConverseResponse = ConversationWithPermissions;
+
+/**
+ * Body payload for `POST /api/chat/message`: one message to an agent, nothing else. The route
+ * runs the agent non-interactively and answers with text only.
+ */
+export interface ChatMessageRequestBodyPayload {
+  /** The user message to send to the agent. */
+  message: string;
+  /** The agent to send the message to. Defaults to the default Elastic AI agent. */
+  agent_id?: string;
+  /** An existing conversation to continue. When omitted, a new conversation is created. */
+  conversation_id?: string;
+}
+
+/** A HITL prompt the agent raised during a `POST /api/chat/message` run, auto-declined because no user could answer it. */
+export interface ChatMessageDeclinedPrompt {
+  /** The tool whose call was declined. */
+  tool_id: string;
+  /** The explanation the agent received in place of the prompt. */
+  message: string;
+}
+
+/** Response of `POST /api/chat/message`. */
+export interface ChatMessageResponse {
+  /** The conversation the message was added to: the one requested, or the one created for it. */
+  conversation_id: string;
+  /** The agent's final text answer. Empty when the agent finished without a message. */
+  answer: string;
+  /** HITL prompts auto-declined during the run; omitted when the agent did not ask for any. */
+  declined_prompts?: ChatMessageDeclinedPrompt[];
+}

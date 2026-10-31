@@ -11,7 +11,7 @@ import { validateSourceQuery } from './validate_source_query';
 describe('validateSourceQuery', () => {
   it('throws a 400 Boom with the shared validator message', () => {
     try {
-      validateSourceQuery('ROW a = 1');
+      validateSourceQuery({ esql: 'ROW a = 1' });
     } catch (error) {
       expect(isBoom(error)).toBe(true);
       expect(error.output.statusCode).toBe(400);
@@ -21,7 +21,7 @@ describe('validateSourceQuery', () => {
     throw new Error('expected "ROW a = 1" to be rejected');
   });
 
-  it('does not throw when the query is valid', () => {
-    expect(() => validateSourceQuery('FROM logs-*')).not.toThrow();
+  it('returns the type of a query that targets one kind of data', () => {
+    expect(validateSourceQuery({ esql: 'FROM logs-*' })).toBe('logs');
   });
 });

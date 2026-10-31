@@ -23,6 +23,7 @@ import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
 export type ChartSectionErrorSource =
   | 'useFetchExemplars'
   | 'useFetchMetricsData'
+  | 'useFetchHistogramBounds'
   | 'useLensProps'
   | 'useMetricSourceKind';
 

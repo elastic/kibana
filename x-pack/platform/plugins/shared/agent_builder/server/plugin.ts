@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
@@ -33,6 +28,11 @@ import type {
   AgentBuilderStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import {
+  AGENT_WORKLOAD_TYPE,
+  resolveAgentWorkloads,
+} from './services/agents/service_account_binding';
+import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
@@ -47,6 +47,7 @@ import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -56,10 +57,11 @@ import { registerInferenceFeatures } from './inference_features';
 import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
 import { registerAttachmentWorkflowSteps, registerConversationWorkflowSteps } from './workflows';
 import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
-import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { apiPrivileges } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
+import { getDeploymentInfo } from './utils/deployment_info';
 
 export class AgentBuilderPlugin
   implements
@@ -72,7 +74,9 @@ export class AgentBuilderPlugin
 {
   private logger: Logger;
   private config: AgentBuilderConfig;
+  private readonly env: PluginInitializerContext['env'];
   private serviceManager: ServiceManager;
+  private cloudSetup?: CloudSetup;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -80,11 +84,12 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
-  private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
+  private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.env = context.env;
     this.serviceManager = new ServiceManager(this.config);
   }
 
@@ -93,17 +98,15 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+    this.cloudSetup = setupDeps.cloud;
 
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
       http: {
-        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
-        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        create: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        download: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     });
 
@@ -138,8 +141,15 @@ export class AgentBuilderPlugin
       actions: setupDeps.actions,
     });
 
+    serviceSetups.hooks.registerCycleHook(
+      createRelevantSkillsCycleHook({
+        getUiSettings: async () => (await coreSetup.getStartServices())[0].uiSettings,
+      })
+    );
+
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
+      getStartServices: coreSetup.getStartServices,
       getTaskHandler: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -150,6 +160,24 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    // Registered even where service accounts are disabled so existing bindings can still be
+    // listed and removed.
+    coreSetup.security.serviceAccounts.registerWorkloadType({
+      type: AGENT_WORKLOAD_TYPE,
+      name: 'Agent',
+      description: 'Agent Builder agent that runs every conversation as the bound service account',
+      resolveWorkloads: async (workloads) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return resolveAgentWorkloads({
+          storage: createAgentStorage({
+            logger: this.logger.get('agents'),
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+          }),
+          workloads,
+        });
+      },
+    });
 
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
@@ -175,14 +203,6 @@ export class AgentBuilderPlugin
       agents: serviceSetups.agents,
       register: this.config.deductive?.register ?? false,
     });
-
-    this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
-      const [coreStart] = await coreSetup.getStartServices();
-      const soClient = coreStart.savedObjects.getScopedClient(request);
-      return coreStart.uiSettings
-        .asScopedToClient(soClient)
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    };
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
@@ -317,6 +337,7 @@ export class AgentBuilderPlugin
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
+        registerCycleHook: serviceSetups.hooks.registerCycleHook.bind(serviceSetups.hooks),
       },
       skills: {
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
@@ -328,6 +349,15 @@ export class AgentBuilderPlugin
         register: serviceSetups.conversationTemplates.register.bind(
           serviceSetups.conversationTemplates
         ),
+      },
+      conversations: {
+        enableUpdatedTrigger: (optIn) => {
+          this.conversationUpdatedOptIns.push(optIn);
+        },
+      },
+      callbacks: {
+        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
     };
@@ -347,7 +377,9 @@ export class AgentBuilderPlugin
       actions,
       taskManager,
       searchInferenceEndpoints,
+      licensing,
       security: securityPlugin,
+      isomer,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -377,7 +409,14 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
       searchInferenceEndpoints,
+      licensing,
+      deploymentInfo: getDeploymentInfo({
+        cloud: this.cloudSetup,
+        packageInfo: this.env.packageInfo,
+        airgapped: this.env.airgapped,
+      }),
       deductiveRegister: this.config.deductive?.register ?? false,
+      isomer,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -385,7 +424,7 @@ export class AgentBuilderPlugin
       this.conversationEventBus,
       startDeps.workflowsExtensions,
       this.logger,
-      this.isExperimentalEnabled!
+      this.conversationUpdatedOptIns
     );
 
     const {
@@ -410,6 +449,9 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       searchInferenceEndpoints,
       logger: this.logger.get('model-provider'),
+      spaces,
+      security,
+      elasticsearch,
     });
 
     this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
@@ -417,7 +459,10 @@ export class AgentBuilderPlugin
       esClient: elasticsearch.client.asInternalUser,
       features: searchInferenceEndpoints.features,
     });
-    this.recommendedEndpointsPoller.start();
+    // Intentionally not started: the EIS-derived list is too broad with the current family
+    // heuristic, so the static recommended endpoints are used instead.
+    // See https://github.com/elastic/search-team/issues/16741
+    // this.recommendedEndpointsPoller.start();
 
     return {
       agents: {
@@ -448,7 +493,7 @@ export class AgentBuilderPlugin
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
           const agentRegistry = await agents.getRegistry({ request });
-          return createConversationPublicClient({ client, agentRegistry });
+          return createConversationPublicClient({ client, agentRegistry, source: 'server_api' });
         },
       },
       attachments: {

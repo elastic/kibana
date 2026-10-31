@@ -1,5 +1,5 @@
 {
-  "sha1": "760a9639ecc6438009558192d5cfa7368642be19",
+  "sha1": "fc9974608e93080efe481691bbbcfdf93c3294be",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 42,
-        "column": 29
+        "line": 53,
+        "column": 15
       }
     },
     {
@@ -531,8 +531,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 63,
-        "column": 31
+        "line": 67,
+        "column": 50
       }
     },
     {
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 81,
-        "column": 96
+        "line": 87,
+        "column": 15
       }
     },
     {
@@ -882,7 +882,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 37,
+        "line": 31,
         "column": 13
       }
     },
@@ -895,8 +895,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
-        "line": 86,
-        "column": 31
+        "line": 78,
+        "column": 9
       }
     },
     {
@@ -908,7 +908,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 116,
+        "line": 115,
         "column": 9
       }
     },
@@ -921,7 +921,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 162,
+        "line": 160,
         "column": 11
       }
     },
@@ -934,7 +934,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_legacy_slot_self_heal.spec.ts",
-        "line": 137,
+        "line": 136,
         "column": 33
       }
     },
@@ -960,7 +960,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
-        "line": 79,
+        "line": 81,
         "column": 9
       }
     },
@@ -973,8 +973,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
-        "line": 105,
-        "column": 40
+        "line": 108,
+        "column": 26
       }
     },
     {
@@ -986,7 +986,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
-        "line": 146,
+        "line": 155,
         "column": 22
       }
     },
@@ -1040,6 +1040,110 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_query_validation.spec.ts",
         "line": 34,
         "column": 11
+      }
+    },
+    {
+      "id": "f9c07a6c5d79f10-a3ba715106b895e",
+      "title": "Lens ES|QL reference line persistence reloads mixed sources, axis placement, styles and independent layer queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_line_persistence.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-9363f8bf6e68b79",
+      "title": "Lens ES|QL reference lines combines query and static references in separate layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 34,
+        "column": 11
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-9ea8c40d53392cd",
+      "title": "Lens ES|QL reference lines offers both reference sources on multi-data-layer ES|QL charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 98,
+        "column": 15
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-569d263c77205d5",
+      "title": "Lens ES|QL reference lines preserves the column and style when moving and duplicating a line",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 127,
+        "column": 97
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-b361a785d664901",
+      "title": "Lens ES|QL reference lines renders a single line from a query returning multiple rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 167,
+        "column": 15
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-54c9daeee5ac31f",
+      "title": "Lens ES|QL reference lines does not render a misleading line for empty results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 202,
+        "column": 25
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-821332891eaa3d4",
+      "title": "Lens ES|QL reference lines does not render a misleading line for null results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 202,
+        "column": 25
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-90a3ba89ec1b1c4",
+      "title": "Lens ES|QL reference lines does not render a misleading line for nonnumeric results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 202,
+        "column": 25
       }
     },
     {
@@ -1303,6 +1407,20 @@
       }
     },
     {
+      "id": "ca140b51b7c75bc-76bb16367ac9c67",
+      "title": "Lens ES|QL metric EVAL maximum renders an EVAL maximum as a bar and can switch to a trendline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_esql_eval_maximum.spec.ts",
+        "line": 21,
+        "column": 5
+      }
+    },
+    {
       "id": "54fc49cce77bf4b-32e907ff9427175",
       "title": "Lens metric primary and breakdown configures primary/secondary/breakdown metrics, trendlines, colors and formatting",
       "expectedStatus": "passed",
@@ -1454,7 +1572,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 50
       }
     },
@@ -1467,7 +1585,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 106,
+        "line": 105,
         "column": 72
       }
     },

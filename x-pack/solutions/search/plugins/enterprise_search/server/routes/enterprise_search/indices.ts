@@ -112,7 +112,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           from: schema.number({ defaultValue: 0, min: 0 }),
           only_show_search_optimized_indices: schema.maybe(schema.boolean()),
           return_hidden_indices: schema.maybe(schema.boolean()),
-          search_query: schema.maybe(schema.string()),
+          search_query: schema.maybe(schema.string({ maxLength: 1000 })),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -174,7 +174,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -214,7 +214,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -281,7 +281,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -328,7 +328,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           is_native: schema.boolean(),
         }),
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -358,7 +358,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -386,7 +386,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -413,7 +413,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -445,7 +445,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -471,7 +471,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -509,7 +509,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
         body: schema.object({
           field_mappings: schema.maybe(
@@ -603,7 +603,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           pipeline_name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -720,7 +720,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           }),
         }),
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -784,8 +784,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
         }),
         params: schema.object({
-          indexName: schema.string(),
-          pipelineName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
+          pipelineName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -868,7 +868,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -908,8 +908,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           processors: schema.arrayOf(schema.any(), { maxSize: 10000 }),
         }),
         params: schema.object({
-          indexName: schema.string(),
-          pipelineName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
+          pipelineName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -968,8 +968,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
-          pipelineName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
+          pipelineName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -1033,7 +1033,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -1095,7 +1095,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          pipelineName: schema.string(),
+          pipelineName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -1142,8 +1142,8 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
-          pipelineName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
+          pipelineName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
@@ -1190,7 +1190,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          modelName: schema.string(),
+          modelName: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -1237,7 +1237,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          modelName: schema.string(),
+          modelName: schema.string({ maxLength: 512 }),
         }),
       },
     },
@@ -1312,7 +1312,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          modelName: schema.string(),
+          modelName: schema.string({ maxLength: 512 }),
         }),
       },
     },

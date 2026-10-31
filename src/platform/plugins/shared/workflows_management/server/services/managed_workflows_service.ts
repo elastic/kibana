@@ -10,7 +10,7 @@
 import { createHash } from 'node:crypto';
 import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -31,8 +31,10 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import type { ManagedWorkflowOrphan } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
+import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -507,6 +509,15 @@ export class ManagedWorkflowsService {
       );
     }
 
+    // This method starts the engine directly (like a parent's `workflow.execute`
+    // step), so it bypasses the `runWorkflow` standalone gate. Refuse here too:
+    // a delegating workflow has no identity of its own to run under.
+    if (requiresDelegatedIdentity(existing)) {
+      throw new WorkflowRequiresDelegatedIdentityError(
+        `Managed workflow '${workflowDocumentId}' delegates its execution identity to a parent workflow and cannot be run standalone.`
+      );
+    }
+
     const context: Record<string, unknown> = {
       spaceId,
       inputs: options.inputs ?? {},
@@ -690,20 +701,13 @@ export class ManagedWorkflowsService {
     spaceId: string,
     reason: 'orphan_cleanup' | 'ready_reconciliation'
   ): Promise<void> {
+    const orphan: ManagedWorkflowOrphan = {
+      managedBy: source.managedBy ?? null,
+      definitionId: source.originManagedWorkflowId ?? null,
+    };
     let deleted = false;
     try {
-      const result = await this.deps.crudService.deleteWorkflows([workflowId], spaceId, {
-        force: true,
-      });
-      deleted = result.successfulIds?.includes(workflowId) ?? false;
-      if (!deleted) {
-        const failure = result.failures.find((item) => item.id === workflowId);
-        this.logger.error(
-          `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}': ${
-            failure?.error ?? 'not deleted'
-          }`
-        );
-      }
+      deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
     } catch (error) {
       this.logger.error(
         `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
@@ -722,14 +726,18 @@ export class ManagedWorkflowsService {
         reason,
       });
     } else {
-      await this.disableUndeletedOrphan(workflowId, spaceId);
+      await this.disableUndeletedOrphan(workflowId, spaceId, orphan);
     }
   }
 
   /** Stops new runs of an orphan that could not be deleted, so a later sweep can remove it. */
-  private async disableUndeletedOrphan(workflowId: string, spaceId: string): Promise<void> {
+  private async disableUndeletedOrphan(
+    workflowId: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<void> {
     try {
-      await this.deps.crudService.disableWorkflow(workflowId, spaceId);
+      await this.deps.crudService.disableManagedOrphan(workflowId, spaceId, orphan);
     } catch (error) {
       this.logger.error(
         `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,

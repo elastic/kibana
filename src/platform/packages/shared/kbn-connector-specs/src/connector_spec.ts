@@ -28,6 +28,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
 import type { ClientRegistry, ClientTypeId } from './lib/clients/client_registry';
+import type { RelayActionClient } from './relay_action_client';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -138,6 +139,12 @@ export interface AuthContext {
   logger: Logger;
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
+  /**
+   * Test-only `fetch` for requests an auth type sends itself rather than through the axios
+   * client, such as token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it
+   * for vendor calls; those go through `client`.
+   */
+  fetchTestOnly?: typeof fetch;
 }
 
 export type AuthMode = 'per-user' | 'shared';
@@ -267,32 +274,6 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   scope: ActionScope;
 }
 
-/**
- * The slice of the Actions plugin's Relay client that action handlers use. Declared structurally so
- * this package does not depend on x-pack; the concrete `RelayClient` satisfies it by shape.
- */
-export interface RelayActionClient {
-  trigger(input: {
-    tenantKey: string;
-    /** Slack conversation id or a connected channel name (`#general`). */
-    channel: string;
-    message: string;
-    threadTs?: string;
-  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
-  /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
-  listBindings(
-    tenantKey: string,
-    options?: { cursor?: string; limit?: number }
-  ): Promise<{
-    bindings: Array<{
-      scope_id?: string;
-      display_name?: string;
-      visibility?: 'public' | 'private';
-    }>;
-    nextCursor?: string;
-  }>;
-}
-
 export interface ActionContext {
   client: AxiosInstance;
   /**
@@ -311,11 +292,22 @@ export interface ActionContext {
   log: Logger;
   secrets?: Record<string, unknown>;
   /**
+   * Signs claims with the connector's private key and sets `iss` to the connector issuer.
+   * Defined only when the spec declares `signingKey`.
+   */
+  signJwt?: (claims: Record<string, unknown>) => Promise<string>;
+  /**
    * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
    * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
    * configured.
    */
   relay?: RelayActionClient;
+  /**
+   * Test-only `fetch` for requests a handler sends itself rather than through `client`, such as
+   * token exchanges. Unset in Kibana, which uses the global `fetch`. Never use it for vendor
+   * calls; those go through `client`.
+   */
+  fetchTestOnly?: typeof fetch;
 }
 
 // ============================================================================
@@ -362,6 +354,15 @@ export interface ConnectorTest {
 }
 
 // ============================================================================
+// SIGNING KEY
+// ============================================================================
+
+export interface ConnectorSigningKey {
+  /** Value of the JWT `typ` header, for example `secevent+jwt`. */
+  jwtType: string;
+}
+
+// ============================================================================
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
@@ -372,6 +373,8 @@ export interface AuthTypeDef {
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
   isExperimental?: boolean;
+  /** When true, this auth type may be used with sandbox credential injection. */
+  supportsSandbox?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
@@ -407,6 +410,10 @@ export interface ConnectorSpec {
   // Omit when the connector has no inbound surface. A connector may declare both
   // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
   events?: ConnectorSpecEvents;
+
+  // Optional Kibana-managed signing key. When present, creating a connector generates
+  // a key pair, Kibana publishes the public key, and actions get `signJwt`.
+  signingKey?: ConnectorSigningKey;
 
   transformations?: Transformations;
 

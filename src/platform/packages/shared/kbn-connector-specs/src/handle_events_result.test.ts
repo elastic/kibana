@@ -84,6 +84,29 @@ describe('parseHandleEventsResult', () => {
     });
   });
 
+  it('accepts a text/plain http ack body', () => {
+    expect(
+      parseHandleEventsResult({
+        type: 'http',
+        httpResponse: {
+          status: 200,
+          body: 'ack',
+          headers: { 'content-type': 'text/plain' },
+        },
+      })
+    ).toMatchObject({
+      ok: true,
+      data: {
+        type: 'http',
+        httpResponse: {
+          status: 200,
+          body: 'ack',
+          headers: { 'content-type': 'text/plain' },
+        },
+      },
+    });
+  });
+
   it('accepts an http handshake ack', () => {
     expect(
       parseHandleEventsResult({

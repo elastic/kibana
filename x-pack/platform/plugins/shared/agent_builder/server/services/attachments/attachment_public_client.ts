@@ -111,7 +111,7 @@ export const createAttachmentPublicClient = ({
         events,
         attachments: { snapshot: conversation.attachments ?? [], produced: stateManager.getAll() },
       },
-      { access: 'converse' }
+      { access: 'converse', source }
     );
   };
 
@@ -252,6 +252,23 @@ export const createAttachmentPublicClient = ({
       }
 
       await persist({ conversation, conversationClient, stateManager });
+    },
+
+    async restore({ conversationId, attachmentId }) {
+      const { conversation, conversationClient, stateManager } = await loadState(conversationId);
+      const existing = stateManager.getAttachmentRecord(attachmentId);
+
+      if (!existing) {
+        throw createAttachmentNotFoundError({ attachmentId });
+      }
+      if (existing.active !== false) {
+        throw createAttachmentInvalidError(`Attachment '${attachmentId}' is not deleted`);
+      }
+      stateManager.restore(attachmentId);
+
+      await persist({ conversation, conversationClient, stateManager });
+
+      return existing;
     },
 
     async bulkCreate({

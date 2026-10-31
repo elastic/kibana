@@ -8,6 +8,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 - [Template](#template)
 - [Notes](#notes)
+- [Verbosity levels](#verbosity-levels)
 - [Pending work pattern](#pending-work-pattern)
 - [Test Coverage Summary — filling in the table](#test-coverage-summary--filling-in-the-table)
 - [Issue Clarity Assessment section](#issue-clarity-assessment-section)
@@ -15,6 +16,8 @@ This file defines the required sections of a test plan, their order, and the con
 ---
 
 ## Template
+
+**Before filling in the template below**, read [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) and render `Overview` / `Feature Background` / `Assumptions` at `VERBOSITY_LEVEL`. The prose lengths shown below are the `standard` shape — the actual placeholders (`[One paragraph …]`, `[… 2–4 sentences]`, four `Assumptions` bullets) are only correct for `standard`. Under `lean` / `detailed` the shape changes per that reference; do not follow the placeholders verbatim if `VERBOSITY_LEVEL` is not `standard`.
 
 ```markdown
 # Test Plan: [Feature Name]
@@ -145,6 +148,10 @@ This file defines the required sections of a test plan, their order, and the con
 - **RBAC / Permission Testing Matrix** — only include if the issue explicitly mentions roles, permissions, or access control. Do not add speculatively.
 - **Scope** must reflect the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) triggers (upgrade / CRUD per persisted object / dependency data lifecycle). Every *Out of scope* bullet carries a one-clause reason on the same line — bullets with no reason are indistinguishable from oversights.
 - If a section cannot be filled in due to missing information, apply the Core rule: stop and ask the user rather than leaving placeholder text in the draft.
+
+## Verbosity levels
+
+The template shows the `standard` shape only; every level rule lives in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) (see the note above the template).
 
 ## Pending work pattern
 

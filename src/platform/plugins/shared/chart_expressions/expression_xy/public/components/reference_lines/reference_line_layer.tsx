@@ -47,10 +47,16 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   const columnToLabelMap: Record<string, string> = columnToLabel ? JSON.parse(columnToLabel) : {};
 
   const row = table.rows[0];
+  if (!row) {
+    return null;
+  }
 
-  const decorationConfigsByValue = decorations.sort(
-    ({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]
-  );
+  const decorationConfigsByValue = decorations
+    .filter(({ forAccessor }) => {
+      const value = row[forAccessor];
+      return typeof value === 'number' && Number.isFinite(value);
+    })
+    .sort(({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]);
 
   const groupedByDirection = groupBy(decorationConfigsByValue, 'fill');
   if (groupedByDirection.below) {
@@ -65,7 +71,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     );
 
     const formatter =
-      formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
+      axisGroup?.formatter ?? formatters[decorationConfig.forAccessor] ?? xAxisFormatter;
     const name =
       columnToLabelMap[decorationConfig.forAccessor] ??
       titles?.yTitles?.[decorationConfig.forAccessor];
