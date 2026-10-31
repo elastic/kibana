@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { dataStreamTypesRt } from './types';
 
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
@@ -34,6 +35,7 @@ export type DatasetTypesPrivileges = rt.TypeOf<typeof datasetPrivilegeRt>;
 export const getDataStreamsTypesPrivilegesResponseRt = rt.exact(
   rt.type({
     datasetTypesPrivileges: datasetPrivilegeRt,
+    accessibleDatasetTypes: rt.array(dataStreamTypesRt),
   })
 );
 

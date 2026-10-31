@@ -23,7 +23,8 @@ import type {
   UpdateFailureStoreResponse,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
-import { datasetQualityPrivileges } from '../../services';
+import type { DataStreamType } from '../../../common/types';
+import { dataStreamService, datasetQualityPrivileges } from '../../services';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityESClient } from '../../utils';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -62,6 +63,7 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
   },
   async handler(resources): Promise<{
     datasetTypesPrivileges: DatasetTypesPrivileges;
+    accessibleDatasetTypes: DataStreamType[];
   }> {
     const { context, params, getIsSecurityEnabled } = resources;
     const coreContext = await context.core;
@@ -70,7 +72,7 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const { datasetsPrivilages } = await getDatasetTypesPrivileges({
+    const { datasetsPrivilages, accessibleDatasetTypes } = await getDatasetTypesPrivileges({
       esClient,
       ...params.query,
       isSecurityEnabled,
@@ -78,6 +80,7 @@ const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
 
     return {
       datasetTypesPrivileges: datasetsPrivilages,
+      accessibleDatasetTypes,
     };
   },
 });
@@ -237,21 +240,29 @@ const totalDocsRoute = createDatasetQualityServerRoute({
     const isSecurityEnabled = await getIsSecurityEnabled();
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    await datasetQualityPrivileges.throwIfCannotReadDataset(
-      esClient,
-      isSecurityEnabled,
-      params.query.type
+    const { type, start, end } = params.query;
+    const dataStreams = await dataStreamService.getMatchingDataStreams(esClient, `${type}-*-*`);
+    const dataStreamNames = dataStreams.map(({ name }) => name);
+    const dataStreamPrivileges = dataStreamNames.length
+      ? await datasetQualityPrivileges.getHasIndexPrivileges(
+          esClient,
+          dataStreamNames,
+          ['read'],
+          isSecurityEnabled
+        )
+      : {};
+    const readableDataStreamNames = dataStreamNames.filter(
+      (dataStreamName) => dataStreamPrivileges[dataStreamName]?.read
     );
 
-    const { type, start, end } = params.query;
-
-    const totalDocs = await getAggregatedDatasetPaginatedResults({
-      esClient,
-      start,
-      end,
-      index: `${type}-*-*`,
-    });
+    const totalDocs = readableDataStreamNames.length
+      ? await getAggregatedDatasetPaginatedResults({
+          esClient,
+          start,
+          end,
+          index: readableDataStreamNames.join(','),
+        })
+      : [];
 
     return {
       totalDocs,

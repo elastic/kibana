@@ -15,9 +15,9 @@ import { useDatasetQualityState } from '../../../hooks/use_dataset_quality_state
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function EmptyStateWrapper({ children }: { children: React.ReactNode }) {
-  const { canUserMonitorAnyDataset, statsLoading } = useDatasetQualityState();
+  const { canUserAccessAnyDataset, statsLoading } = useDatasetQualityState();
 
-  if (!statsLoading && !canUserMonitorAnyDataset) {
+  if (!statsLoading && !canUserAccessAnyDataset) {
     return (
       <EuiEmptyPrompt
         iconType="warning"

@@ -11,7 +11,8 @@ import { useDatasetQualityContext } from '../components/dataset_quality/context'
 export const useDatasetQualityState = () => {
   const { service } = useDatasetQualityContext();
 
-  const { datasetUserPrivileges } = useSelector(service, (state) => state.context) ?? {};
+  const { datasetUserPrivileges, dataStreamStats } =
+    useSelector(service, (state) => state.context) ?? {};
 
   const statsLoading = useSelector(
     service,
@@ -20,15 +21,14 @@ export const useDatasetQualityState = () => {
   );
 
   const canUserReadFailureStore = Boolean(
-    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
-      (privilege) => privilege.canReadFailureStore
-    )
+    dataStreamStats?.some((dataStream) => dataStream.userPrivileges.canReadFailureStore) ||
+      Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
+        (privilege) => privilege.canReadFailureStore
+      )
   );
 
   const canUserMonitorAnyDataset = Boolean(
-    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
-      (privilege) => privilege.canMonitor
-    )
+    dataStreamStats?.some((dataStream) => dataStream.userPrivileges.canMonitor)
   );
 
   const canUserReadAnyDataset = Boolean(
@@ -37,10 +37,21 @@ export const useDatasetQualityState = () => {
     )
   );
 
+  const canUserAccessAnyDataset =
+    Boolean(dataStreamStats?.length) ||
+    canUserReadAnyDataset ||
+    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {}).some(
+      (privilege) => privilege.canMonitor
+    );
+
   return {
+    // Whether concrete data stream discovery and statistics are still loading.
     statsLoading,
+    // Whether failure-store data is readable for any concrete stream or requested dataset pattern.
     canUserReadFailureStore,
+    // Whether at least one discovered concrete data stream grants the monitor privilege.
     canUserMonitorAnyDataset,
-    canUserReadAnyDataset,
+    // Whether the user has any concrete stream or broad read/monitor access to the requested data.
+    canUserAccessAnyDataset,
   };
 };
