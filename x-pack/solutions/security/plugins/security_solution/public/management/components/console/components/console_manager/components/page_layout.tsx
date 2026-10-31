@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import type { KeyboardEventHandler, PropsWithChildren, ReactNode } from 'react';
-import React, { useRef, useCallback, memo, useMemo } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { EuiPanelProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from '@emotion/styled';
 import classnames from 'classnames';
-import type { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const EuiPanelStyled = styled(EuiPanel)`
@@ -37,46 +29,28 @@ const EuiPanelStyled = styled(EuiPanel)`
 `;
 
 export type PageLayoutProps = PropsWithChildren<{
-  pageTitle?: ReactNode;
-  pageDescription?: ReactNode;
+  /** Rendered above the console body (eg. host banners/callouts). */
   pageBody?: ReactNode;
-  actions?: ReactNode | ReactNode[];
-  headerHasBottomBorder?: boolean;
-  restrictWidth?: boolean | number | string;
   paddingSize?: EuiPanelProps['paddingSize'];
   scrollableBody?: boolean;
-  headerBackComponent?: ReactNode;
   'data-test-subj'?: string;
 }>;
 
+/**
+ * The console overlay's content area: an optional `pageBody` (eg. banners/callouts) above the full
+ * height/non-scrollable console itself. The overlay's header lives outside this component (see
+ * `ConsolePageOverlay`, which renders `AppHeaderView` above this layout) - this component owns only
+ * the padded content section below it.
+ */
 export const PageLayout = memo<PageLayoutProps>(
   ({
-    pageTitle,
-    pageDescription,
     pageBody,
-    actions,
-    headerHasBottomBorder,
-    restrictWidth,
     paddingSize = 'l',
     scrollableBody = false,
-    headerBackComponent,
     children,
     'data-test-subj': dataTestSubj,
   }) => {
-    const hideHeader = !pageTitle && !pageDescription && !actions && !headerBackComponent;
-
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const panelRef = useRef<HTMLDivElement>(null);
-
-    const headerRightSideItems = useMemo(() => {
-      return Array.isArray(actions) ? actions : actions ? [actions] : undefined;
-    }, [actions]);
-
-    const headerRightSideGroupProps = useMemo<EuiPageHeaderProps['rightSideGroupProps']>(() => {
-      return {
-        gutterSize: 's',
-      };
-    }, []);
 
     const consoleBodyClassName = useMemo(() => {
       return classnames({
@@ -86,37 +60,6 @@ export const PageLayout = memo<PageLayoutProps>(
       });
     }, [scrollableBody]);
 
-    const headerTitleContainer = useMemo(() => {
-      return hideHeader ? null : (
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          alignItems="flexStart"
-          wrap={false}
-          responsive={false}
-        >
-          {headerBackComponent && <EuiFlexItem grow={false}>{headerBackComponent}</EuiFlexItem>}
-          <EuiSpacer size="m" />
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <span data-test-subj={getTestId('titleHolder')}>{pageTitle}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }, [getTestId, headerBackComponent, hideHeader, pageTitle]);
-
-    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback((event) => {
-      // We prevent the response console - which is currently displayed in a full page overlay - from
-      // closing if the user hits `esc` while focus is on the console overlay.
-      // However, there are still issues when closing Flyouts and certain popup (ex. argument selectors)
-      // where the entire response action may be closed when user hits `ESC`.
-      if (event.key === 'Escape' && panelRef.current?.contains(event.target as Node)) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    }, []);
-
     return (
       <EuiPanelStyled
         hasShadow={false}
@@ -125,8 +68,6 @@ export const PageLayout = memo<PageLayoutProps>(
         data-test-subj={dataTestSubj}
         className="full-height"
         color="transparent"
-        onKeyDown={handleKeyDown}
-        panelRef={panelRef}
       >
         <EuiFlexGroup
           direction="column"
@@ -135,23 +76,7 @@ export const PageLayout = memo<PageLayoutProps>(
           className="full-height"
           data-test-subj={getTestId('root')}
         >
-          {!hideHeader && (
-            <EuiFlexItem grow={false} data-test-subj={getTestId('headerContainer')}>
-              <EuiPageHeader
-                pageTitle={headerTitleContainer}
-                description={pageDescription}
-                bottomBorder={headerHasBottomBorder}
-                rightSideItems={headerRightSideItems}
-                rightSideGroupProps={headerRightSideGroupProps}
-                restrictWidth={restrictWidth}
-                alignItems="bottom"
-                data-test-subj={getTestId('header')}
-              />
-              <EuiSpacer size="l" />
-            </EuiFlexItem>
-          )}
-
-          <EuiFlexItem grow={false}>{pageBody}</EuiFlexItem>
+          {pageBody && <EuiFlexItem grow={false}>{pageBody}</EuiFlexItem>}
           <EuiFlexItem
             grow
             className={consoleBodyClassName}

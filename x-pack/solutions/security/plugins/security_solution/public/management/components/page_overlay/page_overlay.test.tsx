@@ -196,6 +196,29 @@ describe('When using PageOverlay component', () => {
     expect(renderProps.onHide).not.toHaveBeenCalled();
   });
 
+  it('should ignore an Escape from a layer outside the overlay (e.g. a portaled popover)', () => {
+    const portaledLayer = document.createElement('button');
+    document.body.appendChild(portaledLayer);
+
+    try {
+      render();
+
+      fireEvent.keyDown(portaledLayer, { key: 'Escape' });
+
+      expect(renderProps.onHide).not.toHaveBeenCalled();
+    } finally {
+      portaledLayer.remove();
+    }
+  });
+
+  it('should call `onHide` on an Escape with no focused element (target is `<body>`)', () => {
+    render();
+
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+
+    expect(renderProps.onHide).toHaveBeenCalledTimes(1);
+  });
+
   it.each`
     size    | className
     ${'xs'} | ${'padding-xs'}

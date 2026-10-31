@@ -67,9 +67,12 @@ export const FleetArtifactsCard = memo<FleetArtifactsCardProps>(
         pagePathGetters.integration_details_custom({ pkgkey })[1]
       }`;
       return {
+        // Destination-only label (new id, since `...backButtonLabel`'s meaning changed from a
+        // full sentence to a destination name): the `AppHeader` back button renders its own
+        // "Back to {label}" prefix.
         backButtonLabel: i18n.translate(
-          'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',
-          { defaultMessage: 'Return to Elastic Defend integration' }
+          'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonDestinationLabel',
+          { defaultMessage: 'Elastic Defend integration' }
         ),
         onBackButtonNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
