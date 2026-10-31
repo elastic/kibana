@@ -532,6 +532,7 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
 | Analytics docs whose `space_id` names a deleted space | Deleting a space removes the cases SOs by namespace, bypassing the cases delete cascade | Handled automatically — each reconciliation tick deletes the analytics docs of spaces that no longer exist. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
+| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by a one-time pass in the reconciliation task (removed in 10.0) — see "Incremental id backfill (until 10.0)" below. Manual fallback: POST /reset. |
 
 ### Templates migration coupling
 
@@ -594,6 +595,43 @@ Safety properties (all covered by tests):
   `plugin.ts`; it no-ops when analytics v2 is disabled and swallows its
   own errors (scheduling failures are logged, never propagated), so it
   can never fail or retry the migration task.
+
+### Incremental id backfill (until 10.0)
+
+Before 9.6, the incremental-id task numbered cases with a raw SO update that
+didn't bump `attributes.updated_at`, so a case whose `.cases` doc was written
+before it was numbered never received `case.incremental_id`. 9.6 fixes that
+going forward (the incremental-id task mirrors newly numbered cases) and ships
+a one-time repair for docs written before the fix (`incremental_id_backfill/`).
+
+The repair runs at the end of each reconciliation tick, after the three
+cursor walks and the deleted-spaces sweep, until one pass completes. It searches `.cases` for docs
+without `case.incremental_id`, re-reads those cases, and re-emits the ones
+that now have a number. Cases that are still unnumbered are skipped; the
+incremental-id task mirrors them when it numbers them. A completed pass sets
+`incremental_id_backfill_completed` in the reconciliation task state, and
+later ticks skip the repair.
+
+- **Time-boxed within the tick.** The reconciliation task runs under Task
+  Manager's default 5m timeout, and a timed-out run's state is discarded,
+  cursors included. So the repair starts no new page once the tick is 3
+  minutes old (`INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS`); it pauses, the
+  tick's state persists, and the next tick picks up the rest. Docs already
+  repaired drop out of the search, so each tick only re-reads what's left.
+- **A failed pass** leaves the flag unset, is reported via `taskRunError`,
+  and is retried on the next tick.
+- **Skipped** when `xpack.cases.incrementalId.enabled` is false, or when
+  `.cases` failed to bootstrap and the case writer is a no-op. Either way the
+  flag stays unset, so the repair runs once the cause is fixed.
+- **`POST /reset` clears the flag** along with the cursors. The next tick
+  re-runs the repair, which finds nothing because the reset re-emits every
+  case.
+- **No task type of its own**, so shipping and removing it needs no
+  Task Manager registration changes.
+
+Scheduled for removal in 10.0. A major upgrade must go through the last 9.x
+minor first, so every cluster runs the repair before it's removed, including
+self-managed clusters that skip minors.
 
 ## Activity surface
 
@@ -742,10 +780,14 @@ cases_analytics_v2/
 │   ├── retry.ts                          bounded jittered exponential backoff
 │   └── retry.test.ts
 │
+├── incremental_id_backfill/   one-time repair of case.incremental_id in .cases (remove in 10.0)
+│   └── runner.ts            search .cases for missing ids → bulkGet → re-emit numbered cases;
+│                            called from the reconciliation tick
+│
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling
 │   │                        (cases → activity → attachments → deleted
-│   │                        spaces sweep per tick;
+│   │                        spaces sweep → incremental id backfill per tick;
 │   │                        independent cursors; per-surface error
 │   │                        isolation via taskRunError; maxAttempts: 1)
 │   ├── runner.ts            walks cases by `updated_at > last_run_at OR

@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CasesAnalyticsV2Service, V2_NOOP_DATA_VIEW_REFRESHER } from './service';
@@ -20,6 +20,7 @@ import {
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
 import { RESET_TASK_ID, RESET_TASK_TYPE } from './reconciliation/reset_task';
+import * as reconciliation from './reconciliation';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
 jest.mock('./ensure_indices/case');
@@ -33,6 +34,7 @@ const buildService = () =>
     enableAdminRoutes: false,
     resetTaskTimeoutMinutes: 60,
     resetPageDelayMs: 0,
+    incrementalIdEnabled: false,
   });
 
 describe('CasesAnalyticsV2Service', () => {
@@ -143,6 +145,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        incrementalIdEnabled: false,
       });
 
     const startService = async (service: CasesAnalyticsV2Service) => {
@@ -214,6 +217,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        incrementalIdEnabled: false,
       });
 
     const startWithTaskManager = async (service: CasesAnalyticsV2Service) => {
@@ -301,6 +305,79 @@ describe('CasesAnalyticsV2Service', () => {
       await service.triggerBackfillReconciliation();
 
       expect(clearSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('reconciliation incremental id backfill wiring', () => {
+    const build = (incrementalIdEnabled: boolean) =>
+      new CasesAnalyticsV2Service({
+        logger: loggerMock.create(),
+        enabled: true,
+        reconciliationIntervalMinutes: 30,
+        enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
+        incrementalIdEnabled,
+      });
+
+    const setup = (service: CasesAnalyticsV2Service) => {
+      const registerSpy = jest.spyOn(reconciliation, 'registerReconciliationTask');
+      service.setup({
+        core: coreMock.createSetup(),
+        taskManager: taskManagerMock.createSetup(),
+      });
+      return registerSpy.mock.calls[0][0];
+    };
+
+    const start = (service: CasesAnalyticsV2Service) =>
+      service.start({
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        taskManager: taskManagerMock.createStart(),
+        internalSavedObjectsClient: savedObjectsClientMock.create(),
+        dataViewsService: {} as unknown as DataViewsServerPluginStart,
+        spacesEnabled: true,
+      });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it.each([true, false])(
+      'passes incrementalIdEnabled=%s to the reconciliation task',
+      (incrementalIdEnabled) => {
+        const args = setup(build(incrementalIdEnabled));
+
+        expect(args.incrementalIdBackfillEnabled).toBe(incrementalIdEnabled);
+      }
+    );
+
+    it('fails the run when it fires before start', async () => {
+      const args = setup(build(true));
+
+      await expect(args.getRunnerDeps()).rejects.toThrow('before service start completed');
+    });
+
+    it('reports an enabled cases writer once .cases bootstraps', async () => {
+      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = build(true);
+      const args = setup(service);
+      await start(service);
+
+      const deps = await args.getRunnerDeps();
+
+      expect(deps.casesWriterEnabled).toBe(true);
+      expect(deps.esClient).toBeDefined();
+    });
+
+    it('reports a disabled cases writer when .cases failed to bootstrap', async () => {
+      (ensureCaseIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
+      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
+      const service = build(true);
+      const args = setup(service);
+      await start(service);
+
+      const deps = await args.getRunnerDeps();
+
+      expect(deps.casesWriterEnabled).toBe(false);
     });
   });
 });
