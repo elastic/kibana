@@ -65,6 +65,7 @@ import {
   UNASSIGNED_CONDITION,
 } from './assign_by_condition';
 import { isCompleteElasticAgent } from './get_agent_info';
+import { STALE_CHECKIN_MS } from './plan_rebalance';
 import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
@@ -76,6 +77,12 @@ interface EnrolledAgents {
   agentIds: string[];
   /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
   completeAgentIds?: string[];
+  /**
+   * Agents that checked in within STALE_CHECKIN_MS. Offline leftovers of a
+   * re-enrolled agent stay enrolled for days and must not make a single-agent
+   * location look multi-agent. Defaults to all enrolled agents.
+   */
+  checkedInCount?: number;
 }
 
 type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
@@ -271,7 +278,7 @@ export class SyntheticsPrivateLocation {
             newPolicy.condition = UNASSIGNED_CONDITION;
           }
           // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
-        } else if (agentIds.length > 1) {
+        } else if ((conditionHosts?.checkedInCount ?? agentIds.length) > 1) {
           const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
@@ -366,6 +373,8 @@ export class SyntheticsPrivateLocation {
   private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
     const agentIds = new Set<string>();
     const completeAgentIds = new Set<string>();
+    const checkedInSince = Date.now() - STALE_CHECKIN_MS;
+    let checkedInCount = 0;
     const perPage = 1000;
     let page = 1;
 
@@ -383,6 +392,9 @@ export class SyntheticsPrivateLocation {
           if (isCompleteElasticAgent(agent.local_metadata)) {
             completeAgentIds.add(agent.id);
           }
+          if (agent.last_checkin && Date.parse(agent.last_checkin) >= checkedInSince) {
+            checkedInCount += 1;
+          }
         }
       }
 
@@ -392,7 +404,7 @@ export class SyntheticsPrivateLocation {
       page += 1;
     }
 
-    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds] };
+    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds], checkedInCount };
   }
 
   /** Resolves each touched location at most once per monitor batch. */

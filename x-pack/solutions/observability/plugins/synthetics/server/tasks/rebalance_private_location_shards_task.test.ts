@@ -571,12 +571,23 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
     });
 
-    it('never adds a first pin on a single-agent location', async () => {
+    it.each([
+      ['a single agent', [agentInfo(NOW)], false],
+      [
+        'an offline leftover as second agent',
+        [agentInfo(NOW), agentInfo(NOW - STALE_DATA_MS * 10)],
+        false,
+      ],
+      ['two healthy agents', [agentInfo(NOW), agentInfo(NOW)], true],
+    ])('pins unpinned monitors with %s: %s', async (_, infos, pinUnpinned) => {
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map(infos.map((info, i) => [`agent-${i}`, info])));
+      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
+
       await run();
 
-      expect(mockRebalanceShards).toHaveBeenCalledWith(
-        expect.objectContaining({ pinUnpinned: false })
-      );
+      expect(mockRebalanceShards).toHaveBeenCalledWith(expect.objectContaining({ pinUnpinned }));
     });
 
     it.each([
