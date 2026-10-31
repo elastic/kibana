@@ -136,8 +136,14 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
         'platform.core.execute_esql',
       ],
       expectedWorkflowStages: [],
+      // Don't-care, like the retrieved count below: this zero-alert negative
+      // control asks no passed-count question. `null` here ASSERTS the run
+      // reports null (see workflow_evidence_evaluator.ts), which scored a run
+      // that correctly reported 0 alerts passed as 0 while a run that reported
+      // null scored 1 (F23a, bk-01a14b73). An ABSENT `expectedPassedAlertCount`
+      // is the documented don't-care form; `expectedWorkflowStages: []` is what
+      // still fails a run that invents alerts and runs generation/validation.
       expectedRetrievedAlertCount: null,
-      expectedPassedAlertCount: null,
     },
     metadata: {
       alertCount: missingAlertRetrievalFixture.alertCount,
