@@ -516,7 +516,7 @@ export class VisualizationsPlugin
       }),
       getIconForSavedObject: (savedObject) => {
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
+        return visState.type === 'vega' ? VegaIcon : 'chartMix';
       },
     });
     embeddable.registerLegacyURLTransform(

@@ -84,6 +84,7 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
   return (
     <SavedObjectFinder
       id="embeddableAddPanel"
+      typeIconSize="m"
       services={{
         contentClient: {
           ...contentManagement.client,
