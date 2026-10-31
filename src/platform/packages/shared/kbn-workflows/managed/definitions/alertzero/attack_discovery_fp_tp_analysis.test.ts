@@ -829,6 +829,37 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         })
       ).toEqual({ total: { value: 2 }, hits: [] });
     });
+
+    const eventsFailedExpression = String(stepIn('source_status')?.with?.events_failed)
+      .replace(/^\$\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+    const searchFailed = { message: 'search failed' };
+
+    const eventsFailed = (steps: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(eventsFailedExpression, { steps });
+
+    it('is false when the local retry succeeds', () => {
+      expect(
+        eventsFailed({
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: { output: { hits: { total: { value: 1 } } } },
+        })
+      ).toBe(false);
+    });
+
+    it('is true when the primary search and the local retry both fail', () => {
+      expect(
+        eventsFailed({
+          load_events_by_host_id: { error: searchFailed },
+          load_events_by_host_id_local: { error: searchFailed },
+        })
+      ).toBe(true);
+    });
+
+    it('is false when the host searches were skipped', () => {
+      expect(eventsFailed({})).toBe(false);
+    });
   });
 
   describe('the truncation clear', () => {

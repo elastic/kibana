@@ -24,7 +24,7 @@ describe('endpointEventIndices', () => {
     expect(endpointEventIndices(['logs-*', 'filebeat-*', 'endgame-*'])).toBe(ENDPOINT_EVENTS_INDEX);
   });
 
-  it('skips exclusions, including a remote exclusion and a pattern excluded on a cluster', () => {
+  it('subtracts a remote exclusion instead of searching that cluster', () => {
     expect(
       endpointEventIndices([
         '-remote_a:logs-*',
@@ -32,7 +32,27 @@ describe('endpointEventIndices', () => {
         '-logs-*',
         'remote_kept:logs-*',
       ])
-    ).toBe(`${ENDPOINT_EVENTS_INDEX},remote_kept:${ENDPOINT_EVENTS_INDEX}`);
+    ).toBe(
+      `${ENDPOINT_EVENTS_INDEX},remote_kept:${ENDPOINT_EVENTS_INDEX},-remote_a:${ENDPOINT_EVENTS_INDEX},-remote_b:${ENDPOINT_EVENTS_INDEX}`
+    );
+  });
+
+  it('keeps a wildcard include from searching an excluded cluster', () => {
+    expect(endpointEventIndices(['*:logs-*', '-remote_excluded:*'])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},*:${ENDPOINT_EVENTS_INDEX},-remote_excluded:${ENDPOINT_EVENTS_INDEX}`
+    );
+  });
+
+  it('does not add a cluster the data view excludes', () => {
+    expect(endpointEventIndices(['remote_excluded:logs-*', '-remote_excluded:*'])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},-remote_excluded:${ENDPOINT_EVENTS_INDEX}`
+    );
+  });
+
+  it('leaves a cluster in place when the exclusion does not cover endpoint events', () => {
+    expect(endpointEventIndices(['remote_kept:logs-*', '-remote_kept:filebeat-*'])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},remote_kept:${ENDPOINT_EVENTS_INDEX}`
+    );
   });
 
   it('does not treat a :: selector as a cluster separator', () => {
