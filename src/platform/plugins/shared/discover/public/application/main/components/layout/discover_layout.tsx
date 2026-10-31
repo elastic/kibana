@@ -373,9 +373,10 @@ export function DiscoverLayout() {
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
 
+  const cancelFetchData = useCurrentTabAction(internalStateActions.cancelFetchData);
   const onCancelClick = useCallback(() => {
-    dataStateContainer.cancel();
-  }, [dataStateContainer]);
+    dispatch(cancelFetchData());
+  }, [dispatch, cancelFetchData]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);

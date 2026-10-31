@@ -26,6 +26,7 @@ import type { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
 import type { QuerySetup, QueryStart } from './query';
 import type { NowProviderPublicContract } from './now_provider';
+import type { ReplayCacheContract } from './replay_cache';
 import type {
   MultiValueClickDataContext,
   RangeSelectDataContext,
@@ -94,6 +95,7 @@ export interface DataPublicPluginStart {
    * {@link ISearchStart}
    */
   search: ISearchStart;
+  replayCache: ReplayCacheContract;
   /**
    * @deprecated Use fieldFormats plugin instead
    */

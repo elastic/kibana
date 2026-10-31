@@ -10,12 +10,15 @@
 import { type BehaviorSubject, combineLatest, filter, skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import type { DashboardApi, DashboardCreationOptions } from '../..';
 import { dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import type { DashboardInternalApi } from '../types';
 import { newSession$ } from './new_session';
+import type { ReplaySearchSession } from './replay_search_session';
+import { forgetDashboardSearchSession } from './replay_search_session';
 
 /**
  * Enables dashboard search sessions.
@@ -25,7 +28,8 @@ export function startDashboardSearchSessionIntegration(
   dashboardInternalApi: DashboardInternalApi,
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   setSearchSessionId: (searchSessionId: string) => void,
-  searchSessionGenerationInProgress$: BehaviorSubject<boolean>
+  searchSessionGenerationInProgress$: BehaviorSubject<boolean>,
+  replaySearchSession: ReplaySearchSession
 ) {
   if (!searchSessionSettings) return;
 
@@ -39,13 +43,26 @@ export function startDashboardSearchSessionIntegration(
   dataService.search.session.enableStorage(
     createSessionRestorationDataProvider(dashboardApi, dashboardInternalApi),
     {
-      isDisabled: () =>
-        getDashboardCapabilities().storeSearchSession
+      isDisabled: () => {
+        if (replaySearchSession.isCurrentSessionReplayed()) {
+          return {
+            disabled: true,
+            reasonText: i18n.translate(
+              'dashboard.replayCache.backgroundSearchDisabledDescription',
+              {
+                defaultMessage: 'Refresh the results before saving this search in the background.',
+              }
+            ),
+          };
+        }
+
+        return getDashboardCapabilities().storeSearchSession
           ? { disabled: false }
           : {
               disabled: true,
               reasonText: noSearchSessionStorageCapabilityMessage,
-            },
+            };
+      },
     }
   );
 
@@ -79,9 +96,10 @@ export function startDashboardSearchSessionIntegration(
             searchSessionIdFromURL = undefined;
           } else {
             dataService.search.session.restore(searchSessionIdFromURL);
+            forgetDashboardSearchSession(dashboardApi.savedObjectId$.value);
           }
         }
-        return searchSessionIdFromURL ?? dataService.search.session.start();
+        return searchSessionIdFromURL ?? replaySearchSession.startSearchSession();
       })();
 
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
@@ -91,8 +109,17 @@ export function startDashboardSearchSessionIntegration(
       searchSessionGenerationInProgress$.next(false);
     });
 
+  const saveSubscription = dashboardApi.onSave$.subscribe(
+    ({ previousDashboardId, dashboardId }) => {
+      if (previousDashboardId !== dashboardId) {
+        forgetDashboardSearchSession(previousDashboardId);
+      }
+    }
+  );
+
   return () => {
     searchSessionIdChangeSubscription?.unsubscribe();
     newSessionSubscription.unsubscribe();
+    saveSubscription.unsubscribe();
   };
 }

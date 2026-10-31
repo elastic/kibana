@@ -1399,6 +1399,24 @@ describe('tab_state actions', () => {
     loadDataViewSpy.mockRestore();
   });
 
+  describe('cancelFetchData', () => {
+    it('cancels the running queries and forgets the cached session of the tab', async () => {
+      const toolkit = getDiscoverInternalStateMock({
+        persistedDataViews: [dataViewMockWithTimeField],
+      });
+      await toolkit.initializeTabs();
+      const tabId = toolkit.getCurrentTab().id;
+      const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
+      const cancel = jest.spyOn(dataStateContainer, 'cancel');
+      const forgetTab = jest.spyOn(toolkit.searchSessionManager, 'forgetTab');
+
+      toolkit.internalState.dispatch(internalStateActions.cancelFetchData({ tabId }));
+
+      expect(cancel).toHaveBeenCalled();
+      expect(forgetTab).toHaveBeenCalledWith(tabId);
+    });
+  });
+
   it('opens a saved ES|QL tab without loading a data view', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({

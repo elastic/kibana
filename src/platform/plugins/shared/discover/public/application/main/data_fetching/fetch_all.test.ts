@@ -294,9 +294,19 @@ describe('test fetchAll', () => {
 
     const interceptedWarnings = [searchResponseIncompleteWarningLocalCluster];
 
-    test('should add more records', async () => {
+    test('should add more records using the original absolute time range', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
+      const timeRangeAbsolute = {
+        from: '2026-01-01T12:00:00.000Z',
+        to: '2026-01-01T13:00:00.000Z',
+      };
+      deps.internalState.dispatch(
+        internalStateActions.setDataRequestParams({
+          tabId: deps.getCurrentTab().id,
+          dataRequestParams: { ...deps.getCurrentTab().dataRequestParams, timeRangeAbsolute },
+        })
+      );
       mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
@@ -305,6 +315,10 @@ describe('test fetchAll', () => {
       fetchMoreDocuments(deps);
       await waitForNextTick();
 
+      expect(deps.services.data.query.timefilter.timefilter.createFilter).toHaveBeenLastCalledWith(
+        searchSource.getField('index'),
+        timeRangeAbsolute
+      );
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {

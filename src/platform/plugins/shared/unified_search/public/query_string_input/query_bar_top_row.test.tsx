@@ -546,6 +546,69 @@ describe('QueryBarTopRowTopRow', () => {
         expect(button).toBeEnabled();
       });
     });
+
+    describe('when the app disables background search', () => {
+      const reasonText = 'Search storage is disabled by the app.';
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      const renderLoadingQueryBar = (onCancel?: () => void) => {
+        const stateSubject = new Subject<SearchSessionState>();
+        const data = dataPluginMock.createStartContract();
+        data.search.session = getSessionServiceMock({ state$: stateSubject.asObservable() });
+        jest.mocked(data.search.session.getSearchSessionIndicatorUiConfig).mockReturnValue({
+          isDisabled: () => ({ disabled: true, reasonText }),
+        });
+
+        const renderResult = render(
+          wrapQueryBarTopRowInContext(
+            {
+              query: kqlQuery,
+              showQueryInput: false,
+              isDirty: false,
+              indexPatterns: [stubIndexPattern],
+              timeHistory: mockTimeHistory,
+              isLoading: true,
+              onCancel,
+              useBackgroundSearchButton: true,
+            },
+            { servicesOverride: { data } }
+          )
+        );
+        act(() => stateSubject.next(SearchSessionState.Loading));
+        act(() => jest.advanceTimersByTime(500));
+
+        return renderResult;
+      };
+
+      it('keeps the secondary cancel button disabled and shows the reason', async () => {
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        const { getByTestId } = renderLoadingQueryBar(jest.fn());
+        const button = getByTestId('queryCancelButton-secondary-button');
+
+        expect(button).toBeDisabled();
+        await user.hover(button);
+        act(() => jest.advanceTimersByTime(500));
+        expect(screen.getByRole('tooltip')).toHaveTextContent(reasonText);
+      });
+
+      it('keeps the secondary submit button disabled and shows the reason', async () => {
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        const { getByTestId } = renderLoadingQueryBar();
+        const button = getByTestId('querySubmitButton-secondary-button');
+
+        expect(button).toBeDisabled();
+        await user.hover(button);
+        act(() => jest.advanceTimersByTime(500));
+        expect(screen.getByRole('tooltip')).toHaveTextContent(reasonText);
+      });
+    });
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', async () => {
