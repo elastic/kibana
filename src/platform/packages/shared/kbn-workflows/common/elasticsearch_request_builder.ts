@@ -111,7 +111,13 @@ export function buildElasticsearchRequest(
     }
 
     if (stepType === 'elasticsearch.bulk' && 'operations' in params) {
-      bulkBody = buildBulkBody(params.operations as Array<Record<string, unknown>>);
+      if (params.id_field !== undefined && typeof params.id_field !== 'string') {
+        throw new Error('id_field must be a string');
+      }
+      bulkBody = buildBulkBody(
+        params.operations as Array<Record<string, unknown>>,
+        typeof params.id_field === 'string' ? params.id_field : undefined
+      );
       body = {};
     }
 
@@ -179,20 +185,31 @@ function selectBestPattern(patterns: string[], params: Record<string, unknown>):
 }
 
 const OPERATION_TYPES = ['index', 'create', 'update', 'delete'];
-function buildBulkBody(operations: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+function buildBulkBody(
+  operations: Array<Record<string, unknown>>,
+  idField?: string
+): Array<Record<string, unknown>> {
   // check if all operations are documents, not operation rows like index, create, update, delete
   const isDocuments = operations.every(
     (operation) => !Object.keys(operation).every((key) => OPERATION_TYPES.includes(key))
   );
   // backward compatibility with the old format
   if (isDocuments) {
-    return operations.flatMap((doc) => {
-      return [
-        {
-          index: {},
-        },
-        doc,
-      ];
+    return operations.flatMap((doc, index) => {
+      const action: Record<string, unknown> = { index: {} };
+      if (idField !== undefined) {
+        const id = doc[idField];
+        if (id === undefined || id === null) {
+          throw new Error(`Missing id_field "${idField}" at document ${index}`);
+        }
+        if (typeof id === 'object') {
+          throw new Error(
+            `id_field "${idField}" at document ${index} must be a string, number, or boolean`
+          );
+        }
+        (action.index as Record<string, unknown>)._id = String(id);
+      }
+      return [action, doc];
     });
   }
   return operations;
