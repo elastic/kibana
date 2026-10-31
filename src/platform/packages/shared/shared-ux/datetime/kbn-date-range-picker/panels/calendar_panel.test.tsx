@@ -209,7 +209,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(15, 23, 59, 59, 0))
       );
     });
 
@@ -221,7 +221,7 @@ describe('CalendarPanel', () => {
       await clickDay(10);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 0))
       );
     });
 
@@ -239,12 +239,10 @@ describe('CalendarPanel', () => {
 
       expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith('Japan');
 
-      expect(setText).toHaveBeenLastCalledWith(
-        'Feb 10, 2026, 00:00:00.000 to Feb 10, 2026, 23:59:59.999'
-      );
+      expect(setText).toHaveBeenLastCalledWith('Feb 10, 2026, 00:00:00 to Feb 10, 2026, 23:59:59');
 
       const expectedStart = new Date('2026-02-10T00:00:00.000+09:00');
-      const expectedEnd = new Date('2026-02-10T23:59:59.999+09:00');
+      const expectedEnd = new Date('2026-02-10T23:59:59.000+09:00');
 
       const { startDate, endDate } = mockUseDateRangePickerContext().timeRange;
 
@@ -264,7 +262,7 @@ describe('CalendarPanel', () => {
 
       expect(mockCalendarTimeZoneSpy).toHaveBeenLastCalledWith(undefined);
       expect(setText).toHaveBeenLastCalledWith(
-        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0, 0, 0), feb2026(10, 23, 59, 59, 0))
       );
     });
   });
@@ -277,7 +275,7 @@ describe('CalendarPanel', () => {
       await clickDay(10);
 
       expect(setText).toHaveBeenCalledWith(
-        formatInputDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 0))
       );
     });
 
@@ -289,7 +287,7 @@ describe('CalendarPanel', () => {
       await clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 0))
       );
     });
 
@@ -306,14 +304,14 @@ describe('CalendarPanel', () => {
       await clickDay(20);
 
       expect(setText).toHaveBeenCalledWith(
-        formatInputDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+        formatInputDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 0))
       );
     });
   });
 
   describe('timePrecision', () => {
     it.each(['none', 's'] as const)(
-      'keeps the full day up to 23:59:59.999 when the display precision is %s',
+      'keeps the full day up to 23:59:59 when the display precision is %s',
       async (timePrecision) => {
         mockUseDateRangePickerContext.mockReturnValue({
           ...makeContextNoDates(),
@@ -325,10 +323,10 @@ describe('CalendarPanel', () => {
         await clickDay(15);
 
         expect(setText).toHaveBeenLastCalledWith(
-          formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
+          formatInputDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 0))
         );
         expect(mockUseDateRangePickerContext().timeRange.endDate).toEqual(
-          feb2026(15, 23, 59, 59, 999)
+          feb2026(15, 23, 59, 59, 0)
         );
       }
     );
@@ -353,7 +351,7 @@ describe('CalendarPanel', () => {
         ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]),
         timeRange: {
           startDate: feb2026(20, 0, 0),
-          endDate: feb2026(15, 23, 59, 59, 999),
+          endDate: feb2026(15, 23, 59, 59, 0),
           type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW] as [string, string],
           isInvalid: true,
         },
