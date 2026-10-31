@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_CASE_OBSERVABLES_URL } from '../../../../common/constants';
+import {
+  INTERNAL_CASE_OBSERVABLES_URL,
+  MAX_OBSERVABLES_PER_CASE,
+} from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { observableApiV1 } from '../../../../common/types/api';
@@ -24,7 +27,7 @@ export const postObservableRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
     summary: `Add a case observable`,
-    description: 'Each case can have a maximum of 10 observables.',
+    description: `Each case can have a maximum of ${MAX_OBSERVABLES_PER_CASE} observables.`,
     // You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
   },
   handler: async ({ context, request, response }) => {
