@@ -801,12 +801,13 @@ flowchart TB
 
 #### Mode-selection decision tree (in order of preference)
 
-The skill teaches the agent to pick the `security.attack-discovery.run` mode that matches the evidence it just gathered, without re-doing retrieval inside the agent:
+Only a conversation where the audited upstream retrieval did not run in this turn chooses from this ladder — that audited path is `get_default_esql_query` → `execute_esql`, and it hands its alerts to the pipeline in **`provided`** mode (see **Upfront Pipeline Pattern**). The skill teaches the agent to pick the `security.attack-discovery.run` mode that matches the evidence it has gathered, without re-doing retrieval inside the agent:
 
-1. Agent gathered specific candidate alerts during corroboration (via ES|QL, search, or threat hunting) → `provided` mode (`alerts: string[]`). This is the preferred path: the agent controls exactly which evidence goes into the pipeline.
-2. Agent narrowed retrieval into an ES|QL filter → `esql` mode (`esql_query`). Combined with `alert_retrieval_workflow_ids` when the user has custom retrieval workflows to merge in parallel.
-3. User explicitly asked to invoke a custom retrieval workflow with no built-in query → `custom_only` mode with `alert_retrieval_workflow_ids`.
-4. No alerts gathered and no ES|QL query → `custom_query` mode with **explicit** `size`, `start`, and `end` values. The skill explicitly forbids omitting these and relying on server defaults.
+1. Audited upstream retrieval ran in this turn and came back empty for the requested scope → **report that nothing matched and stop.** The empty result is the answer: the skill never re-issues the query for the same evidence, never switches retrieval mode, and never invokes the pipeline to try again.
+2. Agent gathered specific candidate alerts during corroboration (via ES|QL, search, or threat hunting) → `provided` mode (`alerts: string[]`). This is the preferred path: the agent controls exactly which evidence goes into the pipeline.
+3. User supplied an ES|QL query (or asked for a retrieval the default query cannot express) → `esql` mode (`esql_query`). Never a branch to reach by rewriting the default query: that one is executed as returned and handed over in `provided` mode. Combined with `alert_retrieval_workflow_ids` when the user has custom retrieval workflows to merge in parallel.
+4. User explicitly asked to invoke a custom retrieval workflow with no built-in query → `custom_only` mode with `alert_retrieval_workflow_ids`.
+5. No audited upstream retrieval ran in this turn, leaving no gathered alerts and no ES|QL query → `custom_query` mode with **explicit** `size`, `start`, and `end` values. The skill explicitly forbids omitting these and relying on server defaults.
 
 ⛔ The skill explicitly forbids bare connector-ID-only invocations (`{ "connector_id": "..." }`) because they rely on server-side defaults that do not reflect the investigation context.
 
