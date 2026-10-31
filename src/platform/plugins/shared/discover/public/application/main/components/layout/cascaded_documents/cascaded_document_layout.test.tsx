@@ -19,6 +19,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { DataCascade, DataCascadeImplRef } from '@kbn/shared-ux-document-data-cascade';
 import type { ESQLDataGroupNode } from './blocks/types';
+import type { useEsqlDataCascadeRowHeaderComponents } from './blocks';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
@@ -84,6 +85,9 @@ jest.mock('@kbn/esql-language', () => {
 });
 
 const mockGetESQLStatsQueryMeta = jest.requireMock('@kbn/esql-utils').getESQLStatsQueryMeta;
+const mockUseEsqlDataCascadeRowHeaderComponents: jest.MockedFunction<
+  typeof useEsqlDataCascadeRowHeaderComponents
+> = jest.requireMock('./blocks').useEsqlDataCascadeRowHeaderComponents;
 
 const defaultQueryMeta: ESQLStatsQueryMeta = {
   groupByFields: [{ field: 'category', type: 'column' }],
@@ -131,6 +135,7 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     cascadedLeafDataSource: undefined,
     esqlQuery,
     esqlVariables: undefined,
+    histogramComparisonEnabled: false,
     timeRange: undefined,
     esqlApproximation: false,
     renderViewModeToggle: undefined,
@@ -265,6 +270,62 @@ describe('CascadedDocumentsLayout', () => {
           rowSelection: {},
         })
       );
+    });
+  });
+
+  describe('histogram comparison', () => {
+    const patternQueryMeta: ESQLStatsQueryMeta = {
+      groupByFields: [{ field: 'Pattern', type: 'categorize' }],
+      appliedFunctions: [],
+    };
+    const lastHistogramComparison = () =>
+      mockUseEsqlDataCascadeRowHeaderComponents.mock.lastCall?.[4];
+
+    it('offers a comparison for a single CATEGORIZE group when enabled', async () => {
+      mockGetESQLStatsQueryMeta.mockReturnValue(patternQueryMeta);
+      const { Wrapper } = await createWrapper({ histogramComparisonEnabled: true });
+
+      render(
+        <Wrapper>
+          <CascadedDocumentsLayout {...defaultLayoutProps} />
+        </Wrapper>
+      );
+
+      const histogramComparison = lastHistogramComparison();
+      expect(histogramComparison).toBeDefined();
+      expect(
+        histogramComparison?.isSelected({
+          id: 'row-1',
+          groupColumn: 'Pattern',
+          groupValue: 'user .* logged in',
+          aggregatedValues: {},
+        })
+      ).toBe(false);
+    });
+
+    it('does not offer a comparison when disabled', async () => {
+      mockGetESQLStatsQueryMeta.mockReturnValue(patternQueryMeta);
+      const { Wrapper } = await createWrapper({ histogramComparisonEnabled: false });
+
+      render(
+        <Wrapper>
+          <CascadedDocumentsLayout {...defaultLayoutProps} />
+        </Wrapper>
+      );
+
+      expect(lastHistogramComparison()).toBeUndefined();
+    });
+
+    it('does not offer a comparison for a non-CATEGORIZE group', async () => {
+      const { Wrapper } = await createWrapper({ histogramComparisonEnabled: true });
+
+      render(
+        <Wrapper>
+          <CascadedDocumentsLayout {...defaultLayoutProps} />
+        </Wrapper>
+      );
+
+      expect(lastHistogramComparison()).toBeUndefined();
     });
   });
 });

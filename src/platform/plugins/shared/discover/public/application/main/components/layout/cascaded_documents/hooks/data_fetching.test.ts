@@ -280,6 +280,7 @@ describe('data_fetching related hooks', () => {
         cascadedLeafDataSource: undefined,
         esqlQuery,
         esqlVariables: undefined,
+        histogramComparisonEnabled: false,
         timeRange: undefined,
         esqlApproximation: false,
         renderViewModeToggle: undefined,

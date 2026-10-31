@@ -28,4 +28,9 @@ export {
   METRICS_STATE_DEF,
   type MetricsState,
 } from './profile_state_definitions/metrics_grid_profile_state';
+export {
+  PATTERNS_HISTOGRAM_COMPARISON_STATE_DEF,
+  PATTERNS_HISTOGRAM_COMPARISON_STATE_DEFAULTS,
+  type PatternsHistogramComparisonState,
+} from './profile_state_definitions/patterns_histogram_comparison_state';
 export { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_state_transforms/metrics_grid_saved_state_transform';

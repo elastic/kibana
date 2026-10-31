@@ -11,7 +11,7 @@ import React, { type PropsWithChildren } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AggregateQuery } from '@kbn/es-query';
-import { copyToClipboard } from '@elastic/eui';
+import { copyToClipboard, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -21,12 +21,25 @@ import type { ESQLDataGroupNode } from './types';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeRowActionHelpers,
+  type GroupHistogramComparison,
 } from './use_row_header_components';
+
+jest.mock(
+  '../../../../../../context_awareness/profile_providers/common/sparkline_data_source_profile/sparkline_cell_renderer',
+  () => ({
+    SparklineRenderer: ({ isSelected }: { isSelected?: boolean }) => (
+      <div data-test-subj="cascadeSparkline" data-selected={String(Boolean(isSelected))} />
+    ),
+  })
+);
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   copyToClipboard: jest.fn(),
+  useIsWithinMaxBreakpoint: jest.fn().mockReturnValue(false),
 }));
+
+const mockUseIsWithinMaxBreakpoint = jest.mocked(useIsWithinMaxBreakpoint);
 
 const services = createDiscoverServicesMock();
 
@@ -125,6 +138,149 @@ describe('useEsqlDataCascadeRowHeaderComponents', () => {
       expect(screen.getByText('category-a')).toBeInTheDocument();
       expect(
         screen.queryByTestId('row-1-dscCascadeRowTitlePatternCellRenderer')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('histogram comparison', () => {
+    const categorizeQueryMeta: ESQLStatsQueryMeta = {
+      groupByFields: [{ field: 'Pattern', type: 'categorize' }],
+      appliedFunctions: [
+        { identifier: 'Count', aggregation: 'count' },
+        { identifier: 'Sparkline', aggregation: 'sparkline' },
+      ],
+    };
+    const patternRowData: ESQLDataGroupNode = {
+      id: 'row-pattern',
+      groupColumn: 'Pattern',
+      groupValue: 'user .* logged in',
+      aggregatedValues: {
+        Count: 3000,
+        Sparkline: [1, 2],
+      },
+    };
+
+    const ComparisonTestComponent = ({
+      histogramComparison,
+      testRowData = patternRowData,
+    }: {
+      histogramComparison?: GroupHistogramComparison;
+      testRowData?: ESQLDataGroupNode;
+    }) => {
+      const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
+        categorizeQueryMeta,
+        ['Count', 'Sparkline'],
+        function () {},
+        new Map(),
+        histogramComparison
+      );
+      const actions = rowActions({ rowData: testRowData, nodePath: ['Pattern'] });
+
+      return (
+        <>
+          {rowHeaderTitle({ rowData: testRowData, nodePath: ['Pattern'] })}
+          <div data-test-subj="row-sections">
+            {rowHeaderMeta({ rowData: testRowData, rowDepth: 0, nodePath: ['Pattern'] }).map(
+              (slot, index) => (
+                <React.Fragment key={index}>{slot}</React.Fragment>
+              )
+            )}
+          </div>
+          <div data-test-subj="row-actions">
+            {actions.map((action) => (
+              <button
+                key={action['data-test-subj']}
+                aria-label={action['aria-label']}
+                data-test-subj={action['data-test-subj']}
+                data-icon-type={action.iconType}
+                onClick={action.onClick}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </>
+      );
+    };
+
+    it('only renders the row menu action without a comparison', () => {
+      render(<ComparisonTestComponent />, { wrapper: TestProvider });
+
+      expect(screen.getAllByRole('button')).toHaveLength(1);
+      expect(
+        screen.getByTestId('row-pattern-dscCascadeRowContextActionButton')
+      ).toBeInTheDocument();
+    });
+
+    it('renders an eye action before the row menu and toggles the row', async () => {
+      const toggle = jest.fn();
+      render(
+        <ComparisonTestComponent histogramComparison={{ isSelected: () => false, toggle }} />,
+        { wrapper: TestProvider }
+      );
+
+      const actions = screen.getByTestId('row-actions');
+      const compareButton = screen.getByTestId('row-pattern-dscCascadeRowCompareWithTotalButton');
+      const menuButton = screen.getByTestId('row-pattern-dscCascadeRowContextActionButton');
+      expect(actions).toContainElement(compareButton);
+      expect(compareButton.compareDocumentPosition(menuButton)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+      expect(compareButton).toHaveAccessibleName('Compare with total');
+      expect(compareButton).toHaveAttribute('data-icon-type', 'eye');
+      expect(compareButton).not.toHaveTextContent('Compare');
+      expect(
+        screen.queryByTestId('row-pattern-dscCascadeRowComparingBadge')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('cascadeSparkline')).toHaveAttribute('data-selected', 'false');
+
+      await userEvent.click(compareButton);
+
+      expect(toggle).toHaveBeenCalledWith(patternRowData);
+    });
+
+    it('offers to stop comparing on the selected row', () => {
+      render(
+        <ComparisonTestComponent
+          histogramComparison={{ isSelected: () => true, toggle: jest.fn() }}
+        />,
+        { wrapper: TestProvider }
+      );
+
+      expect(
+        screen.queryByTestId('row-pattern-dscCascadeRowComparingBadge')
+      ).not.toBeInTheDocument();
+      const stopButton = screen.getByRole('button', { name: 'Stop comparing with total' });
+      expect(stopButton).toHaveAttribute('data-icon-type', 'eyeSlash');
+      expect(stopButton).not.toHaveTextContent('Stop comparing');
+      expect(screen.getByTestId('cascadeSparkline')).toHaveAttribute('data-selected', 'true');
+    });
+
+    it('does not offer a comparison on mobile, where the cascade hides actions in a menu', () => {
+      mockUseIsWithinMaxBreakpoint.mockReturnValueOnce(true);
+      render(
+        <ComparisonTestComponent
+          histogramComparison={{ isSelected: () => false, toggle: jest.fn() }}
+        />,
+        { wrapper: TestProvider }
+      );
+
+      expect(
+        screen.queryByTestId('row-pattern-dscCascadeRowCompareWithTotalButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not offer a comparison for a row without a pattern', () => {
+      render(
+        <ComparisonTestComponent
+          histogramComparison={{ isSelected: () => false, toggle: jest.fn() }}
+          testRowData={{ ...patternRowData, groupValue: '' }}
+        />,
+        { wrapper: TestProvider }
+      );
+
+      expect(
+        screen.queryByTestId('row-pattern-dscCascadeRowCompareWithTotalButton')
       ).not.toBeInTheDocument();
     });
   });

@@ -1,0 +1,78 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { UnifiedHistogramChartProps } from '@kbn/unified-histogram';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { useProfileAccessor } from '../../../../context_awareness';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { fetchEsql } from '../../data_fetching/fetch_esql';
+import type { HistogramComparisonContext } from '../../../../context_awareness/types';
+import {
+  useHistogramComparisonController,
+  useOptionalObservable,
+} from '../layout/histogram_comparison/use_histogram_comparison_state';
+
+const inspectorTitle = i18n.translate('discover.histogramComparison.inspectorTitle', {
+  defaultMessage: 'Pattern comparison',
+});
+
+const selectedPatternLabel = i18n.translate('discover.histogramComparison.selectedPattern', {
+  defaultMessage: 'Selected pattern',
+});
+
+/** Connects the profile's table selection to the histogram as an exact count series. */
+export const useHistogramComparison = (
+  context: HistogramComparisonContext
+): UnifiedHistogramChartProps['comparison'] => {
+  const { data } = useDiscoverServices();
+  const { scopedProfilesManager } = useScopedServices();
+  const publishHistogramComparison = useProfileAccessor('publishHistogramComparison');
+  const controller = useHistogramComparisonController(context);
+  const selection = useOptionalObservable(controller?.selection$);
+
+  return useMemo(() => {
+    if (!controller || !selection) {
+      return;
+    }
+    return {
+      key: selection.key,
+      label: selectedPatternLabel,
+      description: selection.label,
+      onClear: () => publishHistogramComparison(() => {})(undefined),
+      loadCounts: async ({ fetchParams, timeField, timeColumn, interval, signal }) => {
+        const { dataSource, filters, timeRange, esqlVariables, isApproximate, requestAdapter } =
+          fetchParams;
+        const response = await fetchEsql({
+          query: {
+            esql: `${selection.documentQuery} | STATS count = COUNT(*) BY ${sanitazeESQLInput(
+              timeColumn
+            )} = BUCKET(${sanitazeESQLInput(timeField)}, ${interval})`,
+          },
+          filters,
+          timeRange,
+          esqlSource: dataSource.kind === 'esql' ? dataSource : undefined,
+          abortSignal: signal,
+          inspectorAdapters: { requests: requestAdapter },
+          data,
+          scopedProfilesManager,
+          esqlVariables,
+          esqlApproximation: Boolean(isApproximate),
+          inspectorConfig: { title: inspectorTitle, description: selection.label },
+        });
+        return response.records.map((record) => ({
+          timestamp: record.flattened[timeColumn] as string | number,
+          count: Number(record.flattened.count ?? 0),
+        }));
+      },
+    };
+  }, [controller, data, publishHistogramComparison, scopedProfilesManager, selection]);
+};

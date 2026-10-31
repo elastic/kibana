@@ -61,6 +61,7 @@ export interface DiscoverMainContentProps {
   onDropFieldToTable?: () => void;
   columns: string[];
   isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
+  isHistogramComparisonAvailable?: boolean; // it will be injected by UnifiedHistogram
 }
 
 export const DiscoverMainContent = ({
@@ -71,6 +72,7 @@ export const DiscoverMainContent = ({
   columns,
   onDropFieldToTable,
   isChartAvailable,
+  isHistogramComparisonAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -178,6 +180,8 @@ export const DiscoverMainContent = ({
               dataView={dataView}
               onAddFilter={onAddFilter}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+              isChartAvailable={isChartAvailable}
+              isHistogramComparisonAvailable={isHistogramComparisonAvailable}
             />
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (

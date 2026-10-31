@@ -1011,15 +1011,16 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateDataGridDensity,
     });
 
-    const gridStyle = useMemo<EuiDataGridStyle>(
-      () => ({
+    const gridStyle = useMemo<EuiDataGridStyle>(() => {
+      const style: EuiDataGridStyle = {
         ...DATA_GRID_STYLE_DEFAULT,
         ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
         onChange: onChangeDataGridDensity,
         ...gridStyleOverride,
-      }),
-      [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]
-    );
+      };
+
+      return style;
+    }, [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]);
 
     /**
      * Cell rendering

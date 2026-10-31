@@ -149,6 +149,7 @@ const createContextValue = ({
     cascadedLeafDataSource,
     esqlQuery,
     esqlVariables: undefined,
+    histogramComparisonEnabled: false,
     timeRange: undefined,
     esqlApproximation: false,
     renderViewModeToggle: undefined,

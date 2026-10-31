@@ -93,6 +93,7 @@ import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
+import { useHistogramComparisonState } from './histogram_comparison/use_histogram_comparison_state';
 
 // export needs for testing
 export const onResize = (
@@ -108,11 +109,15 @@ function DiscoverDocumentsComponent({
   dataView,
   onAddFilter,
   onFieldEdited,
+  isChartAvailable,
+  isHistogramComparisonAvailable,
 }: {
   renderViewModeToggle: RenderViewModeToggle;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
+  isChartAvailable?: boolean;
+  isHistogramComparisonAvailable?: boolean;
 }) {
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
@@ -127,6 +132,8 @@ function DiscoverDocumentsComponent({
   const [
     dataSource,
     query,
+    hideChart,
+    breakdownField,
     sort,
     rowHeight,
     headerRowHeight,
@@ -141,6 +148,8 @@ function DiscoverDocumentsComponent({
     return [
       state.dataSource,
       state.query,
+      state.hideChart,
+      state.breakdownField,
       state.sort,
       state.rowHeight,
       state.headerRowHeight,
@@ -156,6 +165,22 @@ function DiscoverDocumentsComponent({
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
   const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
   const isEsqlMode = useIsEsqlMode();
+  const getChartSectionConfiguration = useProfileAccessor('getChartSectionConfiguration');
+  const defaultHistogramAvailable = useMemo(() => {
+    if (!isEsqlMode) {
+      return false;
+    }
+
+    return !getChartSectionConfiguration(() => ({
+      replaceDefaultChart: false,
+    }))().replaceDefaultChart;
+  }, [getChartSectionConfiguration, isEsqlMode]);
+  const histogramComparisonEnabled =
+    Boolean(isChartAvailable) &&
+    Boolean(isHistogramComparisonAvailable) &&
+    defaultHistogramAvailable &&
+    !breakdownField &&
+    !hideChart;
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const currentDataSource = useCurrentDataSource();
@@ -438,22 +463,7 @@ function DiscoverDocumentsComponent({
     requestParams.searchSessionId,
     requestParams.timeRangeAbsolute,
   ]);
-  const cellRendererParams: CellRenderersExtensionParams = useMemo(
-    () => ({
-      dataView,
-      density: cellRendererDensity,
-      rowHeight: cellRendererRowHeight,
-      searchContext,
-      // Spinner while the grid is fetching; warning icon if it finished without context.
-      isDataLoading,
-    }),
-    [cellRendererDensity, cellRendererRowHeight, dataView, isDataLoading, searchContext]
-  );
-
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
-    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
-  }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
     () => (
@@ -549,6 +559,7 @@ function DiscoverDocumentsComponent({
       cascadedLeafDataSource,
       esqlQuery: query,
       esqlVariables,
+      histogramComparisonEnabled,
       timeRange: requestParams.timeRangeAbsolute,
       esqlApproximation,
       renderViewModeToggle,
@@ -579,6 +590,7 @@ function DiscoverDocumentsComponent({
     getExpandedDocSetter,
     getRenderDocumentViewMetaSetter,
     esqlApproximation,
+    histogramComparisonEnabled,
     latestCascadedDocumentsDataGridsUiState,
     latestDataCascadeUiState,
     onUpdateESQLQuery,
@@ -591,6 +603,41 @@ function DiscoverDocumentsComponent({
     renderViewModeToggle,
   ]);
 
+  const gridHistogramComparisonEnabled =
+    histogramComparisonEnabled &&
+    !(cascadedDocumentsContext && cascadedDocumentsContext.selectedCascadeGroups.length > 0);
+  const { selection: histogramComparisonSelection } = useHistogramComparisonState({
+    query,
+    esqlVariables,
+    defaultHistogramAvailable: gridHistogramComparisonEnabled,
+  });
+  const cellRendererParams: CellRenderersExtensionParams = useMemo(
+    () => ({
+      dataView,
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
+      searchContext,
+      // Spinner while the grid is fetching; warning icon if it finished without context.
+      isDataLoading,
+      histogramComparisonSelection: histogramComparisonSelection
+        ? {
+            column: histogramComparisonSelection.column,
+            value: histogramComparisonSelection.value,
+          }
+        : undefined,
+    }),
+    [
+      cellRendererDensity,
+      cellRendererRowHeight,
+      dataView,
+      histogramComparisonSelection,
+      isDataLoading,
+      searchContext,
+    ]
+  );
+  const cellRenderers = useMemo(() => {
+    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
+  }, [cellRendererParams, getCellRenderersAccessor]);
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -667,6 +714,7 @@ function DiscoverDocumentsComponent({
                 />
               ) : undefined
             }
+            histogramComparisonEnabled={gridHistogramComparisonEnabled}
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
@@ -678,6 +726,7 @@ function DiscoverDocumentsComponent({
             onUpdateDataGridDensity={onUpdateDensity}
             query={query}
             filters={filters}
+            esqlVariables={esqlVariables}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
