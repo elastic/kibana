@@ -1,0 +1,5 @@
+## Where the site is slow
+
+1. `observability.ux.get_pages` for the time range. Rank by poor LCP weighted by views (not just the worst single LCP).
+2. `observability.ux.get_overview` for country mix when the question is geo ("where").
+3. Call out INP/CLS only if they are actually bad. Name the top 3–5 pages and a next step (replay a session on that route via `observability.ux.find_sessions`).

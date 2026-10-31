@@ -36,6 +36,24 @@ Object {
         ],
       },
     },
+    "otelLongTaskCount": Object {
+      "filter": Object {
+        "term": Object {
+          "name": "longtask",
+        },
+      },
+    },
+    "otelLongTaskDuration": Object {
+      "percentiles": Object {
+        "field": "attributes.longtask.duration",
+        "hdr": Object {
+          "number_of_significant_value_digits": 3,
+        },
+        "percents": Array [
+          50,
+        ],
+      },
+    },
   },
   "query": Object {
     "bool": Object {
@@ -50,24 +68,135 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "terms": Object {
-            "processor.event": Array [
-              "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
             ],
           },
         },
         Object {
-          "exists": Object {
-            "field": "transaction.marks.navigationTiming.fetchStart",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "transaction.marks.navigationTiming.fetchStart",
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
+            ],
           },
         },
       ],
+      "minimum_should_match": 1,
       "must_not": Array [],
+      "should": Array [
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 0,
+                    "lte": 50000,
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "term": Object {
+                              "transaction.type": "page-load",
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "processor.event": "transaction",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "name": "documentLoad",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "transaction.marks.navigationTiming.fetchStart",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "name": "documentLoad",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 0,
+                    "lte": 50000,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "longtask",
+                },
+              },
+            ],
+          },
+        },
+      ],
     },
   },
   "size": 0,

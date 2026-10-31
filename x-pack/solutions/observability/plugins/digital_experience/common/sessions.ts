@@ -9,7 +9,7 @@ import type { CoreWebVital } from './core_web_vitals';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
 /** Bump when the transform pivot, dest pipeline, or dest mappings change. */
-export const SESSIONS_VERSION = 1;
+export const SESSIONS_VERSION = 2;
 export const SESSIONS_MANAGED_BY = 'digital_experience';
 
 export const SESSIONS_SOURCE_INDICES = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX] as const;
@@ -33,6 +33,12 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  * URLs that differ only in their query or hash collapse into one page.
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
+/** Clicks kept, in order, as the session's click path. Elasticsearch caps `top_metrics` at 10. */
+export const SESSIONS_CLICK_PATH_SIZE = 10;
+/** Longest token in a page, click or event sequence. */
+export const SESSIONS_SEQUENCE_TOKEN_LENGTH = 80;
+/** Error groups kept per session. */
+export const SESSIONS_ERROR_GROUPS_SIZE = 5;
 
 export const SESSION_SORT_FIELDS = [
   'start_time',
@@ -261,4 +267,21 @@ export const toPagePath = (raw: string | null | undefined): string | null => {
     path = slash >= 0 ? path.substring(slash) : '/';
   }
   return path === '' ? '/' : path;
+};
+
+/**
+ * Token of a page or click target in a session's page, click and event sequences: lowercase,
+ * without a leading `#` or `/`, spaces as `_`, and cut to `SESSIONS_SEQUENCE_TOKEN_LENGTH`.
+ * A port of `tokenOf` in the sessions dest pipeline.
+ */
+export const toSequenceToken = (raw: string | null | undefined): string => {
+  const trimmed = raw?.trim();
+  if (!trimmed || trimmed === 'null') {
+    return '';
+  }
+  return trimmed
+    .toLowerCase()
+    .replace(/^[#/]+/, '')
+    .replace(/ /g, '_')
+    .slice(0, SESSIONS_SEQUENCE_TOKEN_LENGTH);
 };

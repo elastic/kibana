@@ -7,22 +7,17 @@
 
 import { of, throwError } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { uxSearchIndex } from '../../../../common/otel_rum';
 import { HAS_RUM_DATA_TIERS } from '../../../services/data/has_rum_data_query';
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { hasRumData } from './ux_overview_fetchers';
 
-jest.mock('../../../services/rest/create_call_apm_api', () => ({
-  callApmApi: jest.fn(),
-}));
-
-const callApmApiMock = callApmApi as jest.Mock;
-const INDEX = 'apm-*';
+const INDEX = uxSearchIndex();
 const TIER_CLAUSE = { terms: { _tier: HAS_RUM_DATA_TIERS } };
 
 const hits = (value: number, serviceName?: string) => ({
   hits: { total: { value, relation: 'eq' as const } },
   aggregations: {
-    services: {
+    otelServices: {
       mostTraffic: { buckets: serviceName ? [{ key: serviceName }] : [] },
     },
   },
@@ -57,10 +52,6 @@ const makeDataPlugin = (responses: {
     search,
   };
 };
-
-beforeEach(() => {
-  callApmApiMock.mockResolvedValue({ apmDataViewIndexPattern: INDEX });
-});
 
 afterEach(() => {
   jest.clearAllMocks();

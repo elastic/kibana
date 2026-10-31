@@ -10,13 +10,13 @@ import { config } from './config';
 describe('digital_experience config', () => {
   const sessionsDefaults = { frequency: '1m', partitions: 1 };
 
-  it('is disabled by default', () => {
-    expect(config.schema.validate({})).toEqual({ enabled: false, sessions: sessionsDefaults });
+  it('is enabled by default', () => {
+    expect(config.schema.validate({})).toEqual({ enabled: true, sessions: sessionsDefaults });
   });
 
-  it('can be enabled', () => {
-    expect(config.schema.validate({ enabled: true })).toEqual({
-      enabled: true,
+  it('can be disabled', () => {
+    expect(config.schema.validate({ enabled: false })).toEqual({
+      enabled: false,
       sessions: sessionsDefaults,
     });
   });

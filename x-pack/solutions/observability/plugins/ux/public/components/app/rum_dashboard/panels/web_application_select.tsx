@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { getServiceNames, serviceNameQuery } from '../../../../services/data/service_name_query';
+import {
+  parseServiceNameApps,
+  serviceNameQuery,
+  type ServiceNameAggregations,
+} from '../../../../services/data/service_name_query';
 import { ServiceNameFilter } from '../url_filter/service_name_filter';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useDataView } from '../local_uifilters/use_data_view';
@@ -30,7 +34,9 @@ export function WebApplicationSelect() {
     { name: 'UxApplicationServices' }
   );
 
-  const rumServiceNames = getServiceNames(data?.aggregations);
+  const applications = parseServiceNameApps(
+    data?.aggregations as ServiceNameAggregations | undefined
+  );
 
-  return <ServiceNameFilter loading={loading ?? true} serviceNames={rumServiceNames} />;
+  return <ServiceNameFilter loading={loading ?? true} applications={applications} />;
 }

@@ -1,0 +1,8 @@
+## Slow users
+
+Call tools. Do not invent session IDs.
+
+1. `observability.ux.find_sessions` with `sortField=durationMs`, `sortDirection=desc`. Honor the user's time range and filters (`serviceName`, `browser`, `os`, `location`). Default `start=now-24h`.
+2. Optionally `observability.ux.get_overview` for volume / LCP context.
+3. Summarize: who (user/geo/browser if present), which pages, duration, whether errors or rage is involved.
+4. End with 3–6 session IDs the user can open in Session Replay. Do not echo emails unless asked.

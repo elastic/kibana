@@ -32,7 +32,8 @@ case "$ES_ZONE_COUNT" in
     ;;
 esac
 
-ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-2048}
+# TEMP (session-replay-poc): the deployment was resized by hand to 4GB; revert to 2048 before merge.
+ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-4096}
 case "$ES_HOT_TIER_MEMORY_SIZE" in
   1024|2048|4096|8192|16384|32768)
     echo "--- Elasticsearch hot tier memory size: ${ES_HOT_TIER_MEMORY_SIZE}MB"
@@ -112,6 +113,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
 else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
+    .resources.elasticsearch[0].plan.elasticsearch.docker_image = "'$ELASTICSEARCH_CLOUD_IMAGE'" |
     (.. | select(.version? != null).version) = "'$VERSION'" |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
     (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
