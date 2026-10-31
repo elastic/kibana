@@ -5,13 +5,71 @@
  * 2.0.
  */
 
-import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_ID_MAX_LENGTH } from '../../../constants';
+import {
+  MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_VALUE_LENGTH,
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_ID_MAX_LENGTH,
+} from '../../../constants';
 import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import {
   AddObservableRequestSchema,
+  BulkAddObservablesRequestSchema,
   BulkDeleteObservablesRequestSchema,
   UpdateObservableRequestSchema,
 } from './v1';
+
+describe('observable value and description bounds', () => {
+  const typeKey = 'ef528526-2af9-4345-9b78-046512c5bbd6';
+  const withValue = (value: string) => ({ typeKey, value, description: null });
+  const withDescription = (description: string) => ({ typeKey, value: 'a', description });
+
+  it.each([
+    [
+      'AddObservableRequestSchema',
+      (observable: object) => AddObservableRequestSchema.safeParse({ observable }),
+    ],
+    [
+      'BulkAddObservablesRequestSchema',
+      (observable: object) =>
+        BulkAddObservablesRequestSchema.safeParse({ caseId: 'case-1', observables: [observable] }),
+    ],
+  ])('%s accepts a value and description at the maximum length', (_name, parse) => {
+    expect(parse(withValue('a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH))).success).toBe(true);
+    expect(parse(withDescription('a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH))).success).toBe(
+      true
+    );
+  });
+
+  it.each([
+    [
+      'AddObservableRequestSchema',
+      (observable: object) => AddObservableRequestSchema.safeParse({ observable }),
+    ],
+    [
+      'BulkAddObservablesRequestSchema',
+      (observable: object) =>
+        BulkAddObservablesRequestSchema.safeParse({ caseId: 'case-1', observables: [observable] }),
+    ],
+  ])('%s rejects a value or description one character over the maximum', (_name, parse) => {
+    expect(parse(withValue('a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1))).success).toBe(false);
+    expect(parse(withDescription('a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1))).success).toBe(
+      false
+    );
+  });
+
+  it('UpdateObservableRequestSchema accepts the maximum length and rejects one over', () => {
+    const parse = (value: string, description: string | null) =>
+      UpdateObservableRequestSchema.safeParse({ observable: { value, description } });
+
+    expect(
+      parse('a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH), 'a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH))
+        .success
+    ).toBe(true);
+    expect(parse('a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1), null).success).toBe(false);
+    expect(parse('a', 'a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1)).success).toBe(false);
+  });
+});
 
 describe('AddObservableRequestSchema', () => {
   it('has expected attributes in request', () => {
