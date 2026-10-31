@@ -503,6 +503,36 @@ test('passes versioned config to router', async () => {
   );
 });
 
+test('logs, rather than silently unsubscribing, when reloaded config is invalid', async () => {
+  const rawConfig$ = new BehaviorSubject<Record<string, unknown>>({ server: {} });
+  const configService = new ConfigService({ getConfig$: () => rawConfig$ }, env, logger);
+  configService.setSchema(config.path, config.schema);
+  configService.setSchema(cspConfig.path, cspConfig.schema);
+  configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
+  configService.setSchema(permissionsPolicyConfig.path, permissionsPolicyConfig.schema);
+
+  mockHttpServer.mockImplementation(() => ({
+    isListening: () => false,
+    setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+    start: noop,
+    stop: noop,
+  }));
+
+  const service = new HttpService({ coreId, configService, env, logger });
+  await service.preboot(prebootDeps);
+  await service.setup(setupDeps);
+
+  // A reload that fails schema validation makes the config observable error. Without the error
+  // handler the subscription dies silently and the service stops tracking config for good.
+  rawConfig$.next({ server: { port: 'not-a-port' } });
+
+  expect(loggingSystemMock.collect(logger).error.flat().join(' ')).toContain(
+    'Reloaded HTTP configuration is invalid and was not applied'
+  );
+
+  await service.stop();
+});
+
 describe('self client hooks', () => {
   const getStartContract = async () => {
     mockHttpServer.mockImplementationOnce(() => ({
