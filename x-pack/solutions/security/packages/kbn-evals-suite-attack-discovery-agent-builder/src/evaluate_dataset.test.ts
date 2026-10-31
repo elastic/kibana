@@ -7,6 +7,7 @@
 
 import {
   ALERT_INDEX_FAMILY,
+  buildScoredEvaluators,
   buildWorkflow,
   computeWorkflowAlertCounts,
   createEvaluateAttackDiscoveryAgentBuilderDataset,
@@ -24,7 +25,12 @@ import {
   resolveValidationWaitTimeoutMs,
   trackedStages,
 } from './evaluate_dataset';
+import { goldenPathDataset, goldenPathExamples } from './dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
+import {
+  createDiscoveryCountCapEvaluator,
+  createMinValidatedDiscoveryEvaluator,
+} from './evaluators/noise_fpr_evaluator';
 import { AD2_SCENARIO_SEED_LABEL } from './scenario_registry';
 import { EMPTY_RETRIEVAL_EVIDENCE, type AttackDiscoveryAgentBuilderTaskOutput } from './types';
 
@@ -119,6 +125,105 @@ describe('evaluate_dataset wiring', () => {
 
     expect(evaluator.name).toBe('AdToolResult');
     expect(evaluator.kind).toBe('CODE');
+  });
+
+  /**
+   * The golden path is the only cohort the weekly build runs, so its annotations
+   * have to make the discovery cap/floor checks SCORE there. Pre-fix (build
+   * 01a14b73, commit 8f4c1fcc) every cell of both checks on all five golden
+   * examples was `null` with label `N/A`: no signal in the baseline, and — until
+   * the collector reads the label — a reported failure per cell.
+   */
+  it('scores the golden-path discovery cap and floor instead of N/A', async () => {
+    const annotated = goldenPathExamples.filter(
+      ({ output }) =>
+        output?.maxDiscoveryCount != null || output?.minValidatedDiscoveryCount != null
+    );
+
+    expect(annotated.map(({ metadata }) => metadata?.fixture)).toEqual([
+      'provided-alerts',
+      'live-retrieval',
+      'multiple-alert-sets',
+    ]);
+
+    for (const example of annotated) {
+      const discoveries = example.output?.attackDiscoveries ?? [];
+      const output = {
+        insights: discoveries,
+        workflow: { validatedDiscoveryCount: discoveries.length },
+        adToolResult: { status: 'completed', discoveryCount: discoveries.length },
+        steps: [],
+      } as unknown as AttackDiscoveryAgentBuilderTaskOutput;
+
+      const cap = await createDiscoveryCountCapEvaluator().evaluate({
+        input: example.input,
+        output,
+        expected: example.output,
+        metadata: example.metadata,
+      });
+      const floor = await createMinValidatedDiscoveryEvaluator().evaluate({
+        input: example.input,
+        output,
+        expected: example.output,
+        metadata: example.metadata,
+      });
+
+      expect({
+        fixture: example.metadata?.fixture,
+        cap: cap.score,
+        capLabel: cap.label,
+        floor: floor.score,
+        floorLabel: floor.label,
+      }).toEqual({
+        fixture: example.metadata?.fixture,
+        cap: 1,
+        capLabel: undefined,
+        floor: 1,
+        floorLabel: undefined,
+      });
+      // The ceiling is the fixture's own population, not a number no run can
+      // exceed (which would score the check without measuring anything).
+      expect(cap.metadata).toMatchObject({
+        maxDiscoveryCount: example.metadata?.alertCount,
+        discoveryCount: discoveries.length,
+      });
+    }
+  });
+
+  it('skips a check the dataset declares it cannot feed', () => {
+    const stub = { traceBasedEvaluators: {} } as never;
+    const names = buildScoredEvaluators({ dataset: goldenPathDataset, evaluators: stub }).map(
+      ({ name }) => name
+    );
+
+    expect(names).not.toContain('NoiseFalsePositive');
+    // ... while the checks the golden fixture CAN feed stay registered.
+    expect(names).toEqual(expect.arrayContaining(['DiscoveryCountCap', 'MinValidatedDiscovery']));
+  });
+
+  it('keeps a declared non-scoring check registered for a dataset that feeds it', () => {
+    const stub = { traceBasedEvaluators: {} } as never;
+    const names = buildScoredEvaluators({
+      dataset: { ...goldenPathDataset, nonScoringEvaluators: [] },
+      evaluators: stub,
+    }).map(({ name }) => name);
+
+    expect(names).toContain('NoiseFalsePositive');
+  });
+
+  it('every declared non-scoring check names a registered evaluator', () => {
+    const stub = { traceBasedEvaluators: {} } as never;
+    const registered = new Set(
+      buildScoredEvaluators({
+        dataset: { ...goldenPathDataset, nonScoringEvaluators: [] },
+        evaluators: stub,
+      }).map(({ name }) => name)
+    );
+
+    expect(goldenPathDataset.nonScoringEvaluators?.length).toBeGreaterThan(0);
+    for (const name of goldenPathDataset.nonScoringEvaluators ?? []) {
+      expect(registered.has(name)).toBe(true);
+    }
   });
 });
 

@@ -7,15 +7,14 @@
 
 import { tags } from '@kbn/evals';
 import { cleanupAttackDiscoveryFixtures, seedAttackDiscoveryFixtures } from '../src/fixtures';
-import { goldenPathExamples } from '../src/dataset';
+import { goldenPathDataset, goldenPathExamples } from '../src/dataset';
 import { evaluate } from '../src/evaluate';
 
-const dataset = {
-  name: 'attack-discovery-agent-builder: golden-path',
-  description:
-    'Isolated default-Agent Builder Attack Discovery 2.0 golden path. This is not a legacy direct-generation cohort.',
-  examples: goldenPathExamples,
-};
+// The dataset object carries the examples' scoring annotations AND the
+// declaration of the checks this fixture cannot feed
+// (`goldenPathDataset.nonScoringEvaluators`); every slice below spreads it, so a
+// slice can never silently lose either.
+const dataset = goldenPathDataset;
 
 evaluate.describe('Attack Discovery Agent Builder', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ esClient, fetch }) => {
