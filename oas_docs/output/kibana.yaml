@@ -141452,7 +141452,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: A custom ID for the new monitor. Generated if omitted.
+        - description: A custom ID for the new monitor. Generated if omitted. Equivalent to the `id` request body field; if both are provided they must match.
           in: query
           name: id
           required: false
@@ -141591,6 +141591,39 @@ paths:
                     type: integer
           description: |
             Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
+        '409':
+          content:
+            application/json:
+              examples:
+                duplicateMonitorId:
+                  description: A 409 error when the supplied `id` already belongs to an existing monitor.
+                  summary: Duplicate monitor ID
+                  value:
+                    attributes:
+                      details: Monitor with id "existing-monitor-id" already exists.
+                    error: Conflict
+                    message: Monitor with id "existing-monitor-id" already exists.
+                    statusCode: 409
+              schema:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                      details:
+                        example: Monitor with id "existing-monitor-id" already exists.
+                        type: string
+                  error:
+                    example: Conflict
+                    type: string
+                  message:
+                    example: Monitor with id "existing-monitor-id" already exists.
+                    type: string
+                  statusCode:
+                    example: 409
+                    type: integer
+          description: |
+            Conflict. Returned when the `id` already belongs to an existing monitor. The existing monitor is left unchanged.
       summary: Create a monitor
       tags:
         - synthetics
@@ -160812,7 +160845,9 @@ components:
         filter_journeys.tags:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: A custom ID for the new monitor. Generated if omitted or empty. If a monitor with this ID already exists, the request fails with a `409 Conflict` error and the existing monitor is left unchanged. Only used by this endpoint; it is ignored by the bulk create endpoint, which always generates IDs.
+          maxLength: 1024
+          type: string
         ignore_https_errors:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: Ignore HTTPS errors. Defaults to `false`.
@@ -160858,6 +160893,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+        max_attempts:
+          description: The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.
+          type: number
         name:
           description: The monitor name.
           maxLength: 4096
@@ -161911,7 +161949,9 @@ components:
         filter_journeys.tags:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
         id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: A custom ID for the new monitor. Generated if omitted or empty. If a monitor with this ID already exists, the request fails with a `409 Conflict` error and the existing monitor is left unchanged. Only used by this endpoint; it is ignored by the bulk create endpoint, which always generates IDs.
+          maxLength: 1024
+          type: string
         ignore_https_errors:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
           description: Ignore HTTPS errors. Defaults to `false`.
@@ -161957,6 +161997,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+        max_attempts:
+          description: The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.
+          type: number
         name:
           description: The monitor name.
           maxLength: 4096
@@ -165405,6 +165448,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+        max_attempts:
+          description: The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.
+          type: number
         max_redirects:
           anyOf:
             - maxLength: 32
@@ -167995,7 +168041,9 @@ components:
           description: Specify whether the monitor is enabled. Defaults to `true`.
           type: boolean
         id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: A custom ID for the new monitor. Generated if omitted or empty. If a monitor with this ID already exists, the request fails with a `409 Conflict` error and the existing monitor is left unchanged. Only used by this endpoint; it is ignored by the bulk create endpoint, which always generates IDs.
+          maxLength: 1024
+          type: string
         ipv4:
           description: If `true`, ping using the ipv4 protocol. Defaults to `true`.
           type: boolean
@@ -168042,6 +168090,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+        max_attempts:
+          description: The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.
+          type: number
         max_redirects:
           anyOf:
             - maxLength: 32
@@ -168243,7 +168294,9 @@ components:
           maxLength: 4096
           type: string
         id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: A custom ID for the new monitor. Generated if omitted or empty. If a monitor with this ID already exists, the request fails with a `409 Conflict` error and the existing monitor is left unchanged. Only used by this endpoint; it is ignored by the bulk create endpoint, which always generates IDs.
+          maxLength: 1024
+          type: string
         ipv4:
           description: If `true`, ping using the ipv4 protocol. Defaults to `true`.
           type: boolean
@@ -168288,6 +168341,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+        max_attempts:
+          description: The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.
+          type: number
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
           enum:
@@ -186792,7 +186848,9 @@ components:
           maxLength: 4096
           type: string
         id:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_syntheticsJsonValue'
+          description: A custom ID for the new monitor. Generated if omitted or empty. If a monitor with this ID already exists, the request fails with a `409 Conflict` error and the existing monitor is left unchanged. Only used by this endpoint; it is ignored by the bulk create endpoint, which always generates IDs.
+          maxLength: 1024
+          type: string
         ipv4:
           description: If `true`, ping using the ipv4 protocol. Defaults to `true`.
           type: boolean
@@ -186837,6 +186895,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+        max_attempts:
+          description: The maximum number of attempts for the monitor, including the initial run. Defaults to `2`. An explicit `retest_on_failure` value takes precedence: `true` uses the default of `2` and `false` uses `1`. When `retest_on_failure` is not set, `max_attempts` is used as provided.
+          type: number
         mode:
           description: The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, use `all`. Defaults to `any`.
           enum:

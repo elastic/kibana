@@ -255,10 +255,27 @@ describe('MonitorConfigRepository', () => {
           formattedSecrets: true,
           spaces: ['default'],
         },
-        { id, overwrite: true, initialNamespaces: ['default'] }
+        { id, initialNamespaces: ['default'] }
       );
 
       expect(result).toBe(mockCreatedMonitor);
+    });
+
+    it('should never overwrite an existing monitor with the same id', async () => {
+      soClient.create.mockResolvedValue({
+        id: 'test-id',
+        attributes: {},
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      });
+
+      await repository.create({
+        id: 'test-id',
+        normalizedMonitor: { name: 'Test Monitor' } as unknown as SyntheticsMonitor,
+        spaceId: 'default',
+      });
+
+      expect(soClient.create.mock.calls[0][2]).not.toHaveProperty('overwrite');
     });
 
     it('should create a monitor without an id', async () => {
@@ -298,7 +315,7 @@ describe('MonitorConfigRepository', () => {
           formattedSecrets: true,
           spaces: ['default'],
         },
-        { id: 'test', overwrite: true, initialNamespaces: ['default'] }
+        { id: 'test', initialNamespaces: ['default'] }
       );
 
       expect(result).toBe(mockCreatedMonitor);

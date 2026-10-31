@@ -18,6 +18,7 @@ import {
 } from '../../../common/fixtures';
 import {
   addMonitor,
+  getMonitor,
   omitMonitorKeys,
   parseMonitorResponse,
 } from '../../../common/fixtures/monitors';
@@ -123,6 +124,93 @@ apiTest.describe(
         } finally {
           await kbnClient.spaces.delete(SPACE_ID);
         }
+      }
+    );
+
+    const newMonitor = () => ({
+      ...httpMonitorFixture,
+      name: `custom-id-${uuidv4()}`,
+      locations: [privateLocation],
+    });
+
+    apiTest('creates a monitor with the id supplied in the body', async ({ apiClient }) => {
+      const customId = `body-id-${uuidv4()}`;
+
+      const res = await addMonitor(apiClient, editorHeaders, { ...newMonitor(), id: customId });
+
+      expect(res.body).toMatchObject({ id: customId, config_id: customId });
+    });
+
+    apiTest('creates a monitor with the id supplied in the query', async ({ apiClient }) => {
+      const customId = `query-id-${uuidv4()}`;
+
+      const res = await addMonitor(apiClient, editorHeaders, newMonitor(), { id: customId });
+
+      expect(res.body).toMatchObject({ id: customId, config_id: customId });
+    });
+
+    apiTest('accepts the same id in both the body and the query', async ({ apiClient }) => {
+      const customId = `both-id-${uuidv4()}`;
+
+      const res = await addMonitor(
+        apiClient,
+        editorHeaders,
+        { ...newMonitor(), id: customId },
+        { id: customId }
+      );
+
+      expect(res.body).toMatchObject({ id: customId });
+    });
+
+    apiTest('rejects different ids in the body and the query', async ({ apiClient }) => {
+      const res = await addMonitor(
+        apiClient,
+        editorHeaders,
+        { ...newMonitor(), id: `body-id-${uuidv4()}` },
+        { id: `query-id-${uuidv4()}`, statusCode: 400 }
+      );
+
+      expect((res.body as { message: string }).message).toContain('does not match');
+    });
+
+    apiTest('generates an id when none is supplied', async ({ apiClient }) => {
+      const res = await addMonitor(apiClient, editorHeaders, newMonitor());
+
+      expect((res.body as { id: string }).id).toMatch(/^[0-9a-f-]{36}$/);
+    });
+
+    apiTest(
+      'returns 409 for an id supplied in the body that already exists, leaving the monitor untouched',
+      async ({ apiClient }) => {
+        const customId = `conflict-body-${uuidv4()}`;
+        const original = { ...newMonitor(), id: customId };
+        await addMonitor(apiClient, editorHeaders, original);
+
+        const res = await addMonitor(
+          apiClient,
+          editorHeaders,
+          { ...newMonitor(), id: customId },
+          { statusCode: 409 }
+        );
+        expect((res.body as { message: string }).message).toBe(
+          `Monitor with id "${customId}" already exists.`
+        );
+
+        const existing = await getMonitor(apiClient, editorHeaders, customId);
+        expect(existing.body).toMatchObject({ name: original.name });
+      }
+    );
+
+    apiTest(
+      'returns 409 for an id supplied in the query that already exists',
+      async ({ apiClient }) => {
+        const customId = `conflict-query-${uuidv4()}`;
+        await addMonitor(apiClient, editorHeaders, newMonitor(), { id: customId });
+
+        await addMonitor(apiClient, editorHeaders, newMonitor(), {
+          id: customId,
+          statusCode: 409,
+        });
       }
     );
   }
