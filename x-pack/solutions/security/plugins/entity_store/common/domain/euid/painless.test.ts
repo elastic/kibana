@@ -59,11 +59,12 @@ describe('streamlangConditionToPainlessDoc', () => {
     expect(streamlangConditionToPainlessDoc(condition)).toBe(`!(${nonEmpty('event.kind')})`);
   });
 
-  it('translates field includes predicate', () => {
+  const includes = (field: string, value: string) =>
+    `(doc.containsKey('${field}') && doc['${field}'].contains("${value}"))`;
+
+  it('translates field includes predicate to membership over all doc values', () => {
     const condition = { field: 'event.kind', includes: 'asset' };
-    expect(streamlangConditionToPainlessDoc(condition)).toBe(
-      `(${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset"))`
-    );
+    expect(streamlangConditionToPainlessDoc(condition)).toBe(includes('event.kind', 'asset'));
   });
 
   it('translates and condition', () => {
@@ -86,9 +87,7 @@ describe('streamlangConditionToPainlessDoc', () => {
       ],
     };
     expect(streamlangConditionToPainlessDoc(condition)).toBe(
-      `((${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset")) || ${nonEmpty(
-        'entity.id'
-      )})`
+      `(${includes('event.kind', 'asset')} || ${nonEmpty('entity.id')})`
     );
   });
 
@@ -125,10 +124,10 @@ describe('streamlangConditionToPainlessDoc', () => {
     };
     const result = streamlangConditionToPainlessDoc(condition);
     expect(result).toContain(nonEmpty('entity.id'));
-    expect(result).toContain(nonEmpty('event.category'));
-    expect(result).toContain('doc[\'event.category\'].value.contains("iam")');
-    expect(result).toContain('doc[\'event.type\'].value.contains("user")');
-    expect(result).toContain('doc[\'event.type\'].value.contains("creation")');
+    expect(result).toContain(includes('event.category', 'iam'));
+    expect(result).toContain(includes('event.type', 'user'));
+    expect(result).toContain(includes('event.type', 'creation'));
+    expect(result).not.toContain('.value.contains(');
     expect(result).toContain(' && ');
     expect(result).toContain(' || ');
   });
@@ -210,15 +209,13 @@ describe('streamlangConditionToPainlessDoc', () => {
     ).toBe('(entity_namespace == null || entity_namespace == "")');
   });
 
-  it('should use evaluated var for includes', () => {
+  it('should use equality on the evaluated var for includes', () => {
     expect(
       streamlangConditionToPainlessDoc(
         { field: 'entity.namespace', includes: 'okta' },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe(
-      'entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")'
-    );
+    ).toBe('entity_namespace != null && entity_namespace == "okta"');
   });
 });
 
