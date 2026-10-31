@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
-  transparentize,
   useEuiShadow,
   useEuiTheme,
   type IconType,
@@ -29,17 +28,21 @@ interface SourceCardAction {
 
 export function SourceCard({
   icon,
+  mark,
   title,
   description,
-  connected = false,
+  badge,
   action,
+  actionNode,
   'data-test-subj': dataTestSubj,
 }: {
-  icon: IconType;
+  icon?: IconType;
+  mark?: React.ReactNode;
   title: string;
   description?: string;
-  connected?: boolean;
-  action: SourceCardAction;
+  badge?: React.ReactNode;
+  action?: SourceCardAction;
+  actionNode?: React.ReactNode;
   'data-test-subj'?: string;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -52,6 +55,12 @@ export function SourceCard({
     gap: ${euiTheme.size.m};
     border-radius: ${euiTheme.size.m};
   `;
+  const plateRowStyles = css`
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: ${euiTheme.size.s};
+  `;
   const plateStyles = css`
     display: flex;
     align-items: center;
@@ -59,11 +68,13 @@ export function SourceCard({
     width: 40px;
     height: 40px;
     border-radius: ${euiTheme.size.s};
-    ${connected
-      ? `background: ${transparentize(euiTheme.colors.success, 0.15)}; color: ${
-          euiTheme.colors.success
-        };`
-      : `background: ${euiTheme.colors.backgroundBasePlain}; color: ${euiTheme.colors.textHeading}; ${plateShadow}`}
+    background: ${euiTheme.colors.backgroundBasePlain};
+    color: ${euiTheme.colors.textHeading};
+    ${plateShadow}
+  `;
+  const badgeStyles = css`
+    flex: 0 0 auto;
+    max-width: 50%;
   `;
   const titleStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
@@ -84,19 +95,30 @@ export function SourceCard({
     align-self: flex-start;
   `;
 
-  const button = (
-    <EuiButton
-      size="s"
-      color="text"
-      iconType={action.icon}
-      onClick={action.onClick}
-      isDisabled={action.disabledReason !== undefined}
-      aria-label={`${action.label} ${title}`}
-      data-test-subj={action['data-test-subj']}
-    >
-      {action.label}
-    </EuiButton>
-  );
+  const renderAction = (): React.ReactNode => {
+    if (actionNode) return actionNode;
+    if (!action) return null;
+    const button = (
+      <EuiButton
+        size="s"
+        color="text"
+        iconType={action.icon}
+        onClick={action.onClick}
+        isDisabled={action.disabledReason !== undefined}
+        aria-label={`${action.label} ${title}`}
+        data-test-subj={action['data-test-subj']}
+      >
+        {action.label}
+      </EuiButton>
+    );
+    return action.disabledReason === undefined ? (
+      button
+    ) : (
+      <EuiToolTip position="top" content={action.disabledReason}>
+        {button}
+      </EuiToolTip>
+    );
+  };
 
   return (
     <EuiPanel
@@ -107,8 +129,13 @@ export function SourceCard({
       role="listitem"
       data-test-subj={dataTestSubj}
     >
-      <div css={plateStyles} aria-hidden={true}>
-        <EuiIcon type={connected ? 'check' : icon} size="m" aria-hidden={true} />
+      <div css={plateRowStyles}>
+        {mark ?? (
+          <div css={plateStyles} aria-hidden={true}>
+            <EuiIcon type={icon ?? 'plugs'} size="m" aria-hidden={true} />
+          </div>
+        )}
+        {badge ? <div css={badgeStyles}>{badge}</div> : null}
       </div>
       <div>
         <div css={titleRowStyles}>
@@ -122,15 +149,7 @@ export function SourceCard({
           </EuiText>
         ) : null}
       </div>
-      <div css={actionStyles}>
-        {action.disabledReason === undefined ? (
-          button
-        ) : (
-          <EuiToolTip position="top" content={action.disabledReason}>
-            {button}
-          </EuiToolTip>
-        )}
-      </div>
+      {(action || actionNode) && <div css={actionStyles}>{renderAction()}</div>}
     </EuiPanel>
   );
 }

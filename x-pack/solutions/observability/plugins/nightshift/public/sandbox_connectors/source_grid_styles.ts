@@ -7,13 +7,9 @@
 
 import { css } from '@emotion/react';
 
-const gridStyles = (columns: number) => css`
+export const sourceGridStyles = css`
   display: grid;
-  grid-template-columns: repeat(${columns}, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
 `;
-
-export const sourceGridStyles = gridStyles(2);
-
-export const sourceGridThreeColumnsStyles = gridStyles(3);

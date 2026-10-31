@@ -6,111 +6,106 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { ActionType } from '@kbn/actions-types';
-import { useKibana } from '../hooks/use_kibana';
-import { ConnectSourcesGrid } from './connect_sources_grid';
+import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { ConnectSourcesGrid, type ConnectSourcesGroup } from './connect_sources_grid';
+import {
+  actionType,
+  httpError,
+  mockKibanaServices,
+  renderWithProviders,
+  sandboxConnector,
+} from './test_utils';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
-const mockUseKibana = useKibana as jest.Mock;
-const mockFetchConnectorTypes = jest.fn();
-
-const type = (id: string, overrides: Partial<ActionType> = {}): ActionType => ({
-  id,
-  name: `Type ${id}`,
-  enabled: true,
-  enabledInConfig: true,
-  enabledInLicense: true,
-  minimumLicenseRequired: 'enterprise',
-  supportedFeatureIds: [],
-  isSystemActionType: false,
-  isDeprecated: false,
-  ...overrides,
-});
-
-const forbiddenError = (): Error =>
-  Object.assign(new Error('Forbidden'), {
-    name: 'HttpFetchError',
-    request: {},
-    response: { status: 403 },
-  });
-
 const setup = ({
   types,
+  connectors,
+  group = 'additional',
+  trailing,
   canSave = true,
   canUpdateAgent = true,
-  onConnected,
+  typesError,
 }: {
   types: ActionType[];
+  connectors?: SandboxConnector[];
+  group?: ConnectSourcesGroup;
+  trailing?: React.ReactNode;
   canSave?: boolean;
   canUpdateAgent?: boolean;
-  onConnected?: () => void;
+  typesError?: Error;
 }) => {
-  mockFetchConnectorTypes.mockResolvedValue(types);
-  const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
-  const agent = {
-    configuration: { connector_ids: [] },
-    permissions: { update_agent: canUpdateAgent },
-  };
-  const agents = {
-    get: jest.fn(async () => agent),
-    addConnectorToAgent: jest.fn().mockResolvedValue(agent),
-    removeConnectorFromAgent: jest.fn().mockResolvedValue(agent),
-  };
-  mockUseKibana.mockReturnValue({
-    services: {
-      agentBuilder: { agents },
-      notifications: { toasts: { addError: jest.fn(), addSuccess: jest.fn() } },
-      application: {
-        capabilities: { actions: { save: canSave }, agentBuilder: { manageAgents: true } },
-      },
-      nightshiftInvestigations: {
-        investigationsClient: {
-          fetch: jest.fn(async (endpoint: string) =>
-            endpoint === 'GET /internal/nightshift/sandbox_connector_types'
-              ? { connector_types: await mockFetchConnectorTypes() }
-              : { connectors: [] }
-          ),
-        },
-      },
-      triggersActionsUi: {
-        getAddConnectorFlyout,
-        actionTypeRegistry: {
-          has: (id: string) => id === '.github',
-          get: () => ({ iconClass: 'logoGithub', selectMessage: 'Repos' }),
-        },
-      },
-    },
+  const services = mockKibanaServices({
+    types,
+    connectors,
+    capabilities: { save: canSave },
+    canUpdateAgent,
   });
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  render(
-    <I18nProvider>
-      <QueryClientProvider client={queryClient}>
-        <ConnectSourcesGrid onConnected={onConnected} />
-      </QueryClientProvider>
-    </I18nProvider>
-  );
-  return { getAddConnectorFlyout, agents };
+  if (typesError) services.fetchConnectorTypes.mockRejectedValueOnce(typesError);
+  renderWithProviders(<ConnectSourcesGrid group={group} trailing={trailing} />);
+  return services;
 };
 
 const githubCard = () => screen.findByRole('button', { name: /Type \.github/ });
+const cardIds = () => screen.getAllByRole('listitem').map((card) => card.dataset.testSubj);
 
 describe('ConnectSourcesGrid', () => {
-  it('renders a card per sandbox-capable type from the Nightshift API', async () => {
-    setup({ types: [type('.github'), type('.http')] });
+  const allTypes = () => [
+    actionType('.github'),
+    actionType('.http'),
+    actionType('.new_relic', { source: 'spec', name: 'New Relic', description: 'APM and more' }),
+    actionType('.elasticsearch', {
+      source: 'spec',
+      name: 'External Elasticsearch',
+      description: 'Search a remote cluster',
+    }),
+  ];
+
+  it('shows External Elasticsearch and New Relic as the telemetry sources', async () => {
+    setup({ types: allTypes(), group: 'telemetry' });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
-    expect(screen.getByTestId('.github-card')).toHaveTextContent('Type .github');
+    expect(cardIds()).toEqual(['.new_relic-card', '.elasticsearch-card']);
+    expect(screen.getByTestId('.new_relic-card')).toHaveTextContent('APM and more');
+    expect(screen.getByTestId('.elasticsearch-card')).toHaveTextContent('External Elasticsearch');
+  });
+
+  it('shows HTTP and the other sandbox-capable types as additional sources', async () => {
+    setup({ types: allTypes(), group: 'additional' });
+
+    await screen.findByTestId('nightshiftConnectSourcesGrid');
+    expect(cardIds()).toEqual(['.github-card', '.http-card']);
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
-    expect(screen.getByTestId('.http-card')).toHaveTextContent('Type .http');
+  });
+
+  it('lists every connector of the type in the HTTP card, preconfigured ones included', async () => {
+    setup({
+      types: [actionType('.http')],
+      connectors: [
+        sandboxConnector('telemetry', { name: 'Elasticsearch telemetry', is_preconfigured: true }),
+        sandboxConnector('other'),
+      ],
+      group: 'additional',
+    });
+
+    fireEvent.click(await screen.findByTestId('.http-connect'));
+
+    await screen.findByTestId('.http-connectPopover');
+    expect(screen.getByTestId('nightshiftConnectorListItem-telemetry')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftConnectorListItem-other')).toBeInTheDocument();
+  });
+
+  it('ends the grid with the trailing card, even without a type to show', async () => {
+    setup({ types: [], group: 'telemetry', trailing: <div data-test-subj="trailingCard" /> });
+
+    expect(await screen.findByTestId('trailingCard')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftConnectSourcesGrid')).toBeInTheDocument();
   });
 
   it('opens the flyout preselected to the card type, then assigns the connector to the agent', async () => {
-    const onConnected = jest.fn();
-    const { getAddConnectorFlyout, agents } = setup({ types: [type('.github')], onConnected });
+    const { getAddConnectorFlyout, agents } = setup({ types: [actionType('.github')] });
 
     fireEvent.click(await githubCard());
 
@@ -121,7 +116,6 @@ describe('ConnectSourcesGrid', () => {
     };
     expect(props.initialConnector).toEqual({ actionTypeId: '.github' });
     props.onConnectorCreated({ id: 'gh', name: 'gh' });
-    expect(onConnected).toHaveBeenCalled();
     await waitFor(() =>
       expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
         agentId: 'nightshift.investigation',
@@ -131,36 +125,45 @@ describe('ConnectSourcesGrid', () => {
   });
 
   it('disables the card when the license does not allow the type', async () => {
-    setup({ types: [type('.github', { enabledInLicense: false })] });
+    setup({ types: [actionType('.github', { enabledInLicense: false })] });
 
     expect(await githubCard()).toBeDisabled();
   });
 
   it('shows an error with a retry when the connector types cannot be loaded', async () => {
-    mockFetchConnectorTypes.mockRejectedValueOnce(forbiddenError());
-    setup({ types: [type('.github')] });
+    const { fetchConnectorTypes } = setup({
+      types: [actionType('.github')],
+      typesError: httpError(403),
+    });
 
     expect(await screen.findByTestId('nightshiftConnectSourcesError')).toHaveTextContent(
       'Could not load the connector types.'
     );
     expect(screen.queryByTestId('nightshiftConnectSourcesGrid')).not.toBeInTheDocument();
 
-    const callsBeforeRetry = mockFetchConnectorTypes.mock.calls.length;
+    const callsBeforeRetry = fetchConnectorTypes.mock.calls.length;
     fireEvent.click(screen.getByTestId('nightshiftConnectSourcesErrorRetry'));
 
     expect(await githubCard()).toBeInTheDocument();
-    expect(mockFetchConnectorTypes).toHaveBeenCalledTimes(callsBeforeRetry + 1);
+    expect(fetchConnectorTypes).toHaveBeenCalledTimes(callsBeforeRetry + 1);
   });
 
   it('disables the card when the user cannot create connectors', async () => {
-    setup({ types: [type('.github')], canSave: false });
+    setup({ types: [actionType('.github')], canSave: false });
 
     expect(await githubCard()).toBeDisabled();
   });
 
   it('disables the card when the user cannot edit the investigation agent', async () => {
-    setup({ types: [type('.github')], canUpdateAgent: false });
+    setup({ types: [actionType('.github')], canUpdateAgent: false });
 
     expect(await githubCard()).toBeDisabled();
+  });
+
+  it('renders nothing when the group has no type and nothing trails', async () => {
+    setup({ types: [actionType('.github')], group: 'telemetry' });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByTestId('nightshiftConnectSourcesGrid')).not.toBeInTheDocument();
   });
 });
