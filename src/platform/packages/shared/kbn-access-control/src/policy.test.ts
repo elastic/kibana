@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FIXTURE_POLICY } from './fixtures/shapes';
+import { FIXTURE_POLICY } from './contract/shapes';
 import { validateAccessPolicy } from './policy';
 import type { AccessPolicy } from './types';
 

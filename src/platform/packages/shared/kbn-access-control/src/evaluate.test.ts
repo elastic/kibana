@@ -8,7 +8,7 @@
  */
 
 import { evaluateAcl, generalAccessPermits, isRestricted } from './evaluate';
-import { ACL_SHAPE_FIXTURES, FIXTURE_POLICY, FIXTURE_PROBES } from './fixtures/shapes';
+import { ACL_SHAPE_FIXTURES, FIXTURE_POLICY, FIXTURE_PROBES } from './contract/shapes';
 import { normalizeAclSource } from './normalize';
 import type { CanonicalAcl } from './types';
 

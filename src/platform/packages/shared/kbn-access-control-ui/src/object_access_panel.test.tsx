@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -345,11 +345,12 @@ describe('ObjectAccessPanel', () => {
     const modal = await screen.findByTestId('accessPanelTransferModal');
     expect(within(modal).getByTestId('accessPanelTransferConfirm')).toBeDisabled();
 
-    await userEvent.type(
+    // One change event is all the picker needs to search, without a re-render per keystroke.
+    fireEvent.change(
       within(within(modal).getByTestId('accessPanelTransferPicker')).getByRole('combobox'),
-      'bob'
+      { target: { value: 'bob' } }
     );
-    await userEvent.click(await screen.findByRole('option', { name: /Bob Builder/ }));
+    await userEvent.click(await screen.findByTestId('accessPanelTransferPickerOption-u_bob'));
     await userEvent.click(within(modal).getByTestId('accessPanelTransferConfirm'));
 
     await waitFor(() => expect(toasts.addSuccess).toHaveBeenCalledWith('Ownership transferred.'));

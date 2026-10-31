@@ -52,7 +52,10 @@ const useAsyncResource = <T>(load: (() => Promise<T>) | undefined): AsyncResourc
 
     let isCurrent = true;
     setIsLoading(true);
-    load()
+    // A load that throws, or returns no promise, ends as a failed or empty load instead of
+    // breaking the page that hosts the panel.
+    Promise.resolve()
+      .then(load)
       .then(
         (data) => isCurrent && setResult({ data }),
         (error) => isCurrent && setResult({ error: toAccessControlError(error) })

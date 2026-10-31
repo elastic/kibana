@@ -61,4 +61,4 @@ export {
   FIXTURE_PROBES,
   type AclShapeFixture,
   type FixtureProbe,
-} from './src/fixtures/shapes';
+} from './src/contract/shapes';
