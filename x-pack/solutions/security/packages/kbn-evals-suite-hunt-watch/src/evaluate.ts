@@ -26,12 +26,13 @@ export const evaluate = base.extend<
   // stack. Order matters: the preflight must run before `assertWorkflowInstalled` checks the
   // per-space Worker, since enabling it is part of the preflight.
   huntWatchPreflight: [
-    async ({ fetch, log, connector, evaluationConnector }, use) => {
+    async ({ config, fetch, log, connector, evaluationConnector }, use) => {
       const cleanup = await runPreflight({
         fetch,
         log,
         connectorId: connector.id,
         evaluationConnector,
+        isServerless: config.serverless,
       });
       // The preflight has already swapped the default AI connector in every eval space by the
       // time it returns, so a failed install check must still restore it.

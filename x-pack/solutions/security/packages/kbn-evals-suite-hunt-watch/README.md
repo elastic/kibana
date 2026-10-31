@@ -173,6 +173,12 @@ The Worker also keeps its own 4h schedule in every eval space, and the suite can
 so on a long-lived stack a scheduled sweep can land during a run and drop that row's trigger.
 `HuntWatchClient.run` throws with the dropped-trigger message when that happens; rerun the row.
 
+AlertZero routes 404 outside a Security solution space. The preflight creates `hunt-a`, `hunt-b`
+and `hunt-blocked` as Security spaces, or switches them to Security, and leaves them that way. It
+only switches `default` when `CI=true`. On a local stack whose `default` space is Classic, the
+preflight fails and names the setting. Set `default`'s solution view to Security in Stack
+Management > Spaces, or run the suite on a throwaway stack.
+
 The `local` profile's `evaluationsKbn.url` defaults to `localhost:5601/dev`. When the Scout
 stack is the only Kibana running, point it at `localhost:5620` in
 `x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.local.json`.
