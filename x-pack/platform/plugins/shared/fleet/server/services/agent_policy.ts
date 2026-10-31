@@ -1316,22 +1316,55 @@ class AgentPolicyService {
       removeProtection?: boolean;
       asyncDeploy?: boolean;
       skipValidation?: boolean;
+      /**
+       * Set when no package policy on this agent policy was added, removed, or changed in a way
+       * that affects its agent version conditions, so the stored ones can be kept as is.
+       */
+      agentVersionConditionsUnchanged?: boolean;
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
-        await this.computeMinAgentVersionData(soClient, id);
+      const agentVersionData = await this.getAgentVersionDataForBump(
+        soClient,
+        id,
+        options?.agentVersionConditionsUnchanged
+      );
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions,
-        minAgentVersion: minAgentVersion ?? null,
-        packageAgentVersionConditions: packageAgentVersionConditions ?? null,
+        ...agentVersionData,
       });
     });
+  }
+
+  // An empty result makes `_update` keep the stored version condition fields.
+  private async getAgentVersionDataForBump(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    conditionsUnchanged?: boolean
+  ): Promise<{
+    hasAgentVersionConditions?: boolean;
+    minAgentVersion?: string | null;
+    packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
+  }> {
+    if (conditionsUnchanged) {
+      const agentPolicy = await this.get(soClient, id, false);
+      // Policies not bumped since these fields were introduced have nothing stored to keep yet.
+      if (typeof agentPolicy?.has_agent_version_conditions === 'boolean') {
+        return {};
+      }
+    }
+
+    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
+      await this.computeMinAgentVersionData(soClient, id);
+    return {
+      hasAgentVersionConditions,
+      minAgentVersion: minAgentVersion ?? null,
+      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
+    };
   }
 
   private async computeMinAgentVersionData(
