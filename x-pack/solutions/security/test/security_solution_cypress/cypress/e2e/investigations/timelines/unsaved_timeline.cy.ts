@@ -37,8 +37,7 @@ import {
 } from '../../../tasks/timeline';
 import { GET_STARTED_URL, hostsUrl, MANAGE_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/276796
-describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
+describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
@@ -133,8 +132,7 @@ describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
 });
 
 // In serverless it is not possible to use the navigation menu without closing the timeline
-// Failing: See https://github.com/elastic/kibana/issues/276802
-describe.skip('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
+describe('[serverless] Save Timeline Prompts', { tags: ['@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
