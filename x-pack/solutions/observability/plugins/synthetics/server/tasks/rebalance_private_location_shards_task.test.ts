@@ -16,6 +16,7 @@ import {
   REBALANCE_SHARDS_TASK_ID,
   DEFAULT_REBALANCE_SCHEDULE,
   MAX_PIN_CLEAR_ATTEMPTS,
+  PIN_NUDGE_DELAY_MS,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
 import {
@@ -57,11 +58,13 @@ const rebalanceResult = (over: Partial<RebalanceShardsResult> = {}): RebalanceSh
 const mockRebalanceShards = jest.fn().mockResolvedValue(rebalanceResult());
 const mockReportEvent = jest.fn();
 const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0, failed: 0 });
+const mockBumpAgentPolicyRevision = jest.fn().mockResolvedValue(undefined);
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
     rebalanceShards: mockRebalanceShards,
     clearShardConditions: mockClearShardConditions,
+    bumpAgentPolicyRevision: mockBumpAgentPolicyRevision,
   },
 } as unknown as SyntheticsMonitorClient;
 
@@ -125,6 +128,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
     mockGetLicense.mockResolvedValue(enterpriseLicense());
     mockRebalanceShards.mockResolvedValue(rebalanceResult());
     mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
+    mockBumpAgentPolicyRevision.mockResolvedValue(undefined);
   });
 
   afterEach(() => jest.useRealTimers());
@@ -555,6 +559,52 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockRebalanceShards).toHaveBeenCalledWith(
         expect.objectContaining({ signal: abortController.signal })
       );
+    });
+  });
+
+  describe('pin nudge', () => {
+    beforeEach(() => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+    });
+
+    it('bumps the agent policy once, 20 s after first pins', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 2 }));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_DELAY_MS - 1_000);
+      expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(1_000);
+      await running;
+
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
+    });
+
+    it('logs a failed bump and does not retry it', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 1 }));
+      mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_DELAY_MS);
+      await running;
+      mockRebalanceShards.mockResolvedValue(rebalanceResult());
+      await run();
+
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to nudge agent policy ap-1: conflict')
+      );
+    });
+
+    it('does not bump for moves between agents', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ moved: 3, failedOver: 3 }));
+
+      await run();
+
+      expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
     });
   });
 
