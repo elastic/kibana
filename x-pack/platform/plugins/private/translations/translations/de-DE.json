@@ -30823,8 +30823,6 @@
     "xpack.ml.alertContext.timestampIso8601Description": "Die Buckets-Zeit der Anomalie im ISO8601-Format",
     "xpack.ml.alertContext.topInfluencersDescription": "Top-Influencer",
     "xpack.ml.alertContext.topRecordsDescription": "Top-Datensätze",
-    "xpack.ml.alerts.actions.addToCase": "Zu einem bestehenden Fall hinzufügen",
-    "xpack.ml.alerts.actions.addToNewCase": "Zu einem neuen Fall hinzufügen",
     "xpack.ml.alertsTable.actionsPopoverAriaLabel": "Alert-Aktionen",
     "xpack.ml.alertsTable.columns.anomalyScore": "Neuester Anomalie-Score",
     "xpack.ml.alertsTable.columns.anomalyTime": "Spätester Zeitpunkt der Anomalie",
