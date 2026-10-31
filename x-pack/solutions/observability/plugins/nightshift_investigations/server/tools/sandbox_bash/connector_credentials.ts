@@ -18,6 +18,9 @@ export type ResolvedSandboxCredentials = Awaited<
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
 
+// Actions framework settings that say nothing about how to reach the service.
+const NON_ENV_CONFIG_KEYS: ReadonlySet<string> = new Set(['selectedActions']);
+
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
   env: Record<string, string>;
@@ -142,6 +145,7 @@ export const buildConnectorEnv = ({
   const secretValues: string[] = [];
 
   for (const [key, value] of Object.entries(config)) {
+    if (NON_ENV_CONFIG_KEYS.has(key)) continue;
     const envValue = toEnvValue(value);
     if (envValue !== undefined) env[`${CONNECTOR_ENV_PREFIX}CONFIG_${toEnvKey(key)}`] = envValue;
   }
