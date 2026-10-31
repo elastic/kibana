@@ -14,8 +14,8 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { GetScopedClients } from '../../routes/types';
@@ -42,11 +42,11 @@ export const SYSTEM_REQUEST = expect.objectContaining({
 
 /** The per-space continuous onboarding document of a space. */
 export const continuousDocumentId = (spaceId: string): string =>
-  `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
+  `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
 /** The per-space cleanup document of a space: scheduled, and not backed by a Settings toggle. */
 export const cleanupDocumentId = (spaceId: string): string =>
-  `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-${spaceId}`;
+  `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-${spaceId}`;
 
 /** The space a saved-objects call was scoped to; it travels as `this` (see `mock.contexts`). */
 interface SoCallContext {
@@ -277,6 +277,8 @@ export function makeService(params?: {
   knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
   ownedRuleIdsBySource?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
+  /** Whether the space has a detection engine service account bound (default: yes). */
+  serviceAccountSetUp?: boolean;
 }) {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
@@ -442,8 +444,22 @@ export function makeService(params?: {
 
   // No `globalAsScopedToClient`: continuous onboarding is a space setting, so a
   // leftover global read or write fails the test.
+  // The detection engine account: rules are turned back on as the account, so Resume needs it bound.
+  const serviceAccounts = {
+    isEnabled: jest.fn(() => true),
+    getWorkloadBinding: jest.fn(async () =>
+      params?.serviceAccountSetUp === false ? undefined : { serviceAccountId: 'account-id' }
+    ),
+    withScopedRequestForWorkload: jest.fn(
+      async (
+        { spaceId }: { spaceId: string },
+        fn: (accountRequest: KibanaRequest) => Promise<unknown>
+      ) => fn(requestInSpace(spaceId))
+    ),
+  };
   const server = {
     core: {
+      security: { serviceAccounts },
       savedObjects,
       dataStreams: { initializeClient },
       elasticsearch: {
@@ -516,5 +532,6 @@ export function makeService(params?: {
     asScoped,
     spaceUiSettingsClient,
     getInternalSpaceUiSettingsClient,
+    serviceAccounts,
   };
 }

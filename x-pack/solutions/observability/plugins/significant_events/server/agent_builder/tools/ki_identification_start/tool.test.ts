@@ -25,10 +25,10 @@ describe('createKiIdentificationStartTool', () => {
   }: { featurePrivilege?: NightshiftFeaturePrivilege } = {}) => {
     const managementApi = {
       getWorkflow: jest.fn().mockResolvedValue({
-        id: 'system-streams-ki-onboarding',
+        id: 'system-sources-ki-onboarding-bound-default',
         name: 'onboarding',
         enabled: true,
-        definition: {},
+        definition: { settings: { run_as: 'service-account-id' } },
         yaml: '',
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
@@ -39,6 +39,7 @@ describe('createKiIdentificationStartTool', () => {
     });
     const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesGet });
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
+      isServiceAccountsEnabled: async () => true,
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
       getSourcesClient,
@@ -80,7 +81,7 @@ describe('createKiIdentificationStartTool', () => {
     );
 
     expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
+      expect.objectContaining({ id: 'system-sources-ki-onboarding-bound-default' }),
       'default',
       expect.objectContaining({
         sourceId: 'logs.nginx',
@@ -89,7 +90,8 @@ describe('createKiIdentificationStartTool', () => {
         skipFeatures: false,
         skipQueries: false,
       }),
-      context.request
+      context.request,
+      'nightshift-detection-engine'
     );
     expect(sourcesGet).toHaveBeenCalledWith('logs.nginx');
     if ('results' in result) {

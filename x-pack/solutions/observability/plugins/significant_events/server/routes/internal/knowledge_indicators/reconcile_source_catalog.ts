@@ -296,18 +296,16 @@ export async function applySourceEnabled({
   }
 }
 
-/** Queues source changes and enables periodic recovery independently so either can survive a failure. */
+/** Queues the reconciliation of a source whose query or enabled flag changed. */
 export const createSourceChangeListener =
   ({
     enqueueReconciliation,
-    ensurePeriodicReconciliation,
   }: {
     enqueueReconciliation: (args: {
       sourceId: string;
       sourceSlug: string;
       request: KibanaRequest;
     }) => Promise<void>;
-    ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
     if (
@@ -317,22 +315,11 @@ export const createSourceChangeListener =
     ) {
       return;
     }
-    const results = await Promise.allSettled([
-      enqueueReconciliation({
-        sourceId: event.source.id,
-        sourceSlug: event.source.slug,
-        request: event.request,
-      }),
-      ensurePeriodicReconciliation(event.request),
-    ]);
-    const failures = results.flatMap((result) =>
-      result.status === 'rejected' ? [result.reason] : []
-    );
-    if (failures.length > 0) {
-      throw failures.length === 1
-        ? failures[0]
-        : new AggregateError(failures, 'Failed to schedule source reconciliation');
-    }
+    await enqueueReconciliation({
+      sourceId: event.source.id,
+      sourceSlug: event.source.slug,
+      request: event.request,
+    });
   };
 
 /**

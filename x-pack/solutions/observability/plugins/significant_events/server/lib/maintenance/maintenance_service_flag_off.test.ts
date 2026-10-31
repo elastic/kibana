@@ -11,7 +11,7 @@ import {
   OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
-import { SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
 import {
@@ -47,7 +47,7 @@ describe('SignificantEventsMaintenanceService', () => {
       await service.pauseOnFlagOff();
 
       expect(updateWorkflow).toHaveBeenCalledWith(
-        `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
         { enabled: false },
         'space-a',
         SYSTEM_REQUEST
@@ -221,7 +221,7 @@ describe('SignificantEventsMaintenanceService', () => {
         expect(document.lastSummary?.partialFailures).toEqual([]);
       }
       expect(updateWorkflow).toHaveBeenCalledWith(
-        `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
         { enabled: false },
         'space-a',
         SYSTEM_REQUEST

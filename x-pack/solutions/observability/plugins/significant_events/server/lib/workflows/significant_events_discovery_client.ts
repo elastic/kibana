@@ -7,13 +7,18 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundDiscoveryWorkflowId,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
+  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { StatusError } from '../errors/status_error';
+import { createNotSetUpError } from '../service_accounts/detection_engine_account';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 export interface SignificantEventsDiscoveryRunParams {
@@ -33,14 +38,44 @@ export interface SignificantEventsDiscoveryRunParams {
  * Extend the generic when the discovery pipeline produces structured output.
  */
 export class SignificantEventsDiscoveryClient {
-  private readonly workflowExecutionService: WorkflowExecutionService;
+  private readonly managementApi: WorkflowsServerPluginSetup['management'];
+  private readonly isServiceAccountsEnabled: () => Promise<boolean>;
+  private readonly orchestratorService: WorkflowExecutionService;
 
-  constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
-    this.workflowExecutionService = new WorkflowExecutionService({
+  constructor({
+    managementApi,
+    isServiceAccountsEnabled,
+  }: {
+    managementApi: WorkflowsServerPluginSetup['management'];
+    isServiceAccountsEnabled: () => Promise<boolean>;
+  }) {
+    this.managementApi = managementApi;
+    this.isServiceAccountsEnabled = isServiceAccountsEnabled;
+    this.orchestratorService = new WorkflowExecutionService({
       managementApi,
       workflowId: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
       workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
+  }
+
+  /** The space's entry point, which runs the shared orchestrator as the space's service account. */
+  private getEntryPointService(spaceId: string): WorkflowExecutionService {
+    return new WorkflowExecutionService({
+      managementApi: this.managementApi,
+      workflowId: getNightshiftBoundDiscoveryWorkflowId(spaceId),
+      workflowSpaceId: spaceId,
+    });
+  }
+
+  /** Whether the space's entry point is installed, enabled and bound to an account. */
+  private async isSetUp(request: KibanaRequest, spaceId: string): Promise<boolean> {
+    if (!(await this.isServiceAccountsEnabled())) {
+      return false;
+    }
+    const entryPoint = await this.managementApi
+      .getClient(request)
+      .getWorkflow(getNightshiftBoundDiscoveryWorkflowId(spaceId), spaceId);
+    return Boolean(entryPoint?.enabled && entryPoint.definition?.settings?.run_as);
   }
 
   async run({
@@ -59,7 +94,11 @@ export class SignificantEventsDiscoveryClient {
     const requestedConnectorId = connectorId?.trim() || undefined;
     const explicitConnectorId =
       requestedConnectorId !== undefined ? await resolveModel(requestedConnectorId) : undefined;
-    const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId, request);
+    if (!(await this.isSetUp(request, spaceId))) {
+      throw createNotSetUpError();
+    }
+    const entryPoint = this.getEntryPointService(spaceId);
+    const lastExecution = await entryPoint.getLastExecution(spaceId, request);
     if (lastExecution && !isTerminalStatus(lastExecution.status)) {
       if (requestedConnectorId !== undefined) {
         throw new StatusError(
@@ -78,10 +117,11 @@ export class SignificantEventsDiscoveryClient {
     }
     await installDiscoveryAgents({ agentBuilder, spaceId });
 
-    const executionId = await this.workflowExecutionService.execute({
+    const executionId = await entryPoint.execute({
       executionSpaceId: spaceId,
       inputs: { connector_id: resolvedConnectorId },
       request,
+      triggeredBy: NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
     });
     return { executionId, isNew: true };
   }
@@ -93,7 +133,10 @@ export class SignificantEventsDiscoveryClient {
     request: KibanaRequest;
     spaceId: string;
   }): Promise<string | null> {
-    return this.workflowExecutionService.cancelLatest({ spaceId, request });
+    // The entry point first: it waits for the orchestrator run, and would otherwise be left waiting.
+    const executionId = await this.getEntryPointService(spaceId).cancelLatest({ spaceId, request });
+    await this.orchestratorService.cancelLatest({ spaceId, request });
+    return executionId;
   }
 
   async getStatus({
@@ -103,6 +146,6 @@ export class SignificantEventsDiscoveryClient {
     spaceId: string;
     request: KibanaRequest;
   }): Promise<SignificantEventsWorkflowStatusResult> {
-    return this.workflowExecutionService.getStatus({ spaceId, request });
+    return this.getEntryPointService(spaceId).getStatus({ spaceId, request });
   }
 }

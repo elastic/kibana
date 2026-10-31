@@ -6,20 +6,21 @@
  */
 
 import {
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 
 // The KI sync workflow YAML lives in the managed workflow definition
-// (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/sync.yaml).
+// (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/sync.yaml), which the
+// space's setup installs bound to the detection engine service account.
 // These tests keep that YAML in sync with the significant_events constants.
-const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID);
+const definition = getManagedWorkflowDefinition(NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID);
 
 const getWorkflowYaml = (): string => {
-  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-    throw new Error('KI sync managed workflow definition is missing inline YAML');
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('KI sync managed workflow definition is missing its YAML template');
   }
-  return definition.yaml;
+  return definition.yamlTemplate({ serviceAccountId: 'service-account-id' });
 };
 
 const WORKFLOW_YAML = getWorkflowYaml();
@@ -33,8 +34,12 @@ describe('sync.yaml managed workflow definition', () => {
     expect(definition?.management.enablement).toBe('restorable');
   });
 
-  it('is disabled by default so SyncWorkflowService controls enablement', () => {
+  it('is disabled by default so the space setup controls enablement', () => {
     assertYamlContains('enabled: false');
+  });
+
+  it('runs as the service account it is installed with', () => {
+    assertYamlContains('run_as: "service-account-id"');
   });
 
   it('drops overlapping runs via a single-instance concurrency key', () => {

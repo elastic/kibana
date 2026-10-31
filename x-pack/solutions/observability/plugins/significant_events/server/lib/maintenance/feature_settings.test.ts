@@ -7,17 +7,17 @@
 
 import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import {
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { shouldRestoreSettingsBackedWorkflow } from './feature_settings';
 
 describe('shouldRestoreSettingsBackedWorkflow', () => {
   it('always restores a recorded continuous onboarding document, ignoring the legacy flag', () => {
     const workflow = {
-      id: `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-space-a`,
+      id: `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-space-a`,
       spaceId: asSpaceId('space-a'),
     };
     expect(
@@ -30,7 +30,7 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
   });
 
   it('restores scheduled discovery only for spaces that were previously enabled', () => {
-    const scheduledId = `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`;
+    const scheduledId = `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`;
     expect(
       shouldRestoreSettingsBackedWorkflow(
         { id: scheduledId, spaceId: asSpaceId('space-a') },
@@ -61,7 +61,7 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
     expect(
       shouldRestoreSettingsBackedWorkflow(
         {
-          id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+          id: `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
           spaceId: asSpaceId('space-a'),
         },
         { continuousOnboardingWasEnabled: false, scheduledDiscoveryEnabledSpaceIds: [] }
@@ -73,7 +73,7 @@ describe('shouldRestoreSettingsBackedWorkflow', () => {
     expect(
       shouldRestoreSettingsBackedWorkflow(
         {
-          id: `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`,
+          id: `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-default`,
           spaceId: asSpaceId('default'),
         },
         undefined

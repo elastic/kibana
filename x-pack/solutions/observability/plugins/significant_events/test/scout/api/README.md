@@ -10,11 +10,12 @@ api/
 ├── playwright.config.ts                        # Scout API test configuration
 ├── fixtures/
 │   ├── index.ts                                # `significantEventsApiTest`, extending apiTest
-│   └── constants.ts                            # Role definitions and API headers
+│   ├── constants.ts                            # Role definitions and API headers
+│   └── detection_engine_service_account.ts     # Sets the default space up to run as its service account
 ├── services/
 │   └── significant_events_api_service.ts       # Typed helper over the route repository
 └── tests/
-    ├── global.setup.ts                         # Enables Streams + the availability feature flag
+    ├── global.setup.ts                         # Enables Streams + the availability feature flag, sets the space up
     ├── global.teardown.ts                      # Reverts the flag, disables Streams
     ├── authorization/                          # Rule events read, plus access for the built-in viewer, editor and admin roles
     ├── maintenance/pause_on_flag_off.spec.ts
@@ -29,6 +30,11 @@ api/
 node scripts/scout run-tests --arch stateful --domain classic \
   --config x-pack/solutions/observability/plugins/significant_events/test/scout/api/playwright.config.ts
 ```
+
+The detection engine only runs as a service account, so `global.setup.ts` creates the
+`nightshift_detection_engine` account (and, on stateful, its role) and calls `_enable` as the admin.
+Without it, resuming Significant Events is refused with a 503. Service accounts are on by default on
+stateful; the default Serverless observability config turns them on.
 
 Significant events is gated behind the `nightshift.enabled` feature flag, which
 defaults to false. `global.setup.ts` forces it on for the run and `global.teardown.ts` reverts it —

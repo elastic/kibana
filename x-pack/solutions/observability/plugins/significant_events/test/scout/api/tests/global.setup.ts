@@ -10,6 +10,7 @@ import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
+import { setUpDetectionEngineServiceAccount } from '../fixtures/detection_engine_service_account';
 
 const AVAILABILITY_PATH = '/internal/significant_events/availability';
 const AVAILABILITY_TIMEOUT_MS = 30_000;
@@ -64,5 +65,37 @@ globalSetupHook(
         lastResponse
       )}`
     );
+  }
+);
+
+globalSetupHook(
+  'Set the default space up with the detection engine service account',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ kbnClient, kbnUrl, esClient, samlAuth, config, log }) => {
+    // Setup hooks run in every lane. A 404 means the plugin is unloaded for this deployment (Logs
+    // Essentials), which has no detection engine to set up.
+    const { status } = await kbnClient.request({
+      path: AVAILABILITY_PATH,
+      method: 'GET',
+      headers: COMMON_API_HEADERS,
+      ignoreErrors: [404],
+    });
+    if (status === 404) {
+      log.debug(
+        '[setup] Significant events plugin not loaded (404); skipping the detection engine'
+      );
+      return;
+    }
+    // The detection engine only runs as a service account, so resuming Significant Events, which
+    // many specs do first, needs the space set up. Once for the whole run: the account belongs to
+    // the deployment, and two workers creating it at once conflict.
+    await setUpDetectionEngineServiceAccount({
+      kbnUrl,
+      esClient,
+      samlAuth,
+      isServerless: Boolean(config.serverless),
+      isCloud: config.isCloud,
+      log,
+    });
   }
 );

@@ -175,10 +175,13 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     executionSpaceId,
     inputs,
     request,
+    triggeredBy,
   }: {
     executionSpaceId: string;
     inputs?: TInput;
     request: KibanaRequest;
+    /** Recorded on the run; a bound entry point refuses runs it was not started for. */
+    triggeredBy?: string;
   }): Promise<string> {
     const workflow = await this.managementApi
       .getClient(request)
@@ -192,7 +195,8 @@ export class WorkflowExecutionService<TInput extends object = {}> {
       { ...workflow, definition: workflow.definition },
       executionSpaceId,
       inputs ?? {},
-      request
+      request,
+      triggeredBy
     );
   }
 

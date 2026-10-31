@@ -8,12 +8,18 @@
  */
 
 import { parse } from 'yaml';
-import {
-  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
-  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
-} from '.';
+import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW } from '.';
+import { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW } from './bound_investigation_completed';
+import CLEANUP_YAML from './cleanup.yaml';
+import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import BOUND_ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
+import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/continuous_onboarding.yaml';
+import SOURCE_RECONCILIATION_YAML from './knowledge_indicators/source_reconciliation.yaml';
+import SYNC_YAML from './knowledge_indicators/sync.yaml';
+import SCHEDULED_DETECTION_YAML from './scheduled_detection.yaml';
+import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
+import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowJsonSchema {
@@ -52,6 +58,7 @@ interface WorkflowStep {
 interface ParsedWorkflow {
   steps: WorkflowStep[];
   triggers?: Array<{
+    type?: string;
     inputs?: {
       properties?: Record<string, { type?: string; maxLength?: number }>;
     };
@@ -77,15 +84,19 @@ const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as Par
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
-const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
-  | ParsedWorkflow & {
-      triggers: Array<{ type: string; on?: { condition?: string } }>;
-    };
+const investigationCompleted = parse(
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW.yamlTemplate({
+    serviceAccountId: 'service-account-id',
+  })
+) as ParsedWorkflow & {
+  settings?: { run_as?: string };
+  triggers: Array<{ type: string; on?: { condition?: string } }>;
+};
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(27);
-    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(28);
+    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(5);
   });
 
   it('accepts every non-written events_write result reason in the discovery output schema', () => {
@@ -127,17 +138,6 @@ describe('significant events persistence workflow contracts', () => {
     expect(
       requireStep(discovery, 'run_discovery_agent')['connector-id-by-feature']
     ).toBeUndefined();
-  });
-
-  it('bootstraps per-space cleanup before discovery work', () => {
-    expect(discovery.steps[0]).toMatchObject({
-      name: 'bootstrap_cleanup_workflow',
-      type: 'kibana.request',
-      with: {
-        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
-      },
-      'on-failure': { continue: true },
-    });
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
@@ -237,7 +237,8 @@ describe('significant events persistence workflow contracts', () => {
     expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
   });
 
-  it('attaches completed or failed investigations only to Significant Events', () => {
+  it('attaches completed or failed investigations only to Significant Events, as the service account', () => {
+    expect(investigationCompleted.settings?.run_as).toBe('service-account-id');
     expect(investigationCompleted.triggers).toEqual([
       {
         type: 'nightshift-investigations.completed',
@@ -256,5 +257,41 @@ describe('significant events persistence workflow contracts', () => {
       completed_at: '{{ event.completed_at }}',
       outcome: '{{ event.status }}',
     });
+  });
+});
+
+describe('workflows that run as the detection engine service account', () => {
+  const startedBySchedule = [
+    ['cleanup', CLEANUP_YAML],
+    ['scheduled detection', SCHEDULED_DETECTION_YAML],
+    ['scheduled review', SCHEDULED_REVIEW_YAML],
+    ['sync', SYNC_YAML],
+    ['continuous onboarding', CONTINUOUS_ONBOARDING_YAML],
+  ];
+  const startedByServerCodeOrEvents = [
+    ['bound onboarding', BOUND_ONBOARDING_YAML],
+    ['bound orchestrator', BOUND_ORCHESTRATOR_YAML],
+    ['source reconciliation', SOURCE_RECONCILIATION_YAML],
+    ['investigation completed', INVESTIGATION_COMPLETED_YAML],
+  ];
+
+  // Anyone allowed to run workflows can start one through the generic run API, with any inputs.
+  it.each([...startedBySchedule, ...startedByServerCodeOrEvents])(
+    '%s refuses direct runs before doing anything',
+    (_name, yaml) => {
+      const { steps }: ParsedWorkflow = parse(yaml);
+      const [first] = steps;
+
+      expect(first.name).toBe('refuse_direct_runs');
+      expect(first.type).toBe('if');
+      expect(first.condition).toContain('execution.triggeredBy');
+      expect(first.steps?.[0].type).toBe('workflow.fail');
+    }
+  );
+
+  it.each(startedBySchedule)('%s has no manual trigger', (_name, yaml) => {
+    const { triggers }: ParsedWorkflow = parse(yaml);
+
+    expect(triggers?.map(({ type }) => type)).toEqual(['scheduled']);
   });
 });

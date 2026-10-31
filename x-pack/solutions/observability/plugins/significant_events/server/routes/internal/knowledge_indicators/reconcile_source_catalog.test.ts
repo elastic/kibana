@@ -621,12 +621,8 @@ describe('createSourceChangeListener', () => {
   const source = makeSource({ id: 'source' });
   const setup = () => {
     const enqueueReconciliation = jest.fn(async () => {});
-    const ensurePeriodicReconciliation = jest.fn(async () => {});
-    const listener = createSourceChangeListener({
-      enqueueReconciliation,
-      ensurePeriodicReconciliation,
-    });
-    return { listener, enqueueReconciliation, ensurePeriodicReconciliation };
+    const listener = createSourceChangeListener({ enqueueReconciliation });
+    return { listener, enqueueReconciliation };
   };
 
   it.each<SourceChangeEvent>([
@@ -640,7 +636,7 @@ describe('createSourceChangeListener', () => {
       request,
     },
   ])('queues a $type change in its request space', async (event) => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    const { listener, enqueueReconciliation } = setup();
     const otherRequest = { spaceId: 'other' } as KibanaRequest;
     await listener({ ...event, request: otherRequest });
     expect(enqueueReconciliation).toHaveBeenCalledWith({
@@ -648,29 +644,18 @@ describe('createSourceChangeListener', () => {
       sourceSlug: source.slug,
       request: otherRequest,
     });
-    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(otherRequest);
   });
 
-  it('retains queued cleanup when periodic recovery setup fails', async () => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
-    ensurePeriodicReconciliation.mockRejectedValue(new Error('workflow installation unavailable'));
-    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
-      'workflow installation unavailable'
-    );
-    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
-  });
-
-  it('enables periodic recovery when enqueueing the immediate job fails', async () => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+  it('reports a failure to queue the reconciliation', async () => {
+    const { listener, enqueueReconciliation } = setup();
     enqueueReconciliation.mockRejectedValue(new Error('queue unavailable'));
     await expect(listener({ type: 'created', source, request })).rejects.toThrow(
       'queue unavailable'
     );
-    expect(ensurePeriodicReconciliation).toHaveBeenCalledWith(request);
   });
 
   it('ignores title changes that preserve the query and enabled flag', async () => {
-    const { listener, enqueueReconciliation, ensurePeriodicReconciliation } = setup();
+    const { listener, enqueueReconciliation } = setup();
     await listener({
       type: 'updated',
       source: { ...source, title: 'Renamed' },
@@ -678,7 +663,6 @@ describe('createSourceChangeListener', () => {
       request,
     });
     expect(enqueueReconciliation).not.toHaveBeenCalled();
-    expect(ensurePeriodicReconciliation).not.toHaveBeenCalled();
   });
 });
 

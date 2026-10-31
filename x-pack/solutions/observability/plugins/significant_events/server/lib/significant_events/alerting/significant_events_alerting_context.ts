@@ -9,6 +9,7 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import { RulesAdapterV2 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
+import { DetectionEngineRulesClient } from '../../service_accounts/detection_engine_rules_client';
 import { canCompileMatchMetric } from '../rules/can_compile_match_metric';
 import type { ISignificantEventsAlertsReader } from './alerts_reader';
 import { ALERTS_READER_V2 } from './alerts_reader';
@@ -26,6 +27,8 @@ export interface SignificantEventsAlertingContext {
 
 export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
+  /** Runs `fn` with the rules client of the space's detection engine account. */
+  withAccountRulesClient: <T>(fn: (accountClient: RulesClientApi) => Promise<T>) => Promise<T>;
   cpsEnabled: boolean;
 }
 
@@ -60,11 +63,14 @@ export function createSignificantEventsAlertingContextResolver(
     // Nullish coalescing assignment: run the async IIFE once, then return the cached promise.
     promise ??= (async () => {
       const alertingV2RulesClient = await params.getAlertingV2RulesClient();
+      const toRulesManagement = (client: RulesClientApi) =>
+        new RulesAdapterV2({ rulesClient: client, cpsEnabled: params.cpsEnabled });
       return {
         alertsReader: ALERTS_READER_V2,
-        rulesClient: new RulesAdapterV2({
-          rulesClient: alertingV2RulesClient,
-          cpsEnabled: params.cpsEnabled,
+        rulesClient: new DetectionEngineRulesClient({
+          caller: toRulesManagement(alertingV2RulesClient),
+          runAsAccount: (fn) =>
+            params.withAccountRulesClient((accountClient) => fn(toRulesManagement(accountClient))),
         }),
         alertingV2RulesClient,
       };

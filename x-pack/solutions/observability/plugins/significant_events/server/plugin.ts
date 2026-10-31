@@ -34,8 +34,10 @@ import {
 import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import {
+  getNightshiftBoundSourceReconciliationWorkflowId,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
@@ -103,15 +105,16 @@ import {
   type ContinuousOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
 import {
-  createCleanupWorkflowService,
-  type CleanupWorkflowService,
-} from './lib/workflows/cleanup_workflow';
-import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
-import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './lib/workflows/managed_workflow_owner';
+import {
+  asDetectionEngineAccount,
+  isDetectionEngineSetUp,
+  registerDetectionEngineWorkloadType,
+} from './lib/service_accounts/detection_engine_account';
 import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
@@ -136,7 +139,6 @@ import { WorkflowExecutionService } from './lib/workflows/workflow_execution_ser
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 const RULE_CREATION_APP = 'nightshift';
 
@@ -171,6 +173,7 @@ export class SignificantEventsPlugin
     core: CoreSetup<SignificantEventsPluginStartDependencies>,
     plugins: SignificantEventsPluginSetupDependencies
   ): void {
+    registerDetectionEngineWorkloadType(core);
     this.server = {
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
@@ -263,14 +266,21 @@ export class SignificantEventsPlugin
         }),
       });
 
-      const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space, {
+      const getRulesClientFor = async (rulesRequest: KibanaRequest) =>
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(rulesRequest, space, {
           app: RULE_CREATION_APP,
         });
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
-          getAlertingV2RulesClient,
+          getAlertingV2RulesClient: () => getRulesClientFor(request),
+          withAccountRulesClient: (fn) =>
+            asDetectionEngineAccount({
+              core: coreStart,
+              request,
+              spaceId: space,
+              fn: async (accountRequest) => fn(await getRulesClientFor(accountRequest)),
+            }),
           cpsEnabled,
         });
 
@@ -345,7 +355,9 @@ export class SignificantEventsPlugin
               !(await uiSettingsClient.get<boolean>(
                 OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
               ))) ||
-            (await this.maintenanceService?.getState({ request })) === 'paused'
+            (await this.maintenanceService?.getState({ request })) === 'paused' ||
+            // KI extraction runs as the space's service account only.
+            !(await streamsKIsOnboardingClient.isSetUp(request))
           ) {
             return false;
           }
@@ -383,14 +395,18 @@ export class SignificantEventsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    const workflowClients = createWorkflowClients(
-      plugins.workflowsManagement?.management,
-      telemetryClient,
-      async (request) => {
+    const workflowClients = createWorkflowClients({
+      managementApi: plugins.workflowsManagement?.management,
+      telemetry: telemetryClient,
+      getSourcesClient: async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });
-      }
-    );
+      },
+      isServiceAccountsEnabled: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.security.serviceAccounts.isEnabled();
+      },
+    });
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
     this.streamsKIsOnboardingClient = streamsKIsOnboardingClient;
 
@@ -442,8 +458,6 @@ export class SignificantEventsPlugin
     }
 
     let continuousOnboardingWorkflowService: ContinuousOnboardingWorkflowService | undefined;
-    let syncWorkflowService: SyncWorkflowService | undefined;
-    let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -468,42 +482,19 @@ export class SignificantEventsPlugin
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
       const { management: managementApi } = plugins.workflowsManagement;
-      const getManagedWorkflowsClient = async () => {
-        const [, pluginsStart] = await core.getStartServices();
-        if (!pluginsStart.workflowsExtensions) {
-          throw new Error('Workflows extensions are not available');
-        }
-        return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
-          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-        );
-      };
-
       if (streamsKIsOnboardingClient) {
         continuousOnboardingWorkflowService = createContinuousOnboardingWorkflowService({
           logger: this.logger,
           managementApi,
           streamsKIsOnboardingClient,
-          getManagedWorkflowsClient,
+          server: this.server,
         });
       }
-
-      syncWorkflowService = createSyncWorkflowService({
-        logger: this.logger,
-        managementApi,
-        getManagedWorkflowsClient,
-      });
-
-      cleanupWorkflowService = createCleanupWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-        getManagedWorkflowsClient,
-      });
 
       // TODO: remove with the legacy default-space cleanup.
       // https://github.com/elastic/kibana/issues/294271
       this.removeLegacyWorkflows = () =>
         removeLegacyDefaultSpaceWorkflows({
-          getManagedWorkflowsClient,
           managementApi,
           logger: this.logger,
         });
@@ -512,7 +503,7 @@ export class SignificantEventsPlugin
         {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
-          getManagedWorkflowsClient,
+          server: this.server,
         }
       );
     }
@@ -540,30 +531,37 @@ export class SignificantEventsPlugin
       },
     });
 
-    const sourceReconciliation = plugins.workflowsManagement?.management
-      ? new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
-          managementApi: plugins.workflowsManagement.management,
-          workflowId: SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
-          workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        })
-      : undefined;
+    const reconciliationManagementApi = plugins.workflowsManagement?.management;
     plugins.nightshiftSources.onSourceChange(
       createSourceChangeListener({
         enqueueReconciliation: async ({ sourceId, sourceSlug, request }) => {
-          if (!sourceReconciliation) {
+          if (!reconciliationManagementApi) {
             throw new Error('Workflows management is required to reconcile source knowledge');
           }
-          await sourceReconciliation.execute({
-            executionSpaceId: request.spaceId,
+          const { spaceId } = request;
+          // Source changes are applied as the space's service account, by the space's bound
+          // reconciliation. A space that is not set up has no detection engine to apply them to.
+          // The sync workflow and the eligible streams sweep align the space with its sources once
+          // it is set up.
+          // TODO: refuse to change the sources of a space that is not set up, so that nothing is
+          // left to catch up. Sources are part of the detection engine.
+          const [coreStart] = await core.getStartServices();
+          if (!(await isDetectionEngineSetUp({ core: coreStart, spaceId }))) {
+            this.logger.warn(
+              `The change of source ${sourceId} was not applied: Nightshift is not set up in space ${spaceId}`
+            );
+            return;
+          }
+          await new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
+            managementApi: reconciliationManagementApi,
+            workflowId: getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
+            workflowSpaceId: spaceId,
+          }).execute({
+            executionSpaceId: spaceId,
             inputs: { sourceId, sourceSlug },
             request,
+            triggeredBy: NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
           });
-        },
-        ensurePeriodicReconciliation: async (request) => {
-          // Keep periodic repair available even when continuous onboarding is switched off.
-          if ((await this.maintenanceService?.getState({ request })) !== 'paused') {
-            await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
-          }
         },
       })
     );
@@ -586,8 +584,6 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousOnboardingWorkflowService,
-        syncWorkflowService,
-        cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,

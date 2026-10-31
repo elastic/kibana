@@ -22,6 +22,7 @@ import { internalKIOnboardingRoutes } from './internal/knowledge_indicators/onbo
 import { internalKIQueriesRoutes } from './internal/knowledge_indicators/queries/route';
 import { internalKIQueryOccurrencesRoutes } from './internal/knowledge_indicators/query_occurrences/route';
 import { internalMaintenanceRoutes } from './internal/maintenance/route';
+import { internalServiceAccountRoutes } from './internal/service_accounts/route';
 import { internalRunQuotaRoutes } from './internal/run_quotas/route';
 import { internalCostRoutes } from './internal/cost/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
@@ -47,6 +48,7 @@ export const significantEventsRouteRepository = {
   ...internalKIQueriesRoutes,
   ...internalKIQueryOccurrencesRoutes,
   ...internalMaintenanceRoutes,
+  ...internalServiceAccountRoutes,
   ...internalRunQuotaRoutes,
   ...internalCostRoutes,
   ...reconcileRoutes,

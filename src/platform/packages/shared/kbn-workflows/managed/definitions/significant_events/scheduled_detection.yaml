@@ -9,6 +9,8 @@ tags:
   - scheduled
   - detection
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   timeout: "10m"
   concurrency:
     key: "significant-events-scheduled-detection"
@@ -18,12 +20,26 @@ triggers:
   - type: scheduled
     with:
       every: "__DETECTION_INTERVAL_MINUTES__m"
-  - type: manual
 steps:
+  # Only the schedule starts this workflow. Anyone allowed to run workflows could otherwise run
+  # detection as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "scheduled"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs detection as the Nightshift service account on its schedule and
+            cannot be run directly. This run was started by {{ execution.triggeredBy }}.
+
   - name: detect
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-detection"
+      # Detection runs as the service account this workflow is bound to.
+      run-as-mode: inherit
       inputs:
         lookback: "now-__DETECTION_LOOKBACK_MINUTES__m"
         bucketInterval: "__DETECTION_BUCKET_INTERVAL_MINUTES__m"

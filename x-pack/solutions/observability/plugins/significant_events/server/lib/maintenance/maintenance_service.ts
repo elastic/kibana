@@ -8,6 +8,10 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import {
+  getNightshiftBoundCleanupWorkflowId,
+  getNightshiftBoundKiSyncWorkflowId,
+} from '@kbn/workflows/managed';
 import type {
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
@@ -53,6 +57,11 @@ import {
   type MaintenanceRuleTarget,
 } from './state_store';
 import { reEnableWorkflow, sweepWorkflows, mergeTargets, targetKey } from './workflows';
+import {
+  createNotSetUpError,
+  isDetectionEngineSetUp,
+  withDetectionEngineAccount,
+} from '../service_accounts/detection_engine_account';
 
 /**
  * `mode` is how the snapshot is treated, not where the pause came from: `pause` records a
@@ -279,45 +288,63 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
-  /** Re-enable the recorded rules; returns failed ids and how many were toggled on. */
-  const reEnableRules = async (
-    request: KibanaRequest,
-    ruleIds: string[],
-    failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<{ failedIds: string[]; toggledCount: number }> => {
+  /**
+   * Re-enable the recorded rules as the space's detection engine account, so they run on keys the
+   * account owns rather than the caller's. Returns failed ids and how many were toggled on.
+   */
+  const reEnableRules = async ({
+    spaceId,
+    ruleIds,
+    failures,
+  }: {
+    spaceId: SpaceId;
+    ruleIds: string[];
+    failures: SignificantEventsMaintenanceFailure[];
+  }): Promise<{ failedIds: string[]; toggledCount: number }> => {
     if (ruleIds.length === 0) {
       return { failedIds: [], toggledCount: 0 };
     }
     try {
-      const { getSignificantEventsAlertingContext, getKnowledgeIndicatorClient, sourcesClient } =
-        await getScopedClients({ request });
-      const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
-      if (!alertingV2RulesClient) {
-        failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
-        // Keep every rule recorded so a later resume can retry them.
-        return { failedIds: ruleIds, toggledCount: 0 };
-      }
-      // A source disabled before or during the pause keeps its rules off: its enabled flag owns
-      // them now, and enabling the source turns them back on. They leave the record here.
-      const [links, disabledSources] = await Promise.all([
-        (await getKnowledgeIndicatorClient()).getRuleBackedQueryLinks(),
-        listAllSources(sourcesClient, { enabled: false }),
-      ]);
-      const disabledSourceIds = new Set(disabledSources.map(({ id }) => id));
-      const disabledSourceRuleIds = new Set(
-        links.filter((link) => disabledSourceIds.has(link.source_id)).map((link) => link.rule_id)
-      );
-      const ruleIdsToEnable = ruleIds.filter((id) => !disabledSourceRuleIds.has(id));
-      if (ruleIdsToEnable.length === 0) {
-        return { failedIds: [], toggledCount: 0 };
-      }
-      const {
-        toggledIds,
-        failedIds,
-        failures: ruleFailures,
-      } = await setV2RulesEnabled(alertingV2RulesClient, ruleIdsToEnable, true);
-      failures.push(...ruleFailures);
-      return { failedIds, toggledCount: toggledIds.length };
+      return await withDetectionEngineAccount({
+        core: server.core,
+        spaceId,
+        fn: async (accountRequest) => {
+          const {
+            getSignificantEventsAlertingContext,
+            getKnowledgeIndicatorClient,
+            sourcesClient,
+          } = await getScopedClients({ request: accountRequest });
+          const { alertingV2RulesClient } = await getSignificantEventsAlertingContext();
+          if (!alertingV2RulesClient) {
+            failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
+            // Keep every rule recorded so a later resume can retry them.
+            return { failedIds: ruleIds, toggledCount: 0 };
+          }
+          // A source disabled before or during the pause keeps its rules off: its enabled flag
+          // owns them now, and enabling the source turns them back on. They leave the record here.
+          const [links, disabledSources] = await Promise.all([
+            (await getKnowledgeIndicatorClient()).getRuleBackedQueryLinks(),
+            listAllSources(sourcesClient, { enabled: false }),
+          ]);
+          const disabledSourceIds = new Set(disabledSources.map(({ id }) => id));
+          const disabledSourceRuleIds = new Set(
+            links
+              .filter((link) => disabledSourceIds.has(link.source_id))
+              .map((link) => link.rule_id)
+          );
+          const ruleIdsToEnable = ruleIds.filter((id) => !disabledSourceRuleIds.has(id));
+          if (ruleIdsToEnable.length === 0) {
+            return { failedIds: [], toggledCount: 0 };
+          }
+          const {
+            toggledIds,
+            failedIds,
+            failures: ruleFailures,
+          } = await setV2RulesEnabled(alertingV2RulesClient, ruleIdsToEnable, true);
+          failures.push(...ruleFailures);
+          return { failedIds, toggledCount: toggledIds.length };
+        },
+      });
     } catch (error) {
       failures.push({ target: 'rules', error: toMessage(error) });
       return { failedIds: ruleIds, toggledCount: 0 };
@@ -621,6 +648,11 @@ export const createSignificantEventsMaintenanceService = ({
         if (currentState !== 'paused' && !hasRetryInventory) {
           return emptySummary('enabled');
         }
+        // What resume turns back on runs as the space's accounts, so a space without them stays
+        // paused, untouched.
+        if (!(await isDetectionEngineSetUp({ core: server.core, spaceId }))) {
+          throw createNotSetUpError();
+        }
 
         const failures: SignificantEventsMaintenanceFailure[] = [];
         const mgmt = server.workflowsManagement?.management;
@@ -662,6 +694,29 @@ export const createSignificantEventsMaintenanceService = ({
               remainingWorkflows.push(workflow);
             }
           }
+          // The sync and the cleanup run whenever the space is set up and not paused, so Resume
+          // also turns them back on when they were disabled outside a pause. A missing one is the
+          // setup's to install.
+          for (const alwaysOn of [
+            { id: getNightshiftBoundKiSyncWorkflowId(spaceId), spaceId },
+            { id: getNightshiftBoundCleanupWorkflowId(spaceId), spaceId },
+          ]) {
+            if (recordedWorkflows.some((workflow) => targetKey(workflow) === targetKey(alwaysOn))) {
+              continue;
+            }
+            const outcome = await reEnableWorkflow({
+              mgmt,
+              workflow: alwaysOn,
+              request,
+              failures,
+              reportMissing: false,
+            });
+            if (outcome === 'toggled') {
+              workflowsToggled += 1;
+            } else if (outcome === 'failed') {
+              remainingWorkflows.push(alwaysOn);
+            }
+          }
         } else {
           for (const workflow of recordedWorkflows) {
             if (shouldAttemptWorkflow(workflow)) {
@@ -676,11 +731,11 @@ export const createSignificantEventsMaintenanceService = ({
           }
         }
 
-        const restoredRules = await reEnableRules(
-          requestForSpace(request, spaceId),
-          recordedRules.map(({ id }) => id),
-          failures
-        );
+        const restoredRules = await reEnableRules({
+          spaceId,
+          ruleIds: recordedRules.map(({ id }) => id),
+          failures,
+        });
         const remainingRules = restoredRules.failedIds.map((id) => ({ id, spaceId }));
         const rulesToggled = restoredRules.toggledCount;
 
