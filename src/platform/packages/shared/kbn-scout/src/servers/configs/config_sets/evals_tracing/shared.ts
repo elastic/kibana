@@ -99,6 +99,9 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
         '--xpack.evals.enabled=true',
         // Suites ingest scores and read datasets through the evals routes.
         '--xpack.evals.mode=full',
+        // Off by default and read-only in the UI. With it on, every inference call an eval makes
+        // writes a token-usage doc, so a run's cost can be compared across models.
+        '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true',
         ...(shouldEnableTracing
           ? [
               '--elastic.apm.active=false',
