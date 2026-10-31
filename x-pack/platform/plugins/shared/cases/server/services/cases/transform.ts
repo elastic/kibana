@@ -127,6 +127,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     status,
     incremental_id,
     settings,
+    // Derived from `observables` below, so a caller-supplied value is never persisted.
+    total_observables: _totalObservables,
     ...restAttributes
   } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
@@ -162,7 +164,9 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
           extractObservables: settings.extractObservables ?? false,
         },
       }),
-      total_observables: restAttributes.observables?.length ?? 0,
+      ...(restAttributes.observables !== undefined && {
+        total_observables: restAttributes.observables.length,
+      }),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };

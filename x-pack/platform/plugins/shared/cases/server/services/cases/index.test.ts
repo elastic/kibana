@@ -610,11 +610,9 @@ describe('CasesService', () => {
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
-        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-          Object {
-            "total_observables": 0,
-          }
-        `);
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
+          `Object {}`
+        );
         const updateOptions = unsecuredSavedObjectsClient.update.mock
           .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
         expect(updateOptions.references).toBeUndefined();
@@ -638,7 +636,6 @@ describe('CasesService', () => {
               "name": "none",
               "type": ".none",
             },
-            "total_observables": 0,
           }
         `);
       });

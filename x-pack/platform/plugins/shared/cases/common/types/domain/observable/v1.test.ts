@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_OBSERVABLE_DESCRIPTION_LENGTH, MAX_OBSERVABLE_VALUE_LENGTH } from '../../../constants';
 import { CaseObservableSchema } from './v1';
 
 describe('CaseObservableSchema', () => {
@@ -21,6 +22,19 @@ describe('CaseObservableSchema', () => {
     const result = CaseObservableSchema.safeParse(observable);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(observable);
+  });
+
+  it('still parses stored observables longer than the request bounds', () => {
+    const legacyObservable = {
+      ...observable,
+      value: 'a'.repeat(MAX_OBSERVABLE_VALUE_LENGTH + 1),
+      description: 'a'.repeat(MAX_OBSERVABLE_DESCRIPTION_LENGTH + 1),
+    };
+
+    const result = CaseObservableSchema.safeParse(legacyObservable);
+
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(legacyObservable);
   });
 
   it('strips unknown fields', () => {
