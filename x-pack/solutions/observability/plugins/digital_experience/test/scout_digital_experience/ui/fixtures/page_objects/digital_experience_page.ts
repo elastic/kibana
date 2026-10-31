@@ -41,6 +41,7 @@ export class DigitalExperiencePage {
   public readonly sessionBack: Locator;
   public readonly sessionWaterfallSegments: Locator;
   public readonly sessionWaterfallErrors: Locator;
+  public readonly sessionPageVisits: Locator;
   public readonly breadcrumbs: Locator;
   public readonly navEntry: Locator;
   public readonly legacyNavEntry: Locator;
@@ -77,6 +78,7 @@ export class DigitalExperiencePage {
     this.sessionBack = page.getByTestId('digitalExperienceSessionBack');
     this.sessionWaterfallSegments = page.getByTestId('digitalExperienceSessionWaterfallSegment');
     this.sessionWaterfallErrors = page.getByTestId('digitalExperienceSessionWaterfallError');
+    this.sessionPageVisits = page.getByTestId('digitalExperiencePageVisit');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');

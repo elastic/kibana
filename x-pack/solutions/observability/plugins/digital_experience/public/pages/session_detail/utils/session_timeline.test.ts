@@ -10,7 +10,7 @@ import {
   type SessionPageVisit,
   type SessionTimelineEvent,
 } from '../../../../common/sessions';
-import { formatOffset, layoutWaterfall } from './session_timeline';
+import { formatOffset, groupEventsByVisit, layoutWaterfall } from './session_timeline';
 
 const START = '2026-10-20T10:00:00.000Z';
 const at = (offsetMs: number) => new Date(Date.parse(START) + offsetMs).toISOString();
@@ -40,6 +40,38 @@ const event = (
   detail: null,
   traceId: null,
   spanId: null,
+});
+
+describe('groupEventsByVisit', () => {
+  const visits = [visit('/', 0, 10_000), visit('/cart', 10_000, 5_000)];
+
+  it('puts each event in the visit it happened in, keeping spans and logs out', () => {
+    const groups = groupEventsByVisit(visits, [
+      event('page_view', 0),
+      event('click', 4_000),
+      event('span', 5_000),
+      event('page_view', 10_000),
+      event('log', 11_000),
+      event('error', 12_000),
+      event('web_vital', 14_000),
+    ]);
+
+    expect(
+      groups.map(({ visit: { page }, events }) => [page, events.map(({ kind }) => kind)])
+    ).toEqual([
+      ['/', ['page_view', 'click']],
+      ['/cart', ['page_view', 'error', 'web_vital']],
+    ]);
+  });
+
+  it('puts events before the first visit in it', () => {
+    const [first] = groupEventsByVisit(visits, [event('click', -2_000)]);
+    expect(first.events.map(({ kind }) => kind)).toEqual(['click']);
+  });
+
+  it('returns no groups without page visits', () => {
+    expect(groupEventsByVisit([], [event('click', 0)])).toEqual([]);
+  });
 });
 
 describe('layoutWaterfall', () => {

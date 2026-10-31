@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   EuiButton,
   EuiCode,
@@ -35,9 +35,10 @@ import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_p
 import { useFormatters } from '../../hooks/use_formatters';
 import { SESSIONS_LABEL } from '../../labels';
 import { pickSessionsListQuery } from '../sessions/hooks/use_sessions_list_query';
+import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
 import { SessionWaterfall, pageColors } from './components/session_waterfall';
-import { layoutWaterfall } from './utils/session_timeline';
+import { groupEventsByVisit, layoutWaterfall } from './utils/session_timeline';
 
 /** Characters of the session ID shown in the breadcrumb; the header has it in full. */
 const SHORT_ID_LENGTH = 8;
@@ -75,11 +76,25 @@ function SessionDetail({
   formatters: ReturnType<typeof useFormatters>;
 }) {
   const { session, pageVisits, timeline, timelineTruncated } = detail;
+  const visitElements = useRef(new Map<number, HTMLElement>());
   const colors = useMemo(() => pageColors(pageVisits), [pageVisits]);
   const layout = useMemo(
     () => layoutWaterfall(session, pageVisits, timeline),
     [session, pageVisits, timeline]
   );
+  const visits = useMemo(() => groupEventsByVisit(pageVisits, timeline), [pageVisits, timeline]);
+
+  const registerVisit = useCallback((index: number, element: HTMLElement | null) => {
+    if (element) {
+      visitElements.current.set(index, element);
+    } else {
+      visitElements.current.delete(index);
+    }
+  }, []);
+
+  const scrollToVisit = useCallback((index: number) => {
+    visitElements.current.get(index)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   return (
     <>
@@ -92,7 +107,7 @@ function SessionDetail({
             size="s"
             title={i18n.translate('xpack.digitalExperience.sessionDetail.timelineTruncatedTitle', {
               defaultMessage:
-                'This session has more events than can be shown, so the timeline ends early.',
+                'This session has more events than can be shown, so the timeline and journey end early.',
             })}
           />
           <EuiSpacer size="m" />
@@ -130,15 +145,36 @@ function SessionDetail({
               </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <SessionWaterfall layout={layout} pageVisits={pageVisits} colors={colors} />
+            <SessionWaterfall
+              layout={layout}
+              pageVisits={pageVisits}
+              colors={colors}
+              onSelectVisit={scrollToVisit}
+            />
           </EuiPanel>
+          <EuiSpacer size="l" />
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.digitalExperience.sessionDetail.journeyTitle', {
+                defaultMessage: 'Page journey',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <PageJourney
+            visits={visits}
+            colors={colors}
+            sessionDurationMs={layout.totalMs}
+            formatters={formatters}
+            registerVisit={registerVisit}
+          />
         </>
       )}
     </>
   );
 }
 
-/** A session: its summary and a waterfall of its page visits. */
+/** A session: its summary, a waterfall of its page visits, and what happened on each page. */
 export function SessionDetailPage({
   serviceName,
   sessionId,

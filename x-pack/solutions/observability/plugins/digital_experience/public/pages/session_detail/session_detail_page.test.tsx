@@ -224,6 +224,30 @@ describe('SessionDetailPage', () => {
     expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
   });
 
+  it('lists what happened on each page, without spans and logs', async () => {
+    mockFetch.mockResolvedValue(detail());
+    const scrollIntoView = jest.fn();
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+    renderPage();
+
+    const visits = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(visits).toHaveLength(2);
+    expect(visits[0]).toHaveTextContent('/');
+    expect(within(visits[0]).getByTestId('digitalExperienceSessionEvent-click')).toHaveTextContent(
+      'button#add'
+    );
+    expect(visits[0]).not.toHaveTextContent('GET /api/cart');
+    const error = within(visits[1]).getByTestId('digitalExperienceSessionEvent-error');
+    expect(error).toHaveTextContent('0:45');
+    expect(error).toHaveTextContent('TypeError');
+    expect(error).toHaveTextContent('cart is undefined');
+    expect(visits[1]).toHaveTextContent('1 error');
+    expect(within(visits[1]).getByTestId('digitalExperienceWebVital-cls')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('digitalExperienceSessionWaterfallSegment')[1]);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
   it('says when the timeline is cut short', async () => {
     mockFetch.mockResolvedValue(detail({ timelineTruncated: true }));
     renderPage();
