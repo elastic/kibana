@@ -1611,6 +1611,79 @@ describe('create', () => {
       expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'urgent' });
     });
 
+    describe('extract_observables_source', () => {
+      const templateWithSettingsSO = {
+        ...templateSO,
+        attributes: {
+          ...templateSO.attributes,
+          definition: yamlStringify({
+            name: 'Template default title',
+            fields: [],
+            settings: { extractObservables: false },
+          }),
+        },
+      };
+
+      it('stamps "template" when the template supplies extractObservables', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+          templateWithSettingsSO as never
+        );
+
+        await create(
+          { ...minimalRequest, template: { id: 'tmpl-exp' } },
+          clientArgs,
+          expansionCasesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.settings.extractObservables).toBe(false);
+        expect(createArgs.attributes.extract_observables_source).toBe('template');
+      });
+
+      it('stamps "explicit" when the caller value wins over the template', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+          templateWithSettingsSO as never
+        );
+
+        await create(
+          {
+            ...minimalRequest,
+            template: { id: 'tmpl-exp' },
+            settings: { syncAlerts: true, extractObservables: true },
+          },
+          clientArgs,
+          expansionCasesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.settings.extractObservables).toBe(true);
+        expect(createArgs.attributes.extract_observables_source).toBe('explicit');
+      });
+
+      it('stamps "template" when the caller value equals the template value', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+          templateWithSettingsSO as never
+        );
+
+        await create(
+          {
+            ...minimalRequest,
+            template: { id: 'tmpl-exp' },
+            settings: { syncAlerts: true, extractObservables: false },
+          },
+          clientArgs,
+          expansionCasesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.settings.extractObservables).toBe(false);
+        expect(createArgs.attributes.extract_observables_source).toBe('template');
+      });
+    });
+
     it('records the expanded (not raw) request on the create_case user action', async () => {
       const clientArgs = createClientArgs();
 
@@ -2439,6 +2512,86 @@ describe('create', () => {
 
       const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
       expect(createCaseCall.settings.extractObservables).toBe(true);
+    });
+
+    describe('extract_observables_source', () => {
+      it('stamps "space_default" as a top-level attribute when the caller omitted extractObservables', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await create(theCase, clientArgs, extractObservablesCasesClient);
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.extract_observables_source).toBe('space_default');
+        expect(attributes.settings).not.toHaveProperty('extractObservablesSource');
+      });
+
+      it('stamps "explicit" as a top-level attribute when the caller set extractObservables', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await create(
+          { ...theCase, settings: { syncAlerts: true, extractObservables: false } },
+          clientArgs,
+          extractObservablesCasesClient
+        );
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.extract_observables_source).toBe('explicit');
+        expect(attributes.settings).not.toHaveProperty('extractObservablesSource');
+      });
+
+      it('stamps "space_default" when the caller value equals the space default', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await create(
+          { ...theCase, settings: { syncAlerts: true, extractObservables: true } },
+          clientArgs,
+          extractObservablesCasesClient
+        );
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(true);
+        expect(attributes.extract_observables_source).toBe('space_default');
+      });
+
+      it('does not record the source in the create_case user action', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await create(theCase, clientArgs, extractObservablesCasesClient);
+
+        const [[userActionArgs]] =
+          clientArgs.services.userActionService.creator.createUserAction.mock.calls;
+        expect(JSON.stringify(userActionArgs)).not.toContain('bservablesSource');
+        expect(JSON.stringify(userActionArgs)).not.toContain('extract_observables_source');
+      });
+
+      it('rejects a caller-supplied settings.extractObservablesSource', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await expect(
+          create(
+            {
+              ...theCase,
+              settings: { syncAlerts: true, extractObservablesSource: 'rule' },
+            } as unknown as CasePostRequest,
+            clientArgs,
+            extractObservablesCasesClient
+          )
+        ).rejects.toThrow('Excess keys are not allowed');
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      });
+
+      it('rejects a caller-supplied top-level extract_observables_source', async () => {
+        const clientArgs = createClientArgsWithConfig(true);
+
+        await expect(
+          create(
+            { ...theCase, extract_observables_source: 'rule' } as unknown as CasePostRequest,
+            clientArgs,
+            extractObservablesCasesClient
+          )
+        ).rejects.toThrow('Excess keys are not allowed');
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      });
     });
   });
 });
