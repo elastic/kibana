@@ -39,6 +39,9 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
+import { getObservableSource, mirrorToObservablesIndex } from './observables_index_sync';
+import type { ObservablesSyncAttributes } from './observables_index_sync';
+import type { ObservableSource } from '../../services/observables';
 import { emitObservablesAddedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
@@ -61,6 +64,11 @@ const MAX_OBSERVABLES_WRITE_ATTEMPTS = 3;
 interface ObservablesWrite<TResult> {
   observables: Observable[];
   result: TResult;
+  /**
+   * Mirrors the change of this attempt to the observables index. What it returns is merged into the
+   * case update of the same attempt, so a failed mirror is recorded with the change it belongs to.
+   */
+  mirror: () => Promise<ObservablesSyncAttributes>;
 }
 
 interface ObservablesWriteArgs<TResult, TComputed extends ObservablesWrite<TResult> | undefined> {
@@ -77,10 +85,13 @@ interface ObservablesWriteOutcome<TResult> {
 }
 
 /**
- * Reads the case, lets `compute` derive the new observables list from it, and writes the list
- * with the case version. On a version conflict the case is re-read and `compute` runs again, so a
- * concurrent writer's observables are never overwritten. `compute` returns undefined when there
- * is nothing to write.
+ * Reads the case, lets `compute` derive the new observables list from it, mirrors the change to the
+ * observables index and writes the list with the case version. On a version conflict the case is
+ * re-read and `compute` and the mirror run again, so a concurrent writer's observables are never
+ * overwritten and the index write is redone for the change that is actually stored. The sync task
+ * relies on that redo: it can remove a mirrored document while this write is in flight, and the
+ * version conflict it causes brings the document back. `compute` returns undefined when there is
+ * nothing to write.
  *
  * The case is not re-authorized on a re-read: authorization ran on the first read and the owner
  * of a case cannot change.
@@ -108,6 +119,8 @@ async function writeObservablesWithRetry<TResult>({
       return;
     }
 
+    const syncAttributes = await write.mirror();
+
     try {
       const patchedCase = await caseService.patchCase({
         caseId: retrievedCase.id,
@@ -116,6 +129,7 @@ async function writeObservablesWithRetry<TResult>({
         updatedAttributes: {
           observables: write.observables,
           total_observables: write.observables.length,
+          ...syncAttributes,
         },
       });
 
@@ -143,16 +157,20 @@ async function writeObservablesWithRetry<TResult>({
  *
  * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
  *   round-trip. When provided, `caseId` is ignored for the initial fetch.
+ * @param source - How the observables reached the case. Defaults to the origin of the cases client.
  */
 export const applyObservablesToCase = async (
   caseId: string,
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
-  prefetchedCase?: CaseSavedObjectTransformed
+  prefetchedCase?: CaseSavedObjectTransformed,
+  source: ObservableSource = getObservableSource(clientArgs.clientSource)
 ) => {
   const {
-    services: { caseService, userActionService },
+    services: { caseService, userActionService, observablesService },
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   if (observables.length === 0) {
@@ -197,6 +215,19 @@ export const applyObservablesToCase = async (
       return {
         observables: [...currentObservables, ...newlyAddedObservables],
         result: newlyAddedObservables,
+        mirror: () =>
+          mirrorToObservablesIndex({
+            caseId: retrievedCase.id,
+            logger,
+            write: () =>
+              observablesService.createObservables({
+                caseId: retrievedCase.id,
+                spaceId,
+                owner: retrievedCase.attributes.owner,
+                observables: newlyAddedObservables,
+                source,
+              }),
+          }),
       };
     },
   });
@@ -318,9 +349,12 @@ export const updateObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
+    clientSource,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -371,7 +405,24 @@ export const updateObservable = async (
           requestFields: updatedObservables,
         });
 
-        return { observables: updatedObservables, result: undefined };
+        return {
+          observables: updatedObservables,
+          result: undefined,
+          mirror: () =>
+            mirrorToObservablesIndex({
+              caseId: currentCase.id,
+              logger,
+              write: () =>
+                observablesService.updateObservable({
+                  caseId: currentCase.id,
+                  spaceId,
+                  owner: currentCase.attributes.owner,
+                  previous: currentObservables[observableIndex],
+                  next: updatedObservables[observableIndex],
+                  source: getObservableSource(clientSource),
+                }),
+            }),
+        };
       },
     });
 
@@ -411,9 +462,11 @@ export const deleteObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -446,7 +499,23 @@ export const deleteObservable = async (
           );
         }
 
-        return { observables: updatedObservables, result: undefined };
+        return {
+          observables: updatedObservables,
+          result: undefined,
+          mirror: () =>
+            mirrorToObservablesIndex({
+              caseId: currentCase.id,
+              logger,
+              write: () =>
+                observablesService.deleteObservables({
+                  caseId: currentCase.id,
+                  spaceId,
+                  observables: currentCase.attributes.observables.filter(
+                    (observable) => observable.id === observableId
+                  ),
+                }),
+            }),
+        };
       },
     });
 
@@ -537,9 +606,11 @@ export const bulkDeleteObservables = async (
   clientArgs: CasesClientArgs
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -577,13 +648,27 @@ export const bulkDeleteObservables = async (
         );
       }
 
+      const removedObservables = currentObservables.filter((observable) =>
+        idsToDelete.has(observable.id)
+      );
       const updatedObservables = currentObservables.filter(
         (observable) => !idsToDelete.has(observable.id)
       );
 
       return {
         observables: updatedObservables,
-        result: currentObservables.length - updatedObservables.length,
+        result: removedObservables.length,
+        mirror: () =>
+          mirrorToObservablesIndex({
+            caseId: currentCase.id,
+            logger,
+            write: () =>
+              observablesService.deleteObservables({
+                caseId: currentCase.id,
+                spaceId,
+                observables: removedObservables,
+              }),
+          }),
       };
     },
   });
