@@ -202736,6 +202736,7 @@ components:
         * `endpoint_event_filters`: Event filters list
         * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
         * `endpoint_blocklists`: Blocklist
+        * `endpoint_custom_yara_signatures`: Custom YARA signatures list
       example: simple_list
       format: nonempty
       minLength: 1
@@ -206750,6 +206751,7 @@ components:
         * `endpoint_event_filters`: Event filters list
         * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
         * `endpoint_blocklists`: Blocklist
+        * `endpoint_custom_yara_signatures`: Custom YARA signatures list
       example: simple_list
       format: nonempty
       minLength: 1
