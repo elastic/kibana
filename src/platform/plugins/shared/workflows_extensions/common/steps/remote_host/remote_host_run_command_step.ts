@@ -30,7 +30,7 @@ export const InputSchema = lazySchema(() =>
   })
 );
 
-export const OutputSchema = z.unknown();
+export const OutputSchema = lazySchema(() => z.unknown());
 
 export type RemoteHostRunCommandStepConfigSchema = typeof ConfigSchema;
 export type RemoteHostRunCommandStepInputSchema = typeof InputSchema;

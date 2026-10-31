@@ -27,7 +27,7 @@ export const InputSchema = lazySchema(() =>
   })
 );
 
-export const OutputSchema = z.null();
+export const OutputSchema = lazySchema(() => z.null());
 
 export type RemoteHostUploadFileStepConfigSchema = typeof ConfigSchema;
 export type RemoteHostUploadFileStepInputSchema = typeof InputSchema;
