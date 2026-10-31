@@ -81,7 +81,7 @@ export interface MigrateDocumentOptions {
    */
   allowDowngrade?: boolean;
   /**
-   * Allow skipping the deep clone of the document when no migration is going to run, see {@link DocumentMigrateOptions.allowSkipClone}.
+   * Skip the deep clone for upgrades and downgrades when the caller hands over ownership, see {@link DocumentMigrateOptions.allowSkipClone}.
    * Defaults to `false`.
    */
   allowSkipClone?: boolean;

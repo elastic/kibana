@@ -28,12 +28,11 @@ function isGreater(a?: string, b?: string) {
 export class DocumentUpgradePipeline implements MigrationPipeline {
   private additionalDocs = [] as SavedObjectUnsanitizedDoc[];
   private document: SavedObjectUnsanitizedDoc;
-  private originalDoc: SavedObjectUnsanitizedDoc;
+  private readonly originalType: string;
   private migrations: ActiveMigrations;
   private kibanaVersion: string;
   private convertNamespaceTypes: boolean;
   private targetTypeVersion: string;
-  private allowSkipClone: boolean;
 
   constructor({
     document,
@@ -49,13 +48,12 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     convertNamespaceTypes: boolean;
     targetTypeVersion?: string;
     /**
-     * Only clone the document when a transform is going to run. Otherwise the document is cloned upfront.
+     * Skip cloning when the caller hands over ownership of the document.
      * See `DocumentMigrateOptions.allowSkipClone`.
      */
     allowSkipClone?: boolean;
   }) {
-    this.originalDoc = document;
-    this.allowSkipClone = allowSkipClone;
+    this.originalType = document.type;
     this.document = allowSkipClone ? document : cloneDeep(document);
     this.migrations = migrations;
     this.kibanaVersion = kibanaVersion;
@@ -68,7 +66,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
       for (const transform of this.getPendingTransforms()) {
         yield transform;
 
-        if (this.document.type !== this.originalDoc.type) {
+        if (this.document.type !== this.originalType) {
           throw new Error(`Changing a document's type during a migration is not supported.`);
         }
       }
@@ -192,11 +190,6 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
 
   run(): MigrationPipelineResult {
     assertValidCoreVersion({ document: this.document, kibanaVersion: this.kibanaVersion });
-
-    if (this.allowSkipClone && this.hasPendingTransforms()) {
-      // transforms may mutate the document, do not let them touch the caller's one
-      this.document = cloneDeep(this.document);
-    }
 
     for (const transform of this.getPipeline()) {
       const { typeMigrationVersion: previousVersion } = this.document;

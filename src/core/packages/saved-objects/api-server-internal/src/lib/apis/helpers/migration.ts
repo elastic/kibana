@@ -52,7 +52,7 @@ export class MigrationHelper {
    * It will therefore accept downgrading the document before returning it from the API.
    */
   migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
-    // the document was just read from Elasticsearch, there is no need to clone it unless it gets migrated
+    // The caller hands over ownership of this document fetched from Elasticsearch, so cloning is unnecessary.
     return this.migrator.migrateDocument(document, { allowDowngrade: true, allowSkipClone: true });
   }
 
@@ -69,7 +69,7 @@ export class MigrationHelper {
 
     const migrate = (doc: SavedObjectUnsanitizedDoc | SavedObject) => {
       try {
-        // the document was just read from Elasticsearch, there is no need to clone it unless it gets migrated
+        // The caller hands over ownership of this document fetched from Elasticsearch, so cloning is unnecessary.
         return this.migrator.migrateDocument(doc, {
           allowDowngrade: true,
           allowSkipClone: true,

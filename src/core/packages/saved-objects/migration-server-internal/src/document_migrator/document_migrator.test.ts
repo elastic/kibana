@@ -243,15 +243,16 @@ describe('DocumentMigrator', () => {
         expect(originalDoc).toEqual(upToDateDoc());
       });
 
-      it(`still doesn't mutate the original document when a migration runs with allowSkipClone`, () => {
+      it('does not clone a document when a migration runs with allowSkipClone', () => {
         const migrator = createMigrator();
         const originalDoc = { ...upToDateDoc(), attributes: {}, typeMigrationVersion: '' };
 
         const migratedDoc = migrator.migrate(originalDoc, { allowSkipClone: true });
 
-        expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
+        expect(_.get(originalDoc, 'attributes.name')).toBe('Mike');
         expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
-        expect(migratedDoc.attributes).not.toBe(originalDoc.attributes);
+        expect(migratedDoc.attributes).toBe(originalDoc.attributes);
+        expect(migratedDoc.typeMigrationVersion).toBe('1.2.3');
       });
     });
 
@@ -1471,6 +1472,46 @@ describe('DocumentMigrator', () => {
   });
 
   describe('down migration', () => {
+    it.each([undefined, false, true])(
+      'only lets forward compatibility schemas mutate the input when allowSkipClone=%s is true',
+      (allowSkipClone) => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'foo',
+            modelVersions: {
+              1: {
+                changes: [],
+                schemas: {
+                  forwardCompatibility: (attributes) => {
+                    if (typeof attributes !== 'object' || attributes === null) {
+                      throw new Error('Expected document attributes to be an object');
+                    }
+                    set(attributes, 'nested.value', 'migrated');
+                    return attributes;
+                  },
+                },
+              },
+            },
+          }),
+        });
+        migrator.prepareMigrations();
+        const document = {
+          id: 'foo-1',
+          type: 'foo',
+          attributes: { nested: { value: 'original' } },
+          typeMigrationVersion: '10.2.0',
+        };
+
+        const migratedDoc = migrator.migrate(document, { allowDowngrade: true, allowSkipClone });
+
+        expect(migratedDoc.typeMigrationVersion).toBe('10.1.0');
+        expect(migratedDoc.attributes).toEqual({ nested: { value: 'migrated' } });
+        expect(document.attributes.nested.value).toBe(allowSkipClone ? 'migrated' : 'original');
+        expect(migratedDoc.attributes === document.attributes).toBe(allowSkipClone === true);
+      }
+    );
+
     it('accepts to downgrade the document if `allowDowngrade` is true', () => {
       const registry = createRegistry({});
 

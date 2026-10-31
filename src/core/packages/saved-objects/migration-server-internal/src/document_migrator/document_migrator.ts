@@ -204,7 +204,10 @@ export class DocumentMigrator implements IDocumentMigrator {
           `Document "${effectiveDoc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
         );
       }
-      return this.transformDown(effectiveDoc, { targetTypeVersion: latestVersion! });
+      return this.transformDown(effectiveDoc, {
+        targetTypeVersion: latestVersion!,
+        allowSkipClone,
+      });
     } else {
       return this.transformUp(effectiveDoc, {
         convertNamespaceTypes,
@@ -241,7 +244,7 @@ export class DocumentMigrator implements IDocumentMigrator {
 
   private transformDown = (
     doc: SavedObjectUnsanitizedDoc,
-    { targetTypeVersion }: { targetTypeVersion: string }
+    { targetTypeVersion, allowSkipClone }: { targetTypeVersion: string; allowSkipClone?: boolean }
   ) => {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -251,6 +254,7 @@ export class DocumentMigrator implements IDocumentMigrator {
       document: doc,
       targetTypeVersion,
       typeTransforms: this.migrations[doc.type],
+      allowSkipClone,
       kibanaVersion: this.options.kibanaVersion,
     });
     const { document } = pipeline.run();
