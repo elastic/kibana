@@ -659,6 +659,7 @@ ${ATTACK_DISCOVERY_REFINE}
         expect(isEmptyModelResponseErrorEntry(state.errors[0])).toBe(true);
         expect(state.errors[0]).not.toContain('SECRET');
         expect(state.errors[0]).not.toContain('incomplete response from the model');
+        expect(state.errors[0]).toMatch(/^refine node detected that /);
 
         let message = '';
         try {
