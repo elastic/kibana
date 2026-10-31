@@ -345,6 +345,42 @@ describe('Lens Attribute', () => {
     });
   });
 
+  it('should put a series on the axis it pins, overriding the field-format default', function () {
+    const { layers } = new LensAttributes(
+      [layerConfig, { ...layerConfig, axisMode: 'right' }],
+      reportViewConfig.reportType
+    ).getXyState() as XYVisualizationState;
+
+    expect(
+      layers
+        .filter((layer) => layer.layerType === 'data')
+        .map((layer) => ('yConfig' in layer ? layer.yConfig?.[0].axisMode : undefined))
+    ).toEqual(['left', 'right']);
+  });
+
+  it('should fill empty unique_count buckets with zero only when the metric opts out of emptyAsNull', function () {
+    const getColumn = (emptyAsNull?: boolean) =>
+      lnsAttr.getColumnBasedOnType({
+        sourceField: REPORT_METRIC_FIELD,
+        layerId: 'layer0',
+        layerConfig,
+        metricOption: {
+          id: 'error_states',
+          field: USER_AGENT_NAME,
+          label: 'Error states',
+          columnType: 'operation',
+          emptyAsNull,
+        },
+      });
+
+    expect(getColumn(false)).toEqual(
+      expect.objectContaining({ operationType: 'unique_count', params: { emptyAsNull: false } })
+    );
+    expect(getColumn()).toEqual(
+      expect.objectContaining({ operationType: 'unique_count', params: { emptyAsNull: true } })
+    );
+  });
+
   it('should return first layer', function () {
     expect(lnsAttr.getLayers()).toEqual(sampleAttribute.state.datasourceStates.formBased.layers);
   });

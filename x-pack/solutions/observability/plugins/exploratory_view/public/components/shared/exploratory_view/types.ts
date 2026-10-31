@@ -14,6 +14,7 @@ import type {
   SeriesType,
   OperationType,
   YConfig,
+  YAxisMode,
   MetricState,
 } from '@kbn/lens-plugin/public';
 
@@ -72,6 +73,8 @@ export interface MetricOption {
   metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition' | 'textAlign'>;
   palette?: PaletteOutput;
   format?: 'percent' | 'number';
+  // `unique_count` only: buckets without matching docs are `null` by default (and a
+  // chart's linear fitting draws across them); `false` makes them `0` instead.
   emptyAsNull?: boolean;
   timestampField?: string;
 }
@@ -127,6 +130,9 @@ export interface SeriesUrl {
   hidden?: boolean;
   showPercentileAnnotations?: boolean;
   color?: string;
+  // Pins this series to a y axis. By default a series goes on the left axis when
+  // its field format matches the first series' and on the right one otherwise.
+  axisMode?: YAxisMode;
 }
 
 export interface UrlFilter {
