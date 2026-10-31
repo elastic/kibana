@@ -293,6 +293,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows'
+  - '@kbn/workflows-yaml'
   - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
