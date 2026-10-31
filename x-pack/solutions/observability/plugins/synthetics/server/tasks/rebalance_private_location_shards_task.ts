@@ -455,7 +455,7 @@ export class RebalancePrivateLocationShardsTask {
     }
   }
 
-  /** Bumps a due nudge once; a failed bump stays pending for the next run. */
+  /** Bumps a due nudge once. A failed bump is dropped, not retried, so it cannot pile up revisions. */
   private async nudgeIfDue(agentPolicyId: string, pinNudges: Record<string, number>, now: number) {
     const dueAt = pinNudges[agentPolicyId];
     if (dueAt === undefined || now < dueAt) {
@@ -465,7 +465,6 @@ export class RebalancePrivateLocationShardsTask {
     try {
       await this.syntheticsMonitorClient.privateLocationAPI.bumpAgentPolicyRevision(agentPolicyId);
     } catch (e) {
-      pinNudges[agentPolicyId] = dueAt;
       this.serverSetup.logger.warn(
         `[RebalancePrivateLocationShardsTask] Failed to nudge agent policy ${agentPolicyId}: ${e.message}`
       );

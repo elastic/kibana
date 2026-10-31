@@ -637,12 +637,16 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(result.state.pinNudges).toEqual({ 'ap-2': NOW + 1_000 });
     });
 
-    it('retries a nudge whose bump failed', async () => {
+    it('drops a backup nudge whose bump failed instead of retrying it', async () => {
       mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
 
       const result = await run({ pinNudges: { 'ap-1': NOW - 1 } });
 
-      expect(result.state.pinNudges).toEqual({ 'ap-1': NOW - 1 });
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(result.state.pinNudges).toEqual({});
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to nudge agent policy ap-1: conflict')
+      );
     });
   });
 
