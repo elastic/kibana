@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ApplicationsResponse } from '../../../common/types/applications';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
@@ -14,7 +14,7 @@ import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { getOtelApplications } from './otel/get_otel_applications';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { MAX_ENVIRONMENT_LENGTH } from './constants';
+import { timeRangeQuery } from '../params';
 
 export const APPLICATIONS_ENDPOINT = 'GET /internal/digital_experience/applications';
 
@@ -25,21 +25,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, APM_API_PRIVILEGE] },
   },
-  params: lazySchema(() =>
-    z.object({
-      query: z
-        .object({
-          start: isoDateTime(),
-          end: isoDateTime(),
-          // All environments when left out.
-          environment: z.string().min(1).max(MAX_ENVIRONMENT_LENGTH).optional(),
-        })
-        .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
-          message: '`start` must be before `end`',
-          path: ['end'],
-        }),
-    })
-  ),
+  params: lazySchema(() => z.object({ query: timeRangeQuery() })),
   handler: async ({
     params,
     context,

@@ -116,6 +116,7 @@ export function createRuleExecutionInput(
   return {
     ruleId: 'rule-1',
     spaceId: asSpaceId('default'),
+    executionId: 'execution-1',
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionContext: createExecutionContext(abortSignal),
     ...overrides,
