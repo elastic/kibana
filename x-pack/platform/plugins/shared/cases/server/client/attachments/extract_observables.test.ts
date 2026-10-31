@@ -308,6 +308,26 @@ describe('extractAndAddObservables', () => {
       );
     });
 
+    it('mirrors extracted observables to the observables index as auto_extract', async () => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      alertsService.getAlerts.mockResolvedValue({
+        docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+      });
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
+      const theCase = makeCase(true);
+
+      await extractAndAddObservables('case-1', [alertAttachment], theCase, clientArgs);
+
+      expect(clientArgs.services.observablesService.createObservables).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseId: caseSO.id,
+          source: 'auto_extract',
+          observables: [expect.objectContaining({ value: '1.2.3.4' })],
+        })
+      );
+    });
+
     it('does not emit and logs when extraction only finds existing observables', async () => {
       licensingService.isAtLeastPlatinum.mockResolvedValue(true);
       alertsService.getAlerts.mockResolvedValue({

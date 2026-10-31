@@ -26,6 +26,7 @@ import type {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  ObservablesService,
 } from '../services';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { LicensingService } from '../services/licensing';
@@ -47,6 +48,7 @@ export interface CasesServices {
   notificationService: NotificationService;
   templatesService: TemplatesService;
   fieldDefinitionsService: FieldDefinitionsService;
+  observablesService: ObservablesService;
 }
 
 /**

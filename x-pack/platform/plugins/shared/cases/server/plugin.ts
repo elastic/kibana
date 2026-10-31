@@ -42,6 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
+import { createObservablesStorage } from './services/observables';
 import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -540,6 +541,12 @@ export class CasePlugin
       // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:
         this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
+      // The adapter creates the index lazily on the first observable write, so building it here
+      // installs nothing in Elasticsearch.
+      observablesStorageClient: createObservablesStorage({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      }).getClient(),
     });
 
     return {

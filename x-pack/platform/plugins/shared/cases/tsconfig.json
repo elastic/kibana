@@ -45,6 +45,7 @@
     "@kbn/test-eui-helpers",
     "@kbn/config-schema",
     "@kbn/task-manager-plugin",
+    "@kbn/storage-adapter",
     "@kbn/usage-collection-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-common",

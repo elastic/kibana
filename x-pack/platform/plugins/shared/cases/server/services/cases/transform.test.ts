@@ -34,6 +34,17 @@ import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/type
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {
+    it('does not return the server-owned observables_sync_pending field', () => {
+      expect(
+        transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          attributes: { observables_sync_pending: true },
+          references: undefined,
+        }).attributes
+      ).not.toHaveProperty('observables_sync_pending');
+    });
+
     it('does not return the connector field if it is undefined', () => {
       expect(
         transformUpdateResponseToExternalModel({
@@ -273,6 +284,13 @@ describe('case transforms', () => {
   });
 
   describe('transformAttributesToESModel', () => {
+    it.each([true, false])('persists observables_sync_pending when it is %s', (pending) => {
+      expect(
+        transformAttributesToESModel({ observables: [], observables_sync_pending: pending })
+          .attributes
+      ).toEqual(expect.objectContaining({ observables_sync_pending: pending }));
+    });
+
     it('does not return the external_service field when it is undefined', () => {
       expect(
         transformAttributesToESModel({
@@ -637,6 +655,16 @@ describe('case transforms', () => {
       ).toBe('foobar');
     });
 
+    it('does not return the server-owned observables_sync_pending field', () => {
+      const caseSO = createCaseSavedObjectResponse({
+        overrides: { observables_sync_pending: true },
+      });
+
+      expect(transformSavedObjectToExternalModel(caseSO).attributes).not.toHaveProperty(
+        'observables_sync_pending'
+      );
+    });
+
     it('returns observables array when it is defined', () => {
       const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
         overrides: {
@@ -923,6 +951,23 @@ describe('case transforms', () => {
       expect(result.assignees).toEqual([{ uid: 'user1' }]);
       expect(result.created_at).toBe('2020-01-01T00:00:00.000Z');
       expect(result.updated_at).toBe('2020-01-02T00:00:00.000Z');
+    });
+
+    it('does not return the server-owned observables_sync_pending field', () => {
+      const hit: estypes.SearchHit<{ references?: SavedObjectReference[] }> = {
+        _index: 'cases',
+        _id: 'case-1',
+        _score: 1.0,
+        _source: { references: [] },
+      };
+
+      const result = transformESModelToCase(
+        'case-1',
+        { ...basicESCaseFields, observables_sync_pending: true },
+        hit
+      );
+
+      expect(result).not.toHaveProperty('observables_sync_pending');
     });
 
     it('returns "0" as version when _seq_no and _primary_term are missing', () => {

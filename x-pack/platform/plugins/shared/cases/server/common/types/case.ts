@@ -47,6 +47,7 @@ export interface CasePersistedAttributes {
   total_comments: number;
   total_events?: number;
   total_observables?: number;
+  observables_sync_pending?: boolean;
   updated_at: string | null;
   updated_by: User | null;
   category?: string | null;
@@ -74,19 +75,22 @@ export type CaseTransformedAttributesWithAttachmentStats = CaseAttributes & {
   total_comments: number;
   total_alerts: number;
   total_events: number;
+  observables_sync_pending?: boolean;
 };
 
 export const CaseTransformedAttributesSchema = CaseAttributesSchema;
 
 /**
  * We add the `total_comments`, `total_alerts`, and `total_events` properties to allow the
- * attachments stats to be updated.
+ * attachments stats to be updated, and `observables_sync_pending` so a write can record that
+ * the observables index is behind the case. It is server-owned and never part of the external model.
  */
 export const getPartialCaseTransformedAttributesSchema = () =>
   CaseAttributesSchema.partial().extend({
     total_comments: z.number().optional(),
     total_alerts: z.number().optional(),
     total_events: z.number().optional(),
+    observables_sync_pending: z.boolean().optional(),
   });
 
 export type CaseSavedObject = SavedObject<CasePersistedAttributes>;

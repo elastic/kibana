@@ -16,10 +16,12 @@ import type {
   AttachmentService,
   TemplatesService,
   FieldDefinitionsService,
+  ObservablesService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
+import type { ObservablesStorageClient } from './observables';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
 import type { UserActionFinder } from './user_actions/operations/find';
@@ -49,6 +51,7 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
+export type ObservablesServiceMock = jest.Mocked<ObservablesService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -270,3 +273,26 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
 
   return service as unknown as FieldDefinitionsServiceMock;
 };
+
+export const createObservablesServiceMock = (): ObservablesServiceMock => {
+  const service: PublicMethodsOf<ObservablesService> = lazyObject({
+    createObservables: jest.fn().mockResolvedValue(undefined),
+    deleteObservables: jest.fn().mockResolvedValue(undefined),
+    updateObservable: jest.fn().mockResolvedValue(undefined),
+  });
+
+  return service as unknown as ObservablesServiceMock;
+};
+
+export const createObservablesStorageClientMock = (): jest.Mocked<ObservablesStorageClient> =>
+  ({
+    bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    get: jest.fn(),
+    index: jest.fn(),
+    search: jest.fn(),
+    delete: jest.fn(),
+    clean: jest.fn(),
+    existsIndex: jest.fn(),
+    esql: jest.fn(),
+    reconcileMappings: jest.fn(),
+  } as unknown as jest.Mocked<ObservablesStorageClient>);

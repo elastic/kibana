@@ -38,6 +38,8 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
+import { getObservableSource, mirrorToObservablesIndex } from './observables_index_sync';
+import type { ObservableSource } from '../../services/observables';
 import { emitObservablesAddedEvent } from './trigger_utils';
 
 const ensureUpdateAuthorized = async (
@@ -66,16 +68,20 @@ const ensureUpdateAuthorized = async (
  *
  * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
  *   round-trip. When provided, `caseId` is ignored for the initial fetch.
+ * @param source - How the observables reached the case. Defaults to the origin of the cases client.
  */
 export const applyObservablesToCase = async (
   caseId: string,
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
-  prefetchedCase?: CaseSavedObjectTransformed
+  prefetchedCase?: CaseSavedObjectTransformed,
+  source: ObservableSource = getObservableSource(clientArgs.clientSource)
 ) => {
   const {
-    services: { caseService, userActionService },
+    services: { caseService, userActionService, observablesService },
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   if (observables.length === 0) {
@@ -116,12 +122,26 @@ export const applyObservablesToCase = async (
 
   const finalObservables = [...currentObservables, ...newlyAddedObservables];
 
+  const syncPending = await mirrorToObservablesIndex({
+    caseId: retrievedCase.id,
+    logger,
+    write: () =>
+      observablesService.createObservables({
+        caseId: retrievedCase.id,
+        spaceId,
+        owner: retrievedCase.attributes.owner,
+        observables: newlyAddedObservables,
+        source,
+      }),
+  });
+
   const patchedCase = await caseService.patchCase({
     caseId: retrievedCase.id,
     originalCase: retrievedCase,
     updatedAttributes: {
       observables: finalObservables,
       total_observables: finalObservables.length,
+      ...syncPending,
     },
   });
 
@@ -236,9 +256,12 @@ export const updateObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
+    clientSource,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -282,12 +305,27 @@ export const updateObservable = async (
       requestFields: updatedObservables,
     });
 
+    const syncPending = await mirrorToObservablesIndex({
+      caseId: retrievedCase.id,
+      logger,
+      write: () =>
+        observablesService.updateObservable({
+          caseId: retrievedCase.id,
+          spaceId,
+          owner: retrievedCase.attributes.owner,
+          previous: currentObservables[observableIndex],
+          next: updatedObservables[observableIndex],
+          source: getObservableSource(clientSource),
+        }),
+    });
+
     const updatedCase = await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
         total_observables: updatedObservables.length,
+        ...syncPending,
       },
     });
 
@@ -325,9 +363,11 @@ export const deleteObservable = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -353,12 +393,26 @@ export const deleteObservable = async (
       throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
     }
 
+    const syncPending = await mirrorToObservablesIndex({
+      caseId: retrievedCase.id,
+      logger,
+      write: () =>
+        observablesService.deleteObservables({
+          caseId: retrievedCase.id,
+          spaceId,
+          observables: retrievedCase.attributes.observables.filter(
+            (observable) => observable.id === observableId
+          ),
+        }),
+    });
+
     await caseService.patchCase({
       caseId: retrievedCase.id,
       originalCase: retrievedCase,
       updatedAttributes: {
         observables: updatedObservables,
         total_observables: updatedObservables.length,
+        ...syncPending,
       },
     });
     await userActionService.creator.createUserAction({
@@ -448,9 +502,11 @@ export const bulkDeleteObservables = async (
   clientArgs: CasesClientArgs
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService, userActionService, observablesService },
     authorization,
     user,
+    logger,
+    spaceId,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -486,6 +542,17 @@ export const bulkDeleteObservables = async (
   );
   const removedCount = removedObservables.length;
 
+  const syncPending = await mirrorToObservablesIndex({
+    caseId: retrievedCase.id,
+    logger,
+    write: () =>
+      observablesService.deleteObservables({
+        caseId: retrievedCase.id,
+        spaceId,
+        observables: removedObservables,
+      }),
+  });
+
   const updatedCase = await caseService.patchCase({
     caseId: retrievedCase.id,
     originalCase: retrievedCase,
@@ -493,6 +560,7 @@ export const bulkDeleteObservables = async (
     updatedAttributes: {
       observables: updatedObservables,
       total_observables: updatedObservables.length,
+      ...syncPending,
     },
   });
 
