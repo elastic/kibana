@@ -87,7 +87,10 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   }
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
-    const context: AlertingPublisherContext = { request, origin: toEventOrigin('user', request) };
+    // A fake request is Kibana acting without a user, so the actor is
+    // `internal` and the channel is `system`. Any other request stays `user`.
+    const actor = request.isFakeRequest ? 'internal' : 'user';
+    const context: AlertingPublisherContext = { request, origin: toEventOrigin(actor, request) };
     for (const action of actions) {
       const event = this.buildEvent(action);
       if (event) {

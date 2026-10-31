@@ -37,6 +37,20 @@ const createAction = (overrides: Partial<AlertAction> = {}): AlertAction => ({
   ...overrides,
 });
 
+const UI_HEADERS = {
+  'kbn-version': '9.0.0',
+  referer: 'http://localhost:5601/app/observability',
+  'x-elastic-internal-origin': 'kibana',
+};
+
+const executionContextHeader = (context: object) => encodeURIComponent(JSON.stringify(context));
+
+const createRequest = (
+  headers: Record<string, string> = {},
+  { isFakeRequest = false }: { isFakeRequest?: boolean } = {}
+): KibanaRequest =>
+  Object.assign(httpServerMock.createKibanaRequest({ headers }), { isFakeRequest });
+
 const baseEnvelope = {
   occurredAt: '2025-02-02T12:34:56.000Z',
   groupHash: 'group-hash-1',
@@ -288,6 +302,59 @@ describe('AlertActionEventPublisher', () => {
       expect(eventBus.publish).toHaveBeenCalledTimes(2);
       expect(eventBus.publish.mock.calls[0][1]?.request).toBe(request);
       expect(eventBus.publish.mock.calls[1][1]?.request).toBe(otherRequest);
+    });
+  });
+
+  describe('origin', () => {
+    const publishedOrigin = () => eventBus.publish.mock.calls[0]?.[1]?.origin;
+
+    it('publishes channel api when the request has no UI headers', () => {
+      publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'api' });
+    });
+
+    it('publishes channel ui and the execution-context app for a browser request', () => {
+      const uiRequest = createRequest({
+        ...UI_HEADERS,
+        'x-kbn-context': executionContextHeader({ name: 'observability' }),
+      });
+
+      publisher.emitEpisodeActions(uiRequest, [createAction({ action_type: 'ack' })]);
+
+      expect(publishedOrigin()).toEqual({
+        actor: 'user',
+        channel: 'ui',
+        app: 'observability',
+      });
+    });
+
+    it('omits origin.app when a UI request has no execution context', () => {
+      publisher.emitEpisodeActions(createRequest(UI_HEADERS), [
+        createAction({ action_type: 'ack' }),
+      ]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
+      expect(publishedOrigin()).not.toHaveProperty('app');
+    });
+
+    it('omits origin.app when the execution-context app fails validation', () => {
+      const uiRequest = createRequest({
+        ...UI_HEADERS,
+        'x-kbn-context': executionContextHeader({ name: 'not a valid app' }),
+      });
+
+      publisher.emitEpisodeActions(uiRequest, [createAction({ action_type: 'ack' })]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
+    });
+
+    it('publishes a fake request as internal on the system channel', () => {
+      publisher.emitEpisodeActions(createRequest({}, { isFakeRequest: true }), [
+        createAction({ action_type: 'ack' }),
+      ]);
+
+      expect(publishedOrigin()).toEqual({ actor: 'internal', channel: 'system' });
     });
   });
 });

@@ -12,6 +12,10 @@ import type {
   ActionPolicyEbtEventType,
 } from '../../../../server/lib/telemetry/action_policy_ebt_schema';
 import type {
+  AlertActionAppliedEbtData,
+  AlertActionEbtEventType,
+} from '../../../../server/lib/telemetry/alert_action_ebt_schema';
+import type {
   RuleChangedEbtData,
   RuleEbtEventType,
 } from '../../../../server/lib/telemetry/rule_ebt_schema';
@@ -31,6 +35,8 @@ export type RuleChangedEbtEvent = BufferedEbtEvent<RuleChangedEbtData>;
 
 export type ActionPolicyChangedEbtEvent = BufferedEbtEvent<ActionPolicyChangedEbtData>;
 
+export type AlertActionAppliedEbtEvent = BufferedEbtEvent<AlertActionAppliedEbtData>;
+
 export interface WaitForRuleChangedEventsParams {
   ruleId: string;
   eventType: RuleEbtEventType;
@@ -42,6 +48,14 @@ export interface WaitForRuleChangedEventsParams {
 export interface WaitForActionPolicyChangedEventsParams {
   actionPolicyId: string;
   eventType: ActionPolicyEbtEventType;
+  /** Number of matching events to wait for. Defaults to 1. */
+  count?: number;
+  timeoutMs?: number;
+}
+
+export interface WaitForAlertActionEventsParams {
+  ruleId: string;
+  eventType: AlertActionEbtEventType;
   /** Number of matching events to wait for. Defaults to 1. */
   count?: number;
   timeoutMs?: number;
@@ -70,6 +84,13 @@ export interface EbtService {
   waitForActionPolicyChangedEvents: (
     params: WaitForActionPolicyChangedEventsParams
   ) => Promise<ActionPolicyChangedEbtEvent[]>;
+  /**
+   * Resolves with the alert-action events of `eventType` reported for the rule.
+   * Returns as soon as `count` events arrived and throws if they do not within the timeout.
+   */
+  waitForAlertActionEvents: (
+    params: WaitForAlertActionEventsParams
+  ) => Promise<AlertActionAppliedEbtEvent[]>;
 }
 
 export const getEbtService = ({
@@ -152,6 +173,19 @@ export const getEbtService = ({
         eventType,
         idProperty: 'action_policy_id',
         id: actionPolicyId,
+        count,
+        timeoutMs,
+      }),
+    waitForAlertActionEvents: ({
+      ruleId,
+      eventType,
+      count = 1,
+      timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+    }) =>
+      waitForEvents<AlertActionAppliedEbtEvent>({
+        eventType,
+        idProperty: 'rule_id',
+        id: ruleId,
         count,
         timeoutMs,
       }),
