@@ -462,6 +462,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           cortexHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
             logger: this.logger.get('cortex'),
             isEnabled: () => this.cortexEnabled,
@@ -470,13 +472,18 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
             getSandboxStart: getGatedSandboxStart,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          composeHydrateNotificationsStepDefinition()
+          composeHydrateNotificationsStepDefinition({
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+          })
         );
         // Registered unconditionally: the combined materialize workflow installs with Cortex
         // or Memory, so a trees-off install would otherwise reference an unknown step type.
@@ -484,6 +491,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -520,6 +529,8 @@ export class NightshiftInvestigationsPlugin
                 ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
                     .connectorId
                 : this.ctx.config.get().sandbox?.telemetry_connector_id,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -527,6 +538,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeReinforceStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
           })
         );

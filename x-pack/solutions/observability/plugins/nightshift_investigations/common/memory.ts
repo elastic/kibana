@@ -41,6 +41,9 @@ export interface StoredMemoryPage {
     /** Provenance only — never a tenancy boundary. */
     agent_id?: string;
     conversation_id?: string;
+    round_id?: string;
+    workflow_execution_id?: string;
+    version?: number;
     source?: string;
     merged_from?: string[];
     archive_reason?: MemoryArchiveReason;
@@ -63,6 +66,9 @@ export interface MemoryPage {
   merged_from?: string[];
   archive_reason?: MemoryArchiveReason;
   conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
+  version?: number;
   agent_id?: string;
   categories: string[];
   references: string[];
