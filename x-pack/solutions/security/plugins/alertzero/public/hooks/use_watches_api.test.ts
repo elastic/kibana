@@ -44,7 +44,10 @@ describe('notifyWorkerUpdateError', () => {
     const error = httpError(500);
     notifyWorkerUpdateError(toasts, error);
 
-    expect(toasts.addError).toHaveBeenCalledWith(error, { title: 'Unable to update the worker' });
+    expect(toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Unable to update the worker',
+      toastMessage: '500',
+    });
     expect(toasts.addWarning).not.toHaveBeenCalled();
     expect(toasts.addDanger).not.toHaveBeenCalled();
   });

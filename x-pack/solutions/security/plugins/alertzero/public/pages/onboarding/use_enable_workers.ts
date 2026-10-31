@@ -12,6 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
 import type { ListWorkersResponse, Worker } from '@kbn/alertzero-common';
+import { workerName } from '../../../common/worker_names';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
 import { useReportToastError } from '../../telemetry';
@@ -19,7 +20,6 @@ import {
   ensureWorkerServiceAccounts,
   type CoreServiceAccounts,
 } from '../../service_accounts/ensure_worker_service_accounts';
-import { workerName } from '../watches/workers/translations';
 import * as onboardingI18n from './translations';
 
 const PARTIAL_SUCCESS_WARNING = i18n.translate('xpack.alertzero.onboarding.partialSuccessWarning', {
@@ -130,10 +130,14 @@ export const useEnableWorkers = (
 
     let hadFailure = accountFailures.length > 0;
     let hadSuccess = false;
-    results.forEach((result) => {
+    results.forEach((result, index) => {
       if (result.status === 'rejected') {
         hadFailure = true;
-        notifyWorkerUpdateError(services.notifications!.toasts, result.reason, reportShown);
+        const id = idsToPatch[index];
+        notifyWorkerUpdateError(services.notifications!.toasts, result.reason, {
+          workerName: workerName(id, workerById.get(id)?.name),
+          reportShown,
+        });
       } else {
         hadSuccess = true;
       }
