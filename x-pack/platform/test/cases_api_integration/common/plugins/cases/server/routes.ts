@@ -16,6 +16,7 @@ import {
   CASES_TELEMETRY_TASK_NAME,
 } from '@kbn/cases-plugin/common/constants';
 import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
+import { CASES_OBSERVABLES_SYNC_TASK_ID } from '@kbn/cases-plugin/server/tasks/observables_sync/constants';
 import { toLegacyAttachmentResponse } from '@kbn/cases-plugin/server/common/attachments';
 import type { CasesByAttachmentIDsRequest } from '@kbn/cases-plugin/server/client/cases/get';
 import type { FixtureStartDeps } from './plugin';
@@ -293,6 +294,27 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
         return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/observables_sync/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (context, req, res) => {
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        return res.ok({ body: await taskManager.runSoon(CASES_OBSERVABLES_SYNC_TASK_ID) });
+      } catch (err) {
+        return res.ok({ body: { id: CASES_OBSERVABLES_SYNC_TASK_ID, error: `${err}` } });
       }
     }
   );
