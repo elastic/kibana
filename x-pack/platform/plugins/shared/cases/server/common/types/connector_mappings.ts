@@ -8,22 +8,17 @@
 import type { SavedObject } from '@kbn/core/server';
 import type {
   ConnectorMappingsAttributes,
-  ExternalSyncFieldMapping,
-  ExternalSyncFieldRule,
-  ExternalSyncSettings,
+  ConnectorSyncSettings,
 } from '../../../common/types/domain';
 import { ConnectorMappingsAttributesSchema } from '../../../common/types/domain';
 
-export interface ConnectorMappingsPersistedAttributes {
+export interface ConnectorMappingsPersistedAttributes extends ConnectorSyncSettings {
   mappings: Array<{
     action_type: string;
     source: string;
     target: string;
   }>;
   owner: string;
-  externalSync?: ExternalSyncSettings;
-  externalSyncFields?: ExternalSyncFieldRule[];
-  externalSyncFieldMappings?: ExternalSyncFieldMapping[];
 }
 
 export const ConnectorMappingsAttributesTransformedSchema = ConnectorMappingsAttributesSchema;

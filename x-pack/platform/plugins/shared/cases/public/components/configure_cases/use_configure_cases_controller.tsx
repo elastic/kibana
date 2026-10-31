@@ -11,6 +11,7 @@ import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/p
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
   ActionConnector,
+  ConnectorSyncSettings,
   ExternalSyncFieldMappings,
   ExternalSyncFieldRules,
   ExternalSyncSettings,
@@ -258,8 +259,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ]
   );
 
-  const onChangeExternalSync = useCallback(
-    (value: ExternalSyncSettings) => {
+  const persistConnectorSync = useCallback(
+    (sync: ConnectorSyncSettings) => {
       persistCaseConfigure({
         connector,
         customFields,
@@ -267,7 +268,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         id: configurationId,
         version: configurationVersion,
         closureType,
-        externalSync: value,
+        ...sync,
       });
     },
     [
@@ -279,52 +280,22 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       templates,
       persistCaseConfigure,
     ]
+  );
+
+  const onChangeExternalSync = useCallback(
+    (value: ExternalSyncSettings) => persistConnectorSync({ externalSync: value }),
+    [persistConnectorSync]
   );
 
   const onChangeExternalSyncFields = useCallback(
-    (value: ExternalSyncFieldRules) => {
-      persistCaseConfigure({
-        connector,
-        customFields,
-        templates,
-        id: configurationId,
-        version: configurationVersion,
-        closureType,
-        externalSyncFields: value,
-      });
-    },
-    [
-      configurationId,
-      configurationVersion,
-      closureType,
-      connector,
-      customFields,
-      templates,
-      persistCaseConfigure,
-    ]
+    (value: ExternalSyncFieldRules) => persistConnectorSync({ externalSyncFields: value }),
+    [persistConnectorSync]
   );
 
   const onChangeExternalSyncFieldMappings = useCallback(
-    (value: ExternalSyncFieldMappings) => {
-      persistCaseConfigure({
-        connector,
-        customFields,
-        templates,
-        id: configurationId,
-        version: configurationVersion,
-        closureType,
-        externalSyncFieldMappings: value,
-      });
-    },
-    [
-      configurationId,
-      configurationVersion,
-      closureType,
-      connector,
-      customFields,
-      templates,
-      persistCaseConfigure,
-    ]
+    (value: ExternalSyncFieldMappings) =>
+      persistConnectorSync({ externalSyncFieldMappings: value }),
+    [persistConnectorSync]
   );
 
   useEffect(() => {

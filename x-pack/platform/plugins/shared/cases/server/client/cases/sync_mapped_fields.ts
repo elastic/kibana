@@ -15,29 +15,17 @@ import { validateExtendedFields } from '../../../common/types/domain/template/va
 import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import {
   coerceExternalFieldValue,
+  keepsKibanaValue,
   pullsFromExternal,
 } from '../../../common/utils/external_sync_fields';
 import type { CasesClientArgs } from '..';
 import { resolveApplicableFields } from './applicable_fields';
 
-export interface MappedFieldsPatch {
+interface MappedFieldsPatch {
   extendedFields: Record<string, string>;
   updatedFields: string[];
   conflictedFields: string[];
 }
-
-const EMPTY: MappedFieldsPatch = { extendedFields: {}, updatedFields: [], conflictedFields: [] };
-
-/** Whether any pulled mapping keeps the Kibana value, so the caller knows to load the edit history. */
-export const mappingsKeepKibanaValue = (
-  mappings: ExternalSyncFieldMappings | undefined,
-  defaultStrategy: ExternalSyncConflictStrategy
-): boolean =>
-  (mappings ?? []).some(
-    (mapping) =>
-      pullsFromExternal(mapping.direction) &&
-      (mapping.conflictStrategy ?? defaultStrategy) === 'kibana'
-  );
 
 /**
  * Reads the mapped external fields off the raw incident and turns them into an
@@ -59,9 +47,10 @@ export const buildMappedFieldsPatch = async ({
   changedInKibana: Set<string>;
   clientArgs: Pick<CasesClientArgs, 'services' | 'logger'>;
 }): Promise<MappedFieldsPatch> => {
+  const patch: MappedFieldsPatch = { extendedFields: {}, updatedFields: [], conflictedFields: [] };
   const pulled = (mappings ?? []).filter((mapping) => pullsFromExternal(mapping.direction));
   if (pulled.length === 0) {
-    return EMPTY;
+    return patch;
   }
 
   const {
@@ -79,8 +68,6 @@ export const buildMappedFieldsPatch = async ({
     applicable.map(({ field }) => [getFieldSnakeKey(field.name, field.type), field])
   );
 
-  const patch: MappedFieldsPatch = { extendedFields: {}, updatedFields: [], conflictedFields: [] };
-
   for (const mapping of pulled) {
     const field = fieldsByKey.get(mapping.caseField);
     const value = coerceExternalFieldValue(incident[mapping.externalField]);
@@ -92,15 +79,16 @@ export const buildMappedFieldsPatch = async ({
       const errors = validateExtendedFields({ [mapping.caseField]: value }, [field], {
         partial: true,
       });
-      const strategy = mapping.conflictStrategy ?? defaultStrategy;
-
       if (errors.length > 0) {
         logger.warn(
           `Skipping external field ${mapping.externalField} for case ${theCase.id}: ${errors.join(
             '; '
           )}`
         );
-      } else if (strategy === 'kibana' && changedInKibana.has(UserActionTypes.extended_fields)) {
+      } else if (
+        keepsKibanaValue(mapping, defaultStrategy) &&
+        changedInKibana.has(UserActionTypes.extended_fields)
+      ) {
         patch.conflictedFields.push(mapping.caseField);
       } else {
         patch.extendedFields[mapping.caseField] = value;

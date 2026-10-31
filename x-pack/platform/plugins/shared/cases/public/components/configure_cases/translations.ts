@@ -379,41 +379,6 @@ export const FIELD_SYNC_COL_CONFLICT = i18n.translate(
   }
 );
 
-export const FIELD_SYNC_FIELD_TITLE = i18n.translate(
-  'xpack.cases.configureCases.fieldSyncFieldTitle',
-  {
-    defaultMessage: 'Title',
-  }
-);
-
-export const FIELD_SYNC_FIELD_DESCRIPTION = i18n.translate(
-  'xpack.cases.configureCases.fieldSyncFieldDescription',
-  {
-    defaultMessage: 'Description',
-  }
-);
-
-export const FIELD_SYNC_FIELD_STATUS = i18n.translate(
-  'xpack.cases.configureCases.fieldSyncFieldStatus',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
-export const FIELD_SYNC_FIELD_TAGS = i18n.translate(
-  'xpack.cases.configureCases.fieldSyncFieldTags',
-  {
-    defaultMessage: 'Tags',
-  }
-);
-
-export const FIELD_SYNC_FIELD_COMMENTS = i18n.translate(
-  'xpack.cases.configureCases.fieldSyncFieldComments',
-  {
-    defaultMessage: 'Comments',
-  }
-);
-
 export const FIELD_SYNC_EXTERNAL_STATUS = i18n.translate(
   'xpack.cases.configureCases.fieldSyncExternalStatus',
   {
@@ -536,9 +501,11 @@ export const EXTERNAL_FIELDS_NOT_SYNCED = i18n.translate(
   }
 );
 
-export const EXTERNAL_FIELDS_CAP = i18n.translate('xpack.cases.configureCases.externalFieldsCap', {
-  defaultMessage: 'You can map up to 20 fields per connector.',
-});
+export const EXTERNAL_FIELDS_CAP = (max: number): string =>
+  i18n.translate('xpack.cases.configureCases.externalFieldsCap', {
+    values: { max },
+    defaultMessage: 'You can map up to {max} fields per connector.',
+  });
 
 export const EXTERNAL_FIELDS_EMPTY = (connectorName: string): string =>
   i18n.translate('xpack.cases.configureCases.externalFieldsEmpty', {

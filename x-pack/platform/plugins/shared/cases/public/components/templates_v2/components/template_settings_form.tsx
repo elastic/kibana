@@ -23,6 +23,7 @@ import type { TemplateSettings } from '../../../../common/types/domain/template/
 import type { ExternalSyncSettings } from '../../../../common/types/domain';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useIsExternalSyncEnabled } from '../../../common/use_is_external_sync_enabled';
+import { getExplicitTemplateSettings } from '../utils/template_settings_yaml';
 import { TemplateConnectorForm } from './template_connector_form';
 import { SyncSettings } from '../../edit_connector/sync_settings';
 import { ExperimentalBadge } from '../../experimental_badge/experimental_badge';
@@ -59,26 +60,17 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
   const isExternalSyncEnabled = useIsExternalSyncEnabled();
 
   const setSetting = useCallback(
-    (key: keyof TemplateSettings, value: boolean) => {
+    (key: 'syncAlerts' | 'extractObservables', value: boolean) => {
       // Keep both settings keys explicit in the panel state so an "off" toggle is a real `false`
       // (and is written as such into the definition merged on save) rather than a dropped key.
-      onSettingsChange({
-        syncAlerts: settings?.syncAlerts ?? false,
-        extractObservables: settings?.extractObservables ?? false,
-        ...(settings?.externalSync && { externalSync: settings.externalSync }),
-        [key]: value,
-      });
+      onSettingsChange({ ...getExplicitTemplateSettings(settings), [key]: value });
     },
     [settings, onSettingsChange]
   );
 
   const setExternalSync = useCallback(
     (externalSync: ExternalSyncSettings) =>
-      onSettingsChange({
-        syncAlerts: settings?.syncAlerts ?? false,
-        extractObservables: settings?.extractObservables ?? false,
-        externalSync,
-      }),
+      onSettingsChange({ ...getExplicitTemplateSettings(settings), externalSync }),
     [settings, onSettingsChange]
   );
 

@@ -25,10 +25,7 @@ export const CommentAttachmentDataSchema = z
 
 export type CommentAttachmentData = z.infer<typeof CommentAttachmentDataSchema>;
 
-/**
- * Attribution of a comment imported from an external incident (technical preview).
- * The only metadata a comment may carry; any other metadata key is still rejected.
- */
+/** Attribution of a comment imported from an external incident (technical preview). */
 export const ExternalSyncCommentMetadataSchema = lazySchema(() =>
   z
     .object({

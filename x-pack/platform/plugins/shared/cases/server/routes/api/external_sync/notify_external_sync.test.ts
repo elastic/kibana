@@ -6,14 +6,18 @@
  */
 
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import type { Case } from '../../../../common/types/domain';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CaseError } from '../../../common/error';
 import { isCaseError } from '../../../common/error';
 import { flattenCaseSavedObject } from '../../../common/utils';
 import { externalIncidentUpdatedTopic } from '../../../external_sync/external_incident_topic';
-import { createServiceAccountsMock } from '../../../external_sync/mocks';
 import { EXTERNAL_SYNC_WORKLOAD_TYPE } from '../../../external_sync/service_account';
 import { mockCases } from '../../../mocks';
 import type { CasesRequestHandlerContext } from '../../../types';
@@ -34,7 +38,7 @@ describe('notifyExternalSyncRoute', () => {
   const casesClient = createCasesClientMock();
   const actionsClient = actionsClientMock.create();
   const { pubsub } = coreMock.createStart();
-  const serviceAccounts = createServiceAccountsMock();
+  const serviceAccounts = securityServiceMock.createServiceAccounts();
   const context = {
     cases: Promise.resolve({ getCasesClient: async () => casesClient }),
   } as unknown as CasesRequestHandlerContext;

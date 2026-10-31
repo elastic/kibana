@@ -12,17 +12,11 @@ import type { SnakeToCamelCase } from '../../../common/types';
 import type { SyncUserAction } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
+import { getExternalSyncFieldLabel } from '../configure_cases/external_sync_options';
 import * as i18n from './translations';
 
-const FIELD_LABELS: Record<string, string> = {
-  title: i18n.TITLE,
-  description: i18n.DESCRIPTION,
-  status: i18n.STATUS,
-  severity: i18n.SEVERITY,
-};
-
 const toFieldList = (fields: string[]) =>
-  fields.map((field) => (FIELD_LABELS[field] ?? field).toLowerCase()).join(', ');
+  fields.map((field) => getExternalSyncFieldLabel(field).toLowerCase()).join(', ');
 
 const getLabel = (payload: SnakeToCamelCase<SyncUserAction>['payload']['sync']) => {
   const { updatedFields, conflictedFields, connectorName, externalTitle, externalUrl } = payload;

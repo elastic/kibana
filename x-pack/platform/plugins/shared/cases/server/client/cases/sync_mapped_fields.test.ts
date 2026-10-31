@@ -10,7 +10,7 @@ import { UserActionTypes } from '../../../common/types/domain';
 import { mockCases } from '../../mocks';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { createCasesClientMockArgs } from '../mocks';
-import { buildMappedFieldsPatch, mappingsKeepKibanaValue } from './sync_mapped_fields';
+import { buildMappedFieldsPatch } from './sync_mapped_fields';
 
 const theCase: Case = {
   ...flattenCaseSavedObject({ savedObject: mockCases[0] }),
@@ -44,30 +44,6 @@ describe('sync_mapped_fields', () => {
       fieldDefinitions: definitions,
       total: definitions.length,
     } as never);
-  });
-
-  describe('mappingsKeepKibanaValue', () => {
-    it('is true only when a pulled mapping resolves to the kibana strategy', () => {
-      expect(mappingsKeepKibanaValue(undefined, 'external')).toBe(false);
-      expect(
-        mappingsKeepKibanaValue(
-          [{ externalField: 'a', caseField: 'b', direction: 'push' }],
-          'kibana'
-        )
-      ).toBe(false);
-      expect(
-        mappingsKeepKibanaValue(
-          [{ externalField: 'a', caseField: 'b', direction: 'pull' }],
-          'kibana'
-        )
-      ).toBe(true);
-      expect(
-        mappingsKeepKibanaValue(
-          [{ externalField: 'a', caseField: 'b', direction: 'both', conflictStrategy: 'kibana' }],
-          'external'
-        )
-      ).toBe(true);
-    });
   });
 
   describe('buildMappedFieldsPatch', () => {

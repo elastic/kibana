@@ -52,6 +52,7 @@ import type {
   ExternalServiceParams,
 } from './types';
 import type { CasesConnectorsMap } from '../../connectors';
+import { isRecord } from '../../connectors/utils';
 import { getCaseViewPath } from '../../common/utils';
 import {
   isCommentAttachmentType,
@@ -274,15 +275,14 @@ export const createIncident = async ({
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
 
-  const externalServiceFields =
-    casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
+  const casesConnector = casesConnectors.get(connector.actionTypeId);
+  const externalServiceFields = casesConnector?.format(theCase, alerts) ?? {};
 
-  const connectorMappings = (casesConnectors.get(connector.actionTypeId)?.getMapping() ?? []).map(
-    (mapping) =>
-      (mapping.source === 'title' || mapping.source === 'description') &&
-      !pushesToExternal(fieldRules[mapping.source].direction)
-        ? { ...mapping, target: 'not_mapped' as const }
-        : mapping
+  const connectorMappings = (casesConnector?.getMapping() ?? []).map((mapping) =>
+    (mapping.source === 'title' || mapping.source === 'description') &&
+    !pushesToExternal(fieldRules[mapping.source].direction)
+      ? { ...mapping, target: 'not_mapped' as const }
+      : mapping
   );
   const descriptionWithKibanaInformation = addKibanaInformationToDescription(
     theCase,
@@ -323,7 +323,7 @@ export const createIncident = async ({
     delete incident[tagsTarget];
   }
 
-  const freeFormFieldsKey = casesConnectors.get(connector.actionTypeId)?.freeFormFieldsKey;
+  const freeFormFieldsKey = casesConnector?.freeFormFieldsKey;
   const mappedFields = collectMappedFieldsToPush(theCase, fieldMappings);
   if (freeFormFieldsKey != null && Object.keys(mappedFields).length > 0) {
     incident[freeFormFieldsKey] = mergeFreeFormFields(incident[freeFormFieldsKey], mappedFields);
@@ -351,20 +351,16 @@ const collectMappedFieldsToPush = (
  * values are merged on top and the result is kept as a string for the connector schema.
  */
 export const mergeFreeFormFields = (existing: unknown, extra: Record<string, string>): string => {
-  let base: Record<string, unknown> = {};
-  if (typeof existing === 'string' && existing.trim().length > 0) {
-    try {
-      const parsed: unknown = JSON.parse(existing);
-      if (parsed != null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        base = parsed as Record<string, unknown>;
-      }
-    } catch {
-      base = {};
-    }
-  } else if (existing != null && typeof existing === 'object' && !Array.isArray(existing)) {
-    base = existing as Record<string, unknown>;
+  const base = typeof existing === 'string' ? parseJson(existing) : existing;
+  return JSON.stringify({ ...(isRecord(base) ? base : {}), ...extra });
+};
+
+const parseJson = (value: string): unknown => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
   }
-  return JSON.stringify({ ...base, ...extra });
 };
 
 export const mapCaseFieldsToExternalSystemFields = (

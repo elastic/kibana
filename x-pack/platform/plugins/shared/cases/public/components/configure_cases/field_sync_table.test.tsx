@@ -123,12 +123,26 @@ describe('FieldSyncTable', () => {
     useGetExternalFieldCatalogMock.mockReturnValue({
       data: undefined,
       isLoading: true,
+      isInitialLoading: true,
       isSuccess: false,
     });
 
     renderWithTestingProviders(<FieldSyncTable {...defaultProps} />);
 
     expect(screen.getByTestId('external-sync-field-catalog-loading')).toBeInTheDocument();
+  });
+
+  it('shows no spinner when the catalog query is disabled', () => {
+    useGetExternalFieldCatalogMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isInitialLoading: false,
+      isSuccess: false,
+    });
+
+    renderWithTestingProviders(<FieldSyncTable {...defaultProps} />);
+
+    expect(screen.queryByTestId('external-sync-field-catalog-loading')).not.toBeInTheDocument();
   });
 
   it('emits every rule when a direction changes', async () => {

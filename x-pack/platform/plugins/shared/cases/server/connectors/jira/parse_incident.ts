@@ -34,7 +34,6 @@ const parseComments = (comment: unknown): ExternalIncidentComment[] | undefined 
       body?: unknown;
       author?: { displayName?: unknown; emailAddress?: unknown };
       created?: unknown;
-      updated?: unknown;
     };
     const externalId = asString(raw.id);
     const body = asString(raw.body);
@@ -49,7 +48,6 @@ const parseComments = (comment: unknown): ExternalIncidentComment[] | undefined 
         body,
         ...(name != null ? { author: { name, ...(email != null ? { email } : {}) } } : {}),
         ...(raw.created != null ? { createdAt: asString(raw.created) } : {}),
-        ...(raw.updated != null ? { updatedAt: asString(raw.updated) } : {}),
       },
     ];
   });

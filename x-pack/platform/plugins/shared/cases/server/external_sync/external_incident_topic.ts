@@ -9,17 +9,15 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import type { Topic } from '@kbn/core/server';
 import { defineTopic } from '@kbn/core/server';
+import type { ExternalIncidentNotification } from '../connectors/types';
 
 /** An incident in an external system changed, and the cases pushed to it may need a sync. */
-export interface ExternalIncidentUpdatedData {
+export interface ExternalIncidentUpdatedData extends ExternalIncidentNotification {
   spaceId: string;
   connectorId: string;
-  externalId: string;
-  /** When the incident changed, as the external system reports it. */
-  updatedAt?: string;
 }
 
-export type ExternalIncidentUpdatedTopic = Topic<
+type ExternalIncidentUpdatedTopic = Topic<
   ExternalIncidentUpdatedData,
   'cases.externalIncident.updated'
 >;

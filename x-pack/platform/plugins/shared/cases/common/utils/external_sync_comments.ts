@@ -8,11 +8,7 @@
 import type { ExternalSyncCommentMetadata } from '../types/domain/attachment/comment/v2';
 import { ExternalSyncCommentMetadataSchema } from '../types/domain/attachment/comment/v2';
 
-/**
- * Attribution of a comment that was imported from an external incident. Lives under
- * `metadata.externalSync` on the unified comment attachment so the UI can show the external
- * author and the sync engine can recognise an already-imported comment.
- */
+/** Returns the `metadata.externalSync` attribution of a comment attachment, if any. */
 export const getExternalSyncCommentMetadata = (
   attachment: unknown
 ): ExternalSyncCommentMetadata | undefined => {

@@ -8,6 +8,7 @@
 import type { ExternalSyncDirection } from '../types/domain';
 import {
   coerceExternalFieldValue,
+  keepsKibanaValue,
   pullsFromExternal,
   pushesToExternal,
   resolveExternalSyncFieldRules,
@@ -80,5 +81,14 @@ describe('external_sync_fields', () => {
   it('classifies directions', () => {
     expect(DIRECTIONS.map(pullsFromExternal)).toEqual([true, false, true, false]);
     expect(DIRECTIONS.map(pushesToExternal)).toEqual([true, true, false, false]);
+  });
+
+  it('keeps the Kibana value only for a pulled field that resolves to the kibana strategy', () => {
+    expect(keepsKibanaValue({ direction: 'push' }, 'kibana')).toBe(false);
+    expect(keepsKibanaValue({ direction: 'pull' }, 'kibana')).toBe(true);
+    expect(keepsKibanaValue({ direction: 'pull' }, 'external')).toBe(false);
+    expect(keepsKibanaValue({ direction: 'both', conflictStrategy: 'kibana' }, 'external')).toBe(
+      true
+    );
   });
 });

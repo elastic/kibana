@@ -892,6 +892,6 @@ export const SYNC_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.syncCase.documentation.details',
   {
     defaultMessage:
-      'This step reads the external incident linked to a case and applies its title, description and status according to the connector sync rules. Identify the case by its id, or by the external incident id (and connector id) carried by the external system webhook. The step returns the updated cases. Cases that were never pushed are skipped.',
+      'This step reads the external incident linked to a case and applies its changes (title, description, status, tags, comments and mapped fields) according to the connector sync rules. Identify the case by its id, or by the external incident id (and connector id) carried by the external system webhook. The step returns the updated cases. Cases that were never pushed are skipped.',
   }
 );

@@ -184,8 +184,7 @@ export const create = async (
       };
     }
 
-    // Precedence: caller > template > the connector's sync defaults. Left unset when no side
-    // defines it.
+    // Precedence: caller > template > the connector's sync defaults.
     if (query.settings.externalSync === undefined && query.connector.type !== ConnectorTypes.none) {
       const { externalSync: connectorDefault } = await getConnectorSyncSettings(
         { connectorId: query.connector.id },

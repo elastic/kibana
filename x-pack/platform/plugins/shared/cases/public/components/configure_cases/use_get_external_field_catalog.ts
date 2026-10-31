@@ -20,7 +20,7 @@ export interface ExternalFieldCatalogEntry {
   label: string;
 }
 
-export type ExternalFieldCatalog = Map<string, ExternalFieldCatalogEntry>;
+type ExternalFieldCatalog = Map<string, ExternalFieldCatalogEntry>;
 
 const CATALOG_CONNECTOR_TYPES: ReadonlySet<string> = new Set([
   ConnectorTypes.jira,

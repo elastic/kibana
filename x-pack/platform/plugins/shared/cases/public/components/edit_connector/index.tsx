@@ -158,7 +158,7 @@ export const EditConnector = React.memo(
     const syncButton = showSyncControls ? (
       <SyncButton
         hasBeenPushed={hasBeenPushed}
-        disabled={!hasBeenPushed || isSyncing || isLoadingPushToService}
+        disabled={isLoadingPushToService}
         isLoading={isSyncing}
         connectorName={connectorName}
         onSync={handleSync}

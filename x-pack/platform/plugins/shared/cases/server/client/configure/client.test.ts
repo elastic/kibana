@@ -1583,14 +1583,13 @@ describe('client', () => {
     };
 
     beforeEach(() => {
-      // @ts-ignore: partial SO shape is sufficient for the test
-      clientArgs.services.caseConfigureService.get.mockResolvedValue(configurationSO);
+      clientArgs.services.caseConfigureService.get.mockResolvedValue(configurationSO as never);
       clientArgs.services.caseConfigureService.patch.mockImplementation(
-        // @ts-ignore: echo back the patched attributes
-        async ({ updatedAttributes }) => ({
-          ...configurationSO,
-          attributes: { ...configurationSO.attributes, ...updatedAttributes },
-        })
+        async ({ updatedAttributes }) =>
+          ({
+            ...configurationSO,
+            attributes: { ...configurationSO.attributes, ...updatedAttributes },
+          } as never)
       );
       casesClientInternal.configuration.getMappings = jest.fn().mockResolvedValue({
         id: 'mapping-1',

@@ -124,7 +124,7 @@ export interface CasesSubClient {
    */
   push(args: PushParams): Promise<Case>;
   /**
-   * Applies the linked external incident to the case (title, description, status). Technical preview.
+   * Applies the linked external incident to the case. Technical preview.
    */
   sync(args: SyncParams): Promise<Case>;
   /**

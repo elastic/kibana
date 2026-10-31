@@ -7,7 +7,12 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest, PubSubEvent } from '@kbn/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import type { Case } from '../../common/types/domain';
 import { ConnectorTypes } from '../../common/types/domain';
 import { createCasesClientMock } from '../client/mocks';
@@ -20,7 +25,6 @@ import {
   registerExternalIncidentConsumer,
   syncCasesForIncident,
 } from './external_incident_consumer';
-import { createServiceAccountsMock } from './mocks';
 import { EXTERNAL_SYNC_WORKLOAD_TYPE } from './service_account';
 
 const caseOn = (id: string, connectorId: string): Case => ({
@@ -41,13 +45,14 @@ describe('syncCasesForIncident', () => {
   const serviceAccountRequest = httpServerMock.createKibanaRequest();
   const casesClient = createCasesClientMock();
   const getCasesClient = jest.fn().mockResolvedValue(casesClient);
-  let serviceAccounts: ReturnType<typeof createServiceAccountsMock>;
+  let serviceAccounts: ReturnType<typeof securityServiceMock.createServiceAccounts>;
 
   const run = () => syncCasesForIncident({ event, serviceAccounts, getCasesClient, logger });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    serviceAccounts = createServiceAccountsMock();
+    serviceAccounts = securityServiceMock.createServiceAccounts();
+    serviceAccounts.isEnabled.mockReturnValue(true);
     serviceAccounts.withScopedRequestForWorkload.mockImplementation(
       async (_params: unknown, fn: (request: KibanaRequest) => Promise<unknown>) =>
         fn(serviceAccountRequest)

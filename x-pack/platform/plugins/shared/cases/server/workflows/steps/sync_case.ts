@@ -31,12 +31,9 @@ export const syncCaseStepDefinition = (
         const caseIds =
           caseId != null
             ? [caseId]
-            : (
-                await client.cases.findByExternalId({
-                  externalId: externalId as string,
-                  connectorId,
-                })
-              ).map((theCase) => theCase.id);
+            : externalId != null
+            ? (await client.cases.findByExternalId({ externalId, connectorId })).map(({ id }) => id)
+            : [];
 
         if (caseIds.length === 0) {
           context.logger.warn(

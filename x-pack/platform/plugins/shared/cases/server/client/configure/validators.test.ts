@@ -480,17 +480,5 @@ describe('validators', () => {
         ])
       ).toThrow('does not name a valid case field');
     });
-
-    it('throws when more fields than the connector limit are mapped', () => {
-      const mappings = Array.from({ length: 21 }, (_, index) => ({
-        externalField: `field_${index}`,
-        caseField: `field_${index}_as_keyword`,
-        direction: 'both' as const,
-      }));
-
-      expect(() => validateExternalSyncFieldMappingsInRequest(mappings)).toThrow(
-        'at most 20 fields can be mapped per connector'
-      );
-    });
   });
 });

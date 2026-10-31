@@ -10,8 +10,6 @@ import { notifyExternalSyncRoute } from './notify_external_sync';
 import { getExternalSyncServiceAccountRoutes } from './service_account_routes';
 import type { ExternalSyncRouteDeps } from './types';
 
-export type { ExternalSyncRouteDeps } from './types';
-
 export const getExternalSyncRoutes = (deps: ExternalSyncRouteDeps): CaseRoute[] => [
   notifyExternalSyncRoute(deps),
   ...getExternalSyncServiceAccountRoutes(deps),

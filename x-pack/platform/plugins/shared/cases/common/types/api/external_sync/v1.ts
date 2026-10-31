@@ -7,9 +7,9 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-/** Matches the longest workload id Core accepts for a service account binding. */
-export const MAX_EXTERNAL_SYNC_CONNECTOR_ID_LENGTH = 512;
-export const MAX_SERVICE_ACCOUNT_ID_LENGTH = 512;
+/** The connector id is the workload id; matches the longest one Core accepts for a binding. */
+const MAX_EXTERNAL_SYNC_CONNECTOR_ID_LENGTH = 512;
+const MAX_SERVICE_ACCOUNT_ID_LENGTH = 512;
 
 export const ExternalSyncConnectorParamsSchema = lazySchema(() =>
   z.object({

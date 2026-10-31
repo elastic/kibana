@@ -7,14 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import type {
-  Case,
-  CaseStatuses,
-  ExternalSyncConflictStrategy,
-} from '../../../common/types/domain';
+import type { Case, ExternalSyncConflictStrategy } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import type { ResolvedExternalSyncFieldRules } from '../../../common/utils/external_sync_fields';
 import {
+  keepsKibanaValue,
   pullsFromExternal,
   resolveExternalSyncFieldRules,
 } from '../../../common/utils/external_sync_fields';
@@ -33,29 +30,21 @@ import {
 } from '../usage_counters';
 import { getLatestPushInfo } from './utils';
 import { getConnectorSyncSettings } from '../configure/get_connector_sync_settings';
-import { buildMappedFieldsPatch, mappingsKeepKibanaValue } from './sync_mapped_fields';
+import { buildMappedFieldsPatch } from './sync_mapped_fields';
 import * as i18n from './translations';
 
 export interface SyncParams {
   caseId: string;
 }
 
-export const SYNCED_FIELDS = ['title', 'description', 'status', 'tags'] as const;
+const SYNCED_FIELDS = ['title', 'description', 'status', 'tags'] as const;
 
-interface SyncPatch {
-  title?: string;
-  description?: string;
-  status?: CaseStatuses;
-  tags?: string[];
-}
+type SyncPatch = Partial<Pick<Case, (typeof SYNCED_FIELDS)[number]>>;
 
-// Push appends "Added by …" (and the case link) to the description; drop it so a
-// round trip compares equal and auto-push does not append it again.
-const ADDED_BY_PREFIX = i18n.ADDED_BY('').trimEnd();
+/** The "Added by …" footer push appends to the description and to every comment it sends. */
+const KIBANA_FOOTER = `\n\n${i18n.ADDED_BY('').trimEnd()}`;
 
-/** Push appends the same footer to every comment it sends; a body carrying it came from Kibana. */
-export const isPushedFromKibana = (body: string): boolean =>
-  body.includes(`\n\n${ADDED_BY_PREFIX}`);
+export const isPushedFromKibana = (body: string): boolean => body.includes(KIBANA_FOOTER);
 
 const sameValue = (a: unknown, b: unknown): boolean => {
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -93,8 +82,9 @@ export const selectCommentsToImport = (
   );
 };
 
+// Stripped so a round trip compares equal and auto-push does not append the footer again.
 export const stripKibanaInformationFromDescription = (description: string): string => {
-  const footerStart = description.lastIndexOf(`\n\n${ADDED_BY_PREFIX}`);
+  const footerStart = description.lastIndexOf(KIBANA_FOOTER);
   return footerStart === -1 ? description : description.slice(0, footerStart);
 };
 
@@ -125,8 +115,7 @@ export const buildSyncPatch = (
         : snapshot[field];
 
     if (value != null && !sameValue(value, theCase[field])) {
-      const strategy = fieldRules[field].conflictStrategy ?? defaultStrategy;
-      if (strategy === 'kibana' && changedInKibana.has(field)) {
+      if (keepsKibanaValue(fieldRules[field], defaultStrategy) && changedInKibana.has(field)) {
         conflictedFields.push(field);
       } else {
         Object.assign(patch, { [field]: value });
@@ -137,16 +126,6 @@ export const buildSyncPatch = (
 
   return { patch, updatedFields, conflictedFields };
 };
-
-const keepsKibanaValueForAnyField = (
-  fieldRules: ResolvedExternalSyncFieldRules,
-  defaultStrategy: ExternalSyncConflictStrategy
-): boolean =>
-  SYNCED_FIELDS.some(
-    (field) =>
-      pullsFromExternal(fieldRules[field].direction) &&
-      (fieldRules[field].conflictStrategy ?? defaultStrategy) === 'kibana'
-  );
 
 const getFieldsChangedSinceLastPush = async (
   caseId: string,
@@ -174,10 +153,7 @@ const getFieldsChangedSinceLastPush = async (
   );
 };
 
-/**
- * Fetches the incident the case was pushed to and applies it to the case.
- * The request is a notification only: the external record is the snapshot.
- */
+/** Fetches the incident the case was pushed to and applies it to the case. */
 export const sync = async (
   { caseId }: SyncParams,
   clientArgs: CasesClientArgs,
@@ -238,18 +214,20 @@ export const sync = async (
       );
     }
 
-    const snapshot = parseIncident(res.data as Record<string, unknown>);
+    const incident = res.data as Record<string, unknown>;
+    const snapshot = parseIncident(incident);
     const connectorSync = await getConnectorSyncSettings(
       { connectorId: theCase.connector.id },
       clientArgs
     );
     const fieldRules = resolveExternalSyncFieldRules(connectorSync.externalSyncFields);
     const defaultStrategy = theCase.settings.externalSync?.conflictStrategy ?? 'external';
-    const changedInKibana =
-      keepsKibanaValueForAnyField(fieldRules, defaultStrategy) ||
-      mappingsKeepKibanaValue(connectorSync.externalSyncFieldMappings, defaultStrategy)
-        ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
-        : new Set<string>();
+    const changedInKibana = [
+      ...SYNCED_FIELDS.map((field) => fieldRules[field]),
+      ...(connectorSync.externalSyncFieldMappings ?? []),
+    ].some((rule) => keepsKibanaValue(rule, defaultStrategy))
+      ? await getFieldsChangedSinceLastPush(caseId, theCase.connector.id, casesClient)
+      : new Set<string>();
 
     const builtIn = buildSyncPatch(theCase, snapshot, {
       changedInKibana,
@@ -258,14 +236,13 @@ export const sync = async (
     });
     const mapped = await buildMappedFieldsPatch({
       theCase,
-      incident: res.data as Record<string, unknown>,
+      incident,
       mappings: connectorSync.externalSyncFieldMappings,
       defaultStrategy,
       changedInKibana,
       clientArgs,
     });
 
-    const patch = builtIn.patch;
     const updatedFields = [...builtIn.updatedFields, ...mapped.updatedFields];
     const conflictedFields = [...builtIn.conflictedFields, ...mapped.conflictedFields];
 
@@ -276,7 +253,7 @@ export const sync = async (
             {
               id: caseId,
               version: theCase.version,
-              ...patch,
+              ...builtIn.patch,
               ...(mapped.updatedFields.length > 0
                 ? { extended_fields: mapped.extendedFields }
                 : {}),

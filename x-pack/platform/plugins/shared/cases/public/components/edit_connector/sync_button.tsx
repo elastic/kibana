@@ -28,6 +28,7 @@ const SyncButtonComponent: React.FC<SyncButtonProps> = ({
   variant = 'empty',
 }) => {
   const label = i18n.SYNC_FROM(connectorName);
+  const isDisabled = disabled || !hasBeenPushed;
   const button =
     variant === 'outlined' ? (
       <EuiButton
@@ -36,7 +37,7 @@ const SyncButtonComponent: React.FC<SyncButtonProps> = ({
         color="text"
         iconType="refresh"
         onClick={onSync}
-        disabled={disabled}
+        disabled={isDisabled}
         isLoading={isLoading}
       >
         {label}
@@ -46,7 +47,7 @@ const SyncButtonComponent: React.FC<SyncButtonProps> = ({
         data-test-subj="sync-from-external-service"
         iconType="refresh"
         onClick={onSync}
-        disabled={disabled}
+        disabled={isDisabled}
         isLoading={isLoading}
       >
         {label}

@@ -522,14 +522,13 @@ export class CasePlugin
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
 
-    if (this.caseConfig.bidirectionalSync.enabled) {
+    if (this.caseConfig.bidirectionalSync.enabled && this.casesEventBus != null) {
       const licensingService = new LicensingService(
         plugins.licensing.license$,
         plugins.licensing.featureUsage.notifyUsage
       );
       registerAutoPushListener({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        casesEventBus: this.casesEventBus!,
+        casesEventBus: this.casesEventBus,
         getCasesClient: this.getCasesClientWithRequest(core, 'external_sync'),
         isAtLeastEnterprise: () => licensingService.isAtLeastEnterprise(),
         logger: this.logger,

@@ -9,8 +9,9 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NONE_CONNECTOR_ID } from '../../common/constants';
 import type { CasesClient } from '../client';
 import type { CasesEventBus } from '../events/event_bus';
+import type { CaseUpdateOrigin } from '../events/types';
 
-export interface AutoPushListenerDeps {
+interface AutoPushListenerDeps {
   casesEventBus: CasesEventBus;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   isAtLeastEnterprise: () => Promise<boolean>;
@@ -89,23 +90,20 @@ export function registerAutoPushListener({
     void run(caseId);
   };
 
+  const scheduleUnlessSynced = ({
+    request,
+    payload: { caseId, origin },
+  }: {
+    request: KibanaRequest;
+    payload: { caseId: string; origin?: CaseUpdateOrigin };
+  }): void => {
+    // Changes applied from the external incident must not be pushed straight back.
+    if (origin !== 'external_sync') {
+      schedule(request, caseId);
+    }
+  };
+
   casesEventBus.onCaseCreated((event) => schedule(event.request, event.payload.caseId));
-
-  casesEventBus.onCaseUpdated((event) => {
-    // Applying the external incident to the case must not push it straight back.
-    if (event.payload.origin === 'external_sync') {
-      return;
-    }
-
-    schedule(event.request, event.payload.caseId);
-  });
-
-  casesEventBus.onAttachmentsAdded((event) => {
-    // Comments imported from the external incident must not be pushed straight back.
-    if (event.payload.origin === 'external_sync') {
-      return;
-    }
-
-    schedule(event.request, event.payload.caseId);
-  });
+  casesEventBus.onCaseUpdated(scheduleUnlessSynced);
+  casesEventBus.onAttachmentsAdded(scheduleUnlessSynced);
 }

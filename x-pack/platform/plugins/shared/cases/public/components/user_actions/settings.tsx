@@ -16,37 +16,29 @@ import {
   ENABLED_SETTING,
   SYNC_ALERTS_LC,
   EXTRACT_OBSERVABLES_LC,
-  AUTO_PUSH_LC,
 } from './translations';
 
-type SettingsPayload = SnakeToCamelCase<SettingsUserAction>['payload']['settings'];
-
-const SETTING_CONFIGS: Array<{
-  getValue: (settings: SettingsPayload) => boolean | undefined;
-  enabledLabel: string;
-  disabledLabel: string;
-}> = [
+const SETTING_CONFIGS = [
   {
-    getValue: (settings) => settings.syncAlerts,
+    key: 'syncAlerts' as const,
     enabledLabel: `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`,
     disabledLabel: `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`,
   },
   {
-    getValue: (settings) => settings.extractObservables,
+    key: 'extractObservables' as const,
     enabledLabel: `${ENABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`,
     disabledLabel: `${DISABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`,
   },
-  {
-    getValue: (settings) => settings.externalSync?.autoPush,
-    enabledLabel: `${ENABLED_SETTING} ${AUTO_PUSH_LC}`,
-    disabledLabel: `${DISABLED_SETTING} ${AUTO_PUSH_LC}`,
-  },
-];
+] as const;
 
-function getSettingsLabels(settings: SettingsPayload): ReactNode[] {
-  return SETTING_CONFIGS.filter((config) => config.getValue(settings) !== undefined).map((config) =>
-    config.getValue(settings) ? config.enabledLabel : config.disabledLabel
+function getSettingsLabel(userAction: SnakeToCamelCase<SettingsUserAction>): ReactNode {
+  const settings = userAction.payload.settings;
+  const labels = SETTING_CONFIGS.filter((config) => settings[config.key] !== undefined).map(
+    (config) => (settings[config.key] ? config.enabledLabel : config.disabledLabel)
   );
+
+  // Join labels if multiple, or return single label
+  return labels.length > 1 ? labels.join(', ') : labels[0] || '';
 }
 
 export const createSettingsUserActionBuilder: UserActionBuilder = ({
@@ -56,21 +48,20 @@ export const createSettingsUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const action = userAction as SnakeToCamelCase<SettingsUserAction>;
-    const labels = getSettingsLabels(action?.payload?.settings ?? {});
+    const { syncAlerts, extractObservables } = action?.payload?.settings;
+    if (syncAlerts !== undefined || extractObservables !== undefined) {
+      const commonBuilder = createCommonUpdateUserActionBuilder({
+        userProfiles,
+        userAction,
+        handleOutlineComment,
+        label: getSettingsLabel(action),
+        icon: 'gear',
+      });
 
-    // Settings this renderer does not know about produce no timeline entry.
-    if (labels.length === 0) {
-      return [];
+      return commonBuilder.build();
     }
 
-    const commonBuilder = createCommonUpdateUserActionBuilder({
-      userProfiles,
-      userAction,
-      handleOutlineComment,
-      label: labels.join(', '),
-      icon: 'gear',
-    });
-
-    return commonBuilder.build();
+    // if new settings are introduced. they won't be rendered
+    return [];
   },
 });

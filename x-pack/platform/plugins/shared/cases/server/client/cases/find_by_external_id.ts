@@ -8,7 +8,6 @@
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { Case } from '../../../common/types/domain';
 import { CasesSchema } from '../../../common/types/domain';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -62,7 +61,7 @@ export const findByExternalId = async (
       ...(connectorId != null
         ? { hasReference: { type: ACTION_SAVED_OBJECT_TYPE, id: connectorId } }
         : {}),
-      perPage: Math.min(MAX_MATCHES, MAX_DOCS_PER_PAGE),
+      perPage: MAX_MATCHES,
       sortField: 'created_at',
     });
 

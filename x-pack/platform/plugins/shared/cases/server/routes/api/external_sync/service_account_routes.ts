@@ -24,6 +24,17 @@ import type { ExternalSyncRouteDeps } from './types';
 
 const decodeParams = decodeWithExcessOrThrowZod(ExternalSyncConnectorParamsSchema);
 
+const toBindingResponse = ({
+  serviceAccountId,
+  boundAt,
+}: {
+  serviceAccountId: string;
+  boundAt: string;
+}): externalSyncApiV1.ExternalSyncServiceAccountBinding => ({
+  service_account_id: serviceAccountId,
+  bound_at: boundAt,
+});
+
 const getEnabledServiceAccounts = async (
   getStartServices: ExternalSyncRouteDeps['getStartServices']
 ): Promise<CoreServiceAccountsService> => {
@@ -64,10 +75,7 @@ export const getExternalSyncServiceAccountRoutes = ({
         });
 
         const body: externalSyncApiV1.ExternalSyncServiceAccountResponse = {
-          binding:
-            binding != null
-              ? { service_account_id: binding.serviceAccountId, bound_at: binding.boundAt }
-              : null,
+          binding: binding != null ? toBindingResponse(binding) : null,
         };
 
         return response.ok({ body });
@@ -103,7 +111,7 @@ export const getExternalSyncServiceAccountRoutes = ({
         });
 
         const body: externalSyncApiV1.ExternalSyncServiceAccountResponse = {
-          binding: { service_account_id: binding.serviceAccountId, bound_at: binding.boundAt },
+          binding: toBindingResponse(binding),
         };
 
         return response.ok({ body });

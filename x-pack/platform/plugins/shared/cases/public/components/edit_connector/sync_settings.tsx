@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSwitch } from '@el
 import type { ExternalSyncSettings } from '../../../common/types/domain';
 import * as i18n from './translations';
 
-export const DEFAULT_EXTERNAL_SYNC: ExternalSyncSettings = {
+const DEFAULT_EXTERNAL_SYNC: ExternalSyncSettings = {
   autoPush: false,
   conflictStrategy: 'external',
 };

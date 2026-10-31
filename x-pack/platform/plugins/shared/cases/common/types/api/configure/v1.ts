@@ -32,9 +32,9 @@ import {
 import { ClosureTypeSchema, ConfigurationBasicWithoutOwnerSchema } from '../../domain/configure/v1';
 import type { Configuration, Configurations } from '../../domain/configure/v1';
 import {
+  EXTERNAL_SYNC_FIELDS,
   ExternalSyncFieldMappingSchema,
   ExternalSyncFieldRuleSchema,
-  ExternalSyncFieldSchema,
   ExternalSyncSettingsSchema,
 } from '../../domain/external_sync/v1';
 import {
@@ -187,7 +187,7 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
 const ExternalSyncFieldRulesRequestSchema = limitedArraySchema({
   codec: ExternalSyncFieldRuleSchema,
   min: 0,
-  max: ExternalSyncFieldSchema.options.length,
+  max: EXTERNAL_SYNC_FIELDS.length,
   fieldName: 'externalSyncFields',
 });
 

@@ -9,10 +9,10 @@ import type {
   ExternalSyncConflictStrategy,
   ExternalSyncDirection,
   ExternalSyncField,
-  ExternalSyncFieldRule,
   ExternalSyncFieldRules,
 } from '../types/domain';
 import { ConnectorTypes } from '../types/domain/connector/v1';
+import { EXTERNAL_SYNC_FIELDS } from '../types/domain/external_sync/v1';
 import { FieldType } from '../types/domain/template/fields';
 
 /** Lower of the Jira `otherFields` and ServiceNow `additional_fields` limits. */
@@ -68,13 +68,7 @@ export const coerceExternalFieldValue = (value: unknown): string | undefined => 
   return undefined;
 };
 
-export const EXTERNAL_SYNC_FIELDS: readonly ExternalSyncField[] = [
-  'title',
-  'description',
-  'status',
-  'tags',
-  'comments',
-];
+export { EXTERNAL_SYNC_FIELDS };
 
 // Status is only read back from the incident (pushing it needs the connector's status
 // transitions), so the other directions would be dead settings for it.
@@ -89,12 +83,12 @@ export const EXTERNAL_SYNC_FIELD_DIRECTIONS: Record<
   comments: ['both', 'push', 'pull', 'off'],
 };
 
-export const DEFAULT_EXTERNAL_SYNC_FIELD_RULES: Record<ExternalSyncField, ExternalSyncFieldRule> = {
-  title: { field: 'title', direction: 'both' },
-  description: { field: 'description', direction: 'both' },
-  status: { field: 'status', direction: 'pull' },
-  tags: { field: 'tags', direction: 'push' },
-  comments: { field: 'comments', direction: 'push' },
+const DEFAULT_EXTERNAL_SYNC_DIRECTIONS: Record<ExternalSyncField, ExternalSyncDirection> = {
+  title: 'both',
+  description: 'both',
+  status: 'pull',
+  tags: 'push',
+  comments: 'push',
 };
 
 export interface ResolvedExternalSyncFieldRule {
@@ -121,7 +115,7 @@ export const resolveExternalSyncFieldRules = (
     const direction =
       saved != null && EXTERNAL_SYNC_FIELD_DIRECTIONS[field].includes(saved.direction)
         ? saved.direction
-        : DEFAULT_EXTERNAL_SYNC_FIELD_RULES[field].direction;
+        : DEFAULT_EXTERNAL_SYNC_DIRECTIONS[field];
 
     resolved[field] = {
       direction,
@@ -137,3 +131,12 @@ export const pullsFromExternal = (direction: ExternalSyncDirection): boolean =>
 
 export const pushesToExternal = (direction: ExternalSyncDirection): boolean =>
   direction === 'push' || direction === 'both';
+
+export const isExternalSyncDirection = (value: string): value is ExternalSyncDirection =>
+  value === 'both' || value === 'push' || value === 'pull' || value === 'off';
+
+/** Whether a pulled field keeps its Kibana value when it was also edited in Kibana. */
+export const keepsKibanaValue = (
+  { direction, conflictStrategy }: ResolvedExternalSyncFieldRule,
+  defaultStrategy: ExternalSyncConflictStrategy
+): boolean => pullsFromExternal(direction) && (conflictStrategy ?? defaultStrategy) === 'kibana';

@@ -20,18 +20,17 @@ export interface RegisterConnectorsArgs extends GetActionTypeParams {
   registerActionType: RegisterActionType;
 }
 
-/**
- * Case fields read back from the external incident. A missing key means the
- * incident carries no usable value for that field.
- */
 export interface ExternalIncidentComment {
   externalId: string;
   body: string;
   author?: { name: string; email?: string };
   createdAt?: string;
-  updatedAt?: string;
 }
 
+/**
+ * Case fields read back from the external incident. A missing key means the
+ * incident carries no usable value for that field.
+ */
 export interface ExternalIncidentSnapshot {
   title?: string;
   description?: string;

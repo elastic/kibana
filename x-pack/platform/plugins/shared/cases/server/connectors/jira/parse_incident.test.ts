@@ -75,7 +75,6 @@ describe('jira parseIncident', () => {
         body: 'Looking into it',
         author: { name: 'Jane Smith', email: 'jane@example.com' },
         createdAt: '2026-10-01T10:00:00.000+0000',
-        updatedAt: '2026-10-01T10:05:00.000+0000',
       },
       { externalId: '20002', body: 'No author' },
     ]);

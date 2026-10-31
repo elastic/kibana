@@ -22,8 +22,6 @@ import {
 } from '@elastic/eui';
 
 import type {
-  ExternalSyncConflictStrategy,
-  ExternalSyncDirection,
   ExternalSyncFieldMapping,
   ExternalSyncFieldMappings,
   ConnectorTypes,
@@ -31,6 +29,7 @@ import type {
 import {
   EXTERNAL_SYNC_MAPPABLE_CONTROLS,
   MAX_EXTERNAL_SYNC_FIELD_MAPPINGS,
+  isExternalSyncDirection,
   pullsFromExternal,
 } from '../../../common/utils/external_sync_fields';
 import {
@@ -41,6 +40,12 @@ import type { CaseConnectorMapping } from '../../containers/configure/types';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { useCreateFieldDefinition } from '../field_library/hooks/use_create_field_definition';
 import { FieldDefinitionFlyout } from '../field_library/components/field_definition_flyout';
+import {
+  FIELD_CONFLICT_OPTIONS,
+  toConflictStrategy,
+  toDirectionOptions,
+  USE_DEFAULT_CONFLICT,
+} from './external_sync_options';
 import * as i18n from './translations';
 import type { ExternalFieldCatalogEntry } from './use_get_external_field_catalog';
 import { useGetExternalFieldCatalog } from './use_get_external_field_catalog';
@@ -62,21 +67,7 @@ interface Row extends ExternalFieldCatalogEntry {
 const NOT_SYNCED = '';
 const PAGE_SIZE = 10;
 
-const DIRECTION_OPTIONS: Array<{ value: ExternalSyncDirection; text: string }> = [
-  { value: 'both', text: i18n.FIELD_SYNC_DIRECTION_BOTH },
-  { value: 'push', text: i18n.FIELD_SYNC_DIRECTION_PUSH },
-  { value: 'pull', text: i18n.FIELD_SYNC_DIRECTION_PULL },
-  { value: 'off', text: i18n.FIELD_SYNC_DIRECTION_OFF },
-];
-
-const CONFLICT_OPTIONS = [
-  { value: 'default', text: i18n.FIELD_SYNC_CONFLICT_DEFAULT },
-  { value: 'kibana', text: i18n.CONFLICT_KEEP_KIBANA },
-  { value: 'external', text: i18n.CONFLICT_KEEP_EXTERNAL },
-];
-
-const isDirection = (value: string): value is ExternalSyncDirection =>
-  value === 'both' || value === 'push' || value === 'pull' || value === 'off';
+const DIRECTION_OPTIONS = toDirectionOptions(['both', 'push', 'pull', 'off']);
 
 const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProps> = ({
   connector,
@@ -201,7 +192,7 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
               value={mapping.direction}
               options={DIRECTION_OPTIONS}
               onChange={(e) => {
-                if (isDirection(e.target.value)) {
+                if (isExternalSyncDirection(e.target.value)) {
                   update(row.key, { ...mapping, direction: e.target.value });
                 }
               }}
@@ -219,17 +210,12 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
               compressed
               fullWidth
               disabled={disabled}
-              value={mapping.conflictStrategy ?? 'default'}
-              options={CONFLICT_OPTIONS}
+              value={mapping.conflictStrategy ?? USE_DEFAULT_CONFLICT}
+              options={FIELD_CONFLICT_OPTIONS}
               onChange={(e) => {
-                const strategy = e.target.value;
+                const strategy = toConflictStrategy(e.target.value);
                 const { conflictStrategy, ...rest } = mapping;
-                update(
-                  row.key,
-                  strategy === 'kibana' || strategy === 'external'
-                    ? { ...rest, conflictStrategy: strategy as ExternalSyncConflictStrategy }
-                    : rest
-                );
+                update(row.key, strategy != null ? { ...rest, conflictStrategy: strategy } : rest);
               }}
               aria-label={i18n.FIELD_SYNC_CONFLICT_ARIA(row.label)}
               data-test-subj={`external-field-mapping-conflict-${row.key}`}
@@ -241,6 +227,7 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
   );
 
   const pageOfRows = rows.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+  const isSearching = search.trim() !== '';
 
   return (
     <div data-test-subj="external-field-mapping-table">
@@ -250,7 +237,7 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
             <h4>{i18n.EXTERNAL_FIELDS_TITLE}</h4>
           </EuiTitle>
         </EuiFlexItem>
-        {catalog.isLoading && (
+        {catalog.isInitialLoading && (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="s" data-test-subj="external-field-mapping-loading" />
           </EuiFlexItem>
@@ -259,7 +246,7 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             disabled={disabled}
             onClick={() => setIsFlyoutOpen(true)}
             data-test-subj="external-field-mapping-create-field"
@@ -279,13 +266,13 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
         </EuiText>
       )}
 
-      {catalog.isSuccess && rows.length === 0 && search.trim() === '' && (
+      {catalog.isSuccess && rows.length === 0 && !isSearching && (
         <EuiText size="s" color="subdued" data-test-subj="external-field-mapping-empty">
           {i18n.EXTERNAL_FIELDS_EMPTY(connector.name)}
         </EuiText>
       )}
 
-      {catalog.isSuccess && (rows.length > 0 || search.trim() !== '') && (
+      {catalog.isSuccess && (rows.length > 0 || isSearching) && (
         <>
           <EuiFieldSearch
             compressed
@@ -303,7 +290,7 @@ const ExternalFieldMappingTableComponent: React.FC<ExternalFieldMappingTableProp
           {capReached && (
             <>
               <EuiText size="xs" color="subdued" data-test-subj="external-field-mapping-cap">
-                {i18n.EXTERNAL_FIELDS_CAP}
+                {i18n.EXTERNAL_FIELDS_CAP(MAX_EXTERNAL_SYNC_FIELD_MAPPINGS)}
               </EuiText>
               <EuiSpacer size="s" />
             </>

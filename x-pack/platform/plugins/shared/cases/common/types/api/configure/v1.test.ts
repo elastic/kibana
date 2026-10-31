@@ -179,6 +179,14 @@ describe('configure', () => {
       });
       expect(result.success).toBe(false);
     });
+
+    it('does not accept a blank externalField', () => {
+      const result = ConfigurationRequestSchema.safeParse({
+        ...defaultRequest,
+        externalSyncFieldMappings: [{ externalField: '   ', caseField: 'team', direction: 'pull' }],
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('ConfigurationPatchRequestSchema', () => {

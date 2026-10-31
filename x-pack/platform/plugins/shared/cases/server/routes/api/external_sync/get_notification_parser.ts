@@ -11,10 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ParseNotification } from '../../../connectors';
 import { casesConnectors } from '../../../connectors';
 
-/**
- * Reads the connector as the caller and returns its notification parser. Throws a 400 for a
- * connector type that cannot notify Kibana, which is anything but Jira or ServiceNow.
- */
+/** Reads the connector as the caller and returns its notification parser; 400 when it has none. */
 export const getNotificationParser = async (
   actionsClient: PublicMethodsOf<ActionsClient>,
   connectorId: string
