@@ -443,6 +443,50 @@ describe('pull_request pipeline generation', () => {
     expect(mockAreChangesSkippable).not.toHaveBeenCalled();
   });
 
+  it.each([
+    'x-pack/platform/packages/shared/isomer/studio/run.ts',
+    'x-pack/platform/packages/shared/isomer/isomer-components/src/pack.ts',
+    'x-pack/platform/packages/shared/isomer/isomer-theme/src/style_context.ts',
+    '.buildkite/scripts/steps/isomer_studio.sh',
+    '.buildkite/scripts/steps/isomer_studio_upload.sh',
+    '.buildkite/scripts/steps/isomer_studio_upload.test.ts',
+    '.buildkite/pipeline-utils/step-library/steps/isomer_studio.ts',
+  ])('emits shared Studio for %s', async (filename) => {
+    const changes = [{ filename }];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('Build shared Isomer Studio');
+    expect(output).toContain('isomer-studio');
+  });
+
+  it('does not build Studio for unrelated changes', async () => {
+    const emitted = waitForEmission();
+    await importPipelineModule();
+    expect(await emitted).not.toContain('Build shared Isomer Studio');
+  });
+
+  it.each(['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml'])(
+    'does not build Studio for an unrelated dependency change in %s',
+    async (filename) => {
+      const changes = [{ filename }];
+      mockGetPrChangesCached.mockResolvedValue(changes);
+      mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+        realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+      );
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      expect(await emitted).not.toContain('Build shared Isomer Studio');
+    }
+  );
+
   it('emits storybooks when pnpm-lock.yaml changes', async () => {
     const changes = [{ filename: 'pnpm-lock.yaml' }];
     mockGetPrChangesCached.mockResolvedValue(changes);

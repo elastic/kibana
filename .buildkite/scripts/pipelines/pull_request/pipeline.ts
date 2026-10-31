@@ -63,6 +63,7 @@ import {
   responseOpsSteps,
   scoutFleetRealAgentSteps,
   storybooks,
+  isomerStudio,
   verifyFipsEnabled,
   warmStartMemoryBenchSteps,
   workflowsOomTestingSteps,
@@ -195,6 +196,16 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     await runPreBuild();
     pipeline.push(renderSteps(prBaseSteps(), { header: true, env: prBaseEnv }));
     pipeline.push(renderSteps(localCheck()));
+
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/platform\/packages\/shared\/isomer\//,
+        /^\.buildkite\/scripts\/steps\/isomer_studio(?:_upload)?\.(?:sh|test\.ts)$/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/isomer_studio\.ts$/,
+      ])
+    ) {
+      pipeline.push(renderSteps(isomerStudio(), cancelOnGate));
+    }
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
