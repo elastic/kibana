@@ -20,6 +20,7 @@ describe('AddDataCard', () => {
     expect(screen.getByTestId('nightshiftAddDataCard')).toHaveTextContent(
       'Add data in 10+ other ways'
     );
+    expect(screen.getByTestId('nightshiftAddDataLogos')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftAddDataButton'));
 
     expect(onboardingLocator.getRedirectUrl).toHaveBeenCalledWith({});

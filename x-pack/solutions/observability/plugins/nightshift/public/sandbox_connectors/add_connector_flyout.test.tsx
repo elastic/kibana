@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { AddConnectorFlyout } from './add_connector_flyout';
 import {
   actionType,
@@ -76,6 +76,26 @@ describe('AddConnectorFlyout', () => {
       })
     );
     expect(await screen.findByTestId('nightshiftConnectorEnable-h1')).toBeInTheDocument();
+  });
+
+  it('spins the clicked toggle while the agent updates', async () => {
+    const { agents } = setup();
+    let finishUpdate!: () => void;
+    const addConnector = agents.addConnectorToAgent.getMockImplementation()!;
+    agents.addConnectorToAgent.mockImplementationOnce(async (params) => {
+      await new Promise<void>((resolve) => (finishUpdate = resolve));
+      return addConnector(params);
+    });
+    fireEvent.click(await screen.findByTestId('.http-toggle'));
+
+    fireEvent.click(screen.getByTestId('nightshiftConnectorEnable-h2'));
+
+    const clicked = await screen.findByTestId('nightshiftConnectorEnable-h2');
+    await waitFor(() => expect(within(clicked).getByRole('progressbar')).toBeInTheDocument());
+    expect(screen.getByTestId('nightshiftConnectorEnabled-h1')).toBeEnabled();
+
+    finishUpdate();
+    expect(await screen.findByTestId('nightshiftConnectorEnabled-h2')).toBeInTheDocument();
   });
 
   it('filters by connector name, counting the matches', async () => {

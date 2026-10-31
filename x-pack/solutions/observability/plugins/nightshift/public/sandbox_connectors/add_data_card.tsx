@@ -14,6 +14,8 @@ import {
 } from '@kbn/deeplinks-observability';
 import { useKibana } from '../hooks/use_kibana';
 import { SourceCard } from './source_card';
+import { LogoStack } from './logo_stack';
+import openTelemetryLogoSrc from './assets/opentelemetry.svg';
 
 export function AddDataCard(): React.ReactElement {
   const { application, share } = useKibana().services;
@@ -26,7 +28,9 @@ export function AddDataCard(): React.ReactElement {
 
   return (
     <SourceCard
-      icon="rocket"
+      mark={
+        <LogoStack frontLogoSrc={openTelemetryLogoSrc} data-test-subj="nightshiftAddDataLogos" />
+      }
       title={i18n.translate('xpack.nightshift.addDataCard.title', {
         defaultMessage: 'Add data in 10+ other ways',
       })}

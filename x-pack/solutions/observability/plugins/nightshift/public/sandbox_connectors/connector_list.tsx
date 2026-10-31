@@ -38,7 +38,7 @@ export function ConnectorList({
   onDelete: (connector: SandboxConnector) => void;
   'data-test-subj'?: string;
 }): React.ReactElement {
-  const { assignedIds, assign, unassign, canEditAgent, isUpdating } = useAgentConnectors();
+  const { assignedIds, assign, unassign, canEditAgent, updatingId } = useAgentConnectors();
 
   return (
     <ul css={listStyles} data-test-subj={dataTestSubj}>
@@ -48,7 +48,7 @@ export function ConnectorList({
           connector={connector}
           isAssigned={assignedIds.includes(connector.id)}
           onToggle={(isAssigned) => (isAssigned ? assign(connector) : unassign(connector))}
-          isUpdating={isUpdating}
+          isUpdating={updatingId === connector.id}
           toggleDisabledReason={canEditAgent ? undefined : noAgentPermissionReason}
           onOpenDetails={() => onOpenDetails(connector)}
           openDetailsDisabledReason={

@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
-import { OnboardingConnectStep } from './connect_step';
+import { CONNECT_SUB_STEP_TITLES, OnboardingConnectStep } from './connect_step';
 
 jest.mock('../sandbox_connectors/connect_sources_grid', () => ({
   ConnectSourcesGrid: jest.fn(({ group, trailing }) => (
@@ -23,6 +23,13 @@ jest.mock('../sandbox_connectors/add_data_card', () => ({
 const mockConnectSourcesGrid = ConnectSourcesGrid as jest.Mock;
 
 describe('OnboardingConnectStep', () => {
+  it('names its two pages for the onboarding to show above the step', () => {
+    expect(CONNECT_SUB_STEP_TITLES).toEqual({
+      telemetry: 'Add telemetry data',
+      additional: 'Connect other sources',
+    });
+  });
+
   it('starts with the telemetry types and the Add data card', () => {
     render(
       <I18nProvider>
@@ -30,9 +37,7 @@ describe('OnboardingConnectStep', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('nightshiftOnboardingTelemetry')).toHaveTextContent(
-      'Add telemetry data'
-    );
+    expect(screen.getByTestId('nightshiftOnboardingTelemetry')).toBeInTheDocument();
     expect(screen.getByTestId('grid-telemetry')).toBeInTheDocument();
     expect(screen.getByTestId('addDataCardStub')).toBeInTheDocument();
   });
@@ -44,9 +49,7 @@ describe('OnboardingConnectStep', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('nightshiftOnboardingAdditionalSources')).toHaveTextContent(
-      'Connect other sources'
-    );
+    expect(screen.getByTestId('nightshiftOnboardingAdditionalSources')).toBeInTheDocument();
     expect(screen.getByTestId('grid-additional')).toBeInTheDocument();
     expect(mockConnectSourcesGrid).toHaveBeenLastCalledWith(
       expect.objectContaining({ group: 'additional' }),

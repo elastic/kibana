@@ -49,7 +49,7 @@ const createLabel = i18n.translate('xpack.nightshift.addConnectorFlyout.createBu
 export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.ReactElement {
   const { application, triggersActionsUi } = useKibana().services;
   const { groups, isLoading, error, typesError, refetch } = useConnectorsByType();
-  const { assignedIds, assign, unassign, canEditAgent, isUpdating } = useAgentConnectors();
+  const { assignedIds, assign, unassign, canEditAgent, updatingId } = useAgentConnectors();
   const { openAdd, addFlyout } = useAddConnectorFlyout();
   const [search, setSearch] = useState('');
   const titleId = useGeneratedHtmlId({ prefix: 'nightshiftAddConnectorFlyout' });
@@ -146,7 +146,7 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
                       assignedIds={assignedIds}
                       isSearching={query.length > 0}
                       canToggle={canEditAgent}
-                      isUpdating={isUpdating}
+                      updatingId={updatingId}
                       onToggle={(connector, enable) =>
                         enable ? assign(connector) : unassign(connector)
                       }
@@ -170,7 +170,7 @@ function ConnectorTypeRow({
   onCreate,
   assignedIds,
   canToggle,
-  isUpdating,
+  updatingId,
   onToggle,
   isSearching,
 }: {
@@ -180,7 +180,7 @@ function ConnectorTypeRow({
   onCreate: () => void;
   assignedIds: string[];
   canToggle: boolean;
-  isUpdating: boolean;
+  updatingId: string | undefined;
   onToggle: (connector: SandboxConnector, enable: boolean) => void;
   isSearching: boolean;
 }): React.ReactElement {
@@ -192,6 +192,7 @@ function ConnectorTypeRow({
   const createButton = (
     <EuiButton
       size="s"
+      color="text"
       iconType="plus"
       isDisabled={createDisabledReason !== undefined}
       onClick={onCreate}
@@ -265,12 +266,14 @@ function ConnectorTypeRow({
             >
               {connectors.map((connector) => {
                 const isEnabled = assignedIds.includes(connector.id);
+                const isUpdating = updatingId === connector.id;
                 const toggle = isEnabled ? (
                   <EuiButtonEmpty
                     size="s"
                     color="success"
                     iconType="check"
-                    isDisabled={!canToggle || isUpdating}
+                    isLoading={isUpdating}
+                    isDisabled={!canToggle}
                     onClick={() => onToggle(connector, false)}
                     aria-label={i18n.translate(
                       'xpack.nightshift.addConnectorFlyout.disableAction',
@@ -285,7 +288,8 @@ function ConnectorTypeRow({
                 ) : (
                   <EuiButtonEmpty
                     size="s"
-                    isDisabled={!canToggle || isUpdating}
+                    isLoading={isUpdating}
+                    isDisabled={!canToggle}
                     onClick={() => onToggle(connector, true)}
                     aria-label={i18n.translate('xpack.nightshift.addConnectorFlyout.enableAction', {
                       defaultMessage: 'Enable {name}',

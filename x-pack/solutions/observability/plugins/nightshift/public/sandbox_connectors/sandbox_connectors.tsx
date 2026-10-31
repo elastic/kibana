@@ -71,7 +71,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
   const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
   const agent = useAgentConnectors();
   const { canEdit, openEdit, editFlyout } = useEditConnector();
-  const { canEditAgent, unassign, isUpdating } = agent;
+  const { canEditAgent, unassign, updatingId } = agent;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<SandboxConnector>> => {
     const modelOf = (typeId: string) => (registry?.has(typeId) ? registry.get(typeId) : undefined);
@@ -149,7 +149,8 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
                 iconType="trash"
                 color="danger"
                 aria-label={disableLabel}
-                isDisabled={!canEditAgent || isUpdating}
+                isLoading={updatingId === connector.id}
+                isDisabled={!canEditAgent}
                 onClick={() => unassign(connector)}
                 data-test-subj={`nightshiftConnectorRemove-${connector.id}`}
               />
@@ -158,7 +159,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         },
       },
     ];
-  }, [canEdit, canEditAgent, isUpdating, openEdit, registry, unassign]);
+  }, [canEdit, canEditAgent, updatingId, openEdit, registry, unassign]);
 
   if (isLoading || agent.isLoading) return <EuiLoadingSpinner size="m" />;
   if (agent.error && isHttpNotFoundError(agent.error)) {

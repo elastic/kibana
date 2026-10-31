@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -39,7 +40,11 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../service_account/use_investigator_service_account';
-import { OnboardingConnectStep, type ConnectSubStep } from './connect_step';
+import {
+  CONNECT_SUB_STEP_TITLES,
+  OnboardingConnectStep,
+  type ConnectSubStep,
+} from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
@@ -65,6 +70,10 @@ const HERO_TITLES: Record<OnboardingStepId, string> = {
 const PROCEED_LABEL = i18n.translate('xpack.nightshift.onboarding.proceedButton', {
   defaultMessage: 'Proceed',
 });
+
+const backButtonStyles = css`
+  width: 100%;
+`;
 
 /**
  * First-run Nightshift: add signals and alerts, try a first investigation, create a first
@@ -246,6 +255,9 @@ export function NightshiftOnboarding({
             </EuiButton>
             <EuiButtonEmpty
               size="s"
+              iconType="sortLeft"
+              iconSide="left"
+              css={backButtonStyles}
               onClick={() => setConnectSubStep('telemetry')}
               data-test-subj="nightshiftOnboardingBackToTelemetryButton"
             >
@@ -258,6 +270,9 @@ export function NightshiftOnboarding({
         {isConnected && (
           <EuiButtonEmpty
             size="s"
+            iconType="sortLeft"
+            iconSide="left"
+            css={backButtonStyles}
             onClick={() => setStepOverride(undefined)}
             data-test-subj="nightshiftOnboardingBackToSuggestionsButton"
           >
@@ -310,6 +325,16 @@ export function NightshiftOnboarding({
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />
+        </>
+      )}
+      {step === 'connect' && (
+        <>
+          <EuiTitle size="s">
+            <h3 data-test-subj="nightshiftOnboardingStepTitle">
+              {CONNECT_SUB_STEP_TITLES[connectSubStep]}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
         </>
       )}
       <div

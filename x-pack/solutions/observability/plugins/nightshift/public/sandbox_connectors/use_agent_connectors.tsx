@@ -35,7 +35,7 @@ export function useAgentConnectors(): {
   refetch: () => void;
   canEditAgent: boolean;
   hasConnectorsAllPrivileges: boolean;
-  isUpdating: boolean;
+  updatingId: string | undefined;
   assign: (connector: ConnectorRef) => void;
   unassign: (connector: ConnectorRef) => void;
 } {
@@ -112,7 +112,7 @@ export function useAgentConnectors(): {
     refetch: () => void agent.refetch(),
     canEditAgent,
     hasConnectorsAllPrivileges,
-    isUpdating: update.isLoading,
+    updatingId: update.isLoading ? update.variables?.connector.id : undefined,
     assign,
     unassign,
   };

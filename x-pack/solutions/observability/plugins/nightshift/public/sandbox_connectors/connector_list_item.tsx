@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButtonIcon,
   EuiCheckbox,
+  EuiLoadingSpinner,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -92,6 +93,12 @@ export function ConnectorListItem({
       label={
         <span css={labelStyles}>
           {connector.name}
+          {isUpdating && (
+            <EuiLoadingSpinner
+              size="s"
+              data-test-subj={`nightshiftConnectorListUpdating-${connector.id}`}
+            />
+          )}
           {connector.is_preconfigured && (
             <EuiBadge color="hollow">
               {i18n.translate('xpack.nightshift.connectorList.preconfiguredBadge', {

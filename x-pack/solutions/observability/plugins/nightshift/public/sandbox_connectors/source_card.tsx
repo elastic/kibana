@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
-  transparentize,
   useEuiShadow,
   useEuiTheme,
   type IconType,
@@ -29,18 +28,18 @@ interface SourceCardAction {
 
 export function SourceCard({
   icon,
+  mark,
   title,
   description,
-  connected = false,
   badge,
   action,
   actionNode,
   'data-test-subj': dataTestSubj,
 }: {
-  icon: IconType;
+  icon?: IconType;
+  mark?: React.ReactNode;
   title: string;
   description?: string;
-  connected?: boolean;
   badge?: React.ReactNode;
   action?: SourceCardAction;
   actionNode?: React.ReactNode;
@@ -69,11 +68,9 @@ export function SourceCard({
     width: 40px;
     height: 40px;
     border-radius: ${euiTheme.size.s};
-    ${connected
-      ? `background: ${transparentize(euiTheme.colors.success, 0.15)}; color: ${
-          euiTheme.colors.success
-        };`
-      : `background: ${euiTheme.colors.backgroundBasePlain}; color: ${euiTheme.colors.textHeading}; ${plateShadow}`}
+    background: ${euiTheme.colors.backgroundBasePlain};
+    color: ${euiTheme.colors.textHeading};
+    ${plateShadow}
   `;
   const badgeStyles = css`
     flex: 0 0 auto;
@@ -133,9 +130,11 @@ export function SourceCard({
       data-test-subj={dataTestSubj}
     >
       <div css={plateRowStyles}>
-        <div css={plateStyles} aria-hidden={true}>
-          <EuiIcon type={connected ? 'check' : icon} size="m" aria-hidden={true} />
-        </div>
+        {mark ?? (
+          <div css={plateStyles} aria-hidden={true}>
+            <EuiIcon type={icon ?? 'plugs'} size="m" aria-hidden={true} />
+          </div>
+        )}
         {badge ? <div css={badgeStyles}>{badge}</div> : null}
       </div>
       <div>
