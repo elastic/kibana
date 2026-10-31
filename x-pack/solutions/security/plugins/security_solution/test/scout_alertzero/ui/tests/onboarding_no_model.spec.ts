@@ -17,7 +17,7 @@ import { createUiOnboardingSpace, listWorkers, spaceTest, tags } from '../fixtur
  * the escape hatch to Feature Settings stays reachable from two surfaces.
  *
  * The "configure a model → controls unlock" flow needs EIS and lives with the
- * EIS layer (follow-up tracked in ROUTE_MAP item 7).
+ * EIS layer (ROUTE_MAP.md §7).
  */
 spaceTest.describe(
   'AlertZero onboarding - no-model blocking',

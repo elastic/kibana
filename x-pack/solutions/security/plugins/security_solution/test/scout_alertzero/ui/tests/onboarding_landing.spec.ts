@@ -59,9 +59,8 @@ spaceTest.describe(
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
-        let cleanupAccount: (() => Promise<void>) | undefined;
         try {
-          cleanupAccount = await enableFirstWorker(space);
+          await enableFirstWorker(space);
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
@@ -70,7 +69,6 @@ spaceTest.describe(
           await expect(alertZero.proposalsTrendChartRow).toBeVisible();
           await expect(alertZero.introPromo).toBeHidden();
         } finally {
-          if (cleanupAccount) await cleanupAccount();
           await space.cleanup();
         }
       }
@@ -82,9 +80,8 @@ spaceTest.describe(
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
-        let cleanupAccount: (() => Promise<void>) | undefined;
         try {
-          cleanupAccount = await enableFirstWorker(space);
+          await enableFirstWorker(space);
 
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
@@ -96,7 +93,6 @@ spaceTest.describe(
           await expect(alertZero.proposalsTrendChartRow).toBeVisible();
           await expect(alertZero.introPromo).toBeHidden();
         } finally {
-          if (cleanupAccount) await cleanupAccount();
           await space.cleanup();
         }
       }

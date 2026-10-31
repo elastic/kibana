@@ -391,7 +391,7 @@ describe('Scout AlertZero onboarding fixtures', () => {
       expect(deletes[0].path).toContain('acct-1');
     });
 
-    it('hands the account cleanup to the caller when the enable succeeds', async () => {
+    it('keeps the account and binds it to the worker when the enable succeeds', async () => {
       const { api, calls } = createFakeApi(({ method, path }) => {
         if (method === 'GET') return { statusCode: 200, body: { workers: [worker] } };
         if (method === 'POST' && path.includes('service_account')) {
@@ -400,10 +400,13 @@ describe('Scout AlertZero onboarding fixtures', () => {
         return undefined;
       });
 
-      const cleanup = await onboarding.enableFirstWorker({ spaceId: 'space-1', api });
+      await onboarding.enableFirstWorker({ spaceId: 'space-1', api });
       expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(0);
-      await cleanup();
-      expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(1);
+      const patch = calls.find((c) => c.method === 'PATCH');
+      expect(patch?.body).toMatchObject({
+        enabled: true,
+        settings: { serviceAccountId: 'acct-1' },
+      });
     });
   });
 

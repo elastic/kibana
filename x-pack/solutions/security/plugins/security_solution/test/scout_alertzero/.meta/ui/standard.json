@@ -1,5 +1,5 @@
 {
-  "sha1": "29d101d91106a95d765889a4bf9a3f7b855249fb",
+  "sha1": "265317d9e805137ec964e69408db143a50803252",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 44,
-        "column": 29
+        "line": 43,
+        "column": 77
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 71,
-        "column": 32
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 61,
-        "column": 11
+        "line": 59,
+        "column": 29
       }
     },
     {
@@ -196,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 81,
-        "column": 65
+        "line": 79,
+        "column": 46
       }
     },
     {
@@ -210,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 98,
-        "column": 19
+        "line": 94,
+        "column": 24
       }
     },
     {

@@ -22,7 +22,7 @@ import {
  * closed bucket lists settled proposals from the last 72h (`CLOSED_DECIDED_WITHIN_HOURS`,
  * filtered on `decidedAt`, not `@timestamp`). The window edge is asserted with
  * both sides: a 71h-old decision must appear, a 73h-old one must not. Issue
- * #19934's text says 24h; ROUTE_MAP item 4 records the mismatch — the code's
+ * #19934's text says 24h; ROUTE_MAP.md §4 records the mismatch — the code's
  * 72h is the contract this spec pins.
  */
 spaceTest.describe(
@@ -37,9 +37,8 @@ spaceTest.describe(
         const space = await createUiOnboardingSpace(kbnClient, apiServices.spaces, {
           withStubModel: true,
         });
-        let cleanupAccount: (() => Promise<void>) | undefined;
         try {
-          cleanupAccount = await enableFirstWorker(space);
+          await enableFirstWorker(space);
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: space.spaceId }));
 
@@ -48,7 +47,6 @@ spaceTest.describe(
           await alertZero.waitForQueue();
           await expect(alertZero.introPromo).toBeHidden();
         } finally {
-          if (cleanupAccount) await cleanupAccount();
           await space.cleanup();
         }
       }
@@ -61,9 +59,8 @@ spaceTest.describe(
           withStubModel: true,
         });
         const seeded: string[] = [];
-        let cleanupAccount: (() => Promise<void>) | undefined;
         try {
-          cleanupAccount = await enableFirstWorker(space);
+          await enableFirstWorker(space);
           const proposal = await seedClosedProposal(esClient, space.spaceId, {
             title: 'Closed row shows decision time',
             decidedAtHoursAgo: 2,
@@ -81,7 +78,6 @@ spaceTest.describe(
           // Decision time renders as a relative age of the seeded `decidedAt` (2h ago).
           await expect(row.getByText(/2 hours ago|an hour ago/i)).toBeVisible();
         } finally {
-          if (cleanupAccount) await cleanupAccount();
           await deleteSeededProposals(esClient, seeded);
           await space.cleanup();
         }
@@ -95,9 +91,8 @@ spaceTest.describe(
           withStubModel: true,
         });
         const seeded: string[] = [];
-        let cleanupAccount: (() => Promise<void>) | undefined;
         try {
-          cleanupAccount = await enableFirstWorker(space);
+          await enableFirstWorker(space);
           const inWindow = await seedClosedProposal(esClient, space.spaceId, {
             title: 'Recently decided appears in closed queue',
             decidedAtHoursAgo: 71,
@@ -120,7 +115,6 @@ spaceTest.describe(
           // pass vacuously during load, so assert a count of zero instead.
           await expect(alertZero.proposalRow(outOfWindow.title)).toHaveCount(0);
         } finally {
-          if (cleanupAccount) await cleanupAccount();
           await deleteSeededProposals(esClient, seeded);
           await space.cleanup();
         }

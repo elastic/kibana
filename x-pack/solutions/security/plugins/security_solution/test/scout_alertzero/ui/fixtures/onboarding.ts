@@ -162,9 +162,11 @@ export const createUiOnboardingSpace = async (
 /**
  * Enables one worker through the same API shape the onboarding UI's save uses
  * (service account + settingsRevision), so the landing page latches to the
- * queue instead of the wizard. Returns the service-account cleanup.
+ * queue instead of the wizard. The space's own cleanup deletes the account: it
+ * is created after the space's service-account snapshot and the worker
+ * references it.
  */
-export const enableFirstWorker = async (space: OnboardingSpace): Promise<() => Promise<void>> => {
+export const enableFirstWorker = async (space: OnboardingSpace): Promise<void> => {
   const workers = await listWorkers(space.api, space.spaceId);
   const target = workers[0];
   const account = await createWorkerServiceAccount(space.api, target.id);
@@ -178,12 +180,10 @@ export const enableFirstWorker = async (space: OnboardingSpace): Promise<() => P
       `enable ${target.id}`
     );
   } catch (error) {
-    // The account is cluster-scoped, and the caller never receives its cleanup when
-    // the enable fails; the space has no worker referencing it yet either.
+    // No worker references the account yet, so the space cleanup would not find it.
     await account.cleanup().catch(() => undefined);
     throw error;
   }
-  return account.cleanup;
 };
 
 /**
