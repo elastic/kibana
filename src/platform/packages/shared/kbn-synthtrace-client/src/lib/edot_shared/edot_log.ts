@@ -9,10 +9,19 @@
 
 import { OtelLog } from '../otel_logs';
 
-/** An EDOT Browser log record; the SDK observes it at the time it is emitted. */
-export class EdotBrowserLog extends OtelLog {
+/** A log record or event of an EDOT SDK; observed when it is emitted by default. */
+export class EdotLog extends OtelLog {
   timestamp(time: number) {
     super.timestamp(time);
+    this.fields.observed_timestamp = time;
+    return this;
+  }
+
+  /**
+   * Sets the observed time apart from the record's time, like the iOS crash reporter, which
+   * observes the crash when it happens and emits it on the next launch.
+   */
+  observedAt(time: number) {
     this.fields.observed_timestamp = time;
     return this;
   }

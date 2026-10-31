@@ -375,13 +375,10 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
 
 type BooleanOptKey = 'withSessionId' | 'includeRawAttribution';
 
-const parseBooleanOpt = (
-  opts: Record<string, unknown> | undefined,
-  key: BooleanOptKey
-): boolean => {
-  const value = opts?.[key];
+/** Parses a boolean scenario option given as a boolean or a `true`/`false` string. */
+export const parseBooleanOption = (key: string, value: unknown, defaultValue: boolean): boolean => {
   if (value === undefined) {
-    return DEFAULT_SCENARIO_OPTS[key];
+    return defaultValue;
   }
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : value;
   if (normalized === true || normalized === 'true') {
@@ -393,9 +390,13 @@ const parseBooleanOpt = (
   throw new Error(`${key} must be true or false`);
 };
 
-const parseScale = (value: unknown): number => {
+const parseBooleanOpt = (opts: Record<string, unknown> | undefined, key: BooleanOptKey): boolean =>
+  parseBooleanOption(key, opts?.[key], DEFAULT_SCENARIO_OPTS[key]);
+
+/** Parses the `scale` scenario option, a positive number. */
+export const parseScale = (value: unknown, defaultValue: number): number => {
   if (value === undefined) {
-    return DEFAULT_SCENARIO_OPTS.scale;
+    return defaultValue;
   }
   const scale = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
   if (typeof scale !== 'number' || !Number.isFinite(scale) || scale <= 0) {
@@ -404,9 +405,10 @@ const parseScale = (value: unknown): number => {
   return scale;
 };
 
-const parseSeed = (value: unknown): string | undefined => {
+/** Parses the `seed` scenario option, a non-empty string or a finite number. */
+export const parseSeed = (value: unknown, defaultValue?: string): string | undefined => {
   if (value === undefined) {
-    return DEFAULT_SCENARIO_OPTS.seed;
+    return defaultValue;
   }
   if ((typeof value === 'string' && value.trim() !== '') || Number.isFinite(value)) {
     return String(value);
@@ -428,8 +430,8 @@ export const parseDigitalExperienceScenarioOpts = (
   return {
     withSessionId: parseBooleanOpt(opts, 'withSessionId'),
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
-    scale: parseScale(opts?.scale),
-    seed: parseSeed(opts?.seed),
+    scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
+    seed: parseSeed(opts?.seed, DEFAULT_SCENARIO_OPTS.seed),
   };
 };
 
@@ -477,10 +479,12 @@ export const generatePerMinute = <TFields extends Fields>(
 };
 
 /** A random v4 UUID, like the `crypto.randomUUID()` EDOT Browser takes its IDs from. */
-const randomUuid = (random: () => number): string =>
+export const randomUuid = (random: () => number): string =>
   generateUuid({ random: Uint8Array.from({ length: 16 }, () => Math.floor(random() * 256)) });
 
-const getTimestamp = (event: EdotBrowserEvent) => Number(event.serialize()[0]['@timestamp']);
+/** The `@timestamp` of an event's first document. */
+export const getTimestamp = (event: Serializable<Fields>): number =>
+  Number(event.serialize()[0]['@timestamp']);
 
 // EDOT Browser 0.4.0 is the first release that writes session data, 0.3.0 the last one without
 const DISTRO_VERSION_WITH_SESSIONS = '0.4.0';

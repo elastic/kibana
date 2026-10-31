@@ -899,7 +899,7 @@ node scripts/synthtrace agent_config --live
 
 ### Digital Experience Scenarios
 
-These scenarios generate browser Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
+These scenarios generate browser and mobile Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
 
 - `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
 - `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
@@ -910,7 +910,7 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 
 > **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the EDOT Browser data. On a shared cluster, that also removes other OTel data.
 
-**Options (both scenarios):**
+**Options (`digital_experience_browser` and `digital_experience_mixed`):**
 
 - `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them. The apps then report distro version `0.3.0`, and `0.4.0` otherwise.
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
@@ -942,12 +942,45 @@ node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z -
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
+Generates the `digital_experience_browser` and `digital_experience_mobile` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` on Android only), with the `app.launch` and screen spans that some of them create themselves. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
 
 **Usage:**
 
 ```sh
 node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
+```
+
+#### `digital_experience_mobile`
+
+Generates EDOT React Native data, as `@elastic/otel-react-native` records it through EDOT Android 1.10.0 and EDOT iOS 2.3.0. It is OTel-native like the EDOT Browser data, in the same data streams:
+
+- `traces-generic.otel-default`: HTTP `CLIENT` spans (OkHttp on Android, named `GET <host[:port]>`; URLSession on iOS, named `GET <host>`), iOS `<screen> - view appearing` spans, and the `app.launch` and screen spans that some apps create themselves with the bridge's `startSpan()` (`INTERNAL`, scope `@elastic/otel-react-native`)
+- `logs-generic.otel-default`: `app.crash`, `app.widget.click` and iOS `device.app.lifecycle` events, ERROR logs of the bridge's `emitLog()`, and the `exception` span events of failed HTTP requests
+
+Every span and log carries the `session.id` of its session, lowercase on Android and uppercase on iOS, and `network.connection.type`, except the `exception` span events: like the Elasticsearch exporter stores them, they only have the exception attributes and link to their request span through `trace_id` and `span_id`. The platforms differ like the SDKs do: EDOT Android writes HTTP errors as `error.type` and crashes when they happen, while EDOT iOS adds an `exception` span event to 4xx/5xx requests and reports crashes as `FATAL` on the next launch, with the time of the crash in `observed_timestamp`. Neither SDK writes a React Native marker, a launch span or Android screen spans; tell mobile apps apart by `telemetry.sdk.name` (`android` or `iOS`).
+
+| `service.name`              | Health   | Notes                                                                 |
+| --------------------------- | -------- | --------------------------------------------------------------------- |
+| `weather-demo-react-native` | healthy  | like the EDOT weather demos: New York forecasts fail with a 500 and an ERROR log |
+| `shop-mobile`               | healthy  | high traffic, mostly Android, own launch and screen spans             |
+| `banking-mobile`            | erroring | mostly iOS, failing `POST /api/transfers`, frequent crashes           |
+| `news-mobile`               | slow     | high HTTP latency, many cellular connections                          |
+| `field-service-mobile`      | critical | Android only, no environment                                          |
+
+Some sessions have a second visit: the user leaves the app and comes back within 30 minutes, which keeps the session. In code and Scout tests, use the `edotReactNative` DSL from `@kbn/synthtrace-client` (`edotReactNative.app()`, `app.client()`, `edotReactNative.session()`) with the `otelSynthtraceEsClient` fixture, and pass `random: createSeededRandom('my-test')` for reproducible sessions.
+
+**Options:**
+
+- `platform` (`android`, `ios` or `both`, default `both`): generates sessions of one platform only.
+- `withManualSpans` (boolean, default `true`): set it to `false` to drop the `app.launch` and screen spans the apps create themselves, which leaves only what the SDKs record on their own.
+- `scale` and `seed`: as for the browser scenarios.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_mobile --from=now-30m --to=now
+node scripts/synthtrace digital_experience_mobile --live --scenarioOpts platform=ios
+node scripts/synthtrace digital_experience_mobile --from=now-1h --to=now --scenarioOpts withManualSpans=false,seed=my-seed
 ```
 
 ### SRE Incident Scenarios
