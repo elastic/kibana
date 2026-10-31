@@ -19,6 +19,7 @@ import {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_NEW_FLYOUT_SETTING,
+  ENABLE_RULE_CHANGES_HISTORY_SETTING,
 } from '../common/constants';
 
 describe('initUiSettings', () => {
@@ -26,7 +27,6 @@ describe('initUiSettings', () => {
   const mockExperimentalFeatures = {
     extendedRuleExecutionLoggingEnabled: false,
     newFlyoutSystemDisabled: false,
-    ruleChangesHistoryEnabled: false,
   } as ExperimentalFeatures;
 
   beforeEach(() => {
@@ -129,5 +129,24 @@ describe('initUiSettings', () => {
 
     const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
     expect(registeredSettings).not.toHaveProperty(ENABLE_NEW_FLYOUT_SETTING);
+  });
+
+  it('always registers ENABLE_RULE_CHANGES_HISTORY_SETTING, regardless of experimental feature flags', () => {
+    const allFeaturesDisabled = {
+      ...mockExperimentalFeatures,
+      enableAlertsAndAttacksAlignment: false,
+      newFlyoutSystemDisabled: true,
+    } as ExperimentalFeatures;
+
+    initUiSettings(mockUiSettings, allFeaturesDisabled, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings).toHaveProperty(ENABLE_RULE_CHANGES_HISTORY_SETTING);
+    expect(registeredSettings[ENABLE_RULE_CHANGES_HISTORY_SETTING]).toEqual(
+      expect.objectContaining({
+        value: true,
+        type: 'boolean',
+      })
+    );
   });
 });

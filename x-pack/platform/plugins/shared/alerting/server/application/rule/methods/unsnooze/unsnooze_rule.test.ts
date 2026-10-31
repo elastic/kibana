@@ -8,12 +8,12 @@
 import type { RulesClientContext } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import { unsnoozeRule } from './unsnooze_rule';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { RecoveredActionGroup } from '../../../../../common';
-import type { IScopedChangeTrackingService } from '../../../../rules_client/lib/change_tracking';
 
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();
@@ -162,11 +162,7 @@ describe('unsnoozeRule change tracking', () => {
     });
   };
 
-  const createChangeTrackingService = (): jest.Mocked<IScopedChangeTrackingService> => ({
-    log: jest.fn().mockResolvedValue(undefined),
-    logBulk: jest.fn().mockResolvedValue(undefined),
-    getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-  });
+  const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
   beforeEach(() => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);

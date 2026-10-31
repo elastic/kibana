@@ -10,7 +10,6 @@ import { elasticsearchServiceMock, userProfileServiceMock } from '@kbn/core/serv
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DataStreamClient } from '@kbn/data-streams';
 import { withSpan } from '@kbn/apm-utils';
-import { FLAGS } from './constants';
 import { ChangeHistoryClient } from './client';
 import type { ObjectChange } from './types';
 
@@ -74,7 +73,6 @@ describe('ChangeHistoryClient', () => {
   };
 
   beforeEach(() => {
-    FLAGS.FEATURE_ENABLED = true;
     DataStreamClientMock.initialize.mockResolvedValue(dataStreamClientMock as never);
   });
 
@@ -545,7 +543,7 @@ describe('ChangeHistoryClient.logBulk', () => {
   };
 
   beforeEach(() => {
-    FLAGS.FEATURE_ENABLED = true;
+    DataStreamClientMock.initialize.mockResolvedValue({} as never);
   });
 
   afterEach(() => {

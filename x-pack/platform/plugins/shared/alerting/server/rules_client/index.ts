@@ -7,4 +7,4 @@
 
 export * from './rules_client';
 export type * from './types';
-export { RuleChangeTrackingDisabledError } from './methods/get_rule_history';
+export { RuleChangeTrackingDisabledError } from './lib/change_tracking';

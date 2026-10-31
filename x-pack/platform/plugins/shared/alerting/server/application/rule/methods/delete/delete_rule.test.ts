@@ -7,6 +7,7 @@
 
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -406,11 +407,7 @@ describe('delete()', () => {
   });
 
   describe('change tracking', () => {
-    const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    });
+    const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({

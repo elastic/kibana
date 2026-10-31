@@ -13,6 +13,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -866,11 +867,7 @@ describe('bulkUpdateRules', () => {
   });
 
   describe('change tracking', () => {
-    const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    });
+    const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({

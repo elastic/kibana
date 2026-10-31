@@ -22,6 +22,7 @@ import type { ConstructorOptions } from '../rules_client';
 import type { AlertingAuthorization } from '../authorization/alerting_authorization';
 import { alertingAuthorizationMock } from '../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { changeTrackingServiceMock } from '../rules_client/lib/change_tracking/service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 
@@ -100,6 +101,7 @@ export const getRulesClientMockParams = (
     isSystemAction: jest.fn(),
     isServerless: false,
     analytics: { reportEvent: jest.fn() },
+    changeTrackingService: changeTrackingServiceMock.createScoped(),
     ...overrides,
   };
 

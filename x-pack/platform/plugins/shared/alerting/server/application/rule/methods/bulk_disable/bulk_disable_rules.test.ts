@@ -14,6 +14,7 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import {
   enabledRule1,
   enabledRule2,
@@ -849,11 +850,7 @@ describe('bulkDisableRules', () => {
   });
 
   describe('change tracking', () => {
-    const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    });
+    const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({
@@ -968,7 +965,7 @@ describe('bulkDisableRules', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
-      expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+      expect(changes.map((c) => c.timestamp)).toEqual([
         '2023-03-05T10:30:00.000Z',
         '2023-03-05T11:00:00.000Z',
       ]);
