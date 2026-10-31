@@ -1993,6 +1993,22 @@ groups:
     id: kibana-siem-settings
     settings:
 
+      - setting: "securitySolution:enableAlertZero"
+        id: securitysolution-enablealertzero
+        description: |
+          Turns on [AlertZero](docs-content://solutions/security/alertzero/index.md) in the space. AlertZero Workers triage alerts, hunt for threats, tune detection rules, and investigate attacks in the background, then bring you the proposed actions that need a person to decide.
+
+          AlertZero works only in spaces that use the Security solution view. After you turn on this setting, open **AlertZero** to select which Workers to run. Turning the setting off hides AlertZero in the space but doesn't turn off its Workers. For the requirements and steps, refer to [Set up AlertZero](docs-content://solutions/security/alertzero/set-up-alertzero.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.6+
+          ech: preview 9.6+
+          ece: preview 9.6+
+          eck: preview 9.6+
+          self: preview 9.6+
+          serverless: unavailable
+
       - setting: "securitySolution:refreshIntervalDefaults"
         id: securitysolution-refreshintervaldefaults
         description: |
