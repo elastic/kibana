@@ -43,7 +43,7 @@ const isClassificationStep = (step: WorkflowStepExecutionDto): boolean =>
   (step.stepType === undefined && CLASSIFICATION_STEP_ID_FALLBACKS.includes(step.stepId));
 
 /** One verdict, as the workflow's classification step is schema-constrained to return it. */
-interface Verdict {
+export interface Verdict {
   /**
    * Alert id the model echoes back. The agent schema names this `id` (matched in
    * `apply_verdicts` via `where: 'id'`). Do not fall back to `alert_id` — that field is only
@@ -355,4 +355,76 @@ export const runAlertAnalysisBatch = async ({
     }
   }
   return { verdicts, executionId: workflowExecutionId, executionStatus: execution.status };
+};
+
+/**
+ * Reads the RAW verdict array of the classification step: every verdict the model returned, in the
+ * order it returned them, before the workflow drops foreign ids or pairs verdicts to alerts. This is
+ * the diagnostic `readVerdict` and `readVerdicts` deliberately hide (they match ids and return one
+ * verdict per id), and the only place over-generation, repeated ids and foreign ids are visible. A
+ * batch of at most `batch_size` alerts is a single model call, so exactly one step record carries the
+ * array; when several do (a retried call), the longest array is kept because it is the worst case the
+ * post-parse cap had to handle.
+ */
+export const readRawVerdicts = (stepExecutions: WorkflowStepExecutionDto[]): Verdict[] => {
+  let longest: Verdict[] = [];
+  for (const step of stepExecutions.filter(isClassificationStep)) {
+    const output = step.output as ClassificationStepOutput | null | undefined;
+    const verdicts = output?.structured_output?.verdicts ?? output?.content?.verdicts;
+    if (Array.isArray(verdicts) && verdicts.length > longest.length) {
+      longest = verdicts;
+    }
+  }
+  return longest;
+};
+
+/** Raw classification-step output of one batched workflow run, for the integrity evaluators. */
+export interface AlertAnalysisBatchIntegrityResult {
+  /** Alert ids handed to the workflow, in the order given. */
+  alertIds: string[];
+  /** Raw verdicts of the classification step, unfiltered. */
+  rawVerdicts: Verdict[];
+  executionId: string;
+  executionStatus: ExecutionStatus;
+  classificationMethod: ClassificationMethod;
+  traceId?: string;
+}
+
+/**
+ * Runs the managed workflow once for a whole batch of seeded alerts (one rule execution) and returns
+ * the raw verdict array of the classification step (`ai.agent` or `ai.prompt`, per the space).
+ */
+export const runAlertAnalysisBatchIntegrityWorkflow = async ({
+  fetch,
+  log,
+  alertIds,
+  alertIndex,
+  classificationMethod,
+  maxWaitMs = 20 * 60_000,
+  pollIntervalMs = 3_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  alertIds: string[];
+  alertIndex: string;
+  classificationMethod: ClassificationMethod;
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<AlertAnalysisBatchIntegrityResult> => {
+  const { workflowExecutionId, execution } = await startAndWait({
+    fetch,
+    log,
+    alertIds,
+    alertIndex,
+    maxWaitMs,
+    pollIntervalMs,
+  });
+  return {
+    alertIds,
+    rawVerdicts: readRawVerdicts(execution.stepExecutions),
+    executionId: workflowExecutionId,
+    executionStatus: execution.status,
+    classificationMethod,
+    traceId: execution.traceId,
+  };
 };
