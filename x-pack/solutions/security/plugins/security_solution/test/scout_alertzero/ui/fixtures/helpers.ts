@@ -294,6 +294,40 @@ export const createWorkerServiceAccount = async (
   };
 };
 
+/** Server-side maximum page size of the service-account list route. */
+const SERVICE_ACCOUNT_LIST_PAGE_SIZE = 100;
+
+interface ServiceAccountListResponse {
+  serviceAccounts?: Array<{ id: string }>;
+  nextPage?: string;
+}
+
+/**
+ * Ids of every service account that exists right now (cluster-wide, all pages).
+ * Taken before a space's workers can be enabled so cleanup can tell accounts the
+ * run created from ones it merely reused. Returns `undefined` when any page cannot
+ * be read: ownership is then unknown.
+ */
+export const listServiceAccountIds = async (
+  api: AlertZeroApi
+): Promise<Set<string> | undefined> => {
+  const ids = new Set<string>();
+  let after: string | undefined;
+  do {
+    const query = `limit=${SERVICE_ACCOUNT_LIST_PAGE_SIZE}${
+      after ? `&after=${encodeURIComponent(after)}` : ''
+    }`;
+    const page = await api.internal<ServiceAccountListResponse>(
+      'GET',
+      `${SECURITY_SERVICE_ACCOUNT_URL}?${query}`
+    );
+    if (page.statusCode !== 200) return undefined;
+    for (const account of page.body.serviceAccounts ?? []) ids.add(account.id);
+    after = page.body.nextPage;
+  } while (after);
+  return ids;
+};
+
 // ---------------------------------------------------------------------------
 // Stub model (plumbing-only enabler — connector is never invoked)
 // ---------------------------------------------------------------------------

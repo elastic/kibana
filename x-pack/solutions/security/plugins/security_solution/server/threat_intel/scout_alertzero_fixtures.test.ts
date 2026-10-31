@@ -8,6 +8,7 @@
 import {
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_WORKERS_URL,
+  SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
 } from '@kbn/alertzero-common';
 
@@ -249,6 +250,118 @@ describe('Scout AlertZero onboarding fixtures', () => {
       await space.cleanup();
 
       expect(ingestEnabled).toBe(true);
+    });
+  });
+
+  describe('service account ownership', () => {
+    const accountsUrl = SECURITY_SERVICE_ACCOUNT_URL;
+
+    /** kbnClient fake: serves the baseline account list and a worker list referencing `referenced`. */
+    const createKbnClient = ({
+      baselineStatus = 200,
+      baselinePages = [{ serviceAccounts: [{ id: 'shared-acct' }] }],
+      referenced,
+    }: {
+      baselineStatus?: number;
+      baselinePages?: Array<{ serviceAccounts: Array<{ id: string }>; nextPage?: string }>;
+      referenced: string[];
+    }) => {
+      const requests: Array<{ method: string; path: string }> = [];
+      const request = jest.fn(async (req: { method: string; path: string }) => {
+        requests.push(req);
+        if (req.method === 'GET' && req.path.startsWith(`${accountsUrl}?`)) {
+          if (baselineStatus !== 200) return { status: baselineStatus, data: {} };
+          const after = new URL(req.path, 'http://localhost').searchParams.get('after');
+          const index = after ? baselinePages.findIndex((page) => page.nextPage === after) + 1 : 0;
+          return { status: 200, data: baselinePages[index] };
+        }
+        if (req.method === 'GET' && req.path.endsWith(ALERTZERO_WORKERS_URL)) {
+          return {
+            status: 200,
+            data: {
+              workers: referenced.map((id, i) => ({
+                id: `worker-${i}`,
+                enabled: false,
+                settings: { serviceAccountId: id },
+              })),
+            },
+          };
+        }
+        return { status: 200, data: {} };
+      });
+      return { kbnClient: { request }, requests };
+    };
+
+    const accountDeletes = (requests: Array<{ method: string; path: string }>) =>
+      requests.filter((r) => r.method === 'DELETE' && r.path.includes('service_account'));
+
+    it('deletes an account created after setup but preserves one from the baseline snapshot', async () => {
+      const { kbnClient, requests } = createKbnClient({
+        referenced: ['shared-acct', 'created-acct'],
+      });
+      const space = await onboarding.createUiOnboardingSpace(kbnClient, createSpaces(), {
+        withStubModel: false,
+      });
+      await space.cleanup();
+
+      const deletes = accountDeletes(requests);
+      expect(deletes).toHaveLength(1);
+      expect(deletes[0].path).toContain('created-acct');
+    });
+
+    it('paginates the baseline listing across nextPage', async () => {
+      const { kbnClient, requests } = createKbnClient({
+        baselinePages: [
+          { serviceAccounts: [{ id: 'acct-a' }], nextPage: 'cursor/1+=' },
+          { serviceAccounts: [{ id: 'acct-b' }] },
+        ],
+        referenced: ['acct-a', 'acct-b', 'created-acct'],
+      });
+      const space = await onboarding.createUiOnboardingSpace(kbnClient, createSpaces(), {
+        withStubModel: false,
+      });
+      await space.cleanup();
+
+      const lists = requests.filter((r) => r.path.startsWith(`${accountsUrl}?`));
+      expect(lists).toHaveLength(2);
+      expect(lists[0].path).toBe(`${accountsUrl}?limit=100`);
+      expect(lists[1].path).toBe(
+        `${accountsUrl}?limit=100&after=${encodeURIComponent('cursor/1+=')}`
+      );
+      const deletes = accountDeletes(requests);
+      expect(deletes).toHaveLength(1);
+      expect(deletes[0].path).toContain('created-acct');
+    });
+
+    it('returns every id across pages and undefined when a page cannot be read', async () => {
+      const pages = [
+        { statusCode: 200, body: { serviceAccounts: [{ id: 'a' }], nextPage: 'n' } },
+        { statusCode: 200, body: { serviceAccounts: [{ id: 'b' }] } },
+      ];
+      const paged = createFakeApi(() => pages.shift());
+      await expect(helpers.listServiceAccountIds(paged.api)).resolves.toStrictEqual(
+        new Set(['a', 'b'])
+      );
+
+      const second = [
+        { statusCode: 200, body: { serviceAccounts: [{ id: 'a' }], nextPage: 'n' } },
+        { statusCode: 500, body: {} },
+      ];
+      const failing = createFakeApi(() => second.shift());
+      await expect(helpers.listServiceAccountIds(failing.api)).resolves.toBeUndefined();
+    });
+
+    it('deletes no service account when the baseline could not be read', async () => {
+      const { kbnClient, requests } = createKbnClient({
+        baselineStatus: 500,
+        referenced: ['shared-acct', 'created-acct'],
+      });
+      const space = await onboarding.createUiOnboardingSpace(kbnClient, createSpaces(), {
+        withStubModel: false,
+      });
+      await space.cleanup();
+
+      expect(accountDeletes(requests)).toHaveLength(0);
     });
   });
 

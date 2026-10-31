@@ -13,6 +13,7 @@ import {
   createApi,
   createApiFromKbnClient,
   createWorkerServiceAccount,
+  listServiceAccountIds,
   listWorkers,
   ok,
   patchWorker,
@@ -87,13 +88,14 @@ const buildOnboardingSpace = async (
 
   let stub: StubModel | undefined;
   let supplyBaseline: SupplyBaseline | undefined;
+  let serviceAccountBaseline: Set<string> | undefined;
 
   const cleanup = () =>
     runSteps([
       { name: 'disable workers', run: () => resetOnboardingState(api, spaceId) },
       {
         name: 'delete worker service accounts',
-        run: () => deleteWorkerServiceAccounts(api, spaceId),
+        run: () => deleteWorkerServiceAccounts(api, spaceId, serviceAccountBaseline),
       },
       {
         name: 'restore Hunt supply workflows',
@@ -111,6 +113,7 @@ const buildOnboardingSpace = async (
     ]);
 
   try {
+    serviceAccountBaseline = await listServiceAccountIds(api);
     // The app is unsupported (404s, hidden) outside a Security-solution space.
     await spaces.setSolutionView({ id: spaceId, solution: 'security' });
     // Worker routes 404 until the per-space gate is on; seeding and every later
@@ -208,20 +211,28 @@ export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): 
 };
 
 /**
- * Deletes the service accounts referenced by this space's workers. Service
+ * Deletes the service accounts this run created for the space's workers. Service
  * accounts and their credentials are cluster-scoped and survive space deletion,
- * so without this step every enable (whether driven by the onboarding UI or the
- * API fixtures) leaks a uniquely named global account. The space is throwaway,
- * so any account a worker references here was created by this run — deleting by
- * the referenced IDs can never touch a pre-existing account.
+ * so without this step every enable leaks a global account. But the onboarding
+ * UI reuses an existing account with the built-in worker name, so a referenced
+ * account may predate the run or serve other spaces. Only referenced ids absent
+ * from `baselineIds` (the accounts that existed before any enable) are deleted;
+ * when the baseline could not be read nothing is deleted, since leaking a
+ * throwaway account is cheaper than breaking a shared one.
  */
-const deleteWorkerServiceAccounts = async (api: AlertZeroApi, spaceId: string): Promise<void> => {
+const deleteWorkerServiceAccounts = async (
+  api: AlertZeroApi,
+  spaceId: string,
+  baselineIds: ReadonlySet<string> | undefined
+): Promise<void> => {
+  if (!baselineIds) return;
   const workers = await listWorkers(api, spaceId);
   const accountIds = [
     ...new Set(
       workers
         .map((worker) => worker.settings?.serviceAccountId)
         .filter((id): id is string => Boolean(id))
+        .filter((id) => !baselineIds.has(id))
     ),
   ];
   const failures: string[] = [];
