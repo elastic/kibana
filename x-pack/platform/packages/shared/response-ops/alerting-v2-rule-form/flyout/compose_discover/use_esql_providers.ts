@@ -62,11 +62,13 @@ const addInlineSuggestTabKeybindings = () => {
  * causing the effect to re-run on every render. The effect only re-runs when
  * the callbacks object reference changes (i.e. when services change).
  */
-export const useEsqlAutocomplete = (services: RuleFormServices) => {
+export const useEsqlAutocomplete = (services: RuleFormServices, query?: string) => {
   const callbacks = useEsqlCallbacks({
     application: services.application,
     http: services.http,
     search: services.data.search.search,
+    cps: services.cps,
+    query,
   });
 
   // Keep callbacks ref current so providers always use the latest without

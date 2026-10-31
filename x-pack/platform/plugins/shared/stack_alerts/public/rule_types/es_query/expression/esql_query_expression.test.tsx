@@ -69,7 +69,13 @@ jest.mock('@kbn/esql-utils', () => {
 });
 
 const mockHttp = httpServiceMock.createStartContract();
-const mockServices = { http: mockHttp, isServerless: false, uiSettings: { get: jest.fn() } };
+const mockGetDefaultProjectRouting = jest.fn();
+const mockServices = {
+  http: mockHttp,
+  isServerless: false,
+  uiSettings: { get: jest.fn() },
+  cps: { cpsManager: { getDefaultProjectRouting: mockGetDefaultProjectRouting } },
+};
 jest.mock('../util', () => ({
   ...jest.requireActual('../util'),
   useTriggerUiActionServices: () => mockServices,
@@ -123,6 +129,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     esqlUtilsMock.getEsqlSourceColumns.mockResolvedValue(defaultSourceColumns);
     esqlUtilsMock.getSourceCommandQueryFromESQLQuery.mockImplementation((esql: string) => esql);
     esqlUtilsMock.getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
+    mockGetDefaultProjectRouting.mockReturnValue(undefined);
 
     triggersActionsCommonMock.getTimeFieldOptions.mockReturnValue([
       { value: '@timestamp', text: '@timestamp' },
@@ -166,6 +173,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
   test('should pass projectRouting to the source columns and time field lookups when query contains SET project_routing', async () => {
     const mockProjectRouting = '_alias:my-project-id';
     getProjectRoutingFromEsqlQuery.mockReturnValue(mockProjectRouting);
+    mockGetDefaultProjectRouting.mockReturnValue('_alias:*');
 
     await act(async () => {
       render(
@@ -238,6 +246,46 @@ describe('EsqlQueryRuleTypeExpression', () => {
     await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
     expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
       expect.objectContaining({ esqlQuery: 'FROM my_index', projectRouting: undefined })
+    );
+  });
+
+  test('should fall back to the space default projectRouting when query has no SET project_routing', async () => {
+    getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
+    mockGetDefaultProjectRouting.mockReturnValue('_alias:*');
+
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            esqlQuery: { esql: 'FROM my_index' },
+          }}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
+    expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
+    expect(esqlUtilsMock.getESQLTimeField).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
     );
   });
 

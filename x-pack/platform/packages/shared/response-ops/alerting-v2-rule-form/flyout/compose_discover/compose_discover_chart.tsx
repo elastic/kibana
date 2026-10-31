@@ -12,6 +12,7 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
+import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import type { QueryColumn } from './use_query_execution';
 
@@ -40,7 +41,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
   timeRange,
   columns,
 }) => {
-  const { lens, dataViews } = useRuleFormServices();
+  const { lens, dataViews, cps } = useRuleFormServices();
   const [lensAttributes, setLensAttributes] = useState<
     TypedLensByValueInput['attributes'] | undefined
   >(undefined);
@@ -134,6 +135,7 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
         viewMode="view"
         timeRange={timeRange}
         attributes={lensAttributes}
+        projectRouting={getRuleProjectRouting(query, cps)}
         noPadding
         disableTriggers
       />

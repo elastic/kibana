@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { getESQLSources, getEsqlColumns, getDatasets, getViews } from '@kbn/esql-utils';
+import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 
 export interface UseEsqlCallbacksParams {
   /** Application service for capabilities and navigation */
@@ -18,6 +20,10 @@ export interface UseEsqlCallbacksParams {
   http: HttpSetup;
   /** Search service for executing ES|QL queries */
   search: ISearchStart['search'];
+  /** CPS service, used to run the lookups with the rule project routing */
+  cps?: CPSPluginStart;
+  /** Rule query, used to read its `SET project_routing` for the sources lookup */
+  query?: string;
 }
 
 /**
@@ -41,15 +47,33 @@ export const useEsqlCallbacks = ({
   application,
   http,
   search,
+  cps,
+  query,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
+  // getSources doesn't receive the query, so it reads the rule query from a ref.
+  // The routing is resolved on each call because CPS loads the space default async.
+  const queryRef = useRef(query);
+  queryRef.current = query;
+
   return useMemo<ESQLCallbacks>(
     () => ({
-      getSources: async () => getESQLSources({ application, http }, undefined),
-      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) =>
-        getEsqlColumns({ esqlQuery: query, search }),
+      getSources: async () =>
+        getESQLSources(
+          { application, http },
+          undefined,
+          undefined,
+          undefined,
+          getRuleProjectRouting(queryRef.current ?? '', cps)
+        ),
+      getColumnsFor: async ({ query: columnsQuery }: { query?: string } | undefined = {}) =>
+        getEsqlColumns({
+          esqlQuery: columnsQuery,
+          search,
+          projectRouting: getRuleProjectRouting(columnsQuery ?? '', cps),
+        }),
       getDatasets: async () => getDatasets(http),
       getViews: async () => getViews(http),
     }),
-    [application, http, search]
+    [application, http, search, cps]
   );
 };

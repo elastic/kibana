@@ -10,11 +10,14 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { createTestQueryClient } from '../../test_utils';
 import { useQueryExecution } from './use_query_execution';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLResults: jest.fn(),
+  getProjectRoutingFromEsqlQuery:
+    jest.requireActual('@kbn/esql-utils').getProjectRoutingFromEsqlQuery,
 }));
 
 const mockGetESQLResults = getESQLResults as jest.Mock;
@@ -41,6 +44,33 @@ describe('useQueryExecution', () => {
     );
 
     expect(result.current.hasRun).toBe(false);
+  });
+
+  it('runs the query with the rule project routing', async () => {
+    mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });
+    const mockCps = {
+      cpsManager: { getDefaultProjectRouting: () => '_alias:*' },
+    } as unknown as CPSPluginStart;
+
+    const { result } = renderHook(
+      () =>
+        useQueryExecution({
+          query: 'FROM logs-*',
+          timeField: '@timestamp',
+          timeRange,
+          data,
+          cps: mockCps,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    act(() => result.current.run());
+
+    await waitFor(() =>
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:*' })
+      )
+    );
   });
 
   it("keeps a tab's own error when switching away and back, without re-running or clearing it", async () => {
