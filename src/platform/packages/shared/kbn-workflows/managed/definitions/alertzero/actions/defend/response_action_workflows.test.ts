@@ -66,6 +66,7 @@ interface YamlWorkflow {
       properties?: {
         actionInput?: {
           properties?: {
+            endpoint_ids?: { minItems?: number };
             parameters?: { properties?: { type?: { enum?: string[] } } };
           };
         };
@@ -291,7 +292,10 @@ describe('AlertZero response-action workflows', () => {
         }
       );
       const branchStep = stepByName('emit_failure_by_cause');
-      const condition = String(branchStep?.condition).slice(3, -2);
+      // The engine evaluates a `${{ }}` condition as one Liquid expression; anything else is KQL.
+      const rawCondition = String(branchStep?.condition).trim();
+      expect(rawCondition).toMatch(/^\$\{\{[\s\S]*\}\}$/);
+      const condition = rawCondition.slice(3, -2).trim();
       const branch = liquid.evalValueSync(condition, {
         variables: { process_not_found: processNotFound },
       })
@@ -316,6 +320,15 @@ describe('AlertZero response-action workflows', () => {
       ['retryable when another endpoint has no output', ['a', 'b'], { a: notFound }, undefined],
     ])('fails as %s', (_case, endpointIds, outputs, expectedType) => {
       expect(failureType(endpointIds, outputs)).toBe(expectedType);
+    });
+
+    // The not-found flag starts true and a loop over no endpoints would leave it there. Inputs
+    // are validated against this schema before the first step runs, so the loop never sees an
+    // empty list.
+    it('requires at least one endpoint', () => {
+      const endpointIds =
+        parsed.triggers?.[0]?.inputs?.properties?.actionInput?.properties?.endpoint_ids;
+      expect(endpointIds?.minItems).toBe(1);
     });
   });
 
