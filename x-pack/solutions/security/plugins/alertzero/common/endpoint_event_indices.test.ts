@@ -106,10 +106,17 @@ describe('endpointEventIndices', () => {
 
   it('drops a searched cluster when its exclusions do not fit', () => {
     const exclusions = Array.from({ length: 120 }, (_, index) => {
-      const dataset = `logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(30)}*`;
+      const dataset = `logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(
+        30
+      )}*`;
       return `-remote_a:${dataset}`;
     });
-    const result = endpointEventIndices(['*:logs-*', 'remote_a:logs-*', 'remote_b:logs-*', ...exclusions]);
+    const result = endpointEventIndices([
+      '*:logs-*',
+      'remote_a:logs-*',
+      'remote_b:logs-*',
+      ...exclusions,
+    ]);
     const parts = result.split(',');
 
     expect(result.length).toBeLessThanOrEqual(ENDPOINT_EVENT_INDICES_MAX_LENGTH);
@@ -120,7 +127,9 @@ describe('endpointEventIndices', () => {
 
   it('drops an overlapping wildcard when a wildcard exclusion does not fit', () => {
     const exclusions = Array.from({ length: 120 }, (_, index) => {
-      const dataset = `logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(30)}*`;
+      const dataset = `logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(
+        30
+      )}*`;
       return `-remote_a*:${dataset}`;
     });
     const result = endpointEventIndices([
