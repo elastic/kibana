@@ -1169,7 +1169,7 @@ describe('ConversationsPage impact pills', () => {
     mockProposals({ investigate: [{ ...proposal, conversationTitle: 'No impact' }] });
     renderPage('/');
 
-    expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Impacted entities' })).not.toBeInTheDocument();
     expect(screen.getByText('No impact')).toBeInTheDocument();
   });
 

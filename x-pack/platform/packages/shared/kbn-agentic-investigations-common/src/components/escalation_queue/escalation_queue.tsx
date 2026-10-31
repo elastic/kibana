@@ -60,7 +60,7 @@ interface EscalationQueueProps {
   isFiltered?: boolean;
   /**
    * Explanatory content rendered at the bottom of the section body. When the bucket is empty
-   * and unfiltered it replaces the "No escalations" line.
+   * and unfiltered it replaces the "No open escalations" or "No closed escalations" line.
    */
   note?: React.ReactNode;
 }
@@ -174,7 +174,7 @@ export const EscalationQueue = memo<EscalationQueueProps>(
             <EuiText size="xs" color="subdued">
               {isFiltered
                 ? ESCALATION_QUEUE_LABELS.emptyQueueWithFilter
-                : ESCALATION_QUEUE_LABELS.emptyQueue}
+                : ESCALATION_QUEUE_LABELS.emptyQueue[status]}
             </EuiText>
           </EuiPanel>
           {loadMoreButton}
