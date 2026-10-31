@@ -11,7 +11,7 @@ import { test } from '../fixtures';
 
 /**
  * Covers the register-repository wizard for a source-only `fs` repository, the setup path the FTR
- * suite drove through the UI. Needs the `snapshot_restore_onprem` config set, which omits
+ * suite drove through the UI. Needs the `onprem` config set, which omits
  * `xpack.cloud.id` so the on-prem types are served — hence local only, since that cannot be done on
  * real ECH. The resulting snapshot's behaviour (Partial, restore rejected) is covered by
  * `test/scout/ui/tests/source_only_logsdb.spec.ts`.

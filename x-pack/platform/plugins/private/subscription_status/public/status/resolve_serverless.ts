@@ -147,6 +147,7 @@ export const resolveServerlessStatus = async ({
         defaultMessage: 'Subscribe',
       }),
       href: billingUrl,
+      external: true,
     },
     secondaryAction: pricingUrl
       ? {
@@ -155,6 +156,7 @@ export const resolveServerlessStatus = async ({
             defaultMessage: 'View pricing',
           }),
           href: pricingUrl,
+          external: true,
         }
       : undefined,
     projectType,

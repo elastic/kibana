@@ -14,15 +14,19 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPopover,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SubscriptionStatus, SubscriptionStatusActionId } from '../status/types';
+import type {
+  SubscriptionStatus,
+  SubscriptionStatusAction,
+  SubscriptionStatusActionId,
+} from '../status/types';
 
 const popoverContentStyles = css({ width: 360 });
 
@@ -39,25 +43,39 @@ const SubscriptionPopover = ({
   onOpen,
   onAction,
 }: Omit<SubscriptionBadgeProps, 'status'> & { status: PopoverStatus }) => {
-  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
-  const { label, title, subtitle, description, primaryAction, secondaryAction } = status;
+  const {
+    label,
+    badgeColor = 'primary',
+    title,
+    subtitle,
+    meter,
+    description,
+    primaryAction,
+    primaryActionStyle = 'fill',
+    secondaryAction,
+  } = status;
 
   const toggle = () => {
     if (!isOpen) onOpen();
     setIsOpen(!isOpen);
   };
 
-  const handleAction = (id: SubscriptionStatusActionId) => {
-    onAction(id);
-    setIsOpen(false);
-  };
+  const getActionProps = ({ id, href, external }: SubscriptionStatusAction) => ({
+    href,
+    target: external ? '_blank' : undefined,
+    onClick: () => {
+      onAction(id);
+      setIsOpen(false);
+    },
+  });
 
   return (
     <EuiPopover
       button={
         <EuiBadge
-          color={euiTheme.colors.primary}
+          color={badgeColor}
+          fill={badgeColor === 'primary'}
           onClick={toggle}
           onClickAriaLabel={i18n.translate('xpack.subscriptionStatus.badge.toggleAriaLabel', {
             defaultMessage: '{label}, show subscription details',
@@ -80,43 +98,77 @@ const SubscriptionPopover = ({
       panelProps={{ 'data-test-subj': 'subscriptionStatusPopover' }}
     >
       <div css={popoverContentStyles}>
-        <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>{title}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-          {subtitle && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {subtitle}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="s">{description}</EuiText>
-        <EuiSpacer size="m" />
+        {title && (
+          <>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h4>{title}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {subtitle && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {subtitle}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {meter && (
+          <div data-test-subj="subscriptionStatusMeter">
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="baseline"
+              gutterSize="m"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{meter.label}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color={meter.urgent ? 'warning' : undefined}>
+                  {meter.value}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiProgress
+              value={meter.percent}
+              max={100}
+              size="m"
+              color={meter.urgent ? 'warning' : 'primary'}
+              aria-label={`${meter.label}, ${meter.value}`}
+            />
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued">
+              {meter.detail}
+            </EuiText>
+          </div>
+        )}
+        {description && <EuiText size="s">{description}</EuiText>}
+        <EuiSpacer size="l" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {secondaryAction && (
+          {secondaryAction && (
+            <EuiFlexItem grow={false}>
               <EuiLink
-                href={secondaryAction.href}
-                target="_blank"
-                onClick={() => handleAction(secondaryAction.id)}
+                {...getActionProps(secondaryAction)}
                 data-test-subj="subscriptionStatusSecondaryAction"
               >
                 {secondaryAction.label}
               </EuiLink>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={!secondaryAction}>
             <EuiButton
-              href={primaryAction.href}
-              target="_blank"
-              fill
+              {...getActionProps(primaryAction)}
+              fill={primaryActionStyle === 'fill'}
+              fullWidth={!secondaryAction}
               size="s"
-              onClick={() => handleAction(primaryAction.id)}
               data-test-subj="subscriptionStatusPrimaryAction"
             >
               {primaryAction.label}
@@ -129,8 +181,6 @@ const SubscriptionPopover = ({
 };
 
 export const SubscriptionBadge = ({ status, onOpen, onAction }: SubscriptionBadgeProps) => {
-  const { euiTheme } = useEuiTheme();
-
   switch (status.kind) {
     case 'popover':
       return <SubscriptionPopover status={status} onOpen={onOpen} onAction={onAction} />;
@@ -144,7 +194,8 @@ export const SubscriptionBadge = ({ status, onOpen, onAction }: SubscriptionBadg
           data-test-subj="subscriptionStatusTooltip"
         >
           <EuiBadge
-            color={euiTheme.colors.primary}
+            color="primary"
+            fill
             tabIndex={0}
             // EuiBadge falls back to its inner text as a native title, which would duplicate the tooltip.
             title=""
