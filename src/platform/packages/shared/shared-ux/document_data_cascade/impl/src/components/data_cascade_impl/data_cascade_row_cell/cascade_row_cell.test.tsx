@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import type { Row } from '@tanstack/react-table';
 import { CascadeRowCellPrimitive } from './cascade_row_cell';
 import type {
   ChildVirtualizerController,
   CascadeRootVirtualizerReturnValue,
 } from '../../../lib/core/virtualizer';
-import { DataCascadeProvider } from '../../../store_provider';
+import type { CascadeTableRow } from '../../../lib/core/table';
+import { DataCascadeProvider, type GroupNode } from '../../../store_provider';
 
 const renderComponent = ({
   cascadeGroups,
@@ -94,7 +94,7 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
-      } as unknown as Row<any>,
+      } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       getVirtualizer: mockVirtualizerGetter,
@@ -126,7 +126,7 @@ describe('CascadeRowCellPrimitive', () => {
         original: rowData,
         getToggleSelectedHandler: jest.fn(),
         getToggleExpandedHandler: jest.fn(),
-      } as unknown as Row<any>,
+      } as unknown as CascadeTableRow<GroupNode>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       onCascadeLeafNodeCollapsed,
@@ -165,7 +165,7 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
+        } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           childPropsSpy(props);
           return <div>Test Child</div>;
@@ -229,7 +229,7 @@ describe('CascadeRowCellPrimitive', () => {
           original: rowData,
           getToggleSelectedHandler: jest.fn(),
           getToggleExpandedHandler: jest.fn(),
-        } as unknown as Row<any>,
+        } as unknown as CascadeTableRow<GroupNode>,
         children: (props) => {
           capturedVirtualizerController = props.virtualizerController;
           return <div>Test Child</div>;

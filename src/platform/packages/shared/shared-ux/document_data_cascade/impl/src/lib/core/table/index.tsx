@@ -8,44 +8,46 @@
  */
 
 import React, { type FC, useCallback, useMemo, useRef } from 'react';
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getExpandedRowModel,
-  flexRender,
-  useReactTable,
-  type Table,
-  type TableOptions,
-  type CellContext,
-  type Row,
-  type Cell,
-} from '@tanstack/react-table';
+import { createColumnHelper, flexRender, useTable, type TableOptions } from '@tanstack/react-table';
 import type { LeafNode } from '../../../store_provider';
 import {
   useDataCascadeActions,
   useDataCascadeState,
   type GroupNode,
 } from '../../../store_provider';
+import {
+  cascadeTableFeatures,
+  type CascadeTable,
+  type CascadeTableCell,
+  type CascadeTableCellContext,
+  type CascadeTableFeatures,
+  type CascadeTableRow,
+} from './table_features';
 
-export type { Row, Table, CellContext };
+export type {
+  CascadeTable,
+  CascadeTableCell,
+  CascadeTableCellContext,
+  CascadeTableRow,
+} from './table_features';
 
-export interface TableProps<G, L>
+export interface TableProps<G extends GroupNode, L>
   extends Omit<
-    TableOptions<G>,
+    TableOptions<CascadeTableFeatures, G>,
+    | 'features'
     | 'columns'
     | 'data'
     | 'state'
     | 'getRowId'
     | 'getSubRows'
-    | 'getCoreRowModel'
-    | 'getExpandedRowModel'
     | 'onExpandedChange'
     | 'onRowSelectionChange'
     | 'getRowCanExpand'
+    | 'enableRowRangeSelection'
   > {
   allowMultipleRowToggle: boolean;
-  header: FC<{ table: Table<G> }>;
-  rowCell: FC<CellContext<G, L>>;
+  header: FC<{ table: CascadeTable<G> }>;
+  rowCell: FC<CascadeTableCellContext<G, unknown>>;
 }
 
 export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
@@ -55,26 +57,25 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
   rowCell: RowCell,
   ...rest
 }: TableProps<G, L>) => {
-  const columnHelper = useMemo(() => createColumnHelper<G>(), []);
+  const columnHelper = useMemo(() => createColumnHelper<CascadeTableFeatures, G>(), []);
   const actions = useDataCascadeActions<G, L>();
   const state = useDataCascadeState<G, L>();
-  const tableRef = useRef<ReturnType<typeof useReactTable<G>> | null>(null);
-
-  const coreRowModel = useMemo(() => getCoreRowModel<G>(), []);
-  const expandedRowModel = useMemo(() => getExpandedRowModel<G>(), []);
+  const tableRef = useRef<CascadeTable<G> | null>(null);
 
   const columns = useMemo(
     () => [
       columnHelper.display({
         id: 'cascade',
         header: Header,
-        cell: RowCell as FC<CellContext<G, unknown>>,
+        cell: RowCell,
       }),
     ],
     [columnHelper, Header, RowCell]
   );
 
-  const onRowSelectionChange = useCallback<NonNullable<TableOptions<G>['onRowSelectionChange']>>(
+  const onRowSelectionChange = useCallback<
+    NonNullable<TableOptions<CascadeTableFeatures, G>['onRowSelectionChange']>
+  >(
     (updater) => {
       const proposedSelectedState =
         typeof updater === 'function' ? updater(state.table.rowSelection) : updater;
@@ -84,7 +85,9 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
     [actions, state.table.rowSelection]
   );
 
-  const onExpandedChangeHandler = useCallback<NonNullable<TableOptions<G>['onExpandedChange']>>(
+  const onExpandedChangeHandler = useCallback<
+    NonNullable<TableOptions<CascadeTableFeatures, G>['onExpandedChange']>
+  >(
     (updater) => {
       const proposedExpandedState =
         typeof updater === 'function' ? updater(state.table.expanded) : updater;
@@ -145,15 +148,15 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
   const getRowId = useCallback((rowData: G) => rowData.id, []);
   const getSubRows = useCallback((row: G) => row.children as G[], []);
 
-  tableRef.current = useReactTable<G>({
+  tableRef.current = useTable({
     ...rest,
+    features: cascadeTableFeatures,
     data: state.groupNodes,
     state: state.table,
     columns,
     debugTable: false,
     enableRowSelection,
-    getCoreRowModel: coreRowModel,
-    getExpandedRowModel: expandedRowModel,
+    enableRowRangeSelection: false,
     getRowCanExpand,
     onRowSelectionChange,
     onExpandedChange: onExpandedChangeHandler,
@@ -175,16 +178,20 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
 };
 
 interface TableRowAdapterArgs<G extends GroupNode> {
-  rowInstance: Row<G>;
+  rowInstance: CascadeTableRow<G>;
 }
 
-function getAdaptedTable<G extends GroupNode>({ tableInstance }: { tableInstance: Table<G> }) {
+function getAdaptedTable<G extends GroupNode>({
+  tableInstance,
+}: {
+  tableInstance: CascadeTable<G>;
+}) {
   return {
-    selectedRows: tableInstance.getSelectedRowModel,
+    selectedRows: () => tableInstance.getSelectedRowModel(),
   };
 }
 
-export function useAdaptedTable<G extends GroupNode>(tableInstance: Table<G>) {
+export function useAdaptedTable<G extends GroupNode>(tableInstance: CascadeTable<G>) {
   return useMemo(() => getAdaptedTable<G>({ tableInstance }), [tableInstance]);
 }
 
@@ -216,13 +223,12 @@ export function getAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
       return this.rowChildren.length;
     },
     get rowVisibleCells() {
-      return rowInstance.getVisibleCells() as Cell<G, L>[];
+      return rowInstance.getAllCells() as Array<CascadeTableCell<G, unknown>>;
     },
-    isRowSelected: rowInstance.getIsSelected,
-    rowHasSelectedChildren: rowInstance.getIsSomeSelected,
+    isRowSelected: () => rowInstance.getIsSelected(),
+    rowHasSelectedChildren: () => rowInstance.getIsSomeSelected(),
     get rowCanSelect() {
-      // maybe we also want to check if the row has children?
-      return rowInstance.getCanSelect;
+      return () => rowInstance.getCanSelect();
     },
     rowSelectionFn: (...args: Parameters<typeof toggleSelectedHandler>) => {
       toggleSelectedHandler(...args);
@@ -254,10 +260,10 @@ export function TableHeader<G extends GroupNode, L extends LeafNode>({
   });
 }
 
-export function TableCellRender<G extends GroupNode, L extends LeafNode>({
+export function TableCellRender<G extends GroupNode>({
   cell,
 }: {
-  cell: Cell<G, L>;
+  cell: CascadeTableCell<G, unknown>;
 }) {
   return useMemo(() => flexRender(cell.column.columnDef.cell, cell.getContext()), [cell]);
 }

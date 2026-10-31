@@ -9,9 +9,9 @@
 
 import type React from 'react';
 import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
-import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
+import type { CascadeTable, CascadeTableCellContext, CascadeTableRow } from '../../lib/core/table';
 import type {
   CascadeVirtualizerProps,
   CascadeRootVirtualizerReturnValue,
@@ -67,7 +67,7 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
-  extends CellContext<G, unknown> {
+  extends CascadeTableCellContext<G, unknown> {
   /**
    * Size of the row cell
    */
@@ -137,7 +137,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
   /**
    * The row instance for the cascade row.
    */
-  rowInstance: Row<G>;
+  rowInstance: CascadeTableRow<G>;
   /**
    * The row header title slot for the cascade row.
    */
@@ -221,7 +221,7 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 
 export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
   id: string;
-  tableInstance: Table<G>;
+  tableInstance: CascadeTable<G>;
   onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
   customTableHeader?: (props: {
     availableColumns: string[];
