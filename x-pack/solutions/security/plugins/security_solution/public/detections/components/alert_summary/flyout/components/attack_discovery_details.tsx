@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import React, { memo } from 'react';
-import { MiniAttackChain } from '../../../attack_discovery/pages/results/attack_discovery_panel/panel_header/summary_actions/mini_attack_chain';
+import { MiniAttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/panel_header/summary_actions/mini_attack_chain';
 
 export const ATTACK_DISCOVERY_DETAILS_CONTAINER_TEST_ID =
   'ease-alert-flyout-attack-discovery-details-container';

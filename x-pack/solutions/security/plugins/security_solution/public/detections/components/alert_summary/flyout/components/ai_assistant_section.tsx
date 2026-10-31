@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { SuggestedPrompts } from './suggested_prompts';
-import { getField } from '../../document_details/shared/utils';
+import { getField } from '../../../../../flyout/document_details/shared/utils';
 import { useEaseDetailsContext } from '../context';
 import { Conversations } from './conversations';
 
