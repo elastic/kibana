@@ -71,6 +71,15 @@ const PROCEED_LABEL = i18n.translate('xpack.nightshift.onboarding.proceedButton'
   defaultMessage: 'Proceed',
 });
 
+const BACK_LABEL = i18n.translate('xpack.nightshift.onboarding.backButton', {
+  defaultMessage: 'Back',
+});
+
+const INVESTIGATE_SECTION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.investigate.sectionTitle',
+  { defaultMessage: 'Try your first investigation' }
+);
+
 const backButtonStyles = css`
   width: 100%;
 `;
@@ -261,9 +270,7 @@ export function NightshiftOnboarding({
               onClick={() => setConnectSubStep('telemetry')}
               data-test-subj="nightshiftOnboardingBackToTelemetryButton"
             >
-              {i18n.translate('xpack.nightshift.onboarding.backButton', {
-                defaultMessage: 'Back',
-              })}
+              {BACK_LABEL}
             </EuiButtonEmpty>
           </>
         )}
@@ -282,31 +289,64 @@ export function NightshiftOnboarding({
           </EuiButtonEmpty>
         )}
       </EuiFlexGroup>
-    ) : step === 'investigate' && latestInvestigation ? (
-      <EuiButton
-        fullWidth
-        size="s"
-        iconType="sortRight"
-        iconSide="right"
-        onClick={() => setStepOverride(undefined)}
-        data-test-subj="nightshiftOnboardingProceedToAutomationButton"
-      >
-        {PROCEED_LABEL}
-      </EuiButton>
+    ) : step === 'investigate' ? (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {latestInvestigation && (
+          <EuiButton
+            fullWidth
+            size="s"
+            iconType="sortRight"
+            iconSide="right"
+            onClick={() => setStepOverride(undefined)}
+            data-test-subj="nightshiftOnboardingProceedToAutomationButton"
+          >
+            {PROCEED_LABEL}
+          </EuiButton>
+        )}
+        <EuiButtonEmpty
+          size="s"
+          iconType="sortLeft"
+          iconSide="left"
+          css={backButtonStyles}
+          onClick={() => setStepOverride('connect')}
+          data-test-subj="nightshiftOnboardingBackToConnectButton"
+        >
+          {BACK_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
     ) : step === 'automate' ? (
-      <EuiButton
-        fullWidth
-        size="s"
-        iconType="sortRight"
-        iconSide="right"
-        onClick={onFinish}
-        data-test-subj="nightshiftOnboardingFinishButton"
-      >
-        {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-          defaultMessage: "I'll do it later",
-        })}
-      </EuiButton>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiButton
+          fullWidth
+          size="s"
+          iconType="sortRight"
+          iconSide="right"
+          onClick={onFinish}
+          data-test-subj="nightshiftOnboardingFinishButton"
+        >
+          {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
+            defaultMessage: "I'll do it later",
+          })}
+        </EuiButton>
+        <EuiButtonEmpty
+          size="s"
+          iconType="sortLeft"
+          iconSide="left"
+          css={backButtonStyles}
+          onClick={() => setStepOverride('investigate')}
+          data-test-subj="nightshiftOnboardingBackToInvestigateButton"
+        >
+          {BACK_LABEL}
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
     ) : undefined;
+
+  const sectionTitle =
+    step === 'connect'
+      ? CONNECT_SUB_STEP_TITLES[connectSubStep]
+      : step === 'investigate'
+      ? INVESTIGATE_SECTION_TITLE
+      : undefined;
 
   return (
     <EuiFlexGroup
@@ -327,12 +367,10 @@ export function NightshiftOnboarding({
           <EuiSpacer size="xl" />
         </>
       )}
-      {step === 'connect' && (
+      {sectionTitle && (
         <>
           <EuiTitle size="s">
-            <h3 data-test-subj="nightshiftOnboardingStepTitle">
-              {CONNECT_SUB_STEP_TITLES[connectSubStep]}
-            </h3>
+            <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
         </>
@@ -360,7 +398,6 @@ export function NightshiftOnboarding({
             <OnboardingFirstInvestigationStep
               execution={execution}
               onInvestigationStarted={() => setStepOverride(undefined)}
-              onChangeDeployment={() => setStepOverride('connect')}
             />
           ) : (
             <OnboardingAutomationStep
