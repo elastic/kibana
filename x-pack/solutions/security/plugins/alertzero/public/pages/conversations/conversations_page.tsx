@@ -50,6 +50,7 @@ import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ALERTZERO_PAGE_CONTENT_WIDTH } from '../../components/layout/constants';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
+import { useAppHeadingTitle } from '../../components/app_chrome/app_heading_title';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
@@ -159,6 +160,7 @@ const ConversationsPageContent: React.FC = () => {
 
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
+  useAppHeadingTitle(QUEUE_PAGE_INFO.pageTitle);
   const { reportEvent } = useAlertZeroTelemetry();
 
   // The Impact entity filter is the queue's only filter today. Only setting it reports, never

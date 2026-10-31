@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
+import { AppHeadingTitleContext } from './app_heading_title';
 import { BRAND_TITLE, NAV_ESCALATIONS } from './translations';
 
 /**
@@ -48,15 +49,18 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const docLink = useAlertZeroDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
+  // Set by a page through `useAppHeadingTitle`. Overrides the route's title while it's mounted.
+  const [pageTitle, setPageTitle] = useState<string | undefined>();
 
   const isWatchesShell = matchesRoute(pathname, CHROME_SCROLLED_ROUTES);
   const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
   const overflow = isChromeScrolled ? 'visible' : 'auto';
   const hideAppHeading = isWatchesShell;
-  const appHeadingTitle = matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE;
+  const appHeadingTitle =
+    pageTitle ?? (matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE);
 
   return (
-    <>
+    <AppHeadingTitleContext.Provider value={setPageTitle}>
       {hideAppHeading ? null : (
         <AppHeaderView title={appHeadingTitle} spacing="compact" docLink={docLink} />
       )}
@@ -81,6 +85,6 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
       >
         {children}
       </div>
-    </>
+    </AppHeadingTitleContext.Provider>
   );
 };
