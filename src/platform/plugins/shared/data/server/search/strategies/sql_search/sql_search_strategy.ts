@@ -55,9 +55,18 @@ export const sqlSearchStrategyProvider = (
           {
             format: params?.format ?? 'json',
             ...getDefaultAsyncGetParams(searchConfig, options),
+            // the browser long-polls (and stops sleeping between polls) when the protocol supports multiplexing
+            ...(params.wait_for_completion_timeout
+              ? { wait_for_completion_timeout: params.wait_for_completion_timeout }
+              : {}),
             id,
           },
-          { ...options.transport, signal: options.abortSignal, meta: true }
+          {
+            ...options.transport,
+            signal: options.abortSignal,
+            meta: true,
+            requestTimeout: 600_000, // large enough to never interfere with `wait_for_completion_timeout`, which should control the timeout of the poll
+          }
         ));
       } else {
         ({ headers, body, meta } = await client.sql.query(
