@@ -1,5 +1,5 @@
 {
-  "sha1": "83eca0703e68d77ecd754926e27735318e8b63b9",
+  "sha1": "93867f5f7ba3d046387d31a411f9494e142f5fbf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
-        "line": 116,
-        "column": 12
+        "line": 189,
+        "column": 20
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
-        "line": 301,
-        "column": 10
+        "line": 298,
+        "column": 27
       }
     },
     {
@@ -153,8 +153,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 22,
-        "column": 11
+        "line": 35,
+        "column": 18
       }
     },
     {
@@ -166,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
-        "line": 32,
-        "column": 13
+        "line": 46,
+        "column": 49
       }
     },
     {
@@ -334,8 +334,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 37,
+        "column": 20
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 86,
-        "column": 10
+        "line": 70,
+        "column": 27
       }
     },
     {
@@ -362,8 +362,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 99,
-        "column": 10
+        "line": 86,
+        "column": 74
       }
     },
     {
@@ -376,8 +376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
-        "line": 53,
-        "column": 10
+        "line": 49,
+        "column": 48
       }
     },
     {
@@ -390,50 +390,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
-        "line": 85,
-        "column": 11
-      }
-    },
-    {
-      "id": "3ec923da60545bd-d9a9d259fe3fb56",
-      "title": "AlertZero e2e - rule tuning tunes a noisy rule with an exception scoped to the FP pattern",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 725,
-        "column": 10
-      }
-    },
-    {
-      "id": "3ec923da60545bd-cce3f511e6a2f92",
-      "title": "AlertZero e2e - rule tuning keeps alerting on a true positive from another user after the tuning",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 743,
-        "column": 10
-      }
-    },
-    {
-      "id": "3ec923da60545bd-5e966f521a25c6b",
-      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
-        "line": 809,
-        "column": 10
+        "line": 74,
+        "column": 14
       }
     },
     {
@@ -549,6 +507,48 @@
       }
     },
     {
+      "id": "3ec923da60545bd-d9a9d259fe3fb56",
+      "title": "AlertZero e2e - rule tuning tunes a noisy rule with an exception scoped to the FP pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 789,
+        "column": 50
+      }
+    },
+    {
+      "id": "3ec923da60545bd-cce3f511e6a2f92",
+      "title": "AlertZero e2e - rule tuning keeps alerting on a true positive from another user after the tuning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 802,
+        "column": 7
+      }
+    },
+    {
+      "id": "3ec923da60545bd-5e966f521a25c6b",
+      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 862,
+        "column": 26
+      }
+    },
+    {
       "id": "7157ea8e83a720a-7d3321514ba68c7",
       "title": "Threat Intel - source catalog API returns the source catalog and creates the space-filtered indicator alias",
       "expectedStatus": "passed",
@@ -558,8 +558,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 43,
+        "column": 11
       }
     },
     {
@@ -572,8 +572,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 78,
-        "column": 10
+        "line": 64,
+        "column": 28
       }
     },
     {
@@ -586,8 +586,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 107,
-        "column": 10
+        "line": 88,
+        "column": 16
       }
     },
     {
@@ -600,8 +600,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
-        "line": 126,
-        "column": 10
+        "line": 107,
+        "column": 11
       }
     },
     {
@@ -614,8 +614,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 79,
-        "column": 10
+        "line": 83,
+        "column": 11
       }
     },
     {
@@ -629,7 +629,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
         "line": 91,
-        "column": 10
+        "column": 5
       }
     },
     {
@@ -642,8 +642,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 116,
-        "column": 10
+        "line": 110,
+        "column": 40
       }
     },
     {
@@ -656,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
-        "line": 152,
-        "column": 10
+        "line": 148,
+        "column": 21
       }
     }
   ]
