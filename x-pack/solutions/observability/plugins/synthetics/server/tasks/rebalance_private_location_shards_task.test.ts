@@ -570,7 +570,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
     });
 
-    it('bumps the agent policy once, 15 s after first pins', async () => {
+    it('bumps the agent policy once, 20 s after first pins', async () => {
       mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 2 }));
 
       const running = run();
