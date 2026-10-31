@@ -254,6 +254,33 @@ describe('OnboardingPage', () => {
       expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
       expect(screen.getAllByRole('switch').length).toBeGreaterThan(0);
     });
+
+    it('does not move focus on initial render', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      expect(document.activeElement).toBe(document.body);
+    });
+
+    it('moves focus to the worker step heading when Continue is activated', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+
+      expect(
+        screen.getByRole('heading', { level: 1, name: /Let's turn on the Watches\?/ })
+      ).toHaveFocus();
+    });
+
+    it('moves focus back to the intro heading when Back is activated', () => {
+      renderPage({ canWrite: true, skipIntro: false });
+
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
+      fireEvent.click(screen.getByTestId('alertZeroOnboardingBackButton'));
+
+      expect(
+        screen.getByRole('heading', { level: 1, name: /Let's add your data\?/ })
+      ).toHaveFocus();
+    });
   });
 
   it('mounts the scan-failure callout', () => {
