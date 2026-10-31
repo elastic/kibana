@@ -17,7 +17,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const ORIGINATING_APP = 'test';
@@ -42,6 +42,10 @@ jest
   .mockResolvedValue([visualizeAction as ActionInternal<object>]);
 
 describe('UnifiedFieldList <FieldVisualizeButton />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render correctly', async () => {
     const user = userEvent.setup();
     const FIELD_NAME = 'extension';
@@ -122,6 +126,69 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
       dataViewSpec: dataView.toSpec(false),
       fieldName: FIELD_NAME,
       originatingApp: ORIGINATING_APP,
+    });
+  });
+
+  it('should let the browser handle modified clicks when the button has a href', async () => {
+    const FIELD_NAME = 'bytes';
+    const field = dataView.fields.find((f) => f.name === FIELD_NAME)!;
+
+    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
+
+    const visualizeButton = await getFieldVisualizeButton({
+      field,
+      dataView,
+      originatingApp: ORIGINATING_APP,
+      uiActions,
+    });
+
+    renderWithI18n(visualizeButton);
+
+    const visualizeLink = screen.getByText('Visualize');
+    expect(visualizeLink.closest('a')).toHaveAttribute('href', '/app/test');
+
+    fireEvent.click(visualizeLink, { metaKey: true });
+
+    expect(uiActions.executeTriggerActions).not.toHaveBeenCalled();
+  });
+
+  it('should request opening in a new tab on modified clicks without a href', async () => {
+    const FIELD_NAME = 'bytes';
+    const field = dataView.fields.find((f) => f.name === FIELD_NAME)!;
+
+    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
+
+    const actionWithoutHref = new ActionInternal({
+      type: ACTION_VISUALIZE_LENS_FIELD,
+      id: ACTION_VISUALIZE_LENS_FIELD,
+      getDisplayName: () => 'test',
+      isCompatible: async () => true,
+      execute: async () => {},
+    });
+    jest
+      .spyOn(uiActions, 'getTriggerCompatibleActions')
+      .mockResolvedValue([actionWithoutHref as ActionInternal<object>]);
+
+    const visualizeButton = await getFieldVisualizeButton({
+      field,
+      dataView,
+      originatingApp: ORIGINATING_APP,
+      uiActions,
+    });
+
+    renderWithI18n(visualizeButton);
+
+    const visualizeLink = screen.getByText('Visualize');
+    expect(visualizeLink.closest('a')).toBeNull();
+
+    fireEvent.click(visualizeLink, { metaKey: true });
+
+    expect(uiActions.executeTriggerActions).toHaveBeenCalledWith(VISUALIZE_FIELD_TRIGGER, {
+      contextualFields: [],
+      dataViewSpec: dataView.toSpec(false),
+      fieldName: FIELD_NAME,
+      originatingApp: ORIGINATING_APP,
+      openInNewTab: true,
     });
   });
 });
