@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { TaskOutput } from '@kbn/evals';
 import {
   toDatasetExample,
+  createEvaluatePersonaMatrixDataset,
   createPersonaMatrixTrajectoryEvaluator,
   createPersonaMatrixExpectedToolCalledEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
@@ -332,5 +333,89 @@ describe('task output shape', () => {
     const messages = (taskOutput as { messages?: Array<{ message?: string }> }).messages ?? [];
     const latestMessage = messages[messages.length - 1]?.message;
     expect(latestMessage).toBe('the real answer');
+  });
+});
+
+describe('createEvaluatePersonaMatrixDataset judge payload cap', () => {
+  const HUGE = 'h'.repeat(50_000);
+  const hugeSteps = [
+    {
+      type: 'tool_call',
+      tool_id: 'security.alerts',
+      results: [{ type: 'other', data: { content: HUGE } }],
+    },
+  ];
+
+  const run = async () => {
+    const analysisOutputs: unknown[] = [];
+    const analysis = () => ({
+      evaluate: jest.fn(async ({ output }: { output: unknown }) => {
+        analysisOutputs.push(output);
+        return { metadata: { ok: true } };
+      }),
+    });
+    const evaluators = {
+      correctnessAnalysis: analysis,
+      groundednessAnalysis: analysis,
+      criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn() }),
+      traceBasedEvaluators: {},
+    };
+    let taskResult: Record<string, unknown> | undefined;
+    const executorClient = {
+      runExperiment: jest.fn(async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+        taskResult = (await task(toDatasetExample(baseExample))) as Record<string, unknown>;
+      }),
+    };
+    const chatClient = {
+      query: jest.fn(async () => ({
+        messages: [{ message: 'final answer' }],
+        steps: hugeSteps,
+        errors: [],
+        traceId: 'trace-1',
+      })),
+    };
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient,
+      evaluators,
+      executorClient,
+      traceEsClient: {} as EsClient,
+      log: buildLog(),
+    } as unknown as Parameters<typeof createEvaluatePersonaMatrixDataset>[0]);
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [baseExample] } });
+    return { analysisOutputs, taskResult: taskResult! };
+  };
+
+  const previous = process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+    } else {
+      process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP = previous;
+    }
+  });
+
+  it('gives the analysis judges a capped copy, keeps the stored transcript verbatim, and reports the trim', async () => {
+    process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP = '1000';
+    const { analysisOutputs, taskResult } = await run();
+
+    expect(analysisOutputs).toHaveLength(2);
+    for (const seen of analysisOutputs) {
+      expect(JSON.stringify(seen).length).toBeLessThan(5_000);
+    }
+    expect(JSON.stringify(taskResult.steps)).toContain(HUGE);
+    expect(taskResult.judgePayloadTrim).toMatchObject({
+      trimmed: [expect.objectContaining({ toolId: 'security.alerts', pass: 'result-cap' })],
+    });
+  });
+
+  it('leaves the judges and the stored output untouched when no cap is configured', async () => {
+    delete process.env.PERSONA_MATRIX_JUDGE_RESULT_CAP;
+    const { analysisOutputs, taskResult } = await run();
+
+    for (const seen of analysisOutputs) {
+      expect(JSON.stringify(seen)).toContain(HUGE);
+    }
+    expect(taskResult).not.toHaveProperty('judgePayloadTrim');
   });
 });
