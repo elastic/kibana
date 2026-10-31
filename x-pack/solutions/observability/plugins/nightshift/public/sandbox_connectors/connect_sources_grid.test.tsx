@@ -130,6 +130,21 @@ describe('ConnectSourcesGrid', () => {
     );
   });
 
+  it('limits a spec connector to its test sub-action', async () => {
+    const { getAddConnectorFlyout } = setup({ types: [type('.github', { source: 'spec' })] });
+
+    fireEvent.click(await githubCard());
+
+    expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
+    const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
+      initialConnector: unknown;
+    };
+    expect(props.initialConnector).toEqual({
+      actionTypeId: '.github',
+      config: { selectedActions: ['_test'] },
+    });
+  });
+
   it('disables the card when the license does not allow the type', async () => {
     setup({ types: [type('.github', { enabledInLicense: false })] });
 

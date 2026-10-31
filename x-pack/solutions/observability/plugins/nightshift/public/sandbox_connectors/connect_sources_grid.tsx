@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ActionType } from '@kbn/actions-types';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectorTypes } from './use_fetch_sandbox_connector_types';
@@ -16,6 +17,7 @@ import { useAgentConnectors } from './use_agent_connectors';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { SourceCard } from './source_card';
 import { getSourceCardItem } from './source_card_item';
+import { getInitialSandboxConnector } from './initial_sandbox_connector';
 import { sourceGridStyles } from './source_grid_styles';
 
 const noPermissionReason = i18n.translate('xpack.nightshift.connectSources.noPermission', {
@@ -39,21 +41,21 @@ export function ConnectSourcesGrid({
   const { data: types, isLoading, error, refetch } = useFetchSandboxConnectorTypes();
   const agent = useAgentConnectors();
   const refresh = useRefreshSandboxConnectors();
-  const [connectingTypeId, setConnectingTypeId] = useState<string | undefined>();
+  const [connectingType, setConnectingType] = useState<ActionType | undefined>();
 
   const { assign } = agent;
   const flyout = useMemo(() => {
-    if (!connectingTypeId || !triggersActionsUi) return null;
+    if (!connectingType || !triggersActionsUi) return null;
     return triggersActionsUi.getAddConnectorFlyout({
-      initialConnector: { actionTypeId: connectingTypeId },
-      onClose: () => setConnectingTypeId(undefined),
+      initialConnector: getInitialSandboxConnector(connectingType),
+      onClose: () => setConnectingType(undefined),
       onConnectorCreated: (connector) => {
         assign(connector);
         refresh();
         onConnected?.();
       },
     });
-  }, [assign, connectingTypeId, onConnected, refresh, triggersActionsUi]);
+  }, [assign, connectingType, onConnected, refresh, triggersActionsUi]);
 
   if (isLoading || agent.isLoading) return <EuiLoadingSpinner size="m" />;
   if (error) {
@@ -98,7 +100,7 @@ export function ConnectSourcesGrid({
                 label: connectLabel,
                 icon: 'plugs',
                 disabledReason,
-                onClick: () => setConnectingTypeId(actionType.id),
+                onClick: () => setConnectingType(actionType),
                 'data-test-subj': `${actionType.id}-connect`,
               }}
             />

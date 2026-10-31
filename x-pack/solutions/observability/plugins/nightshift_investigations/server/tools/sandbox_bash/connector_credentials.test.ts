@@ -89,6 +89,22 @@ describe('buildConnectorEnv', () => {
     expect(secretValues).toEqual([BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue']);
   });
 
+  it('leaves the selectedActions allowlist out of the env', () => {
+    const { env } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.elasticsearch',
+      config: { url: 'http://localhost:9200', authType: 'basic', selectedActions: ['_test'] },
+      headers: {},
+    });
+
+    expect(env).toEqual({
+      CONNECTOR_ID,
+      CONNECTOR_TYPE: '.elasticsearch',
+      CONNECTOR_CONFIG_URL: 'http://localhost:9200',
+      CONNECTOR_CONFIG_AUTHTYPE: 'basic',
+    });
+  });
+
   it('adds the values derived from the Authorization header to secretValues', () => {
     const { secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
