@@ -75,13 +75,16 @@ const exclusionCoversCluster = (exclusionCluster: string, candidate: string): bo
 const fits = (targets: readonly string[], next: string): boolean =>
   `${targets.join(',')},${next}`.length <= ENDPOINT_EVENT_INDICES_MAX_LENGTH;
 
-/** Whether a positive cluster pattern would still search the excluded cluster. */
+/**
+ * Whether a positive cluster pattern would still search the excluded cluster.
+ * Two wildcards overlap by prefix, so `*` and `remote_*` are dropped when
+ * `-remote_a*` does not fit. An exact match is not required.
+ */
 const positiveWouldSearch = (positiveCluster: string, exclusionCluster: string): boolean => {
-  if (positiveCluster.includes('*')) {
-    return exclusionCluster.includes('*')
-      ? positiveCluster === exclusionCluster
-      : globMatches(positiveCluster, exclusionCluster);
+  if (positiveCluster.includes('*') && exclusionCluster.includes('*')) {
+    return globsOverlap(positiveCluster, exclusionCluster);
   }
+  if (positiveCluster.includes('*')) return globMatches(positiveCluster, exclusionCluster);
   return exclusionCoversCluster(exclusionCluster, positiveCluster);
 };
 

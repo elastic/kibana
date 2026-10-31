@@ -118,6 +118,25 @@ describe('endpointEventIndices', () => {
     expect(parts).toContain(`remote_b:${ENDPOINT_EVENTS_INDEX}`);
   });
 
+  it('drops an overlapping wildcard when a wildcard exclusion does not fit', () => {
+    const exclusions = Array.from({ length: 120 }, (_, index) => {
+      const dataset = `logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(30)}*`;
+      return `-remote_a*:${dataset}`;
+    });
+    const result = endpointEventIndices([
+      '*:logs-*',
+      'remote_*:logs-*',
+      'other_*:logs-*',
+      ...exclusions,
+    ]);
+    const parts = result.split(',');
+
+    expect(result.length).toBeLessThanOrEqual(ENDPOINT_EVENT_INDICES_MAX_LENGTH);
+    expect(parts).not.toContain(`*:${ENDPOINT_EVENTS_INDEX}`);
+    expect(parts).not.toContain(`remote_*:${ENDPOINT_EVENTS_INDEX}`);
+    expect(parts).toContain(`other_*:${ENDPOINT_EVENTS_INDEX}`);
+  });
+
   it('stops adding aliases once the search target reaches its length cap', () => {
     const patterns = Array.from({ length: 200 }, (_, i) => `cluster${i}:logs-*`);
 
