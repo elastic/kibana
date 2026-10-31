@@ -590,7 +590,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockRebalanceShards).toHaveBeenCalledWith(expect.objectContaining({ pinUnpinned }));
     });
 
-    it('bumps the agent policy once, 15 s after first pins', async () => {
+    it('bumps the agent policy once, 20 s after first pins', async () => {
       mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 2 }));
 
       const running = run();

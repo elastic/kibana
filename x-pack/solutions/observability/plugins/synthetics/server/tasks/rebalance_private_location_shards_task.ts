@@ -59,7 +59,7 @@ export const MAX_PIN_CLEAR_ATTEMPTS = 3;
  * policy once this long after a location's first pins. Shorter delays let Fleet
  * deliver both revisions at once, which recovers nothing.
  */
-export const PIN_NUDGE_DELAY_MS = 15_000;
+export const PIN_NUDGE_DELAY_MS = 20_000;
 
 const PIN_DRAIN_RESET = {
   [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
