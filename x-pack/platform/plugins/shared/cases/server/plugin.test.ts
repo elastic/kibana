@@ -30,6 +30,7 @@ import {
 } from '../common/constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 import { CasesClientFactory } from './client/factory';
+import { CASES_OBSERVABLES_SYNC_TASK_ID } from './tasks/observables_sync/constants';
 import { createCasesClientMock } from './client/mocks';
 
 jest.mock('./connectors', () => ({ registerConnectorTypes: jest.fn() }));
@@ -60,6 +61,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     runWorkflows: { enabled: true },
     attachments: { enabled: true },
     chat: { enabled: true },
+    observables: { readSource: 'index' },
     ...overrides,
   };
 }
@@ -339,6 +341,9 @@ describe('Cases Plugin', () => {
             "markdownPlugins": Object {
               "lens": true,
             },
+            "observables": Object {
+              "readSource": "index",
+            },
             "runWorkflows": Object {
               "enabled": true,
             },
@@ -354,6 +359,30 @@ describe('Cases Plugin', () => {
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);
+    });
+  });
+
+  describe('observables storage mode', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('looks for the completion record of the sync pass when the plugin starts', () => {
+      plugin.start(coreStart, pluginsStart);
+
+      expect(pluginsStart.taskManager.get).toHaveBeenCalledWith(CASES_OBSERVABLES_SYNC_TASK_ID);
+    });
+
+    it('shares one storage mode with every cases client and stops it when the plugin stops', () => {
+      const initialize = jest.spyOn(CasesClientFactory.prototype, 'initialize');
+
+      plugin.start(coreStart, pluginsStart);
+      const { observablesStorageMode } = initialize.mock.calls[0][0];
+      const stop = jest.spyOn(observablesStorageMode, 'stop');
+      plugin.stop();
+
+      expect(observablesStorageMode.getReadSource()).toBe('case');
+      expect(stop).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -42,7 +42,11 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import { createObservablesStorage, ObservablesService } from './services/observables';
+import {
+  createObservablesStorage,
+  ObservablesService,
+  ObservablesStorageMode,
+} from './services/observables';
 import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -103,6 +107,7 @@ export class CasePlugin
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private templatesMigrationTaskManager?: TemplatesMigrationTaskManager;
   private observablesSyncTaskManager?: ObservablesSyncTaskManager;
+  private observablesStorageMode?: ObservablesStorageMode;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
   private casesEventBus?: CasesEventBus;
@@ -376,6 +381,15 @@ export class CasePlugin
       logger: this.logger,
     }).getClient();
 
+    // Without Task Manager no sync pass can complete, so the case field stays the source of truth.
+    const observablesStorageMode = new ObservablesStorageMode({
+      taskManager: plugins.taskManager,
+      configuredReadSource: this.caseConfig.observables.readSource,
+      logger: this.logger.get('observables'),
+    });
+    this.observablesStorageMode = observablesStorageMode;
+    void observablesStorageMode.start();
+
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
@@ -576,6 +590,7 @@ export class CasePlugin
       analyticsV2DataViewRefresher:
         this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
       observablesStorageClient,
+      observablesStorageMode,
     });
 
     return {
@@ -593,6 +608,7 @@ export class CasePlugin
 
   public stop() {
     this.logger.debug(`Stopping Case Workflow`);
+    this.observablesStorageMode?.stop();
     this.casesAnalyticsV2Service?.stop();
   }
 

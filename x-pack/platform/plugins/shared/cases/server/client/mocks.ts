@@ -58,6 +58,7 @@ import {
   createFieldDefinitionsServiceMock,
   createObservablesServiceMock,
   createObservablesStorageClientMock,
+  createObservablesStorageModeMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 import {
@@ -283,6 +284,7 @@ export const createCasesClientMockArgs = () => {
       templatesService: createTemplatesServiceMock(),
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
       observablesService: createObservablesServiceMock(),
+      observablesStorageMode: createObservablesStorageModeMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
@@ -349,6 +351,7 @@ export const createCasesClientFactoryMockArgs = () => {
     analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     analyticsV2DataViewRefresher: V2_NOOP_DATA_VIEW_REFRESHER,
     observablesStorageClient: createObservablesStorageClientMock(),
+    observablesStorageMode: createObservablesStorageModeMock(),
   };
 };
 
