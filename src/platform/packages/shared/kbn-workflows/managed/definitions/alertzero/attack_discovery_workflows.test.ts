@@ -3984,6 +3984,128 @@ describe('Attack Discovery worker chain', () => {
         expect(script.params?.expected?.pending_ms).toBe(15 * 60 * 1000);
       });
 
+      it('writes this attack its own fingerprint when the retarget loses the document', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        const write = stepIn(attachSteps, 'write_own_fingerprint_when_retarget_lost');
+        const expression = String(write?.if)
+          .replace(/^\$\{\{\s*/, '')
+          .replace(/\s*\}\}$/, '');
+        const engine = createWorkflowLiquidEngine();
+        const context = (steps: Record<string, unknown>, retargetIfMissing = true) => ({
+          inputs: {
+            fingerprint_pending: true,
+            retarget_if_missing: retargetIfMissing,
+            own_fingerprint_id: 'fp-b',
+            investigation_id: 'investigation-a',
+          },
+          steps: {
+            wait_for_investigation: { error: 'not found' },
+            resolve_own_investigation_id: { output: { investigation_id: 'investigation-b' } },
+            ...steps,
+          },
+        });
+        const found = {
+          find_pending_fingerprint: { output: { hits: { hits: [{ _id: 'fp-shared' }] } } },
+        };
+
+        expect(names.indexOf('write_own_fingerprint_when_retarget_lost')).toBeGreaterThan(
+          names.indexOf('retarget_pending_fingerprint')
+        );
+        expect(names.indexOf('write_own_fingerprint_when_retarget_lost')).toBeLessThan(
+          names.indexOf('review_when_investigation_missing')
+        );
+        expect(write?.type).toBe('elasticsearch.index');
+        expect(write?.with?.op_type).toBe('create');
+        expect(write?.with?.id).toBe('{{ inputs.own_fingerprint_id }}');
+        expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.with?._source).toBe(true);
+        expect(write?.if).toContain("steps.retarget_pending_fingerprint.output.result == 'noop'");
+        expect(write?.if).toContain(
+          'steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != inputs.investigation_id'
+        );
+        expect(write?.if).toContain('steps.find_pending_fingerprint.output.hits.hits[0]._id == blank');
+        expect(
+          engine.evalValueSync(
+            expression,
+            context({
+              ...found,
+              retarget_pending_fingerprint: {
+                output: {
+                  result: 'noop',
+                  get: {
+                    _source: { attributes: { investigation_id: 'investigation-winner' } },
+                  },
+                },
+              },
+            })
+          )
+        ).toBe(true);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context({
+              find_pending_fingerprint: { output: { hits: { hits: [] } } },
+            })
+          )
+        ).toBe(true);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context({
+              ...found,
+              retarget_pending_fingerprint: {
+                output: {
+                  result: 'noop',
+                  get: { _source: { attributes: { investigation_id: 'investigation-a' } } },
+                },
+              },
+            })
+          )
+        ).toBe(false);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context({
+              ...found,
+              retarget_pending_fingerprint: {
+                output: { result: 'noop', get: { _source: {} } },
+              },
+            })
+          )
+        ).toBe(false);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context({
+              ...found,
+              retarget_pending_fingerprint: { output: { result: 'updated' } },
+            })
+          )
+        ).toBe(false);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context(
+              {
+                find_pending_fingerprint: {
+                  error: 'search failed',
+                  output: { hits: { hits: [] } },
+                },
+              },
+              true
+            )
+          )
+        ).toBe(false);
+        expect(
+          engine.evalValueSync(
+            expression,
+            context(
+              { find_pending_fingerprint: { output: { hits: { hits: [] } } } },
+              false
+            )
+          )
+        ).toBe(false);
+      });
+
       it('writes this attack its own fingerprint when a failed read never clears', () => {
         const names = attach.steps?.map((step) => step.name) ?? [];
         const write = stepIn(attachSteps, 'write_own_fingerprint_when_unreadable');
@@ -4078,6 +4200,7 @@ describe('Attack Discovery worker chain', () => {
           'find_pending_fingerprint',
           'retarget_pending_fingerprint',
           'write_own_fingerprint_when_unreadable',
+          'write_own_fingerprint_when_retarget_lost',
           'review_when_investigation_missing',
           'reread_investigation',
           'resolve_attach_row',
@@ -4227,8 +4350,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 19 so a young fingerprint is not retargeted', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(19);
+      it('bumps the attach workflow to version 20 so a lost retarget writes its own fingerprint', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(20);
       });
 
       it('keeps its alert tags in sync with the review', () => {

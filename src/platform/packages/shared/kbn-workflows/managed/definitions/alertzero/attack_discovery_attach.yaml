@@ -5,9 +5,12 @@ description: >
   same attack. Waits for the review to create that Investigation, then journals
   the match, the attachments, and any alert tagging. Does not create the
   Investigation, and does not run FP/TP analysis or the forensics gate. If that
-  Investigation is still missing after the wait, retargets the fingerprint at
-  this attack and starts a review of it, instead of leaving it unattached or
-  writing a second fingerprint. Re-reads the Investigation before attaching.
+  Investigation is still missing after the wait, starts a review of this attack.
+  Retargets the fingerprint when it is at least 15 minutes old and still points
+  at that Investigation. A younger fingerprint stays in place. When another
+  attack has already claimed it, this attack writes its own fingerprint. A
+  failed read writes its own fingerprint and does not retarget. Re-reads the
+  Investigation before attaching.
   If it has since closed, expired, or failed, this run does not attach: it
   writes a fingerprint for this attack and starts a review.
 enabled: true
@@ -82,15 +85,18 @@ triggers:
           description: >
             True only when the matcher confirmed a 404. After the wait, the
             existing fingerprint is retargeted at this attack only when this is
-            true. A failed read leaves it false, so a privilege error or a 5xx
-            starts a review and does not rewrite the fingerprint. Omitted on a
-            direct call, which then keeps the retarget.
+            true. If another attack has already claimed that document, this
+            attack writes its own fingerprint. A fingerprint still younger than
+            15 minutes stays in place. A failed read leaves it false, so a
+            privilege error or a 5xx starts a review and does not rewrite the
+            fingerprint. Omitted on a direct call, which then keeps the retarget.
         own_fingerprint_id:
           type: string
           maxLength: 128
           description: >
-            Fingerprint id for the review this run starts when the re-read says
-            the Investigation has closed, expired, or failed. Omitted on a
+            Fingerprint id for the review this run starts when it does not attach.
+            That is a closed, expired, or failed Investigation, a failed read,
+            or a confirmed 404 whose retarget lost the document. Omitted on a
             direct call, which then starts that review without writing one.
         host_entity_ids:
           type: array
@@ -222,6 +228,9 @@ steps:
       index: ai-index-idx-security-attack-fingerprints
       id: "{{ steps.find_pending_fingerprint.output.hits.hits[0]._id }}"
       retry_on_conflict: 3
+      # Returned with a no-op, so the next step can see which Investigation the
+      # script actually read. A search after this write can still show the old id.
+      _source: true
       script:
         lang: painless
         source: >-
@@ -258,11 +267,54 @@ steps:
 
   # A failed read does not retarget, because the Investigation may still be
   # live. This review still needs a fingerprint, or the next continuation
-  # matches the earlier one and opens another Investigation. A confirmed 404
-  # takes the retarget above and does not write a second document.
+  # matches the earlier one and opens another Investigation.
   - name: write_own_fingerprint_when_unreadable
     type: elasticsearch.index
     if: "${{ steps.wait_for_investigation.error != blank and inputs.fingerprint_pending == true and inputs.retarget_if_missing == false and inputs.own_fingerprint_id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank }}"
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      id: "{{ inputs.own_fingerprint_id }}"
+      op_type: create
+      refresh: wait_for
+      document:
+        "@timestamp": "${{ now }}"
+        id: "{{ inputs.own_fingerprint_id }}"
+        type: security.attack_fingerprint
+        title: "{{ inputs.title | truncate: 512, '' }}"
+        tags:
+          - consumer:attack-discovery
+        expires_at: "{{ inputs.expires_at }}"
+        permissions:
+          kibana:
+            privileges:
+              - space: "{{ workflow.spaceId }}"
+        attributes:
+          space_id: "{{ workflow.spaceId }}"
+          investigation_id: "{{ steps.resolve_own_investigation_id.output.investigation_id }}"
+          attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+          alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+          analyzed_alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+          alert_count: "${{ inputs.alert_ids | default: consts.no_alert_ids | size }}"
+          host_entity_ids: "${{ inputs.host_entity_ids | default: consts.no_alert_ids }}"
+          user_entity_ids: "${{ inputs.user_entity_ids | default: consts.no_alert_ids }}"
+          entity_pairs: "${{ inputs.entity_pairs | default: consts.no_alert_ids }}"
+          mitre_attack_tactics: "${{ inputs.tactics | default: consts.no_alert_ids }}"
+          first_alert_at: "{{ inputs.first_alert_at }}"
+          last_alert_at: "{{ inputs.last_alert_at }}"
+          status: open
+          parent_run_id: "{{ inputs.parent_run_id }}"
+
+  # A confirmed 404 whose retarget did not update the document. A search that
+  # no longer finds the fingerprint, or a no-op whose returned Investigation id
+  # is no longer the one this run waited on, means another attack claimed it.
+  # A no-op that still returns that id is the 15-minute age check: the
+  # fingerprint stays, and this review does not write a second one. A missing
+  # source is not treated as a lost race.
+  - name: write_own_fingerprint_when_retarget_lost
+    type: elasticsearch.index
+    if: "${{ steps.wait_for_investigation.error != blank and inputs.fingerprint_pending == true and inputs.retarget_if_missing != false and inputs.own_fingerprint_id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank and ((steps.find_pending_fingerprint.error == blank and steps.find_pending_fingerprint.output.hits.hits[0]._id == blank) or (steps.retarget_pending_fingerprint.output.result == 'noop' and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != blank and steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != inputs.investigation_id)) }}"
     on-failure:
       continue: true
     with:
@@ -302,7 +354,8 @@ steps:
   # `investigation_missing` is what makes the review's note say the wait failed,
   # rather than that the earlier Investigation was a closed false positive.
   # Runs after the fingerprint write, so the review reads the document that
-  # now points at this attack: the retargeted one, or the one just created.
+  # now points at this attack: the retargeted one, or the one just created
+  # because the read failed or the retarget lost.
   - name: review_when_investigation_missing
     type: workflow.executeAsync
     if: "${{ steps.wait_for_investigation.error != blank }}"
