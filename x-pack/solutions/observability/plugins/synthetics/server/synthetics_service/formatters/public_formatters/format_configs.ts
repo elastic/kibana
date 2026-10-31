@@ -14,7 +14,12 @@ import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { periodToSeconds } from '../../../routes/overview_status/utils';
 import { normalizeSecrets } from '../../utils/secrets';
 
-import { formatMWs, replaceStringWithParams, resolveHttpAuthParams } from '../formatting_utils';
+import {
+  applyFilmstripsCapability,
+  formatMWs,
+  replaceStringWithParams,
+  resolveHttpAuthParams,
+} from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 import type {
   BrowserFields,
@@ -50,7 +55,7 @@ export const formatMonitorConfigFields = (
 ) => {
   // Kerberos/NTLM are in PARAMS_KEYS_TO_SKIP; resolve nested string fields here
   // so public Heartbeat configs get the same per-field substitution as private.
-  const resolvedConfig = resolveHttpAuthParams(config, params, logger);
+  const resolvedConfig = applyFilmstripsCapability(resolveHttpAuthParams(config, params, logger));
   const formattedMonitor = {} as Record<ConfigKey, any>;
 
   configKeys.forEach((key) => {

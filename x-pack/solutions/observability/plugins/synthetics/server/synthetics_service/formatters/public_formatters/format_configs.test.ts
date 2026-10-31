@@ -467,6 +467,50 @@ describe('browser fields', () => {
 
     expect(formattedConfig.certificate_error_spki_allowlist).toBeUndefined();
   });
+
+  describe('filmstrips', () => {
+    const format = (filmstrips: boolean, syntheticsArgs: string[] = []) =>
+      formatMonitorConfigFields(
+        [
+          ...(Object.keys(testBrowserConfig) as ConfigKey[]),
+          ConfigKey.FILMSTRIPS,
+          ConfigKey.SYNTHETICS_ARGS,
+        ],
+        {
+          ...testBrowserConfig,
+          [ConfigKey.FILMSTRIPS]: filmstrips,
+          [ConfigKey.SYNTHETICS_ARGS]: syntheticsArgs,
+        },
+        logger,
+        { proxyUrl: 'https://www.google.com' },
+        []
+      );
+
+    it('sends --capability filmstrips as a synthetics arg when enabled', () => {
+      const formattedConfig = format(true, ['--no-sandbox']);
+
+      expect(formattedConfig.synthetics_args).toEqual([
+        '--no-sandbox',
+        '--capability',
+        'filmstrips',
+      ]);
+      expect(formattedConfig.filmstrips).toBeUndefined();
+    });
+
+    it('does not duplicate the capability when already present', () => {
+      expect(format(true, ['--capability', 'filmstrips']).synthetics_args).toEqual([
+        '--capability',
+        'filmstrips',
+      ]);
+    });
+
+    it('omits filmstrips and leaves synthetics_args empty when disabled', () => {
+      const formattedConfig = format(false);
+
+      expect(formattedConfig.synthetics_args).toBeUndefined();
+      expect(formattedConfig.filmstrips).toBeUndefined();
+    });
+  });
 });
 
 describe('formatHeartbeatRequest', () => {

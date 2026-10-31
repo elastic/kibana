@@ -316,6 +316,7 @@ const browserEncryptedAdvanced = () => ({
   [ConfigKey.JOURNEY_FILTERS_TAGS]: z.array(z.string()),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: z.boolean(),
   [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: z.array(z.string()),
+  [ConfigKey.FILMSTRIPS]: z.boolean(),
   [ConfigKey.THROTTLING_CONFIG]: ThrottlingConfigCodec,
 });
 

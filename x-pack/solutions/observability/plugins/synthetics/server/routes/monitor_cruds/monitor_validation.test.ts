@@ -179,6 +179,7 @@ describe('validateMonitor', () => {
       [ConfigKey.JOURNEY_FILTERS_TAGS]: testTags,
       [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
       [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: [],
+      [ConfigKey.FILMSTRIPS]: false,
       [ConfigKey.THROTTLING_CONFIG]: {
         value: {
           download: '5',
