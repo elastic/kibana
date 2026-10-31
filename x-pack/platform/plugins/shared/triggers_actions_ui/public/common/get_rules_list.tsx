@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
 import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';

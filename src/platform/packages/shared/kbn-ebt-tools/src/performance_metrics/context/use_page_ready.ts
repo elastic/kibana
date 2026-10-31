@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { CustomMetrics, Meta } from './performance_context';
-import { usePerformanceContext } from '../../..';
+import { usePerformanceContext } from './use_performance_context';
 
 interface UsePageReadyProps {
   customMetrics?: CustomMetrics;

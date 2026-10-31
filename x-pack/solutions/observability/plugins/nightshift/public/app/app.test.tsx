@@ -6,7 +6,7 @@
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
@@ -19,7 +19,7 @@ import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;

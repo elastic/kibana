@@ -20,7 +20,7 @@ import { usePageReady } from './use_page_ready';
 const mockOnPageReady = jest.fn();
 const mockOnPageRefreshStart = jest.fn();
 
-jest.mock('../../..', () => ({
+jest.mock('./use_performance_context', () => ({
   usePerformanceContext: () => ({
     onPageReady: mockOnPageReady,
     onPageRefreshStart: mockOnPageRefreshStart,

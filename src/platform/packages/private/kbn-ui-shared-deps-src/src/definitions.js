@@ -154,6 +154,7 @@ const externals = {
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-language': '__kbnSharedDeps__.KbnEsqlAst',
   '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
+  '@kbn/ebt-tools/react': '__kbnSharedDeps__.KbnEbtToolsReact',
   '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
   '@kbn/react-kibana-context-common': '__kbnSharedDeps__.KbnReactKibanaContextCommon',
   '@kbn/react-kibana-context-root': '__kbnSharedDeps__.KbnReactKibanaContextRoot',

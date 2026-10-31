@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { OnboardingFlowLayout } from '../../shared/onboarding_flow_layout';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { htmlIdGenerator } from '@elastic/eui';
+import { v1 as uuidv1 } from 'uuid';
 import type { StreamlangStepWithUIAttributes, StreamlangUIBranch } from '../../../types/ui';
 import {
   isConditionBlock,
@@ -13,7 +13,8 @@ import {
   type StreamlangStep,
 } from '../../../types/streamlang';
 
-const createId = htmlIdGenerator();
+// Same output as EUI's htmlIdGenerator()(), without importing @elastic/eui
+const createId = () => `i${uuidv1()}`;
 
 export const convertStepsForUI = (dsl: StreamlangDSL): StreamlangStepWithUIAttributes[] => {
   const result: StreamlangStepWithUIAttributes[] = [];
