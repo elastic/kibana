@@ -6,7 +6,6 @@
  */
 
 import { assignShard, balanceShardsByCost, UNASSIGNED_AGENT_ID } from './assign_shards';
-import { isShardSentinelPolicyId } from './shard_sentinel';
 
 /**
  * ── Scalable private locations: one agent policy + many agents ────────────────
@@ -96,13 +95,8 @@ export const agentIdFromCondition = (condition?: string | null): string | undefi
  * belong to this location. New format is `${configId}-${locationId}`; legacy
  * space-suffixed format is `${configId}-${locationId}-${spaceId}`, so the
  * location id is an infix — `indexOf` (not a fixed trailing strip) handles both.
- * The shard sentinel is not a monitor; legacy locations use the agent policy id
- * as their id, so its `-${agentPolicyId}` suffix would otherwise match.
  */
 export const configIdOf = (policyId: string, locationId: string): string | undefined => {
-  if (isShardSentinelPolicyId(policyId)) {
-    return undefined;
-  }
   const idx = policyId.indexOf(`-${locationId}`);
   return idx > 0 ? policyId.slice(0, idx) : undefined;
 };

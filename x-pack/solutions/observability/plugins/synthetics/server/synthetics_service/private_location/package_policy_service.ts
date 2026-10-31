@@ -15,7 +15,6 @@ import type { SyntheticsServerSetup } from '../../types';
 import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
 import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
-import { buildShardSentinelPolicy, shardSentinelPolicyId } from './shard_sentinel';
 
 interface GetByIdsOptions {
   spaceId: string;
@@ -39,27 +38,6 @@ const getSpaceSoClientFor = (server: SyntheticsServerSetup, spaceId: string) =>
 
 const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
   server.coreStart.elasticsearch.client.asInternalUser;
-
-/**
- * Finds an agent policy in any space and the one space to write through for it.
- * Prefers the default space when the policy is there (or is all-spaces): it
- * matches the create/edit routing fallback, and an all-spaces policy cannot be
- * written through a literal `*` namespace.
- */
-const getAgentPolicyWriteSpace = async (server: SyntheticsServerSetup, policyId: string) => {
-  const unscopedSoClient = server.coreStart.savedObjects.createInternalRepository();
-  const [agentPolicy] = await server.fleet.agentPolicyService.getByIds(
-    unscopedSoClient,
-    [{ id: policyId, spaceId: ALL_SPACES_ID }],
-    { ignoreMissing: true, fields: ['name', 'revision'] }
-  );
-  const spaceIds = agentPolicy?.space_ids ?? [];
-  const writeSpaceId =
-    spaceIds.length === 0 || spaceIds.includes(DEFAULT_SPACE_ID) || spaceIds.includes(ALL_SPACES_ID)
-      ? DEFAULT_SPACE_ID
-      : spaceIds[0];
-  return { agentPolicy, writeSpaceId };
-};
 
 /**
  * Bumps one agent policy's revision, scoping the write to a space the agent
@@ -90,10 +68,23 @@ export const bumpAgentPolicyRevision = async (
   server: SyntheticsServerSetup,
   policyId: string
 ): Promise<void> => {
-  const { writeSpaceId } = await getAgentPolicyWriteSpace(server, policyId);
+  const unscopedSoClient = server.coreStart.savedObjects.createInternalRepository();
+  const [agentPolicy] = await server.fleet.agentPolicyService.getByIds(
+    unscopedSoClient,
+    [{ id: policyId, spaceId: ALL_SPACES_ID }],
+    { ignoreMissing: true, fields: ['name'] }
+  );
+  const spaceIds = agentPolicy?.space_ids ?? [];
+  // Prefer the default space when the policy is there (or is all-spaces): it
+  // matches the create/edit routing fallback, and an all-spaces policy cannot
+  // be written through a literal `*` namespace.
+  const bumpSpaceId =
+    spaceIds.length === 0 || spaceIds.includes(DEFAULT_SPACE_ID) || spaceIds.includes(ALL_SPACES_ID)
+      ? DEFAULT_SPACE_ID
+      : spaceIds[0];
 
   await server.fleet.agentPolicyService.bumpRevision(
-    getSpaceSoClientFor(server, writeSpaceId),
+    getSpaceSoClientFor(server, bumpSpaceId),
     getInternalEsClientFor(server),
     policyId,
     { asyncDeploy: true }
@@ -271,65 +262,6 @@ export class PackagePolicyService {
     }
 
     return items;
-  }
-
-  async hasShardSentinel(agentPolicyId: string): Promise<boolean> {
-    const policies = await this.server.fleet.packagePolicyService.getByIDs(
-      this.server.coreStart.savedObjects.createInternalRepository(),
-      [shardSentinelPolicyId(agentPolicyId)],
-      { ignoreMissing: true, spaceIds: [ALL_SPACES_ID], fields: ['name'] }
-    );
-    return policies.length > 0;
-  }
-
-  /**
-   * Fleet bumps the agent policy before returning, so a revision read afterwards
-   * contains the sentinel. False when another Kibana node created it first.
-   */
-  async createShardSentinel(agentPolicyId: string): Promise<boolean> {
-    const { writeSpaceId } = await getAgentPolicyWriteSpace(this.server, agentPolicyId);
-    const soClient = this.getSpaceSoClient(writeSpaceId);
-    const template = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-      soClient,
-      'synthetics',
-      { logger: this.server.logger, installMissingPackage: true }
-    );
-    if (!template) {
-      throw new Error('Unable to build the Synthetics package policy template');
-    }
-
-    try {
-      await this.server.fleet.packagePolicyService.create(
-        soClient,
-        this.getInternalEsClient(),
-        buildShardSentinelPolicy(template, agentPolicyId),
-        { id: shardSentinelPolicyId(agentPolicyId), force: true }
-      );
-      return true;
-    } catch (e) {
-      if (await this.hasShardSentinel(agentPolicyId)) {
-        return false;
-      }
-      throw e;
-    }
-  }
-
-  async deleteShardSentinel(agentPolicyId: string): Promise<void> {
-    const results = await this.server.fleet.packagePolicyService.delete(
-      this.server.coreStart.savedObjects.createInternalRepository(),
-      this.getInternalEsClient(),
-      [shardSentinelPolicyId(agentPolicyId)],
-      { force: true, spaceIds: [ALL_SPACES_ID], ignoreMissing: true, bumpRevision: false }
-    );
-    // Bumped separately: the unscoped client 404s for agent policies outside the default space.
-    if (results?.some(({ success }) => success)) {
-      await bumpAgentPolicyRevision(this.server, agentPolicyId);
-    }
-  }
-
-  async getAgentPolicyRevision(agentPolicyId: string): Promise<number | undefined> {
-    const { agentPolicy } = await getAgentPolicyWriteSpace(this.server, agentPolicyId);
-    return agentPolicy?.revision;
   }
 
   async bulkCreate({

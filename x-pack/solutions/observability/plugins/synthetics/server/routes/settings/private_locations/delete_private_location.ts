@@ -57,8 +57,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       true
     );
 
-    const location = locations.find((loc) => loc.id === locationId);
-    if (!location) {
+    if (!locations.find((loc) => loc.id === locationId)) {
       return response.badRequest({
         body: {
           message: `Private location with id ${locationId} does not exist.`,
@@ -93,8 +92,5 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
     await savedObjectsClient.delete(privateLocationSavedObjectName, locationId, {
       force: true,
     });
-    await syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel(
-      location.agentPolicyId
-    );
   },
 });

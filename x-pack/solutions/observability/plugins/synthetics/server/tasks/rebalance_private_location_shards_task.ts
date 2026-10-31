@@ -46,12 +46,8 @@ import {
   isRebalancePrivateLocationShardsEnabled,
   REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
-  REBALANCE_SHARDS_SENTINELS_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   REBALANCE_SHARDS_TASK_TYPE,
-  getShardSentinelStates,
-  type ShardSentinelState,
-  type ShardSentinelStates,
 } from './rebalance_shards_enabled';
 
 export { REBALANCE_SHARDS_TASK_ID };
@@ -89,10 +85,10 @@ interface RebalanceTaskState extends Record<string, unknown> {
   snapshotAt?: Record<string, number>;
   /** Telemetry only: locations already reported as broken, so a persistent fault is reported once. */
   locationIssues?: Record<string, PrivateLocationRebalanceReason>;
-  shardSentinels?: ShardSentinelStates;
   /**
-   * Agent policy id → when its one revision bump after first pins is due. A new
-   * revision brings back components lost to elastic/elastic-agent#17714.
+   * Agent policy id → when its one revision bump after first pins is due.
+   * Pinning running monitors can stop them on the agents until a later revision
+   * arrives (elastic/elastic-agent#17714); this is that later revision.
    */
   pinNudges?: Record<string, number>;
 }
@@ -175,11 +171,7 @@ export class RebalancePrivateLocationShardsTask {
 
       if (locations.length === 0) {
         return {
-          state: await this.returnedState(taskInstance, {
-            ...PIN_DRAIN_RESET,
-            shardingMode: mode,
-            [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {},
-          }),
+          state: await this.returnedState(taskInstance, { ...PIN_DRAIN_RESET, shardingMode: mode }),
           schedule,
         };
       }
@@ -197,8 +189,6 @@ export class RebalancePrivateLocationShardsTask {
       // streak restarts on the next recovery.
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
-      const priorSentinels = getShardSentinelStates(taskInstance);
-      const nextSentinels: ShardSentinelStates = {};
       const pinNudges: Record<string, number> = { ...taskState.pinNudges };
 
       for (const location of locations) {
@@ -212,9 +202,6 @@ export class RebalancePrivateLocationShardsTask {
         try {
           await this.nudgeIfDue(location.agentPolicyId, pinNudges, now);
           const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
-          // Before the health checks, so agents enrolling later get it with their first policy.
-          const sentinel = await this.getShardSentinelState(location, priorSentinels[location.id]);
-          nextSentinels[location.id] = sentinel;
 
           // Data-plane liveness veto: only worth a `synthetics-*` query when at
           // least one agent looks stale by check-in. In steady state (all fresh)
@@ -271,20 +258,6 @@ export class RebalancePrivateLocationShardsTask {
             continue;
           }
 
-          const sentinelJustApplied = !sentinel.ready;
-          if (!sentinel.ready) {
-            const ready = healthyAgentIds.every(
-              (agentId) => (agents.get(agentId)?.policyRevision ?? -1) >= sentinel.revision
-            );
-            nextSentinels[location.id] = { ...sentinel, ready };
-            if (!ready) {
-              this.debugLog(
-                `location ${location.id}: waiting for agents to apply revision ${sentinel.revision} (shard sentinel)`
-              );
-              continue;
-            }
-          }
-
           this.debugLog(
             `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, browser-capable=${browserAgentIds.length}, recovery-eligible=${recoveryAgentIds.length}`
           );
@@ -301,12 +274,13 @@ export class RebalancePrivateLocationShardsTask {
             recoveryAgentIds,
             browserAgentIds,
             capacities,
+            pinUnpinned: agents.size > 1,
             signal,
           });
           this.debugLog(
             `location ${location.id}: moved ${result.moved}/${result.total} monitor(s)`
           );
-          if (result.newlyPinned > 0 || sentinelJustApplied) {
+          if (result.newlyPinned > 0) {
             pinNudges[location.agentPolicyId] ??= now + PIN_NUDGE_DELAY_MS;
           }
 
@@ -373,10 +347,6 @@ export class RebalancePrivateLocationShardsTask {
           if (signal.aborted) {
             throw e;
           }
-          const priorSentinel = priorSentinels[location.id];
-          if (priorSentinel) {
-            nextSentinels[location.id] ??= priorSentinel;
-          }
           this.debugLog(`Rebalance failed for location ${location.id}; skipping: ${e.message}`);
           nextIssues[location.id] = 'error';
           if (priorIssues[location.id] !== 'error') {
@@ -403,7 +373,6 @@ export class RebalancePrivateLocationShardsTask {
           shardingMode: mode,
           locationIssues: nextIssues,
           snapshotAt: nextSnapshotAt,
-          [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: nextSentinels,
           pinNudges,
         }),
         schedule,
@@ -473,27 +442,6 @@ export class RebalancePrivateLocationShardsTask {
         `[RebalancePrivateLocationShardsTask] Failed to nudge agent policy ${agentPolicyId}: ${e.message}`
       );
     }
-  }
-
-  /**
-   * Ensures the shard sentinel exists and returns the agent policy revision agents
-   * must reach before pins. A new sentinel or agent policy starts over as not ready.
-   */
-  private async getShardSentinelState(
-    { agentPolicyId }: { agentPolicyId: string },
-    prior?: ShardSentinelState
-  ): Promise<ShardSentinelState> {
-    const { privateLocationAPI } = this.syntheticsMonitorClient;
-    const created = await privateLocationAPI.ensureShardSentinel(agentPolicyId);
-    if (!created && prior?.agentPolicyId === agentPolicyId) {
-      return prior;
-    }
-    // Read after the sentinel exists: this revision and every later one contain it.
-    const revision = await privateLocationAPI.getAgentPolicyRevision(agentPolicyId);
-    if (revision === undefined) {
-      throw new Error(`Agent policy ${agentPolicyId} not found`);
-    }
-    return { agentPolicyId, revision, ready: false };
   }
 
   /**

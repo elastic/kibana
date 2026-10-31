@@ -10,7 +10,6 @@ import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
-import { isShardSentinelPolicyId } from '../synthetics_service/private_location/shard_sentinel';
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -26,8 +25,7 @@ export interface LeftoverPackagePolicies {
 
 /**
  * Compares existing private-location package policies with the
- * `{configId}-{locationId}` ids that monitors expect. Shard sentinels belong to
- * no monitor and are never leftovers.
+ * `{configId}-{locationId}` ids that monitors expect.
  */
 export const findLeftoverPackagePolicies = async (
   server: SyntheticsServerSetup,
@@ -72,9 +70,7 @@ export const findLeftoverPackagePolicies = async (
     finder.close().catch(() => {});
   }
 
-  const leftoverIds = [...existingIds].filter(
-    (id) => !expectedLocationById.has(id) && !isShardSentinelPolicyId(id)
-  );
+  const leftoverIds = [...existingIds].filter((id) => !expectedLocationById.has(id));
   const missingLocationIds = [
     ...new Set(
       [...expectedLocationById]

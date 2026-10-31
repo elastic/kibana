@@ -23,7 +23,6 @@ import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
   REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
-  REBALANCE_SHARDS_SENTINELS_STATE_KEY,
 } from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -59,16 +58,12 @@ const rebalanceResult = (over: Partial<RebalanceShardsResult> = {}): RebalanceSh
 const mockRebalanceShards = jest.fn().mockResolvedValue(rebalanceResult());
 const mockReportEvent = jest.fn();
 const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0, failed: 0 });
-const mockEnsureShardSentinel = jest.fn().mockResolvedValue(false);
-const mockGetAgentPolicyRevision = jest.fn().mockResolvedValue(1);
 const mockBumpAgentPolicyRevision = jest.fn().mockResolvedValue(undefined);
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
     rebalanceShards: mockRebalanceShards,
     clearShardConditions: mockClearShardConditions,
-    ensureShardSentinel: mockEnsureShardSentinel,
-    getAgentPolicyRevision: mockGetAgentPolicyRevision,
     bumpAgentPolicyRevision: mockBumpAgentPolicyRevision,
   },
 } as unknown as SyntheticsMonitorClient;
@@ -101,13 +96,11 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
 const agentInfo = (
   lastCheckin: number,
   memoryMib: number | null = null,
-  complete = false,
-  policyRevision: number | null = 1
+  complete = false
 ): AgentInfo => ({
   lastCheckin,
   memoryMib,
   complete,
-  policyRevision,
 });
 
 const taskInstance = (
@@ -135,8 +128,6 @@ describe('RebalancePrivateLocationShardsTask', () => {
     mockGetLicense.mockResolvedValue(enterpriseLicense());
     mockRebalanceShards.mockResolvedValue(rebalanceResult());
     mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
-    mockEnsureShardSentinel.mockResolvedValue(false);
-    mockGetAgentPolicyRevision.mockResolvedValue(1);
     mockBumpAgentPolicyRevision.mockResolvedValue(undefined);
   });
 
@@ -300,7 +291,6 @@ describe('RebalancePrivateLocationShardsTask', () => {
         extra: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
-        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {},
       });
     });
 
@@ -317,7 +307,6 @@ describe('RebalancePrivateLocationShardsTask', () => {
         foo: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
-        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {},
       });
     });
 
@@ -332,7 +321,6 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
       expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(mockEnsureShardSentinel).not.toHaveBeenCalled();
       expect(result.state).toEqual(
         expect.objectContaining({ [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true })
       );
@@ -394,6 +382,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         recoveryAgentIds: ['agent-1'],
         browserAgentIds: ['agent-1'],
         capacities: new Map([['agent-1', 2048]]),
+        pinUnpinned: true,
         signal: expect.any(AbortSignal),
       });
       // healthy streaks are persisted into the returned state for the next run
@@ -574,98 +563,40 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
   });
 
-  describe('shard sentinel and pin nudge', () => {
-    const sentinelState = (over: Record<string, unknown> = {}) => ({
-      [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {
-        'loc-1': { agentPolicyId: 'ap-1', revision: 7, ready: true, ...over },
-      },
-    });
-    const agents = (...revisions: Array<number | null>) =>
-      jest
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
-        .mockResolvedValue(
-          new Map(
-            revisions.map((revision, i) => [`agent-${i}`, agentInfo(NOW, null, false, revision)])
-          )
-        );
-
+  describe('first pins', () => {
     beforeEach(() => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
     });
 
-    it('creates the sentinel and leaves pins alone until every healthy agent applied it', async () => {
-      mockEnsureShardSentinel.mockResolvedValue(true);
-      mockGetAgentPolicyRevision.mockResolvedValue(7);
-      agents(7, 6);
+    it('never adds a first pin on a single-agent location', async () => {
+      await run();
+
+      expect(mockRebalanceShards).toHaveBeenCalledWith(
+        expect.objectContaining({ pinUnpinned: false })
+      );
+    });
+
+    it.each([
+      ['first pins', rebalanceResult({ newlyPinned: 2 }), { 'ap-1': NOW + PIN_NUDGE_DELAY_MS }],
+      ['moves between agents', rebalanceResult({ moved: 3, failedOver: 3 }), {}],
+    ])('schedules one agent policy nudge for %s only', async (_, rebalanced, nudges) => {
+      mockRebalanceShards.mockResolvedValue(rebalanced);
 
       const result = await run();
 
-      expect(mockEnsureShardSentinel).toHaveBeenCalledWith('ap-1');
-      expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(result.state[REBALANCE_SHARDS_SENTINELS_STATE_KEY]).toEqual(
-        sentinelState({ ready: false })[REBALANCE_SHARDS_SENTINELS_STATE_KEY]
-      );
-    });
-
-    it.each([
-      ['an agent never acknowledged a policy', null, { ready: false }, false],
-      ['every agent reached the revision', 9, { ready: false }, true],
-      ['already ready, even with a new agent', null, { ready: true }, true],
-      ['the location moved agent policy', 9, { agentPolicyId: 'ap-old' }, false],
-    ])('pins when %s: %s', async (_, revision, prior, pins) => {
-      mockGetAgentPolicyRevision.mockResolvedValue(12);
-      agents(7, revision);
-
-      await run(sentinelState(prior));
-
-      expect(mockRebalanceShards).toHaveBeenCalledTimes(pins ? 1 : 0);
-    });
-
-    it('keeps the prior sentinel state when the sentinel cannot be checked', async () => {
-      mockEnsureShardSentinel.mockRejectedValue(new Error('fleet down'));
-      agents(7);
-
-      const result = await run(sentinelState());
-
-      expect(mockRebalanceShards).not.toHaveBeenCalled();
-      expect(result.state[REBALANCE_SHARDS_SENTINELS_STATE_KEY]).toEqual(
-        sentinelState()[REBALANCE_SHARDS_SENTINELS_STATE_KEY]
-      );
-    });
-
-    it.each([
-      ['first pins', sentinelState(), rebalanceResult({ newlyPinned: 2 }), true],
-      ['the gate opening', sentinelState({ ready: false }), rebalanceResult(), true],
-      [
-        'moves between agents',
-        sentinelState(),
-        rebalanceResult({ moved: 3, failedOver: 3 }),
-        false,
-      ],
-    ])('schedules a nudge for %s: %s', async (_, state, rebalanced, nudge) => {
-      agents(7);
-      mockRebalanceShards.mockResolvedValue(rebalanced);
-
-      const result = await run(state);
-
-      expect(result.state.pinNudges).toEqual(nudge ? { 'ap-1': NOW + PIN_NUDGE_DELAY_MS } : {});
+      expect(result.state.pinNudges).toEqual(nudges);
       expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
     });
 
     it('fires a due nudge once and keeps one not due yet', async () => {
-      agents(7);
       jest
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockResolvedValue([location(), location({ id: 'loc-2', agentPolicyId: 'ap-2' })]);
-      const sentinels = {
-        'loc-1': { agentPolicyId: 'ap-1', revision: 1, ready: true },
-        'loc-2': { agentPolicyId: 'ap-2', revision: 1, ready: true },
-      };
 
-      const result = await run({
-        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: sentinels,
-        pinNudges: { 'ap-1': NOW - 1, 'ap-2': NOW + 1_000 },
-      });
+      const result = await run({ pinNudges: { 'ap-1': NOW - 1, 'ap-2': NOW + 1_000 } });
 
       expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
       expect(mockBumpAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
@@ -673,10 +604,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('retries a nudge whose bump failed', async () => {
-      agents(7);
       mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
 
-      const result = await run({ ...sentinelState(), pinNudges: { 'ap-1': NOW - 1 } });
+      const result = await run({ pinNudges: { 'ap-1': NOW - 1 } });
 
       expect(result.state.pinNudges).toEqual({ 'ap-1': NOW - 1 });
     });

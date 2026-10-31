@@ -53,9 +53,6 @@ const makeRouteContext = (body: Record<string, unknown>) => {
     response,
     spaceId: 'default',
     savedObjectsClient: {},
-    syntheticsMonitorClient: {
-      privateLocationAPI: { deleteUnusedShardSentinel: jest.fn().mockResolvedValue(undefined) },
-    },
     monitorConfigRepository: {
       findDecryptedMonitors: jest.fn().mockResolvedValue([]),
     },
@@ -260,9 +257,6 @@ describe('editPrivateLocationRoute agent policy change', () => {
       (runTaskPerPrivateLocation as jest.Mock).mock.invocationCallOrder[0]
     );
     expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
-    expect(
-      routeContext.syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel
-    ).toHaveBeenCalledWith('ap-1');
   });
 
   it('reverts the agent policy and rethrows when scheduling the move fails', async () => {

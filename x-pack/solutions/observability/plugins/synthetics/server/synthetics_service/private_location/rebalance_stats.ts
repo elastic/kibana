@@ -12,10 +12,7 @@ export interface RebalanceShardsResult {
   moved: number;
   /** Moves that Fleet rejected; retried next cycle. */
   failed: number;
-  /**
-   * Package policies that had no agent condition and now carry a pin: inputs
-   * that may already be running get their first `${agent.id}` condition.
-   */
+  /** Monitors with no agent condition that got their first pin (see `pinNudges`). */
   newlyPinned: number;
   /** Monitors pinned to an agent that is no longer healthy. */
   failedOver: number;

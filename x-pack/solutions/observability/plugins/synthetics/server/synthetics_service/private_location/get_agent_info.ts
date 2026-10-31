@@ -28,11 +28,6 @@ export interface AgentInfo {
    * monitors can run only on these agents.
    */
   complete: boolean;
-  /**
-   * Agent policy revision the agent last acknowledged, or null before its
-   * first acknowledgement. Gates pinning on the shard sentinel.
-   */
-  policyRevision: number | null;
 }
 
 interface AgentLocalMetadata {
@@ -139,7 +134,6 @@ export const getAgentInfo = async (
         lastCheckin: last,
         memoryMib,
         complete: isCompleteElasticAgent(agent.local_metadata),
-        policyRevision: agent.policy_revision ?? null,
       });
     }
 

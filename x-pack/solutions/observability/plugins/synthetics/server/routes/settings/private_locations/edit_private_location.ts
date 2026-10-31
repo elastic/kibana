@@ -321,11 +321,6 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             throw error;
           });
         }
-        if (isAgentPolicyChanged) {
-          await routeContext.syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel(
-            existingLocation.attributes.agentPolicyId
-          );
-        }
       }
 
       return toClientContract({

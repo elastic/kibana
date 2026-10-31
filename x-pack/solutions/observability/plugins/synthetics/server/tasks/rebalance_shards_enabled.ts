@@ -12,16 +12,6 @@ export const REBALANCE_SHARDS_TASK_ID = `${REBALANCE_SHARDS_TASK_TYPE}-single-in
 export const REBALANCE_SHARDS_ENABLED_STATE_KEY = 'rebalancePrivateLocationShardsEnabled';
 export const REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY = 'pinsCleared';
 export const REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY = 'pinClearAttempts';
-export const REBALANCE_SHARDS_SENTINELS_STATE_KEY = 'shardSentinels';
-
-/** Per location id: the first agent policy revision with its shard sentinel, and whether agents applied it. */
-export interface ShardSentinelState {
-  agentPolicyId: string;
-  revision: number;
-  ready: boolean;
-}
-
-export type ShardSentinelStates = Record<string, ShardSentinelState>;
 
 /**
  * Cluster-wide kill-switch, stored on the singleton rebalance task's state —
@@ -62,18 +52,4 @@ export const setRebalancePrivateLocationShardsEnabled = async (
     return next;
   });
   return getRebalancePrivateLocationShardsEnabled(taskManager);
-};
-
-export const getShardSentinelStates = (task?: {
-  state?: Record<string, unknown>;
-}): ShardSentinelStates =>
-  (task?.state?.[REBALANCE_SHARDS_SENTINELS_STATE_KEY] as ShardSentinelStates | undefined) ?? {};
-
-/** Whether a location's monitors may be pinned; an unreadable task counts as not ready. */
-export const getShardSentinelReadyCheck = async (taskManager: TaskManagerStartContract) => {
-  const states = await taskManager
-    .get(REBALANCE_SHARDS_TASK_ID)
-    .then(getShardSentinelStates, (): ShardSentinelStates => ({}));
-  return ({ id, agentPolicyId }: { id: string; agentPolicyId: string }): boolean =>
-    states[id]?.ready === true && states[id].agentPolicyId === agentPolicyId;
 };

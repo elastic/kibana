@@ -229,8 +229,7 @@ const indexFakeAgent = async (
     document: {
       active: true,
       policy_id: agentPolicyId,
-      // Past any real revision, so the shard-sentinel pin gate treats fake agents as up to date.
-      policy_revision_idx: 1_000_000,
+      policy_revision_idx: 1,
       last_checkin_status: 'online',
       last_checkin: new Date().toISOString(),
       enrolled_at: new Date().toISOString(),

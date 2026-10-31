@@ -58,7 +58,7 @@ apiTest.describe.skip(
   () => {
     let adminHeaders: Record<string, string>;
     let privateLocation: ScoutPrivateLocation;
-    let agentId: string;
+    let agentIds: string[];
 
     const addMonitorWithMw = async (apiClient: ApiClientFixture, mwId: string) => {
       const res = await addMonitor(apiClient, adminHeaders, {
@@ -134,20 +134,28 @@ apiTest.describe.skip(
       privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
         'default'
       );
-      agentId = await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
-        hostname: 'mw-sync-agent',
-      });
+      // Two agents: a single-agent location never pins its monitors.
+      agentIds = [
+        await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
+          hostname: 'mw-sync-agent-a',
+        }),
+        await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
+          hostname: 'mw-sync-agent-b',
+        }),
+      ];
     });
 
     // A new monitor only gets an agent `condition` while some agent's check-in
     // is fresher than `STALE_CHECKIN_MS`.
     apiTest.beforeEach(async ({ esClient }) => {
-      await setFleetAgentLastCheckin(esClient, agentId, new Date().toISOString());
+      for (const agentId of agentIds) {
+        await setFleetAgentLastCheckin(esClient, agentId, new Date().toISOString());
+      }
     });
 
     apiTest.afterAll(async ({ apiServices, kbnClient, esClient }) => {
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
-      await deleteFleetAgents(esClient, [agentId]);
+      await deleteFleetAgents(esClient, agentIds);
       await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
     });
 

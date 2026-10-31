@@ -6,9 +6,8 @@
  */
 
 import { agentIdCondition, UNASSIGNED_CONDITION } from './assign_by_condition';
-import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
+import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB, UNASSIGNED_AGENT_ID } from './assign_shards';
 import type { ShardedPackagePolicy } from './rebalance_writes';
-import { SHARD_SENTINEL_CONDITION, shardSentinelPolicyId } from './shard_sentinel';
 import {
   configIdOf,
   toClearedConditionUpdates,
@@ -52,10 +51,6 @@ describe('configIdOf', () => {
 
   it('returns undefined for a policy id of another location', () => {
     expect(configIdOf(`monitor-abc-other`, LOCATION)).toBeUndefined();
-  });
-
-  it('never reads the shard sentinel as a monitor, even when the location id is the agent policy id', () => {
-    expect(configIdOf(shardSentinelPolicyId(LOCATION), LOCATION)).toBeUndefined();
   });
 });
 
@@ -282,6 +277,35 @@ describe('toConditionUpdates', () => {
   });
 });
 
+describe('toConditionUpdates on a single-agent location', () => {
+  const conditions = (pkgPolicies: ShardedPackagePolicy[], assignment: Map<string, string>) =>
+    [...toConditionUpdates(pkgPolicies, assignment, LOCATION, false).values()]
+      .flat()
+      .map(({ update }) => [update.id, update.attributes.condition]);
+
+  it('moves existing pins but never adds a first one', () => {
+    expect(
+      conditions(
+        [
+          policy({ id: `m1-${LOCATION}`, condition: agentIdCondition('gone') }),
+          policy({ id: `m2-${LOCATION}` }),
+        ],
+        new Map([
+          ['m1', 'agent-a'],
+          ['m2', 'agent-a'],
+        ])
+      )
+    ).toEqual([[`m1-${LOCATION}`, agentIdCondition('agent-a')]]);
+  });
+
+  it('unparks a browser monitor once a browser-capable agent exists, else leaves it parked', () => {
+    const parked = browserPolicy({ id: `m1-${LOCATION}`, condition: UNASSIGNED_CONDITION });
+
+    expect(conditions([parked], new Map([['m1', 'agent-a']]))).toEqual([[`m1-${LOCATION}`, null]]);
+    expect(conditions([parked], new Map([['m1', UNASSIGNED_AGENT_ID]]))).toEqual([]);
+  });
+});
+
 describe('toClearedConditionUpdates', () => {
   it('emits a null-condition update for every policy that currently has a pin', () => {
     const bySpace = toClearedConditionUpdates([
@@ -297,13 +321,5 @@ describe('toClearedConditionUpdates', () => {
 
   it('writes nothing when no policy has a condition', () => {
     expect(toClearedConditionUpdates([policy({ id: `m1-${LOCATION}` })]).size).toBe(0);
-  });
-
-  it('keeps the shard sentinel condition', () => {
-    expect(
-      toClearedConditionUpdates([
-        policy({ id: shardSentinelPolicyId('ap-1'), condition: SHARD_SENTINEL_CONDITION }),
-      ]).size
-    ).toBe(0);
   });
 });

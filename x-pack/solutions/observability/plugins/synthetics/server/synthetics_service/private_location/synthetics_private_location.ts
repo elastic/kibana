@@ -66,8 +66,6 @@ import {
 } from './assign_by_condition';
 import { isCompleteElasticAgent } from './get_agent_info';
 import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
-import { isShardSentinelPolicyId } from './shard_sentinel';
-import { getShardSentinelReadyCheck } from '../../tasks/rebalance_shards_enabled';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -79,9 +77,6 @@ interface EnrolledAgents {
   /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
   completeAgentIds?: string[];
 }
-
-/** `awaiting_sentinel`: active, but no new pins until the agents apply the shard sentinel. */
-export type LocationShardingMode = AgentShardingMode | 'awaiting_sentinel';
 
 type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
 
@@ -247,7 +242,7 @@ export class SyntheticsPrivateLocation {
     runOnce?: boolean,
     conditionHosts?: EnrolledAgents,
     existingCondition?: string | null,
-    shardingMode: LocationShardingMode = 'inactive',
+    shardingMode: AgentShardingMode = 'inactive',
     secretConnections?: HeartbeatVaultConfig[],
     secretStorageEnabled = true
   ): Promise<NewPackagePolicy | null> {
@@ -259,7 +254,7 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
-      if (shardingMode === 'active' || shardingMode === 'awaiting_sentinel') {
+      if (shardingMode === 'active') {
         const agentIds = conditionHosts?.agentIds ?? [];
         const isBrowser = config.type === MonitorTypeEnum.BROWSER;
         // An omitted condition runs the monitor on every agent. Browser monitors
@@ -271,16 +266,18 @@ export class SyntheticsPrivateLocation {
           // Keep a valid existing pin during edits. Health and balancing moves
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
-        } else if (eligibleAgentIds.length > 0) {
-          const assigned =
-            shardingMode === 'active' ? assignAgentById(config.id, eligibleAgentIds) : undefined;
+        } else if (eligibleAgentIds.length === 0) {
+          if (isBrowser) {
+            newPolicy.condition = UNASSIGNED_CONDITION;
+          }
+          // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        } else if (agentIds.length > 1) {
+          const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
           }
-        } else if (isBrowser) {
-          newPolicy.condition = UNASSIGNED_CONDITION;
         }
-        // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        // A single agent runs everything anyway; no pin (see toConditionUpdates).
       } else if (shardingMode === 'unknown') {
         // License unreadable: keep whatever pin exists until it can be read again.
         if (existingCondition) {
@@ -428,16 +425,6 @@ export class SyntheticsPrivateLocation {
     return privateLocations.filter((location) => locationIds.has(location.id));
   }
 
-  private async getLocationShardingMode(
-    shardingMode: AgentShardingMode
-  ): Promise<(location: { id: string; agentPolicyId: string }) => LocationShardingMode> {
-    if (shardingMode !== 'active') {
-      return () => shardingMode;
-    }
-    const isReady = await getShardSentinelReadyCheck(this.server.pluginsStart.taskManager);
-    return (location) => (isReady(location) ? 'active' : 'awaiting_sentinel');
-  }
-
   async createPackagePolicies(
     configs: PrivateConfig[],
     privateLocations: SyntheticsPrivateLocations,
@@ -470,7 +457,6 @@ export class SyntheticsPrivateLocation {
     const enrolledAgentsByLocation = needsEnrolledAgents
       ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
       : new Map<string, EnrolledAgents>();
-    const locationShardingMode = await this.getLocationShardingMode(shardingMode);
 
     for (const { config, globalParams } of configs) {
       try {
@@ -510,7 +496,7 @@ export class SyntheticsPrivateLocation {
             runOnce,
             enrolledAgents,
             undefined,
-            locationShardingMode(location),
+            shardingMode,
             secretConnections,
             secretStorageEnabled
           );
@@ -590,7 +576,6 @@ export class SyntheticsPrivateLocation {
         shardingMode === 'active'
           ? await this.getEnrolledAgents(location.agentPolicyId)
           : undefined;
-      const locationShardingMode = await this.getLocationShardingMode(shardingMode);
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -603,7 +588,7 @@ export class SyntheticsPrivateLocation {
         undefined,
         conditionHosts,
         undefined,
-        locationShardingMode(location)
+        shardingMode
         // secretConnections omitted (A1): never attach vault credentials to inspect
         // output — Fleet's inspect() compiles vars verbatim, with no secret-ization.
       );
@@ -678,7 +663,6 @@ export class SyntheticsPrivateLocation {
         ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
         : new Map<string, EnrolledAgents>();
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
-    const locationShardingMode = await this.getLocationShardingMode(shardingMode);
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -724,7 +708,7 @@ export class SyntheticsPrivateLocation {
               undefined,
               enrolledAgentsByLocation.get(privateLocation.id),
               existingCondition,
-              locationShardingMode(privateLocation),
+              shardingMode,
               secretConnections,
               secretStorageEnabled
             );
@@ -955,6 +939,7 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds,
     browserAgentIds,
     capacities,
+    pinUnpinned = true,
     signal,
   }: {
     location: { id: string; label?: string; agentPolicyId: string };
@@ -962,18 +947,18 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds?: string[];
     browserAgentIds: string[];
     capacities?: ReadonlyMap<string, number>;
+    /** False for a single-agent location: see {@link toConditionUpdates}. */
+    pinUnpinned?: boolean;
     signal: AbortSignal;
   }): Promise<RebalanceShardsResult> {
     if (healthyAgentIds.length === 0) {
       return EMPTY_REBALANCE_RESULT;
     }
     signal.throwIfAborted();
-    const pkgPolicies = (
-      await this.packagePolicyService.listByAgentPolicy({
-        agentPolicyId: location.agentPolicyId,
-        signal,
-      })
-    ).filter(({ id }) => !isShardSentinelPolicyId(id));
+    const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
+      agentPolicyId: location.agentPolicyId,
+      signal,
+    });
     if (pkgPolicies.length === 0) {
       return {
         ...EMPTY_REBALANCE_RESULT,
@@ -987,7 +972,7 @@ export class SyntheticsPrivateLocation {
       recoveryAgentIds,
       browserAgentIds,
     });
-    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id, pinUnpinned);
     const unpinnedIds = new Set(
       pkgPolicies.filter(({ condition }) => typeof condition !== 'string').map(({ id }) => id)
     );
@@ -1029,36 +1014,6 @@ export class SyntheticsPrivateLocation {
       newlyPinned,
       ...summarizeRebalance({ monitors, assignment, healthyAgentIds }),
     };
-  }
-
-  /** Creates the shard sentinel if missing; true only when this call created it. */
-  async ensureShardSentinel(agentPolicyId: string): Promise<boolean> {
-    return (
-      !(await this.packagePolicyService.hasShardSentinel(agentPolicyId)) &&
-      this.packagePolicyService.createShardSentinel(agentPolicyId)
-    );
-  }
-
-  /**
-   * Best effort: the sentinel is managed, so Fleet refuses to delete its agent
-   * policy while it exists. Never throws.
-   */
-  async deleteUnusedShardSentinel(agentPolicyId: string): Promise<void> {
-    try {
-      const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-      const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      if (!locations.some((location) => location.agentPolicyId === agentPolicyId)) {
-        await this.packagePolicyService.deleteShardSentinel(agentPolicyId);
-      }
-    } catch (e) {
-      this.server.logger.warn(
-        `Unable to remove the shard sentinel from agent policy ${agentPolicyId}: ${e.message}`
-      );
-    }
-  }
-
-  async getAgentPolicyRevision(agentPolicyId: string): Promise<number | undefined> {
-    return this.packagePolicyService.getAgentPolicyRevision(agentPolicyId);
   }
 
   async bumpAgentPolicyRevision(agentPolicyId: string): Promise<void> {

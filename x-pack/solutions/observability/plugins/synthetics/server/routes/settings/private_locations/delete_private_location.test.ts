@@ -23,7 +23,7 @@ const emptyFindResponse = { total: 0, saved_objects: [], page: 1, per_page: 0 };
 const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) => {
   (migrateLegacyPrivateLocations as jest.Mock).mockResolvedValue(undefined);
   (getPrivateLocationsAndAgentPolicies as jest.Mock).mockResolvedValue({
-    locations: [{ id: locationId, agentPolicyId: 'ap-1' }],
+    locations: [{ id: locationId }],
   });
 
   // Internal (unscoped) repository sees monitors in every space.
@@ -44,9 +44,7 @@ const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) =
 
   const routeContext = {
     savedObjectsClient,
-    syntheticsMonitorClient: {
-      privateLocationAPI: { deleteUnusedShardSentinel: jest.fn().mockResolvedValue(undefined) },
-    },
+    syntheticsMonitorClient: {},
     request: { params: { id: locationId } },
     response,
     monitorConfigRepository,
@@ -81,9 +79,6 @@ describe('deletePrivateLocationRoute', () => {
       locationId,
       { force: true }
     );
-    expect(
-      routeContext.syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel
-    ).toHaveBeenCalledWith('ap-1');
   });
 
   it('blocks deletion when a monitor in a non-accessible space still uses the location', async () => {
