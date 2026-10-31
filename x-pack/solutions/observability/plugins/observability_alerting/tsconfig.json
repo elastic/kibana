@@ -20,6 +20,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/triggers-actions-ui-plugin/test/scout/common/ui",
     "@kbn/alerting-v2-episodes-ui",
+    "@kbn/alerts-ui-shared",
     "@kbn/cases-plugin",
     "@kbn/security-plugin",
     "@kbn/kibana-utils-plugin"

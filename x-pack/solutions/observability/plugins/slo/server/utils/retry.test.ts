@@ -11,7 +11,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { ignoreAlreadyExistsAfterAmbiguousFailure, retryTransientEsErrors } from './retry';
+import {
+  REQUEST_RETRY_OPTIONS,
+  ignoreAlreadyExistsAfterAmbiguousFailure,
+  retryTransientEsErrors,
+} from './retry';
 
 const setTimeoutMock = setTimeout as jest.Mock<
   ReturnType<typeof setTimeout>,
@@ -55,8 +59,92 @@ describe('retryTransientErrors', () => {
     });
 
     expect(await retryTransientEsErrors(esCallMock)).toEqual('success');
-    expect(setTimeoutMock.mock.calls).toEqual([[2000], [4000], [8000], [16000]]);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([2000, 4000, 8000, 16000]);
     expect(esCallMock).toHaveBeenCalledTimes(5);
+  });
+
+  it('gives up after 5 retries by default', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(retryTransientEsErrors(esCallMock)).rejects.toBe(error);
+    expect(esCallMock).toHaveBeenCalledTimes(6);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([
+      2000, 4000, 8000, 16000, 32000,
+    ]);
+  });
+
+  it('uses the provided retry options', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { retryOptions: REQUEST_RETRY_OPTIONS })
+    ).rejects.toBe(error);
+    expect(esCallMock).toHaveBeenCalledTimes(3);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([1000, 2000]);
+  });
+
+  it('caps the backoff delay', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      retryTransientEsErrors(esCallMock, {
+        retryOptions: { maxRetries: 4, initialDelayMs: 1000, maxDelayMs: 3000 },
+      })
+    ).rejects.toBe(error);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([1000, 2000, 3000, 3000]);
+  });
+
+  it('does not call the operation when the signal is already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const esCallMock = jest.fn().mockResolvedValue('success');
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { signal: controller.signal })
+    ).rejects.toThrow();
+    expect(esCallMock).not.toHaveBeenCalled();
+  });
+
+  it('passes the signal to the backoff timer', async () => {
+    const controller = new AbortController();
+    const esCallMock = jest
+      .fn()
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockResolvedValue('success');
+
+    await retryTransientEsErrors(esCallMock, { signal: controller.signal });
+    expect(setTimeoutMock).toHaveBeenCalledWith(2000, undefined, { signal: controller.signal });
+  });
+
+  it('stops retrying when the signal is aborted during the backoff', async () => {
+    const controller = new AbortController();
+    const abortError = new Error('aborted');
+    setTimeoutMock.mockImplementationOnce(async () => {
+      controller.abort();
+      throw abortError;
+    });
+    const esCallMock = jest.fn().mockRejectedValue(new EsErrors.ConnectionError('foo'));
+
+    await expect(retryTransientEsErrors(esCallMock, { signal: controller.signal })).rejects.toBe(
+      abortError
+    );
+    expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry once the signal is aborted', async () => {
+    const controller = new AbortController();
+    const esCallMock = jest.fn(async () => {
+      controller.abort();
+      throw new EsErrors.ConnectionError('foo');
+    });
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { signal: controller.signal })
+    ).rejects.toThrow();
+    expect(esCallMock).toHaveBeenCalledTimes(1);
   });
 
   it('retries each supported error type', async () => {

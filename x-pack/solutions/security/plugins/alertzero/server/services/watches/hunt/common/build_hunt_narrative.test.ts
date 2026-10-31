@@ -248,6 +248,46 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
+  it('names adjudicated-out indicators in What was searched when excluded_report_iocs is set', () => {
+    expect(
+      buildHuntNarrative(
+        result({
+          excluded_report_iocs: { count: 1 },
+        }),
+        ctx
+      )
+    ).toContain('- **Not searched (adjudicated out):** 1 indicator');
+  });
+
+  it('pluralizes the adjudicated-out indicators line', () => {
+    expect(
+      buildHuntNarrative(
+        result({
+          excluded_report_iocs: { count: 2 },
+        }),
+        ctx
+      )
+    ).toContain('- **Not searched (adjudicated out):** 2 indicators');
+  });
+
+  it('omits the adjudicated-out line when excluded_report_iocs is absent', () => {
+    expect(buildHuntNarrative(result({}), ctx)).not.toContain('Not searched (adjudicated out)');
+  });
+
+  it('explains no_searchable_terms as adjudication when excluded indicators remain', () => {
+    expect(
+      buildHuntNarrative(
+        result({
+          tier1: tier1({ status: 'no_searchable_terms', resolved_iocs: [], searched_iocs: 0 }),
+          excluded_report_iocs: { count: 7 },
+        }),
+        ctx
+      )
+    ).toContain(
+      'Tier 1 had nothing to search: no eligible indicators remained (7 indicators excluded by adjudication) and the report exposed no searchable techniques.'
+    );
+  });
+
   it('names the model tiers that were unavailable when Tier 2 could not run for want of a model', () => {
     const narrative = buildHuntNarrative(
       result({
@@ -263,6 +303,24 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toContain('no model was available for the Frontier tier');
     expect(narrative).not.toContain('Efficient');
     expect(narrative).not.toContain('Balanced');
+  });
+
+  it('says the dataset-match call failed, not that a model is missing, when the skip carries a detail', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        status: 'tier1_only',
+        tier2_skipped_reason: 'no_inference',
+        tier2_skip_detail: 'connector down',
+        unavailable_model_tiers: ['efficient'],
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain(
+      'the model call that chooses where to hunt failed (connector down)'
+    );
+    expect(narrative).not.toContain('no model to choose where to hunt');
+    expect(narrative).not.toContain('no GenAI connector');
   });
 
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
@@ -316,6 +374,89 @@ describe('buildHuntNarrative', () => {
     );
 
     expect(narrative).toContain('- nothing searched: D');
+  });
+
+  it('says a retryable run with no hit leaves the report unmarked and eligible', () => {
+    const narrative = buildHuntNarrative(
+      result({ completeness: 'incomplete_retryable', completed_successfully: false }),
+      ctx
+    );
+
+    expect(narrative).toContain('the report is not marked as hunted, stays eligible');
+  });
+
+  it('says the hit of a retryable run stands, makes no eligibility claim and does not claim the write', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        tier1: hitTier1(),
+        has_confirmed_hit: true,
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('The confirmed hit stands');
+    expect(narrative).not.toContain('recorded on the report');
+    expect(narrative).not.toContain('stays eligible');
+  });
+
+  it('lists the techniques still to be searched when the run is retryable, and says they are continued', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'over budget', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+            { reason: 'collapsed', detail: 'shared', technique_id: 'T1566' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (2):** `T1059` and `T1105`.');
+    expect(narrative).toContain('while the report is still inside the sweep');
+    expect(narrative).toContain('techniques this run already searched are not repeated');
+    expect(narrative).not.toContain('`T1566`.');
+  });
+
+  it('does not promise a later search for a technique the run gave up on', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        pending_technique_ids: ['T1105'],
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'not returned', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (1):** `T1105`.');
+    expect(narrative).not.toContain('`T1059`.');
+    // The gap itself is still reported.
+    expect(narrative).toContain('not returned');
+  });
+
+  it('lists nothing to continue on a run that is not retryable', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_final',
+        tier2: tier2([], {
+          incomplete: [{ reason: 'collapsed', detail: 'shared', technique_id: 'T1566' }],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).not.toContain('Still to be searched');
   });
 
   it('carries the Tier 2 failure message when Tier 2 threw', () => {
