@@ -9,6 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
+import { createReinforcementRunRegistry } from '../decision_trees/reinforcement_runs';
 import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { decisionTreeReinforceStepDefinition } from './decision_tree_reinforce';
@@ -35,8 +36,13 @@ describe('decisionTreeReinforceStepDefinition', () => {
       stepType: 'nightshift.decisionTreeReinforce',
     } as never);
 
+  const reinforcementRuns = createReinforcementRunRegistry();
+
   const run = (input: Record<string, unknown>) =>
-    decisionTreeReinforceStepDefinition({ getAgentBuilder: () => agentBuilder }).handler(
+    decisionTreeReinforceStepDefinition({
+      getAgentBuilder: () => agentBuilder,
+      reinforcementRuns,
+    }).handler(
       createContext({
         prompt: 'Why is checkout slow?',
         response: 'Connection pool exhausted.',
@@ -115,11 +121,37 @@ describe('decisionTreeReinforceStepDefinition', () => {
     expect(first).not.toBe(second);
   });
 
+  // The submit tool only sees the run's own conversation, so this is how the trees it writes get
+  // stamped with the investigation.
+  it('ties the run to its investigation only while it runs', async () => {
+    let duringRun: string | undefined;
+    runAgent.mockImplementation(async ({ agentParams }) => {
+      duringRun = reinforcementRuns.getInvestigationId(agentParams.conversation.id);
+      return { result: { round: { response: { message: 'Persisted 1 tree' } } } };
+    });
+
+    await run({ conversation_id: 'inv-1' });
+
+    const runConversationId = runAgent.mock.calls[0][0].agentParams.conversation.id;
+    expect(duringRun).toBe('inv-1');
+    expect(reinforcementRuns.getInvestigationId(runConversationId)).toBeUndefined();
+  });
+
+  it('forgets the run when the agent fails', async () => {
+    runAgent.mockRejectedValue(new Error('model unavailable'));
+
+    await expect(run({ conversation_id: 'inv-1' })).rejects.toThrow('model unavailable');
+
+    const runConversationId = runAgent.mock.calls[0][0].agentParams.conversation.id;
+    expect(reinforcementRuns.getInvestigationId(runConversationId)).toBeUndefined();
+  });
+
   it('fails when Agent Builder has not started', async () => {
     await expect(
-      decisionTreeReinforceStepDefinition({ getAgentBuilder: () => undefined }).handler(
-        createContext({})
-      )
+      decisionTreeReinforceStepDefinition({
+        getAgentBuilder: () => undefined,
+        reinforcementRuns,
+      }).handler(createContext({}))
     ).rejects.toThrow('Agent Builder is not available');
   });
 });

@@ -52,6 +52,8 @@ interface DecisionTreeAttributes {
   node_count?: number | string;
   edge_count?: number | string;
   space_id?: string;
+  /** Versions only: the investigation whose round this version was written from. */
+  investigation_id?: string;
 }
 
 /** The head document, one per tree, holding the current markdown and merged learnings. */
@@ -94,7 +96,11 @@ export interface DecisionTreeStore {
     learnings: LearningRecord[];
     /** Evidence-node descriptions; persisted so later reads can reapply them. */
     evidenceGathererMetadata: string[];
+    /** The investigation whose round this version was written from, when there is one. */
+    investigationId?: string;
   }) => Promise<DecisionTreeDetail>;
+  /** Ids of the trees with a version written from this investigation's rounds. */
+  listTreeIdsForInvestigation: (investigationId: string) => Promise<string[]>;
   listVersions: (treeId: string) => Promise<DecisionTreeVersionSummary[]>;
   getVersion: (treeId: string, version: number) => Promise<DecisionTreeVersionDetail | undefined>;
   archive: (treeId: string) => Promise<void>;
@@ -274,6 +280,7 @@ export const createDecisionTreeStore = ({
       summary,
       learnings,
       evidenceGathererMetadata,
+      investigationId,
     }) => {
       const symptom = symptomSlugFromTreeId(treeId);
       const existing = await getHead(symptom);
@@ -306,6 +313,7 @@ export const createDecisionTreeStore = ({
           node_count: nodeCount,
           edge_count: edgeCount,
           space_id: spaceId,
+          ...(investigationId ? { investigation_id: investigationId } : {}),
         },
         learnings,
         evidence_gatherer_metadata: evidenceGathererMetadata,
@@ -350,6 +358,34 @@ export const createDecisionTreeStore = ({
 
       logger.debug(`Committed decision tree ${fullTreeId} v${nextVersion}`);
       return headToDetail(headDoc);
+    },
+
+    listTreeIdsForInvestigation: async (investigationId) => {
+      const response = await esClient.search<DecisionTreeVersionSource>(
+        {
+          index: DECISION_TREE_AI_INDEX_DEST,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: MAX_VERSIONS,
+          track_total_hits: false,
+          _source: ['attributes.tree_id'],
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'decision_tree_version' } },
+                { term: { 'attributes.investigation_id': investigationId } },
+                { term: { [SPACE_ID_FIELD]: spaceId } },
+              ],
+            },
+          },
+        },
+        { signal }
+      );
+
+      const treeIds = response.hits.hits.flatMap((hit) =>
+        hit._source?.attributes?.tree_id ? [hit._source.attributes.tree_id] : []
+      );
+      return [...new Set(treeIds)];
     },
 
     listVersions: async (treeId) => {
