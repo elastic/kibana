@@ -225,10 +225,10 @@ describe('useMitreConfiguration', () => {
   });
 
   describe('empty managed response', () => {
-    it('surfaces isError:true and empty buckets when managed returns no framework_version', () => {
-      // framework_version is undefined when the index has no documents — population has
-      // not run (e.g. ES was not ready at startup). This signal is independent of the
-      // types filter and is the correct uninitialized indicator.
+    it('treats a managed 200 with no framework_version as valid data', () => {
+      // With the 503 architecture, unavailable data (population not run, storage lost)
+      // returns 503 at the API layer. A 200 with framework_version undefined is a valid
+      // response (e.g. querying a framework with no versioned data yet).
       setupKibanaMock(true);
       mockUseFetchMitreEntitiesQuery.mockReturnValue(
         makeQueryResult({ ...mockManagedData, framework_version: undefined })
@@ -236,10 +236,11 @@ describe('useMitreConfiguration', () => {
 
       const { result } = renderHook(() => useMitreConfiguration());
 
-      expect(result.current.isError).toBe(true);
-      expect(result.current.tactics).toEqual([]);
-      expect(result.current.techniques).toEqual([]);
-      expect(result.current.subtechniques).toEqual([]);
+      expect(result.current.isError).toBe(false);
+      expect(result.current.tactics).toEqual(mockManagedData.tactics);
+      expect(result.current.techniques).toEqual(mockManagedData.techniques);
+      expect(result.current.subtechniques).toEqual(mockManagedData.subtechniques);
+      expect(result.current.frameworkVersion).toBeUndefined();
       expect(result.current.isLoading).toBe(false);
     });
 

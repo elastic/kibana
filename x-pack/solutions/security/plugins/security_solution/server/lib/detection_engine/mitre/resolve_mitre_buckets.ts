@@ -25,22 +25,17 @@ export const resetResolveMitreBucketsCache = (): void => {
 
 /**
  * Returns MITRE entity summary buckets for one framework from the managed data client when
- * one is given, otherwise from the cached legacy blob (enterprise only). Throws when the managed
- * collection is empty (population not finished) so callers hit their existing
- * degraded-mode handling instead of treating every rule's MITRE IDs as invalid.
+ * one is given, otherwise from the cached legacy blob (enterprise only). The data client throws
+ * `MitreDataUnavailableError` when data for the framework is missing or unavailable; it
+ * propagates so callers hit their existing degraded-mode handling instead of treating every
+ * rule's MITRE IDs as invalid.
  */
 export const resolveMitreBuckets = async (
   mitreDataClient?: MitreAttackDataClient,
   framework: MitreFramework = DEFAULT_MITRE_FRAMEWORK
 ): Promise<MitreEntitySummaryBuckets> => {
   if (mitreDataClient) {
-    const collection = await mitreDataClient.list({ framework });
-    // An empty collection means SO population has not finished. Throw rather than
-    // return it, otherwise every rule's MITRE IDs would look invalid to callers.
-    if (collection.tactics.length === 0 && collection.techniques.length === 0) {
-      throw new Error(`Managed MITRE data is not initialized (framework: ${framework})`);
-    }
-    return collection;
+    return mitreDataClient.list({ framework });
   }
 
   // The legacy blob is ATT&CK Enterprise only, regardless of what the default framework is.
