@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type {
   CreateRuleData,
   CreateRuleDataInput,
@@ -498,3 +498,18 @@ export function transformRuleSoAttributesToRuleApiResponse(
     updated_at: attrs.updatedAt,
   };
 }
+
+/** Server-managed {@link RuleResponse} fields that a restore never takes from a snapshot. */
+const NON_RESTORABLE_SNAPSHOT_FIELDS = [
+  'id',
+  'version',
+  'enabled',
+  'created_by',
+  'created_at',
+  'updated_by',
+  'updated_at',
+] as const;
+
+/** Returns the configuration part of a change-history snapshot, shaped as a PUT rule body. */
+export const toRestoreRuleData = (snapshot: Record<string, unknown>): Record<string, unknown> =>
+  omit(snapshot, NON_RESTORABLE_SNAPSHOT_FIELDS);

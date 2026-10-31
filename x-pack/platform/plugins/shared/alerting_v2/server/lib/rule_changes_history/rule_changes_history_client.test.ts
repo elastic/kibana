@@ -10,6 +10,7 @@ import {
   getRuleChangeHistoryEventParamsSchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
+  restoreRuleChangeQuerySchema,
   ruleChangeHistoryDetailSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -251,6 +252,76 @@ describe('RuleChangesHistoryClient', () => {
       expect(changeHistory.getHistory).not.toHaveBeenCalled();
     });
   });
+
+  describe('getRuleChangeSnapshot', () => {
+    it('returns the rule id and snapshot without fetching neighbouring entries', async () => {
+      const changeHistory = createChangeHistoryMock();
+      changeHistory.getEvent.mockResolvedValue(
+        createDocument({ id: 'event-1', snapshot: { id: 'rule-1', metadata: { name: 'A' } } })
+      );
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      await expect(client.getRuleChangeSnapshot({ eventId: 'event-1' })).resolves.toEqual({
+        ruleId: 'rule-1',
+        snapshot: { id: 'rule-1', metadata: { name: 'A' } },
+      });
+      expect(changeHistory.getEvent).toHaveBeenCalledWith('default', 'event-1');
+      expect(changeHistory.getHistory).not.toHaveBeenCalled();
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND when the event is missing', async () => {
+      const changeHistory = createChangeHistoryMock();
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      await expect(client.getRuleChangeSnapshot({ eventId: 'missing' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND when the event belongs to another object type', async () => {
+      const changeHistory = createChangeHistoryMock();
+      const document = createDocument({ id: 'event-1' });
+      changeHistory.getEvent.mockResolvedValue({
+        ...document,
+        object: { ...document.object, type: 'workflow' },
+      });
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      await expect(client.getRuleChangeSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+    });
+
+    it('throws RULE_CHANGE_HISTORY_UNAVAILABLE when the data stream is not initialized', async () => {
+      const changeHistory = createChangeHistoryMock();
+      changeHistory.isInitialized.mockReturnValue(false);
+
+      const client = new RuleChangesHistoryClient(
+        changeHistory as unknown as ChangeHistoryClient,
+        'default'
+      );
+
+      await expect(client.getRuleChangeSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
+        output: { statusCode: 503 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE },
+      });
+      expect(changeHistory.getEvent).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('rule change history schemas', () => {
@@ -299,5 +370,15 @@ describe('rule change history schemas', () => {
     expect(getRuleChangeHistoryEventParamsSchema.parse({ change_id: 'event-1' })).toEqual({
       change_id: 'event-1',
     });
+  });
+
+  it('accepts an optional numeric current_version restore query and rejects unknown keys', () => {
+    expect(restoreRuleChangeQuerySchema.parse({})).toEqual({});
+    expect(restoreRuleChangeQuerySchema.parse({ current_version: '3' })).toEqual({
+      current_version: 3,
+    });
+    expect(restoreRuleChangeQuerySchema.safeParse({ current_version: '0' }).success).toBe(false);
+    expect(restoreRuleChangeQuerySchema.safeParse({ current_version: 'abc' }).success).toBe(false);
+    expect(restoreRuleChangeQuerySchema.safeParse({ version: '3' }).success).toBe(false);
   });
 });

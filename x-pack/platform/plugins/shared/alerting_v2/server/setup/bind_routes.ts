@@ -64,6 +64,7 @@ import { ListActionPolicyExecutionsRoute } from '../routes/execution_history/lis
 import { ListRuleExecutionsRoute } from '../routes/execution_history/list_rule_executions_route';
 import { ListRuleChangeHistoryRoute } from '../routes/rule_change_history/list_rule_change_history_route';
 import { GetRuleChangeHistoryEventRoute } from '../routes/rule_change_history/get_rule_change_history_event_route';
+import { RestoreRuleChangeRoute } from '../routes/rule_change_history/restore_rule_change_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
@@ -134,6 +135,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(ListRuleExecutionsRoute);
   bind(Route).toConstantValue(ListRuleChangeHistoryRoute);
   bind(Route).toConstantValue(GetRuleChangeHistoryEventRoute);
+  bind(Route).toConstantValue(RestoreRuleChangeRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 
