@@ -74,6 +74,9 @@ the job's checkout, runs check and build, then uploads:
 - `target/isomer-studio.tar.gz`: the complete static site.
 - `target/junit/isomer-studio.xml`: the check report.
 
+Unrelated PRs, including changes only to the root dependency manifests or
+lockfile, do not trigger a Studio build.
+
 The site's `build.json` records the actual checkout `sourceSha`, dirty status,
 the exact Studio version, and Buildkite build/job identity. `requestedCommit`
 records Buildkite's input separately from the actual SHA (which can be a merge

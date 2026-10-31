@@ -470,6 +470,21 @@ describe('pull_request pipeline generation', () => {
     expect(await emitted).not.toContain('Build shared Isomer Studio');
   });
 
+  it.each(['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml'])(
+    'does not build Studio for an unrelated dependency change in %s',
+    async (filename) => {
+      const changes = [{ filename }];
+      mockGetPrChangesCached.mockResolvedValue(changes);
+      mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+        realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+      );
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      expect(await emitted).not.toContain('Build shared Isomer Studio');
+    }
+  );
+
   it('emits storybooks when pnpm-lock.yaml changes', async () => {
     const changes = [{ filename: 'pnpm-lock.yaml' }];
     mockGetPrChangesCached.mockResolvedValue(changes);

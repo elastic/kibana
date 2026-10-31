@@ -202,7 +202,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/isomer\//,
         /^\.buildkite\/scripts\/steps\/isomer_studio\.sh$/,
         /^\.buildkite\/pipeline-utils\/step-library\/steps\/isomer_studio\.ts$/,
-        /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/,
       ])
     ) {
       pipeline.push(renderSteps(isomerStudio(), cancelOnGate));

@@ -1827,7 +1827,6 @@ exports[`pull_request pipeline scenarios storybook lockfile path 1`] = `
   "ci_stats_ready",
   "report_package_metrics",
   "check",
-  "isomer-studio",
   "check_oas_snapshot",
   "check_api_contracts",
   "storybooks",
