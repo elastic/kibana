@@ -904,10 +904,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerWorkflowSteps(plugins.workflowsExtensions);
       registerEndpointWorkflowSteps(plugins.workflowsExtensions, {
         experimentalFeatures: config.experimentalFeatures,
+        analytics: core.analytics,
         getInternalEsClient: async () => {
           const [coreStart] = await core.getStartServices();
           return coreStart.elasticsearch.client.asInternalUser;
         },
+        endpointAppContextService: this.endpointAppContextService,
       });
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
