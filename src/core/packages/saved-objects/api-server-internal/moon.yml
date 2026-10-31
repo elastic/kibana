@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/saved-objects/api-server-internal
 dependsOn:
+  - '@kbn/access-control'
   - '@kbn/config-schema'
   - '@kbn/es-query'
   - '@kbn/core-elasticsearch-client-server-internal'

@@ -143,6 +143,7 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-spaces-common'
+  - '@kbn/access-control'
 tags:
   - plugin
   - prod

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/actions
 dependsOn:
+  - '@kbn/access-control'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/human-readable-id'
@@ -71,6 +72,7 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/core-security-server'
   - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/core-security-server-mocks'
 tags:
   - plugin
   - prod
@@ -78,6 +80,7 @@ tags:
   - shared
   - jest-unit-tests
   - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - server/**/*

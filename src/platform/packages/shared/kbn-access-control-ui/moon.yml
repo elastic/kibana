@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/core-http-browser'
   - '@kbn/core-notifications-browser'
+  - '@kbn/ui-callout'
   - '@kbn/core-http-browser-mocks'
 tags:
   - shared-browser
