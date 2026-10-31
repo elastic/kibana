@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/saved-objects/api-server
 dependsOn:
   - '@kbn/core-saved-objects-common'
+  - '@kbn/access-control'
 tags:
   - shared-server
   - package
