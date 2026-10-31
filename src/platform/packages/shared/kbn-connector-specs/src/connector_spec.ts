@@ -383,6 +383,13 @@ export interface AuthTypeDef {
     fields?: Record<string, z.ZodType>;
   };
 }
+export interface ConnectorSandbox {
+  /** Fixed hostnames the connector calls, e.g. `api.github.com`: lowercase, no scheme or port. */
+  hosts?: readonly string[];
+  /** Config fields holding a URL; the host of each configured URL is added to `hosts`. */
+  hostsFromConfig?: readonly string[];
+}
+
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
@@ -398,6 +405,11 @@ export interface ConnectorSpec {
   validateUrls?: {
     fields?: string[];
   };
+
+  // Hosts a sandbox command may send this connector's auth headers to. Required when an
+  // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used
+  // from the sandbox.
+  sandbox?: ConnectorSandbox;
 
   policies?: ConnectorPolicies;
 

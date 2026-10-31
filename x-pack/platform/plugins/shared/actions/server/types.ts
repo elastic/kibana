@@ -291,6 +291,11 @@ export interface ActionTypeCoreFields<
     logger: Logger;
   }) => Record<string, string> | Promise<Record<string, string>>;
   /**
+   * Hosts a sandbox command may send this connector's auth headers to. Spec-backed types derive
+   * them from spec.sandbox; stack connectors implement it from their own config.
+   */
+  getSandboxHosts?: (args: { config: Record<string, unknown> }) => readonly string[];
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute

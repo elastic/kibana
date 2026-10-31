@@ -43,6 +43,10 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
   },
 
+  sandbox: {
+    hostsFromConfig: ['apiUrl'],
+  },
+
   schema: z.object({
     apiUrl: z.string().describe('API URL'),
   }),
