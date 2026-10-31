@@ -9,11 +9,14 @@ import type {
   AttachmentFormatContext,
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
+import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import deepEqual from 'fast-deep-equal';
 import { workflowTools } from '../../common/constants';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -37,6 +40,22 @@ const workflowYamlDataSchema = z.object({
 type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
 
 const workflowYamlOriginSchema = z.string().describe('The workflow ID to resolve');
+
+const areWorkflowYamlsEquivalent = (left: string, right: string): boolean => {
+  const parsedLeft = parseYamlToJSONWithoutValidation(left);
+  const parsedRight = parseYamlToJSONWithoutValidation(right);
+
+  if (
+    parsedLeft.success &&
+    parsedLeft.document.errors.length === 0 &&
+    parsedRight.success &&
+    parsedRight.document.errors.length === 0
+  ) {
+    return deepEqual(parsedLeft.json, parsedRight.json);
+  }
+
+  return left.trim() === right.trim();
+};
 
 const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -62,6 +81,29 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     const workflow = await api.getWorkflow(origin, context.spaceId);
     if (!workflow) return undefined;
     return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
+  },
+  isStale: async (
+    attachment: VersionedAttachment<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlData>,
+    context: AttachmentResolveContext
+  ): Promise<boolean> => {
+    if (!attachment.origin || !attachment.origin_snapshot_at) {
+      return false;
+    }
+
+    const workflow = await api.getWorkflow(attachment.origin, context.spaceId);
+    if (
+      !workflow ||
+      Date.parse(workflow.lastUpdatedAt) <= Date.parse(attachment.origin_snapshot_at)
+    ) {
+      return false;
+    }
+
+    const latestVersion = getLatestVersion(attachment);
+    if (!latestVersion) {
+      return false;
+    }
+
+    return !areWorkflowYamlsEquivalent(workflow.yaml, latestVersion.data.yaml);
   },
   format: (attachment: { data: WorkflowYamlData }, context: AttachmentFormatContext) => {
     const { data } = attachment;
