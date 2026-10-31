@@ -16,6 +16,7 @@ import {
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 import {
   buildEntityFlyoutV2NavigationState,
+  buildEntityRightPanel,
   getAgentBuilderLastAgentIdForSecurityOpenChat,
   getHostNameForHostDetailsUrl,
   getServiceNameForServiceDetailsUrl,
@@ -194,6 +195,16 @@ describe('entity_explore_navigation', () => {
           scopeId: 'agent-builder-entity-card',
           origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
         },
+      ]);
+    });
+
+    it('opens a resolution group in resolved mode', () => {
+      const right = buildEntityRightPanel(
+        { identifierType: 'user', identifier: 'alice', entityStoreId: 'user:alice' },
+        'resolved'
+      );
+      expect(right && buildEntityFlyoutV2NavigationState({ preview: [], right })).toEqual([
+        expect.objectContaining({ kind: 'user', entityId: 'user:alice', mode: 'resolved' }),
       ]);
     });
 

@@ -58,7 +58,11 @@ const buildRiskHistoryFlyout = (
     identifier: data.identifier,
     entityStoreId: data.entityStoreId,
   };
-  const right = buildEntityRightPanel(identifier);
+  // A resolution group's history opens the group, so the flyout's risk matches the chart.
+  const right = buildEntityRightPanel(
+    identifier,
+    data.scoreType === 'resolution' ? 'resolved' : undefined
+  );
   if (!right) {
     return null;
   }
