@@ -304,7 +304,7 @@ module.exports = {
       files: [
         'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/{significant_events_app,streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
@@ -408,12 +408,7 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
       },
@@ -465,12 +460,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
       },
     },
@@ -504,7 +494,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react/jsx-no-bind': 'error',
       },
     },
     {
@@ -694,7 +683,6 @@ module.exports = {
         ],
         // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
       },
     },
     {
@@ -707,7 +695,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react/jsx-no-bind': 'error',
       },
     },
 
@@ -810,12 +797,7 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
         'import/order': [

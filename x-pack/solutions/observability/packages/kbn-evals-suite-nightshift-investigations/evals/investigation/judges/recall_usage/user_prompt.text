@@ -1,0 +1,19 @@
+## Question (context only)
+{{{question}}}
+
+## Cortex files the agent opened
+{{{cortexReads}}}
+
+## Memory files the agent opened
+{{{memoryReads}}}
+
+## Final report (conclusion, hypotheses, recommendations)
+{{{answer}}}
+
+## Report's own selected evidence
+{{{evidence}}}
+
+## Tool-call trajectory (everything the agent called, in order)
+{{{trajectory}}}
+
+Judge the cortex influence and which memories the final report cites, then call the `score` tool.

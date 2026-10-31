@@ -29,6 +29,14 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID =
   'system-security-attack-discovery-review';
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
   'system-security-attack-discovery-batched-generation';
+/**
+ * The `generation_source` the Worker's batched generation passes to
+ * `security.attack-discovery.run`. It contributes to the attack hash, so the
+ * Worker's attacks never dedupe against a manual Attack Discovery run by the same
+ * user. YAML cannot import this: keep the literal in
+ * `attack_discovery_batched_generation.yaml` equal to it (a test checks).
+ */
+export const ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE = 'watch_floor_ad_worker';
 export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID =
   'system-security-attack-discovery-fp-tp-analysis';
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
@@ -54,13 +62,47 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
  * Version 11 raises the generation budget to 12h and forwards the prorated alert
  * cap. The YAML change already rolls out through `definitionHash`; the bump is
  * the deliberate signal of that rollout.
+ *
+ * Version 12 marks the worker billable.
+ *
+ * Version 13 passes `tag_fp_chain_alerts` so a continuation attached to an
+ * Investigation already closed as a false positive is tagged `az:ad_fp_chain`
+ * and acknowledged, instead of left open.
+ *
+ * Version 14 passes `tag_in_review_alerts` so a continuation of an open
+ * Investigation with no retiring verdict is tagged `az:ad_in_review` and left
+ * unacknowledged until the review decides.
+ *
+ * Version 15 passes the worker's schedule interval as generation's lookback.
+ *
+ * Version 16 stops passing `tag_in_review_alerts`. The next scheduled tick does
+ * not re-read this tick's alerts, so an open review attaches without a tag.
+ *
+ * Version 17 passes `autonomy` into the attach workflow, so a review started
+ * after a missed attach keeps this worker's autonomy.
+ *
+ * Version 18 requires `schedule_interval`. Generation uses it as the lookback,
+ * so a hand run that omits it fails here instead of passing an empty duration.
+ *
+ * Version 19 keeps that lookback and relies on generation reading one minute
+ * further, so a tick covers the seam with the previous one. A tick that does
+ * not finish is not retried.
+ *
+ * Version 20 passes `fingerprint_pending`. An attach whose Investigation is
+ * not readable yet writes the continuation's alert ids itself, after the wait.
+ *
+ * Version 21 passes the fields a stale attach uses to write its own fingerprint
+ * when the Investigation has closed, expired, or failed since the match.
+ *
+ * Version 22 passes `retarget_if_missing`. A failed Investigation read waits,
+ * but only a confirmed 404 may retarget the fingerprint after that wait.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 12,
+  version: 22,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -92,14 +134,57 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  * positive. A match that is only SYSTEM, Administrator, or root on one host
  * is reviewed on its own.
  *
+ * Version 15 marks the review billable.
+ *
  * Version 16 journals impact as separate host and user counts from this attack.
+ *
+ * Version 17 acknowledges and tags `az:ad_fp_chain` the detection alerts behind a
+ * false-positive attack, without closing them.
+ *
+ * Version 18 retires continuation alerts recorded on the fingerprint, replaces
+ * `az:ad_in_review` with the verdict tag, writes `az:ad_fp_chain` when an analyst
+ * dismisses the proposal as a false positive, and removes the interim tag when
+ * analysis fails or the proposal expires.
+ *
+ * Version 19 releases continuations that arrived while the gate was parked.
+ * Approval swaps `az:ad_in_review` for `az:ad_correlated` and acknowledges the
+ * alerts still open. Any other dismissal removes the interim tag and leaves
+ * those alerts open.
+ *
+ * Version 20 limits both fingerprint reads to the executing space. The index is
+ * shared, and the Investigation id has no space component.
+ *
+ * Version 21 drops `az:ad_in_review`. A verdict still tags and acknowledges.
+ * Approval still tags continuations that arrived during the gate
+ * `az:ad_correlated` and acknowledges the ones still open. A false-positive
+ * dismissal still writes `az:ad_fp_chain` without a new acknowledgement.
+ *
+ * Version 22 journals an attach that waited 15 minutes and never found its
+ * Investigation. That attack is reviewed on its own, and the note names the
+ * Investigation it could not join.
+ *
+ * Version 23 tags and acknowledges at the decision. A false positive still
+ * retires its alerts at the verdict, under `az:ad_fp_chain`. A true positive
+ * or inconclusive waits for the gate. Approval and any dismissal acknowledge
+ * the alerts still open. A false-positive dismissal writes both tags. An
+ * expired proposal or a failed analysis writes neither, and the Investigation
+ * stays open. A later attack does not attach to a closed Investigation, an
+ * expired proposal, or a failed analysis.
+ *
+ * Version 24 writes `GATE FAILED` when the escalation gate step fails. A later
+ * match treats that the same as a failed analysis. A cancel or a restart still
+ * writes nothing.
+ *
+ * Version 25 tags and acknowledges a gate decision before `close_attack_declined`.
+ * That step fails the run when the attack close fails, and the alerts are still
+ * retired.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 16,
+  version: 25,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -121,15 +206,61 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * treats a missing Investigation as in flight. The YAML change rolls out
  * through `definitionHash`; the bump is the deliberate signal.
  *
+ * Version 6 marks the attach workflow billable.
+ *
  * Version 7 journals impact as separate host and user counts from this attack,
  * merged into the Investigation's impact.
+ *
+ * Version 8 tags `az:ad_fp_chain` and acknowledges the open alerts when the
+ * matched Investigation is already a closed false positive, and journals that
+ * retirement.
+ *
+ * Version 9 tags `az:ad_in_review` and does not acknowledge when the matched
+ * Investigation is still open and has no retiring verdict.
+ *
+ * Version 10 reads the tagged alerts back and journals those counts, including
+ * zero, and says a closed false positive is already closed rather than still
+ * under investigation.
+ *
+ * Version 11 re-reads the Investigation immediately before writing
+ * `az:ad_in_review` and skips that tag when the review has since failed,
+ * expired, closed, or been handed off. An unreadable Investigation stays
+ * untagged.
+ *
+ * Version 12 drops that interim tag. An open review attaches its evidence and
+ * leaves the alerts untagged. A closed false positive and a handed-off or
+ * otherwise closed review still tag and acknowledge.
+ *
+ * Version 13 starts a review when the Investigation is still missing after the
+ * 15-minute wait, and skips the attachment writes. The review journals the miss.
+ *
+ * Version 14 keeps a pending continuation's alert ids off the fingerprint until
+ * that wait succeeds. If the Investigation is still missing, the existing
+ * fingerprint is retargeted at this attack. A second fingerprint is not created.
+ *
+ * Version 15 re-reads the Investigation before attaching. A close, an expiry,
+ * or a failed analysis or gate starts a review and writes that review's
+ * fingerprint. A handoff found by the re-read tags `az:ad_correlated`.
+ *
+ * Version 16 retargets only while the fingerprint still points at the earlier
+ * Investigation. Alert ids, expiry, and the last alert become this attack's.
+ *
+ * Version 17 retargets only when the matcher confirmed the Investigation was
+ * missing. A privilege error or a 5xx starts a review and leaves the fingerprint.
+ *
+ * Version 18 writes that review's own fingerprint when the failed read's wait
+ * still fails. A confirmed 404 still retargets and does not create a second one.
+ *
+ * Version 19 leaves a fingerprint younger than 15 minutes in place. The wait
+ * can end before that window, and retargeting then would take a review that
+ * may still be starting.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 19,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -144,7 +275,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * run step's ground-truth gate, so false-positive triage happens only in the
  * review's FP/TP analysis. Version 5 skips alerts the review tagged
  * `az:ad_correlated`. Version 6 gives the child a 12h workflow timeout and
- * limits retrieval to the prorated alert cap. Each bump is a deliberate
+ * limits retrieval to the prorated alert cap. Version 7 marks batched generation
+ * billable. Version 8 also skips `az:ad_fp_chain`, the tag a false-positive
+ * review writes. Version 9 also skips `az:ad_in_review`, the interim tag a
+ * continuation used to write before the verdict. Version 10 records that the
+ * runner supplies the schedule interval as `lookback`. Version 11 drops
+ * `az:ad_in_review` from the exclusion list: the scheduled worker no longer
+ * writes it. Version 12 reads one minute past `lookback`, so a tick covers
+ * the seam with the previous one. Version 13 passes `generation_source`, so
+ * the Worker's attacks stop deduplicating against a manual run by the same
+ * user. Each bump is a deliberate
  * rollout signal; the YAML change alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
@@ -152,7 +292,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 13,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

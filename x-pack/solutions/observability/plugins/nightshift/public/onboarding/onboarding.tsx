@@ -14,13 +14,12 @@ import {
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NightshiftHeader } from '../app/header';
-import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
+import { useFlyoutShareUrlCustomAction } from '../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
@@ -35,7 +34,11 @@ import {
   type OnboardingStepId,
   type OnboardingStepState,
 } from './onboarding_steps';
-import { OnboardingEnableStep } from './enable_step';
+import { NightshiftSetupPrompt } from '../service_account/nightshift_setup_prompt';
+import {
+  isNightshiftSetUp,
+  useInvestigatorServiceAccount,
+} from '../service_account/use_investigator_service_account';
 import { OnboardingConnectStep, type ConnectSubStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
@@ -58,10 +61,6 @@ const HERO_TITLES: Record<OnboardingStepId, string> = {
     defaultMessage: 'Create first automation',
   }),
 };
-
-const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
-  defaultMessage: 'Enable Elastic nightshift',
-});
 
 const PROCEED_LABEL = i18n.translate('xpack.nightshift.onboarding.proceedButton', {
   defaultMessage: 'Proceed',
@@ -88,12 +87,15 @@ export function NightshiftOnboarding({
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
+  // The enable step binds the space's service accounts and installs the agent in one click.
+  const serviceAccount = useInvestigatorServiceAccount();
   const startSuggestions = useStartOnboardingSuggestions();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
   const execution = data?.execution;
-  // Step 1 is done once the investigation agent is installed in the space.
-  const isEnabled = data?.agent_installed === true;
+  // Step 1 is done once the space is bound to its service accounts and the agent is installed:
+  // one click does both, and removing the binding brings the step back.
+  const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
   // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
 
@@ -326,13 +328,7 @@ export function NightshiftOnboarding({
           {isInitialLoading ? (
             <EuiLoadingSpinner size="l" />
           ) : step === 'enable' ? (
-            <>
-              <EuiTitle size="s">
-                <h3>{ENABLE_SECTION_TITLE}</h3>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <OnboardingEnableStep />
-            </>
+            <NightshiftSetupPrompt status={serviceAccount.data} />
           ) : step === 'connect' || !execution ? (
             <OnboardingConnectStep subStep={connectSubStep} />
           ) : step === 'investigate' || !latestInvestigation ? (

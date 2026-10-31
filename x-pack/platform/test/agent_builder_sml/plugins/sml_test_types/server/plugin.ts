@@ -12,6 +12,10 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import { SML_TEST_GATED_FEATURE_ID, SML_TEST_GATED_KI_TYPE } from '../common/constants';
 import { smlTestTypes } from './sml_types';
+import {
+  registerServiceAccountBindingRoute,
+  type StartDependencies,
+} from './service_account_binding_route';
 
 export interface SetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -19,8 +23,15 @@ export interface SetupDependencies {
   features: FeaturesPluginSetup;
 }
 
-export class SmlTestTypesPlugin implements Plugin<void, void, SetupDependencies> {
-  setup(core: CoreSetup, { agentBuilder, agentBuilderSml, features }: SetupDependencies) {
+export class SmlTestTypesPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
+  setup(
+    core: CoreSetup<StartDependencies>,
+    { agentBuilder, agentBuilderSml, features }: SetupDependencies
+  ) {
+    registerServiceAccountBindingRoute(core);
+
     for (const definition of smlTestTypes) {
       agentBuilderSml.registerType(definition);
     }
