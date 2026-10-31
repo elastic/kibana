@@ -50,6 +50,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // observable writes are mirrored to the cases-owned observables index
     loadTestFile(require.resolve('./internal/observables_index'));
     loadTestFile(require.resolve('./internal/observables_sync'));
+    // the observables of a case are listed a page at a time
+    loadTestFile(require.resolve('./internal/observables_find'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
 

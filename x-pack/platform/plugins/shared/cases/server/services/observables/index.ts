@@ -6,8 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { StorageTransportOptions } from '@kbn/storage-adapter';
+import type { FindObservablesSortField, FindObservablesSortOrder } from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
+import { buildObservablesSort, toObservable } from './find_observables';
 import { generateObservableDocumentId } from './observable_id';
 import type {
   ObservableDocument,
@@ -23,6 +26,12 @@ export type {
   ObservablesStorageClient,
 } from './observables_index';
 export { generateObservableDocumentId } from './observable_id';
+export {
+  decodeObservablesCursor,
+  encodeObservablesCursor,
+  pageCaseFieldObservables,
+} from './find_observables';
+export type { ObservablesCursor } from './find_observables';
 export { ObservablesStorageMode } from './storage_mode';
 export type { ObservablesReadSource } from './storage_mode';
 
@@ -57,6 +66,24 @@ interface SyncCaseArgs extends CaseScope {
 
 interface DeleteCaseDocumentsArgs extends CaseScope {
   signal?: AbortSignal;
+}
+
+interface FindObservablesArgs extends CaseScope {
+  owner: string;
+  typeKeys?: string[];
+  sortField: FindObservablesSortField;
+  sortOrder: FindObservablesSortOrder;
+  perPage: number;
+  /** The sort values of the last observable of the previous page. */
+  searchAfter?: SortResults;
+}
+
+export interface FindObservablesResult {
+  observables: Observable[];
+  /** The number of observables of the case that match the filters. */
+  total: number;
+  /** Where the next page starts. Absent on the last page. */
+  searchAfter?: SortResults;
 }
 
 interface ListCaseIdsArgs {
@@ -265,6 +292,52 @@ export class ObservablesService {
     }
 
     return { created, updated, deleted };
+  }
+
+  /**
+   * One page of the observables of a case, read from the index. Every query is limited to the case, its
+   * space and its owner, so the caller must have authorized the case first: the index never decides
+   * who may see what.
+   */
+  public async findObservables({
+    caseId,
+    spaceId,
+    owner,
+    typeKeys,
+    sortField,
+    sortOrder,
+    perPage,
+    searchAfter,
+  }: FindObservablesArgs): Promise<FindObservablesResult> {
+    const response = await this.storageClient.search({
+      // One more than a page, to know whether a next page exists without asking for a count.
+      size: perPage + 1,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { case_id: caseId } },
+            { term: { space_id: spaceId } },
+            { term: { owner } },
+            ...(typeKeys && typeKeys.length > 0 ? [{ terms: { type_key: typeKeys } }] : []),
+          ],
+        },
+      },
+      sort: buildObservablesSort({ sortField, sortOrder }),
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    });
+
+    const { hits, total } = response.hits;
+    const page = hits.slice(0, perPage);
+    const lastHit = page[page.length - 1];
+
+    return {
+      observables: page.flatMap(({ _id, _source }) =>
+        _id && _source ? [toObservable({ id: _id, document: _source })] : []
+      ),
+      total: typeof total === 'number' ? total : total?.value ?? 0,
+      searchAfter: hits.length > perPage ? lastHit?.sort : undefined,
+    };
   }
 
   /** Deletes every document of a case, returning how many were found. */
