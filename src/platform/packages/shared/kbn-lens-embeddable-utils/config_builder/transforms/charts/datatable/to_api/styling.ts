@@ -13,6 +13,7 @@ import {
   LENS_DATAGRID_DENSITY,
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
 } from '@kbn/lens-common';
 import { parseTransposeId } from '@kbn/transpose-utils';
 import type { DatatableConfig } from '../../../../schema';
@@ -145,6 +146,22 @@ function parseSortingToAPI(
   };
 }
 
+/**
+ * The API only accepts the page sizes the datatable offers, so a stored size outside them is
+ * mapped to the closest one, rounding up when it is halfway between two.
+ */
+export function getClosestPageSize(
+  size: number
+): (typeof LENS_DATATABLE_PAGE_SIZE_OPTIONS)[number] {
+  return LENS_DATATABLE_PAGE_SIZE_OPTIONS.reduce((closest, option) => {
+    const distance = Math.abs(option - size);
+    const closestDistance = Math.abs(closest - size);
+    return distance < closestDistance || (distance === closestDistance && option > closest)
+      ? option
+      : closest;
+  });
+}
+
 export function convertStylingToAPIFormat(
   visualization: DatatableVisualizationState,
   columnIdMapping: ColumnIdMapping
@@ -154,15 +171,9 @@ export function convertStylingToAPIFormat(
   const densityAPI = parseDensityToAPI(visualization);
   const sortByAPI = parseSortingToAPI(sorting, columnIdMapping);
 
-  const isValidPagingSize = (size: number): size is 10 | 20 | 30 | 50 | 100 => {
-    return [10, 20, 30, 50, 100].includes(size);
-  };
-
   const styling = {
     ...(densityAPI ? { density: densityAPI } : {}),
-    ...(paging && paging.enabled
-      ? { paging: isValidPagingSize(paging.size) ? paging.size : 10 }
-      : {}),
+    ...(paging && paging.enabled ? { paging: getClosestPageSize(paging.size) } : {}),
     ...(sortByAPI ? { sort_by: sortByAPI } : {}),
     ...(visualization.showRowNumbers != null
       ? { row_numbers: { visible: visualization.showRowNumbers } }

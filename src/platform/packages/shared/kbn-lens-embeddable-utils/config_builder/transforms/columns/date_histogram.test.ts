@@ -15,6 +15,7 @@ import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiDateHistogramOperation } from '../../schema/bucket_ops';
 import { bucketDateHistogramOperationSchema } from '../../schema/bucket_ops';
 import {
+  LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
   LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT,
@@ -29,6 +30,7 @@ describe('Date Histogram Transforms', () => {
         suggested_interval: '1d',
         include_empty_rows: LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
         use_original_time_range: LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
+        drop_partial_intervals: LENS_DATE_HISTOGRAM_DROP_PARTIALS_DEFAULT,
       };
 
       const expected: DateHistogramIndexPatternColumn = {

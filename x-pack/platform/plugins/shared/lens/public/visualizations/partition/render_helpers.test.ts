@@ -7,7 +7,11 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
-import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
+import {
+  checkTableForContainsSmallValues,
+  getLegendStats,
+  stripUnsupportedLegendStats,
+} from './render_helpers';
 import type { LensPartitionLayerState } from '@kbn/lens-common';
 import { PieChartTypes } from '../../../common/constants';
 import { LegendValue } from '@elastic/charts';
@@ -96,6 +100,77 @@ describe('render helpers', () => {
       ).toEqual([LegendValue.Value]);
 
       expect(getLegendStats({} as LensPartitionLayerState, PieChartTypes.PIE)).toEqual(undefined);
+    });
+
+    it('should show at most one stat', () => {
+      expect(
+        getLegendStats(
+          { legendStats: [LegendValue.Value, LegendValue.Value] } as LensPartitionLayerState,
+          PieChartTypes.WAFFLE
+        )
+      ).toEqual([LegendValue.Value]);
+    });
+
+    it('should ignore stats from other charts that the partition legend cannot render', () => {
+      const xyStats = [LegendValue.Average, LegendValue.Max, LegendValue.Percent] as LegendValue[];
+
+      expect(
+        getLegendStats({ legendStats: xyStats } as LensPartitionLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([LegendValue.Value]);
+
+      expect(
+        getLegendStats(
+          { legendStats: [LegendValue.Value, ...xyStats] } as LensPartitionLayerState,
+          PieChartTypes.WAFFLE
+        )
+      ).toEqual([LegendValue.Value]);
+    });
+  });
+
+  describe('#stripUnsupportedLegendStats', () => {
+    it('should remove every stat for shapes without legend stats', () => {
+      const layer = { layerId: 'l1', legendStats: [LegendValue.Value] } as LensPartitionLayerState;
+
+      expect(stripUnsupportedLegendStats(layer, PieChartTypes.PIE)).toEqual({ layerId: 'l1' });
+    });
+
+    it('should keep only the supported stats for waffle', () => {
+      const layer = {
+        layerId: 'l1',
+        legendStats: [LegendValue.Value, LegendValue.Average] as LegendValue[],
+      } as LensPartitionLayerState;
+
+      expect(stripUnsupportedLegendStats(layer, PieChartTypes.WAFFLE)).toEqual({
+        layerId: 'l1',
+        legendStats: [LegendValue.Value],
+      });
+    });
+
+    it('should keep at most one stat for waffle', () => {
+      const layer = {
+        layerId: 'l1',
+        legendStats: [LegendValue.Value, LegendValue.Value],
+      } as LensPartitionLayerState;
+
+      expect(stripUnsupportedLegendStats(layer, PieChartTypes.WAFFLE)).toEqual({
+        layerId: 'l1',
+        legendStats: [LegendValue.Value],
+      });
+    });
+
+    it('should remove the stats when none are supported for waffle', () => {
+      const layer = {
+        layerId: 'l1',
+        legendStats: [LegendValue.Average] as LegendValue[],
+      } as LensPartitionLayerState;
+
+      expect(stripUnsupportedLegendStats(layer, PieChartTypes.WAFFLE)).toEqual({ layerId: 'l1' });
+    });
+
+    it('should leave a layer without stats untouched', () => {
+      const layer = { layerId: 'l1' } as LensPartitionLayerState;
+
+      expect(stripUnsupportedLegendStats(layer, PieChartTypes.WAFFLE)).toBe(layer);
     });
   });
 });

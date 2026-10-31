@@ -14,6 +14,7 @@ import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
+import { getPalettes } from '@kbn/palettes';
 import { LensConfigBuilder } from '../../config_builder';
 import {
   simpleMetricAttributes,
@@ -451,6 +452,53 @@ describe('Metric', () => {
     });
   });
 
+  describe('hidden bar', () => {
+    const getBackgroundChart = (config: MetricConfig) => {
+      const [primaryMetric] = config.metrics;
+      return 'background_chart' in primaryMetric ? primaryMetric.background_chart : undefined;
+    };
+
+    it('(SO -> API) keeps the bar and its max when showBar is set', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = true;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toMatchObject({ type: 'bar' });
+    });
+
+    it('(SO -> API) drops the bar when the max is set but showBar is false', () => {
+      // The editor's supporting visualization None/Trend keeps the max and sets showBar to false
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API) drops the bar when showBar is missing, like the runtime', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      delete (attributes.state.visualization as MetricVisualizationState).showBar;
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(getBackgroundChart(apiOutput)).toBeUndefined();
+    });
+
+    it('(SO -> API -> SO) does not show a bar for a hidden one', () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      (attributes.state.visualization as MetricVisualizationState).showBar = false;
+
+      const builder = new LensConfigBuilder();
+      const so = builder.fromAPIFormat(builder.toAPIFormat(attributes));
+      const viz = so.state.visualization as MetricVisualizationState;
+
+      expect(viz.showBar).toBe(false);
+      expect(viz.maxAccessor).toBeUndefined();
+    });
+  });
+
   describe('color by value named palette', () => {
     it('(API -> SO -> API) round-trips a named palette on a single-value metric as a numeric range', () => {
       const config = {
@@ -501,6 +549,51 @@ describe('Metric', () => {
 
       expect(viz.palette?.params?.rangeType).toBe('percent');
       expect(apiOutput.metrics[0].color).toEqual(config.metrics[0].color);
+    });
+
+    it('(SO -> API) turns a single-value custom percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          continuity: 'above',
+          stops: [
+            { color: '#f6726a', stop: 50 },
+            { color: '#24c292', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#f6726a', stop: 0 },
+            { color: '#24c292', stop: 50 },
+          ],
+        },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({ type: 'static', color: '#24c292' });
+    });
+
+    it('(SO -> API) turns a single-value named percent palette into the static color at 50%', () => {
+      const attributes = structuredClone(defaultColorByValueAttributes);
+      const viz = attributes.state.visualization as MetricVisualizationState;
+      viz.palette = {
+        type: 'palette',
+        name: 'status',
+        params: { name: 'status', rangeType: 'percent', steps: 3, continuity: 'all' },
+      };
+
+      const apiOutput = new LensConfigBuilder().toAPIFormat(attributes) as MetricConfig;
+
+      expect(apiOutput.metrics[0].color).toEqual({
+        type: 'static',
+        color: getPalettes(false).get('status').colors(3)[1],
+      });
     });
 
     it('(SO -> API -> SO) keeps the numeric range of a single-value named palette ', () => {
