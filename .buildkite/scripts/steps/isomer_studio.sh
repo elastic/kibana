@@ -14,3 +14,5 @@ node x-pack/platform/packages/shared/isomer/studio/run.ts build
 
 tar -czf target/isomer-studio.tar.gz -C target isomer-studio
 buildkite-agent artifact upload 'target/isomer-studio.tar.gz'
+
+bash .buildkite/scripts/steps/isomer_studio_upload.sh

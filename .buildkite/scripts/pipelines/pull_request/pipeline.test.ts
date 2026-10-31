@@ -448,6 +448,8 @@ describe('pull_request pipeline generation', () => {
     'x-pack/platform/packages/shared/isomer/isomer-components/src/pack.ts',
     'x-pack/platform/packages/shared/isomer/isomer-theme/src/style_context.ts',
     '.buildkite/scripts/steps/isomer_studio.sh',
+    '.buildkite/scripts/steps/isomer_studio_upload.sh',
+    '.buildkite/scripts/steps/isomer_studio_upload.test.ts',
     '.buildkite/pipeline-utils/step-library/steps/isomer_studio.ts',
   ])('emits shared Studio for %s', async (filename) => {
     const changes = [{ filename }];

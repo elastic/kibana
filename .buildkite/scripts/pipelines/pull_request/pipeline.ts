@@ -200,7 +200,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (
       await doAnyChangesMatch([
         /^x-pack\/platform\/packages\/shared\/isomer\//,
-        /^\.buildkite\/scripts\/steps\/isomer_studio\.sh$/,
+        /^\.buildkite\/scripts\/steps\/isomer_studio(?:_upload)?\.(?:sh|test\.ts)$/,
         /^\.buildkite\/pipeline-utils\/step-library\/steps\/isomer_studio\.ts$/,
       ])
     ) {

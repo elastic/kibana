@@ -65,7 +65,7 @@ Editor workers are JavaScript editing infrastructure, not drawing workers.
 PNG/PDF generation, render hosts, chart lowering, charts, and the Lens
 synthetic-data app are outside this foundation.
 
-## CI review artifact
+## CI review preview and artifact
 
 PR changes under the shared Isomer directory or this CI step trigger
 `isomer-studio` in Kibana's existing Buildkite PR pipeline. The step bootstraps
@@ -82,10 +82,25 @@ the exact Studio version, and Buildkite build/job identity. `requestedCommit`
 records Buildkite's input separately from the actual SHA (which can be a merge
 checkout). Review that metadata before comparing output to a PR.
 
-This step uses `buildkite-agent artifact upload`, as other Kibana jobs do.
-**It publishes a download artifact, not a live preview URL.** Kibana's Storybook
-job separately uploads HTML/JS/CSS to `ci-artifacts.kibana.dev`, which serves
-HTML directly; this foundation does not add a public site to that bucket.
+After building, the step publishes the static site to `ci-artifacts.kibana.dev`
+using the same bucket credentials, upload flags, and PR comment metadata
+convention as Kibana's Storybook job. Open **Isomer Studio Preview** in the CI
+comment or the job annotation. HTML, JavaScript, CSS, and editor assets are
+served directly; no render server is needed.
+
+Each preview has its own path:
+
+```text
+https://ci-artifacts.kibana.dev/isomer-studio/pr-<number>/<source-sha>/<build-id>/<job-id>/
+```
+
+This prevents concurrent builds or retries from overwriting another checkout's
+preview. `build.json` is available beside `index.html`. The site contains the
+checkout's primitive examples, not production or user data. Publishing occurs
+only from CI; a local build does not upload anything.
+
+The downloadable tarball remains available through `buildkite-agent artifact
+upload` as an offline alternative:
 
 Download `target/isomer-studio.tar.gz` from the job's Artifacts tab into an empty
 review directory, then:
