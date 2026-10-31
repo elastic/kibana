@@ -225,7 +225,7 @@ All routes are internal and versioned (`/internal/investigations/escalations`, v
 
 - `GET /internal/investigations/escalations` — list non-closed escalations the caller can access; needs `read_escalations`
 - `POST /internal/investigations/escalations` — create an escalation from a linked investigation; needs `manage_escalations`
-- `PATCH /internal/investigations/escalations/{id}` — update title or append linked investigations; needs `manage_escalations`
+- `POST /internal/investigations/escalations/{id}/_link` — append linked investigations; needs `manage_escalations`, and the caller must own the escalation or be listed on its access control (403 otherwise; 404 if the caller cannot read the escalation at all)
 
 ### Create behaviour
 
@@ -266,8 +266,8 @@ The filter is **fixed and server-side**: `template_id: "escalation" and not meta
 
 ### MVP limitations
 
-- **Owner-only writes.** `patchMetadata` and `update` in Agent Builder are `access: 'owner'`. This conflicts with the epic requirement that participants can link further investigations. A follow-up is needed to widen the access check in Agent Builder's authorization layer.
-- **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `PATCH` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
+- **Linking is limited to the owner and listed participants.** `EscalationsService.link` writes through `patchMetadata` with `access: 'converse'`. Converse access alone also covers every user on a public escalation, so the service first calls `canLinkEscalation` (`common/escalations/can_link_escalation.ts`). That check allows the owner, or a user listed in `access_control.entries`. Anyone else gets `EscalationLinkForbiddenError` (403). The list response carries the same result as `can_link`, and the escalation picker shows only escalations where it is `true`. Public escalations have no ACL entries, so only their owner can link to them.
+- **Last-write-wins on concurrent appends.** The array union for `linked_investigations` is computed in the service (outside the OCC write callback), so two concurrent `_link` requests can each read stale state and one link can be silently lost. The fix is to move the union computation into `writeConversation`'s `fields` callback. Accepted for MVP; follow-up filed.
 - **List caps at 10,000 results.** Offset pagination cannot go beyond Elasticsearch's default result window. Escalations beyond that threshold are unreachable through this API. `search_after` would be needed for deeper paging.
 - **Closed escalations are never returned.** The `status: "closed"` filter is not toggleable. A separate endpoint or a future filter parameter would be needed to retrieve closed escalations.
 

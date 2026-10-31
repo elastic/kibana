@@ -14,6 +14,7 @@ export {
   ESCALATION_BY_ID_PATH,
   ESCALATION_LINK_PATH,
   ESCALATION_ASSIGNEES_PATH,
+  ESCALATIONS_ALL_PRIVILEGE,
   INVESTIGATIONS_INTERNAL_PATH,
   INVESTIGATION_ASSIGNEES_PATH,
   AB_CONVERSATIONS_PATH,
@@ -26,7 +27,14 @@ export {
   NO_INVESTIGATIONS_ROLE,
   INVESTIGATIONS_READ_ROLE,
 } from './constants';
-export { expectCreated, deleteConversations, spaceUrl, seedInvestigation } from './helpers';
+export {
+  expectCreated,
+  deleteConversations,
+  spaceUrl,
+  seedInvestigation,
+  editorWithEscalationManage,
+  resolveProfileUid,
+} from './helpers';
 export type { SeedInvestigationOptions } from './helpers';
 export { seedSubject, cleanupSubjects } from './subject_index';
 export type { SeedSubjectOptions } from './subject_index';
