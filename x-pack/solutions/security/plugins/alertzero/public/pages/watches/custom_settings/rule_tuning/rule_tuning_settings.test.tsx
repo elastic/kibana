@@ -166,7 +166,7 @@ describe('RuleTuningSettings', () => {
       const labelEl = within(row).getByText(label);
       const helpEl = within(row).getByText(help);
       expect(group).toHaveAttribute('aria-labelledby', labelEl.id);
-      expect(group).toHaveAttribute('aria-describedby', helpEl.id);
+      expect(group.getAttribute('aria-describedby')?.split(' ')).toContain(helpEl.id);
       return group;
     };
 
@@ -177,18 +177,19 @@ describe('RuleTuningSettings', () => {
     );
     expect(windowGroup).toContainElement(screen.getByTestId('alertZeroAnalysisWindowDays'));
 
-    expectRowWiring(
+    const thresholdsGroup = expectRowWiring(
       'alertZeroQualifyingThresholdsRow',
       'Qualifying thresholds',
-      /both are met within the analysis window/
+      /meets both thresholds in this window\. Count between 2 and 100, rate between 0 and 100%\./
     );
 
-    // Both threshold inputs point at the shared help line that names their ranges.
-    const help = screen.getByTestId('alertZeroQualifyingThresholdsHelp');
-    expect(help).toHaveTextContent('Count between 2 and 100, rate between 0 and 100%.');
-    for (const testSubj of ['alertZeroFpCountThreshold', 'alertZeroFpRateThresholdPct']) {
-      expect(screen.getByTestId(testSubj)).toHaveAttribute('aria-describedby', help.id);
-    }
+    // The threshold definitions sit behind an info icon; screen readers get them as part of the row
+    // description.
+    expect(screen.getByTestId('alertZeroQualifyingThresholdsRowTooltip')).toBeInTheDocument();
+    const tooltipText = within(screen.getByTestId('alertZeroQualifyingThresholdsRow')).getByText(
+      /Rate is the share of the rule's alerts closed as false positives\./
+    );
+    expect(thresholdsGroup.getAttribute('aria-describedby')?.split(' ')).toContain(tooltipText.id);
   });
 
   it('falls back to the defaults when extras are missing', () => {

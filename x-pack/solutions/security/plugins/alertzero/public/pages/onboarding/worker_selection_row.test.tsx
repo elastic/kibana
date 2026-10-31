@@ -69,7 +69,7 @@ describe('WorkerSelectionRow', () => {
       screen.getByTestId(
         `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
-    ).toHaveTextContent('Every 4 hours');
+    ).toHaveTextContent('Runs every 4 hours');
   });
 
   it('falls back to the event trigger label when there is no schedule interval', () => {
@@ -78,7 +78,7 @@ describe('WorkerSelectionRow', () => {
       screen.getByTestId(
         `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
-    ).toHaveTextContent('On new alerts');
+    ).toHaveTextContent('Runs on new alerts');
   });
 
   it('omits the trigger badge when neither a schedule nor an event trigger is known', () => {

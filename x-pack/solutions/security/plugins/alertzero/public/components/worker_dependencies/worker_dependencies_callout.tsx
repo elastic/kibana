@@ -74,7 +74,7 @@ const DEPENDENCIES_BY_WORKER: Readonly<Record<string, readonly WorkerDependency[
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: [
     { id: 'contextEngine', severity: 'limited', sentence: 'contextEngineHunt' },
     { id: 'threatIngest', severity: 'limited', sentence: 'threatWorkflowOff' },
-    { id: 'threatEnrich', severity: 'limited', sentence: 'threatWorkflowOff' },
+    { id: 'threatEnrich', severity: 'limited', sentence: 'threatEnrichOff' },
   ],
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: [
     { id: 'contextEngine', severity: 'blocked', sentence: 'contextEngineCoverage' },
@@ -102,6 +102,8 @@ interface DependencyMessage {
   sentence: DependencySentenceId;
   destination?: Destination;
   linkText?: string;
+  /** Accessible name for the link when its visible text doesn't name the dependency. */
+  linkAriaLabel?: string;
 }
 
 const advancedSettingsDestination = (query: string): Destination => ({
@@ -130,10 +132,15 @@ interface Props {
 interface DestinationButtonProps {
   destination: Destination;
   linkText: string;
+  ariaLabel?: string;
 }
 
 /** A plain href; Kibana's global link redirect turns plain left clicks into in-app navigation. */
-const DestinationButton: React.FC<DestinationButtonProps> = ({ destination, linkText }) => {
+const DestinationButton: React.FC<DestinationButtonProps> = ({
+  destination,
+  linkText,
+  ariaLabel,
+}) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
@@ -143,7 +150,7 @@ const DestinationButton: React.FC<DestinationButtonProps> = ({ destination, link
       : application.getUrlForApp(destination.appId, { path: destination.path });
 
   return (
-    <EuiButtonEmpty size="s" flush="right" href={href}>
+    <EuiButtonEmpty size="s" flush="right" href={href} aria-label={ariaLabel}>
       {linkText}
     </EuiButtonEmpty>
   );
@@ -161,7 +168,7 @@ interface DependencyRowProps {
 }
 
 const DependencyRow: React.FC<DependencyRowProps> = ({
-  message: { id, status, label, sentence, destination, linkText },
+  message: { id, status, label, sentence, destination, linkText, linkAriaLabel },
   onEnable,
   isEnabling,
   enableDisabled,
@@ -211,7 +218,11 @@ const DependencyRow: React.FC<DependencyRowProps> = ({
             >
               {destination && linkText && (!onEnable || enableFailed) ? (
                 <EuiFlexItem grow={false}>
-                  <DestinationButton destination={destination} linkText={linkText} />
+                  <DestinationButton
+                    destination={destination}
+                    linkText={linkText}
+                    ariaLabel={linkAriaLabel}
+                  />
                 </EuiFlexItem>
               ) : null}
               {onEnable ? (
@@ -326,14 +337,18 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           };
         case 'alertAnalysis': {
           const workflowMissing = checks.alertAnalysisWorkflow === 'missing';
+          const label = workflowMissing
+            ? i18n.ALERT_ANALYSIS_WORKFLOW_LABEL
+            : i18n.ALERT_ANALYSIS_LABEL;
           return {
             id,
             severity,
             sentence: workflowMissing ? 'alertAnalysisWorkflowMissing' : sentence,
             status: checks.alertAnalysis,
-            label: workflowMissing ? i18n.ALERT_ANALYSIS_WORKFLOW_LABEL : i18n.ALERT_ANALYSIS_LABEL,
+            label,
             destination: { appId: 'security', path: '/rules/alert_analysis_workflow' },
-            linkText: i18n.ALERT_ANALYSIS_LINK_TEXT,
+            linkText: i18n.SET_UP_LINK_TEXT,
+            linkAriaLabel: i18n.setUpDependencyLinkLabel(label),
           };
         }
         case 'attackDiscoveryWorkflows': {
@@ -358,7 +373,8 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
             status: checks.defend,
             label: i18n.DEFEND_LABEL,
             destination: { appId: 'integrations', path: '/detail/endpoint/overview' },
-            linkText: i18n.DEFEND_LINK_TEXT,
+            linkText: i18n.SET_UP_LINK_TEXT,
+            linkAriaLabel: i18n.setUpDependencyLinkLabel(i18n.DEFEND_LABEL),
           };
         case 'threatIngest':
         case 'threatEnrich': {
@@ -465,6 +481,9 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
   );
 
   if (surface === 'onboarding') {
+    // A short label stands in for the settings callout title, so the terse rows read as settings.
+    // It only shows when something needs enabling, not for checks that could not be verified.
+    const settingsTitleId = `alertZeroWorkerDependenciesTitle-${worker.id}`;
     return (
       <div
         css={css`
@@ -472,8 +491,23 @@ const ConfiguredWorkerDependenciesCallout: React.FC<Props> = ({ worker, surface 
           padding-top: ${euiTheme.size.s};
           border-top: ${euiTheme.border.thin};
         `}
+        role={hasMissing ? 'group' : undefined}
+        aria-labelledby={hasMissing ? settingsTitleId : undefined}
         data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`}
       >
+        {hasMissing ? (
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              margin-bottom: ${euiTheme.size.xs};
+            `}
+          >
+            <p id={settingsTitleId}>
+              <strong>{i18n.ONBOARDING_SETTINGS_TITLE}</strong>
+            </p>
+          </EuiText>
+        ) : null}
         {rows}
       </div>
     );
