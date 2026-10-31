@@ -32,6 +32,11 @@ export type TestFailure = FailedTestCase['$'] & {
    * kept for the record but never reported to GitHub and get no artifacts of their own.
    */
   cascading?: boolean;
+  /**
+   * The earlier failure in the same report that failed with the same error. This failure still
+   * updates its tracked issue, but never opens a new one.
+   */
+  sameErrorAs?: TestFailure;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
