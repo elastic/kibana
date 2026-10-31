@@ -4022,7 +4022,9 @@ describe('Attack Discovery worker chain', () => {
         expect(write?.if).toContain(
           'steps.retarget_pending_fingerprint.output.get._source.attributes.investigation_id != inputs.investigation_id'
         );
-        expect(write?.if).toContain('steps.find_pending_fingerprint.output.hits.hits[0]._id == blank');
+        expect(write?.if).toContain(
+          'steps.find_pending_fingerprint.output.hits.hits[0]._id == blank'
+        );
         expect(
           engine.evalValueSync(
             expression,
@@ -4098,10 +4100,7 @@ describe('Attack Discovery worker chain', () => {
         expect(
           engine.evalValueSync(
             expression,
-            context(
-              { find_pending_fingerprint: { output: { hits: { hits: [] } } } },
-              false
-            )
+            context({ find_pending_fingerprint: { output: { hits: { hits: [] } } } }, false)
           )
         ).toBe(false);
       });
