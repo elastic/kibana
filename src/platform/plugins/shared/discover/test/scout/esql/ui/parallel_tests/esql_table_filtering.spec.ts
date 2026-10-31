@@ -41,16 +41,19 @@ spaceTest.describe(
         await discover.optOutOfCascadeLayout();
         await dataGrid.waitForDocTableRendered();
 
+        const destination = await dataGrid.getCellValue(0, 'geo.dest').innerText();
         await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
-        expect(await discover.getEsqlQueryValue()).toContain('| WHERE `geo.dest` == "BT"');
+        expect(await discover.getEsqlQueryValue()).toContain(
+          `| WHERE \`geo.dest\` == "${destination}"`
+        );
 
         await dataGrid.waitForDocTableRendered();
 
         // Negating replaces the clause rather than appending a second one.
         await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'out' });
         const negated = await discover.getEsqlQueryValue();
-        expect(negated).toContain('| WHERE `geo.dest`!= "BT"');
-        expect(negated).not.toContain('== "BT"');
+        expect(negated).toContain(`| WHERE \`geo.dest\`!= "${destination}"`);
+        expect(negated).not.toContain(`== "${destination}"`);
       }
     );
 
@@ -63,8 +66,11 @@ spaceTest.describe(
         await discover.optOutOfCascadeLayout();
         await dataGrid.waitForDocTableRendered();
 
+        const destination = await dataGrid.getCellValue(0, 'geo.dest').innerText();
         await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
-        expect(await discover.getEsqlQueryValue()).toContain('AND `geo.dest` == "BT"');
+        expect(await discover.getEsqlQueryValue()).toContain(
+          `AND \`geo.dest\` == "${destination}"`
+        );
       }
     );
 
@@ -87,8 +93,11 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await lens.applyFlyoutChanges();
 
+        const destination = await dataGrid.getCellValue(0, 'geo.dest').innerText();
         await dataGrid.filterCell({ rowIndex: 0, columnId: 'geo.dest', mode: 'for' });
-        expect(await discover.getEsqlQueryValue()).toContain('| WHERE `geo.dest` == "BT"');
+        expect(await discover.getEsqlQueryValue()).toContain(
+          `| WHERE \`geo.dest\` == "${destination}"`
+        );
 
         await discover.openLensEditFlyout();
         expect(await lens.getChartSwitchType()).toBe('Line');

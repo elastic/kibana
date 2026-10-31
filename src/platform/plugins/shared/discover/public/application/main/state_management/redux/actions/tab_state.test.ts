@@ -1108,6 +1108,7 @@ describe('tab_state actions', () => {
         esql: 'FROM the-data-view-title | SORT @timestamp DESC | WHERE KQL("""foo: \'bar\'""")',
       });
       expect(tab.appState.sort).toBeUndefined();
+      expect(tab.appState.columns).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);
       expect(tab.appState.filters).toStrictEqual([]);
       expect(tab.appState.dataSource).toStrictEqual({
@@ -1119,7 +1120,7 @@ describe('tab_state actions', () => {
       expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
       expect(tab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
-        columns: [],
+        columns: undefined,
         hideChart: undefined,
         hideTable: undefined,
         rowHeight: undefined,
