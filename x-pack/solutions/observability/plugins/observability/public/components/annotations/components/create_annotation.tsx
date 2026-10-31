@@ -56,7 +56,8 @@ function CreateAnnotation({
   const { trigger, getValues } = useFormContext<CreateAnnotationForm>();
 
   const onSubmit = useCallback(async () => {
-    const isValid = await trigger();
+    // move focus to the first invalid field so the error is announced (WCAG 2.4.3 / 3.3.1)
+    const isValid = await trigger(undefined, { shouldFocus: true });
     if (!isValid) return;
     const values = getValues();
     const timestamp = values['@timestamp'].toISOString();
