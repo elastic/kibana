@@ -7,7 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useQueryClient } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
+import { invalidateRulesContentList } from '../../../../hooks/invalidate_rules_content_list';
+import { ruleKeys } from '../../../../hooks/query_key_factory';
 import { AutoOpenChangeHistoryModal } from './auto_open_change_history_modal';
 import { createRuleChangeHistoryAdapter } from './rule_change_history_adapter';
 import { RuleChangeHistoryProvider } from './rule_change_history_provider';
@@ -15,10 +19,12 @@ import { RuleChangeHistoryProvider } from './rule_change_history_provider';
 export interface RuleChangeHistoryTarget {
   id: string;
   name: string;
+  /** Rule version the host rendered; restores are rejected with a conflict if it changed. */
+  version: number;
 }
 
 export interface UseRuleChangeHistoryModalOptions {
-  /** Enable restore affordances when the read API + permissions allow it. */
+  /** Enable restore affordances; pass the user's rules write capability. */
   canRestore?: boolean;
 }
 
@@ -47,9 +53,29 @@ export const useRuleChangeHistoryModal = ({
 }: UseRuleChangeHistoryModalOptions = {}): UseRuleChangeHistoryModalResult => {
   const api = useService(RuleChangeHistoryApi);
   const analytics = useService(CoreStart('analytics'));
-  const adapter = createRuleChangeHistoryAdapter(api);
-
+  const { toasts } = useService(CoreStart('notifications'));
+  const queryClient = useQueryClient();
   const [target, setTarget] = useState<RuleChangeHistoryTarget | null>(null);
+  const adapter = createRuleChangeHistoryAdapter(api, {
+    currentVersion: target?.version,
+    onRestored: (rule) => {
+      // Keeps the open modal's title and conflict guard in sync with the restored rule.
+      setTarget(
+        (current) => current && { ...current, name: rule.metadata.name, version: rule.version }
+      );
+      toasts.addSuccess(
+        i18n.translate('xpack.alertingV2.ruleChangeHistory.restoreSuccessToast', {
+          defaultMessage: 'Rule "{ruleName}" restored as version {version}',
+          values: { ruleName: rule.metadata.name, version: rule.version },
+        })
+      );
+      void invalidateRulesContentList();
+      queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(ruleKeys.allTags());
+      queryClient.invalidateQueries(ruleKeys.detail(rule.id));
+    },
+  });
+
   // Advances on every open request so re-opening the same rule remounts the modal.
   const [openCount, setOpenCount] = useState(0);
 

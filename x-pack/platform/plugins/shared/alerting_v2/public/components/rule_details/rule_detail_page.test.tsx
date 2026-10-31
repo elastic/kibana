@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -167,17 +168,19 @@ const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
-    <MemoryRouter>
-      <I18nProvider>
-        <MockChromeContextProvider>
-          <MockLocatorProvider locators={mockLocators}>
-            <RuleProvider rule={rule}>
-              <RuleDetailPage />
-            </RuleProvider>
-          </MockLocatorProvider>
-        </MockChromeContextProvider>
-      </I18nProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter>
+        <I18nProvider>
+          <MockChromeContextProvider>
+            <MockLocatorProvider locators={mockLocators}>
+              <RuleProvider rule={rule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockLocatorProvider>
+          </MockChromeContextProvider>
+        </I18nProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 
 describe('RuleDetailPage', () => {
@@ -569,6 +572,7 @@ describe('RuleDetailPage', () => {
     });
 
     it('passes the new rule to useRuleAutoAttach when the rule id changes', () => {
+      const queryClient = new QueryClient();
       const { rerender } = render(
         <MemoryRouter>
           <I18nProvider>
@@ -580,7 +584,12 @@ describe('RuleDetailPage', () => {
               </MockLocatorProvider>
             </MockChromeContextProvider>
           </I18nProvider>
-        </MemoryRouter>
+        </MemoryRouter>,
+        {
+          wrapper: ({ children }) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
       );
 
       const nextRule = {

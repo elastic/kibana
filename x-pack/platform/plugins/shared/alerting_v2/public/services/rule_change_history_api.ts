@@ -13,6 +13,7 @@ import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
   RuleChangeHistoryListItem,
+  RuleResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH } from '../constants';
 
@@ -22,6 +23,12 @@ export type { ListRuleChangeHistoryResponse, RuleChangeHistoryDetail, RuleChange
 /** Encodes the `change_id` path parameter safely for the detail route. */
 const buildRuleChangeHistoryEventPath = (changeId: string): string =>
   buildPath(`${ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/{change_id}`, {
+    change_id: changeId,
+  });
+
+/** Encodes the `change_id` path parameter safely for the restore route. */
+const buildRestoreRuleChangePath = (changeId: string): string =>
+  buildPath(`${ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/{change_id}/_restore`, {
     change_id: changeId,
   });
 
@@ -41,7 +48,15 @@ export interface GetRuleChangeEventParams {
   signal?: AbortSignal;
 }
 
-/** HTTP client for the Alerting V2 rule change-history read API.
+export interface RestoreRuleChangeParams {
+  /** The change-history event identifier (`event.id`) whose snapshot is restored. */
+  eventId: string;
+  /** The rule version the caller last saw; the restore is rejected with a 409 if it changed. */
+  currentVersion?: number;
+  signal?: AbortSignal;
+}
+
+/** HTTP client for the Alerting V2 rule change-history API.
  * Returns DTOs for the rule change-history UI adapter. */
 @injectable()
 export class RuleChangeHistoryApi {
@@ -67,6 +82,17 @@ export class RuleChangeHistoryApi {
     signal,
   }: GetRuleChangeEventParams): Promise<RuleChangeHistoryDetail> {
     return this.http.get<RuleChangeHistoryDetail>(buildRuleChangeHistoryEventPath(eventId), {
+      signal,
+    });
+  }
+
+  public async restoreRuleChange({
+    eventId,
+    currentVersion,
+    signal,
+  }: RestoreRuleChangeParams): Promise<RuleResponse> {
+    return this.http.post<RuleResponse>(buildRestoreRuleChangePath(eventId), {
+      query: { current_version: currentVersion },
       signal,
     });
   }

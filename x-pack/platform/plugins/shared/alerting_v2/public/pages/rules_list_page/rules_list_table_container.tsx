@@ -58,7 +58,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   onCloneInFlyout,
 }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({
+    canRestore: canWrite,
+  });
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
   const { pageIndex, pageSize, pageSizeOptions, setPageIndex, setPageSize } =
@@ -238,7 +240,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
         onRun={(r) => runRuleMutation.mutate({ id: r.id })}
-        onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
+        onViewChangeHistory={(r) =>
+          openChangeHistory({ id: r.id, name: r.metadata.name, version: r.version })
+        }
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -266,7 +270,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
           onRun={(r) => runRuleMutation.mutate({ id: r.id })}
           onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
-          onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
+          onViewChangeHistory={(r) =>
+            openChangeHistory({ id: r.id, name: r.metadata.name, version: r.version })
+          }
         />
       ) : null}
       {ruleToDelete ? (

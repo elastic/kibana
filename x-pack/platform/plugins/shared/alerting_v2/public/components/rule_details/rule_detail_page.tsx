@@ -99,7 +99,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
   const { flyout, confirmationModal, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({
+    canRestore: canWrite,
+  });
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
 
@@ -150,8 +152,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   }, [runRule, rule.id]);
 
   const onViewChangeHistory = React.useCallback(
-    () => openChangeHistory({ id: rule.id, name: rule.metadata.name }),
-    [openChangeHistory, rule.id, rule.metadata.name]
+    () => openChangeHistory({ id: rule.id, name: rule.metadata.name, version: rule.version }),
+    [openChangeHistory, rule.id, rule.metadata.name, rule.version]
   );
 
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
