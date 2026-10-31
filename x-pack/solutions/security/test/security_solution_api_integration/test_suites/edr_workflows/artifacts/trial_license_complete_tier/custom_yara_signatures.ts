@@ -1657,6 +1657,21 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
 
+        it(`should return 200 with a line-0 error if yara_rule is far more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
+          const yaraRuleLength = MAX_YARA_RULE_CONTENT_BYTE_LENGTH * 3;
+          const yaraRule =
+            dummyRuleWithComment + 'a'.repeat(yaraRuleLength - dummyRuleWithComment.length);
+
+          await callApi(globalWriteAccessTestAgent, {
+            yara_rule: yaraRule,
+            os_types: ['windows'],
+          })
+            .expect(200)
+            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
+              expect(res.body).to.eql(oversizeDiagnostic(yaraRuleLength));
+            });
+        });
+
         it(`should return 200 with empty diagnostics if yara_rule is at the byte limit using multi-byte characters`, async () => {
           const euroSign = '€'; // takes up 3 bytes
           const yaraRule =

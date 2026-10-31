@@ -10,16 +10,14 @@ import { schema } from '@kbn/config-schema';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { DeepMutable } from '../../../endpoint/types';
 
-/**
- * Character-length DoS bound for `yara_rule`. Higher than the product UTF-8 byte cap
- * (32766) so oversize content still reaches `validateCustomYaraRule` and returns a
- * structured diagnostic instead of a schema 400.
- */
-export const MAX_YARA_RULE_VALIDATE_REQUEST_LENGTH = 65532;
-
 export const ValidateCustomYaraSignatureRequestSchema = {
   body: schema.object({
-    yara_rule: schema.string({ maxLength: MAX_YARA_RULE_VALIDATE_REQUEST_LENGTH }),
+    yara_rule: schema.string({
+      // Intentionally unbounded here: the request body is capped by `server.maxPayload` (1MB by default),
+      // and `validateCustomYaraRule` rejects content over `MAX_YARA_RULE_CONTENT_BYTE_LENGTH` bytes before
+      // running libyara. A schema limit would replace that structured diagnostic with a generic 400.
+      maxLength: Number.POSITIVE_INFINITY,
+    }),
     os_types: schema.arrayOf(
       schema.oneOf([
         schema.literal(OperatingSystem.WINDOWS),
