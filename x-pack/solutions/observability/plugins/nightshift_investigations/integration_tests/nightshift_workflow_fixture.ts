@@ -66,6 +66,7 @@ import { memoryMaterializeToSandboxStepDefinition } from '../server/step_definit
 import { memoryOptimizeStepDefinition } from '../server/step_definitions/memory_optimize';
 import { obtainSandboxStepDefinition } from '../server/step_definitions/obtain_sandbox';
 import { resolveModelStepDefinition } from '../server/step_definitions/resolve_model';
+import { scoreMemoryOnlineEvalsStepDefinition } from '../server/step_definitions/score_memory_online_evals';
 
 jest.mock('../server/cortex/register_cortex', () => ({
   hydrateCortexWorkspace: jest.fn(),
@@ -317,6 +318,17 @@ export const createNightshiftWorkflowFixture = ({
     decisionTreeReinforceStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
       isEnabled: () => decisionTreesEnabled,
+    }),
+    scoreMemoryOnlineEvalsStepDefinition({
+      getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
+      getEvaluate: () => undefined,
+      isPaused: () => false,
+      shouldIncludeExplanations: () => false,
+      telemetry: { reportOnlineEvalScore: jest.fn() },
+      logger,
+      isEnabled: () => cortexEnabled || memoryEnabled || decisionTreesEnabled,
+      isCortexEnabled: () => cortexEnabled,
+      isDecisionTreesEnabled: () => decisionTreesEnabled,
     }),
   ];
   const byId = new Map(definitions.map((definition) => [definition.id, definition]));

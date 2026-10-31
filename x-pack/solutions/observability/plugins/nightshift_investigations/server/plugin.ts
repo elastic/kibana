@@ -62,8 +62,10 @@ import { renderSlackMessageStepDefinition } from './step_definitions/render_slac
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
+import { scoreMemoryOnlineEvalsStepDefinition } from './step_definitions/score_memory_online_evals';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
-import { referenceFreeJudges } from './online_evals/judges';
+import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
+import { onlineEvalJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -198,7 +200,7 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
-    for (const judge of referenceFreeJudges) {
+    for (const judge of onlineEvalJudges) {
       plugins.evals?.registerEvaluator(judge);
     }
 
@@ -406,11 +408,13 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
+        const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
+        const shouldIncludeExplanations = createShouldIncludeExplanations(core.getStartServices);
         plugins.workflowsExtensions.registerStepDefinition(
           classifyOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             isEvalsAvailable: () => this.evals !== undefined,
-            isPaused: createIsOnlineEvalsPaused(core.getStartServices),
+            isPaused: isOnlineEvalsPaused,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -541,6 +545,21 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          scoreMemoryOnlineEvalsStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getEvaluate: () => this.evals?.evaluate,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            isPaused: isOnlineEvalsPaused,
+            shouldIncludeExplanations,
+            telemetry,
+            logger: this.logger.get('online_evals'),
+            isEnabled: () => this.cortexEnabled || this.memoryEnabled || this.decisionTreesEnabled,
+            isCortexEnabled: () => this.cortexEnabled,
+            isDecisionTreesEnabled: () => this.decisionTreesEnabled,
           })
         );
       }

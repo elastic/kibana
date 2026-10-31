@@ -140,6 +140,8 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_rca_reward@1.0.0',
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
+        'nightshift_memory_read_judge@1.0.0',
+        'nightshift_memory_write_judge@1.0.0',
       ]
     );
   });
