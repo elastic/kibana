@@ -38,6 +38,7 @@ export { responseOpsCasesSteps } from './steps/response_ops_cases.ts';
 export { responseOpsSteps } from './steps/response_ops.ts';
 export { scoutFleetRealAgentSteps } from './steps/scout_fleet_real_agent.ts';
 export { storybooks } from './steps/storybooks.ts';
+export { isomerStudio } from './steps/isomer_studio.ts';
 export { verifyFipsEnabled } from './steps/verify_fips_enabled.ts';
 export { workflowsOomTestingSteps } from './steps/workflows_oom_testing.ts';
 export { ai4dsocSteps } from './steps/security_solution/ai4dsoc.ts';

@@ -6,14 +6,12 @@
  */
 
 import { createKibanaIsomerRuntime } from '@kbn/isomer';
+import { componentsPack } from '@kbn/isomer-components';
 import { createIsomerStyleContext } from '@kbn/isomer-theme';
 
-import { componentsPack } from './src/pack';
-
-// Not `defineStudioConfig`: the Studio runs through `npx`, so `@elastic/isomer-studio` is not installed to import.
 export default {
-  title: '@kbn/isomer-components',
+  title: 'Kibana Isomer Studio',
+  // All production packs on main. No frames or image formats: no snapshot, PNG, or PDF host.
   runtime: createKibanaIsomerRuntime({ packs: [componentsPack] }),
   createReactContext: (root: ShadowRoot) => createIsomerStyleContext({ root }),
-  imageFonts: './isomer_studio_fonts.ts',
 };
