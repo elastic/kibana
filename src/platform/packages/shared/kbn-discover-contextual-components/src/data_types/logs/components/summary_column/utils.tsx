@@ -30,8 +30,8 @@ import {
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
   getAvailableResourceFields,
   RESOURCE_FIELDS,
-  formatFieldValueReact,
 } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils/components';
 import type { TraceDocument } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';

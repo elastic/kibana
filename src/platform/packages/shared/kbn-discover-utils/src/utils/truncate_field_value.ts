@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { highlightTags } from '@kbn/field-formats-plugin/common';
+import { highlightTags } from '@kbn/field-formats-plugin/common/utils/highlight/highlight_tags';
 import type { ESQLHighlightTags } from '@kbn/esql-utils';
 import type { EsHitRecord } from '../types';
 

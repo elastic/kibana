@@ -24,10 +24,10 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   type ShouldShowFieldInTableHandler,
   TRACE_FIELDS,
-  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   getAvailableTraceFields,
 } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import { Resource } from './resource';
 import { Content } from './content';
 import {
