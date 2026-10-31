@@ -109,6 +109,21 @@ describe('resolveHuntModels', () => {
     }
   });
 
+  it('attributes the cyber-domain model to the same telemetry as the tiers', async () => {
+    await resolve();
+
+    expect(resolveConfiguredScopedModelMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chatModelOptions: {
+          telemetryMetadata: {
+            pluginId: 'alertzero_hunt_sweep',
+            aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+          },
+        },
+      })
+    );
+  });
+
   it('leaves the other tiers intact when one has no usable connector', async () => {
     resolveScopedModelMock.mockImplementation(async ({ featureId }) =>
       featureId === ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID

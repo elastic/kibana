@@ -462,6 +462,46 @@ describe('SLO Edit Page', () => {
       expect(queryByTestId('sloFormDescriptionTextArea')).toHaveValue(slo.description);
     });
 
+    it('shows the required error message when the SLO name is cleared', async () => {
+      const { getByTestId, findByText, queryByText } = render(<SloEditPage />);
+
+      fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: '' } });
+      expect(await findByText('SLO name cannot be empty.')).toBeInTheDocument();
+
+      fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: 'My SLO' } });
+      await waitFor(() => expect(queryByText('SLO name cannot be empty.')).not.toBeInTheDocument());
+    });
+
+    it('passes the data view id resolved from the index pattern on mount to the indicator form', async () => {
+      slo = buildSlo({
+        id: SLO_ID,
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'some-index',
+            good: 'a: 1',
+            total: 'a: *',
+            filter: '',
+            timestampField: '@timestamp',
+          },
+        },
+      });
+      useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
+      useFetchDataViewsMock.mockReturnValue({
+        isLoading: false,
+        data: [{ id: 'dv-id', title: 'some-index', name: 'dv' }],
+        refetch: jest.fn(),
+      });
+
+      render(<SloEditPage />);
+
+      await waitFor(() =>
+        expect(useCreateDataViewMock).toHaveBeenCalledWith(
+          expect.objectContaining({ indexPatternString: 'some-index', dataViewId: 'dv-id' })
+        )
+      );
+    });
+
     it('allows editing Synthetics availability SLOs with timeslices', async () => {
       slo = buildSlo({
         id: SLO_ID,
