@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import {
@@ -32,24 +32,20 @@ describe('Run', () => {
     expect(screen.getByTestId('run')).toHaveTextContent(RUN);
   });
 
-  it('renders the tooltip on hover with the expected text', async () => {
+  it('renders the tooltip on hover with the expected text', () => {
     render(<Run {...defaultProps} />);
 
     fireEvent.mouseOver(screen.getByTestId('run'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('runTooltip')).toHaveTextContent(RUN_TOOLTIP);
-    });
+    expect(screen.getByTestId('runTooltip')).toHaveTextContent(RUN_TOOLTIP);
   });
 
-  it('renders the tooltip on hover with the disabled text when isDisabled is true', async () => {
+  it('renders the tooltip on hover with the disabled text when isDisabled is true', () => {
     render(<Run {...defaultProps} isDisabled={true} />);
 
     fireEvent.mouseOver(screen.getByTestId('run'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('runTooltip')).toHaveTextContent(DISABLED_TOOLTIP);
-    });
+    expect(screen.getByTestId('runTooltip')).toHaveTextContent(DISABLED_TOOLTIP);
   });
 
   it('disables the button when isLoading is true', () => {
@@ -73,16 +69,12 @@ describe('Run', () => {
       expect(screen.getByTestId('run')).toBeDisabled();
     });
 
-    it('renders the missing workflows execute tooltip on hover', async () => {
+    it('renders the missing workflows execute tooltip on hover', () => {
       render(<Run {...defaultProps} hasWorkflowsExecute={false} />);
 
       fireEvent.mouseOver(screen.getByTestId('run'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('runTooltip')).toHaveTextContent(
-          MISSING_WORKFLOWS_EXECUTE_TOOLTIP
-        );
-      });
+      expect(screen.getByTestId('runTooltip')).toHaveTextContent(MISSING_WORKFLOWS_EXECUTE_TOOLTIP);
     });
 
     it('does not call onGenerate when clicked', () => {
