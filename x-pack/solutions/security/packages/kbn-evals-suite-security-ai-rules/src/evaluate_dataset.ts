@@ -12,8 +12,15 @@ import type {
   Example,
   EvalsExecutorClient,
 } from '@kbn/evals';
-import { calculateSetMetrics, createEsqlEquivalenceEvaluator } from '@kbn/evals';
+import {
+  calculateSetMetrics,
+  createEsqlEquivalenceEvaluator,
+  createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
+  selectEvaluators,
+} from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReferenceRule } from '../datasets/sample_rules';
 import type { SecurityRuleGenerationClient } from './chat_client';
@@ -31,6 +38,14 @@ import {
 export interface RuleGenerationTaskOutput {
   generatedRule?: Partial<ReferenceRule>;
   error?: string;
+  /**
+   * OTel trace ID for this round. Required by trace-based evaluators
+   * (token usage, latency, tool calls, skill invocation) so they can
+   * correlate the row to a specific agent interaction.
+   */
+  traceId?: string;
+  /** Tool IDs invoked during this round, in order. Consumed by the trajectory evaluator. */
+  toolCalls?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -161,6 +176,29 @@ function skipAgentErrors(
     evaluate: async (args) => {
       const output = args.output as RuleGenerationTaskOutput;
       if (output?.error && !/could not discover a suitable index/i.test(output.error)) {
+        return AGENT_ERROR_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
+/**
+ * Trajectory counterpart to {@link skipAgentErrors}: returns N/A only when no tool sequence was
+ * observed. A converse round that completed but produced no rule still carries the tools the
+ * agent called (possibly none, possibly the wrong ones) next to its `error`, and that sequence is
+ * exactly what Tool Trajectory measures — suppressing it would hide the agent skipping
+ * `security.create_detection_rule`. Only a request that never returned a response (the task's
+ * catch path, which sets no `toolCalls`) is an agent/environment failure here.
+ */
+function skipUnobservedTrajectories(
+  evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
+): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      const output = args.output as RuleGenerationTaskOutput;
+      if (output?.error && output.toolCalls === undefined) {
         return AGENT_ERROR_NA;
       }
       return evaluator.evaluate(args);
@@ -448,6 +486,68 @@ export function createRuleDescriptionEvaluator(
 }
 
 // ---------------------------------------------------------------------------
+// Trajectory evaluator — tool-call sequence vs. golden path
+// ---------------------------------------------------------------------------
+
+/**
+ * Default golden tool sequence for a reference rule.
+ *
+ * The detection-rule-edit SKILL.md instructs the agent to use exactly
+ * `security.create_detection_rule` for new-rule creation (which is all this
+ * suite exercises). `attachment_update` is reserved for edits, which this
+ * suite does NOT test. Negative-case prompts should produce no tool calls.
+ *
+ * If a ReferenceRule sets `tool_sequence` explicitly, that overrides the default.
+ */
+export function defaultGoldenSequence(
+  expected: Partial<ReferenceRule> | null | undefined
+): string[] {
+  if (expected?.tool_sequence !== undefined) {
+    return expected.tool_sequence;
+  }
+  if (expected?.category === 'negative') {
+    return [];
+  }
+  return ['security.create_detection_rule'];
+}
+
+/**
+ * Trajectory evaluator scoring tool-call alignment.
+ *
+ * The suite asserts an exact sequence — the SKILL.md flow is "call
+ * `security.create_detection_rule` once, then stop" — so `penalizeExtraCalls` is on:
+ * the shared evaluator's order/coverage terms are both divided by the golden path alone,
+ * which means a single expected call would otherwise score 1.0 for any sequence that
+ * merely contains it (extra tools, or the same tool called twice). With the penalty, the
+ * weighted score is scaled by `golden.length / actual.length`, so only an exact-length,
+ * fully-covered sequence reaches 1.0. Order stays weighted lower than coverage (0.4/0.6)
+ * because there is no canonical multi-tool order to enforce; a misordered but complete
+ * sequence is reported through `orderScore`, not treated as an extra call.
+ *
+ * Wrapping (done at registration): missing-index failures return N/A via
+ * `skipMissingIndexFailures`, and requests that never returned a response return N/A via
+ * `skipUnobservedTrajectories`. Unlike the rule-quality evaluators it is NOT wrapped in
+ * `skipAgentErrors`: a completed round with no rule still carries its observed tool calls, and
+ * an empty or wrong sequence there is the failure this evaluator exists to score.
+ */
+export function createRuleTrajectoryEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output: unknown) => (output as RuleGenerationTaskOutput)?.toolCalls ?? [],
+    goldenPathExtractor: (expected: unknown) =>
+      defaultGoldenSequence(expected as Partial<ReferenceRule>),
+    orderWeight: 0.4,
+    coverageWeight: 0.6,
+    penalizeExtraCalls: true,
+  });
+
+  // Rename so the report column is descriptive rather than the generic 'trajectory'.
+  return {
+    ...inner,
+    name: 'Tool Trajectory',
+  } as Evaluator<RuleExample, RuleGenerationTaskOutput>;
+}
+
+// ---------------------------------------------------------------------------
 // Factory — mirrors the agent-builder createEvaluateDataset pattern
 // ---------------------------------------------------------------------------
 
@@ -456,12 +556,14 @@ export function createEvaluateDataset({
   executorClient,
   chatClient,
   inferenceClient,
+  traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityRuleGenerationClient;
   inferenceClient: BoundInferenceClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
   const esqlEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
@@ -498,7 +600,28 @@ export function createEvaluateDataset({
     // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
     skip(createRejectionEvaluator()),
+    // Tool Trajectory — tool-call coverage + order vs. the golden sequence the
+    // detection-rule-edit SKILL.md prescribes. Applies to negatives too (golden = []),
+    // and penalizes extra/duplicate calls so the advertised exact sequence is enforced.
+    // A completed round that returned no rule is still scored on the tools it called; only
+    // missing-index failures and requests that never returned a response are N/A.
+    skipMissingIndexFailures(skipUnobservedTrajectories(createRuleTrajectoryEvaluator())),
+    // Trace-based observability (zero per-example LLM cost — reads OTel spans).
+    // The `reportDisplayOptions` in evaluate.ts has already declared formatting for these.
+    ...Object.values(evaluators.traceBasedEvaluators),
+    // Skill invocation — verifies the agent loaded the detection-rule-edit SKILL.md,
+    // matching the explicit instruction on the rule attachment's getAgentDescription()
+    // (see x-pack/solutions/security/plugins/security_solution/server/agent_builder/attachments/rule.ts).
+    createSkillInvocationEvaluator({
+      traceEsClient,
+      log,
+      skillName: 'detection-rule-edit',
+    }),
   ];
+
+  // Honor SELECTED_EVALUATORS env var so iteration runs can narrow the evaluator set
+  // (documented in README.md but previously a no-op).
+  const selectedEvaluators = selectEvaluators(allEvaluators);
 
   return async function evaluateDataset({
     dataset,
@@ -528,7 +651,7 @@ export function createEvaluateDataset({
                 // so dataset summaries don't misclassify correct behavior as an "agent error".
                 succeeded++;
                 log.info('[Task] Negative case: model refused to generate a rule (expected)');
-                return {};
+                return { traceId: taskResult.traceId, toolCalls: taskResult.toolCalls };
               }
 
               const isMissingIndex =
@@ -543,13 +666,19 @@ export function createEvaluateDataset({
                 otherFailureReasons.push(truncate(taskResult.error ?? 'No rule returned'));
                 log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
               }
-              return { error: taskResult.error || 'No rule returned from agent' };
+              return {
+                error: taskResult.error || 'No rule returned from agent',
+                traceId: taskResult.traceId,
+                toolCalls: taskResult.toolCalls,
+              };
             }
 
             if (expected?.category === 'negative') {
-              // Negative-case prompts should not produce rules.
-              otherFailures++;
-              otherFailureReasons.push(truncate('Generated a rule for a negative-case prompt'));
+              // Negative-case prompts should not produce rules. This is a model-quality
+              // failure (the Rejection evaluator already scores it 0); it is NOT an
+              // agent/env error and must not inflate `otherFailures` — that bucket is
+              // reserved for infrastructure issues so operators can distinguish a noisy
+              // environment from a noisy model.
               log.warning(
                 '[Task] Negative case: model generated a rule (unexpected; rejection evaluator will fail)'
               );
@@ -597,7 +726,7 @@ export function createEvaluateDataset({
           }
         },
       },
-      allEvaluators
+      selectedEvaluators
     );
 
     datasetSkipSummaries.set(dataset.name, {
