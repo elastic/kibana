@@ -597,4 +597,151 @@ describe('ObservablesService', () => {
       });
     });
   });
+
+  describe('findObservables', () => {
+    const hit = (id: string, document: Record<string, unknown>, sort: unknown[] = []) => ({
+      _id: id,
+      _index: '.kibana-cases-observables',
+      _source: {
+        case_id: caseId,
+        space_id: spaceId,
+        owner,
+        type_key: 'type-1',
+        value: id,
+        source: 'api',
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+        ...document,
+      },
+      sort,
+    });
+    const search = (hits: ReturnType<typeof hit>[], total = hits.length) =>
+      storageClient.search.mockResolvedValue({
+        hits: { hits, total: { value: total, relation: 'eq' } },
+      } as unknown as Awaited<ReturnType<typeof storageClient.search>>);
+    const find = (overrides: Partial<Parameters<ObservablesService['findObservables']>[0]> = {}) =>
+      service.findObservables({
+        caseId,
+        spaceId,
+        owner,
+        sortField: 'created',
+        sortOrder: 'asc',
+        perPage: 2,
+        ...overrides,
+      });
+
+    it('only looks at the case in its space and owner, whatever else is asked', async () => {
+      search([]);
+
+      await find();
+
+      expect(storageClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { case_id: caseId } },
+                { term: { space_id: spaceId } },
+                { term: { owner } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('adds the type keys to the filter only when there are some', async () => {
+      search([]);
+
+      await find({ typeKeys: ['type-1', 'type-2'] });
+      await find({ typeKeys: [] });
+
+      const [withTypes, withoutTypes] = storageClient.search.mock.calls.map(
+        ([request]) => (request.query as { bool: { filter: unknown[] } }).bool.filter
+      );
+      expect(withTypes).toContainEqual({ terms: { type_key: ['type-1', 'type-2'] } });
+      expect(withoutTypes).toHaveLength(3);
+    });
+
+    it('sorts with a unique ending, counts exactly and asks for one more than a page', async () => {
+      search([]);
+
+      await find({ sortField: 'value', sortOrder: 'desc', perPage: 25 });
+
+      expect(storageClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          size: 26,
+          track_total_hits: true,
+          sort: [{ value: 'desc' }, { type_key: 'asc' }],
+        })
+      );
+    });
+
+    it('never pages with from', async () => {
+      search([]);
+
+      await find({ searchAfter: ['a', 'b'] });
+
+      expect(storageClient.search.mock.calls[0][0]).not.toHaveProperty('from');
+    });
+
+    it('continues after the sort values of the previous page', async () => {
+      search([]);
+
+      await find({ searchAfter: ['2026-01-01T00:00:00.000Z', 'type-1', 'a'] });
+
+      expect(storageClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search_after: ['2026-01-01T00:00:00.000Z', 'type-1', 'a'],
+        })
+      );
+    });
+
+    it('does not send search_after for a first page', async () => {
+      search([]);
+
+      await find();
+
+      expect(storageClient.search.mock.calls[0][0]).not.toHaveProperty('search_after');
+    });
+
+    it('returns a full page and the sort values of its last observable when more follow', async () => {
+      search(
+        [
+          hit('doc-1', { legacy_id: 'legacy-1' }, ['s1']),
+          hit('doc-2', {}, ['s2']),
+          hit('doc-3', {}, ['s3']),
+        ],
+        5
+      );
+
+      const result = await find();
+
+      expect(result.observables.map(({ id }) => id)).toEqual(['legacy-1', 'doc-2']);
+      expect(result.total).toBe(5);
+      expect(result.searchAfter).toEqual(['s2']);
+    });
+
+    it('has no next page when the observables fit the page', async () => {
+      search([hit('doc-1', {}, ['s1']), hit('doc-2', {}, ['s2'])]);
+
+      const result = await find();
+
+      expect(result.observables).toHaveLength(2);
+      expect(result.searchAfter).toBeUndefined();
+    });
+
+    it('returns nothing for a case that has no documents, as when the index does not exist yet', async () => {
+      search([]);
+
+      expect(await find()).toEqual({ observables: [], total: 0, searchAfter: undefined });
+    });
+
+    it('lets a failed search fail the request instead of showing an empty list', async () => {
+      // Failure scenario: Elasticsearch rejects the search while the index is the source of truth.
+      storageClient.search.mockRejectedValue(new Error('search_phase_execution_exception'));
+
+      await expect(find()).rejects.toThrow('search_phase_execution_exception');
+    });
+  });
 });

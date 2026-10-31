@@ -4,14 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  DEFAULT_OBSERVABLES_PER_PAGE,
+  MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  MAX_OBSERVABLES_CURSOR_LENGTH,
+  MAX_OBSERVABLES_FIND_TYPE_KEYS,
   MAX_OBSERVABLES_PER_CASE,
+  MAX_OBSERVABLES_PER_PAGE,
   MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
-import { limitedArraySchema, limitedStringSchema } from '../../../schema';
-import { CaseObservableBaseSchema } from '../../domain/observable/v1';
+import { limitedArraySchema, limitedNumberSchema, limitedStringSchema } from '../../../schema';
+import { CaseObservableBaseSchema, CaseObservableSchema } from '../../domain/observable/v1';
 
 export const ObservablePostSchema = CaseObservableBaseSchema;
 
@@ -49,9 +54,57 @@ export const BulkDeleteObservablesRequestSchema = z.object({
   }),
 });
 
+export const FindObservablesSortFieldSchema = lazySchema(() =>
+  z.enum(['created', 'updated', 'value', 'type'])
+);
+export const FindObservablesSortOrderSchema = lazySchema(() => z.enum(['asc', 'desc']));
+
+export const FindObservablesRequestSchema = lazySchema(() =>
+  z.object({
+    typeKeys: limitedArraySchema({
+      codec: limitedStringSchema({
+        fieldName: 'typeKeys',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+      }),
+      min: 0,
+      max: MAX_OBSERVABLES_FIND_TYPE_KEYS,
+      fieldName: 'typeKeys',
+    }).optional(),
+    sortField: FindObservablesSortFieldSchema.default('created'),
+    sortOrder: FindObservablesSortOrderSchema.default('asc'),
+    perPage: limitedNumberSchema({
+      fieldName: 'perPage',
+      min: 1,
+      max: MAX_OBSERVABLES_PER_PAGE,
+    }).default(DEFAULT_OBSERVABLES_PER_PAGE),
+    /** The cursor of the previous page, to be sent back unchanged. */
+    cursor: limitedStringSchema({
+      fieldName: 'cursor',
+      min: 1,
+      max: MAX_OBSERVABLES_CURSOR_LENGTH,
+    }).optional(),
+  })
+);
+
+export const FindObservablesResponseSchema = lazySchema(() =>
+  z.object({
+    observables: z.array(CaseObservableSchema),
+    /** The number of observables of the case that match the filters. */
+    total: z.number(),
+    /** Absent on the last page. */
+    cursor: z.string().optional(),
+  })
+);
+
 export type ObservablePost = z.infer<typeof ObservablePostSchema>;
 export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
 export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
 export type UpdateObservableRequest = z.infer<typeof UpdateObservableRequestSchema>;
 export type BulkAddObservablesRequest = z.infer<typeof BulkAddObservablesRequestSchema>;
 export type BulkDeleteObservablesRequest = z.infer<typeof BulkDeleteObservablesRequestSchema>;
+export type FindObservablesSortField = z.infer<typeof FindObservablesSortFieldSchema>;
+export type FindObservablesSortOrder = z.infer<typeof FindObservablesSortOrderSchema>;
+export type FindObservablesRequest = z.input<typeof FindObservablesRequestSchema>;
+export type FindObservablesParams = z.output<typeof FindObservablesRequestSchema>;
+export type FindObservablesResponse = z.infer<typeof FindObservablesResponseSchema>;
