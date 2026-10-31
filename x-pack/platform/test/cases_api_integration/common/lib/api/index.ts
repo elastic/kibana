@@ -51,6 +51,8 @@ import type {
   CaseWithUpdateSummary,
   CustomFieldPutRequest,
   DocumentResponse,
+  FindObservablesRequest,
+  FindObservablesResponse,
   GetRelatedCasesByAlertResponse,
   SimilarCasesSearchRequest,
   UpdateObservableRequest,
@@ -61,6 +63,7 @@ import {
   getCaseBulkDeleteObservablesUrl,
   getCaseCreateObservableUrl,
   getCaseDeleteObservableUrl,
+  getCaseFindObservablesUrl,
   getCaseFindUserActionsUrl,
   getCaseUpdateObservableUrl,
 } from '@kbn/cases-plugin/common/api';
@@ -1010,6 +1013,37 @@ export const addObservable = async ({
     .expect(expectedHttpCode);
 
   return updatedCase;
+};
+
+export const findObservables = async ({
+  supertest,
+  caseId,
+  params = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params?: FindObservablesRequest | Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+}): Promise<FindObservablesResponse> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseFindObservablesUrl(caseId)}`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: page } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return page;
 };
 
 export const updateObservable = async ({

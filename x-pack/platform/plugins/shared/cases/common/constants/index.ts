@@ -130,6 +130,7 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/{observable_id}` as const;
 export const INTERNAL_CASE_OBSERVABLES_BULK_DELETE_URL =
   `${INTERNAL_CASE_OBSERVABLES_URL}/_bulk_delete` as const;
+export const INTERNAL_CASE_OBSERVABLES_FIND_URL = `${INTERNAL_CASE_OBSERVABLES_URL}/_find` as const;
 export const INTERNAL_CASE_WORKFLOW_RUN_URL =
   `${CASES_INTERNAL_URL}/workflows/{workflow_id}/run` as const;
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
@@ -503,6 +504,12 @@ export const MAX_OBSERVABLE_TYPE_KEY_LENGTH = 36;
 export const OBSERVABLE_ID_MAX_LENGTH = 36;
 
 export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
+
+export const DEFAULT_OBSERVABLES_PER_PAGE = 25;
+export const MAX_OBSERVABLES_PER_PAGE = 100;
+export const MAX_OBSERVABLES_FIND_TYPE_KEYS = 100;
+/** Room for the sort values of the last observable of a page, which hold its value and type key. */
+export const MAX_OBSERVABLES_CURSOR_LENGTH = 4096;
 
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 

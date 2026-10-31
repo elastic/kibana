@@ -25,6 +25,7 @@ import { getCasesMetricRoute } from './internal/get_cases_metrics';
 import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 import { postObservableRoute } from './observables/post_observable';
+import { findObservablesRoute } from './observables/find_observables';
 import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observables';
@@ -61,6 +62,7 @@ export const getInternalRoutes = (
     searchCasesRoute,
     replaceCustomFieldRoute,
     postObservableRoute,
+    findObservablesRoute,
     bulkDeleteObservablesRoute,
     patchObservableRoute,
     deleteObservableRoute,
