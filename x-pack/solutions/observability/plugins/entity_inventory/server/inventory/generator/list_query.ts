@@ -8,7 +8,7 @@
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import type { OutputColumn } from './columns';
 import { LAST_SEEN_COLUMN, buildColumns, planColumnNames } from './columns';
-import { quoteIdentifier } from './esql_syntax';
+import { quoteIdentifier, quoteIndexName } from './esql_syntax';
 import type { IdentityPlan } from './identity';
 import { resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
@@ -57,7 +57,7 @@ export const buildListQuery = ({
   limit,
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
-  const { engine, indexPattern, filter } = plan;
+  const { engine, indexPattern, indices, queryTarget, filter } = plan;
   const { groupingFields, presenceFilter, idEvaluation } = identity;
 
   const predicates = [
@@ -72,7 +72,9 @@ export const buildListQuery = ({
 
   const esql = [
     'SET unmapped_fields="nullify";',
-    `${engine} ${indexPattern}`,
+    `${engine} ${
+      queryTarget === 'pattern' ? indexPattern : indices.map(quoteIndexName).join(', ')
+    }`,
     `| WHERE ${predicates.join(`${CONTINUATION}AND `)}`,
     `| STATS ${aggregations.join(`,${CONTINUATION}`)}${CONTINUATION}BY ${groupingFields
       .map(quoteIdentifier)

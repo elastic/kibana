@@ -6,7 +6,7 @@
  */
 
 import { Parser, isAssignment, isColumn } from '@elastic/esql';
-import { getIdentityFields } from '@kbn/entity-store/common';
+import { getIdentityCompositions, getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { getDynamicBlock } from './dynamic';
@@ -27,6 +27,11 @@ export interface IdentityPlan {
   idEvaluation: string;
   /** Columns the id evaluation assigns besides `entity.id`, in assignment order. */
   helperColumns: string[];
+  /**
+   * The fields of each identity composition, in ranking order: `[[field]]` for a single field, one
+   * list per ranking entry otherwise. An index can serve the identity if it maps every field of one.
+   */
+  compositions: string[][];
 }
 
 // Reads the assignment targets from the generated text so the names never drift from the store.
@@ -60,5 +65,6 @@ export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): Iden
     presenceFilter: `(${euid.esql.getEuidDocumentsContainsIdFilter(definition)})`,
     idEvaluation,
     helperColumns: assignedColumns(idEvaluation).filter((name) => name !== ENTITY_ID_COLUMN),
+    compositions: getIdentityCompositions(identityField),
   };
 };

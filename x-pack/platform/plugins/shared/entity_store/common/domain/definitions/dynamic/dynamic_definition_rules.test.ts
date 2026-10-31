@@ -14,6 +14,7 @@ import {
   NO_IDENTITY_ATTRIBUTE_RULE,
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
+  getIdentityCompositions,
   getPresenceFilter,
 } from './dynamic_definition_rules';
 import {
@@ -364,6 +365,22 @@ describe('dynamic definition rules', () => {
 
     it('accepts an attribute on a different field', () => {
       expectAccepted(withAttribute(hostIdentity, 'host.os.name'));
+    });
+  });
+
+  describe('getIdentityCompositions', () => {
+    it('lists the fields of each composition, separators dropped', () => {
+      expect(getIdentityCompositions({ singleField: 'service.name' })).toEqual([['service.name']]);
+      expect(
+        getIdentityCompositions({
+          euidRanking: {
+            branches: [
+              { ranking: [[{ field: 'a' }, { sep: '/' }, { field: 'b' }], [{ field: 'c' }]] },
+            ],
+          },
+          documentsFilter: getPresenceFilter([['a', 'b'], ['c']]),
+        })
+      ).toEqual([['a', 'b'], ['c']]);
     });
   });
 

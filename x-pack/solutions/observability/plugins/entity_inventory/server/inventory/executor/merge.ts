@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ENTITY_ID_COLUMN } from '../generator';
+import type { OutputColumn } from '../generator';
+import type { InventoryRow, MergeResult, PlanResult, Provenance, TypedOutputColumn } from './types';
+import { hasValue, isNewer, lastSeenInstant } from './utils';
+
+interface EntityState {
+  row: InventoryRow;
+  lastSeen: number | null;
+  /** Attribute column to the `last_seen` of the row that supplied its value. */
+  attributeSeen: Map<string, number | null>;
+}
+
+// Under `unmapped_fields="nullify"` a plan that does not map a column's field returns type `null`,
+// which says nothing about the column; a real type from a later plan wins over it.
+const NULL_TYPE = 'null';
+
+const typeColumns = (results: PlanResult[], columns: OutputColumn[]): TypedOutputColumn[] => {
+  const returned = results.flatMap((result) => result.columns);
+  return columns.map(({ name, kind }) => ({
+    name,
+    kind,
+    type:
+      returned.find((column) => column.name === name && column.type !== NULL_TYPE)?.type ?? null,
+  }));
+};
+
+const mergeInto = (
+  state: EntityState,
+  row: InventoryRow,
+  columns: OutputColumn[],
+  provenance: Record<string, string>,
+  indexPattern: string
+): void => {
+  const rowSeen = lastSeenInstant(row);
+  columns.forEach(({ name, kind }) => {
+    const value = row[name];
+    if (!hasValue(value)) {
+      return;
+    }
+    const current = state.row[name];
+    if (kind === 'attribute') {
+      // Compared with the row that supplied the current value, not the entity's newest row, so a
+      // newer row without the attribute does not block an older row that has it.
+      if (!hasValue(current) || isNewer(rowSeen, state.attributeSeen.get(name) ?? null)) {
+        state.row[name] = value;
+        state.attributeSeen.set(name, rowSeen);
+        provenance[name] = indexPattern;
+      }
+      return;
+    }
+    if (kind === 'last_seen') {
+      if (!hasValue(current) || isNewer(rowSeen, state.lastSeen)) {
+        state.row[name] = value;
+        state.lastSeen = rowSeen;
+      }
+      return;
+    }
+    if (!hasValue(current)) {
+      state.row[name] = value;
+    }
+  });
+};
+
+/**
+ * Merges every plan's rows by `entity.id` in plan order: attributes from the row with the newest
+ * `last_seen`, `entity.id` and identity fields first non-null, `last_seen` newest; a null never
+ * replaces a value.
+ */
+export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): MergeResult => {
+  const orderedPlans = [...results].sort((a, b) => a.plan.index - b.plan.index);
+  const entities = new Map<string, EntityState>();
+  const provenance: Provenance = {};
+  let droppedRows = 0;
+
+  orderedPlans.forEach(({ plan, rows }) => {
+    rows.forEach((row) => {
+      const entityId = row[ENTITY_ID_COLUMN];
+      if (typeof entityId !== 'string') {
+        droppedRows += 1;
+        return;
+      }
+      const state: EntityState = entities.get(entityId) ?? {
+        row: {},
+        lastSeen: null,
+        attributeSeen: new Map(),
+      };
+
+      if (!entities.has(entityId)) {
+        entities.set(entityId, state);
+        provenance[entityId] = {};
+      }
+
+      mergeInto(state, row, columns, provenance[entityId], plan.indexPattern);
+    });
+  });
+
+  return {
+    rows: [...entities.values()].map(({ row }) => row),
+    columns: typeColumns(orderedPlans, columns),
+    provenance,
+    droppedRows,
+  };
+};

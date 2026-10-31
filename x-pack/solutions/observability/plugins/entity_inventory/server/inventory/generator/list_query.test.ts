@@ -12,6 +12,7 @@ import {
   k8sDeploymentFixture,
   k8sNodeFixture,
 } from '../__fixtures__/definitions';
+import { resolveAllAs } from '../__fixtures__/resolved_sources';
 import { buildColumns, planColumnNames } from './columns';
 import { InventoryDefinitionError } from './errors';
 import { quoteIdentifier } from './esql_syntax';
@@ -30,10 +31,7 @@ const window: TimeWindow = { from: '2026-10-19T10:00:00.000Z', to: '2026-10-19T1
 const LIMIT = 10000;
 
 const plansOf = (definition: EntityDefinitionWithoutId, engine: QueryEngine) =>
-  planSources(
-    definition,
-    (definition.dynamic?.sources ?? []).map((): QueryEngine => engine)
-  );
+  planSources(definition, resolveAllAs(definition, engine === 'TS' ? 'time_series' : 'standard'));
 
 const cases = INVENTORY_DEFINITION_FIXTURES.flatMap((definition) =>
   (['TS', 'FROM'] as const).map((engine) => [definition.type, engine, definition] as const)
@@ -252,6 +250,35 @@ TS metrics-kubernetes.state_deployment-*
 | KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
 | SORT \`last_seen\` DESC NULLS LAST
 | LIMIT 10000`);
+  });
+
+  it('queries the concrete indices of each plan of a source split by index mode', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: { sources: [{ indexPattern: 'metrics-*-*', filter: 'service.type == "k8s"' }] },
+    };
+    const plans = planSources(definition, [
+      {
+        indices: [
+          { name: '.ds-metrics-b-default-2026.10.19-000001', mode: 'time_series' },
+          { name: '.ds-metrics-a-default-2026.10.19-000001', mode: 'time_series' },
+          { name: '.ds-metrics-kubernetes.event-default-2026.10.19-000001', mode: 'standard' },
+          { name: 'metrics-legacy+old@2026', mode: 'standard' },
+        ],
+      },
+    ]);
+    const queries = generateListQueries(definition, plans, window, LIMIT);
+
+    expect(queries.map(({ esql }) => esql.split('\n')[1])).toEqual([
+      'TS ".ds-metrics-a-default-2026.10.19-000001", ".ds-metrics-b-default-2026.10.19-000001"',
+      'FROM ".ds-metrics-kubernetes.event-default-2026.10.19-000001", "metrics-legacy+old@2026"',
+    ]);
+    queries.forEach(({ esql, params }) => {
+      expect(esql).not.toContain('metrics-*-*');
+      expect(esql).toContain('\n    AND (service.type == "k8s")\n');
+      expect(params).toEqual([{ from: window.from }, { to: window.to }]);
+      expect(Parser.parse(esql).errors).toEqual([]);
+    });
   });
 
   it('rejects an unsafe index pattern before assembling a query', () => {
