@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_VALUE_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
   MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
@@ -13,12 +15,25 @@ import {
 import { limitedArraySchema, limitedStringSchema } from '../../../schema';
 import { CaseObservableBaseSchema } from '../../domain/observable/v1';
 
-export const ObservablePostSchema = CaseObservableBaseSchema;
+// The bounds apply to requests only: the domain schema must keep parsing stored observables that predate them.
+const BoundedObservableValueSchema = lazySchema(() => z.string().max(MAX_OBSERVABLE_VALUE_LENGTH));
+const BoundedObservableDescriptionSchema = lazySchema(() =>
+  z.string().max(MAX_OBSERVABLE_DESCRIPTION_LENGTH).nullable()
+);
 
-export const ObservablePatchSchema = z.object({
-  value: z.string(),
-  description: z.string().nullable(),
-});
+export const ObservablePostSchema = lazySchema(() =>
+  CaseObservableBaseSchema.extend({
+    value: BoundedObservableValueSchema,
+    description: BoundedObservableDescriptionSchema,
+  })
+);
+
+export const ObservablePatchSchema = lazySchema(() =>
+  z.object({
+    value: BoundedObservableValueSchema,
+    description: BoundedObservableDescriptionSchema,
+  })
+);
 
 export const AddObservableRequestSchema = z.object({
   observable: ObservablePostSchema,

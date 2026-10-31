@@ -7,6 +7,10 @@
 
 import { getFlattenedObject } from '@kbn/std';
 
+import {
+  MAX_OBSERVABLE_DESCRIPTION_LENGTH,
+  MAX_OBSERVABLE_VALUE_LENGTH,
+} from '../../../common/constants';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
@@ -136,7 +140,26 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    const result = await applyObservablesToCase(caseId, observables, clientArgs);
+    // Extracted values bypass the request schemas, so the length bounds are enforced here. Values are
+    // skipped rather than truncated, which would corrupt the indicator; only the count is logged.
+    const observablesWithinBounds = observables.filter(
+      ({ value, description }) =>
+        value.length <= MAX_OBSERVABLE_VALUE_LENGTH &&
+        (description ?? '').length <= MAX_OBSERVABLE_DESCRIPTION_LENGTH
+    );
+    const skippedCount = observables.length - observablesWithinBounds.length;
+
+    if (skippedCount > 0) {
+      logger.warn(
+        `[extractAndAddObservables] Skipped ${skippedCount} observable(s) for case ${caseId}: the value or description exceeds the maximum length`
+      );
+    }
+
+    if (observablesWithinBounds.length === 0) {
+      return;
+    }
+
+    const result = await applyObservablesToCase(caseId, observablesWithinBounds, clientArgs);
     if (!result) {
       logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
       return;
