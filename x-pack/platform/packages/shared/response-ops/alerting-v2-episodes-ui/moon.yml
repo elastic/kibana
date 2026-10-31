@@ -80,6 +80,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/unified-histogram'
   - '@kbn/zod'
+  - '@kbn/cell-actions'
   - '@kbn/alerts-ui-shared'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-analytics'
