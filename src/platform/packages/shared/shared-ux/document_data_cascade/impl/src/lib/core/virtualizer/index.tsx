@@ -19,7 +19,12 @@ import React, {
   useSyncExternalStore,
 } from 'react';
 import { type Row } from '@tanstack/react-table';
-import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
+import {
+  useVirtualizer,
+  defaultRangeExtractor,
+  measureElement,
+  type VirtualItem,
+} from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 import {
   createChildVirtualizerController,
@@ -129,27 +134,18 @@ export function calculateActiveStickyIndex<G extends GroupNode>(
     return null;
   }
 
-  const rangeStartParentRows = rangeStartRow.getParentRows();
+  if (rangeStartRow.getIsExpanded()) {
+    return startIndex;
+  }
 
-  if (!rangeStartParentRows.length && !rangeStartRow.getIsExpanded()) {
+  const nearestParent = rangeStartRow.getParentRows().at(-1);
+  if (!nearestParent) {
     return null;
   }
 
-  if (!rangeStartParentRows.length && rangeStartRow.getIsExpanded()) {
-    return rangeStartRow.index;
-  }
-
-  const nearestExpandedParentIndex = rangeStartParentRows.reduce<number>((acc, row, idx) => {
-    return (acc += row.index + idx);
-  }, 0);
-
-  const isExpandedLeafRow = !rangeStartRow.subRows.length && rangeStartRow.getIsExpanded();
-
-  return isExpandedLeafRow
-    ? // we add 1 to the index to account for the fact that
-      // we get an zero based index for children in relation to the parent
-      nearestExpandedParentIndex + rangeStartRow.index + 1
-    : nearestExpandedParentIndex;
+  // Table row indices are local to siblings; the virtualizer indexes the flattened visible rows.
+  const parentIndex = rows.findIndex((row) => row.id === nearestParent.id);
+  return parentIndex >= 0 ? parentIndex : null;
 }
 
 export interface CascadeVirtualizerReturnValue
@@ -164,6 +160,7 @@ export interface CascadeVirtualizerReturnValue
     | 'range'
     | 'measurementsCache'
     | 'calculateRange'
+    | 'scrollToIndex'
   > {
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<string, number>;
@@ -477,6 +474,22 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     () => ({
       count: rows.length,
       estimateSize: () => estimatedRowHeight,
+      measureElement: (element, entry, instance) => {
+        const index = instance.indexFromElement(element);
+
+        const hasDetachedChild =
+          childController &&
+          Array.from(childController.getConnectedChildren().values()).some(
+            (child) => child.rowIndex === index && child.isDetached
+          );
+
+        // A detached child is not in normal flow; retain its row's bounds so scrolling cannot unmount it.
+        if (hasDetachedChild) {
+          return instance.measurementsCache[index]?.size ?? estimatedRowHeight;
+        }
+
+        return measureElement(element, entry, instance);
+      },
       getItemKey,
       getScrollElement,
       overscan: initialOverscan,
@@ -511,6 +524,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       observeElementOffset,
       observeElementRect,
       estimatedRowHeight,
+      childController,
       onStateChange,
     ]
   );
@@ -584,15 +598,31 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
     return () => clearTimeout(id);
   }, [isStable]);
 
-  // Suppress tanstack's built-in scroll adjustments until both root AND
-  // children have stabilized. When the root yields corrections to a child
-  // (skipCorrections), hasStabilizedRef flips immediately but children
-  // haven't mounted yet — allowing adjustments at this point would cause
-  // root row resizes to shift the scroll position while the child's
-  // correction loop is still converging.
   virtualizerImpl.shouldAdjustScrollPositionOnItemSizeChange = (item) => {
+    // Suppress tanstack's built-in scroll adjustments until both root AND
+    // children have stabilized.
     if (!hasStabilizedRef.current) return false;
-    if (childController && !childController.haveAllRestoringChildrenStabilized()) return false;
+
+    if (
+      childController &&
+      /**
+       * When the root yields corrections to a child (i.e. skipCorrections),
+       * hasStabilizedRef flips immediately but it's children haven't mounted
+       * yet — allowing adjustments at this point would cause root row resizes to shift the scroll position
+       * while the child's correction loop is still converging.
+       */
+      (!childController.haveAllRestoringChildrenStabilized() ||
+        /**
+         * A row whose content is virtualized by an attached child resizes every time that child
+         * measures its own rows. The child already corrects the shared scroll offset for rows it
+         * measured above the viewport, and rows it measured below the viewport must not move the
+         * scroll at all, so we ensure the root does not compensate for these rows a second time.
+         */
+        childController.hasAttachedChildForRow(item.index))
+    ) {
+      return false;
+    }
+
     return item.start < (virtualizerImpl.scrollOffset ?? 0);
   };
 
@@ -610,6 +640,9 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       scrollToVirtualizedIndex: ((offset, options = {}) => {
         return virtualizerImpl.options.scrollToFn(offset, options, virtualizerImpl);
       }) satisfies CascadeVirtualizerReturnValue['scrollToVirtualizedIndex'],
+      // item-index based scrolling; accounts for the configured scrollMargin, so for a child
+      // virtualizer this scrolls the shared root scroll element to the child's row
+      scrollToIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
       get measurementsCache() {
         return virtualizerImpl.measurementsCache;
       },

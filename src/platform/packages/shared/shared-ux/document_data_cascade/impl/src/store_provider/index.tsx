@@ -14,6 +14,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   type PropsWithChildren,
 } from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
@@ -97,6 +98,7 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
 }: PropsWithChildren<IDataCascadeProviderProps<G>>) {
   const StoreContext = useMemo(() => createStoreContext<G, L>(), []);
   const storeReducers = useMemo(() => createStoreReducers<G, L>(), []);
+  const groupNodesRef = useRef<G[]>(initialGroupNodes);
 
   const validatedInitialGroupColumn = useMemo(() => {
     if (!initialGroupColumn) return [cascadeGroups[0]];
@@ -115,12 +117,12 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   const initialStoreState = useMemo<IStoreState<G, L>>(
     () => ({
       table: initialTableState,
-      groupNodes: initialGroupNodes,
+      groupNodes: groupNodesRef.current,
       leafNodes: new Map<string, L[]>(),
       groupByColumns: cascadeGroups,
       currentGroupByColumns: validatedInitialGroupColumn.length ? validatedInitialGroupColumn : [],
     }),
-    [initialGroupNodes, initialTableState, cascadeGroups, validatedInitialGroupColumn]
+    [initialTableState, cascadeGroups, validatedInitialGroupColumn]
   );
 
   const { state, actions } = useCreateStore({
@@ -133,11 +135,13 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
       state.groupByColumns.length !== cascadeGroups.length ||
       state.groupByColumns.some((column) => !cascadeGroups.includes(column));
 
-    const groupNodesChanged = state.groupNodes !== initialGroupNodes;
+    const groupNodesChanged = groupNodesRef.current !== initialGroupNodes;
 
     if (columnsChanged || groupNodesChanged) {
+      groupNodesRef.current = initialGroupNodes;
+
       actions._setStoreState({
-        groupNodes: initialGroupNodes,
+        groupNodes: groupNodesRef.current,
         groupByColumns: cascadeGroups,
         currentGroupByColumns: validatedInitialGroupColumn.length
           ? validatedInitialGroupColumn
@@ -150,7 +154,6 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
     cascadeGroups,
     initialGroupNodes,
     state.groupByColumns,
-    state.groupNodes,
     validatedInitialGroupColumn,
   ]);
 

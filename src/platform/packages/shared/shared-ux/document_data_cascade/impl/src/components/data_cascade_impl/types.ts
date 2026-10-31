@@ -19,6 +19,7 @@ import type {
 import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
 import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
+import type { StickyHeaderExtensionPointContextValue } from './data_cascade_row/components/cascade_row_header_extension_point';
 
 /**
  * Sizing options for the cascade components, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
@@ -64,6 +65,12 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   nodePathMap: Record<string, string>;
   virtualizerController: ChildVirtualizerController;
   rowIndex: number;
+  /**
+   * Stable inline header host for content rendered with `createPortal`, including before the header pins.
+   * This allows the child to maintain its React tree relationship with the portaled content,
+   * ensuring state updates trigger proper re-renders.
+   */
+  stickyHeaderExtensionPoint: StickyHeaderExtensionPointContextValue;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
@@ -170,7 +177,7 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
 export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
   /**
-   * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
+   * Ref that provides a reference to the DOM element that will be used to portal the active sticky group node header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
   /**
@@ -178,13 +185,15 @@ export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNod
    */
   isMobile: boolean;
   /**
-   * Denotes if the row is sticky.
+   * Denotes if the row is the sticky candidate, i.e. the nearest expanded ancestor of the first visible row.
    */
   isActiveSticky: boolean;
+  /** Whether the inline header sticks while scrolling. */
+  enableStickyGroupHeader?: boolean;
   /**
    * Ref that provides a reference to the DOM element that renders the cascade row.
    */
-  innerRef: React.LegacyRef<HTMLDivElement>;
+  innerRef: React.Ref<HTMLDivElement>;
   /**
    * The virtual row for the cascade row.
    */

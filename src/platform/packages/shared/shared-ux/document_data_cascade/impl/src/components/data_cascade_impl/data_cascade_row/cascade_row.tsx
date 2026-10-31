@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
@@ -24,8 +24,10 @@ import {
   styles as cascadeRowStyles,
   rootRowAttribute,
   childRowAttribute,
+  stickyHeaderExtensionPointTestSubjAttribute,
 } from './cascade_row.styles';
 import { CascadeRowHeaderPrimitive } from './components/cascade_row_header';
+import { StickyHeaderExtensionPointProvider } from './components/cascade_row_header_extension_point';
 
 export { CascadeRowHeaderPrimitive };
 
@@ -33,10 +35,11 @@ export { CascadeRowHeaderPrimitive };
  * @internal
  * @description Internal component that is used to render a row in the data cascade component.
  */
-export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
+function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
   isMobile,
   activeStickyRenderSlotRef,
   isActiveSticky,
+  enableStickyGroupHeader = true,
   innerRef,
   onCascadeGroupNodeExpanded,
   onCascadeGroupNodeCollapsed,
@@ -62,6 +65,22 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
 
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
+  // A stable host lets cells keep their toolbar and column headers mounted throughout scrolling.
+  const [stickyHeaderExtensionElement] = useState(() => {
+    const element = document.createElement('div');
+    element.setAttribute('data-test-subj', stickyHeaderExtensionPointTestSubjAttribute);
+    return element;
+  });
+
+  const attachStickyHeaderExtensionElement = useCallback(
+    (host: HTMLDivElement | null) => {
+      if (host && stickyHeaderExtensionElement.parentElement !== host) {
+        host.appendChild(stickyHeaderExtensionElement);
+      }
+    },
+    [stickyHeaderExtensionElement]
+  );
+
   const cellId = useMemo(() => {
     if (isGroupNode) return null;
     const nodePath = getCascadeRowNodePath(currentGroupByColumns, rowInstance);
@@ -83,6 +102,13 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       size
     );
   }, [euiTheme, hasAllParentsExpanded, rowDepth, rowParentId, size]);
+
+  // Layout offsets let native sticky positioning account for a leaf's place in the virtual list.
+  const leafRowPositionStyle = useMemo(
+    () => ({ top: virtualRow.start, zIndex: rowDepth + 1 }),
+    [virtualRow.start, rowDepth]
+  );
+  const rowPositionStyle = isGroupNode ? virtualRowStyle : leafRowPositionStyle;
 
   const rowHeader = useMemo(() => {
     return (
@@ -120,13 +146,20 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       data-index={virtualRow.index}
       data-row-type={rowDepth === 0 ? rootRowAttribute : childRowAttribute}
       ref={innerRef}
-      style={virtualRowStyle}
+      style={rowPositionStyle}
       {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
       css={styles.rowWrapper}
     >
-      <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize={!isGroupNode && rowIsExpanded ? 'none' : size}
+        css={styles.rowInner}
+      >
         <React.Fragment>
-          {isActiveSticky && activeStickyRenderSlotRef.current
+          {enableStickyGroupHeader &&
+          isActiveSticky &&
+          isGroupNode &&
+          activeStickyRenderSlotRef.current
             ? createPortal(
                 <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
                 activeStickyRenderSlotRef.current,
@@ -134,8 +167,22 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
               )
             : null}
         </React.Fragment>
-        <EuiFlexItem>{rowHeader}</EuiFlexItem>
-        <React.Fragment>
+        <EuiFlexItem
+          css={[
+            !isGroupNode && styles.rowHeader,
+            enableStickyGroupHeader && !isGroupNode && rowIsExpanded && styles.inlineStickyHeader,
+          ]}
+          data-test-subj={!isGroupNode ? 'dataCascadeInlineStickyHeader' : undefined}
+        >
+          {rowHeader}
+          {!isGroupNode && (
+            <div ref={attachStickyHeaderExtensionElement} css={styles.rowInlineHeaderExtension} />
+          )}
+        </EuiFlexItem>
+        <StickyHeaderExtensionPointProvider
+          extensionPointElement={stickyHeaderExtensionElement}
+          stickyEnabled={enableStickyGroupHeader}
+        >
           {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
             <EuiFlexItem role="gridcell">
               {rowVisibleCells.map((cell) => (
@@ -143,8 +190,18 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
               ))}
             </EuiFlexItem>
           )}
-        </React.Fragment>
+        </StickyHeaderExtensionPointProvider>
       </EuiFlexGroup>
     </div>
   );
 }
+
+/**
+ * @internal
+ * @description Memoized so that the per-scroll re-render of the virtualized list only reconciles rows whose
+ * props actually changed. Table state changes (expansion, selection) still re-render every row through the
+ * cascade store context, which bypasses the memo.
+ */
+export const CascadeRowPrimitive = React.memo(
+  CascadeRowPrimitiveComponent
+) as typeof CascadeRowPrimitiveComponent;

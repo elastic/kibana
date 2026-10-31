@@ -13,6 +13,7 @@ import type { CascadeSizing } from '../types';
 
 export const rootRowAttribute = 'root' as const;
 export const childRowAttribute = 'sub-group' as const;
+export const stickyHeaderExtensionPointTestSubjAttribute = 'sticky-header-extension-point' as const;
 
 export const styles = (
   euiTheme: UseEuiTheme['euiTheme'],
@@ -47,8 +48,8 @@ export const styles = (
     },
 
     [`[data-row-type="${rootRowAttribute}"] + [data-row-type="${childRowAttribute}"] &:before`]: {
-      borderTopLeftRadius: border.radius.small,
-      borderTopRightRadius: border.radius.small,
+      borderTopLeftRadius: border.radius.inline,
+      borderTopRightRadius: border.radius.inline,
     },
 
     [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &`]: {
@@ -57,13 +58,14 @@ export const styles = (
 
     [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &:before`]:
       {
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.inline,
+        borderBottomRightRadius: border.radius.inline,
         borderBottom: `${border.width.thin} solid ${border.color}`,
       },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"] &`]: {
       gap: 0,
+      isolation: 'isolate',
     },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"] & > *`]: {
@@ -86,15 +88,21 @@ export const styles = (
       width: `calc(100% - ${euiSizing[size]} * 2)`,
       height: '100%',
       pointerEvents: 'none',
+      zIndex: euiTheme.levels.header,
       borderTop: `${border.width.thin} solid ${border.color}`,
       borderLeft: `${border.width.thin} solid ${border.color}`,
       borderRight: `${border.width.thin} solid ${border.color}`,
     },
 
+    // Keep the inset frame behind the widened active header.
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"][data-active-sticky="true"] &:after`]: {
+      zIndex: 0,
+    },
+
     [`[data-row-type="${childRowAttribute}"]:not([aria-level="3"]) + [data-row-type="${childRowAttribute}"][aria-level="3"]  &:after`]:
       {
-        borderTopLeftRadius: border.radius.small,
-        borderTopRightRadius: border.radius.small,
+        borderTopLeftRadius: border.radius.inline,
+        borderTopRightRadius: border.radius.inline,
       },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) & > *:last-child`]:
@@ -105,8 +113,8 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) &:after`]:
       {
         height: `calc(100% - ${euiSizing[size]})`,
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.inline,
+        borderBottomRightRadius: border.radius.inline,
         borderBottom: `${border.width.thin} solid ${border.color}`,
       },
   });
@@ -121,14 +129,14 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="2"]) &:before`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderRadius: border.radius.small,
+        borderRadius: border.radius.inline,
       },
 
     // when a level 2 row is focused and followed by a level 3 row, this implies the focused row is expanded
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="3"]) &:before`]:
       {
-        borderTopLeftRadius: border.radius.small,
-        borderTopRightRadius: border.radius.small,
+        borderTopLeftRadius: border.radius.inline,
+        borderTopRightRadius: border.radius.inline,
       },
 
     // when a level 2 row is focused and followed by a level 3 row, which implies the focused row is expanded we select all it's children
@@ -142,34 +150,25 @@ export const styles = (
     [`[data-row-type="${childRowAttribute}"][aria-level="2"]:focus-visible:has(+ [aria-level="3"]) ~ [aria-level="3"]:has(+ [aria-level="2"]) &:before`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderBottomLeftRadius: border.radius.small,
-        borderBottomRightRadius: border.radius.small,
+        borderBottomLeftRadius: border.radius.inline,
+        borderBottomRightRadius: border.radius.inline,
       },
 
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:focus-visible &:after`]: {
       borderWidth: border.width.thick,
       borderColor: OUTLINE_COLOR,
-      borderRadius: border.radius.small,
+      borderRadius: border.radius.inline,
     },
 
     // when a level 3 row is focused and preceded by any row, we want to apply a border to the bottom of the row
     [`[data-row-type="${childRowAttribute}"][aria-level="3"]:focus-visible:has(+ [aria-level]) &:after`]:
       {
         borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-        borderRadius: border.radius.small,
+        borderRadius: border.radius.inline,
       },
   });
 
   return {
-    rowStickyHeaderInner: css({
-      padding: euiSizing[size],
-      position: 'absolute',
-      width: '100%',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      borderWidth: `0 ${border.width.thin} ${border.width.thin} 0`,
-      borderStyle: 'solid',
-      borderColor: border.color,
-    }),
     rowWrapper: css({
       display: 'flex',
       position: 'absolute',
@@ -218,8 +217,8 @@ export const styles = (
             borderLeftStyle: 'solid',
             borderWidth: border.width.thick,
             borderColor: OUTLINE_COLOR,
-            borderTopLeftRadius: border.radius.small,
-            borderTopRightRadius: border.radius.small,
+            borderTopLeftRadius: border.radius.inline,
+            borderTopRightRadius: border.radius.inline,
           },
 
           [`& ~ [data-row-type="${childRowAttribute}"]:before`]: {
@@ -233,8 +232,8 @@ export const styles = (
           [`& ~ [data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]):before`]:
             {
               borderBottom: `${border.width.thick} solid ${OUTLINE_COLOR}`,
-              borderBottomLeftRadius: border.radius.small,
-              borderBottomRightRadius: border.radius.small,
+              borderBottomLeftRadius: border.radius.inline,
+              borderBottomRightRadius: border.radius.inline,
             },
         },
 
@@ -258,5 +257,45 @@ export const styles = (
             paddingBottom: 0,
           },
     ]),
+    rowStickyHeaderInner: css({
+      padding: euiSizing[size],
+      position: 'absolute',
+      width: '100%',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderWidth: `0 ${border.width.thin} ${border.width.thin} 0`,
+      borderStyle: 'solid',
+      borderColor: border.color,
+    }),
+    rowHeader: css({
+      position: 'relative',
+      zIndex: euiTheme.levels.header,
+      backgroundColor:
+        rowDepth % 2 === 1 ? colors.backgroundBaseSubdued : colors.backgroundBasePlain,
+      flexShrink: 0,
+      [`[data-active-sticky="true"] &`]: {
+        boxShadow: `0 ${border.width.thin} 0 ${border.color}`,
+      },
+    }),
+    inlineStickyHeader: css({
+      position: 'sticky',
+      top: 0,
+      padding: `${euiSizing[size]} 0`,
+
+      [`[data-active-sticky="true"] &`]: {
+        marginInlineStart: `calc(${euiSizing[size]} * -${rowDepth})`,
+        marginInlineEnd: `calc(${euiSizing[size]} * -${rowDepth})`,
+      },
+    }),
+    rowInlineHeaderExtension: css({
+      marginTop: euiSizing[size],
+      borderRadius: `${border.radius.inline} ${border.radius.inline} 0 0`,
+      backgroundColor: colors.backgroundBaseSubdued,
+      [`&:has(> [data-test-subj="${stickyHeaderExtensionPointTestSubjAttribute}"]:empty)`]: {
+        display: 'none',
+      },
+      [`[data-active-sticky="true"] &`]: {
+        boxShadow: `inset 0 0 0 ${border.width.thin} ${border.color}`,
+      },
+    }),
   };
 };
