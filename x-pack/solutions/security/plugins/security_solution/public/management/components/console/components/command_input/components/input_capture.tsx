@@ -343,12 +343,19 @@ export const InputCapture = memo<InputCaptureProps>(
             {children}
           </div>
           <div className="textSelectionBoundaryHelper"> </div>
+          {/*
+            This is the element that actually receives focus (see `focusInterface` above), so it -
+            not the `role="textbox"` wrapper - is what a screen reader announces when the console
+            opens. It therefore carries the same accessible name and placeholder as the wrapper.
+          */}
           <input
             name="inputCapture"
             ref={hiddenInputEleRef}
             type="text"
             value=""
             tabIndex={-1}
+            aria-label={ARIA_LABEL_MESSAGE}
+            aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
             onPaste={handleOnPaste}
             onChange={() => {}}
             spellCheck="false"
