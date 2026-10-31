@@ -12,6 +12,10 @@ import React from 'react';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
 import {
+  DEFAULT_EXECUTION_PAGE_FILTERS,
+  EXECUTED_BY_FILTER_FIELD,
+} from './workflow_executions_page_constants';
+import {
   buildExcludeManagedExecutionsFilter,
   buildExcludeStepRunsFilter,
   buildReadableWorkflowsFilter,
@@ -19,6 +23,13 @@ import {
 import { TestProvider } from '../../shared/mocks/test_providers';
 import { FilterControls } from '../../shared/ui/filter_controls';
 
+const mockUseUiSetting = jest.fn((_settingId: string, defaultValue?: boolean) => defaultValue);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: (settingId: string, defaultValue?: boolean) =>
+    mockUseUiSetting(settingId, defaultValue),
+}));
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsApi: jest.fn(),
@@ -35,13 +46,16 @@ const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunc
 >;
 const mockFilterControls = FilterControls as jest.MockedFunction<typeof FilterControls>;
 
-const renderFilters = () =>
+const renderFilters = (
+  props: Partial<React.ComponentProps<typeof WorkflowExecutionsFilters>> = {}
+) =>
   render(
     <WorkflowExecutionsFilters
       filters={[]}
       onFiltersChange={jest.fn()}
       setControlsUrlState={jest.fn()}
       timeRange={{ from: 'now-15m', to: 'now' }}
+      {...props}
     />,
     { wrapper: TestProvider }
   );
@@ -51,6 +65,9 @@ describe('WorkflowExecutionsFilters', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockImplementation(
+      (_settingId: string, defaultValue?: boolean) => defaultValue
+    );
     getReadableWorkflowIds = jest.fn();
     mockUseWorkflowsCapabilities.mockReturnValue({
       canReadManagedWorkflowExecution: true,
@@ -124,5 +141,39 @@ describe('WorkflowExecutionsFilters', () => {
     await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
     expect(screen.queryByTestId('workflowExecutionsFiltersError')).not.toBeInTheDocument();
     expect(getReadableWorkflowIds).toHaveBeenCalledTimes(2);
+  });
+
+  it('offers the "Triggered by" control on the display-name field by default', async () => {
+    getReadableWorkflowIds.mockResolvedValue({});
+
+    renderFilters();
+
+    await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
+    const { defaultControls } = mockFilterControls.mock.calls[0][0];
+    expect(defaultControls).toEqual(DEFAULT_EXECUTION_PAGE_FILTERS);
+    expect(defaultControls?.map(({ field_name: fieldName }) => fieldName)).toContain(
+      EXECUTED_BY_FILTER_FIELD
+    );
+  });
+
+  it('removes the "Triggered by" control everywhere when the show-executor setting is off', async () => {
+    mockUseUiSetting.mockReturnValue(false);
+    getReadableWorkflowIds.mockResolvedValue({});
+
+    renderFilters({
+      controlsUrlState: [
+        { field_name: 'status' },
+        { field_name: EXECUTED_BY_FILTER_FIELD, selected_options: ['Jane Doe'] },
+      ],
+    });
+
+    await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
+    const { controlsUrlState, defaultControls } = mockFilterControls.mock.calls[0][0];
+    expect(defaultControls?.map(({ field_name: fieldName }) => fieldName)).toEqual([
+      'status',
+      'workflowId',
+      'triggeredBy',
+    ]);
+    expect(controlsUrlState).toEqual([{ field_name: 'status' }]);
   });
 });

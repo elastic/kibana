@@ -127,6 +127,9 @@ describe('ES FLS allowlist cross-repo sync', () => {
       'stepId',
       'createdBy',
       'executedBy',
+      // Requires the matching ES-side grant in KibanaWorkflowsImplicitPrivilegesProvider
+      // before user-credentialed queries (e.g. the executions page filter) can read it.
+      'executedByUser.*',
       'effectiveIdentity.*',
       'startedAt',
       'finishedAt',
