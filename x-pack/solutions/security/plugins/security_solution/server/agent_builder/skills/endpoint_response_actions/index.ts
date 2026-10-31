@@ -75,6 +75,27 @@ from chat: say so and point the analyst to the Response Actions UI.
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
    codes and best practices.
 
+4. **Multiple hosts or actions** — when the analyst asks for actions on several
+   hosts and/or several actions (for example "isolate A and B, then scan A"),
+   dispatch one tool call per host per action, one at a time. Never batch them
+   into a single call and never issue the next call before the current one has
+   returned. Each call pauses for its own confirmation card; the analyst can
+   decline one without affecting the others. Do not retry or re-issue a declined
+   action.
+
+5. **Closing incident summary** — after the requested containment is done (every
+   action dispatched, declined, or failed), end with a short incident summary:
+   - hosts handled
+   - actions dispatched, each with its action ID and final status as reported by
+     the tool result (use \`get_response_action_status\` if still pending)
+   - actions declined or cancelled by the analyst
+   - outstanding items: pending actions, \`endpoint_not_found\` /
+     \`ambiguous_hostname\` hosts still needing an agent ID, and anything not
+     available from chat
+
+   List only what the tool results reported; leave out any host or action that
+   was never dispatched rather than implying it happened.
+
 ## Guardrails
 
 - For status and response action lookups, use the tools above instead of
