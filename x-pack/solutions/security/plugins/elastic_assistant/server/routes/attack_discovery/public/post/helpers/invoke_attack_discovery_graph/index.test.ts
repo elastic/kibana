@@ -12,13 +12,20 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceClient } from '@kbn/inference-common';
-import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
+import {
+  ActionsClientLlm,
+  ContentFilteredModelResponseError,
+  InferenceClientLlm,
+} from '@kbn/langchain/server';
 import { getDefaultAttackDiscoveryGraph } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph';
 import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 
 jest.mock('@kbn/langchain/server', () => ({
+  ...jest.requireActual(
+    '@kbn/langchain/server/language_models/content_filtered_model_response_error'
+  ),
   ActionsClientLlm: jest.fn(),
   InferenceClientLlm: jest.fn(),
   getLangSmithTracer: jest.fn().mockReturnValue([]),
@@ -245,5 +252,33 @@ describe('invokeAttackDiscoveryGraph', () => {
         size: 10,
       })
     ).rejects.toThrow('Error counts exceeded');
+  });
+
+  it('replaces a content-filtered error with a message that names the provider and suggests a different model', async () => {
+    mockGraphInvoke.mockRejectedValue(
+      new ContentFilteredModelResponseError({
+        connectorId: 'legacy-connector',
+        contentLength: 0,
+        responseBody: '',
+        model: 'gpt-x',
+      })
+    );
+
+    const error = await invokeAttackDiscoveryGraph({
+      actionsClient,
+      alertsIndexPattern: 'alerts-*',
+      anonymizationFields: [{ id: 'mock-id', field: '_id', allowed: true }],
+      apiConfig: { actionTypeId: '.bedrock', connectorId: 'legacy-connector' },
+      connectorTimeout: 30000,
+      esClient,
+      latestReplacements: {},
+      logger: { ...logger, error: jest.fn() } as unknown as Logger,
+      onNewReplacements: jest.fn(),
+      savedObjectsClient,
+      size: 10,
+    }).catch((e) => e);
+
+    expect(error.message).toContain('bedrock');
+    expect(error.message).toContain('Select a different model');
   });
 });

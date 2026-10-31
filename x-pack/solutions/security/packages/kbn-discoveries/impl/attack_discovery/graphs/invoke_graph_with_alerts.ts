@@ -28,7 +28,10 @@ import {
   takeAttackDiscoveryTemplateAlerts,
 } from './template_completion';
 import { getLlmType } from '../../lib/helpers/get_llm_type';
-import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
+import {
+  throwContentFilteredErrorWithGuidance,
+  throwIfErrorCountsExceeded,
+} from './throw_if_error_counts_exceeded';
 
 export interface InvokeAttackDiscoveryGraphWithAlertsParams {
   abortSignal?: AbortSignal;
@@ -173,25 +176,30 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
       ? `${prompts.default}\n\nAdditional context:\n${additionalContext}`
       : undefined;
 
-  const result: AttackDiscoveryGraphState = await graph.invoke(
-    {
-      anonymizedDocuments: alertsForGraph,
-      ...(promptWithAdditionalContext != null ? { prompt: promptWithAdditionalContext } : {}),
-      replacements,
-    },
-    {
-      callbacks: langSmithProject
-        ? getLangSmithTracer({
-            apiKey: langSmithApiKey,
-            logger,
-            projectName: langSmithProject,
-          })
-        : [],
-      runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
-      signal: abortSignal,
-      tags: [ATTACK_DISCOVERY_TAG, llmType, model].filter(Boolean) as string[],
-    }
-  );
+  let result: AttackDiscoveryGraphState;
+  try {
+    result = await graph.invoke(
+      {
+        anonymizedDocuments: alertsForGraph,
+        ...(promptWithAdditionalContext != null ? { prompt: promptWithAdditionalContext } : {}),
+        replacements,
+      },
+      {
+        callbacks: langSmithProject
+          ? getLangSmithTracer({
+              apiKey: langSmithApiKey,
+              logger,
+              projectName: langSmithProject,
+            })
+          : [],
+        runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
+        signal: abortSignal,
+        tags: [ATTACK_DISCOVERY_TAG, llmType, model].filter(Boolean) as string[],
+      }
+    );
+  } catch (error) {
+    return throwContentFilteredErrorWithGuidance({ error, logger, model, provider: llmType });
+  }
 
   logger.debug(() => `Graph execution completed: ${result.insights?.length ?? 0} discoveries`);
 

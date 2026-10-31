@@ -9,12 +9,40 @@ import { ActionsClientChatOpenAI } from './language_models/chat_openai';
 import { ActionsClientLlm } from './language_models/llm';
 import { ActionsClientChatVertexAI } from './language_models/chat_vertex';
 import { ActionsClientChatBedrockConverse } from './language_models/chat_bedrock_converse';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
+  MAX_RESPONSE_PREVIEW_LENGTH,
+  getBoundedResponsePreview,
+  isEmptyModelResponseError,
+} from './language_models/empty_model_response_error';
+import {
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  CONTENT_FILTER_FINISH_REASON,
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+  isContentFilteredModelResponseError,
+} from './language_models/content_filtered_model_response_error';
 import { InferenceClientLlm } from './language_models/inference_client_llm';
 import { parseBedrockStream } from './utils/bedrock';
 import { parseGeminiResponse } from './utils/gemini';
 import { getDefaultArguments } from './language_models/constants';
 
 export {
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_CODE,
+  CONTENT_FILTERED_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  CONTENT_FILTER_FINISH_REASON,
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+  isContentFilteredModelResponseError,
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
+  MAX_RESPONSE_PREVIEW_LENGTH,
+  getBoundedResponsePreview,
+  isEmptyModelResponseError,
   parseBedrockStream,
   parseGeminiResponse,
   getDefaultArguments,

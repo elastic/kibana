@@ -619,6 +619,33 @@ describe('invokeGenerationWorkflow', () => {
     });
   });
 
+  describe('when workflow execution fails with the content-filter guidance', () => {
+    const guidance =
+      'The content filter of the model provider (openai, model: gpt-x) stopped the response. Select a different model or connector for Attack Discovery and try again.';
+
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+        'workflow-run-id'
+      );
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        error: { message: guidance, type: 'Error' },
+        status: ExecutionStatus.FAILED,
+      });
+    });
+
+    it('keeps the guidance in the message that is persisted to the event log', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow(guidance);
+    });
+
+    it('does not reclassify the failure as a context-length error', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toMatchObject({
+        errorCategory: 'workflow_error',
+      });
+    });
+  });
+
   describe('when workflow execution is skipped due to concurrency limit', () => {
     const mockSkippedExecution: WorkflowExecutionDto = {
       ...mockCompletedExecution,

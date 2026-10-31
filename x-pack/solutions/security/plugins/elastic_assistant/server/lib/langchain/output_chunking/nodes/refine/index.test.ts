@@ -6,7 +6,7 @@
  */
 
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import { ContentFilteredModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -307,6 +307,27 @@ ${ATTACK_DISCOVERY_REFINE}
       generationAttempts: 3,
       refinements: ['refine0', 'refine1'],
     });
+  });
+
+  it('stops the graph by rethrowing a content-filtered error instead of recording an error to retry', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    const contentFiltered = new ContentFilteredModelResponseError({
+      connectorId: 'test-connector-id',
+      contentLength: 12,
+      model: 'test-model',
+      responseBody: '',
+    });
+    mockInvoke.mockRejectedValue(contentFiltered);
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await expect(refineNode(initialGraphState)).rejects.toBe(contentFiltered);
   });
 
   it('returns refined results when combined responses pass validation', async () => {

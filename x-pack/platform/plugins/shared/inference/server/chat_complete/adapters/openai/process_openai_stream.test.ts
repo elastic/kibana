@@ -96,6 +96,7 @@ describe('processOpenAIStream', () => {
       {
         content: '',
         refusal: CONTENT_FILTER_REFUSAL,
+        finish_reason: 'content_filter',
         tool_calls: [],
         type: ChatCompletionEventType.ChatCompletionChunk,
       },
