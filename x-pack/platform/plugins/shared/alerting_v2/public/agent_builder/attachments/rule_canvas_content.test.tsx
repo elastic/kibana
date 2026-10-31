@@ -234,8 +234,10 @@ describe('RuleCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create rule')).toBeUndefined();
     });
 
-    it('Update Rule handler calls upsertRule with the origin id', async () => {
-      const { registerActionButtons, attachment } = renderCanvas({ origin: 'rule-123' });
+    it('Update Rule handler calls upsertRule with the origin id, then refreshes the origin', async () => {
+      const { registerActionButtons, attachment, updateOrigin } = renderCanvas({
+        origin: 'rule-123',
+      });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const updateButton = buttons.find((b) => b.label === 'Update Rule')!;
@@ -244,6 +246,11 @@ describe('RuleCanvasContent', () => {
       expect(mockUpsertRule).toHaveBeenCalledWith(
         'rule-123',
         expect.objectContaining({ metadata: attachment.data.metadata })
+      );
+      expect(updateOrigin).toHaveBeenCalledWith('rule-123');
+      // The sync timestamp must be taken after the save, or the save itself looks like drift.
+      expect(mockUpsertRule.mock.invocationCallOrder[0]).toBeLessThan(
+        updateOrigin.mock.invocationCallOrder[0]
       );
       expect(mockAddSuccess).toHaveBeenCalled();
     });

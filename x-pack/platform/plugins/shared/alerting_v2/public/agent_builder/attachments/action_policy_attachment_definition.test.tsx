@@ -57,6 +57,32 @@ describe('createActionPolicyAttachmentDefinition', () => {
     });
   });
 
+  describe('getHeader', () => {
+    it('returns the reporter icon without badges for a draft', () => {
+      const definition = createActionPolicyAttachmentDefinition(createMockServices());
+      expect(definition.getHeader!({ attachment: createAttachment() })).toEqual({
+        icon: 'reporter',
+      });
+    });
+
+    it('adds an unsaved changes badge when the latest version is newer than the last sync', () => {
+      const definition = createActionPolicyAttachmentDefinition(createMockServices());
+      const attachment = {
+        ...createAttachment({ origin: 'policy-123' }),
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      };
+
+      expect(definition.getHeader!({ attachment }).badges).toEqual([
+        { label: 'Unsaved changes', color: 'warning' },
+      ]);
+    });
+  });
+
   describe('getActionButtons', () => {
     it('returns Preview button when not in canvas', () => {
       const definition = createActionPolicyAttachmentDefinition(createMockServices());
