@@ -7,6 +7,7 @@ sources:
     supported_telemetry: [logs]
 destinations:
   - id: es-prod
+    description: Production application logs, upper-cased before indexing.
     type: elasticsearch
     supported_telemetry: [logs]
     config:
@@ -15,6 +16,7 @@ destinations:
       - name: api_key
         value: __API_KEY__
   - id: es-dev
+    description: Development application logs.
     type: elasticsearch
     supported_telemetry: [logs]
     config:

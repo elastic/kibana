@@ -256,8 +256,15 @@ describe('getDataStreamsMeteringStats', () => {
 });
 
 describe('getDataStreamsWithIndexNames', () => {
-  const makeClient = (getDataStream: jest.Mock) =>
-    ({ indices: { getDataStream } } as unknown as ElasticsearchClient);
+  const makeClient = (
+    getDataStream: jest.Mock,
+    resolveIndex = jest.fn(async ({ name }: { name: string }) => ({
+      data_streams: name.split(',').map((dataStreamName) => ({ name: dataStreamName })),
+    }))
+  ) =>
+    ({
+      indices: { getDataStream, resolveIndex },
+    } as unknown as ElasticsearchClient);
 
   const notFoundError = () =>
     new errors.ResponseError({
@@ -293,7 +300,7 @@ describe('getDataStreamsWithIndexNames', () => {
     });
 
     expect(getDataStream).toHaveBeenCalledWith({
-      name: 'logs-a',
+      name: ['logs-a'],
       filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
     });
   });
@@ -313,6 +320,73 @@ describe('getDataStreamsWithIndexNames', () => {
     await expect(
       getDataStreamsWithIndexNames({ esClient: makeClient(getDataStream), streamName: 'missing' })
     ).resolves.toEqual([]);
+  });
+
+  it('requests several named streams together', async () => {
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
+
+    await getDataStreamsWithIndexNames({
+      esClient: makeClient(getDataStream),
+      streamNames: ['logs-a', 'logs-b', 'logs-a'],
+    });
+
+    // Missing names are skipped by resolve index, so one data stream request covers the batch.
+    expect(getDataStream).toHaveBeenCalledTimes(1);
+    expect(getDataStream).toHaveBeenCalledWith({
+      name: ['logs-a', 'logs-b'],
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+  });
+
+  it('omits names that do not resolve to data streams', async () => {
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
+    const resolveIndex = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
+
+    await getDataStreamsWithIndexNames({
+      esClient: makeClient(getDataStream, resolveIndex),
+      streamNames: ['logs-a', 'missing'],
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      name: ['logs-a'],
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+  });
+
+  it('keeps the other streams when one is deleted after resolving', async () => {
+    const getDataStream = jest.fn(async ({ name }: { name: string[] }) => {
+      if (name.includes('logs-deleted')) {
+        throw notFoundError();
+      }
+      return { data_streams: name.map((dataStreamName) => ({ name: dataStreamName })) };
+    });
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data_streams: [{ name: 'logs-a' }, { name: 'logs-deleted' }, { name: 'logs-b' }],
+      })
+      .mockResolvedValueOnce({ data_streams: [{ name: 'logs-a' }, { name: 'logs-b' }] });
+
+    const result = await getDataStreamsWithIndexNames({
+      esClient: makeClient(getDataStream, resolveIndex),
+      streamNames: ['logs-a', 'logs-deleted', 'logs-b'],
+    });
+
+    expect(result).toEqual([{ name: 'logs-a' }, { name: 'logs-b' }]);
+    expect(resolveIndex).toHaveBeenCalledTimes(2);
+    expect(getDataStream).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries at most three times when streams keep disappearing', async () => {
+    const getDataStream = jest.fn().mockRejectedValue(notFoundError());
+
+    await expect(
+      getDataStreamsWithIndexNames({
+        esClient: makeClient(getDataStream),
+        streamNames: ['logs-a', 'logs-b'],
+      })
+    ).resolves.toEqual([]);
+    expect(getDataStream).toHaveBeenCalledTimes(4);
   });
 
   it('rethrows any other error', async () => {

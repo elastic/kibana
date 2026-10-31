@@ -25,9 +25,13 @@ const dataStreams = [
 
 const makeEsClient = () => {
   const getDataStream = jest.fn().mockResolvedValue({ data_streams: dataStreams });
+  const resolveIndex = jest.fn(async ({ name }: { name: string }) => ({
+    data_streams: name.split(',').map((dataStreamName) => ({ name: dataStreamName })),
+  }));
   const esClient = {
     indices: {
       getDataStream,
+      resolveIndex,
       stats: jest.fn().mockResolvedValue({
         indices: {
           '.ds-logs-a-000001': { primaries: { docs: { count: 3 } } },
@@ -45,7 +49,7 @@ const makeEsClient = () => {
       }),
     },
   } as unknown as ElasticsearchClient;
-  return { esClient, getDataStream };
+  return { esClient, getDataStream, resolveIndex };
 };
 
 const streamsClient = {
@@ -97,7 +101,7 @@ describe.each(cases)('$name', ({ run, expected }) => {
 
     await expect(run(esClient, 'logs-a')).resolves.toEqual(expected);
     expect(getDataStream).toHaveBeenCalledWith({
-      name: 'logs-a',
+      name: ['logs-a'],
       filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
     });
   });
@@ -107,5 +111,64 @@ describe.each(cases)('$name', ({ run, expected }) => {
     getDataStream.mockResolvedValue({});
 
     await expect(run(esClient)).resolves.toEqual([]);
+  });
+});
+
+describe('getFailedDocCountsForStreams query scope', () => {
+  const getEsqlQuery = (esClient: ElasticsearchClient): string =>
+    (esClient.esql.query as jest.Mock).mock.calls[0][0].query;
+
+  it('reads every failure store when no stream is given', async () => {
+    const { esClient } = makeEsClient();
+
+    await getFailedDocCountsForStreams({ esClient, start: 0, end: 1 });
+
+    expect(getEsqlQuery(esClient)).toMatch(/^FROM \*::failures METADATA _index/);
+  });
+
+  it('only reads the failure indices of the requested streams', async () => {
+    const { esClient } = makeEsClient();
+
+    await getFailedDocCountsForStreams({ esClient, start: 0, end: 1, streamName: 'logs-a' });
+
+    expect(getEsqlQuery(esClient)).toMatch(/^FROM \.fs-logs-a-000001 METADATA _index/);
+  });
+
+  it('reads the failure indices of several requested streams', async () => {
+    const { esClient, getDataStream } = makeEsClient();
+    getDataStream.mockResolvedValue({
+      data_streams: [
+        ...dataStreams,
+        {
+          name: 'logs-b',
+          indices: [],
+          failure_store: { indices: [{ index_name: '.fs-logs-b-1' }] },
+        },
+      ],
+    });
+    (esClient.esql.query as jest.Mock).mockResolvedValue({
+      columns: [{ name: 'failed_count' }, { name: 'backing_index' }],
+      values: [
+        [5, '.fs-logs-a-000001'],
+        [3, '.fs-logs-b-1'],
+      ],
+    });
+
+    const result = await getFailedDocCountsForStreams({
+      esClient,
+      start: 0,
+      end: 1,
+      streamNames: ['logs-a', 'logs-b'],
+    });
+
+    expect(getDataStream).toHaveBeenCalledWith({
+      name: ['logs-a', 'logs-b'],
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+    expect(getEsqlQuery(esClient)).toMatch(/^FROM \.fs-logs-a-000001,\.fs-logs-b-1 METADATA/);
+    expect(result).toEqual([
+      { stream: 'logs-a', count: 5 },
+      { stream: 'logs-b', count: 3 },
+    ]);
   });
 });
