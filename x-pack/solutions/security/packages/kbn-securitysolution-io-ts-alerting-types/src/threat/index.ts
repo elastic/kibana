@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import * as t from 'io-ts';
 import { threat_tactic } from '../threat_tactic';

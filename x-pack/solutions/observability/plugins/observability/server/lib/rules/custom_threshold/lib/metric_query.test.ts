@@ -95,7 +95,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       expect(searchBody.aggs!.groupings!.aggs!.currentPeriod).toMatchObject(
         expect.objectContaining({
           aggs: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
+            // eslint-disable-next-line @kbn/compat/typescript-naming-convention
             aggregatedValue_A: {
               avg: {
                 field: 'system.is.a.good.puppy.dog',
@@ -191,7 +191,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
               },
             },
             aggs: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+              // eslint-disable-next-line @kbn/compat/typescript-naming-convention
               aggregatedValue_A: {
                 avg: {
                   field: 'system.is.a.good.puppy.dog',

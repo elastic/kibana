@@ -19,7 +19,7 @@ const esResponse = {
               {
                 key: '4/9/3',
                 doc_count: 1,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
+                // eslint-disable-next-line @kbn/compat/typescript-naming-convention
                 terms_of_Carrier: {
                   buckets: [
                     {
@@ -35,7 +35,7 @@ const esResponse = {
                   },
                   count: 1,
                 },
-                // eslint-disable-next-line @typescript-eslint/naming-convention
+                // eslint-disable-next-line @kbn/compat/typescript-naming-convention
                 avg_of_FlightDelayMin: {
                   value: 3,
                 },
@@ -61,12 +61,12 @@ it('Should convert elasticsearch aggregation response into feature collection of
     },
     id: '10.39269994944334,43.68389896117151,4/9/3',
     properties: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       avg_of_FlightDelayMin: 3,
       doc_count: 1,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       terms_of_Carrier: 'ES-Air',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       terms_of_Carrier__percentage: 100,
     },
     type: 'Feature',

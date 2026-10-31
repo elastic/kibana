@@ -102,7 +102,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           );
           const savedObjects: SavedQueryResponse[] = savedQueries.saved_objects.map(
             (savedObject) => {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+              // eslint-disable-next-line @kbn/compat/typescript-naming-convention
               const ecs_mapping = savedObject.attributes.ecs_mapping;
 
               const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];

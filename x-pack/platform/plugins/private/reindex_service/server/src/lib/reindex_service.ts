@@ -237,7 +237,7 @@ export const reindexServiceFactory = (
         }),
     };
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const settings_override = isServerless
       ? {
           ...newSettings,

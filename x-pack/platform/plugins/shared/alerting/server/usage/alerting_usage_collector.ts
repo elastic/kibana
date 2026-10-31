@@ -25,39 +25,39 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
     _meta: { description: 'Breakdown for transform health rule type.' },
   },
   // APM
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   apm__error_rate: {
     type: 'long',
     _meta: { description: 'Breakdown for APM error rate type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   apm__transaction_error_rate: {
     type: 'long',
     _meta: { description: 'Breakdown for APM transaction error rate rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   apm__transaction_duration: {
     type: 'long',
     _meta: { description: 'Breakdown for APM transaction duration rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   apm__transaction_duration_anomaly: {
     type: 'long',
     _meta: { description: 'Breakdown for APM transaction duration anomaly rule type.' },
   },
-  apm__anomaly: { type: 'long', _meta: { description: 'Breakdown for APM anomaly rule type.' } }, // eslint-disable-line @typescript-eslint/naming-convention
+  apm__anomaly: { type: 'long', _meta: { description: 'Breakdown for APM anomaly rule type.' } }, // eslint-disable-line @kbn/compat/typescript-naming-convention
   // Infra
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   metrics__alert__threshold: {
     type: 'long',
     _meta: { description: 'Breakdown for metrics threshold rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   metrics__alert__inventory__threshold: {
     type: 'long',
     _meta: { description: 'Breakdown for inventory threshold rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   logs__alert__document__count: {
     type: 'long',
     _meta: { description: 'Breakdown for log document count rule type.' },
@@ -98,80 +98,80 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
     _meta: { description: 'Breakdown for monitoring nodes changed rule type.' },
   },
   // Observability
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   observability__rules__custom_threshold: {
     type: 'long',
     _meta: { description: 'Breakdown for custom threshold  rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__synthetics__alerts__monitorStatus: {
     type: 'long',
     _meta: { description: 'Breakdown for Synthetics monitor status rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__synthetics__alerts__tls: {
     type: 'long',
     _meta: { description: 'Breakdown for Synthetics TLS rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   slo__rules__burnRate: {
     type: 'long',
     _meta: { description: 'Breakdown for SLO burn rate rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   streams__rules__esql: {
     type: 'long',
     _meta: { description: 'Breakdown for Streams ES|QL rule type.' },
   },
   // Security Solution
-  siem__signals: { type: 'long', _meta: { description: 'Breakdown for SIEM signals rule type.' } }, // eslint-disable-line @typescript-eslint/naming-convention
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  siem__signals: { type: 'long', _meta: { description: 'Breakdown for SIEM signals rule type.' } }, // eslint-disable-line @kbn/compat/typescript-naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__notifications: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM notifications rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__eqlRule: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM EQL rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__indicatorRule: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM indicator rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__mlRule: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM ML rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__queryRule: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM query rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__savedQueryRule: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM saved query rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   siem__thresholdRule: {
     type: 'long',
     _meta: { description: 'Breakdown for SIEM threshold rule type.' },
   },
   // Uptime
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__uptime__alerts__monitorStatus: {
     type: 'long',
     _meta: { description: 'Breakdown for Uptime monitor status rule type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__uptime__alerts__tls: {
     type: 'long',
     _meta: { description: 'Breakdown for Uptime TLS rules type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__uptime__alerts__durationAnomaly: {
     type: 'long',
     _meta: { description: 'Breakdown for Uptime duration anomaly rules type.' },
@@ -182,12 +182,12 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
     _meta: { description: 'Breakdown for geo-containment rule type.' },
   },
   // ML
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__ml__anomaly_detection_alert: {
     type: 'long',
     _meta: { description: 'Breakdown for ML anomaly detection alert rules type.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   xpack__ml__anomaly_detection_jobs_health: {
     type: 'long',
     _meta: { description: 'Breakdown for ML anomaly detection jobs health rules type.' },

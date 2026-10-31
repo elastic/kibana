@@ -75,12 +75,12 @@ export function buildCreateStackAWSConsoleURL({
      * but template parameters are in CamelCase
      * which triggers the eslint rule.
      */
-    /* eslint-disable @typescript-eslint/naming-convention */
+    /* eslint-disable @kbn/compat/typescript-naming-convention */
     param_FirehoseStreamName: streamName,
     param_ElasticEndpointURL: elasticsearchUrl,
     param_ElasticAPIKey: encodedApiKey,
     param_EnableCloudWatchMetrics: String(metricsEnabled),
-    /* eslint-enable @typescript-eslint/naming-convention */
+    /* eslint-enable @kbn/compat/typescript-naming-convention */
   });
 
   url.pathname = '/cloudformation/home';

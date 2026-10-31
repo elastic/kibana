@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;
 type ExtraEuiVars = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   euiColorVis6_asText: string;
   buttonsBackgroundNormalDefaultPrimary: string;
 };
@@ -32,7 +32,7 @@ export const useEuiTheme = (...props: EuiThemeProps): EuiThemeReturn => {
     const themeVars = euiThemeHook.colorMode === 'DARK' ? euiDarkVars : euiLightVars;
 
     const extraEuiVars: ExtraEuiVars = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       euiColorVis6_asText: shade(themeVars.euiColorVis6, 0.335),
       buttonsBackgroundNormalDefaultPrimary: '#006DE4',
     };

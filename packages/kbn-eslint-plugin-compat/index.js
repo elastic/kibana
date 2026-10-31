@@ -12,5 +12,6 @@
 module.exports = {
   rules: {
     ...require('./rules/react'),
+    ...require('./rules/typescript'),
   },
 };
