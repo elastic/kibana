@@ -28,6 +28,16 @@ const createMockRouter = () => {
   return httpService.createRouter();
 };
 
+// `config.validate.request` is typed as a union (`false | VersionedRouteValidation | (() => ...)`)
+// to cover every possible route shape; this route always registers the plain object form.
+interface SchemaValidator {
+  validate: (value: unknown) => unknown;
+}
+
+interface RequestValidationConfig {
+  request: { params: SchemaValidator; query: SchemaValidator };
+}
+
 const createMockContext = (mockSearchFn: jest.Mock) => {
   const mockCoreContext = coreMock.createRequestHandlerContext();
 
@@ -63,6 +73,66 @@ describe('getScheduledQueryResultsRoute', () => {
 
     routeHandler = routeVersion.handler;
   };
+
+  const getRequestValidation = (): { params: SchemaValidator; query: SchemaValidator } => {
+    const mockRouter = createMockRouter();
+    getScheduledQueryResultsRoute(mockRouter, mockOsqueryContext);
+
+    const route = mockRouter.versioned.getRoute('get', ROUTE_PATH);
+    const routeVersion = route.versions[API_VERSIONS.public.v1];
+    if (!routeVersion) {
+      throw new Error(`Handler for version [${API_VERSIONS.public.v1}] not found!`);
+    }
+
+    const validateConfig = routeVersion.config.validate as unknown as RequestValidationConfig;
+
+    return validateConfig.request;
+  };
+
+  describe('request validation', () => {
+    it('accepts a scheduleId of exactly 1,024 characters', () => {
+      const { params } = getRequestValidation();
+
+      expect(() =>
+        params.validate({ scheduleId: 'a'.repeat(1024), executionCount: 1 })
+      ).not.toThrow();
+    });
+
+    it('rejects a scheduleId longer than 1,024 characters', () => {
+      const { params } = getRequestValidation();
+
+      expect(() => params.validate({ scheduleId: 'a'.repeat(1025), executionCount: 1 })).toThrow(
+        /maximum length of \[1024\]/
+      );
+    });
+
+    const QUERY_LENGTH_LIMITS = [
+      { field: 'sort', limit: 256 },
+      { field: 'kuery', limit: 10_000 },
+      { field: 'esFilters', limit: 16_384 },
+      { field: 'startDate', limit: 64 },
+    ] as const;
+
+    it.each(QUERY_LENGTH_LIMITS)(
+      'accepts $field at the maximum length of $limit',
+      ({ field, limit }) => {
+        const { query } = getRequestValidation();
+
+        expect(() => query.validate({ [field]: 'a'.repeat(limit) })).not.toThrow();
+      }
+    );
+
+    it.each(QUERY_LENGTH_LIMITS)(
+      'rejects $field longer than the maximum length of $limit',
+      ({ field, limit }) => {
+        const { query } = getRequestValidation();
+
+        expect(() => query.validate({ [field]: 'a'.repeat(limit + 1) })).toThrow(
+          new RegExp(`maximum length of \\[${limit}\\]`)
+        );
+      }
+    );
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

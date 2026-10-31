@@ -36,6 +36,7 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
      */
     nextPage: z
       .string()
+      .max(4096)
       .optional()
       .describe(
         'A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.'
@@ -45,6 +46,7 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
      */
     kuery: z
       .string()
+      .max(10000)
       .optional()
       .describe('A search string to filter history entries by pack name, query text, or query ID.'),
     /**
@@ -52,6 +54,7 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
      */
     userIds: z
       .string()
+      .max(10000)
       .optional()
       .describe('Comma-separated list of user IDs to filter live query history.'),
     /**
@@ -59,6 +62,7 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
      */
     sourceFilters: z
       .string()
+      .max(64)
       .optional()
       .describe(
         'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
@@ -66,11 +70,15 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
     /**
      * The start of the time range filter (ISO 8601).
      */
-    startDate: z.string().optional().describe('The start of the time range filter (ISO 8601).'),
+    startDate: z
+      .string()
+      .max(64)
+      .optional()
+      .describe('The start of the time range filter (ISO 8601).'),
     /**
      * The end of the time range filter (ISO 8601).
      */
-    endDate: z.string().optional().describe('The end of the time range filter (ISO 8601).'),
+    endDate: z.string().max(64).optional().describe('The end of the time range filter (ISO 8601).'),
   })
 );
 export type OsqueryGetUnifiedHistoryRequestQuery = z.infer<

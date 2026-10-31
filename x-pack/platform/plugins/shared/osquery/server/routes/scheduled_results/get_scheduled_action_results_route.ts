@@ -63,17 +63,17 @@ export const getScheduledActionResultsRoute = (
         validate: {
           request: {
             params: schema.object({
-              scheduleId: schema.string(),
+              scheduleId: schema.string({ maxLength: 1024 }),
               executionCount: schema.number(),
             }),
             query: schema.object({
               page: schema.maybe(schema.number()),
               pageSize: schema.maybe(schema.number()),
-              sort: schema.maybe(schema.string()),
+              sort: schema.maybe(schema.querySortField()),
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')])
               ),
-              kuery: schema.maybe(schema.string()),
+              kuery: schema.maybe(schema.searchFilter()),
             }),
           },
         },
