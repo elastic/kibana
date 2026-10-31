@@ -28,7 +28,7 @@ function isGreater(a?: string, b?: string) {
 export class DocumentUpgradePipeline implements MigrationPipeline {
   private additionalDocs = [] as SavedObjectUnsanitizedDoc[];
   private document: SavedObjectUnsanitizedDoc;
-  private originalDoc: SavedObjectUnsanitizedDoc;
+  private readonly originalType: string;
   private migrations: ActiveMigrations;
   private kibanaVersion: string;
   private convertNamespaceTypes: boolean;
@@ -40,15 +40,21 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
     kibanaVersion,
     convertNamespaceTypes,
     targetTypeVersion,
+    allowSkipClone = false,
   }: {
     document: SavedObjectUnsanitizedDoc;
     migrations: ActiveMigrations;
     kibanaVersion: string;
     convertNamespaceTypes: boolean;
     targetTypeVersion?: string;
+    /**
+     * Skip cloning when the caller hands over ownership of the document.
+     * See `DocumentMigrateOptions.allowSkipClone`.
+     */
+    allowSkipClone?: boolean;
   }) {
-    this.originalDoc = document;
-    this.document = cloneDeep(document);
+    this.originalType = document.type;
+    this.document = allowSkipClone ? document : cloneDeep(document);
     this.migrations = migrations;
     this.kibanaVersion = kibanaVersion;
     this.convertNamespaceTypes = convertNamespaceTypes;
@@ -60,7 +66,7 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
       for (const transform of this.getPendingTransforms()) {
         yield transform;
 
-        if (this.document.type !== this.originalDoc.type) {
+        if (this.document.type !== this.originalType) {
           throw new Error(`Changing a document's type during a migration is not supported.`);
         }
       }
