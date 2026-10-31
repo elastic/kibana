@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -258,8 +257,8 @@ describe('EventFlyout', () => {
       },
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
-    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutActionsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
     expect(mockOpenChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
@@ -280,11 +279,11 @@ describe('EventFlyout', () => {
       },
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutActionsButton'));
     expect(
       screen.queryByTestId('nightshiftEventFlyoutOpenInvestigationChatItem')
     ).not.toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem'));
     expect(mockOpenChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
   });
 
@@ -292,8 +291,8 @@ describe('EventFlyout', () => {
     mockCanManage = true;
     renderFlyout();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
-    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutActionsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
 
     await waitFor(() =>
       expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
@@ -311,9 +310,9 @@ describe('EventFlyout', () => {
     const onClose = jest.fn();
     renderFlyout({ onClose });
 
-    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Mark inactive' }));
+    expect(screen.queryByTestId('nightshiftEventFlyoutMarkInactiveItem')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutActionsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutMarkInactiveItem'));
     fireEvent.change(screen.getByTestId('nightshiftMarkSignificantEventInactiveReason'), {
       target: { value: 'Known maintenance' },
     });
@@ -348,19 +347,19 @@ describe('EventFlyout', () => {
       ],
     };
     const { rerender } = renderFlyout({ event });
-    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
-    expect(await screen.findByRole('menuitem', { name: 'Mark inactive' })).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutActionsButton'));
+    expect(screen.getByTestId('nightshiftEventFlyoutMarkInactiveItem')).toBeInTheDocument();
 
     await act(async () => {
       rerender(<EventFlyout event={{ ...event, status: 'inactive' }} onClose={jest.fn()} />);
     });
-    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftEventFlyoutMarkInactiveItem')).not.toBeInTheDocument();
 
     mockCanManage = false;
     await act(async () => {
       rerender(<EventFlyout event={event} onClose={jest.fn()} />);
     });
-    expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftEventFlyoutMarkInactiveItem')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
   });
 
