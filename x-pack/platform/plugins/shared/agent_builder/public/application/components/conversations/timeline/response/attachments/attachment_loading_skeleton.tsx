@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +15,11 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
-import { HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
+import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
+import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
+
+/** Width of a typical header split button, so the skeleton matches the loaded header. */
+const SPLIT_BUTTON_SKELETON_WIDTH = '137px';
 
 /**
  * Loading skeleton for an attachment card, shown during streaming before the
@@ -26,25 +29,22 @@ import { HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 export const AttachmentLoadingSkeleton: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const headerRef = useRef<HTMLDivElement | null>(null);
-  const { width: headerWidth } = useResizeObserver(headerRef.current);
+  const [measureElement, setMeasureElement] = useState<HTMLDivElement | null>(null);
+  const { width: headerWidth } = useResizeObserver(measureElement);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const headerStyles = css`
-    min-height: ${isCompact ? 'auto' : `${HEADER_HEIGHT}px`};
+    display: flex;
+    align-items: center;
+    border-radius: ${ATTACHMENT_INNER_RADIUS}px;
+    min-height: ${isCompact ? 'auto' : `${INLINE_HEADER_HEIGHT}px`};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.base};
   `;
 
   return (
-    <EuiSplitPanel.Outer
-      grow
-      hasShadow={false}
-      hasBorder={true}
-      css={css`
-        border-radius: ${AB_PANEL_RADIUS}px;
-      `}
-    >
-      <div ref={headerRef} style={{ width: '100%' }}>
-        <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
+    <AttachmentCard>
+      <div ref={setMeasureElement} style={{ width: '100%' }}>
+        <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="none">
           <EuiFlexGroup
             responsive={false}
             justifyContent="spaceBetween"
@@ -54,32 +54,36 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
             style={{ width: '100%' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiSkeletonRectangle width="160px" height={euiTheme.size.l} borderRadius="s" />
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiSkeletonRectangle
+                    width={euiTheme.size.base}
+                    height={euiTheme.size.base}
+                    borderRadius="s"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSkeletonRectangle
+                    width="160px"
+                    height={euiTheme.size.base}
+                    borderRadius="s"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
               style={isCompact ? { alignSelf: 'flex-end' } : { flexShrink: 0 }}
             >
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle
-                    width={euiTheme.size.xxl}
-                    height={euiTheme.size.xxl}
-                    borderRadius="m"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle
-                    width={euiTheme.size.xxl}
-                    height={euiTheme.size.xxl}
-                    borderRadius="m"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiSkeletonRectangle
+                width={SPLIT_BUTTON_SKELETON_WIDTH}
+                height={euiTheme.size.xl}
+                borderRadius="m"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </div>
-    </EuiSplitPanel.Outer>
+    </AttachmentCard>
   );
 };

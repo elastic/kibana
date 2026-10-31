@@ -165,10 +165,11 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       {...flyoutSessionProps}
     >
       <AttachmentHeader
-        icon={header?.icon}
+        icon={header?.icon ?? uiDefinition?.getIcon?.()}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}
+        color={header?.color}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"
