@@ -124,6 +124,7 @@ export interface ListWorkersResponse {
     id: string;
     enabled: boolean;
     state: string;
+    stateReason?: string;
     workflowId?: string | null;
     settingsRevision: number | null;
   }>;
@@ -196,12 +197,20 @@ export const assertWorkflowInstalled = async ({
           `may have changed; this suite addresses the worker by id and must not create it itself.`
       );
     }
-    if (!worker.enabled || worker.state !== 'ok') {
+    // The pre-seed sweep is blocked (empty universe) and `hunt-blocked` is blocked by design.
+    const readyStates = ['ok', 'degraded'];
+    if (!worker.enabled || !readyStates.includes(worker.state)) {
       throw new Error(
         `Worker "${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}" in space "${spaceId}" is ` +
-          `not ready for evals (enabled=${worker.enabled}, state=${worker.state}). The preflight ` +
+          `not ready for evals (enabled=${worker.enabled}, state=${worker.state}; expected ` +
+          `enabled with state ${readyStates.join(' or ')}). The preflight ` +
           `fixture must enable the Worker (which first requires a subject-model connector bridged ` +
           `via genAiSettings:defaultAIConnector) before any example runs.`
+      );
+    }
+    if (worker.state === 'degraded') {
+      log.info(
+        `Worker in space "${spaceId}" is degraded (${worker.stateReason ?? 'no reason reported'})`
       );
     }
     const expectedWorkflowId = `${HUNT_WORKER_WORKFLOW_ID}-${spaceId}`;
