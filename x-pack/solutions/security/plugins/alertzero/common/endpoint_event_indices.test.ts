@@ -93,6 +93,31 @@ describe('endpointEventIndices', () => {
     expect(endpointEventIndices(['', '   ', ':logs-*'])).toBe(ENDPOINT_EVENTS_INDEX);
   });
 
+  it('treats a run of wildcards as one wildcard', () => {
+    const stars = '*'.repeat(40);
+
+    expect(endpointEventIndices(['remote_a:logs-*', `-remote_a:logs-${stars}`])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},-remote_a:${ENDPOINT_EVENTS_INDEX}`
+    );
+    expect(endpointEventIndices(['remote_a:logs-*', `-remote_a:logs-${stars}x`])).toBe(
+      `${ENDPOINT_EVENTS_INDEX},remote_a:${ENDPOINT_EVENTS_INDEX},-remote_a:logs-${stars}x`
+    );
+  });
+
+  it('drops a searched cluster when its exclusions do not fit', () => {
+    const exclusions = Array.from({ length: 120 }, (_, index) => {
+      const dataset = `logs-endpoint.events.network-${String(index).padStart(3, '0')}${'n'.repeat(30)}*`;
+      return `-remote_a:${dataset}`;
+    });
+    const result = endpointEventIndices(['*:logs-*', 'remote_a:logs-*', 'remote_b:logs-*', ...exclusions]);
+    const parts = result.split(',');
+
+    expect(result.length).toBeLessThanOrEqual(ENDPOINT_EVENT_INDICES_MAX_LENGTH);
+    expect(parts).not.toContain(`*:${ENDPOINT_EVENTS_INDEX}`);
+    expect(parts).not.toContain(`remote_a:${ENDPOINT_EVENTS_INDEX}`);
+    expect(parts).toContain(`remote_b:${ENDPOINT_EVENTS_INDEX}`);
+  });
+
   it('stops adding aliases once the search target reaches its length cap', () => {
     const patterns = Array.from({ length: 200 }, (_, i) => `cluster${i}:logs-*`);
 

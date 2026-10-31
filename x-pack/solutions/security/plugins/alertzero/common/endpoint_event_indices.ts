@@ -19,11 +19,32 @@ const MAX_PATTERN_LENGTH = 1024;
 // A cluster alias, including a wildcard such as `remote_*` or a bare `*`.
 const CLUSTER_ALIAS = /^(?:\*|[A-Za-z0-9][A-Za-z0-9_.*-]*)$/;
 
-const escapeRegExpLiteral = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/**
+ * Whether `value` matches an Elasticsearch glob. `*` is the only wildcard, and a
+ * run of them is one `*`. The scan moves forward only, so a long run of wildcards
+ * cannot backtrack.
+ */
+const globMatches = (pattern: string, value: string): boolean => {
+  const parts = pattern.replace(/\*+/g, '*').split('*');
+  if (parts.length === 1) return parts[0] === value;
 
-/** Compiles an Elasticsearch-style glob, where `*` is the only wildcard, to an anchored RegExp. */
-const globMatches = (pattern: string, value: string): boolean =>
-  new RegExp(`^${pattern.split('*').map(escapeRegExpLiteral).join('.*')}$`).test(value);
+  const head = parts[0];
+  const tail = parts[parts.length - 1];
+  if (!value.startsWith(head) || !value.endsWith(tail)) return false;
+
+  const end = value.length - tail.length;
+  let from = head.length;
+  if (from > end) return false;
+
+  for (let index = 1; index < parts.length - 1; index++) {
+    const part = parts[index];
+    if (part.length === 0) continue;
+    const at = value.indexOf(part, from);
+    if (at < 0 || at + part.length > end) return false;
+    from = at + part.length;
+  }
+  return true;
+};
 
 /** Whether two `*`-only globs can name the same index. A concrete value is tested exactly. */
 const globsOverlap = (left: string, right: string): boolean => {
@@ -51,9 +72,17 @@ const exclusionCoversCluster = (exclusionCluster: string, candidate: string): bo
     ? exclusionCluster === candidate
     : globMatches(exclusionCluster, candidate);
 
-const appendTarget = (targets: string[], next: string): void => {
-  if (`${targets.join(',')},${next}`.length > ENDPOINT_EVENT_INDICES_MAX_LENGTH) return;
-  targets.push(next);
+const fits = (targets: readonly string[], next: string): boolean =>
+  `${targets.join(',')},${next}`.length <= ENDPOINT_EVENT_INDICES_MAX_LENGTH;
+
+/** Whether a positive cluster pattern would still search the excluded cluster. */
+const positiveWouldSearch = (positiveCluster: string, exclusionCluster: string): boolean => {
+  if (positiveCluster.includes('*')) {
+    return exclusionCluster.includes('*')
+      ? positiveCluster === exclusionCluster
+      : globMatches(positiveCluster, exclusionCluster);
+  }
+  return exclusionCoversCluster(exclusionCluster, positiveCluster);
 };
 
 interface EndpointExclusion {
@@ -69,10 +98,11 @@ interface EndpointExclusion {
  * `{alias}:logs-endpoint.events.*`. A remote exclusion that covers every endpoint
  * event does not add that alias; it is rewritten as `-cluster:logs-endpoint.events.*`
  * so a wildcard include cannot search that cluster. A narrower exclusion is passed
- * through as `-cluster:<index>` and the cluster stays in the search. Local
- * exclusions, and ES|QL mode prefixes (`_any:`, `_remote:`, `_coordinator:`), add
- * nothing. The data view's own streams are not searched: this check only reads
- * endpoint fields.
+ * through as `-cluster:<index>` and the cluster stays in the search. An exclusion
+ * that does not fit in the target takes its positive pattern back out, so the
+ * search cannot read events the space excluded. Local exclusions, and ES|QL mode
+ * prefixes (`_any:`, `_remote:`, `_coordinator:`), add nothing. The data view's own
+ * streams are not searched: this check only reads endpoint fields.
  */
 export const endpointEventIndices = (patterns: readonly string[]): string => {
   const targets = [ENDPOINT_EVENTS_INDEX];
@@ -107,11 +137,23 @@ export const endpointEventIndices = (patterns: readonly string[]): string => {
     const fullyExcluded = excluded.some(
       (exclusion) => exclusion.coversAll && exclusionCoversCluster(exclusion.cluster, cluster)
     );
-    if (fullyExcluded) continue;
-    appendTarget(targets, `${cluster}:${ENDPOINT_EVENTS_INDEX}`);
+    const next = `${cluster}:${ENDPOINT_EVENTS_INDEX}`;
+    if (fullyExcluded || !fits(targets, next)) continue;
+    targets.push(next);
   }
   for (const exclusion of excluded) {
-    appendTarget(targets, `-${exclusion.cluster}:${exclusion.index}`);
+    const next = `-${exclusion.cluster}:${exclusion.index}`;
+    if (fits(targets, next)) {
+      targets.push(next);
+      continue;
+    }
+    for (let index = targets.length - 1; index >= 1; index--) {
+      const target = targets[index];
+      if (target.startsWith('-') || !target.includes(':')) continue;
+      const cluster = target.slice(0, target.indexOf(':'));
+      if (positiveWouldSearch(cluster, exclusion.cluster)) targets.splice(index, 1);
+    }
+    if (fits(targets, next)) targets.push(next);
   }
 
   return targets.join(',');
