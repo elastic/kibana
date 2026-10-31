@@ -13,13 +13,12 @@ import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm, httpExitSpan } from '@kbn/synthtrace-client';
 import type { Scenario } from '@kbn/synthtrace';
 
-import type { RunOptions } from '@kbn/synthtrace';
 import { getSynthtraceEnvironment } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
+const scenario: Scenario<ApmFields> = async () => {
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = '240rpm/75% 1000ms';
