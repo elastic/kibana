@@ -75,15 +75,11 @@ interface CriterionVerdict {
   weight?: number;
 }
 
-const isPassing = (result: CriterionVerdict['result']): boolean =>
-  // N/A counts toward the score in the base criteria evaluator (a criterion that
-  // does not apply is not a failure), so mirror that here when voting.
-  result === 'PASS' || result === 'N/A';
-
 /**
  * Wrap the base LLM `criteria` evaluator so each criterion is judged over several
  * independent judge samples and decided by majority vote, then recompute the
  * aggregate score from the voted verdicts.
+ * N/A votes do not participate, and all-N/A criteria are excluded from the aggregate.
  *
  * The judge is noisy on conjunctive/ambiguous criteria: a single pass can flip a
  * verdict even when its own stated reason agrees the criterion holds. Voting
@@ -128,24 +124,35 @@ export const withMajorityVote = (base: Evaluator, samples = 3): Evaluator => ({
       return runs[runs.length - 1];
     }
 
-    let earned = 0;
-    let total = 0;
+    let earnedWeight = 0;
+    let totalApplicableWeight = 0;
     const votedCriteria = Array.from(byId.entries()).map(([id, { weight, results, reason }]) => {
-      const passes = results.filter(isPassing).length;
-      const majorityPass = passes * 2 >= results.length; // ties resolve to PASS
-      total += weight;
-      if (majorityPass) earned += weight;
-      const result: CriterionVerdict['result'] = majorityPass ? 'PASS' : 'FAIL';
+      const applicableResults = results.filter((result) => result !== 'N/A');
+      const passes = applicableResults.filter((result) => result === 'PASS').length;
+      const notApplicable = results.length - applicableResults.length;
+      let result: CriterionVerdict['result'] = 'N/A';
+
+      if (applicableResults.length > 0) {
+        result = passes * 2 >= applicableResults.length ? 'PASS' : 'FAIL'; // ties resolve to PASS
+      }
+
+      if (result !== 'N/A') {
+        totalApplicableWeight += weight;
+        if (result === 'PASS') earnedWeight += weight;
+      }
+
       return {
         id,
         result,
         weight,
-        votes: `${passes}/${results.length} pass`,
+        votes: `${passes}/${applicableResults.length} pass${
+          notApplicable > 0 ? `, ${notApplicable} N/A` : ''
+        }`,
         reason: reason ?? null,
       };
     });
 
-    const score = total === 0 ? 0 : earned / total;
+    const score = totalApplicableWeight === 0 ? null : earnedWeight / totalApplicableWeight;
     return {
       score,
       label: `majority_${samples}x`,
