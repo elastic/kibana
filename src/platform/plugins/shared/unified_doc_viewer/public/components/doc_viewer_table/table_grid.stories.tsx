@@ -30,7 +30,8 @@ import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import React from 'react';
 import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview';
 import type { TableGridProps } from './table_grid';
-import { TableGrid, GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
+import { TableGrid } from './table_grid';
+import { GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid_constants';
 import APMSpanFixture from '../../__fixtures__/span_apm.json';
 import { FieldRow } from './field_row';
 
