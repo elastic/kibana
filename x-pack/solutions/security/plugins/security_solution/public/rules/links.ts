@@ -144,7 +144,7 @@ export const links: LinkItem = {
         'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
         {
           defaultMessage:
-            'Review and maintain your protections MITRE ATT&CK and MITRE ATLAS coverage.',
+            'Review and maintain your protections MITRE ATT&CK® and MITRE ATLAS™ coverage.',
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,

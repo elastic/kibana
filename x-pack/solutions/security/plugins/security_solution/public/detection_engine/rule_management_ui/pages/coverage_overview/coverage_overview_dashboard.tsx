@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
 import { HeaderPage } from '../../../../common/components/header_page';
 
@@ -37,7 +37,7 @@ const CoverageOverviewDashboardComponent = () => {
     'mitreAttackUpdatesUIEnabled'
   );
   const availableFrameworks = useAvailableMitreFrameworks();
-  const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
+  const frameworkLabel = THREAT_FRAMEWORK_DISPLAY_NAME[framework];
 
   return (
     <>
@@ -60,7 +60,7 @@ const CoverageOverviewDashboardComponent = () => {
                 onClick={() => setFramework(tabFramework)}
                 data-test-subj={`coverageOverviewFrameworkTab-${tabFramework}`}
               >
-                {THREAT_FRAMEWORK_NAME[tabFramework]}
+                {THREAT_FRAMEWORK_DISPLAY_NAME[tabFramework]}
               </EuiTab>
             ))}
           </EuiTabs>

@@ -6,6 +6,7 @@
  */
 
 import {
+  THREAT_FRAMEWORK_DISPLAY_NAME,
   THREAT_FRAMEWORK_NAME,
   buildMitreReferenceUrl,
   getMitreFrameworkById,
@@ -15,6 +16,15 @@ import {
 describe('THREAT_FRAMEWORK_NAME', () => {
   it('matches the framework strings shipped on prebuilt rules', () => {
     expect(THREAT_FRAMEWORK_NAME).toEqual({ enterprise: 'MITRE ATT&CK', atlas: 'MITRE ATLAS' });
+  });
+});
+
+describe('THREAT_FRAMEWORK_DISPLAY_NAME', () => {
+  it('adds the MITRE trademark symbols to each framework name', () => {
+    expect(THREAT_FRAMEWORK_DISPLAY_NAME).toEqual({
+      enterprise: 'MITRE ATT&CK®',
+      atlas: 'MITRE ATLAS™',
+    });
   });
 });
 

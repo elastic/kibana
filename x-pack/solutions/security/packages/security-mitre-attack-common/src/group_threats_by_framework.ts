@@ -8,12 +8,12 @@
 import { DEFAULT_MITRE_FRAMEWORK } from './constants';
 import type { MitreFramework } from './schema';
 import { MITRE_FRAMEWORKS } from './schema';
-import { THREAT_FRAMEWORK_NAME, getMitreFrameworkByThreatName } from './threat_framework';
+import { THREAT_FRAMEWORK_DISPLAY_NAME, getMitreFrameworkByThreatName } from './threat_framework';
 
 export interface ThreatFrameworkGroup<T> {
   /** Known framework, or undefined when `framework` string is not recognized. */
   framework: MitreFramework | undefined;
-  /** Display label: THREAT_FRAMEWORK_NAME[framework] for known frameworks, the raw string otherwise. */
+  /** Display label: THREAT_FRAMEWORK_DISPLAY_NAME[framework] for known frameworks, the raw string otherwise. */
   label: string;
   /** Threats of this framework, as the same object references as the input, in input order. */
   threats: T[];
@@ -57,7 +57,7 @@ export const groupThreatsByFramework = <T extends { framework?: string }>(
     if (frameworkThreats) {
       groups.push({
         framework,
-        label: THREAT_FRAMEWORK_NAME[framework],
+        label: THREAT_FRAMEWORK_DISPLAY_NAME[framework],
         threats: frameworkThreats,
       });
     }
