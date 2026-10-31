@@ -367,6 +367,9 @@ steps:
       created: "${{ steps.propose_creation.output.status == 'succeeded' }}"
       # A decision either way. An expired gate is neither, and a draft that never
       # reached the gate was reviewed by nobody; both leave the caller's gap open.
+      # A create that fails as non-retryable reports `decision: approved` with
+      # `status: failed`, so it counts as reviewed but not created. The create
+      # action never fails that way today.
       reviewed: >-
         ${{ steps.propose_creation.output.decision == 'approved'
           or steps.propose_creation.output.decision == 'dismissed' }}
