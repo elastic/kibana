@@ -491,6 +491,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add a display-only Markdown field type to case templates [#278329]({{kib-pull}}278329).
 * Add public Cases APIs to discover applicable `extended_fields` and apply template defaults when creating a case [#279684]({{kib-pull}}279684) [#280143]({{kib-pull}}280143).
 * Add `xpack.alerting.alertsService.totalFieldsLimit` (default `2800`, range `2500`–`5000`) to control {{es}} `index.mapping.total_fields.limit` on `.alerts-*` indices and templates [#274024]({{kib-pull}}274024).
+* Add a `cases-analytics` skill to Agent Builder so agents can answer aggregate and reporting questions about cases and build visualizations and dashboards from the cases analytics indices [#277580]({{kib-pull}}277580).
 
 **Connectivity**:
 * Add a **OneDrive** connector to search files, browse drives, and read file content in Agent Builder and Workflows [#275244]({{kib-pull}}275244).
@@ -688,6 +689,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix alerts-as-data index template updates failing when system-managed template metadata is present [#262534]({{kib-pull}}262534).
 * Fix the alerts-as-data setup overriding an index's total fields limit that was already set to a higher value [#277402]({{kib-pull}}277402).
 * Fix the public **Find rules** and **Get rule** APIs so documented response fields are returned as specified in the OpenAPI spec [#247279]({{kib-pull}}247279).
+* Fix the message that confirms removing a custom field from the case configuration. It now says that existing cases keep their values, because removing the field doesn't delete case data [#280506]({{kib-pull}}280506).
 
 **Connectivity**:
 * Fix the email connector to reject malformed email addresses before attempting SMTP delivery [#268496]({{kib-pull}}268496).
@@ -936,6 +938,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix swapped summary and description text for registered workflow steps such as `data.*` steps in autocomplete and Agent Builder tools [#267290]({{kib-pull}}267290).
 * Fix slow workflow template rendering for workflows with large step outputs [#265027]({{kib-pull}}265027).
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
+* Fix the `max-step-size` setting of the `ai.agent` workflow step being ignored for streamed completions, which could fail large responses with a maximum content length error [#275842]({{kib-pull}}275842).
 
 
 ## 9.4.8 [kibana-9.4.8-release-notes]
