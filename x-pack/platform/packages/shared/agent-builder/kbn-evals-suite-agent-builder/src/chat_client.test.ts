@@ -6,6 +6,9 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AgentBuilderEvaluationChatClient } from './chat_client';
 
 jest.mock('p-retry', () => (fn: () => Promise<unknown>) => fn());
@@ -27,6 +30,64 @@ const mockLog: ToolingLog = {
   warning: jest.fn(),
   error: jest.fn(),
 } as unknown as ToolingLog;
+
+describe('AgentBuilderEvaluationChatClient attachments', () => {
+  const attachments: AttachmentInput[] = [
+    {
+      id: 'screen-context',
+      type: AttachmentType.screenContext,
+      data: { url: 'https://kibana.example/app/agent_builder?note=untrusted' },
+      hidden: true,
+    },
+  ];
+
+  it('sends attachments separately from the user input and preserves response evidence', async () => {
+    const response = makeResponse([], 'Current page');
+    const fetch = makeFetch([response]);
+    const client = new AgentBuilderEvaluationChatClient(fetch, mockLog, 'connector-1');
+
+    const result = await client.converse({
+      messages: [{ message: 'What page am I on?' }],
+      attachments,
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/agent_builder/converse',
+      expect.objectContaining({
+        body: JSON.stringify({
+          agent_id: agentBuilderDefaultAgentId,
+          connector_id: 'connector-1',
+          input: 'What page am I on?',
+          attachments,
+        }),
+      })
+    );
+    expect(result.conversationId).toBe('conv-1');
+    expect(result.messages.at(-1)).toEqual(response.response);
+  });
+
+  it('omits attachments for existing callers', async () => {
+    const fetch = makeFetch([makeResponse()]);
+    const client = new AgentBuilderEvaluationChatClient(fetch, mockLog, 'connector-1');
+    await client.converse({ messages: [{ message: 'Hello' }] });
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).not.toHaveProperty('attachments');
+  });
+
+  it('does not resend attachments during confirmation continuation', async () => {
+    const fetch = makeFetch([
+      makeResponse([{ id: 'confirm', type: 'confirmation' }]),
+      makeResponse([], 'done'),
+    ]);
+    const client = new AgentBuilderEvaluationChatClient(fetch, mockLog, 'connector-1');
+    await client.converse({
+      messages: [{ message: 'Continue' }],
+      attachments,
+      options: { autoConfirm: true },
+    });
+    expect(JSON.parse(fetch.mock.calls[0][1].body).attachments).toEqual(attachments);
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).not.toHaveProperty('attachments');
+  });
+});
 
 describe('AgentBuilderEvaluationChatClient autoConfirm', () => {
   it('should batch all confirmations from one response into a single continuation POST', async () => {
