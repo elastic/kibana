@@ -97,4 +97,17 @@ describe('signalSummary', () => {
     );
     expect(summary).toContain('5 rows');
   });
+
+  it('does not render NaN rows when the row count is unknown', () => {
+    // A tool result dropped by the traces mapping (keyword ignore_above) yields
+    // `returned: {}`. Such a signal gets no tags from classify, so it falls
+    // through to the fallback sentence — which must not interpolate undefined
+    // into a plural and render `NaN rows`.
+    const summary = signalSummary(
+      buildSignal({ status: 'Ok', fell_back_to_raw: false, returned: { columns: [] } }, [])
+    );
+    expect(summary).not.toContain('NaN');
+    expect(summary).not.toContain('undefined');
+    expect(summary).toMatch(/unknown/i);
+  });
 });

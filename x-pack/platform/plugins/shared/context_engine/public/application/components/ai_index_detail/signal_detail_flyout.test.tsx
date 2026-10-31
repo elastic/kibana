@@ -64,6 +64,13 @@ describe('SignalDetailFlyout', () => {
     expect(screen.getByTestId('contextSignalDetailPosition')).toHaveTextContent('Signal 2 of 3');
   });
 
+  it('omits the row-count field when the count is unknown, instead of rendering undefined', () => {
+    // Unknown row_count (tool result dropped by the traces mapping) must not
+    // surface as the literal string 'undefined' in a user-facing field.
+    renderFlyout([buildSignal({ returned: { columns: [] } }, [])], 0);
+    expect(screen.getByTestId('contextSignalDetailFields')).not.toHaveTextContent('undefined');
+    expect(screen.getByTestId('contextSignalDetailFields')).not.toHaveTextContent('Rows returned');
+  });
   it('bases the "Signal X of N" label on the group total, not the loaded page', () => {
     renderFlyout(signals, 0, 100);
 
