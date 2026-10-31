@@ -67,10 +67,7 @@ import {
 import { isCompleteElasticAgent } from './get_agent_info';
 import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 import { isShardSentinelPolicyId } from './shard_sentinel';
-import {
-  isShardSentinelReady,
-  readShardSentinelStates,
-} from '../../tasks/rebalance_shards_enabled';
+import { getShardSentinelReadyCheck } from '../../tasks/rebalance_shards_enabled';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -83,11 +80,7 @@ interface EnrolledAgents {
   completeAgentIds?: string[];
 }
 
-/**
- * `awaiting_sentinel`: sharding is active but the location's agents have not
- * applied its shard sentinel yet, so no new agent pin may be stamped there
- * (see `shard_sentinel.ts`).
- */
+/** `awaiting_sentinel`: active, but no new pins until the agents apply the shard sentinel. */
 export type LocationShardingMode = AgentShardingMode | 'awaiting_sentinel';
 
 type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
@@ -279,8 +272,6 @@ export class SyntheticsPrivateLocation {
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
         } else if (eligibleAgentIds.length > 0) {
-          // Until the agents have applied the shard sentinel, a new pin could stop
-          // their running monitors; leave it unpinned for the rebalance task.
           const assigned =
             shardingMode === 'active' ? assignAgentById(config.id, eligibleAgentIds) : undefined;
           if (assigned) {
@@ -437,19 +428,14 @@ export class SyntheticsPrivateLocation {
     return privateLocations.filter((location) => locationIds.has(location.id));
   }
 
-  /**
-   * Narrows an active sharding mode per location: until the rebalance task has
-   * seen the location's agents apply its shard sentinel, the location awaits it.
-   */
   private async getLocationShardingMode(
     shardingMode: AgentShardingMode
   ): Promise<(location: { id: string; agentPolicyId: string }) => LocationShardingMode> {
     if (shardingMode !== 'active') {
       return () => shardingMode;
     }
-    const sentinels = await readShardSentinelStates(this.server.pluginsStart.taskManager);
-    return (location) =>
-      isShardSentinelReady(sentinels, location) ? 'active' : 'awaiting_sentinel';
+    const isReady = await getShardSentinelReadyCheck(this.server.pluginsStart.taskManager);
+    return (location) => (isReady(location) ? 'active' : 'awaiting_sentinel');
   }
 
   async createPackagePolicies(
@@ -1045,36 +1031,37 @@ export class SyntheticsPrivateLocation {
     };
   }
 
-  /**
-   * Creates the agent policy's shard sentinel when it is missing (see
-   * `shard_sentinel.ts`). `created` is true only when this call created it.
-   */
-  async ensureShardSentinel(agentPolicyId: string): Promise<{ created: boolean }> {
-    if (await this.packagePolicyService.hasShardSentinel(agentPolicyId)) {
-      return { created: false };
-    }
-    return { created: await this.packagePolicyService.createShardSentinel(agentPolicyId) };
+  /** Creates the shard sentinel if missing; true only when this call created it. */
+  async ensureShardSentinel(agentPolicyId: string): Promise<boolean> {
+    return (
+      !(await this.packagePolicyService.hasShardSentinel(agentPolicyId)) &&
+      this.packagePolicyService.createShardSentinel(agentPolicyId)
+    );
   }
 
   /**
-   * Removes the agent policy's shard sentinel once no private location uses the
-   * agent policy: it is managed, so Fleet would refuse to delete the agent policy.
+   * Best effort: the sentinel is managed, so Fleet refuses to delete its agent
+   * policy while it exists. Never throws.
    */
   async deleteUnusedShardSentinel(agentPolicyId: string): Promise<void> {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-    if (locations.some((location) => location.agentPolicyId === agentPolicyId)) {
-      return;
+    try {
+      const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+      const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+      if (!locations.some((location) => location.agentPolicyId === agentPolicyId)) {
+        await this.packagePolicyService.deleteShardSentinel(agentPolicyId);
+      }
+    } catch (e) {
+      this.server.logger.warn(
+        `Unable to remove the shard sentinel from agent policy ${agentPolicyId}: ${e.message}`
+      );
     }
-    await this.packagePolicyService.deleteShardSentinel(agentPolicyId);
   }
 
   async getAgentPolicyRevision(agentPolicyId: string): Promise<number | undefined> {
     return this.packagePolicyService.getAgentPolicyRevision(agentPolicyId);
   }
 
-  /** Bumps the agent policy revision without changing it, so agents rebuild their components. */
-  async redeployAgentPolicy(agentPolicyId: string): Promise<void> {
+  async bumpAgentPolicyRevision(agentPolicyId: string): Promise<void> {
     await bumpAgentPolicyRevision(this.server, agentPolicyId);
   }
 

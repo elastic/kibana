@@ -130,20 +130,3 @@ export const updatePrivateLocationMonitors = async ({
   }
   return results;
 };
-
-/**
- * Best effort: removes the agent policy's shard sentinel once no private
- * location uses it, so Fleet can delete the agent policy. Never fails the route.
- */
-export const deleteUnusedShardSentinel = async (
-  { server, syntheticsMonitorClient }: Pick<RouteContext, 'server' | 'syntheticsMonitorClient'>,
-  agentPolicyId: string
-): Promise<void> => {
-  try {
-    await syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel(agentPolicyId);
-  } catch (error) {
-    server.logger.warn(
-      `Unable to remove the Synthetics shard sentinel from agent policy ${agentPolicyId}: ${error.message}`
-    );
-  }
-};

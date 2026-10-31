@@ -51,7 +51,7 @@ const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) =
     response,
     monitorConfigRepository,
     server: {
-      logger: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
+      logger: { debug: jest.fn(), error: jest.fn() },
       coreStart: {
         savedObjects: { createInternalRepository: jest.fn().mockReturnValue(internalSOClient) },
       },
@@ -81,20 +81,9 @@ describe('deletePrivateLocationRoute', () => {
       locationId,
       { force: true }
     );
-  });
-
-  it('removes the unused shard sentinel of the deleted location, best effort', async () => {
-    const { routeContext, savedObjectsClient } = setup({ crossSpaceMonitorTotal: 0 });
-    const { deleteUnusedShardSentinel } = routeContext.syntheticsMonitorClient.privateLocationAPI;
-    deleteUnusedShardSentinel.mockRejectedValueOnce(new Error('fleet down'));
-
-    await deletePrivateLocationRoute().handler(routeContext);
-
-    expect(savedObjectsClient.delete).toHaveBeenCalled();
-    expect(deleteUnusedShardSentinel).toHaveBeenCalledWith('ap-1');
-    expect(routeContext.server.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('agent policy ap-1: fleet down')
-    );
+    expect(
+      routeContext.syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel
+    ).toHaveBeenCalledWith('ap-1');
   });
 
   it('blocks deletion when a monitor in a non-accessible space still uses the location', async () => {

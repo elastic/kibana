@@ -14,11 +14,7 @@ export const REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY = 'pinsCleared';
 export const REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY = 'pinClearAttempts';
 export const REBALANCE_SHARDS_SENTINELS_STATE_KEY = 'shardSentinels';
 
-/**
- * Per private location id: the agent policy revision that first contained the
- * location's shard sentinel, and whether every healthy agent has applied it.
- * Monitors at a location are pinned to agents only once `ready` is true.
- */
+/** Per location id: the first agent policy revision with its shard sentinel, and whether agents applied it. */
 export interface ShardSentinelState {
   agentPolicyId: string;
   revision: number;
@@ -73,22 +69,11 @@ export const getShardSentinelStates = (task?: {
 }): ShardSentinelStates =>
   (task?.state?.[REBALANCE_SHARDS_SENTINELS_STATE_KEY] as ShardSentinelStates | undefined) ?? {};
 
-/** A state recorded for a previous agent policy of the location does not count. */
-export const isShardSentinelReady = (
-  states: ShardSentinelStates,
-  location: { id: string; agentPolicyId: string }
-): boolean => {
-  const state = states[location.id];
-  return state?.ready === true && state.agentPolicyId === location.agentPolicyId;
-};
-
-/** Reads the sentinel states; an unreadable task counts as no location ready. */
-export const readShardSentinelStates = async (
-  taskManager: TaskManagerStartContract
-): Promise<ShardSentinelStates> => {
-  try {
-    return getShardSentinelStates(await taskManager.get(REBALANCE_SHARDS_TASK_ID));
-  } catch {
-    return {};
-  }
+/** Whether a location's monitors may be pinned; an unreadable task counts as not ready. */
+export const getShardSentinelReadyCheck = async (taskManager: TaskManagerStartContract) => {
+  const states = await taskManager
+    .get(REBALANCE_SHARDS_TASK_ID)
+    .then(getShardSentinelStates, (): ShardSentinelStates => ({}));
+  return ({ id, agentPolicyId }: { id: string; agentPolicyId: string }): boolean =>
+    states[id]?.ready === true && states[id].agentPolicyId === agentPolicyId;
 };

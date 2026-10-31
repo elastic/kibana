@@ -22,7 +22,6 @@ import {
   planLocationRebalance,
   STALE_DATA_MS,
 } from '../synthetics_service/private_location/plan_rebalance';
-import { haveAgentsAppliedSentinel } from '../synthetics_service/private_location/shard_sentinel';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -58,11 +57,7 @@ import {
 export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 export const MAX_PIN_CLEAR_ATTEMPTS = 3;
-/**
- * Delay before the one extra agent policy revision that follows a location's
- * first pins. Shorter than the default interval, so it fires on the next
- * scheduled run rather than a `runSoon` run right after the pins.
- */
+/** Under the default interval: fires on the next scheduled run, not an immediate `runSoon`. */
 export const PIN_NUDGE_DELAY_MS = 45_000;
 
 const PIN_DRAIN_RESET = {
@@ -94,13 +89,10 @@ interface RebalanceTaskState extends Record<string, unknown> {
   snapshotAt?: Record<string, number>;
   /** Telemetry only: locations already reported as broken, so a persistent fault is reported once. */
   locationIssues?: Record<string, PrivateLocationRebalanceReason>;
-  /** See {@link ShardSentinelState}. Rebuilt each active run from the current locations. */
   shardSentinels?: ShardSentinelStates;
   /**
-   * Agent policy id → epoch ms when its one pending revision nudge is due.
-   * Scheduled when unpinned monitors get their first pin: a fresh revision makes
-   * agents rebuild their components with `agent.id` already published, which
-   * brings back anything lost to elastic/elastic-agent#17714.
+   * Agent policy id → when its one revision bump after first pins is due. A new
+   * revision brings back components lost to elastic/elastic-agent#17714.
    */
   pinNudges?: Record<string, number>;
 }
@@ -207,9 +199,7 @@ export class RebalancePrivateLocationShardsTask {
       const nextHealthySince: Record<string, number> = {};
       const priorSentinels = getShardSentinelStates(taskInstance);
       const nextSentinels: ShardSentinelStates = {};
-      const priorNudges = taskState.pinNudges ?? {};
-      const nextNudges: Record<string, number> = {};
-      const nudgesHandled = new Set<string>();
+      const pinNudges: Record<string, number> = { ...taskState.pinNudges };
 
       for (const location of locations) {
         signal.throwIfAborted();
@@ -220,16 +210,9 @@ export class RebalancePrivateLocationShardsTask {
         }
         let agentsTotal = 0;
         try {
-          await this.nudgeIfDue(
-            location.agentPolicyId,
-            priorNudges,
-            nextNudges,
-            nudgesHandled,
-            now
-          );
+          await this.nudgeIfDue(location.agentPolicyId, pinNudges, now);
           const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
-          // Before the health checks, so agents enrolling later get the sentinel
-          // with their first policy.
+          // Before the health checks, so agents enrolling later get it with their first policy.
           const sentinel = await this.getShardSentinelState(location, priorSentinels[location.id]);
           nextSentinels[location.id] = sentinel;
 
@@ -290,16 +273,13 @@ export class RebalancePrivateLocationShardsTask {
 
           const sentinelJustApplied = !sentinel.ready;
           if (!sentinel.ready) {
-            const ready = haveAgentsAppliedSentinel(
-              healthyAgentIds.map((agentId) => agents.get(agentId)?.policyRevision),
-              sentinel.revision
+            const ready = healthyAgentIds.every(
+              (agentId) => (agents.get(agentId)?.policyRevision ?? -1) >= sentinel.revision
             );
             nextSentinels[location.id] = { ...sentinel, ready };
             if (!ready) {
-              // Pinning before the agents run the sentinel could stop their
-              // running monitors (elastic/elastic-agent#17714); leave pins as they are.
               this.debugLog(
-                `location ${location.id}: waiting for healthy agents to apply agent policy revision ${sentinel.revision} (shard sentinel); skipping rebalance`
+                `location ${location.id}: waiting for agents to apply revision ${sentinel.revision} (shard sentinel)`
               );
               continue;
             }
@@ -326,14 +306,8 @@ export class RebalancePrivateLocationShardsTask {
           this.debugLog(
             `location ${location.id}: moved ${result.moved}/${result.total} monitor(s)`
           );
-          if (
-            (result.newlyPinned > 0 || sentinelJustApplied) &&
-            nextNudges[location.agentPolicyId] === undefined
-          ) {
-            nextNudges[location.agentPolicyId] = now + PIN_NUDGE_DELAY_MS;
-            this.debugLog(
-              `location ${location.id}: first pins written; agent policy ${location.agentPolicyId} revision nudge scheduled`
-            );
+          if (result.newlyPinned > 0 || sentinelJustApplied) {
+            pinNudges[location.agentPolicyId] ??= now + PIN_NUDGE_DELAY_MS;
           }
 
           const { evicted, recovered: recoveredByDiff } = diffHealthyAgents({
@@ -400,12 +374,8 @@ export class RebalancePrivateLocationShardsTask {
             throw e;
           }
           const priorSentinel = priorSentinels[location.id];
-          if (!nextSentinels[location.id] && priorSentinel) {
-            nextSentinels[location.id] = priorSentinel;
-          }
-          const priorNudge = priorNudges[location.agentPolicyId];
-          if (priorNudge !== undefined && !nudgesHandled.has(location.agentPolicyId)) {
-            nextNudges[location.agentPolicyId] = priorNudge;
+          if (priorSentinel) {
+            nextSentinels[location.id] ??= priorSentinel;
           }
           this.debugLog(`Rebalance failed for location ${location.id}; skipping: ${e.message}`);
           nextIssues[location.id] = 'error';
@@ -434,7 +404,7 @@ export class RebalancePrivateLocationShardsTask {
           locationIssues: nextIssues,
           snapshotAt: nextSnapshotAt,
           [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: nextSentinels,
-          pinNudges: nextNudges,
+          pinNudges,
         }),
         schedule,
       };
@@ -488,32 +458,17 @@ export class RebalancePrivateLocationShardsTask {
     this.debugLog('Rebalance private location shards task scheduled');
   }
 
-  /**
-   * Fires the agent policy's pending revision nudge once it is due, carrying it
-   * over otherwise. A failed bump stays pending and is retried next run.
-   * Locations sharing an agent policy see it handled by the first of them.
-   */
-  private async nudgeIfDue(
-    agentPolicyId: string,
-    priorNudges: Record<string, number>,
-    nextNudges: Record<string, number>,
-    handled: Set<string>,
-    now: number
-  ): Promise<void> {
-    const dueAt = priorNudges[agentPolicyId];
-    if (dueAt === undefined || handled.has(agentPolicyId)) {
+  /** Bumps a due nudge once; a failed bump stays pending for the next run. */
+  private async nudgeIfDue(agentPolicyId: string, pinNudges: Record<string, number>, now: number) {
+    const dueAt = pinNudges[agentPolicyId];
+    if (dueAt === undefined || now < dueAt) {
       return;
     }
-    handled.add(agentPolicyId);
-    if (now < dueAt) {
-      nextNudges[agentPolicyId] = dueAt;
-      return;
-    }
+    delete pinNudges[agentPolicyId];
     try {
-      await this.syntheticsMonitorClient.privateLocationAPI.redeployAgentPolicy(agentPolicyId);
-      this.debugLog(`nudged agent policy ${agentPolicyId} after its first pins`);
+      await this.syntheticsMonitorClient.privateLocationAPI.bumpAgentPolicyRevision(agentPolicyId);
     } catch (e) {
-      nextNudges[agentPolicyId] = dueAt;
+      pinNudges[agentPolicyId] = dueAt;
       this.serverSetup.logger.warn(
         `[RebalancePrivateLocationShardsTask] Failed to nudge agent policy ${agentPolicyId}: ${e.message}`
       );
@@ -521,30 +476,22 @@ export class RebalancePrivateLocationShardsTask {
   }
 
   /**
-   * Ensures the location's agent policy has its shard sentinel and returns the
-   * agent policy revision agents must reach before monitors are pinned there.
-   * A sentinel created now, or a location moved to another agent policy, starts
-   * over as not ready.
+   * Ensures the shard sentinel exists and returns the agent policy revision agents
+   * must reach before pins. A new sentinel or agent policy starts over as not ready.
    */
   private async getShardSentinelState(
-    location: { id: string; agentPolicyId: string },
+    { agentPolicyId }: { agentPolicyId: string },
     prior?: ShardSentinelState
   ): Promise<ShardSentinelState> {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
-    const { agentPolicyId } = location;
-    const { created } = await privateLocationAPI.ensureShardSentinel(agentPolicyId);
+    const created = await privateLocationAPI.ensureShardSentinel(agentPolicyId);
     if (!created && prior?.agentPolicyId === agentPolicyId) {
       return prior;
     }
-    // Read once the sentinel exists: this revision and every later one contain it.
+    // Read after the sentinel exists: this revision and every later one contain it.
     const revision = await privateLocationAPI.getAgentPolicyRevision(agentPolicyId);
     if (revision === undefined) {
       throw new Error(`Agent policy ${agentPolicyId} not found`);
-    }
-    if (created) {
-      this.debugLog(
-        `created shard sentinel on agent policy ${agentPolicyId} (revision ${revision})`
-      );
     }
     return { agentPolicyId, revision, ready: false };
   }

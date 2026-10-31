@@ -41,10 +41,10 @@ const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
   server.coreStart.elasticsearch.client.asInternalUser;
 
 /**
- * Finds an agent policy in whichever space it lives and picks the one space to
- * write through for it. Prefers the default space when the policy is there (or
- * is all-spaces): it matches the create/edit routing fallback, and an all-spaces
- * policy cannot be written through a literal `*` namespace.
+ * Finds an agent policy in any space and the one space to write through for it.
+ * Prefers the default space when the policy is there (or is all-spaces): it
+ * matches the create/edit routing fallback, and an all-spaces policy cannot be
+ * written through a literal `*` namespace.
  */
 const getAgentPolicyWriteSpace = async (server: SyntheticsServerSetup, policyId: string) => {
   const unscopedSoClient = server.coreStart.savedObjects.createInternalRepository();
@@ -283,11 +283,8 @@ export class PackagePolicyService {
   }
 
   /**
-   * Creates the agent policy's shard sentinel (see `shard_sentinel.ts`) in the
-   * space the agent policy is written through. Bumps the agent policy revision
-   * before returning, so a revision read afterwards already contains it.
-   * Returns false when the sentinel already exists, e.g. created concurrently
-   * by another Kibana node.
+   * Fleet bumps the agent policy before returning, so a revision read afterwards
+   * contains the sentinel. False when another Kibana node created it first.
    */
   async createShardSentinel(agentPolicyId: string): Promise<boolean> {
     const { writeSpaceId } = await getAgentPolicyWriteSpace(this.server, agentPolicyId);
@@ -298,9 +295,7 @@ export class PackagePolicyService {
       { logger: this.server.logger, installMissingPackage: true }
     );
     if (!template) {
-      throw new Error(
-        'Unable to build the Synthetics package policy template for the shard sentinel'
-      );
+      throw new Error('Unable to build the Synthetics package policy template');
     }
 
     try {
@@ -326,13 +321,12 @@ export class PackagePolicyService {
       [shardSentinelPolicyId(agentPolicyId)],
       { force: true, spaceIds: [ALL_SPACES_ID], ignoreMissing: true, bumpRevision: false }
     );
+    // Bumped separately: the unscoped client 404s for agent policies outside the default space.
     if (results?.some(({ success }) => success)) {
-      // Bump through the agent policy's own space; the unscoped client 404s elsewhere.
       await bumpAgentPolicyRevision(this.server, agentPolicyId);
     }
   }
 
-  /** Current revision of an agent policy, or undefined when it does not exist. */
   async getAgentPolicyRevision(agentPolicyId: string): Promise<number | undefined> {
     const { agentPolicy } = await getAgentPolicyWriteSpace(this.server, agentPolicyId);
     return agentPolicy?.revision;

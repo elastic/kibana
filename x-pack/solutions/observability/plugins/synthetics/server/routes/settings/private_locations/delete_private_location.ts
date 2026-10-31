@@ -13,7 +13,6 @@ import { getSavedObjectKqlFilter } from '../../common';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
-import { deleteUnusedShardSentinel } from './helpers';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
@@ -94,6 +93,8 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
     await savedObjectsClient.delete(privateLocationSavedObjectName, locationId, {
       force: true,
     });
-    await deleteUnusedShardSentinel(routeContext, location.agentPolicyId);
+    await syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel(
+      location.agentPolicyId
+    );
   },
 });
