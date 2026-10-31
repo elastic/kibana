@@ -15,6 +15,8 @@ import {
 } from '../fixtures/personas';
 
 // Executions in this suite happen within the last hour.
+// The event log is written asynchronously after each execution.
+const EVENT_LOG_TIMEOUT = 30_000;
 const getDateStart = () => new Date(Date.now() - 60 * 60 * 1000).toISOString();
 const getLogQuery = () => ({
   date_start: getDateStart(),
@@ -61,7 +63,7 @@ apiTest.describe('Connector execution logs and KPIs', { tag: '@local-stateful-cl
           );
           return body.total;
         },
-        { timeout: 30_000 }
+        { timeout: EVENT_LOG_TIMEOUT }
       )
       .toBe(2);
 

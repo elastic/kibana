@@ -188,12 +188,21 @@ describe('AclHelper', () => {
   });
 
   describe('#getInitialAcl', () => {
-    it('returns the extension result for an enforced type', async () => {
-      const acl = { version: 1 as const, general_access: 'none' as const, entries: [] };
-      aclExtension.getInitialAcl.mockResolvedValue(acl);
+    it('returns the extension result for an enforced type in the canonical form', async () => {
+      aclExtension.getInitialAcl.mockResolvedValue({
+        version: 1,
+        owner: { type: 'user', id: 'u_owner' },
+        general_access: 'none',
+        entries: [],
+      });
       const requested = { general_access: 'none' as const };
 
-      await expect(helper.getInitialAcl(ACL_TYPE, 'space-a', requested)).resolves.toBe(acl);
+      await expect(helper.getInitialAcl(ACL_TYPE, 'space-a', requested)).resolves.toEqual({
+        version: [1],
+        owner: { type: ['user'], id: ['u_owner'] },
+        general_access: ['none'],
+        entries: [],
+      });
       expect(aclExtension.getInitialAcl).toHaveBeenCalledWith({
         type: ACL_TYPE,
         namespace: 'space-a',

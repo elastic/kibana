@@ -3925,6 +3925,20 @@ describe('object-level security', () => {
     expect(actionExecutor.execute).not.toHaveBeenCalled();
   });
 
+  test('checks feature privileges before reporting a missing connector', async () => {
+    unsecuredSavedObjectsClient.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('action', '1')
+    );
+    authorization.ensureAuthorized.mockRejectedValue(
+      Boom.forbidden('Unauthorized to execute actions')
+    );
+
+    await expect(actionsClient.execute({ actionId: '1', params: {} })).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(actionExecutor.execute).not.toHaveBeenCalled();
+  });
+
   test('checks use for the connectors it enqueues', async () => {
     deny('forbidden');
     await actionsClient.bulkEnqueueExecution([]);

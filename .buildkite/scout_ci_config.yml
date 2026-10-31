@@ -1,6 +1,7 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - actions
     - advanced_settings
     - agent_builder
     - agent_builder_dashboards
@@ -124,7 +125,6 @@ plugins:
     - workflows_management
     - workflowsExtensionsExample
   disabled:
-    - actions # OLS PoC: enable when the draft PR wants CI runs
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
     - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
@@ -140,7 +140,6 @@ packages:
 
 # Define test configs to be excluded from automatic discovery & execution in CI environment (process.env.CI=true)
 excluded_configs:
-  - x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_ols_poc/ui/playwright.config.ts # OLS PoC
   - src/dev/build/test/scout_fips/api/playwright.config.ts
   - x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts
   - x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel.playwright.config.ts

@@ -161,10 +161,18 @@ Two choices in the rule paths need review:
 - **PS4:** excluding the `acl` extension always throws. Guardrail G2 needs a reviewed allowlist of system uses.
 - **PS8:** UIAM API keys and UIAM service accounts get general access only ([kibana#271760](https://github.com/elastic/kibana/issues/271760)).
 - **D2:** `acl` is a root field, so every read includes it. Its cost is part of the bench.
-- **CI:** `.buildkite/scout_ci_config.yml` disables `actions` and excludes the UI config. Enable them when the draft PR
-  wants CI runs. The `ols_poc` config set needs Apps DX review.
-- **FTR:** the 34 Actions and Alerting API FTR configs run with OLS disabled. 30 pass locally.
-  `spaces_only/tests/alerting/group4` ("should list all registered rule types") fails the same way on the base
-  commit, and `spaces_only_legacy` does not load its tests. `spaces_only/tests/alerting/group3`, the email trimming
-  tests in `security_and_spaces/group2/tests/actions`, and the connectors and rules UI FTRs are still to confirm.
-  None of these suites run with OLS enabled yet.
+- **CI:** the Scout suites with object-level security enabled (`ols_poc`) and disabled run in CI. The `ols_poc`
+  config set needs Apps DX review.
+- **FTR:** the existing Actions and Alerting suites ran locally twice: with the setting off, as CI runs them, and
+  with `xpack.security.accessControl.enabled=true` added to each config. Connectors stay public by default, so
+  existing behavior must not change in either mode.
+  - Of the 34 API configs, 31 pass in both modes, and the connectors and rules UI configs pass in both modes (13 and
+    48 tests).
+  - `spaces_only/tests/alerting/group4` ("should list all registered rule types") fails the same way on the base
+    commit.
+  - `security_and_spaces/group2/tests/actions` has no `emailMaximumBodyLength`, so its email trimming tests fail.
+    The parent `group2` config runs them and passes. `spaces_only_legacy` does not load its tests. Both are
+    disabled in CI.
+  - The telemetry test in `security_and_spaces/group2/tests/telemetry` is flaky on the base commit too.
+  - With the setting on, the suites found one regression: `_execute` reported a missing connector as 404 before it
+    checked feature privileges. A caller without privileges now gets 403 again, before any lookup result.
