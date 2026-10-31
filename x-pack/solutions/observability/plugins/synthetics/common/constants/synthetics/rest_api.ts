@@ -59,6 +59,7 @@ export enum SYNTHETICS_API_URLS {
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/synthetics/journey/screenshot/block`,
   NETWORK_EVENTS = `/internal/synthetics/network_events`,
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
+  JOURNEY_VIDEO = `/internal/synthetics/journey/video/{checkGroup}`,
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
   FILTERS = '/internal/synthetics/monitor/filters',
   TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
