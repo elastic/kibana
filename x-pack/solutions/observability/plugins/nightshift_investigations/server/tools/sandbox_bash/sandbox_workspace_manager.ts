@@ -66,12 +66,20 @@ export const createSandboxWorkspaceManager = ({
       const allowedTargets = configuredTargets.filter(
         ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
       );
-      // Custom agents can use several connectors; only infer guidance for an unambiguous source.
+      // Agents without a bound target (the assistant, custom agents) can use several telemetry
+      // connectors; infer guidance for an unambiguous source, else fall back to the legacy
+      // `telemetry_connector_id`, the same default an investigation without a named target uses.
+      // With several named targets and no legacy default, `elastic.md` stays unseeded and the
+      // agent picks one from `connectors.md`.
       const inferredTarget =
         new Set(allowedTargets.map(({ connectorId }) => connectorId)).size === 1
           ? allowedTargets[0]
           : undefined;
-      return boundTarget ?? inferredTarget;
+      const defaultTarget =
+        telemetryConnectorId && callContext.allowedConnectorIds.includes(telemetryConnectorId)
+          ? { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices }
+          : undefined;
+      return boundTarget ?? inferredTarget ?? defaultTarget;
     })();
     callTargets.set(callContext, pending);
     return pending;
