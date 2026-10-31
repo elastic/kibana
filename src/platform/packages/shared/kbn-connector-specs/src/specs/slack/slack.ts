@@ -1201,7 +1201,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Fetch threaded replies for a message in a Slack channel or DM. Pass the channel ID and the parent message timestamp (threadTs). Returns replies oldest-first (the parent message is first); pass nextCursor to fetch the next page.',
+        'Fetch threaded replies for a message in a Slack channel or DM. Pass the channel ID and the parent message timestamp (ts). Returns replies oldest-first (the parent message is first); pass nextCursor to fetch the next page.',
       input: SlackGetConversationRepliesInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackGetConversationRepliesInput =

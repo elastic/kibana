@@ -521,7 +521,7 @@ export async function relayGetConversationReplies(
   }
 
   const last = page.messages.at(-1);
-  // Slack can return the parent on every page, so a page that ends where it began is the last one.
+  // A page that ends where it began made no progress, so stop instead of looping.
   const nextCursor =
     page.truncated && last && last.ts !== window.oldest
       ? encodeReadCursor({ ...window, oldest: last.ts })
