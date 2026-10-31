@@ -14,16 +14,20 @@ import type {
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
+  MAX_SOURCES_PER_PAGE,
+  RECOMMENDED_SOURCES,
   createSourceRequestSchema,
   getNightshiftSourceViewName,
   getSourceReadTargets,
   getSourceSlugCandidate,
   hasMultipleSourceIndices,
+  normalizeSourceEsql,
   updateSourceRequestSchema,
   type CreateSourceRequest,
   type ISourceReadTargets,
   type ListSourcesResponse,
   type NightshiftSource,
+  type RecommendedSource,
   type SourceHealth,
   type SourceType,
   type SourceWithHealth,
@@ -329,6 +333,24 @@ export class SourcesClient {
       page,
       per_page: perPage,
     };
+  }
+
+  async listRecommended(): Promise<RecommendedSource[]> {
+    const existing = new Set<string>();
+    let sourceCount = 0;
+
+    for (let page = 1; ; page++) {
+      const { sources, total } = await this.list({ page, perPage: MAX_SOURCES_PER_PAGE });
+      for (const source of sources) {
+        existing.add(normalizeSourceEsql(source.esql));
+      }
+      sourceCount += sources.length;
+      if (sources.length < MAX_SOURCES_PER_PAGE || sourceCount >= total) {
+        break;
+      }
+    }
+
+    return RECOMMENDED_SOURCES.filter((preset) => !existing.has(normalizeSourceEsql(preset.esql)));
   }
 
   async delete(id: string): Promise<void> {

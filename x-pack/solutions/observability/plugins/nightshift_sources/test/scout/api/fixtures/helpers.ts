@@ -69,6 +69,13 @@ export const listSources = (
     withHeaders(cookieHeader)
   );
 
+export const listRecommendedSources = (
+  apiClient: ApiClientFixture,
+  cookieHeader: CookieHeader,
+  { spaceId }: SourceRequestOptions = {}
+): Promise<ApiClientResponse> =>
+  apiClient.get(spacePath(`${SOURCES_PATH}/_recommended`, spaceId), withHeaders(cookieHeader));
+
 export const updateSource = (
   apiClient: ApiClientFixture,
   cookieHeader: CookieHeader,
