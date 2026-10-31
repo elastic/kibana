@@ -24,6 +24,9 @@ function generator({ imageFlavor }: TemplateContext) {
   server.shutdownTimeout: "5s"
   elasticsearch.hosts: [ "http://elasticsearch:9200" ]
   monitoring.ui.container.elasticsearch.enabled: true
+
+  # TEMPORARY (OLS PoC): enables object-level security in PR deployments for manual testing.
+  xpack.security.accessControl.enabled: true
   `);
 }
 
