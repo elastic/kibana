@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-security-server'
+  - '@kbn/scout-security'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-server'
   - '@kbn/charts-theme'
@@ -100,10 +101,12 @@ tags:
   - private
   - jest-unit-tests
   - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
 tasks: {}

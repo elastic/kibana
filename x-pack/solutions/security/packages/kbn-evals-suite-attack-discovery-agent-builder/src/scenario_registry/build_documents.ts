@@ -58,7 +58,14 @@ export const buildAlertDocument = (
    * rule share one rule identity — the repeated-rule cluster rule-based
    * correlation is supposed to see — while every alert id stays unique.
    */
-  ruleSeed: string | number = stepNumber
+  ruleSeed: string | number = stepNumber,
+  /**
+   * Opt-in override of the synthetic `agent.id` by host name. In production
+   * alerts carry the enrolled endpoint's real agent id; e2e suites that enroll
+   * real hosts pass the enrolled id here so downstream actions (e.g. isolate)
+   * find an enrolled agent. Unset keeps the synthetic seeded id.
+   */
+  agentIdByHost?: Readonly<Record<string, string>>
 ): Ad2IndexedAlert => {
   const alertId = ad2ScenarioAlertId(runMarker, scenarioKey, stepNumber);
   const ruleId = ad2SeedId(runMarker, 'rule', scenarioKey, ruleSeed);
@@ -93,7 +100,7 @@ export const buildAlertDocument = (
     tags: [runMarker],
     labels: { ad_portable_seed: runMarker },
     agent: {
-      id: ad2SeedId(runMarker, 'agent', scenario.host),
+      id: agentIdByHost?.[scenario.host] ?? ad2SeedId(runMarker, 'agent', scenario.host),
       type: 'endpoint',
       version: '9.5.0',
     },
@@ -165,7 +172,8 @@ export const buildRawEventDocuments = (
   stepNumber: number,
   step: Ad2ScenarioStep,
   timestamp: Date,
-  runMarker: string
+  runMarker: string,
+  agentIdByHost?: Readonly<Record<string, string>>
 ): Ad2IndexedRawEvent[] => {
   if (!step.processName) {
     return [];
@@ -173,7 +181,7 @@ export const buildRawEventDocuments = (
 
   const eventId = ad2SeedId(runMarker, 'process', scenarioKey, stepNumber);
   const host = hostDocument(scenario.host, scenario.os, runMarker);
-  const agentId = ad2SeedId(runMarker, 'agent', scenario.host);
+  const agentId = agentIdByHost?.[scenario.host] ?? ad2SeedId(runMarker, 'agent', scenario.host);
   const base = {
     '@timestamp': isoTimestamp(new Date(timestamp.getTime() - 3_000)),
     ecs: { version: '9.0.0' },
@@ -279,7 +287,8 @@ export const buildRawEventDocuments = (
 export const buildScenarioDocuments = (
   scenario: Ad2ScenarioDefinition,
   baseTime: Date,
-  runMarker: string
+  runMarker: string,
+  agentIdByHost?: Readonly<Record<string, string>>
 ): { alerts: Ad2IndexedAlert[]; rawEvents: Ad2IndexedRawEvent[] } => {
   const alerts: Ad2IndexedAlert[] = [];
   const rawEvents: Ad2IndexedRawEvent[] = [];
@@ -288,10 +297,29 @@ export const buildScenarioDocuments = (
   scenario.steps.forEach((step, index) => {
     const stepNumber = index + 1;
     const timestamp = new Date(start.getTime() + (stepNumber - 1) * 7 * 60 * 1000);
-    alerts.push(buildAlertDocument(scenario.key, scenario, stepNumber, step, timestamp, runMarker));
+    alerts.push(
+      buildAlertDocument(
+        scenario.key,
+        scenario,
+        stepNumber,
+        step,
+        timestamp,
+        runMarker,
+        stepNumber,
+        agentIdByHost
+      )
+    );
     if (scenario.raw) {
       rawEvents.push(
-        ...buildRawEventDocuments(scenario.key, scenario, stepNumber, step, timestamp, runMarker)
+        ...buildRawEventDocuments(
+          scenario.key,
+          scenario,
+          stepNumber,
+          step,
+          timestamp,
+          runMarker,
+          agentIdByHost
+        )
       );
     }
   });

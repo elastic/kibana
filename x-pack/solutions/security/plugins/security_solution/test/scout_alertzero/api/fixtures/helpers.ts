@@ -20,7 +20,7 @@ import {
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import { HUNT_WORKER_URL, TI_HEADERS } from './constants';
+import { HUNT_WORKER_URL, INTERNAL_HEADERS, TI_HEADERS } from './constants';
 import { SUPPLY_WORKFLOW_IDS, type SupplyWorkflowKey } from './supply_workflow_ids';
 
 /** Minimal ES client surface these tests rely on. */
@@ -125,6 +125,17 @@ export interface HuntPrerequisites {
 
 const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
 
+/**
+ * The settings route is `access: 'internal'`, so under the alertzero config set
+ * (`--server.restrictInternalApis=true`) a bare cookie header gets a 400 before the
+ * per-space gate is ever read. Merging `INTERNAL_HEADERS` here keeps every caller —
+ * including ones passing plain cookie headers — working on both lanes.
+ */
+const alertZeroSettingsHeaders = (headers: Record<string, string>): Record<string, string> => ({
+  ...INTERNAL_HEADERS,
+  ...headers,
+});
+
 /** Reads the per-space AlertZero gate as the user set it; `undefined` when it is still the default. */
 export const readAlertZeroEnabledInSpace = async ({
   apiClient,
@@ -136,7 +147,7 @@ export const readAlertZeroEnabledInSpace = async ({
   spaceId: string;
 }): Promise<boolean | undefined> => {
   const response = await apiClient.get(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
-    headers,
+    headers: alertZeroSettingsHeaders(headers),
     responseType: 'json',
   });
   if (response.statusCode !== 200) {
@@ -168,7 +179,7 @@ export const setAlertZeroEnabledInSpace = async ({
   enabled: boolean | undefined;
 }): Promise<void> => {
   const response = await apiClient.post(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
-    headers: { ...headers, 'kbn-xsrf': 'true' },
+    headers: alertZeroSettingsHeaders(headers),
     responseType: 'json',
     body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: enabled ?? null } },
   });
@@ -187,6 +198,25 @@ export const enableAlertZeroInSpace = async (args: {
   headers: Record<string, string>;
   spaceId: string;
 }): Promise<void> => setAlertZeroEnabledInSpace({ ...args, enabled: true });
+
+/**
+ * Enables the per-space AlertZero gate for one suite and returns the restore callback for its
+ * afterAll. The suites run serially (`workers: 1`), so a suite that only enables — never
+ * restores — would 404 the gated routes of the next gated suite on the same stack; restoring
+ * the captured baseline keeps the shared space exactly as this suite found it, including the
+ * case where a previous suite (or the deployment) had the gate already on.
+ */
+export const withAlertZeroEnabledInSpace = async (args: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<() => Promise<void>> => {
+  const baseline = {
+    enabled: await readAlertZeroEnabledInSpace(args),
+  };
+  await setAlertZeroEnabledInSpace({ ...args, enabled: true });
+  return () => setAlertZeroEnabledInSpace({ ...args, enabled: baseline.enabled });
+};
 
 /**
  * Creates a space-scoped `.gen-ai` connector (so Workers are not blocked by `noModel`),
