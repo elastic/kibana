@@ -27,18 +27,21 @@ const byId = (id: string) => {
 describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
   // Each dataset example is its own conversation (PersonaMatrixChatClient.query sends no
   // conversation id), so a question that points back at an earlier incident needs an attachment.
-  it('detection-rule-edit-c supplies the confirmed-threat context through an attachment', () => {
-    const { input } = byId('detection-rule-edit-c');
-    expect(input.question).toContain('this threat');
-    expect(input.attachment).toBeDefined();
-    expect(input.attachment).toContain('srv-win-defend-01');
-    expect(input.attachment).toContain('BluetoothService.exe');
-    expect(input.attachment).toContain('log.dll');
-    expect(input.attachment).toContain(
-      '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-    );
-    expect(input.attachment).toContain('C:\\Users\\Public\\');
-  });
+  it.each(['detection-rule-edit-b', 'detection-rule-edit-c'])(
+    '%s supplies the earlier-hunt/confirmed-threat context through an attachment',
+    (id) => {
+      const { input } = byId(id);
+      expect(input.question).toMatch(/this threat|we just hunted down/);
+      expect(input.attachment).toBeDefined();
+      expect(input.attachment).toContain('srv-win-defend-01');
+      expect(input.attachment).toContain('BluetoothService.exe');
+      expect(input.attachment).toContain('log.dll');
+      expect(input.attachment).toContain(
+        '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
+      );
+      expect(input.attachment).toContain('C:\\Users\\Public\\');
+    }
+  );
 
   describe.each([
     ['multi-step-a', ['virustotal_lookup', 'on_call_lookup']],
