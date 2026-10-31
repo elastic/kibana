@@ -34,6 +34,22 @@ export interface EmptyModelResponseErrorParams {
   traceId?: string;
 }
 
+const buildDiagnostics = ({
+  completionTokens,
+  connectorId,
+  contentLength,
+  model,
+  promptTokens,
+  traceId,
+}: EmptyModelResponseErrorParams): string =>
+  `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX} (code: ${EMPTY_MODEL_RESPONSE_ERROR_CODE}); ` +
+  `connectorId: ${connectorId}; ` +
+  `model: ${model ?? 'unknown'}; ` +
+  `prompt tokens: ${promptTokens ?? 'unknown'}; ` +
+  `completion tokens: ${completionTokens ?? 'unknown'}; ` +
+  `response length: ${contentLength} characters; ` +
+  `traceId: ${traceId ?? 'unknown'}`;
+
 /**
  * Raised when a model returns a successful (HTTP 200) completion that contains no content.
  *
@@ -65,13 +81,14 @@ export class EmptyModelResponseError extends Error {
     traceId,
   }: EmptyModelResponseErrorParams) {
     super(
-      `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX} (code: ${EMPTY_MODEL_RESPONSE_ERROR_CODE}); ` +
-        `connectorId: ${connectorId}; ` +
-        `model: ${model ?? 'unknown'}; ` +
-        `prompt tokens: ${promptTokens ?? 'unknown'}; ` +
-        `completion tokens: ${completionTokens ?? 'unknown'}; ` +
-        `response length: ${contentLength} characters; ` +
-        `traceId: ${traceId ?? 'unknown'}`
+      buildDiagnostics({
+        completionTokens,
+        connectorId,
+        contentLength,
+        model,
+        promptTokens,
+        traceId,
+      })
     );
 
     this.name = 'EmptyModelResponseError';
@@ -89,3 +106,18 @@ export const isEmptyModelResponseError = (error: unknown): boolean =>
   typeof error === 'object' &&
   error != null &&
   (error as { code?: unknown }).code === EMPTY_MODEL_RESPONSE_ERROR_CODE;
+
+/**
+ * The diagnostics line of a real `EmptyModelResponseError`, rebuilt from its structured fields.
+ * `message` is never read: an error that was re-wrapped or had its message replaced can carry
+ * upstream text there, and this line reaches persisted and telemetry sinks.
+ */
+export const getEmptyModelResponseDiagnostics = (error: EmptyModelResponseError): string =>
+  buildDiagnostics({
+    completionTokens: error.completionTokens,
+    connectorId: error.connectorId,
+    contentLength: error.contentLength,
+    model: error.model,
+    promptTokens: error.promptTokens,
+    traceId: error.traceId,
+  });

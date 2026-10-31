@@ -7,6 +7,7 @@
 
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import { EmptyModelResponseError } from '@kbn/langchain/server';
 import {
   attackDiscoveryRefineTemplateRequest,
   createAttackDiscoveryTemplateCompletion,
@@ -52,6 +53,44 @@ describe('createAttackDiscoveryTemplateCompletion', () => {
     await complete({ alerts: ['alert'], phase: 'generate' });
 
     expect(chatComplete.mock.calls[0][0].timeout).toBe(600_000);
+  });
+
+  it.each([[''], ['   \n']])(
+    'throws an EmptyModelResponseError, with no content, for the response %j',
+    async (content) => {
+      chatComplete.mockResolvedValueOnce({
+        content,
+        model: 'daybreak-model',
+        tokens: { prompt: 1234, completion: 0 },
+      });
+      const complete = createAttackDiscoveryTemplateCompletion({
+        inferenceClient,
+        connectorId: 'daybreak',
+      });
+
+      const error = await complete({ alerts: ['alert'], phase: 'generate' }).catch((e) => e);
+
+      expect(error).toBeInstanceOf(EmptyModelResponseError);
+      expect(error).toMatchObject({
+        completionTokens: 0,
+        connectorId: 'daybreak',
+        contentLength: content.length,
+        model: 'daybreak-model',
+        promptTokens: 1234,
+      });
+    }
+  );
+
+  it('throws for a response without content', async () => {
+    chatComplete.mockResolvedValueOnce({});
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+    });
+
+    await expect(complete({ alerts: ['alert'], phase: 'generate' })).rejects.toBeInstanceOf(
+      EmptyModelResponseError
+    );
   });
 });
 

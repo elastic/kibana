@@ -11,6 +11,7 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
 import { EmptyModelResponseError } from './empty_model_response_error';
+import { safeToString } from '../utils/safe_to_string';
 import { sanitizeErrorMessage } from '../utils/sanitize_error_message';
 
 const LLM_TYPE = 'InferenceClientLlm';
@@ -111,11 +112,11 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
           code?: unknown;
           message?: unknown;
         };
-        const message = typeof errorMessage === 'string' ? errorMessage : String(error);
+        const message = typeof errorMessage === 'string' ? errorMessage : safeToString(error);
         // The message can quote the payload it failed on (`Failed to parse line "<SSE chunk>"`, which
         // carries model output), so only its sanitized head is logged above debug level.
         this.#logger.error(
-          `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${String(
+          `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${safeToString(
             code
           )} - ${sanitizeErrorMessage(message)}`
         );

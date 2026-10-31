@@ -174,6 +174,38 @@ describe('InferenceClientLlm', () => {
     });
   });
 
+  describe.each([
+    ['a prototype-less object', Object.create(null)],
+    ['a Symbol', Symbol('s')],
+    ['an Error with a Symbol message', Object.assign(new Error('x'), { message: Symbol('s') })],
+    [
+      'an Error with a prototype-less message',
+      Object.assign(new Error('x'), { message: Object.create(null) }),
+    ],
+  ])(
+    'when chatComplete rejects with a value that cannot be stringified: %s',
+    (_label, rejection) => {
+      it('rethrows the original rejection', async () => {
+        mockInferenceClient.chatComplete.mockRejectedValueOnce(rejection);
+
+        const llm = new InferenceClientLlm({
+          connectorId: 'test-connector',
+          inferenceClient: mockInferenceClient,
+          logger: mockLogger,
+        });
+
+        let thrown: unknown = 'not thrown';
+        try {
+          await llm._call('test prompt');
+        } catch (e) {
+          thrown = e;
+        }
+
+        expect(thrown).toBe(rejection);
+      });
+    }
+  );
+
   describe('empty completions', () => {
     it('rejects with an empty-response error when the model returns no content', async () => {
       (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({

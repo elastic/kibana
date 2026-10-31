@@ -382,6 +382,34 @@ describe('ActionsClientLlm', () => {
         expect(getDebugMessages().some((message) => message.includes('quota exceeded'))).toBe(true);
       });
 
+      it.each([
+        ['a prototype-less object', Object.create(null)],
+        ['a Symbol', Symbol('s')],
+        ['an Error with a Symbol message', Object.assign(new Error('x'), { message: Symbol('s') })],
+      ])(
+        'rethrows the original rejection when it is %s and cannot be stringified',
+        async (_l, rejection) => {
+          (mockInferenceClient.chatComplete as jest.Mock).mockRejectedValue(rejection);
+          const actionsClientLlm = new ActionsClientLlm({
+            actionsClient,
+            connectorId,
+            inferenceClient: mockInferenceClient,
+            isInferenceEndpoint: true,
+            logger: mockLogger,
+          });
+
+          let thrown: unknown = 'not thrown';
+          try {
+            await actionsClientLlm._call(prompt);
+          } catch (e) {
+            thrown = e;
+          }
+
+          expect(thrown).toBe(rejection);
+          expect(() => getDebugMessages()).not.toThrow(); // runs the lazy debug-log callbacks
+        }
+      );
+
       it('rejects with an empty-response error when the model returns no content', async () => {
         (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
           content: '',

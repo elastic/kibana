@@ -221,6 +221,9 @@ describe('throwIfErrorCountsExceeded', () => {
     it('names the empty model response as the cause', () => {
       expect(getMessage()).toContain('The model returned an empty response');
       expect(getMessage()).toContain('will not help');
+      expect(getMessage()).toContain(
+        'when available, the connector, model and token counts are in the errors below'
+      );
     });
 
     it('keeps the connector, model and token counts in the thrown message', () => {

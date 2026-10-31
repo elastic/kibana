@@ -18,6 +18,7 @@ import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { EmptyModelResponseError } from './empty_model_response_error';
 import { getMessageContentAndRole } from './helpers';
+import { safeToString } from '../utils/safe_to_string';
 import type { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
@@ -166,7 +167,9 @@ export class ActionsClientLlm extends LLM {
         this.#logger.debug(
           () =>
             `${LLM_TYPE}#_call error\ntraceId: ${this.#traceId}\nerror:\n${
-              error instanceof Error ? error.message : String(error)
+              error instanceof Error && typeof error.message === 'string'
+                ? error.message
+                : safeToString(error)
             }`
         );
 

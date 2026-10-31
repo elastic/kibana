@@ -43,7 +43,7 @@ export const getEmptyModelResponseError = ({
   llmType: string;
   nodeName: string;
 }): string => {
-  const causeMessage = cause == null ? '' : ` Underlying error: ${getParseErrorSummary(cause)}`; // a real empty-response message is kept whole, anything else is sanitized
+  const causeMessage = cause == null ? '' : ` Underlying error: ${getParseErrorSummary(cause)}`; // diagnostics of a real EmptyModelResponseError only, never a message
 
   return `${nodeName} node detected that ${EMPTY_MODEL_RESPONSE_ERROR_MARKER} (${llmType}) on attempt ${generationAttempts}; the response contained no content. This is a model or connector problem, not a prompt-size problem.${causeMessage}`;
 };

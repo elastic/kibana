@@ -7,14 +7,19 @@
 
 import {
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
   MAX_SANITIZED_ERROR_MESSAGE_LENGTH,
+  getEmptyModelResponseDiagnostics,
   isEmptyModelResponseError,
+  safeToString,
   sanitizeErrorMessage,
 } from '@kbn/langchain/server';
 
 // a `z.record` / `z.map` schema would put model-chosen keys into this path
 const getIssuePath = (path: unknown): string =>
-  Array.isArray(path) && path.length > 0 ? path.map(String).join('.') : '(root)';
+  Array.isArray(path) && path.length > 0
+    ? path.map((segment) => safeToString(segment)).join('.')
+    : '(root)';
 
 const JSON_POSITION_MARKER = ' in JSON at position';
 
@@ -28,7 +33,7 @@ const ERROR_CLASS_NAME = /^[A-Za-z][A-Za-z0-9_]*(Error|Exception)$/;
  * position; drop everything from the first quote.
  */
 const getSyntaxErrorSummary = (error: SyntaxError): string => {
-  const { message } = error;
+  const message = typeof error.message === 'string' ? error.message : '';
   const position = /at position (\d+)/.exec(message)?.[1];
   const cutAt = [message.indexOf('"'), message.indexOf(JSON_POSITION_MARKER)]
     .filter((index) => index !== -1)
@@ -51,8 +56,9 @@ const getSyntaxErrorSummary = (error: SyntaxError): string => {
  * keys and values, and transport errors such as `Failed to parse line "<SSE chunk>"` quote the raw
  * stream chunk. The summary keeps only the error class, the JSON position, the schema issue codes
  * and paths, and, for any other error, a conventional class name plus the message up to its first
- * quote, so it is safe to persist and to send to telemetry. The message of an empty-response error
- * holds diagnostics only and is kept whole.
+ * quote, so it is safe to persist and to send to telemetry. A real `EmptyModelResponseError` is
+ * summarized from its structured fields; an error that only carries its code or message prefix
+ * gets no message text, because the sanitizer cannot tell upstream text from diagnostics.
  */
 export const getParseErrorSummary = (error: unknown): string => {
   if (error instanceof SyntaxError) {
@@ -66,7 +72,9 @@ export const getParseErrorSummary = (error: unknown): string => {
       .map((issue: { code?: unknown; path?: unknown; expected?: unknown }) => {
         const expected = typeof issue?.expected === 'string' ? ` (expected ${issue.expected})` : '';
 
-        return `${String(issue?.code ?? 'invalid')} at ${getIssuePath(issue?.path)}${expected}`;
+        return `${safeToString(issue?.code ?? 'invalid')} at ${getIssuePath(
+          issue?.path
+        )}${expected}`;
       })
       .join('; ');
 
@@ -76,25 +84,22 @@ export const getParseErrorSummary = (error: unknown): string => {
   // an `Error` can carry a non-string `message`, which may hold model output: never read it as text
   const message = error instanceof Error && typeof error.message === 'string' ? error.message : '';
 
-  if (
-    error instanceof Error &&
-    isEmptyModelResponseError(error) &&
-    message.startsWith(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX)
-  ) {
-    // built from connector, model, token counts and trace id only, so it is kept whole
-    return message;
+  if (error instanceof EmptyModelResponseError) {
+    return getEmptyModelResponseDiagnostics(error);
   }
 
   if (error instanceof Error) {
     const code = (error as { code?: unknown }).code;
     const codeSuffix = typeof code === 'string' ? ` [${code}]` : '';
-    const name = ERROR_CLASS_NAME.test(error.name) ? error.name : 'Error';
+    const name =
+      typeof error.name === 'string' && ERROR_CLASS_NAME.test(error.name) ? error.name : 'Error';
+    const looksLikeEmptyResponse =
+      isEmptyModelResponseError(error) ||
+      message.startsWith(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
+    const detail = looksLikeEmptyResponse ? '' : `: ${sanitizeErrorMessage(message)}`;
 
-    return `${name}${codeSuffix}: ${sanitizeErrorMessage(message)}`.slice(
-      0,
-      MAX_SANITIZED_ERROR_MESSAGE_LENGTH
-    );
+    return `${name}${codeSuffix}${detail}`.slice(0, MAX_SANITIZED_ERROR_MESSAGE_LENGTH);
   }
 
-  return String(error).split('"')[0].trim().slice(0, MAX_SANITIZED_ERROR_MESSAGE_LENGTH);
+  return safeToString(error).split('"')[0].trim().slice(0, MAX_SANITIZED_ERROR_MESSAGE_LENGTH);
 };

@@ -111,34 +111,61 @@ describe('getEmptyModelResponseError', () => {
     expect(error).toContain('prompt tokens: 128390');
   });
 
-  it('sanitizes a cause that carries the empty-response code but upstream text', () => {
-    const cause = new Error('upstream said "SECRET model output"');
-    Object.assign(cause, { code: EMPTY_MODEL_RESPONSE_ERROR_CODE });
+  describe('a cause that is not a real EmptyModelResponseError', () => {
+    const build = (message: string): unknown =>
+      Object.assign(new Error(message), { code: EMPTY_MODEL_RESPONSE_ERROR_CODE });
 
-    const error = getEmptyModelResponseError({
-      cause,
-      generationAttempts: 1,
-      llmType: 'inference',
-      nodeName: 'generate',
+    it.each([
+      ['the code with a quote-free foreign message', 'upstream error SECRET3 no quotes'],
+      ['the code with a quoted foreign message', 'upstream said "SECRET model output"'],
+      [
+        'the prefix with a foreign tail',
+        `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX}; upstream body: SECRET2`,
+      ],
+    ])('persists no message text for %s', (_label, message) => {
+      const error = getEmptyModelResponseError({
+        cause: build(message),
+        generationAttempts: 1,
+        llmType: 'inference',
+        nodeName: 'generate',
+      });
+
+      expect(error).not.toContain('SECRET');
+      expect(error).not.toContain('upstream');
+      expect(isEmptyModelResponseErrorEntry(error)).toBe(true);
     });
 
-    expect(error).not.toContain('SECRET');
-    expect(error).toContain('upstream said');
-    expect(isEmptyModelResponseErrorEntry(error)).toBe(true);
+    it('does not throw for a message that is not a string', () => {
+      const cause = new Error('placeholder');
+      (cause as { message: unknown }).message = { text: 'SECRET' };
+
+      const error = getEmptyModelResponseError({
+        cause,
+        generationAttempts: 1,
+        llmType: 'inference',
+        nodeName: 'generate',
+      });
+
+      expect(error).not.toContain('SECRET');
+    });
   });
 
-  it('does not throw, or persist anything, for a cause with a non-string message', () => {
-    const cause = new Error('placeholder');
-    (cause as { message: unknown }).message = { text: 'SECRET' };
-
-    const error = getEmptyModelResponseError({
-      cause,
-      generationAttempts: 1,
-      llmType: 'inference',
-      nodeName: 'generate',
+  describe.each([
+    ['a prototype-less object', Object.create(null)],
+    ['a Symbol', Symbol('s')],
+    ['an Error with a Symbol message', Object.assign(new Error('x'), { message: Symbol('s') })],
+    ['an Error with a Symbol name', Object.assign(new Error('x'), { name: Symbol('s') })],
+  ])('a cause that cannot be stringified: %s', (_label, cause) => {
+    it('does not throw', () => {
+      expect(() =>
+        getEmptyModelResponseError({
+          cause,
+          generationAttempts: 1,
+          llmType: 'inference',
+          nodeName: 'generate',
+        })
+      ).not.toThrow();
     });
-
-    expect(error).not.toContain('SECRET');
   });
 
   it('serializes a non-Error cause', () => {

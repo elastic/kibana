@@ -53,6 +53,9 @@ describe('throwIfErrorCountsExceeded', () => {
     expect(message).toContain('will not help');
     expect(message).not.toContain('Try sending fewer alerts');
     expect(message).toContain(emptyResponseError);
+    expect(message).toContain(
+      'when available, the connector, model and token counts are in the errors below'
+    );
   });
 
   it('keeps the existing remedy when only some of the errors are empty model responses', () => {

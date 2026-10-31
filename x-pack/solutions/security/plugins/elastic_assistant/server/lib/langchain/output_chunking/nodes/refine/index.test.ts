@@ -9,8 +9,14 @@ import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isEmptyModelResponseErrorEntry } from '@kbn/discoveries';
+import {
+  createAttackDiscoveryTemplateCompletion,
+  isEmptyModelResponseErrorEntry,
+} from '@kbn/discoveries';
+import type { InferenceClient } from '@kbn/inference-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
+
+import { throwIfErrorCountsExceeded } from '../../../../../routes/attack_discovery/public/post/helpers/throw_if_error_counts_exceeded';
 
 import {
   getParsedAttackDiscoveriesMock,
@@ -573,5 +579,56 @@ ${ATTACK_DISCOVERY_REFINE}
 
     expect(state.refinements).toEqual(['ref0']);
     expect(state.errors).toHaveLength(1);
+  });
+
+  describe.each([
+    ['an empty', ''],
+    ['a whitespace-only', '   \n'],
+  ])('when a template-required connector returns %s response', (_label, content) => {
+    it('records an empty-response entry, and the route reports a model problem instead of the prompt size', async () => {
+      const chatComplete = jest.fn().mockResolvedValue({
+        content,
+        model: 'template-model',
+        tokens: { prompt: 1234, completion: 0 },
+      });
+      const completeWithTemplate = createAttackDiscoveryTemplateCompletion({
+        inferenceClient: { chatComplete } as unknown as InferenceClient,
+        connectorId: 'template-connector',
+      });
+
+      const node = getRefineNode({
+        completeWithTemplate,
+        llm: mockLlm,
+        logger: mockLogger,
+        responseIsHallucinated: mockResponseIsHallucinated,
+        generationSchema,
+      });
+
+      const state = await node({ ...initialGraphState });
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(state.errors).toHaveLength(1);
+      expect(isEmptyModelResponseErrorEntry(state.errors[0])).toBe(true);
+      expect(state.errors[0]).toContain('template-connector');
+      expect(state.errors[0]).toContain('template-model');
+      expect(state.errors[0]).not.toContain('Unexpected end of JSON input');
+      expect(state.refinements).toEqual(initialGraphState.refinements);
+
+      let message = '';
+      try {
+        throwIfErrorCountsExceeded({
+          errors: state.errors,
+          generationAttempts: state.generationAttempts,
+          hallucinationFailures: 0,
+          maxGenerationAttempts: state.generationAttempts,
+          maxHallucinationFailures: 5,
+        });
+      } catch (error) {
+        message = (error as Error).message;
+      }
+
+      expect(message).toContain('will not help');
+      expect(message).not.toContain('Try sending fewer alerts');
+    });
   });
 });

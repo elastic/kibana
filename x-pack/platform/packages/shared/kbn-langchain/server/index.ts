@@ -13,6 +13,7 @@ import {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
+  getEmptyModelResponseDiagnostics,
   isEmptyModelResponseError,
 } from './language_models/empty_model_response_error';
 import { InferenceClientLlm } from './language_models/inference_client_llm';
@@ -22,16 +23,19 @@ import {
   MAX_SANITIZED_ERROR_MESSAGE_LENGTH,
   sanitizeErrorMessage,
 } from './utils/sanitize_error_message';
+import { safeToString } from './utils/safe_to_string';
 import { getDefaultArguments } from './language_models/constants';
 
 export {
   EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
+  getEmptyModelResponseDiagnostics,
   isEmptyModelResponseError,
   MAX_SANITIZED_ERROR_MESSAGE_LENGTH,
   parseBedrockStream,
   parseGeminiResponse,
+  safeToString,
   sanitizeErrorMessage,
   getDefaultArguments,
   ActionsClientChatOpenAI,

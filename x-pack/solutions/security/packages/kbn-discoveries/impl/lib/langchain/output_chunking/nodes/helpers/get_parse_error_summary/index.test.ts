@@ -147,15 +147,31 @@ describe('getParseErrorSummary', () => {
       expect(summary).toContain('completion tokens');
     });
 
-    it('sanitizes a message that has the empty-response prefix but no empty-response code', () => {
-      const error = new Error(
-        `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX} "data: MODEL-OUTPUT-MARKER"`
-      );
+    it.each([
+      [
+        'the prefix with a foreign tail',
+        `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX}; upstream body: SECRET2`,
+      ],
+      [
+        'the prefix with a quoted tail',
+        `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX} "data: SECRET"`,
+      ],
+    ])('gives no message text to an error that only carries %s', (_label, message) => {
+      const summary = getParseErrorSummary(new Error(message));
+
+      expect(summary).toBe('Error');
+      expect(summary).not.toContain('SECRET');
+    });
+
+    it('gives no message text to an error that only carries the code', () => {
+      const error = Object.assign(new Error('upstream error SECRET3 no quotes'), {
+        code: EMPTY_MODEL_RESPONSE_ERROR_CODE,
+      });
 
       const summary = getParseErrorSummary(error);
 
-      expect(summary).toBe(`Error: ${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX}`);
-      expect(summary).not.toContain('MODEL-OUTPUT-MARKER');
+      expect(summary).toBe(`Error [${EMPTY_MODEL_RESPONSE_ERROR_CODE}]`);
+      expect(summary).not.toContain('SECRET3');
     });
 
     it.each([
@@ -229,7 +245,7 @@ describe('getParseErrorSummary', () => {
         expect(summary).not.toContain('SECRET');
       });
 
-      it('does not throw for an EmptyModelResponseError whose message was replaced', () => {
+      it('rebuilds the diagnostics of an EmptyModelResponseError whose message was replaced', () => {
         const error = new EmptyModelResponseError({
           completionTokens: 0,
           connectorId: 'my-connector',
@@ -240,12 +256,27 @@ describe('getParseErrorSummary', () => {
         const summary = getParseErrorSummary(error);
 
         expect(summary).not.toContain('SECRET');
-        expect(summary).not.toContain(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
+        expect(summary).toContain('connectorId: my-connector');
       });
     });
 
     it('bounds the summary of a long message', () => {
       expect(getParseErrorSummary(new Error('x'.repeat(1000)))).toHaveLength(200);
+    });
+
+    describe.each([
+      ['a prototype-less object', Object.create(null)],
+      ['a Symbol', Symbol('s')],
+      ['an Error with a Symbol message', Object.assign(new Error('x'), { message: Symbol('s') })],
+      ['an Error with a Symbol name', Object.assign(new Error('x'), { name: Symbol('s') })],
+      [
+        'an Error with a prototype-less message',
+        Object.assign(new Error('x'), { message: Object.create(null) }),
+      ],
+    ])('a value that cannot be stringified: %s', (_label, value) => {
+      it('does not throw', () => {
+        expect(() => getParseErrorSummary(value)).not.toThrow();
+      });
     });
 
     it('stringifies a non-error without quoted content', () => {
