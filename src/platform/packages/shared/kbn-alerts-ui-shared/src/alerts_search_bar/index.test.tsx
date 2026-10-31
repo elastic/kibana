@@ -269,6 +269,49 @@ describe('AlertsSearchBar', () => {
       });
     });
 
+    it('shows the filter bar only once the alerts fields are available', async () => {
+      mockUseAlertsDataView.mockReturnValue({
+        isLoading: true,
+        dataView: undefined,
+      });
+
+      const props = {
+        rangeFrom: 'now/d',
+        rangeTo: 'now/d',
+        query: '',
+        onQuerySubmit: jest.fn(),
+        onFiltersUpdated: jest.fn(),
+        unifiedSearchBar: unifiedSearchBarMock,
+        toasts: toastsMock,
+        http: httpMock,
+        dataService: mockDataPlugin,
+        appName: 'test',
+        showFilterBar: true,
+      };
+      const { rerender } = render(<AlertsSearchBar {...props} />);
+
+      await waitFor(() => {
+        expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+          expect.objectContaining({ showFilterBar: false })
+        );
+      });
+
+      mockUseAlertsDataView.mockReturnValue({
+        isLoading: false,
+        dataView: {
+          title: '.alerts-*',
+          fields: [{ aggregatable: true, name: 'event.action', searchable: true, type: 'string' }],
+        },
+      });
+      rerender(<AlertsSearchBar {...props} />);
+
+      await waitFor(() => {
+        expect(unifiedSearchBarMock).toHaveBeenCalledWith(
+          expect.objectContaining({ showFilterBar: true })
+        );
+      });
+    });
+
     it('calls the unifiedSearchBar with correct index patters without data views', async () => {
       jest.mocked(useAlertsDataView).mockReturnValue({
         isLoading: false,

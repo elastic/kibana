@@ -80,6 +80,9 @@ export const AlertsSearchBar = ({
     return null;
   }, [dataView, ruleTypeIds, alertFields]);
 
+  // The filter editor resolves its data view only on mount, so wait for the fields to be available
+  const hasAlertsFields = Boolean(dataView?.fields?.length || alertFields?.length);
+
   const isSecurity = ruleTypeIds?.some(isSiemRuleType) ?? false;
 
   const onSearchQuerySubmit = useCallback(
@@ -120,7 +123,7 @@ export const AlertsSearchBar = ({
     dateRangeFrom: rangeFrom,
     dateRangeTo: rangeTo,
     displayStyle: 'inPage',
-    showFilterBar,
+    showFilterBar: showFilterBar && hasAlertsFields,
     onQuerySubmit: onSearchQuerySubmit,
     onFiltersUpdated: (newFilters) => {
       dataService.query.filterManager.setFilters(newFilters);
