@@ -280,6 +280,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       dataView,
       services,
       sort: sort as SortOrder[],
+      inputTimeRange: getCurrentTab().dataRequestParams.timeRangeAbsolute,
     });
 
     // Fetch more documents

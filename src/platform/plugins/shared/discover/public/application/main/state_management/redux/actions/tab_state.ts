@@ -701,8 +701,19 @@ export const fetchData: InternalStateThunkActionCreator<
     const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const dataStateContainer = dataStateContainer$.getValue();
     if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
-      dataStateContainer?.fetch();
+      dataStateContainer?.fetch({ initial });
     }
+  };
+
+/**
+ * Cancels the running queries and discards the cached results of the tab
+ */
+export const cancelFetchData: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
+  function cancelFetchDataThunkFn(_, __, { runtimeStateManager, searchSessionManager }) {
+    const { dataStateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    dataStateContainer$.getValue()?.cancel();
+    searchSessionManager.forgetTab(tabId);
   };
 
 /**

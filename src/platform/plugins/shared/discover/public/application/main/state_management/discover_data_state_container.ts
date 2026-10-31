@@ -22,7 +22,7 @@ import {
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -56,6 +56,7 @@ import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import type { ProfileStateMap } from '../../../../common/context_awareness';
+import { getReplayCacheContextKey } from './utils/get_replay_cache_context_key';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -69,7 +70,7 @@ export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
-export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
+export type DataRefetchMsg = 'initial' | 'reset' | 'fetch_more' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
@@ -100,8 +101,9 @@ export interface DiscoverLatestFetchDetails {
 export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
+   * Pass `initial` on the first load of a tab: only that load can reuse the tab's cached results.
    */
-  fetch: () => void;
+  fetch: (options?: { initial?: boolean }) => void;
   /**
    * Fetch more data from ES
    */
@@ -276,6 +278,7 @@ export function getDataStateContainer({
     tap(() => inspectorAdapters.requests.reset()),
     map((val) => ({
       options: {
+        initial: val === 'initial',
         reset: val === 'reset',
         fetchMore: val === 'fetch_more',
       },
@@ -324,13 +327,25 @@ export function getDataStateContainer({
 
           let searchSessionId: string;
           let isSearchSessionRestored: boolean;
+          let timeRangeAbsolute: TimeRange | undefined;
 
           if (options.fetchMore && dataRequestParams.searchSessionId) {
             searchSessionId = dataRequestParams.searchSessionId;
             isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
+            timeRangeAbsolute = dataRequestParams.timeRangeAbsolute;
           } else {
-            ({ searchSessionId, isSearchSessionRestored } =
-              searchSessionManager.getNextSearchSessionId());
+            const contextKey = getReplayCacheContextKey(
+              tabState,
+              timefilter.getTime(),
+              services.cps?.cpsManager?.getProjectRouting()
+            );
+
+            ({ searchSessionId, isSearchSessionRestored, timeRangeAbsolute } =
+              searchSessionManager.getTabSearchSession({
+                tabId: currentTabId,
+                initial: options.initial,
+                contextKey,
+              }));
           }
 
           const searchSource = createSearchSource({
@@ -361,7 +376,7 @@ export function getDataStateContainer({
             const fetchMoreTracker = scopedEbtManager.trackQueryPerformanceEvent({
               eventName: 'discoverFetchMore',
               query: getCurrentTab().appState.query,
-              timeRange: timefilter.getAbsoluteTime(),
+              timeRange: timeRangeAbsolute,
             });
 
             await fetchMoreDocuments({
@@ -377,7 +392,7 @@ export function getDataStateContainer({
           internalState.dispatch(
             injectCurrentTab(internalStateActions.setDataRequestParams)({
               dataRequestParams: {
-                timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                timeRangeAbsolute,
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
                 isSearchSessionRestored,
@@ -549,7 +564,7 @@ export function getDataStateContainer({
           const fetchAllTracker = scopedEbtManager.trackQueryPerformanceEvent({
             eventName: 'discoverFetchAll',
             query,
-            timeRange: timefilter.getAbsoluteTime(),
+            timeRange: timeRangeAbsolute,
           });
 
           await fetchAll({
@@ -623,7 +638,7 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = async () => {
+  const fetchQuery = async ({ initial = false }: { initial?: boolean } = {}) => {
     const query = getCurrentTab().appState.query;
     if (isEmptyEsqlQuery(query)) {
       return;
@@ -636,7 +651,7 @@ export function getDataStateContainer({
         injectCurrentTab(internalStateActions.setSkipInitialFetch)({ skipInitialFetch: false })
       );
     }
-    refetch$.next(undefined);
+    refetch$.next(initial ? 'initial' : undefined);
     return refetch$;
   };
 
