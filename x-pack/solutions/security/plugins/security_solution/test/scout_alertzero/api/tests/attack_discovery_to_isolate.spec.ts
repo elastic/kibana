@@ -34,7 +34,7 @@ import {
   updateWorker,
   withAlertZeroEnabledInSpace,
   listChatCompletionConnectors,
-  waitForExecution,
+  waitForWorkflowExecution,
   waitForExecutionStatus,
   waitForNewExecution,
 } from '../fixtures';
@@ -331,7 +331,7 @@ apiTest.describe(
           knownExecutionIds,
           { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
-        const execution = await waitForExecution(
+        const execution = await waitForWorkflowExecution(
           api,
           'the attack discovery worker execution to finish',
           workflowExecutionId,

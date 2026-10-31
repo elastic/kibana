@@ -7,7 +7,7 @@
 
 import { ok } from './kbn';
 import type { AlertZeroApi } from './kbn';
-import { waitForExecution } from './alertzero';
+import { waitForWorkflowExecution } from './alertzero';
 import type { WorkflowExecution } from './alertzero';
 
 /**
@@ -48,7 +48,7 @@ export const runWorkflow = async (
     ),
     `run workflow ${workflowId}`
   );
-  return waitForExecution(api, `workflow ${workflowId} execution`, workflowExecutionId, {
+  return waitForWorkflowExecution(api, `workflow ${workflowId} execution`, workflowExecutionId, {
     timeoutMs,
   });
 };

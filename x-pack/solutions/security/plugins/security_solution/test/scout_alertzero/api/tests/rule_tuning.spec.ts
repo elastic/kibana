@@ -25,7 +25,7 @@ import {
   testData,
   updateWorker,
   withAlertZeroEnabledInSpace,
-  waitForExecution,
+  waitForWorkflowExecution,
   waitForNewExecution,
 } from '../fixtures';
 import type { AlertZeroApi } from '../fixtures';
@@ -312,7 +312,7 @@ const runTuningSweep = async (adminApi: AlertZeroApi): Promise<string> => {
     knownExecutionIds,
     { timeoutMs: testData.ACTION_TIMEOUT_MS }
   );
-  const sweep = await waitForExecution(
+  const sweep = await waitForWorkflowExecution(
     adminApi,
     'the rule tuning sweep execution to finish',
     sweepExecutionId,

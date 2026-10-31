@@ -311,7 +311,7 @@ export const describeExecution = async (
  * Polls an execution to a terminal status. A timeout names the execution's last known state, so a
  * run that never finishes explains where it is parked.
  */
-export const waitForExecution = async (
+export const waitForWorkflowExecution = async (
   api: AlertZeroApi,
   label: string,
   executionId: string,

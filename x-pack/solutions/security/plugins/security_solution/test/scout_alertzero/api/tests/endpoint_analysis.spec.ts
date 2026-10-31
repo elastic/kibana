@@ -44,7 +44,7 @@ import {
   testData,
   updateWorker,
   withAlertZeroEnabledInSpace,
-  waitForExecution,
+  waitForWorkflowExecution,
   waitForNewExecution,
 } from '../fixtures';
 import type { AlertZeroApi, InvestigationProposal, SeededScenario } from '../fixtures';
@@ -392,7 +392,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
         knownWorkerExecutionIds,
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
-      const sweep = await waitForExecution(
+      const sweep = await waitForWorkflowExecution(
         adminApi,
         'the forensics sweep execution to finish',
         sweepExecutionId,
@@ -412,7 +412,7 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
           ).find((id) => !knownRunExecutionIds.includes(id)),
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
-      const run = await waitForExecution(
+      const run = await waitForWorkflowExecution(
         adminApi,
         'the endpoint analysis run execution to finish',
         runExecutionId,
