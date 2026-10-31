@@ -108,7 +108,7 @@ evaluate.describe(
                   {
                     id: 'security.search_entities',
                     criteria: [
-                      'The tool is called with parameters that sort or filter by risk score.',
+                      'The tool is called with parameters that sort or filter by risk score, or with no sort parameter at all, since sortBy defaults to "riskScore" and orders results by risk score descending.',
                     ],
                   },
                 ],
