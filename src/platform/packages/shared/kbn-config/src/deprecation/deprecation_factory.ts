@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { get } from 'lodash';
+import { get, isPlainObject, mergeWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import type {
@@ -15,6 +15,7 @@ import type {
   AddConfigDeprecation,
   ConfigDeprecationFactory,
   FactoryConfigDeprecationDetails,
+  FactoryRenameConfigDeprecationDetails,
   ConfigDeprecationCommand,
 } from './types';
 
@@ -57,13 +58,15 @@ const _deprecate = (
   });
 };
 
+const replaceArrays = (_: unknown, source: unknown) => (Array.isArray(source) ? source : undefined);
+
 const _rename = (
   config: Record<string, any>,
   rootPath: string,
   addDeprecation: AddConfigDeprecation,
   oldKey: string,
   newKey: string,
-  details: FactoryConfigDeprecationDetails
+  { mergeObjects, ...details }: FactoryRenameConfigDeprecationDetails
 ): void | ConfigDeprecationCommand => {
   const fullOldPath = getPath(rootPath, oldKey);
   const oldValue = get(config, fullOldPath);
@@ -94,6 +97,30 @@ const _rename = (
     });
     return {
       set: [{ path: fullNewPath, value: oldValue }],
+      unset: [{ path: fullOldPath }],
+    };
+  } else if (mergeObjects && isPlainObject(oldValue) && isPlainObject(newValue)) {
+    addDeprecation({
+      configPath: fullOldPath,
+      title: getDeprecationTitle(fullOldPath),
+      message: i18n.translate('kbnConfig.deprecations.mergedSettingMessage', {
+        defaultMessage:
+          'Setting "{fullOldPath}" has been replaced by "{fullNewPath}". However, both are present. Settings in "{fullNewPath}" take precedence over "{fullOldPath}"',
+        values: { fullOldPath, fullNewPath },
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('kbnConfig.deprecations.replacedSetting.manualStepOneMessage', {
+            defaultMessage:
+              'Replace "{fullOldPath}" with "{fullNewPath}" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
+            values: { fullOldPath, fullNewPath },
+          }),
+        ],
+      },
+      ...details,
+    });
+    return {
+      set: [{ path: fullNewPath, value: mergeWith({}, oldValue, newValue, replaceArrays) }],
       unset: [{ path: fullOldPath }],
     };
   } else {
@@ -180,12 +207,20 @@ const deprecateFromRoot =
     _deprecate(config, '', addDeprecation, unusedKey, removeBy, details);
 
 const rename =
-  (oldKey: string, newKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation =>
+  (
+    oldKey: string,
+    newKey: string,
+    details: FactoryRenameConfigDeprecationDetails
+  ): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
 
 const renameFromRoot =
-  (oldKey: string, newKey: string, details: FactoryConfigDeprecationDetails): ConfigDeprecation =>
+  (
+    oldKey: string,
+    newKey: string,
+    details: FactoryRenameConfigDeprecationDetails
+  ): ConfigDeprecation =>
   (config, rootPath, addDeprecation) =>
     _rename(config, '', addDeprecation, oldKey, newKey, details);
 
