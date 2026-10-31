@@ -1,0 +1,74 @@
+version: '1'
+name: 'Automatic Troubleshooting: find endpoint artifacts'
+description: >
+  Reads one Elastic Defend artifact list and returns compact item summaries, the
+  fetch population, and whether the caller could read the list. Internal: reached
+  only by id through execute_workflow.
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        list_id:
+          type: string
+          enum:
+            - endpoint_list
+            - endpoint_trusted_apps
+            - endpoint_trusted_devices
+            - endpoint_event_filters
+            - endpoint_host_isolation_exceptions
+            - endpoint_blocklists
+          description: Which Elastic Defend artifact list to read.
+        search:
+          type: string
+          maxLength: 256
+          description: Free-text filter passed to the artifact list route.
+        policy_id:
+          type: string
+          maxLength: 256
+          description: Keep only items scoped to this package policy.
+        os:
+          type: string
+          enum: [windows, macos, linux]
+          description: Keep only items for this operating system.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 10
+          description: Maximum number of item summaries to return.
+      required:
+        - list_id
+      additionalProperties: false
+outputs:
+  type: object
+  required: [summaries, population, unauthorized]
+  additionalProperties: false
+  properties:
+    summaries:
+      type: array
+      maxItems: 20
+      items:
+        type: object
+        additionalProperties: true
+    population:
+      type: object
+      required: [fetched, total, truncated]
+      additionalProperties: true
+      properties:
+        fetched: { type: number }
+        total: { type: number }
+        truncated: { type: boolean }
+    unauthorized:
+      type: boolean
+steps:
+  - name: find
+    type: security.findEndpointArtifacts
+    with: { list_id: "{{ inputs.list_id }}", search: "${{ inputs.search }}", policy_id: "${{ inputs.policy_id }}",
+            os: "${{ inputs.os }}", limit: "${{ inputs.limit }}" }
+  - name: emit
+    type: workflow.output
+    with:
+      summaries: "${{ steps.find.output.summaries }}"
+      population: "${{ steps.find.output.population }}"
+      unauthorized: "${{ steps.find.output.unauthorized }}"
