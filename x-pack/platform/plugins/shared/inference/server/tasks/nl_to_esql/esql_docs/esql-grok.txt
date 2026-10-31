@@ -1,6 +1,6 @@
 # GROK
 
-The GROK command is used to extract structured data from a string by matching it against patterns based on regular expressions. It extracts the specified patterns as columns.
+The GROK command extracts structured data from a string. It matches strings against regular expression-based grok patterns and extracts the specified patterns as columns.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The GROK command is used to extract structured data from a string by matching it
 
 #### input
 
-The column containing the string you want to structure. If the column has multiple values, GROK will process each value.
+The column that contains the string you want to structure. If the column has multiple values, `GROK` will process each value.
 
 #### pattern
 
@@ -18,21 +18,32 @@ A grok pattern. If a field name conflicts with an existing column, the existing 
 
 ## Examples
 
-Extracts the date, IP address, email address, and number from a string and keeps only those fields.
+Parse a string that contains a timestamp, an IP address, an email address, and a number:
+
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num}"""
 | KEEP date, ip, email, num
 ```
 
-Extracts the date, IP address, email address, and converts the extracted number to an integer type.
+date:keyword | ip:keyword | email:keyword | num:keyword
+2023-01-23T12:15:00.000Z | 127.0.0.1 | some.email@foo.com | 42
+
+Convert a captured number to an integer with the `:int` type suffix:
+
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"""
 | KEEP date, ip, email, num
 ```
 
-Extracts the date, IP address, email address, converts the number to integer, and then converts the date to a datetime type.
+date:keyword | ip:keyword | email:keyword | num:integer
+2023-01-23T12:15:00.000Z | 127.0.0.1 | some.email@foo.com | 42
+
+If a typed capture matches a value that cannot be converted, the row is treated like a failed match: all extracted columns are `null` for that row and a warning is added to the response.
+
+Convert a captured timestamp with a type conversion function:
+
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num:int}"""
@@ -40,9 +51,18 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | EVAL date = TO_DATETIME(date)
 ```
 
-Splits a zip code into two parts by extracting two words into a multi-valued column named `zip_parts`.
+ip:keyword | email:keyword | num:integer | date:date
+127.0.0.1 | some.email@foo.com | 42 | 2023-01-23T12:15:00.000Z
+
+Create a multi-valued column from duplicate field names in a grok pattern:
+
 ```esql
 FROM addresses
 | KEEP city.name, zip_code
 | GROK zip_code """%{WORD:zip_parts} %{WORD:zip_parts}"""
 ```
+
+city.name:keyword | zip_code:keyword | zip_parts:keyword
+Amsterdam | 1016 ED | ["1016", "ED"]
+San Francisco | CA 94108 | ["CA", "94108"]
+Tokyo | 100-7014 | null

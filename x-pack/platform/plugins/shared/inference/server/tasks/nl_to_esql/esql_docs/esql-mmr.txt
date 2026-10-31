@@ -1,6 +1,6 @@
 # MMR
 
-The `MMR` command reduces a result set by applying a diversification strategy to the returned rows. It uses Maximum Marginal Relevance to discard rows that are too similar to each other while preserving the ordering of the input rows.
+The `MMR` command reduces a result set by applying a diversification strategy to the returned rows. It uses Maximum Marginal Relevance to discard results that are too similar to each other while preserving the input row ordering.
 
 ## Syntax
 
@@ -8,30 +8,32 @@ The `MMR` command reduces a result set by applying a diversification strategy to
 
 ### Parameters
 
-#### field
+#### `field`
 
 The name of the field that will use its values for the diversification process. The field must be a `dense_vector` type.
 
-#### limit
+#### `limit`
 
 The maximum number of rows to return after diversification.
 
-#### query_vector
+#### `query_vector`
 
-Optional. The query vector to use as part of the diversification algorithm for comparison. It must have the same number of dimensions as the vector field you are searching against. It must be one of:
+Optional. The query vector to use as part of the diversification algorithm for comparison. Must have the same number of dimensions as the vector field you are searching against.
+
+Must be one of:
 
 - An array of floats
-- A hex-encoded byte vector, with one byte per dimension, or one byte per 8 dimensions for `bit`
-- A base64-encoded vector string. Base64 supports `float` and `bfloat16` in big-endian format, `byte`, and `bit` encodings depending on the target field type
+- A hex-encoded byte vector, with one byte per dimension. For `bit`, one byte per 8 dimensions
+- A base64-encoded vector string. Base64 supports `float` and `bfloat16` big-endian, `byte`, and `bit` encodings depending on the target field type
 - A function or expression that returns a `dense_vector`
 
-#### lambda_value
+#### `lambda_value`
 
-Required if `WITH` is used. A value between 0.0 and 1.0 that controls how similarity is calculated during diversification. Higher values weight similarity to the `query_vector` more heavily, while lower values weight diversity more heavily.
+Required if `WITH` is used. A value between 0.0 and 1.0 that controls how similarity is calculated during diversification. Higher values weight the similarity to the `query_vector` more heavily, lower values weight the diversity more heavily.
 
 ## Examples
 
-Diversify ten sorted rows to return three rows using the `text_vector` field.
+Diversify ten sorted vector rows down to three rows.
 
 ```esql
 FROM mmr_text_vector_keyword
@@ -41,13 +43,12 @@ FROM mmr_text_vector_keyword
 | DROP text_vector, byte_vector, bit_vector
 ```
 
-| keyword_field:keyword | text_body:text |
-| --- | --- |
-| test1 | first text |
-| test3 | third text |
-| test6 | sixth text |
+keyword_field:keyword | text_body:text
+test1 | first text
+test3 | third text
+test6 | sixth text
 
-Diversify ten sorted rows using an explicit query vector and a lambda value.
+Diversify vector rows using a query vector and `lambda`.
 
 ```esql
 FROM mmr_text_vector_keyword
@@ -57,13 +58,12 @@ FROM mmr_text_vector_keyword
 | DROP text_vector, byte_vector, bit_vector
 ```
 
-| keyword_field:keyword | text_body:text |
-| --- | --- |
-| test3 | third text |
-| test6 | sixth text |
-| test8 | eighth text |
+keyword_field:keyword | text_body:text
+test3 | third text
+test6 | sixth text
+test8 | eighth text
 
-Generate a query vector with `TEXT_EMBEDDING`, run a vector search, and diversify the top results.
+Generate a text embedding query vector, rank with `KNN`, and diversify the top ten rows.
 
 ```esql
 FROM dense_vector_text METADATA _score
@@ -75,11 +75,10 @@ FROM dense_vector_text METADATA _score
 | KEEP text_field, query_embedding
 ```
 
-| text_field:text | query_embedding:dense_vector |
-| --- | --- |
-| be excellent to each other | [45.0, 55.0, 54.0] |
-| live long and prosper | [45.0, 55.0, 54.0] |
-| all we have to decide is what to do with the time that is given to us | [45.0, 55.0, 54.0] |
+text_field:text | query_embedding:dense_vector
+be excellent to each other | [45.0, 55.0, 54.0]
+live long and prosper | [45.0, 55.0, 54.0]
+all we have to decide is what to do with the time that is given to us | [45.0, 55.0, 54.0]
 
 ## Limitations
 
