@@ -135,6 +135,15 @@ describe('CreateAutomationFlyout', () => {
     expect(submitButton).toBeEnabled();
   });
 
+  it('allows an unlimited daily trigger limit', async () => {
+    renderFlyout();
+    await addTrigger('Alert triggered');
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
+  });
+
   it('requires a Slack channel when posting to Slack', async () => {
     renderFlyout();
     await addTrigger('Alert triggered');

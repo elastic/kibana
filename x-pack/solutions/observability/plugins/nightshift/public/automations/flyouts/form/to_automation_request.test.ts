@@ -333,6 +333,20 @@ describe('automation request', () => {
       });
     });
 
+    it('sends a null daily limit when the form is unlimited', () => {
+      const automation = buildAutomation({ runtime: { dailyDispatchLimit: 15 } });
+      const values = {
+        ...toAutomationFormValues(automation),
+        dailyDispatchLimit: 'unlimited',
+        trigger: toAutomationFormValues(automation).trigger,
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
+        dailyDispatchLimit: null,
+      });
+      expect(toAutomationRequestBody(values).runtime).toEqual({});
+    });
+
     it('keeps the stored completion of a Slack-triggered automation on unrelated edits', () => {
       const automation = buildAutomation({
         trigger: { rows: [{ kind: 'slack', event: 'message', channels: ['#oncall'] }] },
