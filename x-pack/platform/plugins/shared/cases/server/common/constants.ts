@@ -59,6 +59,11 @@ export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user usage';
  */
 export const LICENSING_CASE_OBSERVABLES_FEATURE = 'Cases observable assignment';
 
+/**
+ * The alias of the cases-owned index that holds one document per observable.
+ */
+export const OBSERVABLES_INDEX_NAME = '.kibana-cases-observables';
+
 export const SEVERITY_EXTERNAL_TO_ESMODEL: Record<CaseSeverity, CasePersistedSeverity> = {
   [CaseSeverity.LOW]: CasePersistedSeverity.LOW,
   [CaseSeverity.MEDIUM]: CasePersistedSeverity.MEDIUM,

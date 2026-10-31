@@ -136,7 +136,13 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    const result = await applyObservablesToCase(caseId, observables, clientArgs);
+    const result = await applyObservablesToCase(
+      caseId,
+      observables,
+      clientArgs,
+      undefined,
+      'auto_extract'
+    );
     if (!result) {
       logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
       return;

@@ -1029,3 +1029,274 @@ describe('applyObservablesToCase', () => {
     expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
   });
 });
+
+describe('observables index mirror', () => {
+  const { observablesService } = mockClientArgs.services;
+  const owner = caseSO.attributes.owner;
+  const spaceId = 'default';
+
+  const newObservable: ObservablePost = {
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    value: '10.0.0.1',
+    description: '',
+  };
+
+  const patchedAttributes = () => mockCaseService.patchCase.mock.calls[0][0].updatedAttributes;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    mockClientArgs.authorization.ensureAuthorized.mockResolvedValue(undefined);
+    mockCaseService.getCase.mockResolvedValue(caseSOWithObservables);
+    mockCaseService.patchCase.mockResolvedValue(caseSOWithObservables);
+  });
+
+  describe('add', () => {
+    it('writes the new observable to the index before the case is updated', async () => {
+      await addObservable(
+        'case-id',
+        { observable: newObservable },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(observablesService.createObservables).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+        spaceId,
+        owner,
+        observables: [
+          expect.objectContaining({ typeKey: newObservable.typeKey, value: '10.0.0.1' }),
+        ],
+        source: 'api',
+      });
+      expect(observablesService.createObservables.mock.invocationCallOrder[0]).toBeLessThan(
+        mockCaseService.patchCase.mock.invocationCallOrder[0]
+      );
+      expect(patchedAttributes()).not.toHaveProperty('observables_sync_pending');
+    });
+
+    // Failure scenario: Elasticsearch is unavailable or rejects the write, but the case field is the
+    // source of truth, so the user's change must still succeed and the case must be flagged for sync.
+    it('still updates the case, flags it as pending sync and logs when the index write fails', async () => {
+      observablesService.createObservables.mockRejectedValueOnce(new Error('index down'));
+
+      const result = await addObservable(
+        'case-id',
+        { observable: newObservable },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(result).toBeDefined();
+      expect(patchedAttributes()).toEqual(
+        expect.objectContaining({
+          observables: expect.arrayContaining([expect.objectContaining({ value: '10.0.0.1' })]),
+          observables_sync_pending: true,
+        })
+      );
+      expect(mockClientArgs.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`case ${caseSO.id}`),
+        { error: { stack_trace: expect.any(String) } }
+      );
+    });
+
+    it('does not touch the index when nothing new is added', async () => {
+      const result = await applyObservablesToCase(
+        caseSO.id,
+        [mockObservablePost],
+        mockClientArgs,
+        caseSOWithObservables
+      );
+
+      expect(result).toBeUndefined();
+      expect(observablesService.createObservables).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['rest_api', 'api'],
+      ['plugin_contract', 'api'],
+      ['connector', 'api'],
+      ['workflow', 'workflow'],
+      ['agent_builder', 'agent'],
+    ] as const)('records source %s as %s', async (clientSource, source) => {
+      await applyObservablesToCase(
+        caseSO.id,
+        [newObservable],
+        { ...mockClientArgs, clientSource },
+        caseSOWithObservables
+      );
+
+      expect(observablesService.createObservables).toHaveBeenCalledWith(
+        expect.objectContaining({ source })
+      );
+    });
+
+    it('records an explicitly given source over the origin of the client', async () => {
+      await applyObservablesToCase(
+        caseSO.id,
+        [newObservable],
+        mockClientArgs,
+        caseSOWithObservables,
+        'auto_extract'
+      );
+
+      expect(observablesService.createObservables).toHaveBeenCalledWith(
+        expect.objectContaining({ source: 'auto_extract' })
+      );
+    });
+
+    it('mirrors only the observables that fit under the per-case cap', async () => {
+      const almostFull: Observable[] = Array.from(
+        { length: MAX_OBSERVABLES_PER_CASE - 1 },
+        (_, index) => ({
+          ...mockObservable,
+          id: `existing-${index}`,
+          value: `existing-${index}`,
+        })
+      );
+      mockCaseService.getCase.mockResolvedValue({
+        ...caseSO,
+        attributes: { ...caseSO.attributes, observables: almostFull },
+      });
+
+      await bulkAddObservables(
+        {
+          caseId: 'case-id',
+          observables: [
+            { ...newObservable, value: 'fits' },
+            { ...newObservable, value: 'does-not-fit-1' },
+            { ...newObservable, value: 'does-not-fit-2' },
+          ],
+        },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(observablesService.createObservables).toHaveBeenCalledWith(
+        expect.objectContaining({
+          observables: [expect.objectContaining({ value: 'fits' })],
+        })
+      );
+    });
+  });
+
+  describe('update', () => {
+    const params = { observable: { value: '192.168.0.1', description: 'Updated description' } };
+
+    it('mirrors the change with the previous and the updated observable', async () => {
+      await updateObservable('case-id', mockObservable.id, params, mockClientArgs, mockCasesClient);
+
+      expect(observablesService.updateObservable).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+        spaceId,
+        owner,
+        previous: mockObservable,
+        next: expect.objectContaining({ id: mockObservable.id, value: '192.168.0.1' }),
+        source: 'api',
+      });
+      expect(observablesService.updateObservable.mock.invocationCallOrder[0]).toBeLessThan(
+        mockCaseService.patchCase.mock.invocationCallOrder[0]
+      );
+      expect(patchedAttributes()).not.toHaveProperty('observables_sync_pending');
+    });
+
+    it('still updates the case and flags it as pending sync when the index write fails', async () => {
+      observablesService.updateObservable.mockRejectedValueOnce(new Error('index down'));
+
+      const result = await updateObservable(
+        'case-id',
+        mockObservable.id,
+        params,
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(result).toBeDefined();
+      expect(patchedAttributes()).toEqual(
+        expect.objectContaining({ observables_sync_pending: true })
+      );
+    });
+  });
+
+  describe('delete', () => {
+    it('mirrors the removal before the case is updated', async () => {
+      await deleteObservable('case-id', mockObservable.id, mockClientArgs, mockCasesClient);
+
+      expect(observablesService.deleteObservables).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+        spaceId,
+        observables: [mockObservable],
+      });
+      expect(observablesService.deleteObservables.mock.invocationCallOrder[0]).toBeLessThan(
+        mockCaseService.patchCase.mock.invocationCallOrder[0]
+      );
+      expect(patchedAttributes()).not.toHaveProperty('observables_sync_pending');
+    });
+
+    it('still updates the case and flags it as pending sync when the index write fails', async () => {
+      observablesService.deleteObservables.mockRejectedValueOnce(new Error('index down'));
+
+      await deleteObservable('case-id', mockObservable.id, mockClientArgs, mockCasesClient);
+
+      expect(patchedAttributes()).toEqual(
+        expect.objectContaining({ observables: [], observables_sync_pending: true })
+      );
+    });
+
+    it('does not touch the index when the observable does not exist', async () => {
+      await expect(
+        deleteObservable('case-id', 'missing-id', mockClientArgs, mockCasesClient)
+      ).rejects.toThrow('not found');
+
+      expect(observablesService.deleteObservables).not.toHaveBeenCalled();
+      expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulk delete', () => {
+    beforeEach(() => {
+      mockCaseService.getCase.mockResolvedValue(caseSOWithMultipleObservables);
+      mockCaseService.patchCase.mockResolvedValue(caseSOWithMultipleObservables);
+    });
+
+    it('mirrors the removal of every requested observable once, even when an id is repeated', async () => {
+      await bulkDeleteObservables(
+        {
+          caseId: caseSO.id,
+          observableIds: [mockObservable.id, mockObservable2.id, mockObservable2.id],
+        },
+        mockClientArgs
+      );
+
+      expect(observablesService.deleteObservables).toHaveBeenCalledTimes(1);
+      expect(observablesService.deleteObservables).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+        spaceId,
+        observables: [mockObservable, mockObservable2],
+      });
+      expect(patchedAttributes()).not.toHaveProperty('observables_sync_pending');
+    });
+
+    it('still updates the case and flags it as pending sync when the index write fails', async () => {
+      observablesService.deleteObservables.mockRejectedValueOnce(new Error('index down'));
+
+      const result = await bulkDeleteObservables(
+        { caseId: caseSO.id, observableIds: [mockObservable.id] },
+        mockClientArgs
+      );
+
+      expect(result).toBeDefined();
+      expect(patchedAttributes()).toEqual(
+        expect.objectContaining({ observables_sync_pending: true })
+      );
+    });
+
+    it('does not touch the index when a requested id does not exist', async () => {
+      await expect(
+        bulkDeleteObservables({ caseId: caseSO.id, observableIds: ['missing-id'] }, mockClientArgs)
+      ).rejects.toThrow('not found');
+
+      expect(observablesService.deleteObservables).not.toHaveBeenCalled();
+    });
+  });
+});

@@ -49,6 +49,7 @@ import {
   AlertService,
   TemplatesService,
   FieldDefinitionsService,
+  ObservablesService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -59,6 +60,7 @@ import type { CasesClientArgs, CasesServices, CasesClientSource } from './types'
 import type { ActionSource } from '../../common/types/domain';
 import { getDefaultActionSource } from '../common/get_default_action_source';
 import { LicensingService } from '../services/licensing';
+import type { ObservablesStorageClient } from '../services/observables';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
@@ -120,6 +122,11 @@ interface CasesClientFactoryArgs {
    * unconditionally.
    */
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
+  /**
+   * Client of the cases-owned observables index. It is built on the internal Elasticsearch user:
+   * requests are authorized through the case saved object, never against the index.
+   */
+  observablesStorageClient: ObservablesStorageClient;
 }
 
 interface CreateCasesClientParams {
@@ -398,6 +405,10 @@ export class CasesClientFactory {
       attachmentService,
       licensingService,
       notificationService,
+      observablesService: new ObservablesService({
+        storageClient: this.options.observablesStorageClient,
+        logger: this.logger.get('observables'),
+      }),
     };
   }
 

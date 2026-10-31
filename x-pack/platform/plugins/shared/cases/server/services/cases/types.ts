@@ -39,6 +39,10 @@ export interface AttachmentStatsAttributes {
   total_events: number;
 }
 
+export interface ObservablesSyncAttributes {
+  observables_sync_pending: boolean;
+}
+
 export interface GetCaseArgs {
   id: string;
 }
@@ -70,7 +74,9 @@ export interface BulkCreateCasesArgs extends IndexRefresh {
 
 export interface PatchCase extends IndexRefresh {
   caseId: string;
-  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes>;
+  updatedAttributes: Partial<
+    CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes & ObservablesSyncAttributes
+  >;
   originalCase: CaseSavedObjectTransformed;
   closeReason?: string;
   version?: string;
