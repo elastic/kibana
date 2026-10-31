@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../common/feature';
 import type { ApplicationSource } from '../../common/types/applications';
-import type { SessionsListUrlQuery } from '../pages/sessions/utils/sessions_list_query';
+import type { SessionsListUrlQuery } from '../utils/sessions_list_query';
 import { useDigitalExperienceRouter } from './use_digital_experience_router';
 import { useKibanaServices } from './use_kibana_services';
 import { useListQuery } from './use_list_query';

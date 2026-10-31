@@ -34,7 +34,7 @@ import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useFormatters } from '../../hooks/use_formatters';
 import { SESSIONS_LABEL } from '../../labels';
-import { pickSessionsListQuery } from '../sessions/hooks/use_sessions_list_query';
+import { pickSessionsListQuery } from '../../utils/sessions_list_query';
 import { SessionSummary } from './components/session_summary';
 import { SessionWaterfall, pageColors } from './components/session_waterfall';
 import { layoutWaterfall } from './utils/session_timeline';

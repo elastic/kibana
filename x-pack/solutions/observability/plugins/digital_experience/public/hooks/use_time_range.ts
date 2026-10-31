@@ -6,21 +6,16 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import qs from 'query-string';
 import { getDateRange } from '@kbn/timerange';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
 import { useKibanaServices } from './use_kibana_services';
+import { useUpdateUrlQuery } from './use_update_url_query';
 
 /** Relative or absolute bounds, e.g. `{ rangeFrom: 'now-15m', rangeTo: 'now' }`. */
 export interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
-
-// Sorted like the typed router's links, so a breadcrumb to this page matches the URL exactly.
-const withTimeRange = (search: string, timeRange: TimeRange): string =>
-  qs.stringify({ ...qs.parse(search), ...timeRange });
 
 /**
  * Whether both bounds parse as dates, e.g. `now-15m` or an ISO date, and the range starts before it
@@ -47,8 +42,7 @@ export const useTimeRange = (): {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
   const { query } = useDigitalExperienceParams('/');
-  const history = useHistory();
-  const location = useLocation();
+  const updateUrlQuery = useUpdateUrlQuery();
 
   const { from, to } = timefilter.getTime();
   const rangeFrom = query.rangeFrom ?? from;
@@ -57,11 +51,8 @@ export const useTimeRange = (): {
   const isTimeRangeInUrl = query.rangeFrom !== undefined && query.rangeTo !== undefined;
 
   const setTimeRange = useCallback(
-    (nextTimeRange: TimeRange) => {
-      // Only `search` changes; the path, hash and history state are kept.
-      history.push({ ...location, search: withTimeRange(location.search, nextTimeRange) });
-    },
-    [history, location]
+    (nextTimeRange: TimeRange) => updateUrlQuery({ ...nextTimeRange }),
+    [updateUrlQuery]
   );
 
   return { timeRange, isTimeRangeInUrl, setTimeRange };
@@ -74,8 +65,7 @@ export const useTimeRange = (): {
 export const useSyncTimeRange = (): boolean => {
   const { data } = useKibanaServices();
   const { timefilter } = data.query.timefilter;
-  const history = useHistory();
-  const location = useLocation();
+  const updateUrlQuery = useUpdateUrlQuery();
   const { timeRange, isTimeRangeInUrl } = useTimeRange();
   const hasValidTimeRange = isTimeRangeInUrl && isValidTimeRange(timeRange);
 
@@ -88,11 +78,8 @@ export const useSyncTimeRange = (): boolean => {
     const { from, to } = isValidTimeRange({ rangeFrom: current.from, rangeTo: current.to })
       ? current
       : timefilter.getTimeDefaults();
-    history.replace({
-      ...location,
-      search: withTimeRange(location.search, { rangeFrom: from, rangeTo: to }),
-    });
-  }, [hasValidTimeRange, timefilter, history, location]);
+    updateUrlQuery({ rangeFrom: from, rangeTo: to }, { replace: true });
+  }, [hasValidTimeRange, timefilter, updateUrlQuery]);
 
   useEffect(() => {
     if (!hasValidTimeRange) {
