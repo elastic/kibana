@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { generateInsights } from './run_attack_discovery';
+import { generateInsights, runAttackDiscovery } from './run_attack_discovery';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { AttackDiscoveryTaskInput } from '../types';
 
 const FENCED_JSON_REPLY = [
   'Here are the insights:',
@@ -15,7 +16,9 @@ const FENCED_JSON_REPLY = [
   '```',
 ].join('\n');
 
-const log = { debug: jest.fn() } as unknown as Parameters<typeof generateInsights>[0]['log'];
+const log = { debug: jest.fn(), error: jest.fn() } as unknown as Parameters<
+  typeof generateInsights
+>[0]['log'];
 
 const createInferenceClient = (reply: string) => {
   const chatComplete = jest.fn(
@@ -135,5 +138,47 @@ describe('generateInsights', () => {
     if (message == null) throw new Error('chatComplete was not called with a message');
     expect(message.content).toContain(alertsWithDollars[0]);
     expect(message.content).not.toContain('{query}');
+  });
+
+  it('labels a wire failure and does not retry it as a parse failure', async () => {
+    const chatComplete = jest.fn(async () => {
+      throw new TypeError('fetch failed');
+    });
+    const inferenceClient = { chatComplete } as unknown as BoundInferenceClient;
+
+    await expect(
+      generateInsights({
+        inferenceClient,
+        log,
+        prompt: 'Analyze the alerts.',
+        alerts: ['alert one'],
+      })
+    ).rejects.toThrow(/inference request failed on the wire: fetch failed/);
+
+    // one attempt: a request that never produced a response is not retried
+    // through the parse loop, which allows three attempts
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('records the wire failure in the task output errors', async () => {
+    const chatComplete = jest.fn(async () => {
+      throw new TypeError('fetch failed');
+    });
+    const inferenceClient = { chatComplete } as unknown as BoundInferenceClient;
+    const attackDiscoveryClient = { searchAlertsAsContext: jest.fn() } as never;
+
+    const output = await runAttackDiscovery({
+      inferenceClient,
+      attackDiscoveryClient,
+      log,
+      input: { mode: 'graphState', anonymizedAlerts: [] } as AttackDiscoveryTaskInput,
+    });
+
+    // the reporting shape (null insights + one error string) is the pre-existing
+    // task-error path; this pins the message that path now carries
+    expect(output.insights).toBeNull();
+    expect(output.errors).toHaveLength(1);
+    expect(output.errors?.[0]).toContain('inference request failed on the wire: fetch failed');
+    expect(output.errors?.[0]).not.toContain('Failed to parse insights');
   });
 });

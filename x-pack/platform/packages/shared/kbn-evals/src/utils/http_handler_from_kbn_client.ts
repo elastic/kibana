@@ -9,6 +9,13 @@ import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { EXECUTION_ID_BAGGAGE_KEY, EVAL_EXPERIMENT_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
 
+/**
+ * Attempts (initial try + retries) for a transient failure. Small and bounded:
+ * it absorbs a blip without turning a deterministic connector failure into a
+ * slow success.
+ */
+const DEFAULT_HTTP_RETRIES = 2;
+
 // redefine args type to make it easier to handle in a type-safe way
 type HttpHandlerArgs =
   | [string, HttpFetchOptions & { asResponse: true }]
@@ -63,7 +70,13 @@ export function httpHandlerFromKbnClient({
 
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
 
-    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
+    // Bounded retry budget for transient failures (a transport blip or a
+    // retryable HTTP status). It used to default to 0, so a single connection
+    // blip lost the run: the requester logged `attempt=1/0` and the suite
+    // published the serving-layer error as a scored model failure.
+    // `KBN_EVALS_HTTP_RETRIES=0` still disables retries entirely.
+    const maxRetries =
+      Number(process.env.KBN_EVALS_HTTP_RETRIES ?? String(DEFAULT_HTTP_RETRIES)) || 0;
     const retryStatuses = new Set([429, 503, 504]);
 
     async function sleep(ms: number) {
@@ -142,8 +155,15 @@ export function httpHandlerFromKbnClient({
 
         lastError = error;
 
+        // A missing numeric status means the request never produced an HTTP
+        // response at all (a network-level failure such as `fetch failed`).
+        // Those are transient too, so they get the same bounded budget as a
+        // retryable status; a deterministic failure (any other status) still
+        // fails fast on the first attempt.
+        const isNetworkFailure = typeof status !== 'number';
         const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
+          attempt < maxRetries &&
+          (isNetworkFailure || (typeof status === 'number' && retryStatuses.has(status)));
 
         if (!shouldRetry) {
           throw error;
@@ -162,9 +182,11 @@ export function httpHandlerFromKbnClient({
         const delayMs = baseDelayMs + jitterMs;
 
         log.warning(
-          `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
-            attempt + 1
-          }/${maxRetries + 1})`
+          `${
+            isNetworkFailure ? 'network failure' : `HTTP ${status}`
+          } from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${attempt + 1}/${
+            maxRetries + 1
+          })`
         );
         await sleep(delayMs);
       }
