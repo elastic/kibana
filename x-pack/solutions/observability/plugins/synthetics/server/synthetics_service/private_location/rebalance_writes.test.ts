@@ -6,7 +6,7 @@
  */
 
 import { agentIdCondition, UNASSIGNED_CONDITION } from './assign_by_condition';
-import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
+import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB, UNASSIGNED_AGENT_ID } from './assign_shards';
 import type { ShardedPackagePolicy } from './rebalance_writes';
 import {
   configIdOf,
@@ -274,6 +274,35 @@ describe('toConditionUpdates', () => {
 
     expect(bySpace.get('default')).toHaveLength(1);
     expect(bySpace.get('team-x')).toHaveLength(1);
+  });
+});
+
+describe('toConditionUpdates on a single-agent location', () => {
+  const conditions = (pkgPolicies: ShardedPackagePolicy[], assignment: Map<string, string>) =>
+    [...toConditionUpdates(pkgPolicies, assignment, LOCATION, false).values()]
+      .flat()
+      .map(({ update }) => [update.id, update.attributes.condition]);
+
+  it('moves existing pins but never adds a first one', () => {
+    expect(
+      conditions(
+        [
+          policy({ id: `m1-${LOCATION}`, condition: agentIdCondition('gone') }),
+          policy({ id: `m2-${LOCATION}` }),
+        ],
+        new Map([
+          ['m1', 'agent-a'],
+          ['m2', 'agent-a'],
+        ])
+      )
+    ).toEqual([[`m1-${LOCATION}`, agentIdCondition('agent-a')]]);
+  });
+
+  it('unparks a browser monitor once a browser-capable agent exists, else leaves it parked', () => {
+    const parked = browserPolicy({ id: `m1-${LOCATION}`, condition: UNASSIGNED_CONDITION });
+
+    expect(conditions([parked], new Map([['m1', 'agent-a']]))).toEqual([[`m1-${LOCATION}`, null]]);
+    expect(conditions([parked], new Map([['m1', UNASSIGNED_AGENT_ID]]))).toEqual([]);
   });
 });
 

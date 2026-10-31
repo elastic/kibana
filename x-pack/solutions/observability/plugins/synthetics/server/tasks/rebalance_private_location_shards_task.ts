@@ -53,6 +53,13 @@ import {
 export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+/**
+ * Pinning running monitors can stop them on the agents until a later agent policy
+ * revision arrives (elastic/elastic-agent#17714), so the task bumps the agent
+ * policy once this long after a location's first pins. Shorter delays let Fleet
+ * deliver both revisions at once, which recovers nothing.
+ */
+export const PIN_NUDGE_DELAY_MS = 20_000;
 
 const PIN_DRAIN_RESET = {
   [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
@@ -181,6 +188,7 @@ export class RebalancePrivateLocationShardsTask {
       // streak restarts on the next recovery.
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
+      const pinNudges = new Map<string, number>();
 
       for (const location of locations) {
         signal.throwIfAborted();
@@ -264,11 +272,16 @@ export class RebalancePrivateLocationShardsTask {
             recoveryAgentIds,
             browserAgentIds,
             capacities,
+            // Healthy, not enrolled: offline leftovers of re-enrolled agents stay enrolled for days.
+            pinUnpinned: healthyAgentIds.length > 1,
             signal,
           });
           this.debugLog(
             `location ${location.id}: moved ${result.moved}/${result.total} monitor(s)`
           );
+          if (result.newlyPinned > 0) {
+            pinNudges.set(location.agentPolicyId, Date.now() + PIN_NUDGE_DELAY_MS);
+          }
 
           const { evicted, recovered: recoveredByDiff } = diffHealthyAgents({
             priorHealthySince,
@@ -351,6 +364,7 @@ export class RebalancePrivateLocationShardsTask {
           }
         }
       }
+      await this.nudgeAgentPolicies(pinNudges, signal);
 
       return {
         state: await this.returnedState(taskInstance, {
@@ -410,6 +424,26 @@ export class RebalancePrivateLocationShardsTask {
     // must stay claimable so a disabled cycle can drain leftover agent pins.
     await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /** Bumps each agent policy once its nudge is due. A failed bump is logged, not retried. */
+  private async nudgeAgentPolicies(dueAtByAgentPolicy: Map<string, number>, signal: AbortSignal) {
+    for (const [agentPolicyId, dueAt] of dueAtByAgentPolicy) {
+      const waitMs = dueAt - Date.now();
+      if (waitMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+      }
+      signal.throwIfAborted();
+      try {
+        await this.syntheticsMonitorClient.privateLocationAPI.bumpAgentPolicyRevision(
+          agentPolicyId
+        );
+      } catch (e) {
+        this.serverSetup.logger.warn(
+          `[RebalancePrivateLocationShardsTask] Failed to nudge agent policy ${agentPolicyId}: ${e.message}`
+        );
+      }
+    }
   }
 
   /**

@@ -45,7 +45,7 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { PackagePolicyService } from './package_policy_service';
+import { bumpAgentPolicyRevision, PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
 import {
   EMPTY_REBALANCE_RESULT,
@@ -65,6 +65,7 @@ import {
   UNASSIGNED_CONDITION,
 } from './assign_by_condition';
 import { isCompleteElasticAgent } from './get_agent_info';
+import { STALE_CHECKIN_MS } from './plan_rebalance';
 import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
@@ -76,6 +77,12 @@ interface EnrolledAgents {
   agentIds: string[];
   /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
   completeAgentIds?: string[];
+  /**
+   * Agents that checked in within STALE_CHECKIN_MS. Offline leftovers of a
+   * re-enrolled agent stay enrolled for days and must not make a single-agent
+   * location look multi-agent. Defaults to all enrolled agents.
+   */
+  checkedInCount?: number;
 }
 
 type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
@@ -266,15 +273,18 @@ export class SyntheticsPrivateLocation {
           // Keep a valid existing pin during edits. Health and balancing moves
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
-        } else if (eligibleAgentIds.length > 0) {
+        } else if (eligibleAgentIds.length === 0) {
+          if (isBrowser) {
+            newPolicy.condition = UNASSIGNED_CONDITION;
+          }
+          // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        } else if ((conditionHosts?.checkedInCount ?? agentIds.length) > 1) {
           const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
           }
-        } else if (isBrowser) {
-          newPolicy.condition = UNASSIGNED_CONDITION;
         }
-        // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        // A single agent runs everything anyway; no pin (see toConditionUpdates).
       } else if (shardingMode === 'unknown') {
         // License unreadable: keep whatever pin exists until it can be read again.
         if (existingCondition) {
@@ -363,6 +373,8 @@ export class SyntheticsPrivateLocation {
   private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
     const agentIds = new Set<string>();
     const completeAgentIds = new Set<string>();
+    const checkedInSince = Date.now() - STALE_CHECKIN_MS;
+    let checkedInCount = 0;
     const perPage = 1000;
     let page = 1;
 
@@ -380,6 +392,9 @@ export class SyntheticsPrivateLocation {
           if (isCompleteElasticAgent(agent.local_metadata)) {
             completeAgentIds.add(agent.id);
           }
+          if (agent.last_checkin && Date.parse(agent.last_checkin) >= checkedInSince) {
+            checkedInCount += 1;
+          }
         }
       }
 
@@ -389,7 +404,7 @@ export class SyntheticsPrivateLocation {
       page += 1;
     }
 
-    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds] };
+    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds], checkedInCount };
   }
 
   /** Resolves each touched location at most once per monitor batch. */
@@ -936,6 +951,7 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds,
     browserAgentIds,
     capacities,
+    pinUnpinned = true,
     signal,
   }: {
     location: { id: string; label?: string; agentPolicyId: string };
@@ -943,6 +959,8 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds?: string[];
     browserAgentIds: string[];
     capacities?: ReadonlyMap<string, number>;
+    /** False for a single-agent location: see {@link toConditionUpdates}. */
+    pinUnpinned?: boolean;
     signal: AbortSignal;
   }): Promise<RebalanceShardsResult> {
     if (healthyAgentIds.length === 0) {
@@ -966,10 +984,14 @@ export class SyntheticsPrivateLocation {
       recoveryAgentIds,
       browserAgentIds,
     });
-    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id, pinUnpinned);
+    const unpinnedIds = new Set(
+      pkgPolicies.filter(({ condition }) => typeof condition !== 'string').map(({ id }) => id)
+    );
 
     let moved = 0;
     let failedMoves = 0;
+    let newlyPinned = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
       signal.throwIfAborted();
       // Update in the policy's own recorded space (grouped in toConditionUpdates),
@@ -981,6 +1003,10 @@ export class SyntheticsPrivateLocation {
       // Count only successful moves (a failed bulkUpdate leaves the old pin).
       moved += policiesToUpdate.length - failed.length;
       failedMoves += failed.length;
+      const failedIds = new Set(failed.map(({ update }) => update.id));
+      newlyPinned += policiesToUpdate.filter(
+        ({ update: { id } }) => unpinnedIds.has(id) && !failedIds.has(id)
+      ).length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so
         // the next run re-attempts these same moves. warn (not error) — no
@@ -997,8 +1023,13 @@ export class SyntheticsPrivateLocation {
       total: pkgPolicies.length,
       moved,
       failed: failedMoves,
+      newlyPinned,
       ...summarizeRebalance({ monitors, assignment, healthyAgentIds }),
     };
+  }
+
+  async bumpAgentPolicyRevision(agentPolicyId: string): Promise<void> {
+    await bumpAgentPolicyRevision(this.server, agentPolicyId);
   }
 
   /**
