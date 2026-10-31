@@ -23,6 +23,22 @@ import type {
 } from '../../common/service_accounts';
 
 /**
+ * What a backend knows about a service account, read without a request, for the stale binding
+ * cleanup. These are facts about the account only. Whether a binding to it is stale also depends on
+ * when the binding was made, and that is the caller's to decide.
+ *
+ * - `present`: the account exists. `credentialCreatedAt` is when Kibana created the credential it
+ *   holds for the account, when it holds one. It is only set on Elasticsearch, where an account
+ *   deleted and created again keeps its ID.
+ * - `missing`: the account is gone, or was revoked.
+ * - `unknown`: the lookup failed, and says nothing about the account.
+ */
+export type ServiceAccountFacts =
+  | { status: 'present'; credentialCreatedAt?: string }
+  | { status: 'missing' }
+  | { status: 'unknown' };
+
+/**
  * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
  * previous page, opaque to the caller and specific to the backend that issued it.
  */
@@ -64,6 +80,15 @@ export interface ServiceAccountsBackend {
    * Leaves the account's workload bindings alone. Checking for them first is the caller's job.
    */
   delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse>;
+
+  /**
+   * Looks up a service account with Kibana's own access, for the stale binding cleanup. Never
+   * rejects: a failed lookup is `unknown`.
+   */
+  getAccountFactsAsInternalUser(
+    id: string,
+    options: { signal?: AbortSignal }
+  ): Promise<ServiceAccountFacts>;
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`

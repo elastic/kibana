@@ -467,9 +467,28 @@ export interface ServiceAccountAuditEventParams {
    * Recorded in the message only.
    */
   platformAssumers?: readonly string[];
+  /**
+   * Why Kibana itself, not a user, made the change. Set by the stale binding cleanup. Recorded in
+   * the message only, which then names Kibana as the actor.
+   */
+  reason?: ServiceAccountAuditReason;
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
+
+/** Why the stale binding cleanup removed a binding. */
+export type ServiceAccountAuditReason =
+  | 'service_account_missing'
+  | 'service_account_recreated'
+  | 'workload_missing'
+  | 'workload_type_unregistered';
+
+const serviceAccountAuditReasons: Record<ServiceAccountAuditReason, string> = {
+  service_account_missing: 'the service account no longer exists',
+  service_account_recreated: 'the service account was deleted and created again since the bind',
+  workload_missing: 'the workload no longer exists',
+  workload_type_unregistered: 'no plugin registers the workload type any more',
+};
 
 export function serviceAccountAuditEvent({
   action,
@@ -478,6 +497,7 @@ export function serviceAccountAuditEvent({
   spaceId,
   force,
   platformAssumers,
+  reason,
   outcome,
   error,
 }: ServiceAccountAuditEventParams): AuditEvent {
@@ -520,9 +540,16 @@ export function serviceAccountAuditEvent({
     ? `Failed attempt to ${present} ${doc}${
         outcome === 'unknown' ? ', which might have been left behind' : ''
       }`
+    : reason !== undefined
+    ? `Kibana has ${past} ${doc}, because ${serviceAccountAuditReasons[reason]}`
     : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
+
+  const kibana = {
+    ...(workload ? { workload } : {}),
+    ...(spaceId !== undefined ? { space_id: spaceId } : {}),
+  };
 
   return {
     message,
@@ -534,7 +561,7 @@ export function serviceAccountAuditEvent({
       outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     ...(targetAttributes.length > 0 ? { user: { target } } : {}),
-    ...(workload ? { kibana: { workload } } : {}),
+    ...(Object.keys(kibana).length > 0 ? { kibana } : {}),
     error: error && {
       code: error.name,
       message: error.message,

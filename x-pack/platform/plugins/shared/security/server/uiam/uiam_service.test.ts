@@ -1937,6 +1937,18 @@ describe('UiamService', () => {
       expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
     });
 
+    it('passes the signal on to the request', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+      const signal = new AbortController().signal;
+
+      await uiamService.getServiceAccount('service-account-id', { signal });
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/service-accounts/service-account-id',
+        expect.objectContaining({ signal })
+      );
+    });
+
     it('URL-encodes the service account id', async () => {
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
