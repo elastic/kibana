@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { GraphWorkspaceSavedObject, Workspace } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
-import { createWorkspaceState, initializeWorkspace, submitSearch, workspaceChanged } from '.';
+import { createWorkspaceState, submitSearch, workspaceLoaded, workspaceRuntimeChanged } from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource } from './datasource';
@@ -111,8 +111,7 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(loadFields(allFields));
       listenerApi.dispatch(updateSettings(advancedSettings));
       listenerApi.dispatch(loadTemplates(urlTemplates));
-      listenerApi.dispatch(initializeWorkspace());
-      listenerApi.dispatch(workspaceChanged(createWorkspaceState(createdWorkspace)));
+      listenerApi.dispatch(workspaceLoaded(createWorkspaceState(createdWorkspace)));
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
@@ -144,7 +143,7 @@ export const registerPersistenceListeners = (
           getState: () => {
             const currentWorkspace = deps.getWorkspace();
             if (currentWorkspace) {
-              listenerApi.dispatch(workspaceChanged(createWorkspaceState(currentWorkspace)));
+              listenerApi.dispatch(workspaceRuntimeChanged(createWorkspaceState(currentWorkspace)));
             }
             return listenerApi.getState();
           },

@@ -142,11 +142,7 @@ const ControlPanelComponent = ({
         <SelectedNodeEditor workspace={workspace} selectedNode={selectedNode} />
       )}
       {control === 'mergeTerms' && (
-        <MergeCandidates
-          workspace={workspace}
-          mergeCandidates={mergeCandidates}
-          onSetControl={onSetControl}
-        />
+        <MergeCandidates mergeCandidates={mergeCandidates} onSetControl={onSetControl} />
       )}
     </div>
   );
