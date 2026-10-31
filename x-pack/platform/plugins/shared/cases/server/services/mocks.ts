@@ -279,6 +279,9 @@ export const createObservablesServiceMock = (): ObservablesServiceMock => {
     createObservables: jest.fn().mockResolvedValue(undefined),
     deleteObservables: jest.fn().mockResolvedValue(undefined),
     updateObservable: jest.fn().mockResolvedValue(undefined),
+    syncCase: jest.fn().mockResolvedValue({ created: 0, updated: 0, deleted: 0 }),
+    deleteCaseDocuments: jest.fn().mockResolvedValue(0),
+    listCaseKeys: jest.fn().mockResolvedValue({ cases: [] }),
   });
 
   return service as unknown as ObservablesServiceMock;
