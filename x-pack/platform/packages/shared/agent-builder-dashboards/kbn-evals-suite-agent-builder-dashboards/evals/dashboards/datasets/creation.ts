@@ -32,11 +32,14 @@ export const DASHBOARD_CREATION_EXAMPLES: DashboardDatasetExample[] = [
   dashboardExample({
     question:
       'Create a dashboard using kibana_sample_data_logs with 6 compact metric panels in one row: total requests, error count, average bytes, unique hosts, 95th percentile bytes, and max memory.',
-    structure: { panelKinds: { metric: 6 } },
+    structure: { panelKinds: { metric: 6 }, rows: [{ kind: 'metric' }] },
   }),
   dashboardExample({
     question:
       'Create a dashboard using kibana_sample_data_logs with 4 KPI metric panels across the top row and one full-width time series panel directly below them.',
-    structure: { panelKinds: { metric: 4, xy: 1 } },
+    structure: {
+      panelKinds: { metric: 4, xy: 1 },
+      rows: [{ kind: 'metric' }, { kind: 'xy', fullWidth: true }],
+    },
   }),
 ];

@@ -6,12 +6,14 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type {
   ControlsGold,
   DashboardDatasetExample,
   DashboardRoute,
   DashboardStructureGold,
   EnhanceMode,
+  LayoutEditGold,
 } from '../../../src/types';
 import { getDefectScope } from '../../../src/evaluators/seed_defects';
 import { GENERATE_DASHBOARD_TOOL_ID } from '../../../src/extract_dashboard';
@@ -21,10 +23,11 @@ import {
   MESSY_LOGS_DASHBOARD_DEFECTS,
 } from '../../../src/fixtures/messy_logs_dashboard';
 import { SAMPLE_LOGS_MAPPED_FIELDS } from '../../../src/fixtures/sample_logs_fields';
+import { SECTIONED_LOGS_DASHBOARD } from '../../../src/fixtures/sectioned_logs_dashboard';
 
 /** Slicing keys stored on every example so golden-cluster results can be split by behaviour. */
 export interface ExampleMetadata {
-  behaviour: 'creation' | 'routing' | 'enhance' | 'discover_results';
+  behaviour: 'creation' | 'routing' | 'enhance' | 'discover_results' | 'layout_edit';
   /** `logs_dissect` is the sample logs index read through a `DISSECT` query attached from Discover. */
   dataSource: 'logs' | 'logs_dissect';
   enhanceMode?: EnhanceMode;
@@ -122,6 +125,29 @@ export const discoverResultsExample = ({
     route: 'dashboard',
     ...(structure ? { structure } : {}),
     controls: { mappedFields: SAMPLE_LOGS_MAPPED_FIELDS, ...controls },
+    goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
+  },
+});
+
+/**
+ * A request that adds, removes, moves or edits panels of the seeded sectioned
+ * logs dashboard. `layoutEdit` names the containers the edit may rearrange
+ * and where the prompt puts things.
+ */
+export const layoutEditExample = ({
+  question,
+  layoutEdit,
+  dashboard = SECTIONED_LOGS_DASHBOARD,
+}: {
+  question: string;
+  layoutEdit: LayoutEditGold;
+  dashboard?: DashboardAttachmentData;
+}): DashboardDatasetExample => ({
+  input: { question, dashboard },
+  metadata: { behaviour: 'layout_edit', dataSource: 'logs' } satisfies ExampleMetadata,
+  output: {
+    route: 'dashboard',
+    layoutEdit,
     goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });

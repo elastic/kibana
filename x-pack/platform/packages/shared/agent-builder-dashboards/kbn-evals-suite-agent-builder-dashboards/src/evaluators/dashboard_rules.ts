@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
+import {
+  isSection,
+  type AttachmentPanel,
+  type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 import {
   GRID_COLUMNS,
@@ -46,6 +47,7 @@ export type DashboardRuleId =
   | ChartRuleId
   | 'out_of_bounds'
   | 'overlapping_panels'
+  | 'layout_gap'
   | 'full_width_kpi'
   | 'size_by_kind'
   | 'width_divides_48'
@@ -117,6 +119,49 @@ const overlaps = (a: AttachmentPanel, b: AttachmentPanel): boolean =>
   a.grid.y < b.grid.y + b.grid.h &&
   b.grid.y < a.grid.y + a.grid.h;
 
+type GridBox = AttachmentPanel['grid'];
+
+const coversColumn = (box: GridBox, x: number): boolean => x >= box.x && x < box.x + box.w;
+
+const covers = (box: GridBox, x: number, y: number): boolean =>
+  coversColumn(box, x) && y >= box.y && y < box.y + box.h;
+
+/** Top of the last row, where a row is a run of boxes whose heights overlap. */
+const getLastRowTop = (boxes: readonly GridBox[]): number => {
+  let top = -Infinity;
+  let bottom = -Infinity;
+  for (const { y, h } of [...boxes].sort((a, b) => a.y - b.y)) {
+    if (y >= bottom) {
+      top = y;
+    }
+    bottom = Math.max(bottom, y + h);
+  }
+  return top;
+};
+
+/**
+ * The first empty cell, in reading order, above the last row or above a box
+ * in the same column that could move up into it.
+ */
+const findFirstGap = (boxes: readonly GridBox[]): { x: number; y: number } | undefined => {
+  const lastRowTop = getLastRowTop(boxes);
+  const bottom = Math.max(...boxes.map(({ y, h }) => y + h));
+  for (let y = 0; y < bottom; y++) {
+    for (let x = 0; x < GRID_COLUMNS; x++) {
+      const isGap =
+        !boxes.some((box) => covers(box, x, y)) &&
+        (y < lastRowTop || boxes.some((box) => box.y > y && coversColumn(box, x)));
+      if (isGap) {
+        return { x, y };
+      }
+    }
+  }
+  return undefined;
+};
+
+const describeContainer = (sectionTitle: string | undefined): string =>
+  sectionTitle === undefined ? 'the top level' : `section "${sectionTitle}"`;
+
 /**
  * A rule that checks the dashboard as a whole. With a panel `appliesTo` its
  * violations name the panels involved, which are scored like panel rules, so
@@ -162,6 +207,29 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
       ),
     { appliesTo: 'all' }
   ),
+  // Rows fill the 48 columns down to the last one, so no panel below could move into an empty cell.
+  // In the top level each section takes one full-width row.
+  layout_gap: dashboardRule('appearance', (dashboard) => {
+    const sectionRows = dashboard.panels
+      .filter(isSection)
+      .map(({ grid: { y } }) => ({ x: 0, y, w: GRID_COLUMNS, h: 1 }));
+    return getPanelContainers(dashboard).flatMap(({ sectionId, sectionTitle, panels }) => {
+      const grids = panels.map(({ grid }) => grid);
+      const gap = findFirstGap(sectionId === undefined ? [...grids, ...sectionRows] : grids);
+      return gap === undefined
+        ? []
+        : [
+            {
+              rule: 'layout_gap' as const,
+              panelIds: [],
+              container: sectionId,
+              detail: `empty cell at x=${gap.x} y=${gap.y} in ${describeContainer(
+                sectionTitle
+              )}, above other panels`,
+            },
+          ];
+    });
+  }),
   full_width_kpi: panelRule('full_width_kpi', {
     appliesTo: ['metric', 'gauge'],
     check: (panel) =>
@@ -209,9 +277,11 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
               {
                 rule: 'summary_not_first' as const,
                 panelIds: late.map(({ id }) => id),
-                detail: `${late.length} metric/gauge panel(s) placed after other charts in ${
-                  sectionTitle === undefined ? 'the top level' : `section "${sectionTitle}"`
-                }`,
+                detail: `${
+                  late.length
+                } metric/gauge panel(s) placed after other charts in ${describeContainer(
+                  sectionTitle
+                )}`,
               },
             ];
       }),
@@ -305,6 +375,7 @@ const DASHBOARD_RULES: Record<DashboardRuleId, DashboardRule<DashboardRuleId>> =
 export const LAYOUT_RULES: readonly DashboardRuleId[] = [
   'out_of_bounds',
   'overlapping_panels',
+  'layout_gap',
   'full_width_kpi',
   'size_by_kind',
   'width_divides_48',
