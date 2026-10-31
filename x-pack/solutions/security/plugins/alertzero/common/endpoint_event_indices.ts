@@ -40,7 +40,9 @@ const globsOverlap = (left: string, right: string): boolean => {
  * because one concrete cluster under it was excluded.
  */
 const exclusionCoversCluster = (exclusionCluster: string, candidate: string): boolean =>
-  candidate.includes('*') ? exclusionCluster === candidate : globMatches(exclusionCluster, candidate);
+  candidate.includes('*')
+    ? exclusionCluster === candidate
+    : globMatches(exclusionCluster, candidate);
 
 const appendTarget = (targets: string[], next: string): void => {
   if (`${targets.join(',')},${next}`.length > ENDPOINT_EVENT_INDICES_MAX_LENGTH) return;
