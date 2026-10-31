@@ -63,9 +63,10 @@ Only persisted native `textBased` ES|QL Lens layers are planned. Form-based
 aggregations/formulas, mixed/legacy datasources, inline tables, unknown layer
 extensions, partial-bucket transforms, saved filters and nonempty global queries
 are explicitly unsupported. Visualization state is opaque validated JSON, not a
-claim of chart support. Form-based query planning should be added with the first
-metric slice and its semantic fixtures, not by copying the demo's approximate
-ES|QL synthesizer.
+claim of chart support. The next metric slice must add actual semantic query
+planning for ordinary form-based Lens, backed by its semantic fixtures, not by
+copying the demo's approximate ES|QL synthesizer. This native-ES|QL intermediate
+core does not yet lower ordinary form-based Lens.
 
 Inputs must be finite JSON, at most 20 levels deep, 100,000 values, 2,000,000 total
 string/key characters, 100,000 characters per string and 10,000 entries per
