@@ -13,6 +13,7 @@
     "@kbn/evals-suite-attack-discovery",
     "@kbn/scout",
     "@kbn/security-evals-alerts-snapshot",
+    "@kbn/security-evals-matrix",
     "@kbn/tooling-log",
     "@kbn/kbn-client"
   ]
