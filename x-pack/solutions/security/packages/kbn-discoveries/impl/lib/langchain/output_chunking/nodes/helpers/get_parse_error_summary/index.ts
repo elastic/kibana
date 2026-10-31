@@ -73,13 +73,16 @@ export const getParseErrorSummary = (error: unknown): string => {
     return `the response does not match the expected schema (${summary})`;
   }
 
+  // an `Error` can carry a non-string `message`, which may hold model output: never read it as text
+  const message = error instanceof Error && typeof error.message === 'string' ? error.message : '';
+
   if (
     error instanceof Error &&
     isEmptyModelResponseError(error) &&
-    error.message.startsWith(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX)
+    message.startsWith(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX)
   ) {
     // built from connector, model, token counts and trace id only, so it is kept whole
-    return error.message;
+    return message;
   }
 
   if (error instanceof Error) {
@@ -87,7 +90,7 @@ export const getParseErrorSummary = (error: unknown): string => {
     const codeSuffix = typeof code === 'string' ? ` [${code}]` : '';
     const name = ERROR_CLASS_NAME.test(error.name) ? error.name : 'Error';
 
-    return `${name}${codeSuffix}: ${sanitizeErrorMessage(error.message)}`.slice(
+    return `${name}${codeSuffix}: ${sanitizeErrorMessage(message)}`.slice(
       0,
       MAX_SANITIZED_ERROR_MESSAGE_LENGTH
     );

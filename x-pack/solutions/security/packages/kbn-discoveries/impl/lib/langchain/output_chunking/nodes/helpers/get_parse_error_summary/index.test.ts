@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 
 import {
+  EMPTY_MODEL_RESPONSE_ERROR_CODE,
   EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
   EmptyModelResponseError,
 } from '@kbn/langchain/server';
@@ -199,6 +200,48 @@ describe('getParseErrorSummary', () => {
       expect(getParseErrorSummary(error)).toBe(
         'Error: ActionsClientLlm: action result status is error: error invoking action - Status code: 429. Message: Too Many Requests'
       );
+    });
+
+    describe.each([
+      ['undefined', undefined],
+      ['an object', { text: 'SECRET' }],
+    ])('an Error whose message is %s', (_label, message) => {
+      const buildError = (code?: string): Error => {
+        const error = new Error('placeholder');
+        (error as { message: unknown }).message = message;
+        if (code != null) {
+          Object.assign(error, { code });
+        }
+        return error;
+      };
+
+      it('does not throw, and persists nothing from the message', () => {
+        const summary = getParseErrorSummary(buildError());
+
+        expect(summary).toBe('Error: ');
+        expect(summary).not.toContain('SECRET');
+      });
+
+      it('does not treat it as an empty-response error, even with the empty-response code', () => {
+        const summary = getParseErrorSummary(buildError(EMPTY_MODEL_RESPONSE_ERROR_CODE));
+
+        expect(summary.startsWith('Error')).toBe(true);
+        expect(summary).not.toContain('SECRET');
+      });
+
+      it('does not throw for an EmptyModelResponseError whose message was replaced', () => {
+        const error = new EmptyModelResponseError({
+          completionTokens: 0,
+          connectorId: 'my-connector',
+          contentLength: 0,
+        });
+        (error as { message: unknown }).message = message;
+
+        const summary = getParseErrorSummary(error);
+
+        expect(summary).not.toContain('SECRET');
+        expect(summary).not.toContain(EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX);
+      });
     });
 
     it('bounds the summary of a long message', () => {
