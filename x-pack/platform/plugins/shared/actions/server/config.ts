@@ -274,6 +274,7 @@ export const configSchema = schema.object({
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
         recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+        recipient_allowlist_in_trial: schema.maybe(schema.arrayOf(schema.string(), { minSize: 0 })),
         maximum_body_length: schema.maybe(
           schema.number({ min: 0, defaultValue: DEFAULT_EMAIL_BODY_LENGTH })
         ),
@@ -314,7 +315,7 @@ export const configSchema = schema.object({
       {
         validate: (obj) => {
           if (obj && Object.keys(obj).length === 0) {
-            return 'email.domain_allowlist, email.recipient_allowlist, or email.services must be defined';
+            return 'email.domain_allowlist, email.recipient_allowlist, email.recipient_allowlist_in_trial, or email.services must be defined';
           }
 
           if (obj?.domain_allowlist && obj?.recipient_allowlist) {

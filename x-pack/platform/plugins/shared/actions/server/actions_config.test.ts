@@ -832,6 +832,110 @@ describe('validateEmailAddresses()', () => {
       );
     });
   });
+
+  describe('recipient_allowlist_in_trial', () => {
+    const trialEmails = ['trial-user@company.co'];
+    const nonTrialEmails = ['dev.team@company.co'];
+    const email = {
+      recipient_allowlist: ['dev.*@company.co'],
+      recipient_allowlist_in_trial: ['trial-user@company.co'],
+    };
+
+    test('allows recipient_allowlist_in_trial to be empty to not allow any recipients', () => {
+      const acu = getActionsConfigurationUtilities(
+        { ...defaultActionsConfig, email: { recipient_allowlist_in_trial: [] } },
+        { isTrial: () => true }
+      );
+
+      const message = acu.validateEmailAddresses(trialEmails);
+      expect(message).toMatchInlineSnapshot(`"not allowed emails: trial-user@company.co"`);
+    });
+
+    test('uses recipient_allowlist_in_trial instead of recipient_allowlist when in trial', () => {
+      const acu = getActionsConfigurationUtilities(
+        { ...defaultActionsConfig, email },
+        { isTrial: () => true }
+      );
+
+      expect(acu.validateEmailAddresses(trialEmails)).toBe(undefined);
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toMatchInlineSnapshot(
+        `"not allowed emails: dev.team@company.co"`
+      );
+    });
+
+    test('ignores recipient_allowlist_in_trial when not in trial', () => {
+      const acu = getActionsConfigurationUtilities(
+        { ...defaultActionsConfig, email },
+        { isTrial: () => false }
+      );
+
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toBe(undefined);
+      expect(acu.validateEmailAddresses(trialEmails)).toMatchInlineSnapshot(
+        `"not allowed emails: trial-user@company.co"`
+      );
+    });
+
+    test('ignores recipient_allowlist_in_trial when isTrial is not provided', () => {
+      const acu = getActionsConfigurationUtilities({
+        ...defaultActionsConfig,
+        email: { recipient_allowlist_in_trial: ['trial-user@company.co'] },
+      });
+
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toBe(undefined);
+    });
+
+    test('uses recipient_allowlist in trial when recipient_allowlist_in_trial is not set', () => {
+      const acu = getActionsConfigurationUtilities(
+        { ...defaultActionsConfig, email: { recipient_allowlist: ['dev.*@company.co'] } },
+        { isTrial: () => true }
+      );
+
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toBe(undefined);
+      expect(acu.validateEmailAddresses(trialEmails)).toMatchInlineSnapshot(
+        `"not allowed emails: trial-user@company.co"`
+      );
+    });
+
+    test('does not restrict recipients in trial when neither allowlist is set', () => {
+      const acu = getActionsConfigurationUtilities(defaultActionsConfig, {
+        isTrial: () => true,
+      });
+
+      expect(acu.validateEmailAddresses([...trialEmails, ...nonTrialEmails])).toBe(undefined);
+    });
+
+    test('re-evaluates trial status on each validation', () => {
+      let inTrial = true;
+      const acu = getActionsConfigurationUtilities(
+        { ...defaultActionsConfig, email },
+        { isTrial: () => inTrial }
+      );
+
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toMatchInlineSnapshot(
+        `"not allowed emails: dev.team@company.co"`
+      );
+      inTrial = false;
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toBe(undefined);
+    });
+
+    test('still applies domain_allowlist when in trial', () => {
+      const acu = getActionsConfigurationUtilities(
+        {
+          ...defaultActionsConfig,
+          email: {
+            domain_allowlist: ['elastic.co'],
+            recipient_allowlist_in_trial: ['*@company.co', '*@elastic.co'],
+          },
+        },
+        { isTrial: () => true }
+      );
+
+      expect(acu.validateEmailAddresses(['bob@elastic.co'])).toBe(undefined);
+      expect(acu.validateEmailAddresses(trialEmails)).toMatchInlineSnapshot(
+        `"not allowed emails: trial-user@company.co"`
+      );
+    });
+  });
 });
 
 describe('getMaxEmailBodyLength() ', () => {
