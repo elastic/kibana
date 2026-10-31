@@ -6,6 +6,7 @@
  */
 
 import {
+  canStoreExtractObservablesTrue,
   getCaseSettings,
   isObservablesExtractionBlocked,
   resolveExtractObservables,
@@ -65,6 +66,27 @@ describe('isObservablesExtractionBlocked', () => {
     'returns false for unknown owner %j so space config is respected',
     (owner) => {
       expect(isObservablesExtractionBlocked(owner)).toBe(false);
+    }
+  );
+});
+
+describe('canStoreExtractObservablesTrue', () => {
+  it('returns true for Security (owner that auto-extracts)', () => {
+    expect(canStoreExtractObservablesTrue('securitySolution')).toBe(true);
+  });
+
+  it('returns false for Stack (observables on, auto-extract off)', () => {
+    expect(canStoreExtractObservablesTrue('cases')).toBe(false);
+  });
+
+  it('returns false for Observability (observables off)', () => {
+    expect(canStoreExtractObservablesTrue('observability')).toBe(false);
+  });
+
+  it.each([[''], ['foobar'], ['securitySolutionFixture'], ['toString']])(
+    'returns true for unknown owner %j because it is not guarded',
+    (owner) => {
+      expect(canStoreExtractObservablesTrue(owner)).toBe(true);
     }
   );
 });

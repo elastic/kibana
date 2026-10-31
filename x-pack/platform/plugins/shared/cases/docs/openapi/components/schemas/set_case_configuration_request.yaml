@@ -41,8 +41,8 @@ properties:
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
       When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
-      For owners that do not support observable extraction (currently Observability), setting this to `true`
-      has no effect on case creation; new cases for those owners always use `false`.
+      Only Security can set this to `true`. For Stack and Observability, a request that sets this to `true`,
+      in the configuration or in a template, fails with a 400 error.
   owner:
     $ref: 'owner.yaml'
   templates:

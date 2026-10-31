@@ -14,6 +14,7 @@ import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
@@ -560,6 +561,13 @@ const createBulkCreateCaseRequest = async ({
       },
     };
   }
+
+  // Checked on the final value (caller, space configuration or owner default), before any write.
+  // The cases connector reaches this path, so a rejected case fails the whole bulk request.
+  assertCanStoreExtractObservables({
+    owner: caseWithoutId.owner,
+    extractObservables: caseWithoutId.settings.extractObservables,
+  });
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
