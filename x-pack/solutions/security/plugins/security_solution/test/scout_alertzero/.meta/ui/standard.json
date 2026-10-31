@@ -1,9 +1,275 @@
 {
-  "sha1": "25eea903aff81847e7fda1db4f20fc1e5e447255",
+  "sha1": "60e4b7639dd966bd9a0f52d98a7b617c3380107a",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "8d66d7ea541899f-15fe7a1d89d5355",
+      "title": "AlertZero onboarding - post-enable page and closed window post-enable app root is the queue, not onboarding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "8d66d7ea541899f-be0aefd0fee7c16",
+      "title": "AlertZero onboarding - post-enable page and closed window closed rows show the decision time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
+        "line": 44,
+        "column": 29
+      }
+    },
+    {
+      "id": "8d66d7ea541899f-99638eec58bf4a9",
+      "title": "AlertZero onboarding - post-enable page and closed window 72h window: 71h-old decision listed, 73h-old excluded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
+        "line": 71,
+        "column": 32
+      }
+    },
+    {
+      "id": "fcbfe695f42afab-72e84f383ed548b",
+      "title": "AlertZero onboarding - enable transaction enable and run gives every enabled worker a service account and lands on the queue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "fcbfe695f42afab-552d940e76ee428",
+      "title": "AlertZero onboarding - enable transaction a rapid double click issues exactly one PATCH per worker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
+        "line": 50,
+        "column": 27
+      }
+    },
+    {
+      "id": "fcbfe695f42afab-b627b59272ab12e",
+      "title": "AlertZero onboarding - enable transaction a failed PATCH fails open: siblings enable and the UI recovers to the queue",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
+        "line": 78,
+        "column": 77
+      }
+    },
+    {
+      "id": "fcbfe695f42afab-3c2f77a1c4f27b0",
+      "title": "AlertZero onboarding - enable transaction disabling a worker from Watch settings persists off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
+        "line": 118,
+        "column": 82
+      }
+    },
+    {
+      "id": "71ae6e7c92e15cf-bcc46f5ae7c1113",
+      "title": "AlertZero onboarding - intro and Continue gating intro promo and UI preview render",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_intro.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    },
+    {
+      "id": "71ae6e7c92e15cf-00eaf5defcfe86a",
+      "title": "AlertZero onboarding - intro and Continue gating read-only user cannot advance past the intro",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_intro.spec.ts",
+        "line": 37,
+        "column": 66
+      }
+    },
+    {
+      "id": "71ae6e7c92e15cf-b35ee4b7b1a561a",
+      "title": "AlertZero onboarding - intro and Continue gating privileged user advances from intro to worker selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_intro.spec.ts",
+        "line": 54,
+        "column": 77
+      }
+    },
+    {
+      "id": "f7ed49850f0baf1-eb0459ffb643bf7",
+      "title": "AlertZero onboarding - landing and access all workers off renders onboarding, not the queue or a gate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "f7ed49850f0baf1-75af7dde33345fb",
+      "title": "AlertZero onboarding - landing and access an enabled worker lands on the queue instead of onboarding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
+        "line": 44,
+        "column": 77
+      }
+    },
+    {
+      "id": "f7ed49850f0baf1-75644f506508303",
+      "title": "AlertZero onboarding - landing and access reload keeps the queue once a worker is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
+        "line": 61,
+        "column": 11
+      }
+    },
+    {
+      "id": "f7ed49850f0baf1-67cc859e9b09e83",
+      "title": "AlertZero onboarding - landing and access read-only user sees onboarding with Continue disabled and a reason",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
+        "line": 81,
+        "column": 65
+      }
+    },
+    {
+      "id": "f7ed49850f0baf1-f00e973866cc30d",
+      "title": "AlertZero onboarding - landing and access space with the per-space setting off hides the app and 404s worker routes (#19935)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
+        "line": 98,
+        "column": 19
+      }
+    },
+    {
+      "id": "6c6d21aacdb51c5-343c54524287755",
+      "title": "AlertZero onboarding - no-model blocking no-model callout renders and locks worker controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "6c6d21aacdb51c5-c75ea4f14b30a99",
+      "title": "AlertZero onboarding - no-model blocking feature-settings escape hatch links to the management page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
+        "line": 61,
+        "column": 30
+      }
+    },
+    {
+      "id": "aef97376a048da1-009dd9de527ade0",
+      "title": "AlertZero onboarding - worker defaults and no-save every worker is selected by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
+        "line": 43,
+        "column": 16
+      }
+    },
+    {
+      "id": "aef97376a048da1-6f41322044f919d",
+      "title": "AlertZero onboarding - worker defaults and no-save toggles do not persist when navigating away before Enable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
+        "line": 57,
+        "column": 77
+      }
+    },
     {
       "id": "12e1f9dc0a1a5b4-20dcfefc21169df",
       "title": "AlertZero queue page width keeps the trend charts within the window and resizes them when it narrows",
@@ -16,6 +282,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/queue_page_width.spec.ts",
         "line": 54,
         "column": 26
+      }
+    },
+    {
+      "id": "576b27bb4712c51-18e0079de941191",
+      "title": "AlertZero onboarding - reset fixture self-check stub clears no_model; enable persists; reset disables every worker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
+        "line": 30,
+        "column": 19
       }
     }
   ]

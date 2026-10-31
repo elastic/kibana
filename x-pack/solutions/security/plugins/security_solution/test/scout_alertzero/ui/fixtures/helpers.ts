@@ -1,0 +1,510 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { randomUUID } from 'crypto';
+import type { ApiClientFixture } from '@kbn/scout-security';
+import type { KbnClient } from '@kbn/kbn-client';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
+import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_WORKERS_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+  SECURITY_SERVICE_ACCOUNT_URL,
+  buildServiceAccountUrl,
+  buildWorkerUrl,
+  getWorkerRoleName,
+  WORKER_SERVICE_ACCOUNT_NAMES,
+} from '@kbn/alertzero-common';
+import {
+  SUPPLY_WORKFLOW_IDS,
+  type SupplyWorkflowKey,
+} from '../../api/fixtures/supply_workflow_ids';
+
+/** Poll interval for bounded waits inside specs (server-side settle can take seconds). */
+export const POLL_INTERVAL_MS = 2_000;
+
+export type Headers = Record<string, string>;
+export type Method = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+
+export interface ApiResult<T> {
+  statusCode: number;
+  body: T;
+}
+
+/**
+ * Kibana API calls as the logged-in user. `internal` adds the internal-origin
+ * headers the alertzero routes require (`restrictInternalApis=true` on this
+ * config set); `public` sends only what the caller provides; `raw` takes full
+ * control for versioned routes that need their own header set.
+ */
+export interface AlertZeroApi {
+  internal: <T = unknown>(
+    method: Method,
+    path: string,
+    options?: { body?: unknown }
+  ) => Promise<ApiResult<T>>;
+  public: <T = unknown>(
+    method: Method,
+    path: string,
+    options?: { body?: unknown }
+  ) => Promise<ApiResult<T>>;
+  raw: <T = unknown>(
+    method: Method,
+    path: string,
+    headers: Headers,
+    body?: unknown
+  ) => Promise<ApiResult<T>>;
+}
+
+export const createApi = (apiClient: ApiClientFixture, cookieHeader: Headers): AlertZeroApi => {
+  const send = async <T>(
+    method: Method,
+    path: string,
+    headers: Headers,
+    body?: unknown
+  ): Promise<ApiResult<T>> => {
+    const response = await apiClient[method.toLowerCase() as Lowercase<Method>]<T>(path, {
+      headers: { ...cookieHeader, ...headers },
+      body,
+      responseType: 'json',
+    });
+    return { statusCode: response.statusCode, body: response.body };
+  };
+  const internalHeaders = {
+    ...INTERNAL_API_HEADERS,
+    'kbn-xsrf': 'some-xsrf-token',
+  };
+  // Public mutating routes (e.g. actions connector create/delete) reject requests
+  // without kbn-xsrf; GETs ignore it, so it is safe on every public call.
+  const publicHeaders = {
+    'kbn-xsrf': 'some-xsrf-token',
+    'Content-Type': 'application/json;charset=UTF-8',
+  };
+
+  return {
+    internal: (method, path, options) => send(method, path, internalHeaders, options?.body),
+    public: (method, path, options) => send(method, path, publicHeaders, options?.body),
+    raw: (method, path, headers, body) => send(method, path, headers, body),
+  };
+};
+
+/**
+ * UI-suite twin of `createApi`: scout's `kbnClient` embeds admin credentials in its
+ * base URL and already sends `kbn-xsrf` + `x-elastic-internal-origin` on every call,
+ * so only the API-version header needs adding. Non-2xx responses resolve (instead of
+ * the requester's default throw) so `ok()` keeps deciding pass/fail.
+ */
+export const createApiFromKbnClient = (kbnClient: KbnClient): AlertZeroApi => {
+  const send = async <T>(
+    method: Method,
+    path: string,
+    headers: Headers,
+    body?: unknown
+  ): Promise<ApiResult<T>> => {
+    try {
+      const response = await kbnClient.request<T>({
+        method,
+        path,
+        headers,
+        body,
+        // The default 5 attempts turn one 4xx into five identical failures (and 10s+ of
+        // backoff); these helpers treat the status as data.
+        retries: 1,
+      });
+      return { statusCode: response.status, body: response.data };
+    } catch (error) {
+      if (error instanceof KbnClientRequesterError && error.status !== undefined) {
+        // The requester error carries no structured body (the body is folded
+        // into its message text), so non-2xx callers get an empty object.
+        return { statusCode: error.status, body: {} as T };
+      }
+      throw error;
+    }
+  };
+  return {
+    internal: (method, path, options) =>
+      send(method, path, { 'elastic-api-version': '1' }, options?.body),
+    public: (method, path, options) => send(method, path, {}, options?.body),
+    raw: (method, path, headers, body) => send(method, path, headers, body),
+  };
+};
+
+/** Resolves with the body of a 2xx response; anything else fails with the status and body. */
+export const ok = <T>(result: ApiResult<T>, label: string): T => {
+  if (result.statusCode < 200 || result.statusCode >= 300) {
+    throw new Error(`${label} failed: ${result.statusCode} ${JSON.stringify(result.body)}`);
+  }
+  return result.body;
+};
+
+/** Bounded polling: resolves with the first non-undefined `read` value; timeout throws. */
+export const pollUntil = async <T>(
+  label: string,
+  read: () => Promise<T | undefined>,
+  { timeoutMs, intervalMs = POLL_INTERVAL_MS }: { timeoutMs: number; intervalMs?: number }
+): Promise<T> => {
+  const deadline = Date.now() + timeoutMs;
+  let lastError: unknown;
+  for (;;) {
+    try {
+      const value = await read();
+      if (value !== undefined) return value;
+    } catch (error) {
+      lastError = error;
+    }
+    if (Date.now() >= deadline) {
+      throw new Error(
+        `Timed out after ${timeoutMs}ms waiting for ${label}${
+          lastError === undefined ? '' : `; last error: ${String(lastError)}`
+        }`
+      );
+    }
+    const wait = Math.min(intervalMs, Math.max(0, deadline - Date.now()));
+    await new Promise((resolve) => setTimeout(resolve, wait));
+  }
+};
+
+/** Prefixes a path with `/s/<spaceId>` for a non-default Space. */
+export const spaceUrl = (path: string, spaceId?: string): string => {
+  const trimmed = path.startsWith('/') ? path.slice(1) : path;
+  return spaceId && spaceId !== 'default' ? `/s/${spaceId}/${trimmed}` : `/${trimmed}`;
+};
+
+const helperError = (label: string, response: ApiResult<unknown>): never => {
+  throw new Error(
+    `Setup: failed to ${label} (status ${response.statusCode}): ${JSON.stringify(response.body)}`
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Worker state
+// ---------------------------------------------------------------------------
+
+export interface WorkerInfo {
+  id: string;
+  enabled: boolean;
+  blockingReasons?: string[];
+  settingsRevision?: number | null;
+  settings?: { serviceAccountId?: string };
+}
+
+export interface WorkersResponse {
+  workers: Array<{
+    id: string;
+    enabled: boolean;
+    blockingReasons?: string[];
+    settingsRevision?: number | null;
+    settings?: { serviceAccountId?: string };
+  }>;
+}
+
+/** Server-visible predicate: a worker whose enablement the server will refuse. */
+export const isWorkerEnableBlocked = (worker: Pick<WorkerInfo, 'blockingReasons'>): boolean =>
+  (worker.blockingReasons ?? []).includes('no_model');
+
+/** GET the worker list in a space. */
+export const listWorkers = async (api: AlertZeroApi, spaceId: string): Promise<WorkerInfo[]> => {
+  const { workers } = ok<WorkersResponse>(
+    await api.internal('GET', spaceUrl(ALERTZERO_WORKERS_URL, spaceId)),
+    `list workers in ${spaceId}`
+  );
+  return workers;
+};
+
+/**
+ * PATCH one worker. `settingsRevision` is required by the server when `settings`
+ * is present (read it from the list response); enable/disable alone sends just
+ * `enabled`.
+ */
+export const patchWorker = async (
+  api: AlertZeroApi,
+  spaceId: string,
+  workerId: string,
+  body: {
+    enabled?: boolean;
+    settingsRevision?: number | null;
+    settings?: { serviceAccountId?: string };
+  }
+): Promise<ApiResult<unknown>> =>
+  api.internal('PATCH', spaceUrl(buildWorkerUrl(workerId), spaceId), { body });
+
+// ---------------------------------------------------------------------------
+// Per-space gate
+// ---------------------------------------------------------------------------
+
+const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
+
+export const setAlertZeroEnabledInSpace = async (
+  api: AlertZeroApi,
+  spaceId: string,
+  enabled: boolean | undefined
+): Promise<void> => {
+  const response = await api.internal('POST', spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
+    body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: enabled ?? null } },
+  });
+  if (response.statusCode !== 200) {
+    helperError(`set AlertZero enabled=${String(enabled)} in ${spaceId}`, response);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Service accounts (global — no space prefix; created by the onboarding UI flow)
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates the throwaway service account the enable PATCH requires. Mirrors the UI's
+ * `ensureWorkerServiceAccounts` (roles from the built-in worker-role registry), but
+ * with a unique name so parallel/failed runs cannot collide on the reserved name.
+ */
+export const createWorkerServiceAccount = async (
+  api: AlertZeroApi,
+  workerId: string
+): Promise<{ id: string; cleanup: () => Promise<void> }> => {
+  const accountName = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
+  if (!accountName) {
+    throw new Error(`No service-account name registered for worker ${workerId}`);
+  }
+  const roleName = getWorkerRoleName(accountName, { isServerless: false });
+  const created = await api.internal<{ id: string }>('POST', SECURITY_SERVICE_ACCOUNT_URL, {
+    body: {
+      name: `${accountName}_scout_${uniqueSuffix()}`.slice(0, 50),
+      description: 'Scout AlertZero onboarding e2e',
+      roles: [roleName],
+    },
+  });
+  if (created.statusCode !== 200 || !created.body?.id) {
+    helperError(`create service account for ${workerId}`, created);
+  }
+  const { id } = created.body;
+  return {
+    id,
+    cleanup: async () => {
+      // `?force=true` revokes API keys first; 404 means another run already removed it.
+      const deleted = await api.internal('DELETE', `${buildServiceAccountUrl(id)}?force=true`);
+      if (deleted.statusCode !== 200 && deleted.statusCode !== 204 && deleted.statusCode !== 404) {
+        helperError(`delete service account ${id}`, deleted);
+      }
+    },
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Stub model (plumbing-only enabler — connector is never invoked)
+// ---------------------------------------------------------------------------
+
+interface InferenceSettingsResponse {
+  data: {
+    features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }>;
+  };
+}
+
+const SEARCH_INFERENCE_SETTINGS_PATH = '/internal/search_inference_endpoints/settings';
+const SEARCH_INFERENCE_API_VERSION = '1';
+
+const inferenceSettingsHeaders: Headers = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': SEARCH_INFERENCE_API_VERSION,
+};
+
+/**
+ * Pins an explicit empty AlertZero parent model assignment in the space. A space with no
+ * assignment document falls back to every cluster-wide chat-completion endpoint, so a
+ * connector created anywhere else would silently unblock the "no model" cases. An
+ * assignment document with zero endpoints is what makes `no_model` deterministic. The
+ * document is space-scoped, so deleting the throwaway space removes it.
+ */
+export const assignEmptyModelAssignment = async (
+  api: AlertZeroApi,
+  spaceId: string
+): Promise<void> => {
+  const put = await api.raw(
+    'PUT',
+    spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+    inferenceSettingsHeaders,
+    { features: [{ feature_id: ALERTZERO_INFERENCE_PARENT_FEATURE_ID, endpoints: [] }] }
+  );
+  if (put.statusCode !== 200) {
+    helperError(`pin an empty model assignment in ${spaceId}`, put);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Deployment-wide Hunt supply workflows
+// ---------------------------------------------------------------------------
+
+const DEPLOYMENT_SUPPLY_KEYS: readonly SupplyWorkflowKey[] = ['ingest', 'enrich'];
+
+export type SupplyBaseline = Partial<Record<SupplyWorkflowKey, boolean>>;
+
+interface SupplyStatusRows {
+  workflows?: Array<{ key: string; enabled: boolean; installed: boolean }>;
+}
+
+/**
+ * Enabling Hunt turns the deployment-wide ingest/enrich workflows on, and disabling the
+ * last Hunt tears them down — a per-space reset reaches beyond the space. Records their
+ * `enabled` state (read through `spaceId`, whose gate must already be on) so cleanup can
+ * put them back. Returns `undefined` when the status cannot be read: nothing to restore.
+ */
+export const readSupplyBaseline = async (
+  api: AlertZeroApi,
+  spaceId: string
+): Promise<SupplyBaseline | undefined> => {
+  const status = await api.internal<SupplyStatusRows>(
+    'GET',
+    spaceUrl(HUNT_THREAT_INTEL_SUPPLY_URL, spaceId)
+  );
+  if (status.statusCode !== 200) return undefined;
+  const baseline: SupplyBaseline = {};
+  for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+    const row = status.body.workflows?.find((workflow) => workflow.key === key);
+    if (row?.installed) baseline[key] = row.enabled;
+  }
+  return baseline;
+};
+
+/** Re-applies a recorded baseline through the Workflows API wherever the current state differs. */
+export const restoreSupplyBaseline = async (
+  api: AlertZeroApi,
+  spaceId: string,
+  baseline: SupplyBaseline
+): Promise<void> => {
+  const current = ok<SupplyStatusRows>(
+    await api.internal('GET', spaceUrl(HUNT_THREAT_INTEL_SUPPLY_URL, spaceId)),
+    `read supply status in ${spaceId}`
+  );
+  for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+    const wanted = baseline[key];
+    const row = current.workflows?.find((workflow) => workflow.key === key);
+    if (wanted !== undefined && row?.installed && row.enabled !== wanted) {
+      ok(
+        await api.raw(
+          'PUT',
+          `/api/workflows/managed/workflow/${encodeURIComponent(SUPPLY_WORKFLOW_IDS[key])}`,
+          { 'kbn-xsrf': 'some-xsrf-token', 'elastic-api-version': '2023-10-31' },
+          { enabled: wanted }
+        ),
+        `restore supply workflow ${key}`
+      );
+    }
+  }
+};
+
+/** Unique per call; names a connector, so `randomUUID` rather than `Math.random`. */
+const uniqueSuffix = () => `${Date.now()}-${randomUUID().slice(0, 8)}`;
+
+export interface StubModel {
+  connectorId: string;
+  cleanup: () => Promise<void>;
+}
+
+/**
+ * Seeds the space-scoped stub `.gen-ai` connector the onboarding UI needs before it
+ * unlocks worker toggles (pattern: `test/scout_alertzero/api/fixtures/helpers.ts`
+ * `setupHuntPrerequisites`, minus the Hunt-specific service account). The connector
+ * is never invoked — enablement only checks endpoint existence. Cleanup restores the
+ * inference-settings document (PUT back the pre-test features) and deletes the
+ * connector, so `getForFeature` is not polluted for sibling specs.
+ */
+export const seedStubModel = async (api: AlertZeroApi, spaceId: string): Promise<StubModel> => {
+  const suffix = uniqueSuffix();
+  const connectorName = `scout-onboarding-genai-${spaceId}-${suffix}`;
+
+  const createdConnector = await api.public('POST', spaceUrl('api/actions/connector', spaceId), {
+    body: {
+      name: connectorName,
+      connector_type_id: '.gen-ai',
+      config: {
+        apiProvider: 'OpenAI',
+        apiUrl: 'https://example.invalid/v1',
+        defaultModel: 'gpt-4',
+      },
+      secrets: { apiKey: 'scout-test-key' },
+    },
+  });
+  if (createdConnector.statusCode !== 200 || !(createdConnector.body as { id?: string }).id) {
+    helperError(`create .gen-ai connector in ${spaceId}`, createdConnector);
+  }
+  const connectorId = (createdConnector.body as { id: string }).id;
+
+  const settingsHeaders = inferenceSettingsHeaders;
+  let existingFeatures: InferenceSettingsResponse['data']['features'] = [];
+  let assigned = false;
+
+  const cleanup = async () => {
+    if (assigned) {
+      const restore = await api.raw(
+        'PUT',
+        spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+        settingsHeaders,
+        { features: existingFeatures }
+      );
+      if (restore.statusCode !== 200) {
+        helperError(`restore inference settings in ${spaceId}`, restore);
+      }
+    }
+    const deleteConnector = await api.public(
+      'DELETE',
+      spaceUrl(`api/actions/connector/${encodeURIComponent(connectorId)}`, spaceId)
+    );
+    if (
+      deleteConnector.statusCode !== 200 &&
+      deleteConnector.statusCode !== 204 &&
+      deleteConnector.statusCode !== 404
+    ) {
+      helperError(`delete stub connector ${connectorId}`, deleteConnector);
+    }
+  };
+
+  // A failure after the connector exists must not leave it behind: the caller never
+  // receives `cleanup` when this throws.
+  try {
+    const settingsGet = await api.raw<InferenceSettingsResponse>(
+      'GET',
+      spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+      settingsHeaders
+    );
+    if (settingsGet.statusCode !== 200) {
+      helperError(`read inference settings in ${spaceId}`, settingsGet);
+    }
+    existingFeatures = settingsGet.body.data?.features ?? [];
+    const parent = existingFeatures.find(
+      (f) => f.feature_id === ALERTZERO_INFERENCE_PARENT_FEATURE_ID
+    );
+    const shouldAssign = !parent || parent.endpoints.length === 0;
+    if (shouldAssign) {
+      const put = await api.raw(
+        'PUT',
+        spaceUrl(SEARCH_INFERENCE_SETTINGS_PATH, spaceId),
+        settingsHeaders,
+        {
+          features: [
+            ...existingFeatures.filter(
+              (f) => f.feature_id !== ALERTZERO_INFERENCE_PARENT_FEATURE_ID
+            ),
+            {
+              feature_id: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+              endpoints: [{ id: connectorId }],
+            },
+          ],
+        }
+      );
+      if (put.statusCode !== 200) {
+        helperError(`assign stub model in ${spaceId}`, put);
+      }
+      assigned = true;
+    }
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
+  }
+
+  return { connectorId, cleanup };
+};
