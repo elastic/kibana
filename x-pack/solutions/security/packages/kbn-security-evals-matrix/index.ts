@@ -9,3 +9,6 @@ export * as cli from './src/cli';
 
 // Generic per-example report model + pluggable output adapters (HTML, JSON fallback)
 export * from './src/report';
+
+// Agent Builder tool classification + security-owned trajectory evaluator
+export * from './src/trajectory';
