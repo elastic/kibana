@@ -58,8 +58,8 @@ describe('Assistant Conversation Sharing', { tags: ['@ess', '@serverless'] }, ()
   const secondaryRole = isCloudServerless
     ? 'platform_engineer'
     : isServerless
-      ? 'system_indices_superuser'
-      : 'elastic';
+    ? 'system_indices_superuser'
+    : 'elastic';
   let primaryUser: string;
   let secondaryUser: string;
   let secondaryUserFullName: string;
