@@ -36,6 +36,7 @@ import { EditPackagePolicyPage } from '.';
 type MockFn = jest.MockedFunction<any>;
 
 let lastStepConfigureProps: any;
+let lastStepDefineProps: any;
 let lastLayoutProps: any;
 
 jest.mock('../../../../../services/use_yaml', () => ({
@@ -217,6 +218,13 @@ jest.mock('../create_package_policy_page/components', () => {
       lastStepConfigureProps = props;
       return (actual as any).StepConfigurePackagePolicy(props);
     }),
+    // A memo component, so it is rendered as an element rather than called.
+    StepDefinePackagePolicy: jest.fn((props) => {
+      lastStepDefineProps = props;
+      return jest
+        .requireActual('react')
+        .createElement((actual as any).StepDefinePackagePolicy, props);
+    }),
   };
 });
 
@@ -310,6 +318,7 @@ describe('edit package policy page', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
+    lastStepDefineProps = undefined;
     lastLayoutProps = undefined;
     (useUIExtension as MockFn).mockReset();
 
@@ -435,7 +444,7 @@ describe('edit package policy page', () => {
     await waitFor(() => {
       expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
     });
-    act(() => lastStepConfigureProps.onLogsdbColumnarChange(true));
+    act(() => lastStepDefineProps.onLogsdbColumnarChange(true));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
