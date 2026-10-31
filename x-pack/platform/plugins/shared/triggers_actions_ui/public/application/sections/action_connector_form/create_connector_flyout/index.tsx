@@ -31,6 +31,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
 import { connectorTypePublishesKeys } from '@kbn/connector-specs';
+import { useAccessPolicy, type AccessDraft } from '@kbn/access-control-ui';
 import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
@@ -46,6 +47,7 @@ import type { ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useConnectorCreateForm } from '../use_connector_create_form';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ConnectorAccessSection } from '../connector_access/connector_access_section';
 import { ConnectorContext } from '../../../context/connector_context';
 import { EditConnectorFlyoutContent } from '../edit_connector_flyout';
 import { FlyoutHeader } from './header';
@@ -97,6 +99,16 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     featureId ? [featureId] : []
   );
 
+  // With object-level security, people can restrict a connector while creating it. The connector is
+  // created with that access in one request.
+  const accessPolicy = useAccessPolicy(services.http, 'action');
+  const [accessDraft, setAccessDraft] = useState<AccessDraft>();
+  useEffect(() => {
+    if (accessPolicy.data?.enabled) {
+      setAccessDraft({ general_access: accessPolicy.data.general_access.default, entries: [] });
+    }
+  }, [accessPolicy.data]);
+
   const {
     actionTypeModel,
     isLoadingActionTypeModel,
@@ -116,6 +128,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
     initialConnector,
+    accessControl: accessDraft,
   });
 
   useEffect(() => {
@@ -563,6 +576,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                     setResetForm={setResetForm}
                     settingsContent={inboundSettingsContent}
                   />
+                  {accessPolicy.data?.enabled && accessDraft ? (
+                    <>
+                      <EuiSpacer size="l" />
+                      <ConnectorAccessSection
+                        policy={accessPolicy.data}
+                        value={accessDraft}
+                        onChange={setAccessDraft}
+                        isDisabled={isSaving}
+                      />
+                    </>
+                  ) : null}
                   {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
                 </>
               )}

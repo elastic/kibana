@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CanonicalAcl, Principal } from '@kbn/access-control';
 import Boom from '@hapi/boom';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -12,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type {
   IScopedClusterClient,
+  ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
   Logger,
@@ -30,6 +32,7 @@ import type { RotateInboundIngressResult } from '../application/connector/method
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
+import { resolveConnectorName } from '../application/connector/methods/resolve_connector_name';
 import { getAuthStatus } from '../application/connector/methods/get_auth_status';
 import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
@@ -38,6 +41,8 @@ import { rotateInboundIngress } from '../application/connector/methods/rotate_in
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
 import { execute } from '../application/connector/methods/execute';
+import { getRestrictedConnectorIds } from '../application/connector/methods/get_restricted_connector_ids';
+import { ensureConnectorsUsable } from '../application/connector/methods/ensure_connectors_usable';
 import type {
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
@@ -66,6 +71,13 @@ import type {
 } from '../create_execute_function';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
+import {
+  ensureConnectorOperation,
+  ensureConnectorsOperation,
+  getConnectorAccessControl,
+  operationForAuthMode,
+} from '../lib/connector_access';
+import { excludeHiddenConnectors } from '../lib/hidden_connectors';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   OAuthAuthorizationCodeParams,
@@ -139,6 +151,10 @@ export interface ConstructorOptions {
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
   securityService?: SecurityServiceStart;
+  /**
+   * Reads connectors whatever the caller can see, for system decisions about them.
+   */
+  internalSavedObjectsRepository?: ISavedObjectsRepository;
 }
 
 export interface ActionsClientContext {
@@ -170,6 +186,7 @@ export interface ActionsClientContext {
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
   securityService?: SecurityServiceStart;
+  internalSavedObjectsRepository?: ISavedObjectsRepository;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -204,6 +221,7 @@ export class ActionsClient {
     getCurrentUserProfileId,
     evictClientPool,
     securityService,
+    internalSavedObjectsRepository,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -232,6 +250,7 @@ export class ActionsClient {
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
       evictClientPool,
       securityService,
+      internalSavedObjectsRepository,
     };
   }
 
@@ -286,6 +305,14 @@ export class ActionsClient {
     ConnectorWithExtraFindData[]
   > {
     return getAll({ context: this.context, includeSystemActions, sandboxCapableOnly });
+  }
+
+  /**
+   * Returns the ID of the connector with the given name, or `undefined` when there is none or the
+   * caller cannot view it. An ambiguous name fails the same way for every caller.
+   */
+  public async resolveConnectorName(name: string): Promise<string | undefined> {
+    return resolveConnectorName({ context: this.context, name });
   }
 
   /**
@@ -508,16 +535,33 @@ export class ActionsClient {
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
         let authMode: AuthMode | undefined;
+        let acl: CanonicalAcl | undefined;
+        const isInMemory = this.context.inMemoryConnectors.some(
+          ({ id }) => id === tokenOpts.connectorId
+        );
         try {
           const rawConnector = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
             'action',
             tokenOpts.connectorId
           );
           authMode = rawConnector.attributes.authMode;
+          acl = rawConnector.acl;
         } catch (err) {
+          // With object-level security, a connector the caller cannot see never hands out a token.
+          if (!isInMemory && getConnectorAccessControl(this.context)) {
+            throw err;
+          }
           this.context.logger.debug(
             `Failed to read authMode for connector ${tokenOpts.connectorId}: ${err.message}`
           );
+        }
+
+        if (!isInMemory) {
+          await ensureConnectorOperation(this.context, {
+            id: tokenOpts.connectorId,
+            acl,
+            operation: operationForAuthMode(authMode),
+          });
         }
 
         const profileUid = await this.context.getCurrentUserProfileId?.(this.context.request);
@@ -553,6 +597,26 @@ export class ActionsClient {
   }
 
   /**
+   * Throws unless the caller can start or end an OAuth flow on a stored connector. A per-user flow
+   * needs `use`; a shared flow changes credentials everyone uses, so it needs `edit`.
+   */
+  public async ensureOAuthAccess(id: string) {
+    if (this.context.inMemoryConnectors.some((connector) => connector.id === id)) {
+      return;
+    }
+
+    const { attributes, acl } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+      'action',
+      id
+    );
+    await ensureConnectorOperation(this.context, {
+      id,
+      acl,
+      operation: operationForAuthMode(attributes.authMode),
+    });
+  }
+
+  /**
    * Delete action
    */
   public async delete({ id }: { id: string }) {
@@ -584,14 +648,6 @@ export class ActionsClient {
       throw error;
     }
 
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.DELETE,
-        outcome: 'unknown',
-        savedObject: { type: 'action', id },
-      })
-    );
-
     let rawAction;
     try {
       rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
@@ -612,6 +668,19 @@ export class ActionsClient {
     const {
       attributes: { actionTypeId, config, authMode },
     } = rawAction;
+
+    // Checked before the audit event of the delete itself and before any side effect, such as token
+    // revocation. The final delete is bound to the authorized document, so a concurrent access change
+    // fails it with a conflict.
+    await ensureConnectorOperation(this.context, { id, acl: rawAction.acl, operation: 'delete' });
+
+    this.context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.DELETE,
+        outcome: 'unknown',
+        savedObject: { type: 'action', id },
+      })
+    );
 
     let actionType: ActionType | undefined;
     try {
@@ -729,7 +798,11 @@ export class ActionsClient {
         this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
       )
     );
-    return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
+    return this.context.bulkExecutionEnqueuer(
+      this.context.unsecuredSavedObjectsClient,
+      options,
+      (connectors) => ensureConnectorsOperation(this.context, { connectors, operation: 'use' })
+    );
   }
 
   public async listTypes({
@@ -753,6 +826,24 @@ export class ActionsClient {
 
   public isSystemAction(connectorId: string): boolean {
     return isSystemAction(this.context, connectorId);
+  }
+
+  /**
+   * Returns the stored connectors whose general access does not let everyone use them, including
+   * connectors the caller cannot view.
+   */
+  public async getRestrictedConnectorIds(ids: string[]): Promise<string[]> {
+    return getRestrictedConnectorIds({ context: this.context, ids });
+  }
+
+  /**
+   * Throws unless the request's credential can run every given stored connector.
+   */
+  public async ensureConnectorsUsable(
+    ids: string[],
+    { principal }: { principal?: Principal } = {}
+  ): Promise<void> {
+    return ensureConnectorsUsable({ context: this.context, ids, principal });
   }
 
   public async getGlobalExecutionLogWithAuth({
@@ -792,11 +883,15 @@ export class ActionsClient {
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
     const eventLogClient = await this.context.getEventLogClient();
+    const authFilter = await excludeHiddenConnectors(
+      { ...this.context, esClient: this.context.scopedClusterClient.asInternalUser },
+      { filter: authorizationTuple.filter, namespaces }
+    );
 
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
         'action',
-        authorizationTuple.filter,
+        authFilter,
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
@@ -854,11 +949,15 @@ export class ActionsClient {
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
     const eventLogClient = await this.context.getEventLogClient();
+    const authFilter = await excludeHiddenConnectors(
+      { ...this.context, esClient: this.context.scopedClusterClient.asInternalUser },
+      { filter: authorizationTuple.filter, namespaces }
+    );
 
     try {
       const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
         'action',
-        authorizationTuple.filter,
+        authFilter,
         {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),

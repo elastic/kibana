@@ -609,6 +609,9 @@ export class Server {
       }
     );
 
+    const typeRegistry = savedObjectsStart.getTypeRegistry();
+    this.security.setAccessPolicyProvider((type) => typeRegistry.getAccessPolicy(type));
+
     const userActivityStart = this.userActivity.start({
       typeRegistry: savedObjectsStart.getTypeRegistry(),
     });

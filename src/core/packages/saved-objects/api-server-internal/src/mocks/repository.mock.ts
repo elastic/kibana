@@ -39,6 +39,7 @@ const createRepositoryMock = () => {
     asScopedToNamespace: jest.fn().mockImplementation(createRepositoryMock),
     changeOwnership: jest.fn(),
     changeAccessMode: jest.fn(),
+    changeAcl: jest.fn(),
   };
 
   return mock;

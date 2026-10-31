@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreAccessControlService, KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { fromKueryExpression, nodeBuilder, type KueryNode } from '@kbn/es-query';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -18,7 +18,14 @@ import {
 export interface ConstructorOptions {
   request: KibanaRequest;
   authorization?: SecurityPluginSetup['authz'];
+  /** Object-level security. When enabled, recovery authority rides on every privilege check. */
+  accessControl?: CoreAccessControlService;
 }
+
+/**
+ * Privilege action that grants recovery authority over connectors, see platform object-level security.
+ */
+const RECOVERY_OPERATION = 'manage_access_control';
 
 const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
   execute: (authorization) => [
@@ -33,10 +40,12 @@ const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz'
 export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly accessControl?: CoreAccessControlService;
 
-  constructor({ request, authorization }: ConstructorOptions) {
+  constructor({ request, authorization, accessControl }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
+    this.accessControl = accessControl;
   }
 
   public async ensureAuthorized({
@@ -56,9 +65,33 @@ export class ActionsAuthorization {
         ? operationAlias[operation](authorization)
         : [authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, operation)];
 
-      const { hasAllRequested } = await checkPrivileges({
-        kibana: [...privileges, ...additionalPrivileges],
+      // Object-level security needs recovery authority only to decide between a forbidden operation and
+      // a missing connector. It rides on this request so that it never costs another one, and it does
+      // not affect whether the operation itself is authorized.
+      const recoveryAction = this.accessControl?.isEnabled()
+        ? authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, RECOVERY_OPERATION)
+        : undefined;
+      const response = await checkPrivileges({
+        kibana: [
+          ...privileges,
+          ...additionalPrivileges,
+          ...(recoveryAction ? [recoveryAction] : []),
+        ],
       });
+
+      let { hasAllRequested } = response;
+      const recovery = recoveryAction
+        ? response.privileges.kibana.find(({ privilege }) => privilege === recoveryAction)
+        : undefined;
+      if (recovery) {
+        hasAllRequested = response.privileges.kibana.every(
+          ({ privilege, authorized }) => privilege === recoveryAction || authorized
+        );
+        this.accessControl
+          ?.asScoped(this.request)
+          .primeRecovery(ACTION_SAVED_OBJECT_TYPE, [recovery.resource ?? '*'], recovery.authorized);
+      }
+
       if (!hasAllRequested) {
         throw Boom.forbidden(
           `Unauthorized to ${operation} ${actionTypeId ? `a "${actionTypeId}" action` : `actions`}`

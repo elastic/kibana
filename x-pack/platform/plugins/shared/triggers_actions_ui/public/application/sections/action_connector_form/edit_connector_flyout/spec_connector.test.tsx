@@ -190,10 +190,16 @@ describe('spec connector edit flyout Test tab', () => {
 
   it('shows error state on the Test tab when spec fetch fails and retries', async () => {
     const errorMessage = 'Failed to fetch spec';
-    appMockRenderer.coreStart.http.get = jest
+    const getSpec = jest
       .fn()
       .mockRejectedValueOnce(new Error(errorMessage))
       .mockResolvedValueOnce(mockSpecResponse(true));
+    // The flyout also loads the connector access policy; an empty response leaves access control off.
+    appMockRenderer.coreStart.http.get = jest.fn((path: string, options?: unknown) =>
+      path.startsWith('/internal/security/access_control/')
+        ? Promise.resolve({})
+        : getSpec(path, options)
+    ) as unknown as typeof appMockRenderer.coreStart.http.get;
 
     appMockRenderer.render(
       <EditConnectorFlyout
@@ -218,7 +224,7 @@ describe('spec connector edit flyout Test tab', () => {
     await userEvent.click(screen.getByTestId('connector-spec-load-retry'));
 
     expect(await screen.findByTestId('test-connector-form')).toBeInTheDocument();
-    expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledTimes(2);
+    expect(getSpec).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -245,6 +251,8 @@ describe('stack connector edit flyout — embedder path (no connector-types fetc
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
+    // The flyout loads the connector access policy; an empty response leaves access control off.
+    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({});
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
   });

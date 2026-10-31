@@ -1487,4 +1487,77 @@ describe('bulkExecute()', () => {
       ]
     `);
   });
+
+  describe('with object-level security', () => {
+    const acl = {
+      version: [1],
+      owner: { type: ['user'], id: ['u_owner'] },
+      general_access: ['none'],
+      entries: [],
+    };
+    const executeOptions = (id: string) => ({
+      id,
+      params: {},
+      spaceId: DEFAULT_SPACE_ID,
+      executionId: `execution-${id}`,
+      apiKey: null,
+      source: asHttpRequestExecutionSource(request),
+      actionTypeId: 'mock-action',
+    });
+
+    const createExecuteFn = () =>
+      createBulkExecutionEnqueuerFunction({
+        taskManager: mockTaskManager,
+        actionTypeRegistry: actionTypeRegistryMock.create(),
+        isESOCanEncrypt: true,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'in-memory',
+            actionTypeId: 'mock-action',
+            isPreconfigured: true,
+            name: 'in-memory',
+          }),
+        ],
+        configurationUtilities: mockActionsConfig,
+        logger: mockLogger,
+      });
+
+    beforeEach(() => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'stored',
+            type: 'action',
+            attributes: { actionTypeId: 'mock-action' },
+            references: [],
+            acl,
+          },
+        ],
+      });
+    });
+
+    test('checks the stored connectors with their ACL before anything is queued', async () => {
+      const ensureConnectorsUsable = jest.fn();
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+      await createExecuteFn()(
+        savedObjectsClient,
+        [executeOptions('stored'), executeOptions('in-memory')],
+        ensureConnectorsUsable
+      );
+
+      expect(ensureConnectorsUsable).toHaveBeenCalledWith([{ id: 'stored', acl }]);
+    });
+
+    test('queues nothing when the caller cannot run a connector', async () => {
+      const ensureConnectorsUsable = jest.fn().mockRejectedValue(new Error('Forbidden'));
+
+      await expect(
+        createExecuteFn()(savedObjectsClient, [executeOptions('stored')], ensureConnectorsUsable)
+      ).rejects.toThrow('Forbidden');
+
+      expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(mockTaskManager.bulkSchedule).not.toHaveBeenCalled();
+    });
+  });
 });

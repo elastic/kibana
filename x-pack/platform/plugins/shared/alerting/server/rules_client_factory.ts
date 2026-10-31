@@ -529,6 +529,13 @@ export class RulesClientFactory {
         }
         return actions.getActionsClientWithRequest(request);
       },
+      async getActionsClientWithRequest(otherRequest: KibanaRequest) {
+        if (isExplicitSpaceOverride) {
+          return actions.getActionsClientWithRequestInSpace(otherRequest, spaceId);
+        }
+        return actions.getActionsClientWithRequest(otherRequest);
+      },
+      accessControl: securityService.accessControl,
       async getEventLogClient() {
         if (isExplicitSpaceOverride) {
           return eventLog.getClientWithRequestInSpace(request, spaceId);

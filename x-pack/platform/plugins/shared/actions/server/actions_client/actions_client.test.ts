@@ -43,6 +43,7 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
@@ -3455,7 +3456,11 @@ describe('bulkEnqueueExecution()', () => {
       `undefined`
     );
 
-    expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
+    expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(
+      unsecuredSavedObjectsClient,
+      opts,
+      expect.any(Function)
+    );
   });
 });
 
@@ -3839,5 +3844,155 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       executionNamespaces,
       true
     );
+  });
+});
+
+describe('object-level security', () => {
+  const PRIVATE_ACL = {
+    version: [1],
+    owner: { type: ['user'], id: ['u_owner'] },
+    general_access: ['none'],
+    entries: [],
+  };
+  const scopedAccessControl = securityServiceMock.createScopedAccessControl();
+
+  beforeEach(() => {
+    securityService.accessControl.asScoped.mockReturnValue(scopedAccessControl);
+    scopedAccessControl.isEnabled.mockReturnValue(true);
+    actionTypeRegistry.register(getConnectorType({ id: 'my-ols-type', preSaveHook }));
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: '1',
+      type: 'action',
+      attributes: { actionTypeId: 'my-ols-type', isMissingSecrets: false, config: {}, secrets: {} },
+      references: [],
+      acl: PRIVATE_ACL,
+    });
+  });
+
+  const deny = (status: 'forbidden' | 'not_found') =>
+    scopedAccessControl.authorize.mockResolvedValue(
+      new Map([['1', status === 'forbidden' ? { status, operation: 'edit' } : { status }]])
+    );
+
+  test('checks delete before revoking tokens, deleting, or auditing the delete', async () => {
+    deny('forbidden');
+
+    await expect(actionsClient.delete({ id: '1' })).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+
+    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: 'delete', objects: [{ id: '1', acl: PRIVATE_ACL }] })
+    );
+    expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    expect(auditLogger.log).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: expect.objectContaining({ outcome: 'unknown' }) })
+    );
+  });
+
+  test('checks edit before the pre-save hook and the write', async () => {
+    deny('forbidden');
+
+    await expect(
+      actionsClient.update({ id: '1', action: { name: 'renamed', config: {}, secrets: {} } })
+    ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: 'edit' })
+    );
+    expect(preSaveHook).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  test('checks use before running a connector over HTTP', async () => {
+    deny('forbidden');
+
+    await expect(actionsClient.execute({ actionId: '1', params: {} })).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(actionExecutor.execute).not.toHaveBeenCalled();
+  });
+
+  test('reports a connector the caller cannot view as missing instead of running it', async () => {
+    unsecuredSavedObjectsClient.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('action', '1')
+    );
+
+    await expect(actionsClient.execute({ actionId: '1', params: {} })).rejects.toMatchObject({
+      output: { statusCode: 404 },
+    });
+    expect(actionExecutor.execute).not.toHaveBeenCalled();
+  });
+
+  test('checks feature privileges before reporting a missing connector', async () => {
+    unsecuredSavedObjectsClient.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('action', '1')
+    );
+    authorization.ensureAuthorized.mockRejectedValue(
+      Boom.forbidden('Unauthorized to execute actions')
+    );
+
+    await expect(actionsClient.execute({ actionId: '1', params: {} })).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(actionExecutor.execute).not.toHaveBeenCalled();
+  });
+
+  test('checks use for the connectors it enqueues', async () => {
+    deny('forbidden');
+    await actionsClient.bulkEnqueueExecution([]);
+    const [, , ensureConnectorsUsable] = bulkExecutionEnqueuer.mock.calls[0];
+
+    await expect(ensureConnectorsUsable?.([{ id: '1', acl: PRIVATE_ACL }])).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: 'use', objects: [{ id: '1', acl: PRIVATE_ACL }] })
+    );
+  });
+
+  test('validates requested access before the pre-save hook, and creates in one request', async () => {
+    const accessControl = { general_access: 'none' as const, entries: [] };
+    scopedAccessControl.validateInitialAcl.mockRejectedValueOnce(
+      Boom.badRequest('Access cannot be restricted')
+    );
+
+    await expect(
+      actionsClient.create({
+        action: { actionTypeId: 'my-ols-type', name: 'p', config: {}, secrets: {}, accessControl },
+      })
+    ).rejects.toMatchObject({ output: { statusCode: 400 } });
+    expect(preSaveHook).not.toHaveBeenCalled();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'new',
+      type: 'action',
+      attributes: { actionTypeId: 'my-ols-type', name: 'p', isMissingSecrets: false, config: {} },
+      references: [],
+    });
+    await actionsClient.create({
+      action: { actionTypeId: 'my-ols-type', name: 'p', config: {}, secrets: {}, accessControl },
+    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'action',
+      expect.anything(),
+      expect.objectContaining({ initialAcl: accessControl })
+    );
+  });
+
+  test('changes nothing while object-level security is disabled', async () => {
+    scopedAccessControl.isEnabled.mockReturnValue(false);
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
+    } as never);
+
+    await actionsClient.delete({ id: '1' });
+
+    expect(scopedAccessControl.authorize).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalled();
   });
 });

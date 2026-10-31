@@ -214,7 +214,7 @@ export const changeObjectAccessControl = async (
   const bulkGetDocs = validObjects.map<estypes.MgetOperation>((x) => ({
     _id: serializer.generateRawId(undefined, x.value.type, x.value.id),
     _index: getIndexForType(x.value.type),
-    _source: ['type', 'namespaces', 'accessControl'],
+    _source: ['type', 'namespaces', 'accessControl', 'acl'],
   }));
 
   const bulkGetResponse = await client.mget<SavedObjectsRawDocSource>(

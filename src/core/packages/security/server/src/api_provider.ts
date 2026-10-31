@@ -16,6 +16,7 @@ import type {
   ServiceAccountWorkloadRef,
 } from '@kbn/core-security-common';
 
+import type { CoreAccessControlService } from './access_control';
 import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
 import type { CoreServiceAccountsService } from './service_accounts';
@@ -30,6 +31,7 @@ export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
   audit: AuditServiceContract;
   serviceAccounts: ServiceAccountsServiceContract;
+  accessControl: AccessControlServiceContract;
   /**
    * Binds a `profile_uid` to a fake request. The delegate owns the storage
    * (typically a WeakMap) consulted by its own `authc.getCurrentUser`. Core
@@ -52,6 +54,8 @@ export interface CoreSecurityDelegateContract {
 export type AuthenticationServiceContract = CoreAuthenticationService;
 
 export type AuditServiceContract = CoreAuditService;
+
+export type AccessControlServiceContract = CoreAccessControlService;
 
 /**
  * The service accounts contract that the security provider must implement: the plugin-agnostic

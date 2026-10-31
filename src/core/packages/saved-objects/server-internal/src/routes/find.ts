@@ -24,7 +24,7 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
+import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes, stripAcl } from './utils';
 import { logWarnOnExternalRequest } from './utils';
 
 interface RouteDependencies {
@@ -258,7 +258,7 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
         migrationVersionCompatibility: 'compatible',
       });
 
-      return response.ok({ body: result });
+      return response.ok({ body: stripAcl(result) });
     })
   );
 };

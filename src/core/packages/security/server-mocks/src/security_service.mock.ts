@@ -8,6 +8,7 @@
  */
 
 import type {
+  CoreScopedAccessControl,
   CoreSecurityDelegateHandle,
   CoreServiceAccountsService,
   ResolvedServiceAccountWorkload,
@@ -65,6 +66,23 @@ const createSetupMock = () => {
   return mock;
 };
 
+// By default object-level security is disabled and allows everything, as before platform OLS.
+const createScopedAccessControlMock = (): jest.Mocked<CoreScopedAccessControl> => ({
+  isEnabled: jest.fn().mockReturnValue(false),
+  getPrincipal: jest.fn().mockResolvedValue(undefined),
+  evaluate: jest.fn(),
+  authorize: jest.fn().mockResolvedValue(new Map()),
+  filterVisible: jest.fn().mockImplementation(async ({ objects }) => objects),
+  getReadFilter: jest.fn().mockResolvedValue(undefined),
+  validateInitialAcl: jest.fn().mockResolvedValue(undefined),
+  primeRecovery: jest.fn(),
+});
+
+const createAccessControlMock = () => ({
+  isEnabled: jest.fn().mockReturnValue(false),
+  asScoped: jest.fn().mockImplementation(createScopedAccessControlMock),
+});
+
 export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart, 'audit'>> & {
   audit: MockedAuditService;
 };
@@ -79,6 +97,7 @@ const createStartMock = (): SecurityStartMock => {
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
+    accessControl: createAccessControlMock(),
   });
 
   return mock;
@@ -121,6 +140,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     serviceAccounts: lazyObject({
       asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
     }),
+    accessControl: createAccessControlMock(),
   });
 
   return mock;
@@ -130,6 +150,7 @@ const createServiceMock = () => {
   const mock = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
+    setAccessPolicyProvider: jest.fn(),
     stop: jest.fn(),
   });
 
@@ -169,6 +190,8 @@ export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
   createServiceAccounts: createServiceAccountsStartMock,
+  createAccessControl: createAccessControlMock,
+  createScopedAccessControl: createScopedAccessControlMock,
   createDelegateHandle: createDelegateHandleMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,

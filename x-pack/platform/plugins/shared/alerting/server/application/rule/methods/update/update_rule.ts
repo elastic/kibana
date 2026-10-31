@@ -36,6 +36,7 @@ import {
   updateMetaAttributes,
   bulkMigrateLegacyActions,
   migrateLegacyLastRunOutcomeMsg,
+  validateNewRuleKeyConnectorAccess,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -335,6 +336,12 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
+  });
+
+  await validateNewRuleKeyConnectorAccess(context, {
+    spaceId: context.spaceId,
+    connectorIds: updateRuleData.actions.map(({ id }) => id),
+    keySet: apiKeyAttributes,
   });
 
   const notifyWhen = getRuleNotifyWhenType(

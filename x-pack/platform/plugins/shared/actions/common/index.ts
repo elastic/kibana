@@ -128,3 +128,4 @@ export {
   OAUTH_CALLBACK_QUERY_PARAMS,
   OAUTH_BROADCAST_CHANNEL_NAME,
 } from './oauth_callback';
+export { CONNECTOR_ACCESS_POLICY } from './access_policy';

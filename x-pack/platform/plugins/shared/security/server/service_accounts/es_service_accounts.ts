@@ -515,6 +515,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * tokens, or access tokens it was issued. Those are cleaned up, so a retry can finish what an
    * earlier delete, or a forced one, left behind.
    */
+  async exists(id: string) {
+    return (await this.credentialStore.findExisting([id])).has(id);
+  }
+
   async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(

@@ -14,7 +14,13 @@ import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RuleDomain } from '../../types';
@@ -5199,5 +5205,79 @@ describe('update()', () => {
       }),
       expect.anything()
     );
+  });
+
+  describe('rule key connector access', () => {
+    const NEW_API_KEY = Buffer.from('new:key').toString('base64');
+    const updateData = {
+      schedule: { interval: '1m' },
+      name: 'abc',
+      tags: ['foo'],
+      params: {},
+      throttle: null,
+      notifyWhen: 'onActiveAlert' as const,
+      actions: [{ group: 'default', id: '1', params: { foo: true } }],
+    };
+
+    beforeEach(() => {
+      rulesClientParams.createAPIKey.mockResolvedValue({
+        apiKeysEnabled: true,
+        result: { id: 'new', name: 'new', api_key: 'key' },
+      });
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? '1',
+        type,
+        attributes,
+        references: options?.references ?? [],
+      }));
+    });
+
+    it('makes no extra call when the connectors are unrestricted', async () => {
+      const { options, getActionsClientWithRequest } = await setupRuleKeyConnectorAccess(
+        rulesClientParams,
+        []
+      );
+
+      await new RulesClient(options).update({ id: '1', data: updateData });
+
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('validates the new key as the caller before the rule is written', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+
+      await new RulesClient(options).update({ id: '1', data: updateData });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.create.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('refuses the new key, invalidates it, and keeps the previous key', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      refuseConnector(keyActionsClient, '1');
+
+      const error = await new RulesClient(options)
+        .update({ id: '1', data: updateData })
+        .catch((e) => e);
+
+      expect(error.output.statusCode).toBe(403);
+      expect(error.message).toBe(`The rule's API key cannot use connector "1"`);
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+        { apiKeys: [NEW_API_KEY] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
   });
 });

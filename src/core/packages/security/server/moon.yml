@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/security/server
 dependsOn:
+  - '@kbn/access-control'
   - '@kbn/core-security-common'
   - '@kbn/core-http-server'
   - '@kbn/logging'

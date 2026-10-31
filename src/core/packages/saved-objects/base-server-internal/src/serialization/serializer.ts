@@ -14,6 +14,7 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
+import { normalizeAclSource, toStoredAcl } from '@kbn/access-control';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
@@ -104,6 +105,8 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
         : undefined,
     } = _source;
 
+    const acl = normalizeAclSource(_source);
+
     const version =
       _seq_no != null || _primary_term != null
         ? encodeVersion(_seq_no!, _primary_term!)
@@ -134,6 +137,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
         _source.accessControl && {
           accessControl: _source.accessControl,
         }),
+      ...(acl && { acl }),
     };
   }
 
@@ -161,6 +165,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       typeMigrationVersion,
       managed,
       accessControl,
+      acl,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -178,6 +183,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(createdAt && { created_at: createdAt }),
       ...(createdBy && { created_by: createdBy }),
       ...(accessControl && { accessControl }),
+      ...(acl && { acl: toStoredAcl(acl) }),
     };
     return {
       _id: this.generateRawId(namespace, type, id),

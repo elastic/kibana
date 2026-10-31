@@ -33,6 +33,7 @@ import {
   setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+import { apiHelperMocks } from '../../../mocks/api_helpers.mocks';
 import type { WithAuditName } from '@kbn/core-saved-objects-server';
 import {
   type ISavedObjectsSecurityExtension,
@@ -92,6 +93,7 @@ describe('collectMultiNamespaceReferences', () => {
       getIndexForType: (type: string) => `index-for-${type}`,
       createPointInTimeFinder: jest.fn() as CreatePointInTimeFinderFn,
       securityExtension,
+      aclHelper: apiHelperMocks.create().acl,
       objects,
       options,
     };

@@ -8,6 +8,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
+import { ACL_FIELD } from '@kbn/access-control';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRawDocSource, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
@@ -21,8 +22,10 @@ import {
   isRight,
   isLeft,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { isMgetDoc, rawDocExistsInNamespace } from './utils';
 import type { ApiExecutionContext } from './types';
+import type { AclHelperObject } from './helpers';
 
 export interface PerformCheckConflictsParams<T = unknown> {
   objects: SavedObjectsCheckConflictsObject[];
@@ -33,7 +36,7 @@ export const performCheckConflicts = async <T>(
   { objects, options }: PerformCheckConflictsParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsCheckConflictsResponse> => {
-  const { common: commonHelper } = helpers;
+  const { common: commonHelper, acl: aclHelper } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -74,7 +77,9 @@ export const performCheckConflicts = async <T>(
   const bulkGetDocs = validObjects.map(({ value: { type, id } }) => ({
     _id: serializer.generateRawId(namespace, type, id),
     _index: commonHelper.getIndexForType(type),
-    _source: { includes: ['type', 'namespaces'] },
+    _source: {
+      includes: ['type', 'namespaces', ...(aclHelper.isEnforced(type) ? [ACL_FIELD] : [])],
+    },
   }));
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
@@ -93,6 +98,25 @@ export const performCheckConflicts = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
 
+  // An object the caller cannot view is not a conflict: the create that follows reports it as
+  // missing, the same as for an ID that is not used.
+  const aclObjects: AclHelperObject[] = [];
+  for (const { value } of validObjects) {
+    const doc = bulkGetResponse?.body.docs[value.esRequestIndex];
+    if (isMgetDoc(doc) && doc.found && doc._source) {
+      const [objectNamespace] = doc._source.namespaces ?? [];
+      aclObjects.push({
+        type: value.type,
+        id: value.id,
+        source: doc._source,
+        namespace: objectNamespace
+          ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
+          : namespace,
+      });
+    }
+  }
+  const aclDecisions = await aclHelper.authorize('view', namespace, aclObjects);
+
   const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
   expectedBulkGetResults.forEach((expectedResult) => {
     // Unsupported type
@@ -103,7 +127,7 @@ export const performCheckConflicts = async <T>(
 
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
-    if (isMgetDoc(doc) && doc.found) {
+    if (isMgetDoc(doc) && doc.found && !aclHelper.getError(aclDecisions, { type, id })) {
       errors.push({
         id,
         type,

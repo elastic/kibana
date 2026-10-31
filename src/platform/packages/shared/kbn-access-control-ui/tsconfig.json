@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@kbn/ambient-ui-types"],
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/access-control",
+    "@kbn/i18n",
+    "@kbn/user-profile-components",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks",
+  ]
+}

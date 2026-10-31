@@ -11,6 +11,7 @@
     "common/**/*"
   ],
   "kbn_references": [
+    "@kbn/access-control",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/human-readable-id",
@@ -65,6 +66,7 @@
     "@kbn/core-security-common",
     "@kbn/core-security-server",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/core-security-server-mocks",
   ],
   "exclude": [
     "target/**/*",

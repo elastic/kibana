@@ -24,7 +24,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
-import { getAllUnsecured } from './get_all';
+import { getAllUnsecured, getAllUnsecuredWithAcl } from './get_all';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { createMockInMemoryConnector } from '../../mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -2241,6 +2241,84 @@ describe('getAllUnsecured()', () => {
 
     result.forEach((connector) => {
       expect(connector.authMode).toBeDefined();
+    });
+  });
+});
+
+describe('getAllUnsecuredWithAcl()', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+  });
+
+  test('returns each connector with the ACL of its saved object, and never puts it on the connector', async () => {
+    const acl = {
+      version: [1],
+      owner: { type: ['user'], id: ['u_owner'] },
+      general_access: ['none'],
+      entries: [],
+    };
+    internalSavedObjectsRepository.find.mockResolvedValueOnce({
+      total: 2,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [
+        {
+          id: 'private',
+          type: 'action',
+          attributes: { name: 'b', actionTypeId: '.slack', isMissingSecrets: false, config: {} },
+          acl,
+          score: 1,
+          references: [],
+        },
+        {
+          id: 'public',
+          type: 'action',
+          attributes: { name: 'a', actionTypeId: '.slack', isMissingSecrets: false, config: {} },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: { hits: [] },
+      aggregations: {
+        private: { doc_count: 0 },
+        public: { doc_count: 0 },
+        testPreconfigured: { doc_count: 0 },
+      },
+    });
+
+    const result = await getAllUnsecuredWithAcl({
+      esClient: scopedClusterClient.asInternalUser,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          isPreconfigured: true,
+          name: 'c',
+        }),
+      ],
+      internalSavedObjectsRepository,
+      kibanaIndices,
+      logger,
+      spaceId: 'custom',
+      connectorTypeRegistry: actionTypeRegistry,
+    });
+
+    expect(result.map(({ connector, acl: connectorAcl }) => [connector.id, connectorAcl])).toEqual([
+      ['public', undefined],
+      ['private', acl],
+      ['testPreconfigured', undefined],
+    ]);
+    expect(result.some(({ connector }) => 'acl' in connector)).toBe(false);
+    expect(internalSavedObjectsRepository.find).toHaveBeenCalledWith({
+      perPage: 10000,
+      type: 'action',
+      namespaces: ['custom'],
     });
   });
 });

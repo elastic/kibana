@@ -35,6 +35,11 @@ export const performUpdateObjectsSpaces = async <T>(
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObjectsUpdateObjectsSpacesResponse> => {
+  // Types with an access policy are `multiple-isolated`: they live in exactly one space.
+  helpers.acl.rejectUnsupported(
+    objects.map(({ type }) => type),
+    'updateObjectsSpaces'
+  );
   const { common: commonHelper } = helpers;
   const { securityExtension } = extensions;
 

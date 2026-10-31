@@ -35,6 +35,7 @@ export const serviceAccountsServiceMock = {
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn().mockReturnValue(null),
       delete: jest.fn().mockResolvedValue({ warnings: [] }),
+      exists: jest.fn().mockResolvedValue(false),
     },
     management: {
       listWorkloads: jest.fn().mockResolvedValue([]),

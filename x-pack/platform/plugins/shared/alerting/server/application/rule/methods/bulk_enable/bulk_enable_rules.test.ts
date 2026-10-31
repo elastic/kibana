@@ -10,7 +10,14 @@ import { getRulesClientMockParams } from '../../../../test_utils';
 import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '../../../../types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
+import { generateAPIKeyName } from '../../../../rules_client/common/generate_api_key_name';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -873,6 +880,128 @@ describe('bulkEnableRules', () => {
       rules: [returnedRuleForBulkOps1],
       total: 2,
       taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  describe('rule key connector access', () => {
+    const withConnector = (
+      rule: typeof disabledRule1,
+      {
+        name,
+        connectorId,
+        apiKey = null,
+      }: { name: string; connectorId: string; apiKey?: string | null }
+    ) =>
+      ({
+        ...rule,
+        attributes: { ...rule.attributes, name, apiKey },
+        references: [{ type: 'action', id: connectorId, name: 'action_0' }],
+      } as unknown as SavedObject<RawRule>);
+    const newKeyFor = (ruleName: string) =>
+      Buffer.from(`${generateAPIKeyName('fakeType', ruleName)}:abc`).toString('base64');
+
+    const restrictedRule = withConnector(disabledRule1, {
+      name: 'restricted-rule',
+      connectorId: 'restricted',
+    });
+    const publicRule = withConnector(disabledRule2, { name: 'public-rule', connectorId: 'public' });
+
+    const setup = async () => {
+      const access = await setupRuleKeyConnectorAccess(rulesClientParams, []);
+      access.actionsClient.getRestrictedConnectorIds.mockImplementation(async (ids) =>
+        ids.filter((id) => id === 'restricted')
+      );
+      return access;
+    };
+
+    beforeEach(() => {
+      rulesClientParams.createAPIKey.mockImplementation(async (name: string) => ({
+        apiKeysEnabled: true,
+        result: { id: name, name, api_key: 'abc' },
+      }));
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+    });
+
+    test('makes no extra call when every connector is unrestricted', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [publicRule] });
+      mockUnsecuredSavedObjectFind(1);
+      const { options, getActionsClientWithRequest } = await setup();
+
+      await new RulesClient(options).bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(actionsClient.getRestrictedConnectorIds).toHaveBeenCalledWith(['public']);
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+    });
+
+    test('validates new keys as the caller before the rules are written', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [restrictedRule, publicRule] });
+      const { options, keyActionsClient } = await setup();
+
+      const result = await new RulesClient(options).bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(result.errors).toEqual([]);
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledTimes(1);
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['restricted'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.bulkCreate.mock.invocationCallOrder[0]
+      );
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+    });
+
+    test('refuses a rule whose new key cannot use its connector and keeps the others', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [restrictedRule, publicRule] });
+      const { options, keyActionsClient } = await setup();
+      refuseConnector(keyActionsClient, 'restricted');
+
+      const result = await new RulesClient(options).bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(result.errors).toEqual([
+        {
+          message: `The rule's API key cannot use connector "restricted"`,
+          rule: { id: restrictedRule.id, name: 'restricted-rule' },
+        },
+      ]);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0].map(({ id }) => id)).toEqual([
+        publicRule.id,
+      ]);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [newKeyFor('restricted-rule')] },
+        expect.anything(),
+        unsecuredSavedObjectsClient
+      );
+    });
+
+    test('refuses a key in use without invalidating it', async () => {
+      const retainedKey = Buffer.from('123:abc').toString('base64');
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          withConnector(disabledRule1, {
+            name: 'restricted-rule',
+            connectorId: 'restricted',
+            apiKey: retainedKey,
+          }),
+          publicRule,
+        ],
+      });
+      const { options, keyActionsClient } = await setup();
+      refuseConnector(keyActionsClient, 'restricted');
+
+      const result = await new RulesClient(options).bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['restricted'], {
+        principal: undefined,
+      });
+      expect(result.errors).toHaveLength(1);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0].map(({ id }) => id)).toEqual([
+        publicRule.id,
+      ]);
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
 

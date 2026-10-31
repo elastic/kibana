@@ -745,6 +745,8 @@ packages:
   - 'src/platform/packages/shared/home/sample_data_card'
   - 'src/platform/packages/shared/home/sample_data_tab'
   - 'src/platform/packages/shared/home/sample_data_types'
+  - 'src/platform/packages/shared/kbn-access-control'
+  - 'src/platform/packages/shared/kbn-access-control-ui'
   - 'src/platform/packages/shared/kbn-actions-types'
   - 'src/platform/packages/shared/kbn-actions-utils'
   - 'src/platform/packages/shared/kbn-aiops-utils'
