@@ -1,5 +1,5 @@
 {
-  "sha1": "d20643699fde7ffb0d8196a806ecea92909b8151",
+  "sha1": "91a7c6505fe247ab0c7f46b2c144ab39eada168a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -137,14 +137,14 @@
     {
       "id": "402fcd63f7942bd-32566624ccc15f6",
       "title": "GettingStarted creates a basic monitor from getting started page",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/getting_started.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 5
       }
     },
