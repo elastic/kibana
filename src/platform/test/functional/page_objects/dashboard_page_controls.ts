@@ -464,26 +464,50 @@ export class DashboardPageControls extends FtrService {
   public async optionsListPopoverGetAvailableOptions() {
     this.log.debug(`getting available options from options list`);
     await this.optionsListPopoverWaitForLoading();
-    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     const optionsCount = await this.optionsListPopoverGetAvailableOptionsCount();
 
-    const selectableListItems = await availableOptions.findByClassName('euiSelectableList__list');
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
-      await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
+      const [suggestion, docCount] = await this.retry.try(async () => {
+        const availableOptions = await this.testSubjects.find(
+          `optionsList-control-available-options`
+        );
+        const selectableListItems = await availableOptions.findByClassName(
+          'euiSelectableList__list'
+        );
+        await this.browser.execute((element) => {
+          (element as unknown as HTMLElement).dispatchEvent(
+            new KeyboardEvent('keydown', {
+              key: 'ArrowDown',
+              code: 'ArrowDown',
+              bubbles: true,
+              cancelable: true,
+            })
+          );
+        }, selectableListItems);
 
-      const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
-      const activeDescendantId = await list.getAttribute('aria-activedescendant');
-
-      if (activeDescendantId) {
-        const currentOption = await selectableListItems.findByCssSelector(`#${activeDescendantId}`);
-        const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
-        if (suggestion !== 'Exists') {
-          suggestions[suggestion] = Number(docCount);
+        const refreshedAvailableOptions = await this.testSubjects.find(
+          `optionsList-control-available-options`
+        );
+        const refreshedSelectableListItems = await refreshedAvailableOptions.findByClassName(
+          'euiSelectableList__list'
+        );
+        const list = await refreshedSelectableListItems.findByCssSelector(`ul[role="listbox"]`);
+        const activeDescendantId = await list.getAttribute('aria-activedescendant');
+        if (!activeDescendantId) {
+          throw new Error('options list did not set an active option');
         }
+        const currentOption = await refreshedSelectableListItems.findByCssSelector(
+          `#${activeDescendantId}`
+        );
+        return (await currentOption.getVisibleText()).split('\n');
+      });
+      if (suggestion !== 'Exists') {
+        suggestions[suggestion] = Number(docCount);
       }
     }
 
+    const availableOptions = await this.testSubjects.find(`optionsList-control-available-options`);
     const invalidSelectionElements = await availableOptions.findAllByClassName(
       'optionsList__selectionInvalid'
     );
@@ -534,8 +558,16 @@ export class DashboardPageControls extends FtrService {
       // Type into the search input element itself, not whatever happens to hold focus,
       // so a missed focus can't drop the search text on the wrong element.
       const input = await this.testSubjects.find('optionsList-control-search-input');
-      await input.clearValue();
+      await input.clearValueWithKeyboard();
       await input.type(search, { charByChar: true });
+      const currentValue = await (
+        await this.testSubjects.find('optionsList-control-search-input')
+      ).getAttribute('value');
+      if (currentValue !== search) {
+        throw new Error(
+          `Options list search input contained '${currentValue}' instead of '${search}'`
+        );
+      }
     });
     await this.optionsListPopoverWaitForLoading();
   }

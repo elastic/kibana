@@ -491,8 +491,8 @@ export function MachineLearningCommonUIProvider({
         await testSubjects.setValue('optionsListFilterInput', value);
         await testSubjects.click(`optionsListControlSelection-${value}`);
       });
-      // The control closes its own popover on selection; wait for the panel to go so it can't
-      // overlay subsequent controls (e.g. the wizard "Next" button).
+      // Selecting an option closes the popover. Wait for that state change instead of pressing
+      // Escape, which can reach and close the next popover after this one has already disappeared.
       await testSubjects.missingOrFail('optionsListControlAvailableOptions', { timeout: 5000 });
     },
 
