@@ -13,6 +13,10 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 
 import { dataService } from '../../services/kibana_services';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
+import {
+  forgetDashboardSearchSession,
+  initializeReplaySearchSession,
+} from './replay_search_session';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
@@ -27,6 +31,7 @@ export function initializeSearchSessionManager(
   let stopSearchSessionIntegration: (() => void) | undefined;
   let requestSearchSessionId: (() => Promise<string | undefined>) | undefined;
   if (searchSessionSettings) {
+    const replaySearchSession = initializeReplaySearchSession(dashboardApi);
     stopSearchSessionIntegration = startDashboardSearchSessionIntegration(
       {
         ...dashboardApi,
@@ -35,7 +40,8 @@ export function initializeSearchSessionManager(
       dashboardInternalApi,
       searchSessionSettings,
       (searchSessionId: string) => searchSessionId$.next(searchSessionId),
-      searchSessionGenerationInProgress$
+      searchSessionGenerationInProgress$,
+      replaySearchSession
     );
 
     const { sessionIdToRestore } = searchSessionSettings;
@@ -48,14 +54,15 @@ export function initializeSearchSessionManager(
     });
     if (sessionIdToRestore) {
       dataService.search.session.restore(sessionIdToRestore);
+      forgetDashboardSearchSession(dashboardApi.savedObjectId$.value);
     }
     const existingSession = dataService.search.session.getSessionId();
 
     const initialSearchSessionId =
       sessionIdToRestore ??
       (existingSession && incomingEmbeddables?.length
-        ? existingSession
-        : dataService.search.session.start());
+        ? replaySearchSession.registerContinuedSearchSession(existingSession)
+        : replaySearchSession.getInitialSearchSessionId());
     searchSessionId$.next(initialSearchSessionId);
 
     // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID

@@ -297,4 +297,17 @@ describe('kibanaContextFn', () => {
     expect(filters!.length).toBe(1);
     expect(filters![0]).toBe(filter2);
   });
+
+  it('keeps the now of the input context', async () => {
+    const { fn } = kibanaContextFn;
+    const input: KibanaContext = {
+      type: 'kibana_context',
+      now: Date.parse('2026-01-02T12:00:00.000Z'),
+      timeRange: { from: 'now-15m', to: 'now' },
+    };
+
+    const { now } = await fn(input, emptyArgs, createExecutionContextMock());
+
+    expect(now).toBe(input.now);
+  });
 });
