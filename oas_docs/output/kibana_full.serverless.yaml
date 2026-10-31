@@ -173925,6 +173925,45 @@ components:
     Kibana_HTTP_APIs_new_connector:
       additionalProperties: false
       properties:
+        access_control:
+          additionalProperties: false
+          description: Initial access to the connector. The creator becomes its owner. Only valid when object-level access control is enabled.
+          type: object
+          properties:
+            entries:
+              default: []
+              items:
+                additionalProperties: false
+                type: object
+                properties:
+                  access:
+                    enum:
+                      - use
+                    type: string
+                  id:
+                    maxLength: 1024
+                    minLength: 1
+                    type: string
+                  type:
+                    enum:
+                      - user
+                      - service_account
+                    type: string
+                required:
+                  - type
+                  - id
+                  - access
+              maxItems: 100
+              type: array
+            general_access:
+              description: 'What everyone else in the space can do: nothing, run the connector, or also edit it.'
+              enum:
+                - none
+                - use
+                - edit
+              type: string
+          required:
+            - general_access
         connector_type_id:
           description: The type of connector.
           maxLength: 64
