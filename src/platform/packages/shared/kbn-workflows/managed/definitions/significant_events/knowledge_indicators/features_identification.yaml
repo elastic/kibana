@@ -74,6 +74,7 @@ triggers:
         description: "Fraction (0–1) of sample allocated to diverse (unfiltered) documents."
       - name: maxExcludedFeaturesInPrompt
         type: number
+        default: 10
         description: "Maximum number of excluded KI features sent in the LLM prompt."
       - name: maxEntityFilters
         type: number

@@ -179,22 +179,24 @@ const identifyInferredFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      connectorId: z.string().max(MAX_ID_LENGTH).optional(),
-      runId: z.string().max(MAX_ID_LENGTH).optional(),
-      iteration: z.number().optional(),
-      documents: inferenceDocumentsSchema,
-      samplingTelemetry: z.object({
-        totalFilters: z.number().int().min(0),
-        filtersCapped: z.boolean(),
-        hasFilteredDocuments: z.boolean(),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        connectorId: z.string().max(MAX_ID_LENGTH).optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
+        iteration: z.number().optional(),
+        documents: inferenceDocumentsSchema,
+        samplingTelemetry: z.object({
+          totalFilters: z.number().int().min(0),
+          filtersCapped: z.boolean(),
+          hasFilteredDocuments: z.boolean(),
+        }),
+        maxExcludedFeaturesInPrompt: z.number().int().min(0).max(50),
+        maxPreviouslyIdentifiedFeatures: z.number().optional(),
       }),
-      maxExcludedFeaturesInPrompt: z.number().optional(),
-      maxPreviouslyIdentifiedFeatures: z.number().optional(),
-    }),
-  }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -206,8 +208,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, sourcesClient, inferenceClient, tuningConfig, licensing } =
-      scopedClients;
+    const { scopedClusterClient, sourcesClient, inferenceClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -221,7 +222,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       iteration,
       documents,
       samplingTelemetry,
-      maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
+      maxExcludedFeaturesInPrompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
@@ -267,7 +268,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         hasFilteredDocuments,
         iteration,
         tuning: {
-          max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
+          maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
