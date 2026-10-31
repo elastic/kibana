@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { RemovePanelActionApi } from './remove_panel_action';
 import { RemovePanelAction } from './remove_panel_action';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
+import { usageCollection } from '../../kibana_services';
 
 describe('Remove panel action', () => {
   let action: RemovePanelAction;
@@ -65,6 +66,22 @@ describe('Remove panel action', () => {
     it('calls the parent removePanel method on execute', async () => {
       action.execute(context);
       expect(context.embeddable.parentApi.removePanel).toHaveBeenCalled();
+    });
+
+    it('reports a panel_remove counter', async () => {
+      jest.mocked(usageCollection.reportUiCounter).mockClear();
+      await action.execute({
+        embeddable: {
+          ...context.embeddable,
+          type: 'lens',
+          parentApi: { ...context.embeddable.parentApi, type: 'dashboard' },
+        },
+      });
+      expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
+        'dashboard',
+        'click',
+        'lens:panel_remove'
+      );
     });
   });
 });
