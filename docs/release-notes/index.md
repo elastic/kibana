@@ -32,7 +32,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add options to include frozen tier data in Agent Builder tools: an `include_frozen` parameter for built-in tools, an **Include frozen tier data** option for custom {{esql}} and index search tools, and the `agentBuilder:includeFrozenByDefault` advanced setting to include it by default in a space. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
 
 **Data ingestion and {{fleet}}**:
-* Sort agent policies alphabetically in the **Assign new agent policy** modal [#296067]({{kib-pull}}296067).
+* Sort agent policies alphabetically in the **Assign new policy to agent** modal [#296067]({{kib-pull}}296067).
 
 **{{es}} solution**:
 * Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record [#297728]({{kib-pull}}297728).
@@ -74,23 +74,23 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix an agent policy showing an outdated minimum {{agent}} version after you upgrade several integration policies at once [#294439]({{kib-pull}}294439).
 * Fix integration policy edits not reaching {{agent}} for packages that declare their {{agent}} version requirement in the package manifest [#296354]({{kib-pull}}296354).
 * Fix agents enrolled by an older {{fleet-server}} being left on a deleted version-specific agent policy [#295107]({{kib-pull}}295107).
-* Fix managed integration policy upgrades redeploying the agent policy once per integration policy, which slowed upgrades and could stall them when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
-* Fix integrations that default to agentless deployment saving an agent-based policy when the integration also has a cloud connector option [#299039]({{kib-pull}}299039).
+* Fix automatic integration policy upgrades redeploying the agent policy once for each integration policy, which slowed upgrades and could make them time out when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
+* Fix integrations whose default deployment option is **Elastic Managed Integration** saving an agent-based policy when they also have a cloud connector option [#299039]({{kib-pull}}299039).
 * Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
 * Fix {{fleet}} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters [#299837]({{kib-pull}}299837).
-* Fix the agentless enrollment flyout not showing component health details, and the **Details** action being disabled for agentless integration policies [#294970]({{kib-pull}}294970).
+* Fix the managed integration enrollment flyout not showing component health details, and the **Details** action being unavailable for managed integration policies [#294970]({{kib-pull}}294970).
 * Fix the **Agent policies** page taking tens of seconds, or failing with an `HTTP 500` error, when agent policies contain thousands of integration policies [#297979]({{kib-pull}}297979).
-* Fix agentless policies still appearing in the agent policy search and policy filter when **Show agentless agents and policies in {{fleet}}** is turned off [#296087]({{kib-pull}}296087).
+* Fix agent policies for managed integrations appearing in agent policy searches and filters when **Show agentless agents and policies in {{fleet}}** is turned off [#296087]({{kib-pull}}296087).
 * Fix {{fleet}} rejecting integration policies whose `data_stream.dataset` uses an agent variable placeholder such as `${env.NAME}` [#295496]({{kib-pull}}295496).
-* Fix {{fleet}} running {{es}} transforms from uploaded integration packages with {{kib}}'s internal system identity. Transforms in uploaded packages are now bound to the user who installed them [#297771]({{kib-pull}}297771).
+* Fix {{fleet}} running {{es}} transforms from uploaded integration packages with {{kib}}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package [#297771]({{kib-pull}}297771).
 * Fix scheduled unenrollment not deactivating inactive agents that have a stale `unenrolled_at` value [#300148]({{kib-pull}}300148).
 * Fix {{fleet}} setup tripping the {{es}} request circuit breaker on deployments with large agent policy documents [#300777]({{kib-pull}}300777).
 * Fix {{fleet}} hanging when the Elastic product versions API stops responding. The lookup of available {{agent}} versions now honors its timeout and falls back to the versions bundled with {{kib}} [#292736]({{kib-pull}}292736).
 * Fix installed integration icons rendering as black shapes [#293176]({{kib-pull}}293176).
 % !!DEFERRED!! Not in the latest BC (9.5.6-eb06deac, built from 6b06ce57); the backport merged after the BC was cut. Re-verify against the next BC.
-% * Fix updating an output or a {{fleet}} Server host through the API erasing its secret values [#299235]({{kib-pull}}299235).
+% * Fix updating an output or a {{fleet-server}} host through the API erasing its secret values [#299235]({{kib-pull}}299235).
 % !!DEFERRED!! Not in the latest BC (9.5.6-eb06deac, built from 6b06ce57); the backport merged after the BC was cut. Re-verify against the next BC.
-% * Fix a {{fleet}} Server policy ignoring the {{es}} output configured on the policy when its {{fleet}} Server host has SSL settings [#301068]({{kib-pull}}301068).
+% * Fix a {{fleet-server}} policy ignoring the {{es}} output configured on the policy when its {{fleet-server}} host has SSL settings [#301068]({{kib-pull}}301068).
 % !!DEFERRED!! Not in the latest BC (9.5.6-eb06deac, built from 6b06ce57); the backport merged after the BC was cut. Re-verify against the next BC.
 % * Fix integration upgrades failing with a `400` error from a proxy in front of {{es}} when the data stream namespace contains non-ASCII characters [#301496]({{kib-pull}}301496).
 % !!DEFERRED!! Not in the latest BC (9.5.6-eb06deac, built from 6b06ce57); the backport merged after the BC was cut. Re-verify against the next BC.
