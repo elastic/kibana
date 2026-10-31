@@ -812,6 +812,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     templates: {
       enabled: true,
     },
+    observables: {
+      readSource: 'index',
+    },
     runWorkflows: {
       enabled: true,
     },
