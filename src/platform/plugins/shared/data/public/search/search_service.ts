@@ -294,6 +294,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       search,
+      hasResponseCacheForSession: (sessionId) =>
+        this.searchInterceptor.hasResponseCacheForSession(sessionId),
+      evictResponseCacheForSession: (sessionId) =>
+        this.searchInterceptor.evictResponseCacheForSession(sessionId),
       dsl: (params, options) => this.searchMethodsService.dsl(params, options),
       dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
       esql: (params, options) => this.searchMethodsService.esql(params, options),
