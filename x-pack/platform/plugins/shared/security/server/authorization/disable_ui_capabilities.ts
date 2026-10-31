@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, isObject, mapValues } from 'lodash';
+import { flatten, isObject, mapValues, uniq } from 'lodash';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { Capabilities as UICapabilities } from '@kbn/core/types';
@@ -28,7 +28,8 @@ export function disableUICapabilitiesFactory(
   elasticsearchFeatures: ElasticsearchFeature[],
   logger: Logger,
   authz: AuthorizationServiceSetup,
-  user: AuthenticatedUser | null
+  user: AuthenticatedUser | null,
+  getUserIndexNames: () => Promise<string[]>
 ) {
   // nav links are sourced from the apps property.
   // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
@@ -64,6 +65,35 @@ export function disableUICapabilitiesFactory(
         }, {} as Record<string, string[]>),
       };
     }, {});
+
+  const allRequiredAnyIndexPrivileges = uniq(
+    Object.values(elasticsearchFeatureMap)
+      .flat()
+      .flatMap((p) => p.requiredAnyIndexPrivileges ?? [])
+  );
+
+  // Index names granted to the user are checked against every privilege in `requiredAnyIndexPrivileges`,
+  // so that Elasticsearch resolves privilege implication (e.g. `all` implies `read`).
+  const getIndexPrivilegesToCheck = async (): Promise<Record<string, string[]>> => {
+    if (allRequiredAnyIndexPrivileges.length === 0) {
+      return allRequiredIndexPrivileges;
+    }
+
+    let userIndexNames: string[] = [];
+    try {
+      userIndexNames = await getUserIndexNames();
+    } catch (err) {
+      logger.debug(`Unable to retrieve index privileges for the current user: ${err.message}`);
+    }
+
+    return userIndexNames.reduce<Record<string, string[]>>(
+      (acc, indexName) => {
+        acc[indexName] = uniq([...(acc[indexName] ?? []), ...allRequiredAnyIndexPrivileges]);
+        return acc;
+      },
+      { ...allRequiredIndexPrivileges }
+    );
+  };
 
   const isCatalogueItemReferencedByFeatureSet = (
     catalogueEntry: string,
@@ -180,7 +210,7 @@ export function disableUICapabilitiesFactory(
         kibana: uiActions,
         elasticsearch: {
           cluster: allRequiredClusterPrivileges,
-          index: allRequiredIndexPrivileges,
+          index: await getIndexPrivilegesToCheck(),
         },
       });
     } catch (err) {
@@ -351,9 +381,23 @@ function isGrantedElasticsearchPrivilege(
     }
   );
 
+  const { requiredAnyIndexPrivileges = [] } = privilege;
+  const hasRequiredAnyIndexPrivileges =
+    requiredAnyIndexPrivileges.length === 0 ||
+    Object.values(checkPrivilegesResponse.privileges.elasticsearch.index).some((indexResponse) =>
+      requiredAnyIndexPrivileges.every((requiredPrivilege) =>
+        indexResponse.some((x) => x.privilege === requiredPrivilege && x.authorized === true)
+      )
+    );
+
   const hasRequiredRoles = (privilege.requiredRoles ?? []).every(
     (requiredRole) => user?.roles.includes(requiredRole) ?? false
   );
 
-  return hasRequiredClusterPrivileges && hasRequiredIndexPrivileges && hasRequiredRoles;
+  return (
+    hasRequiredClusterPrivileges &&
+    hasRequiredIndexPrivileges &&
+    hasRequiredAnyIndexPrivileges &&
+    hasRequiredRoles
+  );
 }
