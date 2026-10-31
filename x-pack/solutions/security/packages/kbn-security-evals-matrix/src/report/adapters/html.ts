@@ -290,6 +290,27 @@ const summaryCellHtml = (cell: ReportSummaryCell): string => {
   return `<td class="cell ${tone}"${title}>${esc(cell.text)}</td>`;
 };
 
+/** Only render `href` for http(s) URLs; anything else (e.g. `javascript:`) renders as plain escaped text. */
+const isSafeHttpUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const provenanceItemHtml = (item: string | { text: string; href?: string }): string => {
+  if (typeof item === 'string') {
+    return esc(item);
+  }
+  return item.href && isSafeHttpUrl(item.href)
+    ? `<a href="${esc(item.href)}">${esc(item.text)}</a>`
+    : item.href
+    ? `${esc(item.text)} ${esc(item.href)}`
+    : esc(item.text);
+};
+
 const renderSummaryTable = (table: ReportSummaryTable): string => {
   const hasGroups = table.columns.some((col) => col.group);
   const groupHeader = hasGroups
@@ -310,7 +331,7 @@ const renderSummaryTable = (table: ReportSummaryTable): string => {
         return html;
       })()}</tr>`
     : '';
-  const header = `${groupHeader}<tr><th></th>${table.columns
+  const header = `${groupHeader}<tr><th>${esc(table.rowLabelHeader ?? '')}</th>${table.columns
     .map((c) => `<th>${esc(c.label)}</th>`)
     .join('')}</tr>`;
   const rows = table.rows
@@ -339,6 +360,8 @@ const exampleHtml = (example: ReportExample): string => {
     body += `<div class="answer">${mdToHtml(example.answerMarkdown)}</div>`;
   } else if (example.question || (example.steps?.length ?? 0) > 0) {
     body += '<div class="answer"><p class="empty">No final answer message captured.</p></div>';
+  } else if (example.emptyNote) {
+    body += `<p class="empty">${esc(example.emptyNote)}</p>`;
   } else {
     body += '<p class="empty">Trace unavailable.</p>';
   }
@@ -370,15 +393,25 @@ const sectionHtml = (section: ReportSection): string => {
 /** Renders a self-contained HTML report from a generic report document. */
 export const renderReportHtml = (doc: ReportDocument): string => {
   const generatedAt = new Date().toISOString();
-  const provenanceLine = [`Generated ${esc(generatedAt)}`, ...(doc.provenance ?? []).map(esc)].join(
-    ' · '
-  );
+  const provenanceLine = [
+    `Generated ${esc(generatedAt)}`,
+    ...(doc.provenance ?? []).map(provenanceItemHtml),
+  ].join(' · ');
   const methodologyBlock = doc.notes?.length
     ? `<details class="methodology"><summary>Methodology &amp; scoring-semantics notes</summary><ul>${doc.notes
         .map((note) => `<li>${esc(note)}</li>`)
         .join('')}</ul></details>`
     : '';
   const summaryTable = doc.summaryTable ? renderSummaryTable(doc.summaryTable) : '';
+  const extraTables = (doc.summaryTables ?? [])
+    .map(
+      (table) =>
+        `<details class="methodology tokencost" open><summary>${esc(
+          table.caption ?? ''
+        )}</summary>${renderSummaryTable(table)}</details>`
+    )
+    .join('');
+  const legend = doc.legend ? `<p class="legend">${esc(doc.legend)}</p>` : '';
   const sections = doc.sections.map(sectionHtml).join('\n');
   return `<!DOCTYPE html>
 <html lang="en">
@@ -394,6 +427,8 @@ export const renderReportHtml = (doc: ReportDocument): string => {
 <p class="sub">${provenanceLine}</p>
 ${methodologyBlock}
 ${summaryTable}
+${extraTables}
+${legend}
 ${sections}
 </div>
 </body>
