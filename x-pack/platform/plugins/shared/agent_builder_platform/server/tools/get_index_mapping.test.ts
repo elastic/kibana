@@ -16,7 +16,7 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import { getIndexMappingsTool } from './get_index_mapping';
-import { resolveToolSchema } from './test_utils';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
 
@@ -24,9 +24,10 @@ const runTool = async (
   indices: string[],
   raw: boolean,
   includeFrozen?: boolean,
-  includeFrozenByDefault = false
+  includeFrozenByDefault = false,
+  isServerless = false
 ) => {
-  const tool = getIndexMappingsTool();
+  const tool = getIndexMappingsTool({ isServerless });
   const schema = await resolveToolSchema(tool, includeFrozenByDefault);
   const result = (await tool.handler(
     schema.parse({ indices, raw, include_frozen: includeFrozen }),
@@ -87,6 +88,16 @@ describe('getIndexMappingsTool', () => {
         },
       });
     });
+
+    it('omits the frozen tier explanation in serverless', async () => {
+      const result = await runTool(['logs-aged-out'], true, undefined, false, true);
+
+      expect(result?.data).toMatchObject({
+        resources: {
+          'logs-aged-out': { warning: 'No fields found.' },
+        },
+      });
+    });
   });
 
   describe('include_frozen', () => {
@@ -124,6 +135,24 @@ describe('getIndexMappingsTool', () => {
       expect(getIndexFieldsMock).toHaveBeenCalledWith(
         expect.objectContaining({ includeFrozen: false })
       );
+    });
+
+    describe('in serverless', () => {
+      it('does not expose include_frozen or read the space setting', async () => {
+        const context = createSchemaContext(true);
+        const schema = await getIndexMappingsTool({ isServerless: true }).getSchema(context);
+
+        expect(schema.shape).not.toHaveProperty('include_frozen');
+        expect(context.uiSettings.get).not.toHaveBeenCalled();
+      });
+
+      it('excludes frozen tier indices even when include_frozen is passed', async () => {
+        await runTool(['logs-*'], false, true, true, true);
+
+        expect(getIndexFieldsMock).toHaveBeenCalledWith(
+          expect.objectContaining({ includeFrozen: false })
+        );
+      });
     });
   });
 
