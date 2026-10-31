@@ -105,6 +105,13 @@ export {
   getRegistryDataStreamAssetBaseName,
   getComponentTemplateNameForDatastream,
 } from './datastream_es_name';
+export {
+  LOGSDB_COLUMNAR_INDEX_MODE,
+  getLogsdbColumnarNotReadyDataStreams,
+  getLogsdbColumnarReadiness,
+  isLogsdbColumnarDefault,
+  isLogsdbColumnarReady,
+} from './columnar_index_mode';
 
 export * from './file_storage';
 export {

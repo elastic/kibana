@@ -419,6 +419,9 @@ export const updatePackageHandler: FleetRequestHandler<
 
   const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
     savedObjectsClient,
+    // Needed to apply a `logsdb_columnar` change to the package's index templates.
+    esClient: (await context.core).elasticsearch.client.asInternalUser,
+    logger: appContextService.getLogger(),
     pkgName,
     ...request.body,
   });
@@ -908,6 +911,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
+      logsdb_columnar_enabled: attributes.logsdb_columnar_enabled,
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
       namespace_customization_settings: attributes.namespace_customization_settings,
     };

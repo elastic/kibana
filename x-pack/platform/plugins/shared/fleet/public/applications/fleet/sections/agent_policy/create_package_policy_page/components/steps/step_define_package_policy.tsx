@@ -62,6 +62,7 @@ import type { PackagePolicyValidationResults } from '../../services';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
 
 import {
+  ColumnarIndexModeSetting,
   PackagePolicyConditionField,
   PackagePolicyInputVarField,
   VarGroupSelector,
@@ -95,6 +96,13 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   packagePolicyId?: string;
   deploymentSelector?: React.ReactNode;
   hideInVarGroupOptions?: Record<string, string[]>;
+  /** The columnar index mode picked on this page; `undefined` until the switch is used. */
+  logsdbColumnar?: boolean;
+  /**
+   * Shows the columnar index mode switch in the advanced options. The page applies the choice
+   * when it saves.
+   */
+  onLogsdbColumnarChange?: (enabled: boolean) => void;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -112,6 +120,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     packagePolicyId,
     deploymentSelector,
     hideInVarGroupOptions,
+    logsdbColumnar,
+    onLogsdbColumnarChange,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const varGroups = packageInfo.var_groups;
@@ -825,6 +835,13 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       )}
                     </EuiFormRow>
                   </EuiFlexItem>
+                  {onLogsdbColumnarChange && (
+                    <ColumnarIndexModeSetting
+                      packageInfo={packageInfo}
+                      logsdbColumnar={logsdbColumnar}
+                      onLogsdbColumnarChange={onLogsdbColumnarChange}
+                    />
+                  )}
                   <EuiFlexItem>
                     <EuiFormRow
                       isInvalid={validationResults?.additional_datastreams_permissions !== null}

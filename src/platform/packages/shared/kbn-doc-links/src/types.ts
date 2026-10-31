@@ -615,6 +615,7 @@ export interface DocLinks {
     datastreamsTSDS: string;
     datastreamsTSDSMetrics: string;
     datastreamsDownsampling: string;
+    datastreamsLogsdbColumnar: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     grantESAccessToStandaloneAgents: string;

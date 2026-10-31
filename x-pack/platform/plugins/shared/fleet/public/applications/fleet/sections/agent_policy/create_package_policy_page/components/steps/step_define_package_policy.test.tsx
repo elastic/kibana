@@ -962,4 +962,67 @@ describe('StepDefinePackagePolicy', () => {
       });
     });
   });
+
+  describe('columnar index mode switch', () => {
+    const SWITCH = 'columnarIndexModeSwitch';
+    const logsPackageInfo = {
+      ...packageInfo,
+      elasticsearch: { logsdb_columnar: 'opt_in' },
+      data_streams: [
+        { type: 'logs', dataset: 'apache.access', title: 'Apache access logs', path: 'access' },
+      ],
+    } as unknown as PackageInfo;
+
+    const renderWithColumnar = (
+      props: Partial<React.ComponentProps<typeof StepDefinePackagePolicy>> = {}
+    ) =>
+      (renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          packageInfo={logsPackageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={true}
+          onLogsdbColumnarChange={jest.fn()}
+          {...props}
+        />
+      ));
+
+    it('is only shown once the advanced options are open', async () => {
+      act(() => {
+        renderWithColumnar();
+      });
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() => expect(renderResult.getByTestId(SWITCH)).not.toBeDisabled());
+    });
+
+    it('is not shown when the page does not apply the choice', async () => {
+      act(() => {
+        renderWithColumnar({ onLogsdbColumnarChange: undefined });
+      });
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() =>
+        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toBeInTheDocument()
+      );
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is not shown for an integration without logs data streams', async () => {
+      act(() => {
+        renderWithColumnar({ packageInfo });
+      });
+
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+
+      await waitFor(() =>
+        expect(renderResult.getByTestId('packagePolicyNamespaceInput')).toBeInTheDocument()
+      );
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+  });
 });
