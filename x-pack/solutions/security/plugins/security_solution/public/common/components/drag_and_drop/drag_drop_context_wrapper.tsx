@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux-v7';
 import type { Dispatch } from 'redux-v4';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import { useAddToTimelineSensor } from '@kbn/timelines-plugin/public/hooks/use_add_to_timeline';
 
 import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
@@ -37,7 +38,6 @@ import {
   userIsReArrangingProviders,
 } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
 
@@ -101,8 +101,7 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
-  const { timelines } = useKibana().services;
-  const sensors = [timelines.getUseAddToTimelineSensor()];
+  const sensors = [useAddToTimelineSensor];
   const { dataProviders: activeTimelineDataProviders, timelineType } = useDeepEqualSelector(
     (state) =>
       pick(

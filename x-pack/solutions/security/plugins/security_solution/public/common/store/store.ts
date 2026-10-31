@@ -20,6 +20,7 @@ import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import { timelineReducer as embeddedTimelineReducer } from '@kbn/timelines-plugin/public/store/timeline/reducer';
 import reduceReducers from 'reduce-reducers';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
@@ -96,7 +97,7 @@ export const createStoreFactory = async (
 
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
-    startPlugins.timelines?.getTimelineReducer() ?? {},
+    embeddedTimelineReducer,
     subPlugins.timelines.store.reducer.timeline
   ) as unknown as Reducer<TimelineState, AnyAction>;
 

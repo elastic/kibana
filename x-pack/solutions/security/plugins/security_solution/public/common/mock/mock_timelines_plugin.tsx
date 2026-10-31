@@ -5,17 +5,4 @@
  * 2.0.
  */
 
-const useAddToTimeline = () => ({
-  beginDrag: jest.fn(),
-  cancelDrag: jest.fn(),
-  dragToLocation: jest.fn(),
-  endDrag: jest.fn(),
-  hasDraggableLock: jest.fn(),
-  startDragToTimeline: jest.fn(),
-});
-
-export const mockTimelines = {
-  getLastUpdated: jest.fn(),
-  getFieldBrowser: jest.fn(),
-  getUseAddToTimeline: () => useAddToTimeline,
-};
+export const mockTimelines = {};

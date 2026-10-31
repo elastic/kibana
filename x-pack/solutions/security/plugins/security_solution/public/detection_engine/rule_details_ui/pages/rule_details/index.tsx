@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -248,7 +249,6 @@ export const RuleDetailsPage = connector(
 
     const {
       application,
-      timelines: timelinesUi,
       spaces: spacesApi,
       aiRuleCreation,
     } = useKibana().services;
@@ -591,11 +591,11 @@ export const RuleDetailsPage = connector(
     );
     const currentAlertStatusFilterValue = useMemo(() => [filterGroup], [filterGroup]);
     const updatedAtValue = useMemo(() => {
-      return timelinesUi.getLastUpdated({
+      return getLastUpdated({
         updatedAt: updatedAt || Date.now(),
         showUpdating,
       });
-    }, [updatedAt, showUpdating, timelinesUi]);
+    }, [updatedAt, showUpdating]);
 
     const renderGroupedAlertTable = useCallback(
       (groupingFilters: Filter[]) => {
