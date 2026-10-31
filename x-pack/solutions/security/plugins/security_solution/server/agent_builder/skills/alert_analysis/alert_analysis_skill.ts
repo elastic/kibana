@@ -25,15 +25,17 @@ export const alertAnalysisSkill = defineSkillType({
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',
   description:
-    'Count, list, prioritize, and investigate Security detection alerts in the current Kibana space. ' +
-    'Use for questions like "how many alerts", "high/critical alerts in last 24h", or triage of a specific alert. ' +
+    'Count, list, prioritize, rank, and investigate Security detection alerts in the current Kibana space. ' +
+    'Use for queue questions answered from the alerts themselves — "which alerts should I look at first?", ' +
+    '"what should I focus on?", "what is most urgent?", "how many alerts", "high/critical alerts in last 24h", ' +
+    '"which hosts are affected?" — and for triage of a specific alert. ' +
     'Fetches alerts via security.alerts (space-scoped), correlates related alerts, enriches with Security Labs, and assesses entity risk.',
   content: `# Alert Analysis Guide
 
 ## When to Use This Skill
 
 Use this skill when:
-- Counting, listing, prioritizing, or summarizing security alerts in the current space (e.g. "how many alerts in the last 24 hours")
+- Counting, listing, prioritizing, or summarizing security alerts in the current space — "which alerts should I look at first?", "what should I focus on?", "what is most urgent?", "how many alerts in the last 24 hours"
 - Triaging a specific security alert to determine if it is a true or false positive
 - Investigating alerts to understand their context and impact
 - Finding related alerts that share entities (hosts, users, IPs) with a known alert
@@ -79,7 +81,7 @@ Use this skill when:
 - Reference the entity-analytics skill for deeper entity profiling or asset criticality review
 
 ## Tool Selection Guardrails
-- For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
+- For list/prioritization/rank/count questions about security alerts in the current space — "which alerts should I look at first?", "what should I focus on?", "what is most urgent?", "how many alerts", "high/critical alerts in last 24h" — use only 'security.alerts' unless explicit correlation by alertId is requested. These are alert-list questions, not queue-scoring requests: do not load or call the 'alert-triage' skill or 'security.alert-triage' tool to answer them, and do not report an empty queue from a windowed tool result.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.

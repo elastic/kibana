@@ -358,4 +358,47 @@ describe('prioritizeAlerts', () => {
       expect((alertSearchCall![0] as { size: number }).size).toBe(100);
     });
   });
+
+  describe('zero-result scope reporting', () => {
+    it('names the window, workflow status, and space when a queue scan matches nothing', async () => {
+      const { esClient } = createEsClient({ alerts: [] });
+      const result = await prioritizeAlerts({ ...defaultArgs, timeWindowHours: 24, esClient });
+
+      expect(result.groups).toEqual([]);
+      expect(result.totalAlertsFetched).toBe(0);
+      expect(result.emptyResultNotice).toContain('24h');
+      expect(result.emptyResultNotice).toContain('"open"');
+      expect(result.emptyResultNotice).toContain('"default"');
+      // The field exists so a windowed zero cannot be reported as "the queue is clear".
+      expect(result.emptyResultNotice).toContain('does NOT mean the alert queue is empty');
+    });
+
+    it('names the window that was actually queried, not the default', async () => {
+      const { esClient } = createEsClient({ alerts: [] });
+      const result = await prioritizeAlerts({ ...defaultArgs, timeWindowHours: 168, esClient });
+
+      expect(result.emptyResultNotice).toContain('168h');
+      expect(result.emptyResultNotice).not.toContain('24h');
+    });
+
+    it('reports missing requested ids, not an empty queue, on the explicit-ids path', async () => {
+      const { esClient } = createEsClient({ alerts: [] });
+      const result = await prioritizeAlerts({
+        ...defaultArgs,
+        esClient,
+        alertIds: ['missing-1', 'missing-2'],
+      });
+
+      expect(result.emptyResultNotice).toContain('2 requested alert id');
+      expect(result.emptyResultNotice).not.toContain('time window');
+    });
+
+    it('omits the notice when alerts were scored', async () => {
+      const { esClient } = createEsClient({ alerts: [criticalLateralMovementHit] });
+      const result = await prioritizeAlerts({ ...defaultArgs, esClient });
+
+      expect(result.groups.length).toBeGreaterThan(0);
+      expect(result.emptyResultNotice).toBeUndefined();
+    });
+  });
 });
