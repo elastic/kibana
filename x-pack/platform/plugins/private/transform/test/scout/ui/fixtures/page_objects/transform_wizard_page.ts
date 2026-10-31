@@ -64,8 +64,6 @@ export class TransformWizardPage {
   public readonly indexPreviewHistogramButton: Locator;
   public readonly useFullDataButton: Locator;
   public readonly dataTierOptionsButton: Locator;
-  public readonly startDateButton: Locator;
-  public readonly endDateButton: Locator;
   public readonly fieldStatsFlyout: Locator;
   public readonly dataViewTimeFieldSelect: Locator;
   public readonly continuousModeDateFieldSelect: Locator;
@@ -115,8 +113,6 @@ export class TransformWizardPage {
     this.indexPreviewHistogramButton = page.getByTestId('transformIndexPreviewHistogramButton');
     this.useFullDataButton = page.getByTestId('mlDatePickerButtonUseFullData');
     this.dataTierOptionsButton = page.getByTestId('mlDatePickerButtonDataTierOptions');
-    this.startDateButton = page.getByTestId('superDatePickerstartDatePopoverButton');
-    this.endDateButton = page.getByTestId('superDatePickerendDatePopoverButton');
     this.fieldStatsFlyout = page.getByTestId('mlFieldStatsFlyout');
     this.dataViewTimeFieldSelect = page.getByTestId('mlDataViewTimeFieldSelect');
     this.continuousModeDateFieldSelect = page.getByTestId('transformContinuousDateFieldSelect');
