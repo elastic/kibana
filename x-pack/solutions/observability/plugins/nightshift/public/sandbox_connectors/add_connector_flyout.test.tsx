@@ -20,7 +20,6 @@ jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const types = [actionType('.http'), actionType('.github')];
 const connectors = [
-  sandboxConnector('telemetry', { is_preconfigured: true }),
   sandboxConnector('h1', { name: 'acme-sre' }),
   sandboxConnector('h2', { name: 'acme-payments' }),
 ];
@@ -29,8 +28,7 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
   const services = mockKibanaServices({
     types,
     connectors,
-    assigned: ['telemetry', 'h1'],
-    telemetryConnectorIds: ['telemetry'],
+    assigned: ['h1'],
     ...options,
   });
   const onClose = jest.fn();
@@ -39,13 +37,12 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
 };
 
 describe('AddConnectorFlyout', () => {
-  it('lists the sandbox-capable types with how many connectors each has, telemetry aside', async () => {
+  it('lists the sandbox-capable types with how many connectors each has', async () => {
     setup();
 
     expect(await screen.findByTestId('.http-row')).toHaveTextContent('Type .http');
     expect(screen.getByTestId('.http-count')).toHaveTextContent('2 connectors');
     expect(screen.getByTestId('.github-count')).toHaveTextContent('0 connectors');
-    expect(screen.queryByTestId('nightshiftConnectorRow-telemetry')).not.toBeInTheDocument();
   });
 
   it('shows the enabled connectors as such and enables another one', async () => {

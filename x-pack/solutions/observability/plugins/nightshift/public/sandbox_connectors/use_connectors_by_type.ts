@@ -22,7 +22,6 @@ export interface ConnectorTypeGroup {
 
 export function useConnectorsByType(): {
   groups: ConnectorTypeGroup[];
-  telemetryConnectors: SandboxConnector[];
   isLoading: boolean;
   error: Error | null;
   typesError: Error | null;
@@ -34,34 +33,24 @@ export function useConnectorsByType(): {
   const agent = useAgentConnectors();
   const { assignedIds } = agent;
 
-  const { telemetryConnectors, groups } = useMemo(() => {
-    const telemetryIds = new Set(connectors.data?.telemetry_connector_ids ?? []);
+  const groups = useMemo(() => {
     const byType = new Map<string, SandboxConnector[]>();
-    const telemetry: SandboxConnector[] = [];
     for (const connector of connectors.data?.connectors ?? []) {
-      if (telemetryIds.has(connector.id)) {
-        telemetry.push(connector);
-        continue;
-      }
       const ofType = byType.get(connector.connector_type_id) ?? [];
       byType.set(connector.connector_type_id, [...ofType, connector]);
     }
-    return {
-      telemetryConnectors: telemetry,
-      groups: (types.data ?? []).map((actionType): ConnectorTypeGroup => {
-        const ofType = byType.get(actionType.id) ?? [];
-        return {
-          actionType,
-          connectors: ofType,
-          assignedCount: ofType.filter(({ id }) => assignedIds.includes(id)).length,
-        };
-      }),
-    };
+    return (types.data ?? []).map((actionType): ConnectorTypeGroup => {
+      const ofType = byType.get(actionType.id) ?? [];
+      return {
+        actionType,
+        connectors: ofType,
+        assignedCount: ofType.filter(({ id }) => assignedIds.includes(id)).length,
+      };
+    });
   }, [assignedIds, connectors.data, types.data]);
 
   return {
     groups,
-    telemetryConnectors,
     isLoading: types.isLoading || connectors.isLoading || agent.isLoading,
     error: types.error ?? connectors.error ?? agent.error,
     typesError: types.error,

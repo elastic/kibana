@@ -12,13 +12,13 @@ import { useKibana } from '../hooks/use_kibana';
 import { useConnectorsByType } from './use_connectors_by_type';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { ConnectTypeCard } from './connect_type_card';
-import { TelemetryConnectorCard } from './telemetry_connector_card';
 import { sourceGridStyles } from './source_grid_styles';
 
 /** The two pages of the "Add data" onboarding step. */
 export type ConnectSourcesGroup = 'telemetry' | 'additional';
 
-const TELEMETRY_TYPE_IDS = new Set(['.new_relic']);
+/** The connector types that read telemetry; the other sandbox-capable types are additional sources. */
+const TELEMETRY_TYPE_IDS = new Set(['.elasticsearch', '.new_relic']);
 
 const typesLoadErrorTitle = i18n.translate('xpack.nightshift.connectSources.loadError', {
   defaultMessage: 'Could not load the connector types.',
@@ -32,8 +32,7 @@ export function ConnectSourcesGrid({
   trailing?: React.ReactNode;
 }): React.ReactElement | null {
   const { triggersActionsUi } = useKibana().services;
-  const { groups, telemetryConnectors, isLoading, error, typesError, refetch } =
-    useConnectorsByType();
+  const { groups, isLoading, error, typesError, refetch } = useConnectorsByType();
 
   if (isLoading) return <EuiLoadingSpinner size="m" />;
   if (error) {
@@ -49,8 +48,7 @@ export function ConnectSourcesGrid({
   const shown = triggersActionsUi
     ? groups.filter(({ actionType }) => TELEMETRY_TYPE_IDS.has(actionType.id) === isTelemetry)
     : [];
-  const leading = isTelemetry ? telemetryConnectors : [];
-  if (shown.length === 0 && leading.length === 0 && !trailing) return null;
+  if (shown.length === 0 && !trailing) return null;
 
   return (
     <div
@@ -61,9 +59,6 @@ export function ConnectSourcesGrid({
       })}
       data-test-subj="nightshiftConnectSourcesGrid"
     >
-      {leading.map((connector) => (
-        <TelemetryConnectorCard key={connector.id} connector={connector} />
-      ))}
       {shown.map((typeGroup) => (
         <ConnectTypeCard key={typeGroup.actionType.id} group={typeGroup} />
       ))}

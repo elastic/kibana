@@ -6,7 +6,7 @@
  */
 
 import { config } from './config';
-import { getTelemetryConnectorIds, resolveTelemetryTarget } from './telemetry_targets';
+import { resolveTelemetryTarget } from './telemetry_targets';
 
 const sandbox = config.schema.validate({
   sandbox: {
@@ -33,21 +33,6 @@ it('preserves the legacy default and resolves named targets independently', () =
     readableIndices: 'logs-orcabench.*',
   });
   expect(resolveTelemetryTarget(sandbox, 'none')).toEqual({});
-});
-
-it('lists the connector ids of every target once, the legacy default first', () => {
-  expect(getTelemetryConnectorIds(sandbox)).toEqual(['legacy', 'customer0', 'orca']);
-  expect(
-    getTelemetryConnectorIds(
-      config.schema.validate({
-        sandbox: {
-          telemetry_connector_id: 'shared',
-          telemetry_targets: { again: { connector_id: 'shared' } },
-        },
-      }).sandbox
-    )
-  ).toEqual(['shared']);
-  expect(getTelemetryConnectorIds(undefined)).toEqual([]);
 });
 
 it('does not reapply a named default to an existing legacy conversation', () => {

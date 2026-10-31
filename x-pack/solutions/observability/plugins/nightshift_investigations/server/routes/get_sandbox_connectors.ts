@@ -17,17 +17,11 @@ export const getSandboxConnectorsRoute = createNightshiftInvestigationsServerRou
     summary: 'List sandbox connectors',
     description:
       'Returns the connectors the investigation agent can use from its sandbox in the current ' +
-      'space: the sandbox-capable connectors the caller can read, and the ids of the configured ' +
-      'telemetry targets.',
+      'space: the sandbox-capable connectors the caller can read.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   params: z.object({}),
-  handler: async ({
-    request,
-    listSandboxConnectors,
-    getTelemetryConnectorIds,
-  }): Promise<GetSandboxConnectorsResponse> => ({
+  handler: async ({ request, listSandboxConnectors }): Promise<GetSandboxConnectorsResponse> => ({
     connectors: await listSandboxConnectors(request),
-    telemetry_connector_ids: getTelemetryConnectorIds(),
   }),
 });

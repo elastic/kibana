@@ -69,7 +69,6 @@ export interface NightshiftInvestigationsRouteHandlerResources
   isCortexEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;
   listSandboxConnectorTypes: ListSandboxConnectorTypes;
-  getTelemetryConnectorIds: () => string[];
   customContextClient: CustomContextClient;
   onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;

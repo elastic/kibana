@@ -23,7 +23,6 @@ jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 const setup = ({
   types,
   connectors,
-  telemetryConnectorIds,
   group = 'additional',
   trailing,
   canSave = true,
@@ -32,7 +31,6 @@ const setup = ({
 }: {
   types: ActionType[];
   connectors?: SandboxConnector[];
-  telemetryConnectorIds?: string[];
   group?: ConnectSourcesGroup;
   trailing?: React.ReactNode;
   canSave?: boolean;
@@ -42,7 +40,6 @@ const setup = ({
   const services = mockKibanaServices({
     types,
     connectors,
-    telemetryConnectorIds,
     capabilities: { save: canSave },
     canUpdateAgent,
   });
@@ -59,57 +56,45 @@ describe('ConnectSourcesGrid', () => {
     actionType('.github'),
     actionType('.http'),
     actionType('.new_relic', { source: 'spec', name: 'New Relic', description: 'APM and more' }),
+    actionType('.elasticsearch', {
+      source: 'spec',
+      name: 'External Elasticsearch',
+      description: 'Search a remote cluster',
+    }),
   ];
-  const telemetry = sandboxConnector('telemetry', {
-    name: 'Local Elasticsearch telemetry',
-    is_preconfigured: true,
-  });
-  const telemetryConnectorIds = ['telemetry'];
 
-  it('leads the telemetry page with the telemetry connectors, then New Relic', async () => {
-    setup({
-      types: allTypes(),
-      connectors: [telemetry],
-      telemetryConnectorIds,
-      group: 'telemetry',
-    });
+  it('shows External Elasticsearch and New Relic as the telemetry sources', async () => {
+    setup({ types: allTypes(), group: 'telemetry' });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
-    expect(cardIds()).toEqual(['nightshiftTelemetryConnectorCard-telemetry', '.new_relic-card']);
-    const telemetryCard = screen.getByTestId('nightshiftTelemetryConnectorCard-telemetry');
-    expect(telemetryCard).toHaveTextContent('Local Elasticsearch telemetry');
-    expect(telemetryCard).toHaveTextContent('HTTP');
-    expect(telemetryCard).toHaveTextContent('1 connector');
-    expect(telemetryCard.querySelector('button')).toBeNull();
+    expect(cardIds()).toEqual(['.new_relic-card', '.elasticsearch-card']);
     expect(screen.getByTestId('.new_relic-card')).toHaveTextContent('APM and more');
+    expect(screen.getByTestId('.elasticsearch-card')).toHaveTextContent('External Elasticsearch');
   });
 
   it('shows HTTP and the other sandbox-capable types as additional sources', async () => {
-    setup({
-      types: allTypes(),
-      connectors: [telemetry],
-      telemetryConnectorIds,
-      group: 'additional',
-    });
+    setup({ types: allTypes(), group: 'additional' });
 
     await screen.findByTestId('nightshiftConnectSourcesGrid');
     expect(cardIds()).toEqual(['.github-card', '.http-card']);
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
   });
 
-  it('keeps the telemetry connector out of the HTTP card', async () => {
+  it('lists every connector of the type in the HTTP card, preconfigured ones included', async () => {
     setup({
       types: [actionType('.http')],
-      connectors: [telemetry, sandboxConnector('other')],
-      telemetryConnectorIds,
+      connectors: [
+        sandboxConnector('telemetry', { name: 'Elasticsearch telemetry', is_preconfigured: true }),
+        sandboxConnector('other'),
+      ],
       group: 'additional',
     });
 
     fireEvent.click(await screen.findByTestId('.http-connect'));
 
     await screen.findByTestId('.http-connectPopover');
+    expect(screen.getByTestId('nightshiftConnectorListItem-telemetry')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftConnectorListItem-other')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftConnectorListItem-telemetry')).not.toBeInTheDocument();
   });
 
   it('ends the grid with the trailing card, even without a type to show', async () => {

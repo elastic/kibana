@@ -46,7 +46,6 @@ const notFoundError = (): Error =>
 const setup = ({
   connectors,
   assigned = connectors.map(({ id }) => id),
-  telemetryConnectorIds = [],
   fetchError,
   agentError,
   capabilities = { show: true, save: true, delete: true, execute: true },
@@ -57,7 +56,6 @@ const setup = ({
 }: {
   connectors: SandboxConnector[];
   assigned?: string[];
-  telemetryConnectorIds?: string[];
   fetchError?: Error;
   agentError?: Error;
   capabilities?: { show?: boolean; save?: boolean; delete?: boolean; execute?: boolean };
@@ -66,9 +64,7 @@ const setup = ({
   withTriggersActionsUi?: boolean;
   ui?: React.ReactElement;
 }) => {
-  const fetch = jest
-    .fn()
-    .mockResolvedValue({ connectors, telemetry_connector_ids: telemetryConnectorIds });
+  const fetch = jest.fn().mockResolvedValue({ connectors });
   if (fetchError) fetch.mockRejectedValueOnce(fetchError);
   const agent = () => ({
     configuration: { connector_ids: assigned },
@@ -143,18 +139,6 @@ const expectRemoved = (agents: { removeConnectorFromAgent: jest.Mock }, connecto
   );
 
 describe('SandboxConnectorsTable', () => {
-  it('leaves the telemetry targets out, even when the agent has them', async () => {
-    setup({
-      connectors: [connector('telemetry', true), connector('other')],
-      telemetryConnectorIds: ['telemetry'],
-    });
-
-    expect(await screen.findByTestId('nightshiftSandboxConnectorsTable')).toHaveTextContent(
-      'Connector other'
-    );
-    expect(screen.queryByText('Connector telemetry')).not.toBeInTheDocument();
-  });
-
   it('lists the connectors assigned to the agent with their type and preconfigured badge', async () => {
     const { fetch, agents } = setup({
       connectors: [connector('github'), connector('telemetry', true), connector('unassigned')],

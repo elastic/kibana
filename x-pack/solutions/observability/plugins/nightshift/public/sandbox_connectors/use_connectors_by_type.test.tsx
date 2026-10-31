@@ -44,29 +44,27 @@ describe('useConnectorsByType', () => {
         assignedCount: 1,
       }),
     ]);
-    expect(result.current.telemetryConnectors).toEqual([]);
   });
 
-  it('sets the telemetry connectors apart from the type groups', async () => {
+  it('counts a preconfigured connector like any other of its type', async () => {
     mockKibanaServices({
       types: [actionType('.http')],
       connectors: [
         sandboxConnector('telemetry', { is_preconfigured: true }),
         sandboxConnector('h1'),
       ],
-      assigned: ['telemetry', 'h1'],
-      telemetryConnectorIds: ['telemetry', 'unreadable'],
+      assigned: ['telemetry'],
     });
 
     const { result } = renderHook(() => useConnectorsByType(), { wrapper: createHookWrapper() });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.telemetryConnectors).toEqual([
-      expect.objectContaining({ id: 'telemetry' }),
-    ]);
     expect(result.current.groups).toEqual([
       expect.objectContaining({
-        connectors: [expect.objectContaining({ id: 'h1' })],
+        connectors: [
+          expect.objectContaining({ id: 'telemetry' }),
+          expect.objectContaining({ id: 'h1' }),
+        ],
         assignedCount: 1,
       }),
     ]);

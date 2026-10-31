@@ -68,14 +68,11 @@ export function mockKibanaServices({
   canManageAgents = true,
   withTriggersActionsUi = true,
   withOnboardingLocator = true,
-  telemetryConnectorIds = [],
 }: {
   types?: ActionType[];
   connectors?: SandboxConnector[];
   /** Ids of the connectors assigned to the investigation agent */
   assigned?: string[];
-  /** Ids of the sandbox telemetry targets, as the server reports them */
-  telemetryConnectorIds?: string[];
   capabilities?: { show?: boolean; save?: boolean; delete?: boolean; execute?: boolean };
   canUpdateAgent?: boolean;
   canManageAgents?: boolean;
@@ -100,9 +97,7 @@ export function mockKibanaServices({
     }),
   };
   const fetchConnectorTypes = jest.fn().mockResolvedValue(types);
-  const fetchConnectors = jest
-    .fn()
-    .mockResolvedValue({ connectors, telemetry_connector_ids: telemetryConnectorIds });
+  const fetchConnectors = jest.fn().mockResolvedValue({ connectors });
   const fetch = jest.fn(async (endpoint: string) =>
     endpoint === 'GET /internal/nightshift/sandbox_connector_types'
       ? { connector_types: await fetchConnectorTypes() }

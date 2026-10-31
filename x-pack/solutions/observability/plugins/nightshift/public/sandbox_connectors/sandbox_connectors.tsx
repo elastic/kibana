@@ -193,10 +193,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
     );
   }
   if (!data) return null;
-  // The telemetry targets are the agent's own; they are not managed here.
-  const assigned = data.connectors.filter(
-    ({ id }) => agent.assignedIds.includes(id) && !data.telemetry_connector_ids.includes(id)
-  );
+  const assigned = data.connectors.filter(({ id }) => agent.assignedIds.includes(id));
   if (assigned.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="nightshiftSandboxConnectorsEmpty">
