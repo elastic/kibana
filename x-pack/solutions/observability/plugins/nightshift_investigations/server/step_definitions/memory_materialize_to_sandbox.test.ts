@@ -16,6 +16,7 @@ jest.mock('../memory/register_memory', () => ({
     notification: '',
     summary: {
       retrievalMode: 'search',
+      retriever: 'hybrid',
       searchFallback: false,
       candidateCount: 2,
       recalledCount: 1,
