@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/private/vis_types/vega
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-http-browser'
   - '@kbn/vega-sandbox'
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
@@ -42,6 +43,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/utility-types'
   - '@kbn/ui-theme'
+  - '@kbn/ui-callout'
   - '@kbn/std'
   - '@kbn/datemath'
   - '@kbn/mapbox-gl'
@@ -60,6 +62,11 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/scout'
   - '@kbn/presentation-util'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/saved-objects-plugin'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/date-range-picker'
+  - '@kbn/date-range-picker-presets'
   - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/as-code-shared-telemetry'
