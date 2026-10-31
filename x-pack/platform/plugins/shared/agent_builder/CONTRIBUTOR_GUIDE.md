@@ -564,7 +564,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       icon: 'eye',
       type: ActionButtonType.SECONDARY,
       handler: () => {
-        setPreviewBadgeState?.('previewing');
+        setPreviewBadgeState?.('previewing_in_canvas');
       },
     });
 
@@ -648,9 +648,29 @@ The callback handles setting the correct conversation context in localStorage be
 
 `setPreviewBadgeState` accepts:
 
-- **`none`** - regular inline state
-- **`preview_available`** - show "Preview Only" badge
-- **`previewing`** - show "You're previewing this" badge and hide inline action buttons
+- **`previewing_in_canvas`** - mark this attachment as previewed: show a "Close preview" button and hide inline action buttons
+- any other state - clear that mark
+
+#### Previewing in the app
+
+When the app the user is on shows an attachment (for example, Dashboards showing a dashboard attachment), return `previewing_in_app` from `getPreviewState$`. The inline card then shows a "You're previewing this" badge instead of its action buttons, with no close button since there is no canvas to close. A canvas preview of the same card takes priority.
+
+```tsx
+const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: (attachment) => attachment.description ?? 'My attachment',
+  getPreviewState$: (attachment) =>
+    shownAttachmentId$.pipe(
+      map((shownId) => (shownId === attachment.id ? 'previewing_in_app' : 'none'))
+    ),
+};
+```
+
+The card states are:
+
+- **`none`** - regular action buttons
+- **`preview_available`** - "Preview Only" badge
+- **`previewing_in_canvas`** - previewed in the canvas: "Close preview" button instead of the action buttons
+- **`previewing_in_app`** - previewed in the app: "You're previewing this" badge instead of the action buttons
 
 #### Dynamic canvas buttons with registerActionButtons
 
