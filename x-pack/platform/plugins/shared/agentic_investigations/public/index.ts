@@ -37,6 +37,7 @@ export {
   useSetInvestigationStatus,
   useInvestigationClosePreview,
 } from './investigations/hooks/use_investigations_api';
+export { useCanManageInvestigations } from './investigations/hooks/use_can_manage_investigations';
 
 export { escalationQueryKeys } from './escalations/query_keys';
 export { impactPillsQueryKeys } from './impact/query_keys';

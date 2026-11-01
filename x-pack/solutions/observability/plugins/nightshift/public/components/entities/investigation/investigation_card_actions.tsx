@@ -41,15 +41,18 @@ const openMenuLabel = i18n.translate('xpack.nightshift.investigations.cardOpenMe
 
 export interface InvestigationCardActionsProps {
   investigation: InvestigationSummary;
+  /** The assignee avatars and picker, shown before the divider. */
+  assignees?: React.ReactNode;
 }
 
 /**
- * Trailing controls for a Nightshift investigation list card: open in chat (same Agent Builder
- * route as the flyout footer) and an overflow menu with Copy link (same share URL / link icon as
- * the investigation flyout menu action).
+ * Trailing controls for a Nightshift investigation list card: the assignees, open in chat (same
+ * Agent Builder route as the flyout footer) and an overflow menu with Copy link (same share URL /
+ * link icon as the investigation flyout menu action).
  */
 export const InvestigationCardActions = ({
   investigation,
+  assignees,
 }: InvestigationCardActionsProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useKibana().services;
@@ -104,6 +107,19 @@ export const InvestigationCardActions = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      {assignees != null && (
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="nightshiftInvestigationCardAssignees"
+          // The list item around the card is tagged "view investigation", which a click here is not.
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.ASSIGN_INVESTIGATION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+          })}
+        >
+          {assignees}
+        </EuiFlexItem>
+      )}
       <span
         aria-hidden="true"
         css={css({
