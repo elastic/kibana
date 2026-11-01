@@ -101,8 +101,9 @@ const buildOnboardingSpace = async (
         name: 'delete worker service accounts',
         run: () =>
           deleteWorkerServiceAccounts(api, spaceId, {
-            // Unreachable when undefined: setup throws before returning the space.
-            baselineIds: serviceAccountBaseline ?? new Set<string>(),
+            // undefined (unreadable baseline): referenced accounts are kept —
+            // leaking a throwaway is cheaper than breaking a shared one.
+            baselineIds: serviceAccountBaseline,
             ownedIds: createdAccountIds,
           }),
       },
@@ -246,16 +247,18 @@ export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): 
 const deleteWorkerServiceAccounts = async (
   api: AlertZeroApi,
   spaceId: string,
-  { baselineIds, ownedIds }: { baselineIds: ReadonlySet<string>; ownedIds: ReadonlySet<string> }
+  { baselineIds, ownedIds }: { baselineIds?: ReadonlySet<string>; ownedIds: ReadonlySet<string> }
 ): Promise<void> => {
   const workers = await listWorkers(api, spaceId);
   const accountIds = [
     ...new Set([
       ...ownedIds,
-      ...workers
-        .map((worker) => worker.settings?.serviceAccountId)
-        .filter((id): id is string => Boolean(id))
-        .filter((id) => !baselineIds.has(id)),
+      ...(baselineIds
+        ? workers
+            .map((worker) => worker.settings?.serviceAccountId)
+            .filter((id): id is string => Boolean(id))
+            .filter((id) => !baselineIds.has(id))
+        : []),
     ]),
   ];
   const failures: string[] = [];

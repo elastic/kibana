@@ -351,16 +351,21 @@ describe('Scout AlertZero onboarding fixtures', () => {
       await expect(helpers.listServiceAccountIds(failing.api)).resolves.toBeUndefined();
     });
 
-    it('deletes no service account when the baseline could not be read', async () => {
+    it('fails setup and deletes no service account when the baseline could not be read', async () => {
       const { kbnClient, requests } = createKbnClient({
         baselineStatus: 500,
         referenced: ['shared-acct', 'created-acct'],
       });
-      const space = await onboarding.createUiOnboardingSpace(kbnClient, createSpaces(), {
-        withStubModel: false,
-      });
-      await space.cleanup();
+      const spaces = createSpaces();
 
+      // Unreadable baseline is fail-fast: setup rejects (never silently
+      // degrades to "delete nothing" while leaking created accounts).
+      await expect(
+        onboarding.createUiOnboardingSpace(kbnClient, spaces, { withStubModel: false })
+      ).rejects.toThrow(/Could not read the service-account baseline/);
+
+      // Teardown still ran (the space is deleted) and no service account was.
+      expect(spaces.delete).toHaveBeenCalledTimes(1);
       expect(accountDeletes(requests)).toHaveLength(0);
     });
   });
@@ -382,9 +387,15 @@ describe('Scout AlertZero onboarding fixtures', () => {
         return undefined;
       });
 
-      await expect(onboarding.enableFirstWorker({ spaceId: 'space-1', api })).rejects.toThrow(
-        /failed: 500/
-      );
+      const owned: string[] = [];
+      await expect(
+        onboarding.enableFirstWorker({
+          spaceId: 'space-1',
+          api,
+          trackOwnedAccountId: (id) => owned.push(id),
+        })
+      ).rejects.toThrow(/failed: 500/);
+      expect(owned).toEqual(['acct-1']);
 
       const deletes = calls.filter((c) => c.method === 'DELETE');
       expect(deletes).toHaveLength(1);
@@ -400,7 +411,13 @@ describe('Scout AlertZero onboarding fixtures', () => {
         return undefined;
       });
 
-      await onboarding.enableFirstWorker({ spaceId: 'space-1', api });
+      const owned: string[] = [];
+      await onboarding.enableFirstWorker({
+        spaceId: 'space-1',
+        api,
+        trackOwnedAccountId: (id) => owned.push(id),
+      });
+      expect(owned).toEqual(['acct-1']);
       expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(0);
       const patch = calls.find((c) => c.method === 'PATCH');
       expect(patch?.body).toMatchObject({
