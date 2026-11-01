@@ -126,9 +126,12 @@ describe('validateSecurity with checkScopes', () => {
     servers: [{ url: 'https://api.example.com' }],
     paths: {
       '/read': { get: { security: [{ oauth: ['a'] }], responses: ok } },
-      '/write': { post: { security: [{ oauth: ['a', 'b'] }], responses: ok } },
+      '/write': { post: { security: [{ oauth: ['b', 'c'] }], responses: ok } },
       '/either': {
-        get: { security: [{ oauth: ['admin', 'root'] }, { oauth: ['a', 'c'] }], responses: ok },
+        get: { security: [{ oauth: ['admin', 'root'] }, { oauth: ['c', 'd'] }], responses: ok },
+      },
+      '/both': {
+        get: { security: [{ oauth: ['b', 'c'], other: ['d'] }], responses: ok },
       },
       '/key-or-oauth': { get: { security: [{ apiKey: [] }, { oauth: ['b'] }], responses: ok } },
     },
@@ -136,6 +139,10 @@ describe('validateSecurity with checkScopes', () => {
       securitySchemes: {
         apiKey: { type: 'apiKey', in: 'header', name: 'X-Api-Key' },
         oauth: {
+          type: 'oauth2',
+          flows: { clientCredentials: { tokenUrl: 'https://auth.example.com/token', scopes: {} } },
+        },
+        other: {
           type: 'oauth2',
           flows: { clientCredentials: { tokenUrl: 'https://auth.example.com/token', scopes: {} } },
         },
@@ -162,7 +169,7 @@ describe('validateSecurity with checkScopes', () => {
     calls.length = 0;
   });
 
-  it("answers 403 insufficient_scope naming the operation's scopes when the token lacks some", async () => {
+  it("answers 403 insufficient_scope naming the operation's scopes when the token has none of them", async () => {
     const token = await tokenFor('a');
 
     const read = await call('GET', '/read', { authorization: `Bearer ${token}` });
@@ -171,35 +178,48 @@ describe('validateSecurity with checkScopes', () => {
     expect(read.status).toBe(200);
     expect(write.status).toBe(403);
     expect(write.headers.get('www-authenticate')).toBe(
-      'Bearer error="insufficient_scope", scope="a b"'
+      'Bearer error="insufficient_scope", scope="b c"'
     );
     expect((await write.json()).violations).toEqual([
       {
         path: ['security'],
         code: 'insufficient_scope',
-        message: 'Token was granted a, but the operation also needs b (requires a b)',
+        message: 'Token was granted a, but the operation needs one of b c',
       },
     ]);
     expect(calls.map(({ status }) => status)).toEqual([200, 200, 403]);
   });
 
-  it('accepts a token with every scope of the requirement', async () => {
-    const token = await tokenFor('a b');
+  it("reads a scheme's scopes as alternatives, as vendors list them", async () => {
+    const token = await tokenFor('c');
 
     expect((await call('POST', '/write', { authorization: `Bearer ${token}` })).status).toBe(200);
   });
 
-  it('accepts any one of several scope sets, and names the closest when none match', async () => {
-    const match = await tokenFor('c a');
-    const partial = await tokenFor('a');
+  it('needs a scope of every scheme of the requirement', async () => {
+    const oneScheme = await tokenFor('b');
+    const both = await tokenFor('b d');
+
+    const forbidden = await call('GET', '/both', { authorization: `Bearer ${oneScheme}` });
+
+    expect(forbidden.status).toBe(403);
+    expect((await forbidden.json()).violations[0].message).toBe(
+      'Token was granted b, but the operation needs one of d'
+    );
+    expect((await call('GET', '/both', { authorization: `Bearer ${both}` })).status).toBe(200);
+  });
+
+  it('accepts any one of several requirements, and names the first when none is met', async () => {
+    const match = await tokenFor('d');
+    const other = await tokenFor('x');
 
     const matched = await call('GET', '/either', { authorization: `Bearer ${match}` });
-    const forbidden = await call('GET', '/either', { authorization: `Bearer ${partial}` });
+    const forbidden = await call('GET', '/either', { authorization: `Bearer ${other}` });
 
     expect(matched.status).toBe(200);
     expect(forbidden.status).toBe(403);
     expect(forbidden.headers.get('www-authenticate')).toBe(
-      'Bearer error="insufficient_scope", scope="a c"'
+      'Bearer error="insufficient_scope", scope="admin root"'
     );
   });
 
@@ -212,12 +232,17 @@ describe('validateSecurity with checkScopes', () => {
     );
   });
 
-  it('does not check tokens issued without a scope or not issued by the mock', async () => {
+  it('does not check tokens issued without a scope, for a .default scope, or not by the mock', async () => {
     const unscoped = await tokenFor();
+    const appDefault = await tokenFor('https://api.example.com/.default');
 
     expect((await call('POST', '/write', { authorization: `Bearer ${unscoped}` })).status).toBe(
       200
     );
+    expect((await call('POST', '/write', { authorization: `Bearer ${appDefault}` })).status).toBe(
+      200
+    );
+    expect(issueAccessToken('https://api.example.com/.default')).toBe(issueAccessToken());
     expect((await call('POST', '/write', { authorization: 'Bearer from-config' })).status).toBe(
       200
     );
@@ -259,7 +284,7 @@ describe('validateSecurity with checkScopes', () => {
         {
           path: ['security'],
           code: 'insufficient_scope',
-          message: 'Token was granted a, but the operation also needs b (requires a b)',
+          message: 'Token was granted a, but the operation needs one of b c',
         },
       ],
       undefined,
