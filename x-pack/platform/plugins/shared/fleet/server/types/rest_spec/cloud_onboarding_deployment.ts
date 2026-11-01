@@ -16,6 +16,14 @@ const EcfFamilySchema = schema.oneOf(
   { meta: { description: 'ECF template family.' } }
 );
 
+const EcfServiceConfigSchema = schema.object({
+  serviceId: schema.string({ minLength: 1, maxLength: 128 }),
+  bucketArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), { maxSize: 1000 }),
+  logGroupArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), {
+    maxSize: 1000,
+  }),
+});
+
 const EcfStackSchema = schema.object({
   family: EcfFamilySchema,
   stackName: schema.string({
@@ -39,6 +47,15 @@ const EcfStackSchema = schema.object({
     schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
       maxSize: 1000,
       meta: { description: 'Service IDs active when the stack was last launched or updated.' },
+    })
+  ),
+  serviceConfigs: schema.maybe(
+    schema.arrayOf(EcfServiceConfigSchema, {
+      maxSize: 1000,
+      meta: {
+        description:
+          'Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated.',
+      },
     })
   ),
 });

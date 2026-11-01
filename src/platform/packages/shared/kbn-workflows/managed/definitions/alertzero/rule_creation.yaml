@@ -68,6 +68,10 @@ outputs:
     type: string
   - name: skip_reason
     type: string
+  - name: no_rule
+    type: boolean
+  - name: proposed
+    type: boolean
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
@@ -116,6 +120,10 @@ steps:
         strings for interval, from and to, empty lists for threat and tags),
         and give the reason in one sentence under "reason". Leave "reason"
         empty when the tool returned a rule.
+
+        If the tool rejected the request, copy its rejectionCode exactly under
+        "rejection_code". Leave "rejection_code" empty in every other case,
+        including when the tool returned a rule or an error.
 
         Write the name, the description and the reason in ASD-STE100 Simplified
         Technical English.
@@ -184,9 +192,18 @@ steps:
             type: string
             description: >-
               Why the tool returned no rule, in one sentence. Empty when it returned one.
+          # Required, so a model that drops it cannot turn a gap with no data into one
+          # that is retried on every sweep. Lists every code the tool defines, so a code
+          # this workflow does not act on still validates and is retried.
+          rejection_code:
+            type: string
+            enum: ['', NO_DATA, INCOHERENT, NOT_SECURITY_RELEVANT, INVALID_OUTPUT]
+            description: >-
+              The tool's rejectionCode when it rejected the request. Empty otherwise.
         required:
           - rule
           - attachment_id
+          - rejection_code
 
   # A draft missing its query, name, description or attachment is not reviewable, so
   # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
@@ -194,8 +211,10 @@ steps:
   # and plain values everywhere else so the structured output still validates. The
   # create action requires a name and a description, so such a draft can never be
   # created: proposing it fails the run instead of asking the analyst anything
-  # answerable. Step `if` cannot group with parentheses, so the compound test lives
-  # here as a flag.
+  # answerable. An interval that is empty or holds a placeholder such as `<UNKNOWN>`
+  # fails the same way on approval. An interval is date math only, so "unknown" is
+  # never a real value. Step `if` cannot group with parentheses, so the compound test
+  # lives here as a flag.
   - name: draft_ready
     type: data.set
     with:
@@ -206,8 +225,34 @@ steps:
           and steps.draft_creation.output.structured_output.rule.name != ''
           and steps.draft_creation.output.structured_output.rule.description != null
           and steps.draft_creation.output.structured_output.rule.description != ''
+          and steps.draft_creation.output.structured_output.rule.interval != null
+          and steps.draft_creation.output.structured_output.rule.interval != ''
+          and not (steps.draft_creation.output.structured_output.rule.interval contains 'unknown')
+          and not (steps.draft_creation.output.structured_output.rule.interval contains 'UNKNOWN')
+          and not (steps.draft_creation.output.structured_output.rule.interval contains 'Unknown')
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
+      # The tool rejected the request for a reason another run would not change: no
+      # index fits the gap. Any other unusable draft, such as a model mistake or a tool
+      # error, can pass on the next sweep.
+      final: "${{ steps.draft_creation.output.structured_output.rejection_code == 'NO_DATA' }}"
+
+  # The draft has no index list of its own: its sources are the `FROM` clause, which
+  # the preview checks for `read` before running so that an index the worker cannot
+  # see is named rather than counted as zero. Index names are lowercase by rule, so
+  # the query is downcased to find the command whatever its case, and a source may
+  # be quoted (`FROM "logs-*"`), so the quotes come off too.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.draft_ready.output.ok == true }}"
+    with:
+      csv: >-
+        {%- assign parts = steps.draft_creation.output.structured_output.rule.query | downcase | split: 'from ' -%}
+        {%- assign sources = parts[1] | default: '' | split: '|' | first | split: 'metadata' | first | split: ',' -%}
+        {%- for source in sources -%}
+        {%- assign name = source | remove: '"' | strip -%}
+        {%- if name != '' -%},{{ name | json }}{%- endif -%}
+        {%- endfor -%}
 
   - name: preview_creation
     type: workflow.execute
@@ -217,6 +262,7 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        indices: "${{ steps.probe_indices.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
         preview_body:
           name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
           description: "{{ steps.draft_creation.output.structured_output.rule.description }}"
@@ -297,7 +343,7 @@ steps:
           ```
 
           **Backtest**
-          {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          {% if steps.preview_creation.output.unreadable_indices != blank %}Not run: the Rule Coverage worker's service account cannot read these drafted rule indices: `{{ steps.preview_creation.output.unreadable_indices }}`. The worker reads only the default security index patterns, so a draft on other indices cannot be backtested. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.no_matching_indices == true %}Not run: no index the Rule Coverage worker can read matches the drafted rule's index patterns. Either they do not exist, or the worker's service account cannot read them: it reads only the default security index patterns. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{% if steps.preview_creation.output.alert_limit_reached == true %}At least {% endif %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% if steps.preview_creation.output.alert_limit_reached == true %} The preview stopped at the rule's maximum alerts per execution, so the real number is higher.{% endif %}{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.no_matching_indices != true and steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
           Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
 
           **On approval**
@@ -326,7 +372,15 @@ steps:
           or steps.propose_creation.output.decision == 'dismissed' }}
       decision: "{{ steps.propose_creation.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+      # The tool rejected the request for a reason a retry would not change, for example
+      # because no data source exists for the gap, so the caller stops asking about the
+      # gap. A draft with a model mistake or a tool error, or one that could not be
+      # copied to the investigation, is not this case: that can pass on the next sweep.
+      no_rule: "${{ steps.draft_ready.output.ok != true and steps.draft_ready.output.final == true }}"
+      # True when the rule was shown to the analyst as a proposal, even if nobody answered
+      # before it expired. False when nothing was proposed.
+      proposed: "${{ steps.proposal_ready.output.ok == true }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-
-        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description, an interval and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}
