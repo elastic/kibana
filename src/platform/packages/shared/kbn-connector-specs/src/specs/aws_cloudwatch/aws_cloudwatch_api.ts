@@ -152,8 +152,8 @@ export async function callCloudWatchApi(
 
 /**
  * Calls GetMetricWidgetImage and returns the raw PNG bytes as a base64 string.
- * This action responds with a binary image body rather than JSON, so it needs
- * its own request with responseType: 'arraybuffer'.
+ * Over the JSON protocol the image is base64 in `MetricWidgetImage`, which is
+ * decoded; the body is read as bytes so a raw image body works too.
  */
 export async function callCloudWatchGetMetricWidgetImage(
   ctx: ActionContext,
@@ -171,9 +171,9 @@ export async function callCloudWatchGetMetricWidgetImage(
       },
       responseType: 'arraybuffer',
     });
-    const buffer = Buffer.from(response.data as ArrayBuffer);
-    // An error response here is still JSON (not a PNG); detect it before
-    // returning what would otherwise look like a (corrupt) image buffer.
+    let buffer = Buffer.from(response.data as ArrayBuffer);
+    // Over the JSON protocol the image arrives base64-encoded in `MetricWidgetImage`, and errors
+    // are JSON too; detect both before returning what would otherwise look like a (corrupt) PNG.
     if (buffer.length > 0 && buffer[0] === '{'.charCodeAt(0)) {
       let parsed: unknown;
       try {
@@ -183,6 +183,10 @@ export async function callCloudWatchGetMetricWidgetImage(
       }
       if (parsed !== undefined) {
         assertNotAwsErrorBody('AWS CloudWatch', parsed);
+        const image = (parsed as { MetricWidgetImage?: unknown }).MetricWidgetImage;
+        if (typeof image === 'string') {
+          buffer = Buffer.from(image, 'base64');
+        }
       }
     }
     if (buffer.length === 0) {
