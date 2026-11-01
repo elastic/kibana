@@ -8,6 +8,7 @@
  */
 
 import { Readable } from 'stream';
+import { issueAccessToken } from '@kbn/connector-emulate';
 import { z } from '@kbn/zod/v4';
 import { getGcpIdToken, parseServiceAccountKey } from '../auth_types/gcp_jwt_helpers';
 import type { ConnectorSpec } from '../connector_spec';
@@ -156,8 +157,9 @@ describe('createContractContext', () => {
 
     await runAction('whoAmI', {});
 
+    // A token the mock issued for the auth type's default scopes, so it can check them.
     expect(ctx.client.defaults.headers.common.Authorization).toBe(
-      'Bearer contract-mock-access-token'
+      `Bearer ${issueAccessToken('current_user:read file_content:read projects:read')}`
     );
     expect(mock.calls.map(({ status, requestViolations }) => [status, requestViolations])).toEqual([
       [200, []],
