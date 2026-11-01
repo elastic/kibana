@@ -192,7 +192,7 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
-    it('bounds the wildcard and checks the full text for long name filters', async () => {
+    it('filters long execution names with the full text in one wildcard query', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
         took: 0,
@@ -203,20 +203,11 @@ describe('WorkflowExecutionQueryService', () => {
 
       await service.getWorkflowExecutions({ workflowId: 'wf-1', runName }, 'default');
 
-      expect(mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must).toEqual(
-        expect.arrayContaining([
-          { wildcard: { runName: { value: `*${'B'.repeat(128)}*`, case_insensitive: true } } },
-          {
-            script: {
-              script: {
-                source:
-                  "doc['runName'].size() != 0 && doc['runName'].value.toLowerCase(Locale.ROOT).contains(params.runName)",
-                params: { runName: runName.toLowerCase() },
-              },
-            },
-          },
-        ])
-      );
+      const must = mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must;
+      expect(must).toContainEqual({
+        wildcard: { runName: { value: `*${runName}*`, case_insensitive: true } },
+      });
+      expect(must).not.toContainEqual(expect.objectContaining({ script: expect.anything() }));
     });
 
     it('does not add a name filter for blank input', async () => {

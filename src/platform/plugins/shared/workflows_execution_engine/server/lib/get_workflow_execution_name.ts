@@ -53,8 +53,14 @@ export const getWorkflowExecutionName = (
           .slice(0, WORKFLOW_RUN_NAME_MAX_LENGTH)
           .replace(/[\uD800-\uDBFF]$/, '') || undefined
       : undefined;
-  } catch {
-    logger.warn('Could not evaluate run-name; using the default execution label.');
+  } catch (error) {
+    logger.warn(
+      `Could not evaluate run-name for workflow ${
+        execution.workflowId
+      }; using the default execution label: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
     return undefined;
   }
 };

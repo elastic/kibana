@@ -114,6 +114,9 @@ describe('buildWorkflowExecutionDocument', () => {
 
       expect(execution.status).toBe(ExecutionStatus.PENDING);
       expect(execution.runName).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/run-name for workflow workflow-1;.*invalid_filter/)
+      );
     });
 
     it('bounds names produced by runtime data', () => {

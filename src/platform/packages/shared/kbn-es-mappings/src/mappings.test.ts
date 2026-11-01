@@ -37,6 +37,11 @@ describe('mappings', () => {
         "type": "keyword",
       }
     `);
+    expect(mappings.wildcard()).toMatchInlineSnapshot(`
+      Object {
+        "type": "wildcard",
+      }
+    `);
     expect(mappings.text()).toMatchInlineSnapshot(`
       Object {
         "fields": Object {

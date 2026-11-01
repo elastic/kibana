@@ -54,7 +54,7 @@ describe('Type checking with TypeScript compiler', () => {
           ],
         },
         Object {
-          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"match_only_text\\" | \\"text\\" | \\"date_nanos\\" | \\"date\\" | \\"flattened\\" | \\"semantic_text\\" | \\"alias\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\" | \\"short\\"'.",
+          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"match_only_text\\" | \\"text\\" | \\"wildcard\\" | \\"date_nanos\\" | \\"date\\" | \\"flattened\\" | \\"semantic_text\\" | \\"alias\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\" | \\"short\\"'.",
           "lineNumber": 69,
           "tsErrorLine": Array [
             "Type Error Explanation: not_mapped is not defined in the mapping",

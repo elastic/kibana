@@ -953,8 +953,7 @@ export class WorkflowsExecutionEnginePlugin
                   logger,
                   {
                     createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
-                    getRunName: (execution) =>
-                      getWorkflowExecutionName(execution, logger, coreStart, dependencies),
+                    getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
                     hasActiveTaskForExecution: (executionId) =>
                       workflowTaskManager.hasActiveTaskForExecution(executionId),
                   }
@@ -1013,8 +1012,7 @@ export class WorkflowsExecutionEnginePlugin
                   authenticatedUser: executedBy,
                   now: workflowCreatedAt,
                   maxEventChainDepth: this.config.eventDriven.maxChainDepth,
-                  getRunName: (execution) =>
-                    getWorkflowExecutionName(execution, logger, coreStart, dependencies),
+                  getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
                   getConcurrencyGroupKey: (execution) =>
                     this.getConcurrencyGroupKey(
                       execution,
@@ -1309,8 +1307,7 @@ export class WorkflowsExecutionEnginePlugin
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
-        getRunName: (execution) =>
-          getWorkflowExecutionName(execution, this.logger, coreStart, dependencies),
+        getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(
             execution,
@@ -2106,6 +2103,14 @@ export class WorkflowsExecutionEnginePlugin
 
   public stop() {
     void this.dataClientBundle.stop();
+  }
+
+  private getRunName(
+    execution: WorkflowExecutionForInputRendering,
+    coreStart: CoreStart,
+    dependencies: ContextDependencies
+  ): string | undefined {
+    return getWorkflowExecutionName(execution, this.logger, coreStart, dependencies);
   }
 
   /**

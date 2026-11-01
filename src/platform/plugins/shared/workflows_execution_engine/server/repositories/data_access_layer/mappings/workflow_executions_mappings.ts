@@ -15,7 +15,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
   properties: {
     spaceId: mappings.keyword(),
     id: mappings.keyword(),
-    runName: mappings.keyword(),
+    runName: mappings.wildcard(),
     workflowId: mappings.keyword(),
     managed: mappings.boolean(),
     managedBy: mappings.keyword(),
