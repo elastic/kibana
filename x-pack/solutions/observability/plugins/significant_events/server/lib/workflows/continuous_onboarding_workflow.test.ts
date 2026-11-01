@@ -211,9 +211,18 @@ describe('createContinuousOnboardingWorkflowService', () => {
 
   it('disables and drains the space document but keeps it when turned off', async () => {
     getWorkflow.mockResolvedValue({ enabled: true });
+    let coordinatorTerminated = false;
+    let sweptChildrenAfterCoordinator = false;
     (managementApi.getWorkflowExecutions as jest.Mock)
       .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
-      .mockResolvedValue({ results: [], total: 0 });
+      .mockImplementation(async () => {
+        coordinatorTerminated = true;
+        return { results: [], total: 0 };
+      });
+    cancelAllRunning.mockImplementation(async () => {
+      sweptChildrenAfterCoordinator = coordinatorTerminated;
+      return 0;
+    });
 
     await createService().ensureWorkflow({ enabled: false, request, spaceId });
 
@@ -224,19 +233,18 @@ describe('createContinuousOnboardingWorkflowService', () => {
       request
     );
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
+    expect(cancelAllRunning).toHaveBeenCalledWith({ request });
+    expect(sweptChildrenAfterCoordinator).toBe(true);
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 
   it('can disable without waiting for running executions to drain', async () => {
     getWorkflow.mockResolvedValue({ enabled: true });
-    let resolvePoll: (value: { results: []; total: number }) => void = () => {};
-    const poll = new Promise<{ results: []; total: number }>((resolve) => {
-      resolvePoll = resolve;
+    (managementApi.getWorkflowExecutions as jest.Mock).mockResolvedValue({
+      results: [{ id: 'exec-1' }],
+      total: 1,
     });
-    (managementApi.getWorkflowExecutions as jest.Mock)
-      .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
-      .mockReturnValueOnce(poll);
 
     await expect(
       createService().ensureWorkflow({
@@ -255,10 +263,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
     );
     expect(managementApi.getWorkflowExecutions).toHaveBeenCalled();
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
-    expect(cancelAllRunning).toHaveBeenCalledWith({ request });
-
-    resolvePoll({ results: [], total: 0 });
-    await poll;
+    expect(cancelAllRunning).not.toHaveBeenCalled();
   });
 
   it('leaves the legacy default-space document alone outside the default space', async () => {
