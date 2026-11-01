@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
@@ -1325,22 +1325,26 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
 // Base schema without transform - can be extended (used in generate_yaml_schema_from_connectors.ts)
-const WorkflowSchemaBase = z.object({
-  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
-  name: z.string().min(1),
-  'run-name': z
-    .string()
-    .max(WORKFLOW_RUN_NAME_MAX_LENGTH)
-    .optional()
-    .describe('Execution name, evaluated once at creation using Liquid and the workflow context.'),
-  description: z.string().optional(),
-  settings: WorkflowSettingsSchema.optional(),
-  enabled: z.boolean().default(true),
-  tags: z.array(z.string()).optional(),
-  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
-  consts: WorkflowConstsSchema.optional(),
-  steps: z.array(StepSchema).min(1),
-});
+const WorkflowSchemaBase = lazySchema(() =>
+  z.object({
+    version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
+    name: z.string().min(1),
+    'run-name': z
+      .string()
+      .max(WORKFLOW_RUN_NAME_MAX_LENGTH)
+      .optional()
+      .describe(
+        'Execution name, evaluated once at creation using Liquid and the workflow context.'
+      ),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true),
+    tags: z.array(z.string()).optional(),
+    outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
+    consts: WorkflowConstsSchema.optional(),
+    steps: z.array(StepSchema).min(1),
+  })
+);
 
 /** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
 function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
