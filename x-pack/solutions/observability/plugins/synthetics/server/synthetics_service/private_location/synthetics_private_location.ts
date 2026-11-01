@@ -82,7 +82,7 @@ interface EnrolledAgents {
    * re-enrolled agent stay enrolled for days and must not make a single-agent
    * location look multi-agent. Defaults to all enrolled agents.
    */
-  checkedInCount?: number;
+  checkedInAgentIds?: string[];
 }
 
 type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
@@ -268,6 +268,13 @@ export class SyntheticsPrivateLocation {
         // only run on elastic-agent-complete, so they must not use that fallback.
         const eligibleAgentIds = isBrowser ? conditionHosts?.completeAgentIds ?? [] : agentIds;
         const existingAgentId = agentIdFromCondition(existingCondition);
+        // One agent that can run the monitor runs it anyway, so it gets no pin
+        // (see toConditionUpdates). A browser monitor whose only agent is not
+        // browser-capable still needs one.
+        const checkedInAgentIds = conditionHosts?.checkedInAgentIds ?? agentIds;
+        const isSingleAgent =
+          checkedInAgentIds.length <= 1 &&
+          checkedInAgentIds.every((agentId) => eligibleAgentIds.includes(agentId));
 
         if (existingAgentId && eligibleAgentIds.includes(existingAgentId)) {
           // Keep a valid existing pin during edits. Health and balancing moves
@@ -278,13 +285,12 @@ export class SyntheticsPrivateLocation {
             newPolicy.condition = UNASSIGNED_CONDITION;
           }
           // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
-        } else if ((conditionHosts?.checkedInCount ?? agentIds.length) > 1) {
+        } else if (!isSingleAgent) {
           const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
           }
         }
-        // A single agent runs everything anyway; no pin (see toConditionUpdates).
       } else if (shardingMode === 'unknown') {
         // License unreadable: keep whatever pin exists until it can be read again.
         if (existingCondition) {
@@ -374,7 +380,7 @@ export class SyntheticsPrivateLocation {
     const agentIds = new Set<string>();
     const completeAgentIds = new Set<string>();
     const checkedInSince = Date.now() - STALE_CHECKIN_MS;
-    let checkedInCount = 0;
+    const checkedInAgentIds = new Set<string>();
     const perPage = 1000;
     let page = 1;
 
@@ -393,7 +399,7 @@ export class SyntheticsPrivateLocation {
             completeAgentIds.add(agent.id);
           }
           if (agent.last_checkin && Date.parse(agent.last_checkin) >= checkedInSince) {
-            checkedInCount += 1;
+            checkedInAgentIds.add(agent.id);
           }
         }
       }
@@ -404,7 +410,11 @@ export class SyntheticsPrivateLocation {
       page += 1;
     }
 
-    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds], checkedInCount };
+    return {
+      agentIds: [...agentIds],
+      completeAgentIds: [...completeAgentIds],
+      checkedInAgentIds: [...checkedInAgentIds],
+    };
   }
 
   /** Resolves each touched location at most once per monitor batch. */
@@ -1005,7 +1015,10 @@ export class SyntheticsPrivateLocation {
       failedMoves += failed.length;
       const failedIds = new Set(failed.map(({ update }) => update.id));
       newlyPinned += policiesToUpdate.filter(
-        ({ update: { id } }) => unpinnedIds.has(id) && !failedIds.has(id)
+        ({ update: { id, attributes } }) =>
+          unpinnedIds.has(id) &&
+          !failedIds.has(id) &&
+          agentIdFromCondition(attributes.condition) !== undefined
       ).length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so

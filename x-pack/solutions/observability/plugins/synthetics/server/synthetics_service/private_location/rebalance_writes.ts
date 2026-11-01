@@ -180,8 +180,9 @@ export const toConditionUpdate = (
  *
  * With `pinUnpinned` false (a single-agent location) monitors without an agent
  * pin get none: it adds nothing there, and pinning running monitors can stop
- * them (elastic/elastic-agent#17714). A parked browser monitor is unparked
- * instead once a browser-capable agent exists.
+ * them (elastic/elastic-agent#17714). Parking is not a pin (Fleet Server strips
+ * the unassigned condition from every agent), so a browser monitor is still
+ * parked without a browser-capable agent and unparked once one exists.
  */
 export const toConditionUpdates = (
   pkgPolicies: ShardedPackagePolicy[],
@@ -200,8 +201,12 @@ export const toConditionUpdates = (
       continue; // unplaceable (no healthy target) → leave as-is, no write
     }
     let desiredCondition: string | null = agentIdCondition(desiredAgentId);
-    if (!pinUnpinned && !agentIdFromCondition(pkgPolicy.condition)) {
-      if (pkgPolicy.condition !== UNASSIGNED_CONDITION || desiredAgentId === UNASSIGNED_AGENT_ID) {
+    if (
+      !pinUnpinned &&
+      !agentIdFromCondition(pkgPolicy.condition) &&
+      desiredAgentId !== UNASSIGNED_AGENT_ID
+    ) {
+      if (pkgPolicy.condition !== UNASSIGNED_CONDITION) {
         continue;
       }
       desiredCondition = null;

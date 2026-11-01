@@ -540,6 +540,33 @@ describe('SyntheticsPrivateLocation', () => {
       }
     );
 
+    it('pins a browser monitor when the only checked-in agent cannot run it', async () => {
+      const browserConfig = {
+        ...dummyBrowserConfig,
+        id: 'browser-id',
+      } as unknown as HeartbeatConfig;
+
+      const policy = await new SyntheticsPrivateLocation(serverMock).generateNewPolicy(
+        browserConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        {
+          agentIds: ['basic', 'offline-complete'],
+          completeAgentIds: ['offline-complete'],
+          checkedInAgentIds: ['basic'],
+        },
+        undefined,
+        'active'
+      );
+
+      expect(policy?.condition).toBe(agentIdCondition('offline-complete'));
+    });
+
     it('does not pin when the second enrolled agent is an offline leftover', async () => {
       const listAgents = jest.fn().mockResolvedValue({
         agents: [
@@ -589,6 +616,35 @@ describe('SyntheticsPrivateLocation', () => {
         ignoreMissing: true,
         fields: ['revision'],
       });
+    });
+
+    it('does not count parking a browser monitor as a first pin', async () => {
+      jest.spyOn(PackagePolicyService.prototype, 'listByAgentPolicy').mockResolvedValue([
+        {
+          id: 'browser-loc-1',
+          spaceIds: ['default'],
+          version: 'WzAsMV0=',
+          revision: 1,
+          name: 'browser-loc-1',
+          policy_ids: ['ap-1'],
+          inputs: [{ type: 'synthetics/browser', enabled: true }],
+        },
+      ]);
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a', 'agent-b'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(
+        bulkUpdateInSpace.mock.calls[0][0].policiesToUpdate[0].update.attributes.condition
+      ).toBe(UNASSIGNED_CONDITION);
+      expect(result.newlyPinned).toBe(0);
     });
 
     it('counts only landed first pins as newly pinned', async () => {
@@ -1300,7 +1356,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result.get('condition-location')).toEqual({
         agentIds: ['basic', 'complete', 'missing-flag'],
         completeAgentIds: ['complete'],
-        checkedInCount: 0,
+        checkedInAgentIds: [],
       });
     });
 

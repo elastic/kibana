@@ -298,6 +298,14 @@ describe('toConditionUpdates on a single-agent location', () => {
     ).toEqual([[`m1-${LOCATION}`, agentIdCondition('agent-a')]]);
   });
 
+  it('still parks an unpinned browser monitor without a browser-capable agent', () => {
+    const unpinned = browserPolicy({ id: `m1-${LOCATION}` });
+
+    expect(conditions([unpinned], new Map([['m1', UNASSIGNED_AGENT_ID]]))).toEqual([
+      [`m1-${LOCATION}`, UNASSIGNED_CONDITION],
+    ]);
+  });
+
   it('unparks a browser monitor once a browser-capable agent exists, else leaves it parked', () => {
     const parked = browserPolicy({ id: `m1-${LOCATION}`, condition: UNASSIGNED_CONDITION });
 

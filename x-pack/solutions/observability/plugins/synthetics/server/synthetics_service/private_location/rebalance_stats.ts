@@ -12,7 +12,7 @@ export interface RebalanceShardsResult {
   moved: number;
   /** Moves that Fleet rejected; retried next cycle. */
   failed: number;
-  /** Monitors with no agent condition that got their first pin (see `pinNudges`). */
+  /** Monitors with no condition that got pinned to an agent (parking does not count). */
   newlyPinned: number;
   /** Monitors pinned to an agent that is no longer healthy. */
   failedOver: number;
