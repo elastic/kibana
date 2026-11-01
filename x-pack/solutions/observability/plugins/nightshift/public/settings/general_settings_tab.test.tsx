@@ -23,6 +23,9 @@ jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: mockApplication } }),
 }));
 jest.mock('../hooks/use_developer_mode');
+jest.mock('./components/connectors_section', () => ({
+  ConnectorsSection: () => <div data-test-subj="connectorsSectionStub" />,
+}));
 jest.mock('./components/apps_section', () => ({
   AppsSection: ({ canEdit }: { canEdit: boolean }) => (
     <div data-test-subj="apps-section" data-can-edit={canEdit ? 'true' : 'false'} />

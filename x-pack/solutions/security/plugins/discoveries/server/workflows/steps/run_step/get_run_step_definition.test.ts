@@ -808,6 +808,33 @@ describe('getRunStepDefinition', () => {
     });
   });
 
+  describe('generation_source', () => {
+    it('forwards the input to the workflow config', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: { ...syncMockContext.input, generation_source: 'watch_floor_ad_worker' },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({ generation_source: 'watch_floor_ad_worker' }),
+        })
+      );
+    });
+
+    it('leaves it out of the workflow config when omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0].workflowConfig).not.toHaveProperty(
+        'generation_source'
+      );
+    });
+  });
+
   describe('provided alerts auto-detection', () => {
     it('disables default retrieval and forwards alerts when alerts are non-empty', async () => {
       const contextWithAlerts = {

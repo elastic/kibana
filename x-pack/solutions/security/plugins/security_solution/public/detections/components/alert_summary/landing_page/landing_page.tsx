@@ -84,9 +84,9 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
       <EuiFlexItem
         css={css`
           // to have the background color correctly applied
-          // we need to compensate for the 24px padding that is applied to a parent component
+          // we need to compensate for the 24px side padding that is applied to a parent component
           //(see here x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/index.tsx)
-          margin: -${euiTheme.size.l} -${euiTheme.size.l} 0 -${euiTheme.size.l};
+          margin: 0 -${euiTheme.size.l};
         `}
       >
         <EuiFlexGroup
@@ -101,7 +101,7 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1>{TITLE}</h1>
+              <h2>{TITLE}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
