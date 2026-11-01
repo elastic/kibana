@@ -370,9 +370,9 @@ describe('createContractContext', () => {
       });
 
       expect(await runAction('listSecrets', {})).toBe(200);
-      // The mock appends the granted scopes to the token it issues.
-      expect(ctx.client.defaults.headers.common.Authorization).toMatch(
-        /^Bearer contract-mock-access-token(\.|$)/
+      // No scope is sampled, so the auth type requests its default, which the token carries.
+      expect(ctx.client.defaults.headers.common.Authorization).toBe(
+        `Bearer ${issueAccessToken('https://www.googleapis.com/auth/cloud-platform')}`
       );
       expect(mock.calls.map(({ operation, status }) => [operation, status])).toEqual([
         ['OAuth token', 200],

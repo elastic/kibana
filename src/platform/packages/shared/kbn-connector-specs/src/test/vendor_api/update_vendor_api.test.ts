@@ -330,7 +330,7 @@ describe('updateVendorApi', () => {
     documents[SPEC_URL] = specYaml('1.0')
       .replace(
         `servers: [{ url: '${BASE}' }]`,
-        `servers: [{ url: '${BASE}' }]\nsecurity: [{ oauth: [items:read, items:all] }]`
+        `servers: [{ url: '${BASE}' }]\nsecurity: [{ oauth: [items:all, items:admin] }]`
       )
       .replace(
         'components:\n',
@@ -351,7 +351,7 @@ describe('updateVendorApi', () => {
     const { problems } = await update({ connector: scoped, sources: { main: SPEC_URL } });
 
     expect(problems).toEqual([
-      "listItems: under auth type oauth_client_credentials, GET /items needs OAuth scopes the auth type doesn't request: Token was granted items:read, but the operation also needs items:all (requires items:read items:all); add them to the auth type's default \"scope\", or correct the spec's scopes in overlay.yaml",
+      "listItems: under auth type oauth_client_credentials, GET /items needs OAuth scopes the auth type doesn't request: Token was granted items:read, but the operation needs one of items:all items:admin; add one to the auth type's default \"scope\", or correct the spec's scopes in overlay.yaml",
     ]);
 
     await fs.writeFile(

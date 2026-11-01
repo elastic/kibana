@@ -125,6 +125,11 @@ const toSecrets = (
       secrets[key] = fallback.data;
       continue;
     }
+    // A sampled scope would be scope checked, though nobody configured it; left out, the auth
+    // type requests its own default, as it would in Kibana.
+    if (key === 'scope' && fallback.success) {
+      continue;
+    }
     const options = field instanceof z.ZodEnum ? field.options : [];
     const placeholder = [...options, ...placeholdersFor(key)].find(
       (value) => field.safeParse(value).success
