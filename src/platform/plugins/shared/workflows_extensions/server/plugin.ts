@@ -173,6 +173,7 @@ export class WorkflowsExtensionsServerPlugin
         this.logger.warn(
           'No workflows client provider set, using noop resumeExternalHitl to avoid errors. HITL resume ignored.'
         );
+        throw new Error('Workflows client provider is not available');
       },
       managedWorkflows: {
         install: async () => {

@@ -79,6 +79,10 @@ Example `app_mention` body:
 That payload emits `slack2.app_mention` with `workspace`, `channel`, `messageId`, `sender`, and `text`.
 
 ### Workflow human-in-the-loop (HITL) interactive responses [slack-v2-hitl-interactive]
+```{applies_to}
+serverless: preview
+stack: preview 9.7+
+```
 
 Human-in-the-loop (HITL) (`waitForApproval` / `waitForInput`) steps can collect the response in Slack when the workflow channel uses Slack (v2) with `interactive: true`:
 
@@ -90,17 +94,9 @@ channels:
     interactive: true
 ```
 
-That posts Block Kit controls (Approve/Decline, or fields from the `waitForInput` schema) instead of {{kib}} resume links. Clicks are delivered as Slack Interactivity payloads to the **same connector ingest URL** used for Receive events.
+That posts Block Kit controls (Approve/Decline, or fields from the `waitForInput` schema) instead of {{kib}} resume links. The click resumes the paused step. It does not start a workflow.
 
-Requirements:
-
-1. Turn **Receive events** on for the Slack (v2) connector and copy the webhook URL and ingest token.
-2. In the Slack app, turn on **Interactivity & Shortcuts**. Leave Socket Mode off so Slack shows the Request URL.
-3. Set **Interactivity** > **Request URL** to that ingest URL, including the ingest token.
-4. Set **Event Subscriptions** > **Request URL** to the same ingest URL only when workflows should also start from Slack events.
-5. Use conversation IDs the bot can post to.
-
-`interactive: true` does not start a new workflow from the button click; it resumes the paused HITL step.
+Turn **Receive events** on for the connector. Point the Slack app Interactivity Request URL at that connector ingest URL, including the ingest token, and post to conversation IDs the bot can post to. Point the Slack Event Subscriptions Request URL at the same ingest URL only when workflows should also start from Slack events.
 
 ## Test connectors [slack-v2-action-configuration]
 

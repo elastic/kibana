@@ -278,10 +278,18 @@ export async function sendWaitForInputNotifications({
     if (interactive && !slackInteractiveResume) {
       throw new Error('Slack interactive HITL input requires resume correlation context');
     }
-    const text = interactive
-      ? stepMessage.length > 0
+    const renderedChannelMessage =
+      slack2Config.message != null && slack2Config.message.length > 0
+        ? renderTemplate(slack2Config.message)
+        : undefined;
+    const interactivePrompt =
+      renderedChannelMessage != null && renderedChannelMessage.length > 0
+        ? renderedChannelMessage
+        : stepMessage.length > 0
         ? stepMessage
-        : 'Provide the requested input'
+        : 'Provide the requested input';
+    const text = interactive
+      ? interactivePrompt
       : slack2Config.message != null
       ? resolveWaitForInputChannelMessage({
           channelMessageTemplate: slack2Config.message,
@@ -293,7 +301,7 @@ export async function sendWaitForInputNotifications({
     const blocks =
       interactive && slackInteractiveResume
         ? buildHitlSlackInputBlocksFromSchema({
-            message: stepMessage,
+            message: interactivePrompt,
             schema: inputSchema,
             resume: slackInteractiveResume,
           })
