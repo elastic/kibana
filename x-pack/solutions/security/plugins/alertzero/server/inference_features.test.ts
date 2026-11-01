@@ -83,7 +83,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
       featureName: 'Efficient models',
       featureDescription:
-        'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
+        'Quick, lightweight judgment on calls that run often, such as triaging alerts or checking detection coverage. Choose a small, low-cost model.',
       recommendedEndpoints: [
         '.anthropic-claude-4.5-haiku-chat_completion',
         '.google-gemini-3.5-flash-lite-chat_completion',
@@ -106,7 +106,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
       featureName: 'Balanced models',
       featureDescription:
-        'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
+        'Calls where accuracy matters but that run often or use tools over many steps, such as diagnosing a noisy rule or reconstructing endpoint activity from telemetry. Choose a strong mid-size model.',
       recommendedEndpoints: [
         SONNET_5,
         '.openai-gpt-5.6-terra-chat_completion',
