@@ -63,12 +63,19 @@ const renderEditor = ({
   return { onCommit, onCancel, fetchCheck };
 };
 
+/** Sets the path combo box in two synchronous events; typing it re-renders per keystroke. */
+const commitPath = (value: string) => {
+  const input = screen.getByTestId('componentDefinitionFormPath-path').querySelector('input');
+  if (!input) {
+    throw new Error('Path combo box rendered without a search input');
+  }
+  fireEvent.change(input, { target: { value } });
+  fireEvent.keyDown(input, { key: 'Enter' });
+};
+
 /** Fills the one `add_fields` operation the editor starts with. */
-const fillOperation = async () => {
-  await userEvent.type(
-    screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ?? document.body,
-    'team{enter}'
-  );
+const fillOperation = () => {
+  commitPath('team');
   fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
     target: { value: 'core' },
   });
@@ -91,11 +98,7 @@ describe('ProcessorEditor', () => {
     const { onCommit } = renderEditor();
 
     expect(screen.getByTestId('componentDefinitionForm-processor-add_fields')).toBeTruthy();
-    await userEvent.type(
-      screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-        document.body,
-      'team{enter}'
-    );
+    commitPath('team');
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
       target: { value: 'core' },
     });
@@ -151,11 +154,7 @@ describe('ProcessorEditor', () => {
     await waitFor(() => expect(onCommit).toHaveBeenCalledTimes(1));
     expect(fetchCheck).not.toHaveBeenCalled();
 
-    await userEvent.type(
-      screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-        document.body,
-      '.token{enter}'
-    );
+    commitPath('secret.token');
     await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
 
     await waitFor(() => expect(onCommit).toHaveBeenCalledTimes(2));
@@ -219,11 +218,7 @@ describe('ProcessorEditor', () => {
       ),
     };
     const { onCommit } = renderEditor({ catalogue: fixedCatalogue });
-    await userEvent.type(
-      screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-        document.body,
-      'team{enter}'
-    );
+    commitPath('team');
     fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
       target: { value: 'core' },
     });
@@ -263,11 +258,7 @@ describe('ProcessorEditor', () => {
       const { onCommit } = renderEditor({ telemetry: ['logs', 'metrics', 'traces'] });
 
       await userEvent.click(screen.getByLabelText('Remove metrics from selection in this group'));
-      await userEvent.type(
-        screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-          document.body,
-        'team{enter}'
-      );
+      commitPath('team');
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
       });
@@ -347,11 +338,7 @@ describe('ProcessorEditor', () => {
       });
       expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeDisabled();
 
-      await userEvent.type(
-        screen.getByTestId('componentDefinitionFormPath-path').querySelector('input') ??
-          document.body,
-        'team{enter}'
-      );
+      commitPath('team');
       fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
         target: { value: 'core' },
       });

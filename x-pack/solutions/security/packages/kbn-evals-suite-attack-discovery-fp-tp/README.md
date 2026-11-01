@@ -95,6 +95,35 @@ node scripts/evals start --suite security-attack-discovery-fp-tp --model <connec
 
 The suite's stack uses the `evals_attack_discovery_fp_tp` Scout config set, which enables AlertZero (and the `agenticInvestigations` and `proposals` plugins it requires) plus the Workflows UI and agent settings.
 
+## Seeding a twin by hand
+
+`scripts/load_fp_tp_twin.js` seeds one scenario twin so the managed analysis can be run from the Workflows UI.
+
+Classic stack (Basic auth, default space; `--space` other than `default` needs `--serverless`):
+
+```bash
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/load_fp_tp_twin.js --scenario encoded-powershell --variant fp
+```
+
+Serverless project (ApiKey auth, one dedicated Kibana space per seed; `--space` is required and must not be `default`):
+
+```bash
+node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/scripts/load_fp_tp_twin.js --serverless \
+  --kibanaUrl <kibana-url> --elasticsearchUrl <es-url> --apiKey <encoded-api-key> \
+  --space <space-id> --reasoningConnectorId <connector-id> --variant fp
+```
+
+On serverless the seeder cannot write the way the classic path does, so it:
+
+- provisions the space's alerts data stream through a no-match detection rule (it never creates dot-prefixed indices) and bulk-`create`s the alerts, so a leftover id fails loudly;
+- writes raw events to a seeder-owned `logs-endpoint.events.fp-tp-<kind>-<space>` namespace, provisioned through a seeder-owned composable template (priority 250, composed of `logs@mappings` + `ecs@mappings`, 6000-field budget) so ECS fields keep their real types, and through an ingest pipeline that normalizes `@timestamp` and stamps `event.ingested`;
+- creates entities through the Entity Store CRUD API;
+- builds the twin under a per-space run marker, so its host ids differ from every other space's seed (the analysis reads raw events by `host.id` across every namespace);
+- maps the space's `alertzero_frontier` inference feature to `--reasoningConnectorId`;
+- persists the Attack Discovery by running the managed `system-attack-discovery-validate` workflow, never by writing the ad-hoc index.
+
+Re-running a seed removes the previous one first, so it is safe to repeat; that includes an earlier seed of another scenario or variant in the space, found by the seed label in its alerts' `tags`. Teardown removes the seeded alerts, events, entities and persisted discovery only: the bootstrap no-match rule, the `alertzero_frontier` mapping, the stopped Entity Store extraction, the seeder-owned index template, ingest pipeline and raw-event data streams stay in the space, which is why the serverless path refuses the `default` space (it validates `--space` against `[a-z0-9][a-z0-9_-]{0,63}`) and belongs in a space dedicated to seeding. The API key needs access to the space's detection-engine, workflows, and Entity Store APIs plus the `.alerts-security.alerts-*`, `.adhoc.alerts-security.attack.discovery.alerts-*`, `logs-endpoint.events.*`, and `entities-latest-*` indices, and cluster privileges to install the seeder-owned index template (`manage_index_templates`) and ingest pipeline (`manage_ingest_pipelines`).
+
 ## Seeding for the AD Worker (QA)
 
 The eval seeds an authored attack with a fixed id and runs the analysis on it, so it skips generation. To test the Worker end to end ([security-team#19893](https://github.com/elastic/security-team/issues/19893)), `scripts/seed_ad_worker_fp_tp.js` seeds one example's detection alerts, Entity Store entities and raw endpoint events, and no Attack Discovery. The Worker then generates the attack and its review runs the FP/TP analysis. The alerts are the same in every world; the entities and raw events decide the verdict.
@@ -106,6 +135,7 @@ node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/s
 - `--space`: required, a dedicated non-default space, one per scenario. The script creates it if it does not exist. Before seeding, the script deletes every earlier seed's alerts in the space (found by the seed label in `tags`), the raw events on their hosts and the entities on those hosts. Attack Discovery generation reads every open alert in the space, so seeding two worlds into one space mixes them into one attack.
 - `--outcome fp|tp|inconclusive` seeds `encoded-powershell.fp`, `encoded-powershell.tp` or `encoded-powershell.fp-events-truncated`. `--example <id>` seeds any other example whose gold is not `failed`; a `failed` gold needs a hand-made discovery.
 - Every run gets a fresh run marker, so alert, event and host ids are new. The twins share alert ids under one marker, and persistence de-duplicates attacks on a hash of their alert ids, so a reused marker generates no new attack. Host ids must be unique as well, because the analysis reads raw events by `host.id` across every namespace, and by `host.name` only when the cited alerts have no `host.id`.
+- `--sets N` seeds N copies of the same example. Each copy has its own alert and event ids. Copies after the first reuse the first copy's host and user, and do not write entities again. `--append` skips the cleanup and adds `--sets` copies onto the host and user already seeded in the space. The Worker reads every open alert in the space, so run it on one set and let that set be correlated before appending the next; otherwise generation folds the open sets into one attack.
 - Setup: the detection alerts index (created by the space's first rule run, so the script keeps an always-on no-match rule, `fptp-seeder-bootstrap-nomatch`, in the space), the `securitySolution:enableAttackDiscoveryWorkflows` Advanced Setting (off in a new space, and generation then fails every batch while the Worker run still completes), the Entity Store installed with log extraction stopped (it stays stopped; run `PUT /s/<space>/api/security/entity_store/start` to resume it), `alertzero_frontier` mapped (`--reasoningConnectorId`, or keep the space's mapping), and the space's anonymization-fields index, which a fresh space lacks until an AI Assistant route runs ([security-team#20129](https://github.com/elastic/security-team/issues/20129)).
 - Timestamps move so the last alert is 5 minutes before the seed. The analysis reads raw events from 2 hours before the earliest cited alert's `kibana.alert.original_time` to 2 hours after the latest, so a Worker run hours after the activity still sees the events. The manifest's `windowDeadline` records the old discovery-centered bound and is not a deadline for the search.
 - The script only seeds data. Then, in the space, enable the Attack Discovery Worker (AlertZero → Watches → Triage Watch → Attack Discovery: Enabled, Autonomy Manual, Save); saving binds the Worker's service account and starts its first run. Read the verdict in the `system-security-attack-discovery-fp-tp-analysis` and `system-security-attack-discovery-review` executions (Workflows, with Show managed workflows on) and in the Investigation's verdict card in Agent Builder. Do not run `system-security-attack-discovery-review` by hand: it fails without the Worker run's service-account parent. Re-running the Worker over the same seed generates no new review, because persistence de-duplicates the attack; seed a new space for each repetition.
@@ -124,7 +154,7 @@ node x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/s
   --reasoningConnectorId .anthropic-claude-5-opus-chat_completion
 ```
 
-Serverless is not supported yet: [#297538](https://github.com/elastic/kibana/pull/297538) adds the space-scoped serverless path (`createLiveKbnRequest` and the space index helpers here come from it).
+Serverless projects are supported with `--serverless` (ApiKey auth and a dedicated non-default `--space`, as above): the alerts go to the space's `.alerts-security.alerts-<space>` data stream (bootstrapped by the same no-match rule), and the raw events go to the same seeder-owned `logs-endpoint.events.fp-tp-<kind>-<space>` data streams the twin seeder uses — installed through the same composable template and ingest pipeline, and kept inside them on cleanup. The seeder provisions everything except the Worker run itself; verify AlertZero (Watches → Triage Watch) works on the project before relying on it for QA. The API key needs the cluster privileges the twin seeder's serverless path documents (`manage_index_templates`, `manage_ingest_pipelines`) plus the `logs-endpoint.events.fp-tp-*` streams.
 
 ## Reproducibility
 

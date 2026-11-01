@@ -28,6 +28,7 @@ import {
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
@@ -64,6 +65,8 @@ export interface HeaderProps {
  * Document header for the flyout_v2 document flyout.
  * Renders severity, timestamp, title (as a rule-details link for alerts),
  * and alert-only summary blocks (status, risk score assignees, and notes).
+ * The share button is only shown inside the Security Solution app: its link opens the alerts page,
+ * which would navigate users away from where they are (e.g. Discover, that has its own share button).
  */
 export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
@@ -73,6 +76,7 @@ export const Header: FC<HeaderProps> = memo(
       [hit]
     );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+    const isInSecurityApp = useIsInSecurityApp();
 
     const alertDetailsLink = useGetFlyoutLink({
       eventId: hit.raw._id ?? '',
@@ -86,7 +90,7 @@ export const Header: FC<HeaderProps> = memo(
       <>
         <FlyoutHeaderActions>
           <ShareUrlIconButton
-            url={isAlert ? alertDetailsLink : null}
+            url={isAlert && isInSecurityApp ? alertDetailsLink : null}
             tooltip={SHARE_ALERT_LABEL}
             ariaLabel={SHARE_ALERT_LABEL}
             dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
