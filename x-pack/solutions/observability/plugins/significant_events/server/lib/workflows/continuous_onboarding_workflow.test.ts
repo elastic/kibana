@@ -134,6 +134,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
   let getLegacyWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
+  let cancelAllRunning: jest.Mock;
 
   beforeEach(() => {
     logger = {
@@ -157,6 +158,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
     };
+    cancelAllRunning = jest.fn().mockResolvedValue(0);
   });
 
   const createService = () =>
@@ -164,7 +166,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
       logger,
       managementApi,
       streamsKIsOnboardingClient: {
-        cancelAllRunning: jest.fn().mockResolvedValue(0),
+        cancelAllRunning,
       } as unknown as SignificantEventsKIsOnboardingClient,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
     });
@@ -228,11 +230,13 @@ describe('createContinuousOnboardingWorkflowService', () => {
 
   it('can disable without waiting for running executions to drain', async () => {
     getWorkflow.mockResolvedValue({ enabled: true });
-    let resolveExecutions: (value: { results: []; total: number }) => void = () => {};
-    const executions = new Promise<{ results: []; total: number }>((resolve) => {
-      resolveExecutions = resolve;
+    let resolvePoll: (value: { results: []; total: number }) => void = () => {};
+    const poll = new Promise<{ results: []; total: number }>((resolve) => {
+      resolvePoll = resolve;
     });
-    (managementApi.getWorkflowExecutions as jest.Mock).mockReturnValue(executions);
+    (managementApi.getWorkflowExecutions as jest.Mock)
+      .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
+      .mockReturnValueOnce(poll);
 
     await expect(
       createService().ensureWorkflow({
@@ -250,9 +254,11 @@ describe('createContinuousOnboardingWorkflowService', () => {
       request
     );
     expect(managementApi.getWorkflowExecutions).toHaveBeenCalled();
+    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
+    expect(cancelAllRunning).toHaveBeenCalledWith({ request });
 
-    resolveExecutions({ results: [], total: 0 });
-    await executions;
+    resolvePoll({ results: [], total: 0 });
+    await poll;
   });
 
   it('leaves the legacy default-space document alone outside the default space', async () => {
