@@ -392,7 +392,7 @@ describe('Scout AlertZero onboarding fixtures', () => {
         onboarding.enableFirstWorker({
           spaceId: 'space-1',
           api,
-          trackOwnedAccountId: (id) => owned.push(id),
+          trackOwnedAccountId: (id: string) => owned.push(id),
         })
       ).rejects.toThrow(/failed: 500/);
       expect(owned).toEqual(['acct-1']);
@@ -415,7 +415,7 @@ describe('Scout AlertZero onboarding fixtures', () => {
       await onboarding.enableFirstWorker({
         spaceId: 'space-1',
         api,
-        trackOwnedAccountId: (id) => owned.push(id),
+        trackOwnedAccountId: (id: string) => owned.push(id),
       });
       expect(owned).toEqual(['acct-1']);
       expect(calls.filter((c) => c.method === 'DELETE')).toHaveLength(0);
