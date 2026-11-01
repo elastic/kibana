@@ -113,7 +113,10 @@ describe('KibanaActionStepImpl', () => {
       }),
       getCoreStart: jest.fn().mockReturnValue({
         featureFlags: { getBooleanValue$: mockGetBooleanValue$ },
-        security: { authc: { apiKeys: {} } },
+        security: {
+          authc: { apiKeys: {} },
+          serviceAccounts: { refreshRequestCredential: jest.fn().mockResolvedValue(undefined) },
+        },
         http: {
           basePath: {
             publicBaseUrl: 'https://localhost:5601',
