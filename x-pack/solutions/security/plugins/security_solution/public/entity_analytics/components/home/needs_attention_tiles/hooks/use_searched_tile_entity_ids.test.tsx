@@ -5,8 +5,27 @@
  * 2.0.
  */
 
-import { fetchSearchedTileEntityIds } from './use_searched_tile_entity_ids';
+import React from 'react';
+import type { PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+import { ENTITY_GRID_QUERY_KEY } from '../../entities_grid/common';
+import {
+  fetchSearchedTileEntityIds,
+  useSearchedTileEntityIds,
+} from './use_searched_tile_entity_ids';
 import type { TileEntityIds } from './use_searched_tile_entity_ids';
+
+const mockRunQuery = jest.fn();
+
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({ services: { data: { search: {} } } }),
+}));
+jest.mock('../../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
+jest.mock('../../entities_grid/queries/esql', () => ({
+  ...jest.requireActual('../../entities_grid/queries/esql'),
+  createEsqlRunner: () => mockRunQuery,
+}));
 
 const tileEntityIds: TileEntityIds = {
   entitiesWithAlerts: ['host:a', 'user:b'],
@@ -62,5 +81,32 @@ describe('fetchSearchedTileEntityIds', () => {
       noEntityIds
     );
     expect(runQuery).not.toHaveBeenCalled();
+  });
+});
+
+describe('useSearchedTileEntityIds', () => {
+  it('searches the tiles again when the grid queries are invalidated', async () => {
+    mockRunQuery.mockResolvedValue([{ 'entity.id': 'user:b' }]);
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { result } = renderHook(
+      () =>
+        useSearchedTileEntityIds({
+          spaceId: 'default',
+          searchExpression: searchArgs.searchExpression,
+          isReady: true,
+          tileEntityIds,
+        }),
+      {
+        wrapper: ({ children }: PropsWithChildren<{}>) => (
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        ),
+      }
+    );
+    await waitFor(() => expect(result.current.searchedTileEntityIds).toBeDefined());
+    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+
+    await queryClient.invalidateQueries({ queryKey: [ENTITY_GRID_QUERY_KEY] });
+
+    await waitFor(() => expect(mockRunQuery).toHaveBeenCalledTimes(2));
   });
 });

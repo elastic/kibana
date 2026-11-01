@@ -10,7 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { getEntityIds } from '../../entities_grid/common';
+import { ENTITY_GRID_QUERY_KEY, getEntityIds } from '../../entities_grid/common';
 import { buildSearchedTargetsQuery } from '../../entities_grid/queries/entities_in_view';
 import { createEsqlRunner, fetchPerIdChunk } from '../../entities_grid/queries/esql';
 import type { EsqlRunner } from '../../entities_grid/queries/types';
@@ -63,7 +63,7 @@ export const useSearchedTileEntityIds = ({
     isFetching,
     error,
   } = useQuery(
-    ['searchedTileEntityIds', searchArgs, tileEntityIds],
+    [ENTITY_GRID_QUERY_KEY, 'searched-tile-entity-ids', searchArgs, tileEntityIds],
     ({ signal }) => {
       if (!searchArgs) throw new Error('There is no search to apply to the tiles');
       return fetchSearchedTileEntityIds(
