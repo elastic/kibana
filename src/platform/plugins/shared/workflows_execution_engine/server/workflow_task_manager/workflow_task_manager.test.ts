@@ -172,6 +172,133 @@ describe('WorkflowTaskManager', () => {
     }
   );
 
+  it.each(['delay', 'idle timeout', 'immediate', 'wake', 'queued'] as const)(
+    'schedules %s tasks as the workflow binding when a service account started the execution',
+    async (kind) => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      const callerRequest = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer agent-service-account-token' },
+      });
+      const workflowRequest = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer workflow-service-account-token' },
+      });
+      core.security.authc.getPrincipal.mockImplementation((actual) =>
+        actual === callerRequest
+          ? { type: 'service_account', serviceAccountId: 'agent-account', variant: 'uiam' }
+          : null
+      );
+      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
+        async (_, execute) => execute(workflowRequest)
+      );
+      mockTaskManager.schedule.mockResolvedValue(taskManagerMock.createTask());
+      const workflowExecution = createMockWorkflowExecution();
+      workflowExecution.workflowDefinition.settings = { run_as: 'account-a' };
+
+      await withWorkflowExecutionIdentity(
+        core,
+        workflowExecution,
+        callerRequest,
+        async (request) => {
+          const params = {
+            workflowExecution,
+            executionId: workflowExecution.id,
+            spaceId: workflowExecution.spaceId,
+            resumeAt: new Date(),
+            fakeRequest: request,
+          };
+          switch (kind) {
+            case 'delay':
+              await workflowTaskManager.scheduleResumeTask(params);
+              break;
+            case 'idle timeout':
+              await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask(params);
+              break;
+            case 'immediate':
+              await workflowTaskManager.scheduleImmediateResume({
+                ...params,
+                regenerateApiKey: true,
+              });
+              break;
+            case 'wake':
+              await workflowTaskManager.ensureWakeTask(params);
+              break;
+            case 'queued':
+              await workflowTaskManager.scheduleDormantQueuedRunTask({
+                workflowExecution,
+                request,
+              });
+              break;
+          }
+        }
+      );
+
+      const calls = [
+        ...mockTaskManager.schedule.mock.calls,
+        ...mockTaskManager.ensureScheduled.mock.calls,
+      ];
+      expect(calls.length).toBeGreaterThan(0);
+      for (const [task, options] of calls) {
+        expect(task.runAs).toEqual({
+          workloadType: 'workflow',
+          workloadId: 'test-workflow-id',
+          spaceId: 'default',
+          expectedServiceAccountId: 'account-a',
+        });
+        expect(options).toBeUndefined();
+      }
+    }
+  );
+
+  it('clones the caller credential once the service account execution has settled', async () => {
+    const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+    core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+    const callerRequest = httpServerMock.createKibanaRequest();
+    const workflowRequest = httpServerMock.createKibanaRequest();
+    core.security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'agent-account',
+      variant: 'stack',
+    });
+    core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
+      async (_, execute) => execute(workflowRequest)
+    );
+    mockTaskManager.schedule.mockResolvedValue(taskManagerMock.createTask());
+    const workflowExecution = createMockWorkflowExecution();
+    workflowExecution.workflowDefinition.settings = { run_as: 'account-a' };
+
+    await withWorkflowExecutionIdentity(core, workflowExecution, callerRequest, async () => {});
+    await workflowTaskManager.scheduleResumeTask({
+      workflowExecution,
+      resumeAt: new Date(),
+      fakeRequest: workflowRequest,
+    });
+
+    const [[task, options]] = mockTaskManager.schedule.mock.calls;
+    expect(task.runAs).toBeUndefined();
+    expect(options).toEqual({ request: workflowRequest, cloneApiKey: true });
+  });
+
+  it('schedules a queued run as the given runAs instead of the caller credential', async () => {
+    mockTaskManager.schedule.mockResolvedValue(taskManagerMock.createTask());
+    const runAs = {
+      workloadType: 'workflow',
+      workloadId: 'test-workflow-id',
+      spaceId: 'default',
+      expectedServiceAccountId: 'account-a',
+    };
+
+    await workflowTaskManager.scheduleDormantQueuedRunTask({
+      workflowExecution: createMockWorkflowExecution(),
+      request: fakeRequest,
+      runAs,
+    });
+
+    const [[task, options]] = mockTaskManager.schedule.mock.calls;
+    expect(task.runAs).toEqual(runAs);
+    expect(options).toBeUndefined();
+  });
+
   describe('scheduleResumeTask', () => {
     it('should schedule a resume task with correct parameters', async () => {
       const workflowExecution = createMockWorkflowExecution();

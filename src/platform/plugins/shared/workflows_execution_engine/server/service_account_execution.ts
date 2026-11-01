@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { TaskInstance } from '@kbn/task-manager-plugin/server';
 import { visitNestedSteps, WorkflowExecuteStepInputSchema } from '@kbn/workflows';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
@@ -17,10 +18,16 @@ type IdentityExecution = Pick<
   EsWorkflowExecution,
   'id' | 'workflowId' | 'spaceId' | 'workflowDefinition' | 'effectiveIdentity' | 'managed'
 >;
+type BindingExecution = Partial<
+  Pick<EsWorkflowExecution, 'workflowDefinition' | 'effectiveIdentity'>
+>;
+type RunAsExecution = Pick<EsWorkflowExecution, 'workflowId' | 'spaceId'> & BindingExecution;
+export type WorkflowTaskRunAs = NonNullable<TaskInstance['runAs']>;
 const executionContexts = new WeakMap<
   KibanaRequest,
   { originalRequest: KibanaRequest; execution: IdentityExecution }
 >();
+const taskRunAsByRequest = new WeakMap<KibanaRequest, WorkflowTaskRunAs>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
   'allowed-workflow-ids': true,
@@ -28,7 +35,7 @@ const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'run-as-mode': true,
 });
 
-export const getExecutionServiceAccountId = (execution: IdentityExecution): string | undefined =>
+export const getExecutionServiceAccountId = (execution: BindingExecution): string | undefined =>
   execution.effectiveIdentity?.inheritedFrom
     ? execution.effectiveIdentity.id
     : execution.workflowDefinition?.settings?.run_as;
@@ -141,6 +148,56 @@ export const ensureInheritedBindingCurrent = async (
 export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>
   executionContexts.get(request)?.originalRequest ?? request;
 
+const toTaskRunAs = (
+  execution: RunAsExecution,
+  serviceAccountId: string
+): WorkflowTaskRunAs & { expectedServiceAccountId: string } => ({
+  workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+  workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
+  spaceId: execution.spaceId,
+  expectedServiceAccountId: serviceAccountId,
+});
+
+/** The workload a bound execution's tasks run as, or `undefined` when the execution is unbound. */
+export const getExecutionTaskRunAs = (execution: RunAsExecution): WorkflowTaskRunAs | undefined => {
+  const serviceAccountId = getExecutionServiceAccountId(execution);
+  return serviceAccountId ? toTaskRunAs(execution, serviceAccountId) : undefined;
+};
+
+/**
+ * The workload a task for `execution` runs as when it is scheduled with a service account's
+ * request. Task Manager can't clone that credential, so a bound execution mints its own instead.
+ */
+export const getServiceAccountCallerTaskRunAs = (
+  core: CoreStart,
+  request: KibanaRequest,
+  execution: RunAsExecution
+): WorkflowTaskRunAs | undefined => {
+  const principal = core.security.authc.getPrincipal(getWorkflowOriginalRequest(request));
+  return principal?.type === 'service_account' ? getExecutionTaskRunAs(execution) : undefined;
+};
+
+/** The workload the follow-up tasks of the execution running with `request` run as, if any. */
+export const getWorkflowTaskRunAs = (request: KibanaRequest): WorkflowTaskRunAs | undefined =>
+  taskRunAsByRequest.get(request);
+
+/** Runs `execute` with the follow-up tasks it schedules through `request` running as `runAs`. */
+export const withWorkflowTaskRunAs = async <T>(
+  request: KibanaRequest,
+  runAs: WorkflowTaskRunAs | undefined,
+  execute: () => Promise<T>
+): Promise<T> => {
+  if (!runAs) {
+    return execute();
+  }
+  taskRunAsByRequest.set(request, runAs);
+  try {
+    return await execute();
+  } finally {
+    taskRunAsByRequest.delete(request);
+  }
+};
+
 export const withWorkflowExecutionIdentity = async <T>(
   core: CoreStart,
   execution: IdentityExecution,
@@ -155,18 +212,13 @@ export const withWorkflowExecutionIdentity = async <T>(
   if (!core.security.serviceAccounts.isEnabled()) {
     throw Boom.forbidden('Service account execution is disabled.');
   }
+  const taskRunAs = getServiceAccountCallerTaskRunAs(core, originalRequest, execution);
   return core.security.serviceAccounts.withScopedRequestForWorkload(
-    {
-      workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
-      workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
-      spaceId: execution.spaceId,
-      expectedServiceAccountId: serviceAccountId,
-      executionId: execution.id,
-    },
+    { ...toTaskRunAs(execution, serviceAccountId), executionId: execution.id },
     async (scopedRequest) => {
       executionContexts.set(scopedRequest, { originalRequest, execution });
       try {
-        return await execute(scopedRequest);
+        return await withWorkflowTaskRunAs(scopedRequest, taskRunAs, () => execute(scopedRequest));
       } finally {
         executionContexts.delete(scopedRequest);
       }

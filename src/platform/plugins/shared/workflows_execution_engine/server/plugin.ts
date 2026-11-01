@@ -19,6 +19,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import {
   ExecutionStatus,
   isTerminalStatus,
@@ -87,8 +88,11 @@ import { StepExecutionRepository } from './repositories/step_execution_repositor
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import {
   ensureInheritedBindingCurrent,
+  getExecutionTaskRunAs,
+  getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
   resolveInheritedWorkflowIdentity,
+  withWorkflowTaskRunAs,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
@@ -246,6 +250,59 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
+  /**
+   * Lets a `workflow:run` / `workflow:resume` task run as the execution's service account binding.
+   * Task Manager can't clone a service account's credential, so when one starts a bound execution
+   * its tasks are scheduled with `runAs` and get a request minted for the binding when they run.
+   */
+  private withRunAsRequest(
+    core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
+    definition: TaskRegisterDefinition
+  ): TaskRegisterDefinition {
+    const { createTaskRunner } = definition;
+    return {
+      ...definition,
+      runAs: {
+        workloadTypes: [WORKFLOW_SERVICE_ACCOUNT_TYPE],
+        withScopedRequest: async (params, fn) => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.security.serviceAccounts.withScopedRequestForWorkload(params, fn);
+        },
+      },
+      createTaskRunner: (context) => {
+        const { fakeRequest, runAs, taskInstance } = context;
+        if (fakeRequest || !runAs) {
+          return createTaskRunner(context);
+        }
+        const { workflowRunId, spaceId } = taskInstance.params as StartWorkflowExecutionParams;
+        let taskRunner: ReturnType<typeof createTaskRunner> | undefined;
+        return {
+          run: async () => {
+            const { workflowExecutionRepository } = this.createScopedRepositories();
+            const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+              workflowRunId,
+              spaceId
+            );
+            const executionRunAs = execution ? getExecutionTaskRunAs(execution) : undefined;
+            if (!executionRunAs) {
+              taskRunner = createTaskRunner(context);
+              return taskRunner.run();
+            }
+            return runAs.withScopedRequest((request) =>
+              withWorkflowTaskRunAs(request, executionRunAs, async () => {
+                taskRunner = createTaskRunner({ ...context, fakeRequest: request });
+                return taskRunner.run();
+              })
+            );
+          },
+          cancel: async () => {
+            await taskRunner?.cancel?.();
+          },
+        };
+      },
+    };
+  }
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
@@ -307,7 +364,7 @@ export class WorkflowsExecutionEnginePlugin
     }
 
     plugins.taskManager.registerTaskDefinitions({
-      [WORKFLOW_RUN_TASK_TYPE]: {
+      [WORKFLOW_RUN_TASK_TYPE]: this.withRunAsRequest(core, {
         title: 'Run Workflow',
         description: 'Executes a workflow immediately',
         // Set high timeout for long-running workflows.
@@ -517,10 +574,10 @@ export class WorkflowsExecutionEnginePlugin
             },
           };
         },
-      },
+      }),
     });
     plugins.taskManager.registerTaskDefinitions({
-      [WORKFLOW_RESUME_TASK_TYPE]: {
+      [WORKFLOW_RESUME_TASK_TYPE]: this.withRunAsRequest(core, {
         paramsSchema: schema.object({
           workflowRunId: schema.string(),
           spaceId: schema.string(),
@@ -796,7 +853,7 @@ export class WorkflowsExecutionEnginePlugin
             },
           };
         },
-      },
+      }),
     });
     plugins.taskManager.registerTaskDefinitions({
       [WORKFLOW_SCHEDULED_TASK_TYPE]: {
@@ -1496,6 +1553,8 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
+      const runAs = getServiceAccountCallerTaskRunAs(coreStart, originalRequest, workflowExecution);
+
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
@@ -1504,6 +1563,7 @@ export class WorkflowsExecutionEnginePlugin
             workflowExecutionId: workflowExecution.id,
             spaceId: workflowExecution.spaceId,
             request,
+            runAs,
             workflowExecutionRepository,
             stepExecutionRepository,
             workflowTaskManager,
@@ -1543,7 +1603,7 @@ export class WorkflowsExecutionEnginePlugin
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
-        const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
+        const taskInstance = { ...createTaskInstance(workflowExecution, ['workflows']), runAs };
         await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request as KibanaRequest);
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${

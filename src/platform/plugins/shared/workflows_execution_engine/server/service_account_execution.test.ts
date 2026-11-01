@@ -15,8 +15,11 @@ import {
 } from '@kbn/core/server/mocks';
 import { hasWorkflowAccess } from './lib/has_workflow_access';
 import {
+  getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
   withWorkflowExecutionIdentity,
+  withWorkflowTaskRunAs,
 } from './service_account_execution';
 
 describe('workflow service account execution', () => {
@@ -79,6 +82,102 @@ describe('workflow service account execution', () => {
       expect.any(Function)
     );
     expect(getWorkflowOriginalRequest(scoped)).toBe(scoped);
+  });
+
+  describe('task runAs for service account callers', () => {
+    const serviceAccountPrincipal = {
+      type: 'service_account' as const,
+      serviceAccountId: 'agent-account',
+      variant: 'uiam' as const,
+    };
+
+    it('runs a bound execution started by a service account as the workflow binding', () => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      const request = httpServerMock.createKibanaRequest();
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+
+      expect(getServiceAccountCallerTaskRunAs(core, request, execution('account-a'))).toEqual({
+        workloadType: 'workflow',
+        workloadId: 'workflow',
+        spaceId: 'space',
+        expectedServiceAccountId: 'account-a',
+      });
+      expect(core.security.authc.getPrincipal).toHaveBeenCalledWith(request);
+    });
+
+    it('runs an inherited execution as the binding it inherited', () => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+
+      expect(
+        getServiceAccountCallerTaskRunAs(core, httpServerMock.createKibanaRequest(), {
+          ...execution(),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'parent-account',
+            inheritedFrom: { workloadId: 'parent-workflow' },
+          },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          workloadId: 'parent-workflow',
+          expectedServiceAccountId: 'parent-account',
+        })
+      );
+    });
+
+    it('keeps cloning for users and for unbound executions', () => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      const request = httpServerMock.createKibanaRequest();
+      core.security.authc.getPrincipal.mockReturnValue({ type: 'user', username: 'elastic' });
+      expect(getServiceAccountCallerTaskRunAs(core, request, execution('account-a'))).toBe(
+        undefined
+      );
+
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+      expect(getServiceAccountCallerTaskRunAs(core, request, execution())).toBe(undefined);
+    });
+
+    it('scopes the runAs to the request while the execution runs', async () => {
+      const core = {
+        ...coreMock.createStart(),
+        security: securityServiceMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+      const request = httpServerMock.createKibanaRequest();
+      const scoped = httpServerMock.createKibanaRequest();
+      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
+        async (_params, fn) => fn(scoped)
+      );
+
+      await withWorkflowExecutionIdentity(core, execution('account-a'), request, async (actual) => {
+        expect(getWorkflowTaskRunAs(actual)).toEqual(
+          expect.objectContaining({ expectedServiceAccountId: 'account-a' })
+        );
+      });
+      expect(getWorkflowTaskRunAs(scoped)).toBeUndefined();
+      expect(getWorkflowTaskRunAs(request)).toBeUndefined();
+    });
+
+    it('releases the runAs when the work throws', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const runAs = {
+        workloadType: 'workflow',
+        workloadId: 'workflow',
+        spaceId: 'space',
+        expectedServiceAccountId: 'account-a',
+      };
+
+      await expect(
+        withWorkflowTaskRunAs(request, runAs, async () => {
+          expect(getWorkflowTaskRunAs(request)).toBe(runAs);
+          throw new Error('boom');
+        })
+      ).rejects.toThrow('boom');
+      expect(getWorkflowTaskRunAs(request)).toBeUndefined();
+    });
   });
 
   it('does not fall back when the binding changed or the feature is disabled', async () => {

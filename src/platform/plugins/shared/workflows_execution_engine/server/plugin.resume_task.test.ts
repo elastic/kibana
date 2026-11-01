@@ -69,7 +69,7 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 }));
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
-import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';
+import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
 import {
   getWorkflowGlobalTimeoutResumeTaskId,
   getWorkflowImmediateResumeTaskId,
@@ -621,6 +621,84 @@ describe('workflow:resume task runner event fields', () => {
       space_id: 'default',
       outcome: 'interrupted',
     });
+  });
+
+  it('lets run and resume tasks run as a workflow service account binding', () => {
+    setupPlugin();
+    expect(taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].runAs?.workloadTypes).toEqual(['workflow']);
+    expect(taskDefinitions[WORKFLOW_RUN_TASK_TYPE].runAs?.workloadTypes).toEqual(['workflow']);
+  });
+
+  it('resumes a runAs task with a request minted for the binding and keeps its tasks on runAs', async () => {
+    setupPlugin();
+    const workflowRunId = 'exec-run-as';
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-run-as',
+      spaceId: 'default',
+      status: 'waiting',
+      workflowDefinition: { settings: { run_as: 'account-a' } },
+    });
+    const mintedRequest = {} as KibanaRequest;
+    const withScopedRequest = jest.fn(async (fn) => fn(mintedRequest));
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowGlobalTimeoutResumeTaskId(workflowRunId),
+          params: { workflowRunId, spaceId: 'default' },
+        },
+        fakeRequest: undefined,
+        runAs: { withScopedRequest },
+      })
+    );
+
+    await runner.run();
+
+    expect(withScopedRequest).toHaveBeenCalledTimes(1);
+    expect(mockFailExecutionMissingIdentity).not.toHaveBeenCalled();
+    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: getWorkflowWakeTaskId(workflowRunId),
+        runAs: {
+          workloadType: 'workflow',
+          workloadId: 'wf-run-as',
+          spaceId: 'default',
+          expectedServiceAccountId: 'account-a',
+        },
+      }),
+      undefined
+    );
+  });
+
+  it('fails a runAs task whose execution is not bound to a service account', async () => {
+    setupPlugin();
+    const workflowRunId = 'exec-run-as-unbound';
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-unbound',
+      spaceId: 'default',
+      status: 'waiting',
+      workflowDefinition: {},
+    });
+    const withScopedRequest = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          params: { workflowRunId, spaceId: 'default' },
+        },
+        fakeRequest: undefined,
+        runAs: { withScopedRequest },
+      })
+    );
+
+    await runner.run();
+
+    expect(withScopedRequest).not.toHaveBeenCalled();
+    expect(mockFailExecutionMissingIdentity).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowRunId })
+    );
   });
 
   it('fails the execution when claimed without a Task Manager identity', async () => {

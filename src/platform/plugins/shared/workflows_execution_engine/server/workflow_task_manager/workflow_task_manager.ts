@@ -22,10 +22,31 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
-import { getWorkflowOriginalRequest } from '../service_account_execution';
+import {
+  getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
+  type WorkflowTaskRunAs,
+} from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
+
+type ScheduleOptions = NonNullable<Parameters<TaskManagerStartContract['schedule']>[1]>;
+
+/** A task of an execution started by a service account runs as the execution's binding. */
+const runAsFields = (
+  request: KibanaRequest | undefined,
+  runAs: WorkflowTaskRunAs | undefined = request && getWorkflowTaskRunAs(request)
+): { runAs?: WorkflowTaskRunAs } => (runAs ? { runAs } : {});
+
+/** Other tasks clone the caller's API key, which a service account's credential is not. */
+const cloneApiKeyOptions = (
+  request: KibanaRequest | undefined,
+  options: Omit<ScheduleOptions, 'request' | 'cloneApiKey'> = {}
+): ScheduleOptions | undefined =>
+  request && !getWorkflowTaskRunAs(request)
+    ? { request: getWorkflowOriginalRequest(request), cloneApiKey: true, ...options }
+    : undefined;
 
 export const getTaskPriority = (context?: Record<string, unknown> | null): TaskPriority =>
   context?.isUserInteractive === true ? TaskPriority.UserInteractive : TaskPriority.Standard;
@@ -130,8 +151,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...runAsFields(fakeRequest),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      cloneApiKeyOptions(fakeRequest)
     );
 
     return {
@@ -161,8 +183,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...runAsFields(fakeRequest),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      cloneApiKeyOptions(fakeRequest)
     );
 
     return {
@@ -177,9 +200,12 @@ export class WorkflowTaskManager {
   async scheduleDormantQueuedRunTask({
     workflowExecution,
     request,
+    runAs,
   }: {
     workflowExecution: EsWorkflowExecution;
     request: KibanaRequest;
+    /** Set when a service account queued a bound execution: its credential can't be cloned. */
+    runAs?: WorkflowTaskRunAs;
   }): Promise<{ taskId: string }> {
     if (!workflowExecution.id || !workflowExecution.spaceId) {
       throw new Error('Workflow execution must have id and spaceId to schedule a queued run task');
@@ -212,8 +238,9 @@ export class WorkflowTaskManager {
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
         priority,
+        ...runAsFields(request, runAs),
       },
-      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
+      runAs ? undefined : cloneApiKeyOptions(request)
     );
 
     return { taskId: task.id };
@@ -293,14 +320,9 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
         priority,
+        ...runAsFields(fakeRequest),
       },
-      fakeRequest
-        ? {
-            request: getWorkflowOriginalRequest(fakeRequest),
-            cloneApiKey: true,
-            ...(regenerateApiKey ? { regenerateApiKey: true } : {}),
-          }
-        : undefined
+      cloneApiKeyOptions(fakeRequest, regenerateApiKey ? { regenerateApiKey: true } : {})
     );
     return { taskId };
   }
@@ -439,10 +461,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
+        ...runAsFields(params.fakeRequest),
       },
-      params.fakeRequest
-        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
-        : undefined
+      cloneApiKeyOptions(params.fakeRequest)
     );
   }
 
