@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 import type { RuleActionsMenuProps } from './rule_actions_menu';
 import { RuleActionsMenu } from './rule_actions_menu';
 
@@ -40,7 +41,9 @@ const renderMenu = (props: Partial<RuleActionsMenuProps> = {}) => {
   };
   const view = render(
     <I18nProvider>
-      <RuleActionsMenu {...allProps} />
+      <MockLocatorProvider locators={createMockLocators()}>
+        <RuleActionsMenu {...allProps} />
+      </MockLocatorProvider>
     </I18nProvider>
   );
   return { ...view, props: allProps };

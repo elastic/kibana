@@ -43,6 +43,10 @@ export const getListKiStatusFilterLabel = (status: KiLifecycleStatus): string =>
       return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusDeleted', {
         defaultMessage: 'Deleted',
       });
+    case 'verification_failed':
+      return i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.statusVerificationFailed', {
+        defaultMessage: 'Failed',
+      });
   }
 };
 

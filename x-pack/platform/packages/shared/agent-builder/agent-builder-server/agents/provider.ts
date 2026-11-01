@@ -167,8 +167,10 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
-  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  /** Whether AI index instructions are enabled by the Context Engine setting */
   aiIndices: boolean;
+  /** Whether SML is available, which follows the Agent Builder experimental setting */
+  sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
@@ -241,6 +243,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * Service account the execution runs as; see `GetAgentOptions.runAs`.
+   */
+  runAs?: string;
   /**
    * Information about the deployment (environment, version, license...) the agent runs in.
    */

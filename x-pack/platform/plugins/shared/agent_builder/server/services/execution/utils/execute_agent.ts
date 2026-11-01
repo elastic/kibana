@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { Observable, shareReplay } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -18,7 +19,10 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
-import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import type {
+  ExecutionConversationOrigin,
+  ExecutionRunAs,
+} from '@kbn/agent-builder-server/execution';
 import type {
   ChatCompletionReasoningEffort,
   ConnectorTelemetryMetadata,
@@ -35,6 +39,8 @@ export const executeAgent$ = ({
   nextInput,
   origin,
   author,
+  owner,
+  runAs,
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
@@ -60,6 +66,10 @@ export const executeAgent$ = ({
   nextInput: ConverseInput;
   origin?: ExecutionConversationOrigin;
   author?: ConversationRoundAuthor;
+  /** Identity conversation writes are attributed to; see {@link RunAgentParams.owner}. */
+  owner?: UserIdAndName;
+  /** Service account the execution runs as; see {@link RunAgentParams.runAs}. */
+  runAs?: ExecutionRunAs;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -80,6 +90,8 @@ export const executeAgent$ = ({
       request,
       agentId,
       executionId,
+      owner,
+      runAs,
       abortSignal,
       defaultConnectorId,
       telemetryMetadata,
