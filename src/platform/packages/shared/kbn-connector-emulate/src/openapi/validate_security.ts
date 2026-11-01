@@ -71,13 +71,20 @@ const bearerScopes = ({ headers }: SecurityInput): readonly string[] | undefined
 /**
  * The scopes the token lacks for the satisfied requirement it is closest to, or undefined when
  * scopes aren't checked: the token wasn't issued by the mock for specific scopes, or one of the
- * satisfied requirements needs no scope it lacks.
+ * satisfied requirements is met. A scheme's scopes are read as alternatives, so a token needs one
+ * of them: vendors list the scopes that each allow an operation (Google, Zoom, Slack, Figma),
+ * although OpenAPI reads the list as all of them.
  */
 const missingScopes = (
   { security }: ContractOperation,
   input: SecurityInput
 ):
-  | { readonly granted: readonly string[]; readonly required: string[]; readonly missing: string[] }
+  | {
+      readonly granted: readonly string[];
+      readonly required: string[];
+      /** Per scheme the token doesn't meet, the scopes any one of which would. */
+      readonly missing: ReadonlyArray<readonly string[]>;
+    }
   | undefined => {
   const granted = bearerScopes(input);
   if (!granted) {
@@ -85,10 +92,13 @@ const missingScopes = (
   }
   const candidates = security
     .filter((requirement) => isSatisfied(requirement, input))
-    .map((requirement) => {
-      const required = requiredScopes(requirement);
-      return { granted, required, missing: required.filter((scope) => !granted.includes(scope)) };
-    })
+    .map((requirement) => ({
+      granted,
+      required: requiredScopes(requirement),
+      missing: requirement
+        .map(({ scopes = [] }) => scopes)
+        .filter((scopes) => scopes.length > 0 && !scopes.some((scope) => granted.includes(scope))),
+    }))
     .sort((a, b) => a.missing.length - b.missing.length);
   const [closest] = candidates;
   return closest && closest.missing.length > 0 ? closest : undefined;
@@ -145,9 +155,9 @@ export const validateSecurity = (
     {
       path: ['security'],
       code: 'insufficient_scope',
-      message: `Token was granted ${granted}, but the operation also needs ${found.missing.join(
-        ' '
-      )} (requires ${found.required.join(' ')})`,
+      message: `Token was granted ${granted}, but the operation needs ${found.missing
+        .map((scopes) => `one of ${scopes.join(' ')}`)
+        .join(', and ')}`,
     },
   ];
 };
