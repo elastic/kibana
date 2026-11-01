@@ -90,8 +90,18 @@ export interface SeriesHead {
 export interface OperatorDeactivation {
   groupHash: string;
   episodeId: string;
+  /** Empty when the operator gave none (blank, or the standard no-reason note). */
   reason: string;
   deactivatedAt: string;
+}
+
+/**
+ * What the deactivation read found. `failed` means the read did not complete, so an absent series
+ * proves nothing; otherwise an absent series has no user deactivation.
+ */
+export interface OperatorDeactivationLookup {
+  deactivations: Map<string, OperatorDeactivation>;
+  failed: boolean;
 }
 
 /** A `.alert-actions` row; `Readonly` keeps it a type alias, which `esqlToObjects` accepts. */
@@ -717,16 +727,17 @@ export class RuleEventsClient {
    * an older deactivation never applies to it. Other actions (snooze, ack, assign, tag) are not
    * read, so they never mask a deactivation. Keyed by `group_hash`.
    *
-   * Any read failure counts as "not deactivated" and is logged: a missing index or an unreadable
-   * mapping must not break the write path that calls this.
+   * A deactivation with no reason is kept, with an empty `reason`, so it differs from no
+   * deactivation. A read failure is logged and reported as `failed` instead of thrown: a missing
+   * index or an unreadable mapping must not break the write path that calls this.
    */
   async findOperatorDeactivations({
     heads,
   }: {
     heads: readonly SeriesHead[];
-  }): Promise<Map<string, OperatorDeactivation>> {
+  }): Promise<OperatorDeactivationLookup> {
     const deactivations = new Map<string, OperatorDeactivation>();
-    if (heads.length === 0) return deactivations;
+    if (heads.length === 0) return { deactivations, failed: false };
 
     try {
       const groupHashes = [...new Set(heads.map(({ groupHash }) => groupHash))];
@@ -754,9 +765,8 @@ export class RuleEventsClient {
         if (current === undefined || isLaterAction(row, current)) latest.set(row.group_hash, row);
       }
 
-      // A deactivation with no reason carries the standard note and tells the agent nothing, so it
-      // is not held: the series reopens like any new event. Kibana's locale is instance-wide, so
-      // the browser and this server write and read the same text.
+      // The standard no-reason note tells the agent nothing, so it counts as no reason. Kibana's
+      // locale is instance-wide, so the browser and this server write and read the same text.
       const noReasonNote = operatorFallbackAssessmentNote('inactive');
       for (const { groupHash, episodeId } of heads) {
         const action = latest.get(groupHash);
@@ -768,22 +778,21 @@ export class RuleEventsClient {
           continue;
         }
         const reason = (action.reason ?? '').trim();
-        if (reason === noReasonNote) continue;
         deactivations.set(groupHash, {
           groupHash,
           episodeId,
-          reason,
+          reason: reason === noReasonNote ? '' : reason,
           deactivatedAt: action['@timestamp'],
         });
       }
-      return deactivations;
+      return { deactivations, failed: false };
     } catch (error) {
       this.clients.logger?.error(
         `deactivation_check_failed: could not read operator deactivations from ${ALERT_ACTIONS_DATA_STREAM}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return new Map();
+      return { deactivations: new Map(), failed: true };
     }
   }
 
@@ -882,11 +891,9 @@ export class RuleEventsClient {
   }
 
   /**
-   * Reads every operator deactivation of an event from Alerting v2's `.alert-actions`: the episode
-   * and the operator's reason. It is history, not current state: a deactivation that an operator
-   * later activated again is still listed. The version a deactivation writes to `.rule-events`
-   * only copies the previous version's data, so the reason lives only here. Failures read as no
-   * deactivations and are logged.
+   * Reads every operator deactivation of an event from `.alert-actions`, oldest first: the episode,
+   * the time and the reason. The version a deactivation writes to `.rule-events` only copies the
+   * previous data, so the reason lives only here. Failures read as none and are logged.
    */
   async findEventDeactivations(eventId: string): Promise<EventDeactivation[]> {
     try {
@@ -900,7 +907,11 @@ export class RuleEventsClient {
       );
       if (series === undefined) return [];
 
-      const rows = esqlToObjects<{ alert_id: string | null; reason: string | null }>(
+      const rows = esqlToObjects<{
+        '@timestamp': string;
+        alert_id: string | null;
+        reason: string | null;
+      }>(
         await queryEsql({
           esClient: this.actionsEsClient(),
           query: esql.from([ALERT_ACTIONS_DATA_STREAM], []).where`space_id == ${esql.str(
@@ -908,14 +919,20 @@ export class RuleEventsClient {
           )}`.where`group_hash == ${esql.str(series.group_hash)}`
             .where`action_type == "deactivate" AND actor.type == "user"`
             .sort(['@timestamp', 'ASC'])
-            .keep('alert_id', 'reason'),
+            .keep('@timestamp', 'alert_id', 'reason'),
         })
       );
       // `alert_id` in `.alert-actions` is the episode id.
       return rows.flatMap((row) =>
         row.alert_id === null
           ? []
-          : [{ episode_id: row.alert_id, reason: (row.reason ?? '').trim() }]
+          : [
+              {
+                '@timestamp': row['@timestamp'],
+                episode_id: row.alert_id,
+                reason: (row.reason ?? '').trim(),
+              },
+            ]
       );
     } catch (error) {
       this.clients.logger?.error(

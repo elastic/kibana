@@ -15,6 +15,7 @@ import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { EntitiesGrid } from '../components/home/entities_grid/components/entities_grid';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import type { SignalCardData } from '../components/home/needs_attention_tiles/data';
 
@@ -79,7 +80,7 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
   }),
 }));
 jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
-  EntitiesGrid: () => null,
+  EntitiesGrid: jest.fn(() => null),
 }));
 jest.mock('../components/home/entities_grid/components/entities_groups', () => ({
   EntitiesGroups: () => null,
@@ -140,13 +141,17 @@ const mockPrivileges = ({
   isError = false,
   hasReadPermissions = true,
   alerts = true,
+  alertsFeature = alerts,
   risk = true,
   anomalies = true,
 }: {
   isLoading?: boolean;
   isError?: boolean;
   hasReadPermissions?: boolean;
+  /** Read on the alerts index. */
   alerts?: boolean;
+  /** The Security > Alerts Kibana feature privilege; follows `alerts` unless set. */
+  alertsFeature?: boolean;
   risk?: boolean;
   anomalies?: boolean;
 } = {}) => {
@@ -167,7 +172,12 @@ const mockPrivileges = ({
       privileges: { elasticsearch: { index: {} }, kibana: {} },
     },
   });
-  (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexRead: alerts, loading: false });
+  (useAlertsPrivileges as jest.Mock).mockReturnValue({
+    hasIndexRead: alerts,
+    // Like the real hook, the feature privilege and index read are both required.
+    hasAlertsRead: alertsFeature && alerts,
+    loading: false,
+  });
   (useEntityEnginePrivileges as jest.Mock).mockReturnValue({
     isLoading,
     isError,
@@ -231,12 +241,14 @@ const mockTiles = (
     severeAlertsEntityIds: [],
     watchlistedCount: 2,
     watchlistedEntityIds: [],
+    hasCount: true,
     isLoading: false,
     isCountPending: of('alerts').isCountPending,
   });
   const count = (tile: Tile) => ({
     count: 3,
     entityIds: [],
+    hasCount: true,
     isLoading: false,
     isMissingIndex: false,
     isCountPending: of(tile).isCountPending,
@@ -388,6 +400,53 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
   );
 });
 
+describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useEntityStoreStatus as jest.Mock).mockReturnValue({
+      data: { status: 'running' },
+      isLoading: false,
+    });
+    mockTiles();
+  });
+
+  it('skips the alert tiles and says why when Alerts is None but the alerts index is readable', () => {
+    mockPrivileges({ alerts: true, alertsFeature: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    [COUNT_HOOKS.alerts, DELTA_HOOKS.alerts, SERIES_HOOKS.alerts].forEach((hook) => {
+      expect(lastOptions(hook).skip).toBe(true);
+    });
+    ['entitiesWithAlerts', 'watchlisted'].forEach((id) => {
+      expect(getCard(id as SignalCardData['id'])?.noDataMessage).toBe(
+        'Requires read access to alerts'
+      );
+    });
+    // The grid drops the Alerts columns (and so their count and click path) for this role.
+    const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+    expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(false);
+  });
+
+  it('warns in the privileges callout when only the Alerts feature privilege is missing', () => {
+    mockPrivileges({ alerts: true, alertsFeature: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const wrapper = screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper');
+    expect(within(wrapper).getByText('Insufficient privileges')).toBeInTheDocument();
+    expect(within(wrapper).getByText('Alerts')).toBeInTheDocument();
+  });
+
+  it('keeps the alert tiles on when Alerts and the alerts index are both readable', () => {
+    mockPrivileges({ alerts: true, alertsFeature: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(lastOptions(COUNT_HOOKS.alerts).skip).toBe(false);
+    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBeUndefined();
+    const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+    expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(true);
+  });
+});
+
 describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -492,6 +551,27 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
+  });
+
+  it('passes whether each count has a result to its tile, so a missing count is not shown as 0', () => {
+    mockTiles();
+    hooks.useRiskMoversCount.mockReturnValue({
+      ...hooks.useRiskMoversCount(),
+      count: 0,
+      hasCount: false,
+    });
+    hooks.useNewlyHighCriticalCount.mockReturnValue({
+      ...hooks.useNewlyHighCriticalCount(),
+      count: 0,
+      hasCount: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('riskMovers')).toEqual(expect.objectContaining({ value: 0, hasCount: false }));
+    expect(getCard('newlyHighCritical')).toEqual(
+      expect.objectContaining({ value: 0, hasCount: true })
+    );
+    expect(getCard('newEntity')).toEqual(expect.objectContaining({ hasCount: true }));
   });
 
   it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
