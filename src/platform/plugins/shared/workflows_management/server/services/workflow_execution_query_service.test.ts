@@ -12,6 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import type {
   IWorkflowLogsQueryService,
   StepExecutionsDataClient,
@@ -192,30 +193,23 @@ describe('WorkflowExecutionQueryService', () => {
       );
     });
 
-    it('bounds the wildcard and checks the full text for long name filters', async () => {
+    it('uses only a wildcard query for the longest name filter', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
         took: 0,
         timed_out: false,
         _shards: { total: 1, successful: 1, failed: 0 },
       });
-      const runName = 'B'.repeat(1024);
+      const runName = 'B'.repeat(WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH);
 
       await service.getWorkflowExecutions({ workflowId: 'wf-1', runName }, 'default');
 
-      expect(mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must).toEqual(
-        expect.arrayContaining([
-          { wildcard: { runName: { value: `*${'B'.repeat(128)}*`, case_insensitive: true } } },
-          {
-            script: {
-              script: {
-                source:
-                  "doc['runName'].size() != 0 && doc['runName'].value.toLowerCase(Locale.ROOT).contains(params.runName)",
-                params: { runName: runName.toLowerCase() },
-              },
-            },
-          },
-        ])
+      const must = mockWorkflowDataClient.search.mock.calls[0][0]?.query?.bool?.must;
+      expect(must).toContainEqual({
+        wildcard: { runName: { value: `*${runName}*`, case_insensitive: true } },
+      });
+      expect(must).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ script: expect.anything() })])
       );
     });
 

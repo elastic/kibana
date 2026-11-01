@@ -28,7 +28,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
-import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows/common/constants';
+import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import { getStatusLabel } from '../../../shared/translations';
 
 export interface ExecutedByFilterOption {
@@ -345,7 +345,7 @@ export function ExecutionListFilters({
               { defaultMessage: 'Filter by execution name' }
             )}
             value={filters.runName ?? ''}
-            maxLength={WORKFLOW_RUN_NAME_MAX_LENGTH}
+            maxLength={WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH}
             onChange={(event) => onFiltersChange({ ...filters, runName: event.target.value })}
             data-test-subj="workflowExecutionListRunNameSearch"
           />

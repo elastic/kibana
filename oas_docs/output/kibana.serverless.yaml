@@ -137918,7 +137918,7 @@ paths:
           name: runName
           required: false
           schema:
-            maxLength: 1024
+            maxLength: 128
             type: string
         - description: Filter by execution status.
           in: query

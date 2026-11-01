@@ -17,7 +17,7 @@ import {
   ExecutionTypeValues,
   type LayoutDirection,
 } from '@kbn/workflows';
-import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows/common/constants';
+import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import {
   getStoredEditorView,
   getStoredGraphDirection,
@@ -182,7 +182,8 @@ export function useWorkflowUrlState() {
           ExecutionTypeValues
         ),
         executedBy: stringList(params.executedBy),
-        runName: runName && runName.length <= WORKFLOW_RUN_NAME_MAX_LENGTH ? runName : undefined,
+        runName:
+          runName && runName.length <= WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH ? runName : undefined,
       },
       lastViewedExecutionId: boundedToken(firstString(params.lastViewedExecutionId)),
     };

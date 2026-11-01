@@ -11,7 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
-import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows/common/constants';
+import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import { useWorkflowUrlState } from './use_workflow_url_state';
 import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
@@ -168,7 +168,7 @@ describe('useWorkflowUrlState', () => {
 
   it('ignores execution name filters over the length limit', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper([`/?runName=${'a'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1)}`]),
+      wrapper: createWrapper([`/?runName=${'a'.repeat(WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH + 1)}`]),
     });
 
     expect(result.current.executionListFilters.runName).toBeUndefined();
