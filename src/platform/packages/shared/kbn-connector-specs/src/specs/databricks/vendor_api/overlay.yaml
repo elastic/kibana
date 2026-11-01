@@ -22,17 +22,6 @@ actions:
       /api/2.1/jobs/runs/repair:
         $ref: '#/paths/~1api~12.2~1jobs~1runs~1repair'
 
-  # The connector calls Clusters API 2.0, while the reference documents 2.1. Start and restart are
-  # the same in both; 2.1 adds paging to list, which the connector doesn't use.
-  - target: $.paths
-    update:
-      /api/2.0/clusters/list:
-        $ref: '#/paths/~1api~12.1~1clusters~1list'
-      /api/2.0/clusters/start:
-        $ref: '#/paths/~1api~12.1~1clusters~1start'
-      /api/2.0/clusters/restart:
-        $ref: '#/paths/~1api~12.1~1clusters~1restart'
-
   # The list pages only say they return "a list of ClusterInfo objects" or "EndpointInfo objects";
   # their example responses show the envelope.
   - target: $.paths['/api/2.1/clusters/list'].get.responses['200'].content['application/json']

@@ -65,7 +65,7 @@
           },
           "style": "cursor"
         },
-        "path": "/api/2.0/clusters/list",
+        "path": "/api/2.1/clusters/list",
         "source": "docs"
       }
     ],
@@ -118,7 +118,7 @@
     "restartCluster": [
       {
         "method": "post",
-        "path": "/api/2.0/clusters/restart",
+        "path": "/api/2.1/clusters/restart",
         "source": "docs"
       }
     ],
@@ -133,7 +133,7 @@
     "startCluster": [
       {
         "method": "post",
-        "path": "/api/2.0/clusters/start",
+        "path": "/api/2.1/clusters/start",
         "source": "docs"
       }
     ],

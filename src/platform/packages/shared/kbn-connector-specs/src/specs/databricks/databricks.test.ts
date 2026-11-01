@@ -427,10 +427,24 @@ describe('Databricks', () => {
       expect(Databricks.actions.listClusters.isTool).toBe(true);
     });
 
-    it('calls GET /api/2.0/clusters/list', async () => {
+    it('calls GET /api/2.1/clusters/list with no params when none provided', async () => {
       const input = parse('listClusters', {});
       await Databricks.actions.listClusters.handler(mockContext, input);
-      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/clusters/list`);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/clusters/list`, {
+        params: {},
+      });
+    });
+
+    it('passes pageSize and pageToken as snake_case params', async () => {
+      const input = parse('listClusters', { pageSize: 50, pageToken: 'CAEaFDAzMTU' });
+      await Databricks.actions.listClusters.handler(mockContext, input);
+      expect(mockGet).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/clusters/list`, {
+        params: { page_size: 50, page_token: 'CAEaFDAzMTU' },
+      });
+    });
+
+    it('rejects a pageSize above 100', () => {
+      expect(() => parse('listClusters', { pageSize: 101 })).toThrow();
     });
   });
 
@@ -439,10 +453,10 @@ describe('Databricks', () => {
       expect(Databricks.actions.startCluster.isTool).toBe(false);
     });
 
-    it('calls POST /api/2.0/clusters/start with cluster_id', async () => {
+    it('calls POST /api/2.1/clusters/start with cluster_id', async () => {
       const input = parse('startCluster', { clusterId: '0923-164208-meows279' });
       await Databricks.actions.startCluster.handler(mockContext, input);
-      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/clusters/start`, {
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/clusters/start`, {
         cluster_id: '0923-164208-meows279',
       });
     });
@@ -453,10 +467,10 @@ describe('Databricks', () => {
       expect(Databricks.actions.restartCluster.isTool).toBe(false);
     });
 
-    it('calls POST /api/2.0/clusters/restart with cluster_id', async () => {
+    it('calls POST /api/2.1/clusters/restart with cluster_id', async () => {
       const input = parse('restartCluster', { clusterId: '0923-164208-meows279' });
       await Databricks.actions.restartCluster.handler(mockContext, input);
-      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.0/clusters/restart`, {
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/clusters/restart`, {
         cluster_id: '0923-164208-meows279',
       });
     });
