@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { getInlineActionStepDefinition } from '../registry';
 import type { ConnectorCreationConfig, InlineWorkflowActionDraft } from '../types';
-import { validateInlineAction } from '../types';
+import { validateInlineAction } from '../helpers/validate_inline_action';
 import { ConnectorSelector } from './connector_selector';
 import { ParamsEditor } from './params_editor';
 

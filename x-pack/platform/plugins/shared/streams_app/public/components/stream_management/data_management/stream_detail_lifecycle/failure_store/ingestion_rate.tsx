@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
 import { FailureStoreChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
 import { IngestionRatePanel } from '../common/ingestion_rate_panel';
@@ -34,7 +35,6 @@ export function FailureStoreIngestionRate({
     <IngestionRatePanel isLoading={isLoadingStats} hasAggregations={Boolean(aggregations)}>
       {isServerless ? (
         <FailureStoreChartBarSeries
-          definition={definition}
           stats={stats}
           timeState={timeState}
           isLoadingStats={isLoadingStats}
@@ -43,7 +43,8 @@ export function FailureStoreIngestionRate({
         />
       ) : (
         <ChartBarPhasesSeries
-          definition={definition}
+          indexName={definition.stream.name}
+          isIlm={isIlmLifecycle(definition.effective_lifecycle)}
           stats={stats}
           timeState={timeState}
           isLoadingStats={isLoadingStats}

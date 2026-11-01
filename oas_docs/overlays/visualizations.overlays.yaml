@@ -17,6 +17,16 @@ actions:
         - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard).
         - Use the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
 
+        ## Stability
+
+        | 9.4 | 9.5 | Serverless |
+        | --- | --- | --- |
+        | Experimental | Generally available ¹ | Generally available ² |
+
+        ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+        ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
         ## Get started
 
         Before you begin:

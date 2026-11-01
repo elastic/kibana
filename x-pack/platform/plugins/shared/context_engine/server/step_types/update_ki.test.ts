@@ -119,7 +119,7 @@ describe('getUpdateKiStepDefinition', () => {
         query: kiIdQuery('ki-1'),
         size: 2,
         seq_no_primary_term: true,
-        _source: ['id', 'governance'],
+        _source: true,
       },
       { signal: context.abortSignal }
     );

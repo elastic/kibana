@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -400,6 +401,29 @@ describe('POST /internal/evals/evaluators/_test', () => {
     // The caller supplies the trace id and the prompt, so the judge's explanation can
     // quote back whatever the read returned. It has to be their own privileges.
     expect(awaitTraceReadyMock.mock.calls[0][0].esClient).toBe(asCurrentUser);
+  });
+
+  it('returns 403 when the caller cannot read the trace', async () => {
+    awaitTraceReadyMock.mockRejectedValueOnce(
+      new errors.ResponseError({
+        statusCode: 403,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as ConstructorParameters<typeof errors.ResponseError>[0]['meta'],
+      })
+    );
+    const prompt = jest.fn();
+    const { handler, context } = setup({ prompt });
+
+    const response = await handler(context, request(), kibanaResponseFactory);
+
+    expect(response.status).toBe(403);
+    expect(response.payload).toEqual({
+      message:
+        'Insufficient Elasticsearch privileges to read the trace. Grant read access to traces-* and logs-*.',
+    });
+    expect(prompt).not.toHaveBeenCalled();
   });
 
   it('does not retain the draft it rendered', async () => {

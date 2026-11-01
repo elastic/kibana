@@ -27,6 +27,7 @@ const validActivePayload = {
     status: 'active',
     actionGroup: 'default',
     start: '2025-01-01T00:00:00.000Z',
+    severity: 'high',
   },
 };
 
@@ -66,9 +67,23 @@ describe('alertStatusChangedV1EventSchema', () => {
     it('accepts a recovered payload with null actionGroup and null start', () => {
       const recovered = {
         ...validActivePayload,
-        alert: { ...validActivePayload.alert, status: 'recovered', actionGroup: null, start: null },
+        alert: {
+          ...validActivePayload.alert,
+          status: 'recovered',
+          actionGroup: null,
+          start: null,
+          severity: null,
+        },
       };
       expect(() => alertStatusChangedV1EventSchema.parse(recovered)).not.toThrow();
+    });
+
+    it('accepts an active payload with null severity (the rule type sets none)', () => {
+      const noSeverity = {
+        ...validActivePayload,
+        alert: { ...validActivePayload.alert, severity: null },
+      };
+      expect(() => alertStatusChangedV1EventSchema.parse(noSeverity)).not.toThrow();
     });
 
     it('accepts an active payload with null actionGroup (not yet scheduled)', () => {
@@ -119,6 +134,13 @@ describe('alertStatusChangedV1EventSchema', () => {
       const { start: _omit, ...alertNoStart } = validActivePayload.alert;
       expect(() =>
         alertStatusChangedV1EventSchema.parse({ ...validActivePayload, alert: alertNoStart })
+      ).toThrow();
+    });
+
+    it('rejects a payload where alert.severity is absent (must be null or string, not undefined)', () => {
+      const { severity: _omit, ...alertNoSeverity } = validActivePayload.alert;
+      expect(() =>
+        alertStatusChangedV1EventSchema.parse({ ...validActivePayload, alert: alertNoSeverity })
       ).toThrow();
     });
   });

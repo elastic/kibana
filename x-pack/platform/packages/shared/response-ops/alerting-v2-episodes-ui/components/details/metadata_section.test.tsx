@@ -70,37 +70,21 @@ const mockEpisodeEventsResponse = {
   values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
 };
 
-// Episode event-data ESQL query response template (used by useFetchEpisodeEventDataQuery)
+// Latest event data response (used by useFetchEpisodeEventDataQuery and useFetchEpisodeQuery)
 const buildEventDataResponse = (lastData: string | null) => ({
   columns: [
-    { name: 'last_data', type: 'keyword' },
-    { name: 'last_data_timestamp', type: 'date' },
-    { name: 'last_event_timestamp', type: 'date' },
+    { name: '@timestamp', type: 'date' },
+    { name: 'episode_data', type: 'keyword' },
   ],
-  values: [
-    [
-      lastData,
-      lastData ? '2026-04-29T10:00:00.000Z' : null,
-      lastData ? '2026-04-29T10:00:00.000Z' : null,
-    ],
-  ],
+  values: lastData ? [['2026-04-29T10:00:00.000Z', lastData]] : [],
 });
-
-// Group hash lookup response (used by useFetchEpisodeQuery before the episode query)
-const mockGroupHashResponse = {
-  columns: [{ name: 'group_hash', type: 'keyword' }],
-  values: [['gh-1']],
-};
 
 // The section fires its ESQL queries concurrently, so the mock dispatches on
 // the query text instead of relying on call order.
 const mockEsqlResponses = (eventData: string | null | 'error') => {
   runEsqlAsyncSearchMock.mockImplementation(async ({ params }) => {
     const query = String(params.query ?? '');
-    if (query.includes('KEEP group_hash')) {
-      return mockGroupHashResponse;
-    }
-    if (query.includes('last_data')) {
+    if (query.includes('JSON_EXTRACT')) {
       if (eventData === 'error') {
         throw new Error('boom');
       }

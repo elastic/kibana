@@ -24,7 +24,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./routing'),
       require.resolve('./expressions_explorer'),
       require.resolve('./response_stream'),
-      require.resolve('./esql_ux_example'),
     ],
     services: functionalConfig.get('services'),
     uiSettings: {

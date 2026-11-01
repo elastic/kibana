@@ -131,6 +131,9 @@ export const useEntitiesWithAnomaliesCount = ({
 
   return {
     count: shownResult?.count ?? 0,
+    // True only when the count query returned a result. A skipped, failed, timed-out or no-access
+    // count is not a genuine 0, so the tile must not show `count` (0) for it.
+    hasCount: shownResult !== undefined && !error && !indexError,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
     // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
