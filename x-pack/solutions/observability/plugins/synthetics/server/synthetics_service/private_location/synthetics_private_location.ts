@@ -987,7 +987,10 @@ export class SyntheticsPrivateLocation {
       failedMoves += failed.length;
       const failedIds = new Set(failed.map(({ update }) => update.id));
       newlyPinned += policiesToUpdate.filter(
-        ({ update: { id } }) => unpinnedIds.has(id) && !failedIds.has(id)
+        ({ update: { id, attributes } }) =>
+          unpinnedIds.has(id) &&
+          !failedIds.has(id) &&
+          agentIdFromCondition(attributes.condition) !== undefined
       ).length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so
