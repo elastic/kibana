@@ -636,7 +636,7 @@ Connectors that can't have a vendor spec, such as ones that talk to a database d
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
-Recording also checks OAuth scopes. Auth types that get a token through `getToken` (such as `oauth_authorization_code` and `oauth_client_credentials`) receive one carrying the `scope` they request, usually the auth type's `defaults`, and the mock runs with `checkScopes: 'report'`: a request whose operation needs scopes the token lacks is still answered, so the recording doesn't change, but it is reported with the granted, missing and required scopes. Where the vendor's spec is wrong about scopes, such as Figma's, which requires a deprecated scope alongside each granular one, correct it in `overlay.yaml`.
+Recording also checks OAuth scopes. Auth types that get a token through `getToken` (such as `oauth_authorization_code` and `oauth_client_credentials`) receive one carrying the `scope` they request, usually the auth type's `defaults`, and the mock runs with `checkScopes: 'report'`: a request whose operation needs a scope the token lacks is still answered, so the recording doesn't change, but it is reported with the granted scopes and those that would do. The scopes a spec lists for an operation are read as alternatives, as vendors mean them. Scopes the contract context samples aren't checked: an auth type without a default `scope` requests its own fallback, as it would in Kibana. Where the vendor's spec is wrong about scopes, correct it in `overlay.yaml`.
 
 The script fails when:
 

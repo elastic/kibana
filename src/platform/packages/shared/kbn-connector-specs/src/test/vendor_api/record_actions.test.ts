@@ -481,8 +481,7 @@ describe('recordActions', () => {
             {
               path: ['security'],
               code: 'insufficient_scope',
-              message:
-                'Token was granted items:read, but the operation also needs items:write (requires items:write)',
+              message: 'Token was granted items:read, but the operation needs one of items:write',
             },
           ],
         },

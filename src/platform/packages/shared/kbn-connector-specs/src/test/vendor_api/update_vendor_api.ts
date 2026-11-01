@@ -117,7 +117,7 @@ const describeFinding = (finding: RecordingFinding): string => {
         .map(({ message }) => message)
         .join(
           '; '
-        )}; add them to the auth type's default "scope", or correct the spec's scopes in ${OVERLAY}`;
+        )}; add one to the auth type's default "scope", or correct the spec's scopes in ${OVERLAY}`;
     case 'read-scope':
       return `${finding.action}: has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
     case 'unused-query':
