@@ -227,6 +227,23 @@ describe('Drag and drop reordering', () => {
   });
 
   describe('keyboard mode', () => {
+    test('marks the reorderable group as active only while reordering by keyboard', async () => {
+      const { startDraggingByKeyboard, dropByKeyboard, reorderDownByKeyboard, cancelByKeyboard } =
+        renderDragAndDropGroup();
+      const group = screen.getByTestId('domDragDrop-reorderableGroup');
+      expect(group).toHaveAttribute('data-dnd-reorder-active', 'false');
+
+      await startDraggingByKeyboard(0);
+      expect(group).toHaveAttribute('data-dnd-reorder-active', 'true');
+      await reorderDownByKeyboard();
+      await dropByKeyboard();
+      expect(group).toHaveAttribute('data-dnd-reorder-active', 'false');
+
+      await startDraggingByKeyboard(1);
+      expect(group).toHaveAttribute('data-dnd-reorder-active', 'true');
+      await cancelByKeyboard();
+      expect(group).toHaveAttribute('data-dnd-reorder-active', 'false');
+    });
     test('doesn`t run onDrop when dropping into an original position without any other movements', async () => {
       const { startDraggingByKeyboard, dropByKeyboard } = renderDragAndDropGroup();
       // 0 -> 0

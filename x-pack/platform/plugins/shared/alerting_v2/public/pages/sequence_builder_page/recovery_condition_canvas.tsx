@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -28,44 +28,23 @@ import {
   ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { layoutSequence, SequenceEdge, SequenceNode } from '@kbn/alerting-v2-rule-form';
+import {
+  layoutSequence,
+  recoveryTrackedStepIndices,
+  SequenceEdge,
+  SequenceNode,
+} from '@kbn/alerting-v2-rule-form';
 import type {
   SequenceEdgeType,
   SequenceFormValues,
   SequenceNodeType,
+  SequenceRecoveryMode,
 } from '@kbn/alerting-v2-rule-form';
 import { useCanvasFitView } from './use_canvas_fit_view';
 import { CollapsibleSidePanel } from './collapsible_side_panel';
 
 const nodeTypes = { sequenceStage: SequenceNode };
 const edgeTypes = { sequenceHop: SequenceEdge };
-
-type RecoveryMode = 'last' | 'all' | 'custom';
-
-export interface RecoveryConfig {
-  mode: RecoveryMode;
-}
-
-export const DEFAULT_RECOVERY_CONFIG: RecoveryConfig = {
-  mode: 'last',
-};
-
-export const resolveRecoveryIndices = (
-  mode: RecoveryMode,
-  stepsLength: number,
-  currentIndices: number[]
-): { recoveryStepIndices: number[] } => {
-  if (mode === 'all') {
-    return { recoveryStepIndices: Array.from({ length: stepsLength }, (_, i) => i) };
-  }
-  if (mode === 'custom' && currentIndices.length > 0) {
-    const valid = currentIndices.filter((i) => i < stepsLength).sort((a, b) => a - b);
-    if (valid.length > 0) {
-      return { recoveryStepIndices: valid };
-    }
-  }
-  return { recoveryStepIndices: [Math.max(0, stepsLength - 1)] };
-};
 
 const RECOVERY_MODE_OPTIONS = [
   {
@@ -167,8 +146,6 @@ const RecoveryCanvasContent: React.FC<RecoveryCanvasContentProps> = ({
 export interface RecoveryConditionCanvasProps {
   seqValues: SequenceFormValues;
   setSeqValues: React.Dispatch<React.SetStateAction<SequenceFormValues>>;
-  recoveryConfig: RecoveryConfig;
-  setRecoveryConfig: React.Dispatch<React.SetStateAction<RecoveryConfig>>;
   isRuleListOpen: boolean;
   onToggleRuleList: () => void;
 }
@@ -176,45 +153,36 @@ export interface RecoveryConditionCanvasProps {
 export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = ({
   seqValues,
   setSeqValues,
-  recoveryConfig,
-  setRecoveryConfig,
   isRuleListOpen,
   onToggleRuleList,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
 
-  const activeIndices = useMemo<Set<number>>(() => {
-    if (recoveryConfig.mode === 'last') {
-      return new Set([seqValues.steps.length - 1]);
-    }
-    if (recoveryConfig.mode === 'all') {
-      return new Set(seqValues.steps.map((_, i) => i));
-    }
-    return new Set(seqValues.recoveryStepIndices.filter((i) => i < seqValues.steps.length));
-  }, [recoveryConfig.mode, seqValues.steps, seqValues.recoveryStepIndices]);
+  const activeIndices = useMemo<Set<number>>(
+    () => new Set(recoveryTrackedStepIndices(seqValues)),
+    [seqValues]
+  );
 
   const handleModeChange = useCallback(
     (id: string) => {
-      const mode = id as RecoveryMode;
-      setRecoveryConfig({ mode });
+      const recoveryMode = id as SequenceRecoveryMode;
       setSeqValues((prev) => ({
         ...prev,
-        ...resolveRecoveryIndices(mode, prev.steps.length, prev.recoveryStepIndices),
+        recoveryMode,
+        recoveryStepIndices:
+          recoveryMode === 'custom' ? recoveryTrackedStepIndices(prev) : undefined,
       }));
     },
-    [setRecoveryConfig, setSeqValues]
+    [setSeqValues]
   );
-
-  const recoveryModeRef = useRef(recoveryConfig.mode);
-  recoveryModeRef.current = recoveryConfig.mode;
 
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: SequenceNodeType) => {
-      if (recoveryModeRef.current !== 'custom') return;
       const idx = node.data.stageIndex;
 
       setSeqValues((prev) => {
-        const current = prev.recoveryStepIndices;
+        if (prev.recoveryMode !== 'custom') return prev;
+        const current = recoveryTrackedStepIndices(prev);
         const already = current.includes(idx);
         if (already && current.length <= 1) return prev;
         const next = already ? current.filter((i) => i !== idx) : [...current, idx];
@@ -228,7 +196,11 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
     () =>
       seqValues.steps.map((step) => ({
         stepId: step.id,
-        rules: step.rules.map((r) => ({ ruleId: r.ruleId, ruleName: r.ruleName ?? r.ruleId })),
+        rules: step.rules.map((r) => ({
+          ruleId: r.ruleId,
+          ruleName: r.ruleName ?? r.ruleId,
+          isMissing: r.isMissing,
+        })),
         operator: step.operator,
       })),
     [seqValues.steps]
@@ -259,11 +231,11 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
                   borderRadius: euiTheme.border.radius.medium,
                 }
               : {}),
-            ...(recoveryConfig.mode === 'custom' ? { cursor: 'pointer' } : {}),
+            ...(seqValues.recoveryMode === 'custom' ? { cursor: 'pointer' } : {}),
           },
         };
       }),
-    [baseNodes, activeIndices, euiTheme, recoveryConfig.mode]
+    [baseNodes, activeIndices, euiTheme, seqValues.recoveryMode]
   );
 
   const activeNodeIds = useMemo(
@@ -336,12 +308,12 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
               defaultMessage: 'Recovery mode',
             })}
             options={RECOVERY_MODE_OPTIONS}
-            idSelected={recoveryConfig.mode}
+            idSelected={seqValues.recoveryMode}
             onChange={handleModeChange}
             buttonSize="compressed"
             data-test-subj="recoveryModeSelector"
           />
-          {recoveryConfig.mode === 'custom' && (
+          {seqValues.recoveryMode === 'custom' && (
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.alertingV2.sequenceBuilderPage.recovery.customHint"

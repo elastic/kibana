@@ -31,6 +31,8 @@ export interface UseHistogramHeatmapParams {
   originalSource?: string;
   histogramVisualization: HistogramVisualization;
   description?: string;
+  seriesColor: string;
+  backgroundColor: string;
 }
 
 export interface HistogramHeatmapState {
@@ -50,6 +52,8 @@ export const useHistogramHeatmap = ({
   originalSource,
   histogramVisualization,
   description,
+  seriesColor,
+  backgroundColor,
 }: UseHistogramHeatmapParams): HistogramHeatmapState => {
   const isHeatmapsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
@@ -94,9 +98,11 @@ export const useHistogramHeatmap = ({
             query: distributionQuery,
             title: metricItem.metricName,
             description,
+            seriesColor,
+            backgroundColor,
           })
         : undefined,
-    [distributionQuery, metricItem.metricName, description]
+    [distributionQuery, metricItem.metricName, description, seriesColor, backgroundColor]
   );
 
   return { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig };

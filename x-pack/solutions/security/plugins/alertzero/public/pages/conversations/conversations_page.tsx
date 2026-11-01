@@ -8,15 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import { PROPOSALS_UI_CAPABILITY_SHOW } from '@kbn/proposals-common';
 import {
-  PROPOSALS_UI_CAPABILITY_SHOW,
-  PROPOSALS_UI_CAPABILITY_DECIDE,
-} from '@kbn/proposals-common';
-import {
-  type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
   type Investigation,
@@ -25,31 +21,20 @@ import {
   Impact,
   useEntityFilter,
 } from '@kbn/agentic-investigations-common';
-import {
-  useApproveProposal,
-  useDismissProposal,
-  useIsApprovingProposal,
-  useIsDecliningProposal,
-  useProposal,
-  queryKeys as platformQueryKeys,
-} from '@kbn/proposals-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
   useSetInvestigationStatus,
   useProposalImpactPills,
   impactPillsQueryKeys,
-  useCurrentUserProfile,
   useStatusSignal,
   useOpenInChat,
-  decisionErrorMessage,
   EscalationModalBoundary,
   LazyConnectedCloseInvestigationModal,
   LazyConnectedEscalationModal,
 } from '@kbn/agentic-investigations-plugin/public';
-import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
@@ -57,13 +42,13 @@ import {
   CLOSED_DECIDED_WITHIN_HOURS,
   CLOSED_GROUP_KEY,
   OPEN_PROPOSAL_CATEGORIES,
-  type ProposalItem,
 } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { useQueuePolling } from '../../hooks/use_queue_polling';
 import { useSettlingProposalsPolling } from '../../hooks/use_settling_proposals_polling';
 import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
+import { ALERTZERO_PAGE_CONTENT_WIDTH } from '../../components/layout/constants';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
@@ -78,7 +63,6 @@ import {
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { WorkersRunningPanel } from '../../components/workers_running_panel';
 import { useRunningSummary } from '../../hooks/use_running_summary';
-import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
@@ -91,7 +75,6 @@ import {
   useAlertZeroTelemetry,
   useReportErrorShown,
   useReportHomeOpened,
-  useReportToastError,
 } from '../../telemetry';
 
 const wrapScanFailureCallout = (callout: JSX.Element) => (
@@ -145,7 +128,6 @@ const POLLED_QUERY_KEYS = [
 const POLLED_ALL_PAGES_QUERY_KEYS = [impactPillsQueryKeys.proposals()];
 
 const ConversationsPageContent: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
   // Impact pills and the entity filter go through the investigations impact client, which needs
@@ -175,13 +157,7 @@ const ConversationsPageContent: React.FC = () => {
     void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
   });
 
-  const { mutateAsync: approveDecision } = useApproveProposal();
-  const { mutateAsync: dismissDecision } = useDismissProposal();
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
-  const { data: currentUserProfile } = useCurrentUserProfile();
-  const currentActorName = currentUserProfile
-    ? getUserDisplayName(currentUserProfile.user)
-    : undefined;
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
   const { reportEvent } = useAlertZeroTelemetry();
 
@@ -196,17 +172,6 @@ const ConversationsPageContent: React.FC = () => {
     },
     [effectiveEntityFilter, reportEvent, setEntityFilter]
   );
-
-  const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
-    string | undefined
-  >(undefined);
-  const isApprovingSelected = useIsApprovingProposal(selectedIdForRecommendedAction);
-  const isDecliningSelected = useIsDecliningProposal(selectedIdForRecommendedAction);
-  const isSubmittingSelected = isApprovingSelected
-    ? 'applying'
-    : isDecliningSelected
-    ? 'declining'
-    : undefined;
 
   const {
     selectedConversationId,
@@ -274,7 +239,6 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const closeModal = useCallback(() => setModalState({ type: null, recordId: null }), []);
-  const closeApproval = useCallback(() => setSelectedIdForRecommendedAction(undefined), []);
 
   const { getChatHref, openChat } = useOpenInChat();
 
@@ -298,7 +262,7 @@ const ConversationsPageContent: React.FC = () => {
   );
 
   const {
-    services: { application, notifications },
+    services: { notifications },
   } = useKibana<CoreStart>();
 
   const { mutateAsync: setInvestigationStatus } = useSetInvestigationStatus();
@@ -333,7 +297,6 @@ const ConversationsPageContent: React.FC = () => {
     [reopenInvestigation]
   );
 
-  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
   const {
     manageEscalations: canManageEscalations,
     manageInvestigations: canManageInvestigations,
@@ -369,49 +332,6 @@ const ConversationsPageContent: React.FC = () => {
     buttonIconSize: 's',
   });
 
-  // Both decisions close on success only, and surface the refusal otherwise: an expired
-  // deadline or a proposal someone else already decided must not look like it landed.
-  const reportQueueToastError = useReportToastError('queue');
-  const onDecisionError = useMemo(
-    () => (err: unknown) => {
-      notifications?.toasts.addDanger(decisionErrorMessage(err));
-      reportQueueToastError(classifyError(err));
-    },
-    [notifications, reportQueueToastError]
-  );
-
-  // The modal stays open after success. It shows the "Applied" state, so the analyst sees the
-  // result before they close it.
-  const confirmApproval = useCallback(
-    async (proposal: ProposalItem) => {
-      try {
-        // Do not drop the row from the queue. An approved proposal stays in its category while its
-        // action runs. The approve mutation already refetched the recorded decision.
-        await approveDecision({ id: proposal.id, body: { actionInput: proposal.actionInput } });
-      } catch (err) {
-        onDecisionError(err);
-        throw err;
-      }
-    },
-    [approveDecision, onDecisionError]
-  );
-
-  // The approval modal collects its own decline reason inline now, so this is a direct mutation
-  // call — distinct from the ⋮ "Close investigation" action below, which closes the whole
-  // investigation rather than dismissing a single proposal.
-  const dismissApproval = useCallback(
-    async (proposal: ProposalItem, { dismissReason, rationale }: DeclineParams) => {
-      try {
-        await dismissDecision({ id: proposal.id, body: { dismissReason, rationale } });
-        void dropDecided(proposal.id);
-      } catch (err) {
-        onDecisionError(err);
-        throw err;
-      }
-    },
-    [dismissDecision, dropDecided, onDecisionError]
-  );
-
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
       <EscalationModalBoundary>
@@ -425,29 +345,6 @@ const ConversationsPageContent: React.FC = () => {
     [dropDecided]
   );
 
-  const renderDismissModal = useCallback(
-    ({ recordId, onClose }: { recordId?: string | null; onClose: () => void }) => {
-      if (!recordId) return null;
-      return (
-        <DismissProposalModal
-          proposalId={recordId}
-          onClose={onClose}
-          onConfirm={async ({ dismissReason, rationale }) => {
-            try {
-              await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
-              void dropDecided(recordId);
-              onClose();
-            } catch (err) {
-              onDecisionError(err);
-              throw err;
-            }
-          }}
-        />
-      );
-    },
-    [dismissDecision, dropDecided, onDecisionError]
-  );
-
   const renderEscalationModal = useCallback(
     (props: EscalationModalRenderProps) => (
       <EscalationModalBoundary>
@@ -456,11 +353,6 @@ const ConversationsPageContent: React.FC = () => {
     ),
     []
   );
-
-  const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
-    useCallback(({ id }) => {
-      setSelectedIdForRecommendedAction(id);
-    }, []);
 
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
@@ -498,68 +390,21 @@ const ConversationsPageContent: React.FC = () => {
     [conversations, modalState.recordId]
   );
 
-  // Cards are keyed by proposal id, so the click already names the row the modal decides on.
-  const liveSelectedProposal = selectedIdForRecommendedAction
-    ? proposalsById.get(selectedIdForRecommendedAction)
-    : undefined;
-
-  // `useDropDecidedProposal` removes a declined proposal from the open-bucket cache that
-  // `proposalsById` reads. Without a fallback, `InvestigationActionModals` would close the modal
-  // when the row leaves the queue, before the analyst sees the result.
-  // `useProposal` keeps the single record fresh, so the sticky copy below is never old.
-  const [stickySelectedProposal, setStickySelectedProposal] = useState<ProposalItem | undefined>(
-    undefined
-  );
-  useEffect(() => {
-    if (liveSelectedProposal) {
-      setStickySelectedProposal(liveSelectedProposal);
-    }
-  }, [liveSelectedProposal]);
-  useEffect(() => {
-    if (!selectedIdForRecommendedAction) {
-      setStickySelectedProposal(undefined);
-    }
-  }, [selectedIdForRecommendedAction]);
-
-  const selectedProposalQuery = useProposal(selectedIdForRecommendedAction);
-  const { data: selectedProposalData } = selectedProposalQuery;
-  const selectedProposal: ProposalItem | undefined = useMemo(
-    () =>
-      liveSelectedProposal ??
-      (stickySelectedProposal && selectedProposalData
-        ? { ...stickySelectedProposal, ...selectedProposalData }
-        : stickySelectedProposal),
-    [liveSelectedProposal, stickySelectedProposal, selectedProposalData]
-  );
-
-  const pageContentProps = useMemo(
-    () => ({
-      css: css`
-        padding-block: ${euiTheme.size.xxl};
-        align-self: center;
-        max-width: 1000px;
-      `,
-    }),
-    [euiTheme.size.xxl]
-  );
-
   return (
-    <AlertZeroPageSection contentProps={pageContentProps}>
+    <AlertZeroPageSection
+      contentProps={{
+        css: css`
+          width: ${ALERTZERO_PAGE_CONTENT_WIDTH}px;
+          max-width: 100%;
+          margin-inline: auto;
+        `,
+      }}
+    >
       <InvestigationActionModals
         action={modalState.type}
-        recordId={modalState.recordId}
-        initialAssignee={actionInvestigation?.assignee}
         investigation={actionInvestigation}
-        approvalProposal={selectedProposal}
-        readOnly={!canDecide}
         onCloseAction={closeModal}
-        onCloseApproval={closeApproval}
-        onConfirmApproval={confirmApproval}
-        isSubmitting={isSubmittingSelected}
-        currentActorName={currentActorName}
-        onDismissApproval={dismissApproval}
         renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
-        renderDismissModal={renderDismissModal}
         renderEscalationModal={renderEscalationModal}
       />
 
@@ -637,7 +482,6 @@ const ConversationsPageContent: React.FC = () => {
                 section={section}
                 entityFilter={effectiveEntityFilter}
                 selectedProposalId={currentProposalId}
-                onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
                 onClickAction={onClickAction}
                 onClickCard={onClickCard}
                 onOpenChat={openChatForProposal}

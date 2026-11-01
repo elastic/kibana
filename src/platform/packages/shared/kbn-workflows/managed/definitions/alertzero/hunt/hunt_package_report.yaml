@@ -213,6 +213,8 @@ steps:
             runId: "{{ inputs.runId }}"
             closureSummary: "{{ steps.decide_and_package.output.closureSummary }}"
             expectedProposalCount: "${{ steps.decide_and_package.output.expectedProposalCount }}"
+            # The gate names it in its journal note when it cannot create its Proposal.
+            reportId: "{{ inputs.reportId }}"
 
   # A finding a live Proposal already covers creates nothing here. The Investigation that raised
   # that Proposal is named in a journal line on this one, so an analyst reading it can see where

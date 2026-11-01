@@ -19,6 +19,7 @@ import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
+  ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
 import type { ReleaseGateParams } from './proposals_service';
@@ -1446,6 +1447,7 @@ describe('ProposalsService', () => {
           decision: 'approved',
           status: 'executing',
           decidedBy: analyst('analyst'),
+          decisionMode: 'manual',
         },
         SPACE_ID
       );
@@ -1454,6 +1456,7 @@ describe('ProposalsService', () => {
       expect(proposal.decidedBy).toEqual(
         expect.objectContaining({ username: 'analyst', profileUid: 'analyst-uid' })
       );
+      expect(proposal.decisionMode).toBe('manual');
       // Stamped by the service, so the recorded moment is the moment written.
       expect(proposal.decidedAt).toEqual(expect.any(String));
     });
@@ -1502,6 +1505,7 @@ describe('ProposalsService', () => {
       // Settled, but nobody decided it.
       expect(proposal.decision).toBeUndefined();
       expect(proposal.decidedBy).toBeUndefined();
+      expect(proposal.decisionMode).toBeUndefined();
     });
 
     it('should not stamp decidedAt while the proposal is still awaiting', async () => {
@@ -1825,6 +1829,7 @@ describe('ProposalsService', () => {
           status: 'failed',
           decidedBy: analyst('analyst'),
           decidedAt: '2026-09-02T00:00:00.000Z',
+          decisionMode: 'auto',
           executionError: 'action exploded',
           rationale: 'Looks right',
         })
@@ -1851,6 +1856,7 @@ describe('ProposalsService', () => {
       expect(cloneArgs.document.decision).toBeUndefined();
       expect(cloneArgs.document.decidedBy).toBeUndefined();
       expect(cloneArgs.document.decidedAt).toBeUndefined();
+      expect(cloneArgs.document.decisionMode).toBeUndefined();
       expect(cloneArgs.document.executionError).toBeUndefined();
       expect(cloneArgs.document.rationale).toBeUndefined();
     });
@@ -2750,6 +2756,160 @@ describe('ProposalsService', () => {
         decision: undefined,
         actionInput: { name: 'Suspicious PowerShell' },
       });
+    });
+  });
+
+  describe('getLatestRevisions', () => {
+    it('should read every chain in one search, scoped to the space and to live revisions', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.getLatestRevisions(['root-1', 'root-2', 'root-1', ' '], SPACE_ID);
+
+      expect(storage.search).toHaveBeenCalledTimes(1);
+      const [[searchRequest]] = storage.search.mock.calls;
+      expect(searchRequest).toMatchObject({
+        track_total_hits: true,
+        size: 10_000,
+        allow_partial_search_results: false,
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { bool: { must_not: { exists: { field: 'supersededBy' } } } },
+          { terms: { rootProposalId: ['root-1', 'root-2'] } },
+        ])
+      );
+    });
+
+    it('should not filter on the deadline unless asked', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.getLatestRevisions(['root-1'], SPACE_ID);
+
+      const [[searchRequest]] = storage.search.mock.calls;
+      expect(JSON.stringify(searchRequest.query.bool.filter)).not.toContain('expiresAt');
+    });
+
+    it('should key each live revision by its root and leave out roots with no match', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: {
+          hits: [
+            searchHit(
+              baseDocument({ rootProposalId: 'root-1', supersedes: 'root-1', revision: 2 }),
+              'root-1-revision-2'
+            ),
+            searchHit(baseDocument({ rootProposalId: 'root-2' }), 'root-2'),
+          ],
+          total: { value: 2 },
+        },
+      });
+      const { service } = createService(storage);
+
+      const heads = await service.getLatestRevisions(['root-1', 'root-2', 'root-3'], SPACE_ID);
+
+      expect([...heads.keys()]).toEqual(['root-1', 'root-2']);
+      expect(heads.get('root-1')).toMatchObject({ id: 'root-1-revision-2', revision: 2 });
+      expect(heads.get('root-1')).not.toHaveProperty('ranks');
+    });
+
+    it('should keep the released revision when a chain has two live rows', async () => {
+      const storage = createStorage();
+      // In the order the query sorts them: the released row first.
+      storage.search.mockResolvedValue({
+        hits: {
+          hits: [
+            searchHit(
+              baseDocument({
+                rootProposalId: 'root-1',
+                gateReleasedAt: '2026-09-01T00:05:00.000Z',
+              }),
+              'root-1'
+            ),
+            searchHit(
+              baseDocument({ rootProposalId: 'root-1', supersedes: 'root-1', revision: 2 }),
+              'root-1-revision-2'
+            ),
+          ],
+          total: { value: 2 },
+        },
+      });
+      const { service } = createService(storage);
+
+      const heads = await service.getLatestRevisions(['root-1'], SPACE_ID);
+
+      expect(heads.get('root-1')?.id).toBe('root-1');
+      const [[searchRequest]] = storage.search.mock.calls;
+      expect(searchRequest.sort).toEqual([
+        { gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } },
+        { revision: { order: 'desc' } },
+      ]);
+    });
+
+    it('should not search when no root id is given', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(service.getLatestRevisions(['', '  '], SPACE_ID)).resolves.toEqual(new Map());
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('should combine the root ids with the origin and expiry filters', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.getLatestRevisions(['root-1'], SPACE_ID, {
+        origin: 'alertzero',
+        excludeExpired: true,
+      });
+
+      const [[searchRequest]] = storage.search.mock.calls;
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { origin: 'alertzero' } },
+          { terms: { rootProposalId: ['root-1'] } },
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([{ range: { expiresAt: { gt: 'now' } } }]),
+            }),
+          }),
+        ])
+      );
+    });
+
+    it('should throw rather than return a partial answer when the search matched more than it returned', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: {
+          hits: [searchHit(baseDocument({ rootProposalId: 'root-1' }), 'root-1')],
+          total: { value: 10_001 },
+        },
+      });
+      const { service } = createService(storage);
+
+      await expect(service.getLatestRevisions(['root-1'], SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalLookupTruncatedError
+      );
+    });
+
+    it('should read up to 10,000 distinct root ids in one search and refuse more without searching', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+      const rootIds = Array.from({ length: 10_000 }, (_, i) => `root-${i}`);
+
+      // A duplicate and a blank do not count towards the limit.
+      await service.getLatestRevisions([...rootIds, 'root-0', ''], SPACE_ID);
+      const [[searchRequest]] = storage.search.mock.calls;
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([{ terms: { rootProposalId: rootIds } }])
+      );
+
+      await expect(
+        service.getLatestRevisions([...rootIds, 'root-10000'], SPACE_ID)
+      ).rejects.toBeInstanceOf(ProposalLookupTruncatedError);
+      expect(storage.search).toHaveBeenCalledTimes(1);
     });
   });
 

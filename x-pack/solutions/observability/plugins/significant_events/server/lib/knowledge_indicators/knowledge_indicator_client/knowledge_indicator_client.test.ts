@@ -292,6 +292,49 @@ describe('KnowledgeIndicatorClient.bulk', () => {
     });
   });
 
+  describe('durability', () => {
+    it('re-indexes a durable feature without expires_at, payload and exclusion preserved', async () => {
+      const { client, create, runEsql } = makeClient();
+      const latest = createFeatureDoc({ expires_at: '2026-02-01T00:00:00.000Z', excluded: true });
+      runEsql.mockResolvedValueOnce({ hits: [latest] });
+
+      const result = await client.bulk(SOURCE, [{ durability: { id: latest.id, durable: true } }]);
+
+      expect(result).toEqual({ applied: 1, skipped: 0 });
+      const [{ documents }] = create.mock.calls[0];
+      const written = documents[0] as StoredFeatureKnowledgeIndicator;
+      expect(written.id).toBe(latest.id);
+      expect(written).not.toHaveProperty('expires_at');
+      expect(written.excluded).toBe(true);
+      expect(written.feature).toEqual(latest.feature);
+    });
+
+    it('gives an expiring feature a fresh expires_at', async () => {
+      const { client, create, runEsql } = makeClient();
+      const latest = createFeatureDoc();
+      runEsql.mockResolvedValueOnce({ hits: [latest] });
+
+      await client.bulk(SOURCE, [{ durability: { id: latest.id, durable: false } }]);
+
+      const [{ documents }] = create.mock.calls[0];
+      const written = documents[0] as StoredFeatureKnowledgeIndicator;
+      expect(Date.parse(written.expires_at ?? '')).toBeGreaterThan(Date.now());
+    });
+
+    it('skips unknown ids and computed features', async () => {
+      const { client, create, runEsql } = makeClient();
+      runEsql.mockResolvedValueOnce({ hits: [createComputedFeatureDoc()] });
+
+      const result = await client.bulk(SOURCE, [
+        { durability: { id: 'computed-1-uuid', durable: true } },
+        { durability: { id: 'missing', durable: true } },
+      ]);
+
+      expect(result).toEqual({ applied: 0, skipped: 2 });
+      expect(create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('disabled source guard', () => {
     // A plain function keeps the generic `withSourceWrite` signature; the spy records the call.
     const trackSourceWrite = () => {
