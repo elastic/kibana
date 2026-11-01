@@ -300,9 +300,9 @@ describe('ActionsClientLlm', () => {
 
         await actionsClientLlm._call(prompt);
 
-        expect((mockInferenceClient.chatComplete as jest.Mock).mock.calls[0][0]).not.toHaveProperty(
-          'metadata'
-        );
+        const chatComplete = mockInferenceClient.chatComplete as jest.Mock;
+        expect(chatComplete).toHaveBeenCalledTimes(1);
+        expect(chatComplete.mock.lastCall?.[0]).not.toHaveProperty('metadata');
       });
 
       it('passes model and temperature when provided', async () => {
