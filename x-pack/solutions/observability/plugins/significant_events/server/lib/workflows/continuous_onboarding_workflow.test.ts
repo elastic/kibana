@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
@@ -134,7 +135,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
   let getLegacyWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
-  let cancelAllRunning: jest.Mock;
+  let cancelRunningChildrenOf: jest.Mock;
 
   beforeEach(() => {
     logger = {
@@ -151,6 +152,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
       getWorkflow: getLegacyWorkflow,
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      getWorkflowExecutionStatuses: jest.fn().mockResolvedValue([]),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
       cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
@@ -158,7 +160,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
     };
-    cancelAllRunning = jest.fn().mockResolvedValue(0);
+    cancelRunningChildrenOf = jest.fn().mockResolvedValue(0);
   });
 
   const createService = () =>
@@ -166,7 +168,7 @@ describe('createContinuousOnboardingWorkflowService', () => {
       logger,
       managementApi,
       streamsKIsOnboardingClient: {
-        cancelAllRunning,
+        cancelRunningChildrenOf,
       } as unknown as SignificantEventsKIsOnboardingClient,
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
     });
@@ -209,41 +211,66 @@ describe('createContinuousOnboardingWorkflowService', () => {
     ).rejects.toThrow('update failed');
   });
 
-  it('disables and drains the space document but keeps it when turned off', async () => {
-    getWorkflow.mockResolvedValue({ enabled: true });
-    let coordinatorTerminated = false;
-    let sweptChildrenAfterCoordinator = false;
-    (managementApi.getWorkflowExecutions as jest.Mock)
-      .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
-      .mockImplementation(async () => {
-        coordinatorTerminated = true;
-        return { results: [], total: 0 };
-      });
-    cancelAllRunning.mockImplementation(async () => {
-      sweptChildrenAfterCoordinator = coordinatorTerminated;
-      return 0;
+  it('drains only the captured coordinator children across a concurrent enable', async () => {
+    getWorkflow.mockResolvedValueOnce({ enabled: true }).mockResolvedValue({ enabled: false });
+    (managementApi.getWorkflowExecutions as jest.Mock).mockResolvedValue({
+      results: [{ id: 'old-coordinator' }],
+      total: 1,
     });
+    let resolvePollStarted: () => void = () => {};
+    const pollStarted = new Promise<void>((resolve) => {
+      resolvePollStarted = resolve;
+    });
+    let resolveStatuses: (value: Array<{ id: string; status: ExecutionStatus }>) => void = () => {};
+    const statuses = new Promise<Array<{ id: string; status: ExecutionStatus }>>((resolve) => {
+      resolveStatuses = resolve;
+    });
+    (managementApi.getWorkflowExecutionStatuses as jest.Mock).mockImplementation(() => {
+      resolvePollStarted();
+      return statuses;
+    });
+    const service = createService();
 
-    await createService().ensureWorkflow({ enabled: false, request, spaceId });
+    const disable = service.ensureWorkflow({ enabled: false, request, spaceId });
+    await pollStarted;
+    await service.ensureWorkflow({ enabled: true, request, spaceId });
+    resolveStatuses([{ id: 'old-coordinator', status: ExecutionStatus.COMPLETED }]);
+    await disable;
 
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: false },
+    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'old-coordinator',
       spaceId,
       request
     );
-    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
-    expect(cancelAllRunning).toHaveBeenCalledWith({ request });
-    expect(sweptChildrenAfterCoordinator).toBe(true);
-    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
+    expect(managementApi.getWorkflowExecutionStatuses).toHaveBeenCalledWith(
+      ['old-coordinator'],
+      spaceId,
+      { request }
+    );
+    expect(cancelRunningChildrenOf).toHaveBeenCalledWith({
+      parentExecutionIds: ['old-coordinator'],
+      request,
+    });
   });
 
   it('can disable without waiting for running executions to drain', async () => {
-    getWorkflow.mockResolvedValue({ enabled: true });
+    getWorkflow.mockResolvedValueOnce({ enabled: true }).mockResolvedValue({ enabled: false });
     (managementApi.getWorkflowExecutions as jest.Mock).mockResolvedValue({
-      results: [{ id: 'exec-1' }],
+      results: [{ id: 'old-coordinator' }],
       total: 1,
+    });
+    let resolveStatuses: (value: Array<{ id: string; status: ExecutionStatus }>) => void = () => {};
+    const statuses = new Promise<Array<{ id: string; status: ExecutionStatus }>>((resolve) => {
+      resolveStatuses = resolve;
+    });
+    (managementApi.getWorkflowExecutionStatuses as jest.Mock).mockReturnValue(statuses);
+    let resolveChildDrain: () => void = () => {};
+    const childDrain = new Promise<void>((resolve) => {
+      resolveChildDrain = resolve;
+    });
+    cancelRunningChildrenOf.mockImplementation(async () => {
+      resolveChildDrain();
+      return 1;
     });
 
     await expect(
@@ -262,8 +289,19 @@ describe('createContinuousOnboardingWorkflowService', () => {
       request
     );
     expect(managementApi.getWorkflowExecutions).toHaveBeenCalled();
-    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
-    expect(cancelAllRunning).not.toHaveBeenCalled();
+    expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+      'old-coordinator',
+      spaceId,
+      request
+    );
+    expect(cancelRunningChildrenOf).not.toHaveBeenCalled();
+
+    resolveStatuses([{ id: 'old-coordinator', status: ExecutionStatus.COMPLETED }]);
+    await childDrain;
+    expect(cancelRunningChildrenOf).toHaveBeenCalledWith({
+      parentExecutionIds: ['old-coordinator'],
+      request,
+    });
   });
 
   it('leaves the legacy default-space document alone outside the default space', async () => {

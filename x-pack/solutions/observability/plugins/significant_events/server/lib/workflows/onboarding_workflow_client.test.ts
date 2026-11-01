@@ -774,6 +774,43 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
   });
 
+  describe('cancelRunningChildrenOf', () => {
+    it('cancels only onboarding executions started by the captured coordinators', async () => {
+      const { client, managementApi } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [
+            {
+              id: 'old-child',
+              status: ExecutionStatus.RUNNING,
+              context: { parentWorkflowExecutionId: 'old-coordinator' },
+            },
+            {
+              id: 'new-child',
+              status: ExecutionStatus.RUNNING,
+              context: { parentWorkflowExecutionId: 'new-coordinator' },
+            },
+            { id: 'direct-onboarding', status: ExecutionStatus.RUNNING },
+          ],
+        }),
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        client.cancelRunningChildrenOf({
+          parentExecutionIds: ['old-coordinator'],
+          request,
+        })
+      ).resolves.toBe(1);
+
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'old-child',
+        'default',
+        request
+      );
+    });
+  });
+
   describe('cancelAllRunning', () => {
     it('cancels all non-terminal onboarding executions', async () => {
       const { client, managementApi } = createClient({

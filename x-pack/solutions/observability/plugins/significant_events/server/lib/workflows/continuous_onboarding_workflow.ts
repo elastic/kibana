@@ -34,7 +34,7 @@ export interface ContinuousOnboardingWorkflowService {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
-    /** When false, request coordinator cancellation without broadly cancelling child runs. */
+    /** When false, finish the captured coordinator-and-child drain in the background. */
     waitForRunningExecutions?: boolean;
   }): Promise<void>;
 }
@@ -72,7 +72,7 @@ export const createContinuousOnboardingWorkflowService = ({
     return { results, total };
   };
 
-  const requestRunningExecutionCancellation = async ({
+  const captureAndRequestRunningExecutionCancellation = async ({
     workflowId,
     spaceId,
     request,
@@ -80,10 +80,16 @@ export const createContinuousOnboardingWorkflowService = ({
     workflowId: string;
     spaceId: string;
     request: KibanaRequest;
-  }): Promise<boolean> => {
+  }): Promise<string[]> => {
     const { results } = await getNonTerminalExecutions({ workflowId, spaceId, request });
+    // List first, then confirm the workflow is still disabled. A concurrent enable either appears
+    // in this read (so the stale disable aborts) or starts after the captured execution set.
+    const current = await managementApi.getClient(request).getWorkflow(workflowId, spaceId);
+    if (!current || current.enabled) {
+      return [];
+    }
     if (results.length === 0) {
-      return false;
+      return [];
     }
 
     await Promise.all(
@@ -91,21 +97,22 @@ export const createContinuousOnboardingWorkflowService = ({
     );
 
     log.debug(() => `Requested cancellation for ${results.length} running workflow execution(s)`);
-    return true;
+    return results.map(({ id }) => id);
   };
 
   const awaitRunningExecutionTermination = async ({
-    workflowId,
+    executionIds,
     spaceId,
     request,
   }: {
-    workflowId: string;
+    executionIds: string[];
     spaceId: string;
     request: KibanaRequest;
   }): Promise<void> => {
+    const nonTerminalStatuses = new Set<string>(NonTerminalExecutionStatuses);
     await pollUntil(
-      () => getNonTerminalExecutions({ workflowId, spaceId, request }),
-      ({ total }) => total === 0
+      () => managementApi.getWorkflowExecutionStatuses(executionIds, spaceId, { request }),
+      (executions) => executions.every(({ status }) => !nonTerminalStatuses.has(status))
     );
   };
 
@@ -174,28 +181,35 @@ export const createContinuousOnboardingWorkflowService = ({
       // stays: uninstalling force-deletes it, which purges its execution history.
       await setManagedEnabled({ enabled: false, workflowId, spaceId, request });
 
-      // The fast path returns after requesting coordinator cancellation. Full drains wait for it
-      // to stop before sweeping children, preventing both late children and stale post-enable sweeps.
-      const cancellationRequested = await requestRunningExecutionCancellation({
+      const coordinatorExecutionIds = await captureAndRequestRunningExecutionCancellation({
         workflowId,
         spaceId,
         request,
       }).catch((err) => {
         log.warn(`Failed to cancel running continuous onboarding executions: ${err}`);
-        return false;
+        return [];
       });
-      if (waitForRunningExecutions) {
-        if (cancellationRequested) {
-          await awaitRunningExecutionTermination({ workflowId, spaceId, request }).catch((err) =>
+      const drainCapturedExecutions = async () => {
+        if (coordinatorExecutionIds.length > 0) {
+          await awaitRunningExecutionTermination({
+            executionIds: coordinatorExecutionIds,
+            spaceId,
+            request,
+          }).catch((err) =>
             log.warn(`Failed to cancel running continuous onboarding executions: ${err}`)
           );
         }
-        // The coordinator must stop before its async children are swept, or it can create a child
-        // after the sweep. The last-source fast path skips this broad cancellation because source
-        // reconciliation cancels the deleted source's onboarding run.
         await streamsKIsOnboardingClient
-          .cancelAllRunning({ request })
+          .cancelRunningChildrenOf({
+            parentExecutionIds: coordinatorExecutionIds,
+            request,
+          })
           .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
+      };
+      if (waitForRunningExecutions) {
+        await drainCapturedExecutions();
+      } else {
+        void drainCapturedExecutions();
       }
 
       log.info(`Disabled continuous KI onboarding workflow in space ${spaceId}`);
