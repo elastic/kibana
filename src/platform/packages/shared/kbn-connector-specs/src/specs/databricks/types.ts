@@ -177,7 +177,7 @@ export const RepairRunInputSchema = lazySchema(() =>
     })
     .refine(
       (v) =>
-        (v.rerunTasks !== undefined && v.rerunAllFailedTasks === undefined) ||
+        (v.rerunTasks !== undefined && v.rerunAllFailedTasks !== true) ||
         (v.rerunTasks === undefined && v.rerunAllFailedTasks === true),
       {
         message:

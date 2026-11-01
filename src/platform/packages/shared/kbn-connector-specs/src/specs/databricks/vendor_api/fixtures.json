@@ -32,9 +32,14 @@
     ]
   },
   "repairRun": {
-    "input": {
-      "rerunAllFailedTasks": true
-    }
+    "input": [
+      {
+        "rerunAllFailedTasks": true
+      },
+      {
+        "rerunAllFailedTasks": false
+      }
+    ]
   },
   "runQuery": {
     "config": {

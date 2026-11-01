@@ -411,6 +411,19 @@ describe('Databricks', () => {
       ).toThrow('Specify exactly one');
     });
 
+    it('accepts rerunTasks with rerunAllFailedTasks: false, and sends only rerun_tasks', async () => {
+      const input = parse('repairRun', {
+        runId: 455644833,
+        rerunTasks: ['task_a'],
+        rerunAllFailedTasks: false,
+      });
+      await Databricks.actions.repairRun.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
+        run_id: 455644833,
+        rerun_tasks: ['task_a'],
+      });
+    });
+
     it('rejects when rerunTasks is an empty array', () => {
       expect(() => parse('repairRun', { runId: 455644833, rerunTasks: [] })).toThrow();
     });
