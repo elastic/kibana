@@ -577,6 +577,20 @@ describe('SyntheticsPrivateLocation', () => {
       expect(bulkCreate.mock.calls[0][0].newPolicies[0].condition).toBeUndefined();
     });
 
+    it('reads the agent policy revision wherever the agent policy lives', async () => {
+      const getByIds = jest.fn().mockResolvedValue([{ id: 'ap-1', revision: 7 }]);
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: { ...serverMock.fleet, agentPolicyService: { getByIds } },
+      } as unknown as SyntheticsServerSetup);
+
+      await expect(syntheticsPrivateLocation.getAgentPolicyRevision('ap-1')).resolves.toBe(7);
+      expect(getByIds).toHaveBeenCalledWith(expect.anything(), [{ id: 'ap-1', spaceId: '*' }], {
+        ignoreMissing: true,
+        fields: ['revision'],
+      });
+    });
+
     it('counts only landed first pins as newly pinned', async () => {
       const pkgPolicy = (id: string, condition?: string) => ({
         id,
