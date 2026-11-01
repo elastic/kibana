@@ -1,0 +1,57 @@
+overlay: 1.0.0
+info:
+  title: Figma REST API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/v1/files/{file_key}'].get.security[?@.OAuth2]
+    description: >-
+      Each operation's OAuth2 requirement lists its granular scope together with files:read, so
+      a token needs both. The spec's own scope list marks files:read as deprecated, and Figma
+      accepts either scope, so each combined requirement is replaced with one per scope.
+    remove: true
+  - target: $.paths['/v1/files/{file_key}'].get.security
+    update:
+      - OAuth2:
+          - file_content:read
+      - OAuth2:
+          - files:read
+  - target: $.paths['/v1/files/{file_key}/nodes'].get.security[?@.OAuth2]
+    remove: true
+  - target: $.paths['/v1/files/{file_key}/nodes'].get.security
+    update:
+      - OAuth2:
+          - file_content:read
+      - OAuth2:
+          - files:read
+  - target: $.paths['/v1/images/{file_key}'].get.security[?@.OAuth2]
+    remove: true
+  - target: $.paths['/v1/images/{file_key}'].get.security
+    update:
+      - OAuth2:
+          - file_content:read
+      - OAuth2:
+          - files:read
+  - target: $.paths['/v1/me'].get.security[?@.OAuth2]
+    remove: true
+  - target: $.paths['/v1/me'].get.security
+    update:
+      - OAuth2:
+          - current_user:read
+      - OAuth2:
+          - files:read
+  - target: $.paths['/v1/projects/{project_id}/files'].get.security[?@.OAuth2]
+    remove: true
+  - target: $.paths['/v1/projects/{project_id}/files'].get.security
+    update:
+      - OAuth2:
+          - projects:read
+      - OAuth2:
+          - files:read
+  - target: $.paths['/v1/teams/{team_id}/projects'].get.security[?@.OAuth2]
+    remove: true
+  - target: $.paths['/v1/teams/{team_id}/projects'].get.security
+    update:
+      - OAuth2:
+          - projects:read
+      - OAuth2:
+          - files:read
