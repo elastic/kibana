@@ -949,6 +949,7 @@ packages:
   - 'src/platform/packages/shared/kbn-timerange'
   - 'src/platform/packages/shared/kbn-tooling-log'
   - 'src/platform/packages/shared/kbn-tour-queue'
+  - 'src/platform/packages/shared/kbn-trace-latency-map'
   - 'src/platform/packages/shared/kbn-traced-es-client'
   - 'src/platform/packages/shared/kbn-tracing'
   - 'src/platform/packages/shared/kbn-tracing-config'
