@@ -1738,24 +1738,25 @@ describe('WorkflowContextManager', () => {
     });
 
     describe('renderObjectAccordingToContextAsync', () => {
-      it('renders each top-level key with a context built once for the whole object', async () => {
-        testContainer.templatingEngineMock.render = jest
-          .fn()
-          .mockImplementation((template) => `rendered(${template})`);
-        const obj = { first: '{{ workflow.name }}', second: '{{ inputs.userId }}' };
+      it('builds the context synchronously, once for the whole object, and renders it async', async () => {
+        const rendered = { first: 'rendered' };
+        testContainer.templatingEngineMock.renderAsync = jest.fn().mockResolvedValue(rendered);
+        const obj = { first: '{{ workflow.name }}', nested: { second: '{{ inputs.userId }}' } };
 
-        const result = await testContainer.underTest.renderObjectAccordingToContextAsync(obj);
+        const resultPromise = testContainer.underTest.renderObjectAccordingToContextAsync(obj);
 
-        expect(result).toEqual({
-          first: 'rendered({{ workflow.name }})',
-          second: 'rendered({{ inputs.userId }})',
-        });
+        // Parallel branches install their scope only during the synchronous part of a step.
         expect(
           testContainer.templatingEngineMock.extractGlobalVariableSegments
         ).toHaveBeenCalledTimes(1);
         expect(
           testContainer.templatingEngineMock.extractGlobalVariableSegments
         ).toHaveBeenCalledWith(obj);
+        expect(testContainer.templatingEngineMock.renderAsync).toHaveBeenCalledWith(
+          obj,
+          expect.any(Object)
+        );
+        expect(await resultPromise).toBe(rendered);
       });
     });
   });

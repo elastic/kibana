@@ -75,6 +75,40 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('renderAsync', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('renders the same result as render', async () => {
+      const obj = {
+        message: 'Hello, {{ user.name }}!',
+        expression: '${{ user.tags }}',
+        details: { age: '{{ user.age }}', tags: ['{{ user.tags[0] }}', 7], empty: null },
+        missing: undefined,
+        flag: true,
+      };
+      const context = { user: { name: 'Alice', age: 30, tags: ['admin', 'editor'] } };
+
+      expect(await templatingEngine.renderAsync(obj, context)).toEqual(
+        templatingEngine.render(obj, context)
+      );
+    });
+
+    it('yields to the event loop before each string at any depth', async () => {
+      // Every clock read is past the yield budget, so each string yields.
+      let now = 1e12;
+      jest.spyOn(performance, 'now').mockImplementation(() => (now += 30));
+      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const obj = { top: '{{ a }}', nested: { deep: { leaf: '{{ b }}' } }, list: [1, '{{ c }}'] };
+
+      const rendered = await templatingEngine.renderAsync(obj, { a: 'A', b: 'B', c: 'C' });
+
+      expect(rendered).toEqual({ top: 'A', nested: { deep: { leaf: 'B' } }, list: [1, 'C'] });
+      expect(setImmediateSpy).toHaveBeenCalledTimes(3);
+    });
+  });
+
   describe('basic rendering', () => {
     it('should render simple variables', () => {
       const template = 'Hello {{ name }}!';
