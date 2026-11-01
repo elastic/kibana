@@ -199,23 +199,87 @@ export const enableAlertZeroInSpace = async (args: {
   spaceId: string;
 }): Promise<void> => setAlertZeroEnabledInSpace({ ...args, enabled: true });
 
+type SpaceSolution = 'security' | 'classic' | 'oblt' | 'es';
+
+const readSpaceSolution = async ({
+  apiClient,
+  headers,
+  spaceId,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<SpaceSolution> => {
+  // Spaces is a public API: it takes the public API version, not the internal one.
+  const response = await apiClient.get(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
+    headers: { ...INTERNAL_HEADERS, ...headers, 'elastic-api-version': '2023-10-31' },
+    responseType: 'json',
+  });
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `Setup: failed to read space ${spaceId} (status ${response.statusCode}): ${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+  return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
+};
+
+const setSpaceSolution = async ({
+  apiClient,
+  headers,
+  spaceId,
+  solution,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+  solution: SpaceSolution;
+}): Promise<void> => {
+  const response = await apiClient.put(
+    `/internal/spaces/space/${encodeURIComponent(spaceId)}/solution`,
+    {
+      headers: { ...INTERNAL_HEADERS, ...headers },
+      responseType: 'json',
+      body: { solution },
+    }
+  );
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `Setup: failed to set solution ${solution} on space ${spaceId} (status ${
+        response.statusCode
+      }): ${JSON.stringify(response.body)}`
+    );
+  }
+};
+
 /**
- * Enables the per-space AlertZero gate for one suite and returns the restore callback for its
- * afterAll. The suites run serially (`workers: 1`), so a suite that only enables — never
- * restores — would 404 the gated routes of the next gated suite on the same stack; restoring
- * the captured baseline keeps the shared space exactly as this suite found it, including the
- * case where a previous suite (or the deployment) had the gate already on.
+ * Makes one suite's space usable by AlertZero and returns the restore callback for its afterAll.
+ *
+ * AlertZero answers 404 outside a Security solution space, and the default space may be
+ * Classic, so the space's solution view is switched to Security alongside the per-space gate.
+ * The suites run serially (`workers: 1`), so a suite that only enables — never restores — would
+ * leak into the next suite on the same stack; restoring both captured baselines keeps the shared
+ * space exactly as this suite found it, including when the gate or the Security view was
+ * already on.
  */
 export const withAlertZeroEnabledInSpace = async (args: {
   apiClient: ApiClientFixture;
   headers: Record<string, string>;
   spaceId: string;
 }): Promise<() => Promise<void>> => {
-  const baseline = {
-    enabled: await readAlertZeroEnabledInSpace(args),
-  };
+  const baselineSolution = await readSpaceSolution(args);
+  if (baselineSolution !== 'security') {
+    await setSpaceSolution({ ...args, solution: 'security' });
+  }
+  const baselineEnabled = await readAlertZeroEnabledInSpace(args);
   await setAlertZeroEnabledInSpace({ ...args, enabled: true });
-  return () => setAlertZeroEnabledInSpace({ ...args, enabled: baseline.enabled });
+  return async () => {
+    await setAlertZeroEnabledInSpace({ ...args, enabled: baselineEnabled });
+    if (baselineSolution !== 'security') {
+      await setSpaceSolution({ ...args, solution: baselineSolution });
+    }
+  };
 };
 
 /**
