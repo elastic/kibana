@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
@@ -380,28 +380,30 @@ export const HitlEmailChannelSchema = z.object({
     .describe('Email subject. Defaults to a built-in subject when omitted.'),
 });
 
-export const HitlSlack2ChannelSchema = z.object({
-  'connector-id': z
-    .string()
-    .min(1)
-    .max(CONNECTOR_ID_MAX_LENGTH)
-    .describe('Slack (v2) connector saved object id or name'),
-  channels: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
-        .describe(
-          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
-        )
-    )
-    .min(1)
-    .describe(
-      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
-    ),
-  interactive: z.boolean().optional().describe(HITL_SLACK2_INTERACTIVE_DESCRIPTION),
-});
+export const HitlSlack2ChannelSchema = lazySchema(() =>
+  z.object({
+    'connector-id': z
+      .string()
+      .min(1)
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .describe('Slack (v2) connector saved object id or name'),
+    channels: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+          .describe(
+            'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+          )
+      )
+      .min(1)
+      .describe(
+        'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
+      ),
+    interactive: z.boolean().optional().describe(HITL_SLACK2_INTERACTIVE_DESCRIPTION),
+  })
+);
 
 export const HitlTeamsChannelSchema = z.object({
   'connector-id': z
