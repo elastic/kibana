@@ -8,18 +8,16 @@
  */
 
 import { get, isString } from 'lodash';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
-import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { fetchAlertSourcesByIds } from './fetch_by_ids';
+import { assertWithinRunLimit } from './fetch_by_ids';
 import type {
   AlertEventRule,
   AlertSelection,
   AlertTriggerInput,
 } from '../../../../../common/types/alert_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
+import { loadAlertDocuments } from '../../../lib/load_alert_documents';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
@@ -99,26 +97,14 @@ async function fetchAlerts(
   context: AlertPreprocessingContext,
   logger: Logger
 ): Promise<AlertHit[]> {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const ruleTypeRegistryMap = (await context.alerting).listTypes();
-
-  const documents = await fetchAlertSourcesByIds({ selections: alertIds, esClient, logger });
-
-  return documents.map(({ _id, _index, _source }) => {
-    let alert = _source as Alert;
-
-    const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
-
-    const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
-    // Format alert using the registered rule type's formatAlert function if available,
-    if (registeredRuleType?.alerts?.formatAlert) {
-      alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
-    }
-
-    const expandedAlert = expandFlattenedAlert(alert) as Alert;
-
-    return { _id, _index, ...expandedAlert };
+  const { alerts } = await loadAlertDocuments({
+    alerts: { selections: alertIds },
+    esClient: (await context.core).elasticsearch.client.asCurrentUser,
+    ruleTypes: (await context.alerting).listTypes(),
+    logger,
   });
+
+  return alerts as AlertHit[];
 }
 
 /**
@@ -135,6 +121,8 @@ export async function preprocessAlertInputs(
   if (!event || event.triggerType !== 'alert' || !event.alertIds || event.alertIds.length === 0) {
     return inputs;
   }
+
+  assertWithinRunLimit(event.alertIds.length, 'alerts');
 
   logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
 
