@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync, statSync, unlinkSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, statSync, unlinkSync } from 'fs';
+import { join, resolve } from 'path';
 import type { ScoutServerConfig } from '../../../../types';
 
 const GCS_SETTING_PREFIX = 'gcs.client.default.credentials_file=';
+const TOKEN_USAGE_TRACKING_ARG = '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true';
 
 const loadServers = (modulePath: string, env: Record<string, string>): ScoutServerConfig => {
   let servers: ScoutServerConfig | undefined;
@@ -37,14 +39,6 @@ describe.each([
     process.env = originalEnv;
   });
 
-  it('turns on inference token usage tracking', () => {
-    const { kbnTestServer } = loadServers(modulePath, {});
-
-    expect(kbnTestServer.serverArgs).toContain(
-      '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true'
-    );
-  });
-
   it('adds no secure file without GCS_CREDENTIALS', () => {
     const { esTestCluster } = loadServers(modulePath, {});
 
@@ -67,5 +61,33 @@ describe.each([
     } finally {
       unlinkSync(filePath);
     }
+  });
+});
+
+describe('eval config sets', () => {
+  const configSetsDir = resolve(__dirname, '..');
+  const evalConfigModules = readdirSync(configSetsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('evals_'))
+    .flatMap(({ name }) =>
+      ['stateful', 'serverless'].flatMap((arch) => {
+        const archDir = join(configSetsDir, name, arch);
+        return existsSync(archDir)
+          ? readdirSync(archDir)
+              .filter((file) => file.endsWith('.config.ts'))
+              .map((file) => join(name, arch, file))
+          : [];
+      })
+    );
+
+  it('finds the eval config sets', () => {
+    expect(evalConfigModules).toContain(
+      join('evals_tracing', 'stateful', 'classic.stateful.config.ts')
+    );
+  });
+
+  it.each(evalConfigModules)('%s enables token usage tracking', (configModule) => {
+    const { kbnTestServer } = loadServers(join(configSetsDir, configModule), {});
+
+    expect(kbnTestServer.serverArgs).toContain(TOKEN_USAGE_TRACKING_ARG);
   });
 });
