@@ -173,7 +173,6 @@ describe('syncContinuousOnboarding', () => {
         enabled,
         request,
         spaceId: request.spaceId,
-        waitForRunningExecutions: false,
       });
     }
   );

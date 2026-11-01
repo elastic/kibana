@@ -76,8 +76,5 @@ export const syncContinuousOnboarding = async ({
     spaceId: event.request.spaceId,
     enabled,
     logger,
-    // Source writes await listeners. Disable scheduling now, then drain executions in background
-    // so deleting the last source does not block on the workflow's termination polling.
-    waitForRunningExecutions: false,
   });
 };

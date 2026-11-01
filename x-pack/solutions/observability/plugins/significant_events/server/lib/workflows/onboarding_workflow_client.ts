@@ -569,43 +569,8 @@ export class SignificantEventsKIsOnboardingClient {
   }
 
   /**
-   * Cancels non-terminal onboarding executions started by the given coordinator executions.
-   * Direct onboarding and children of a later coordinator are left alone.
-   */
-  async cancelRunningChildrenOf({
-    parentExecutionIds,
-    request,
-  }: {
-    parentExecutionIds: string[];
-    request: KibanaRequest;
-  }): Promise<number> {
-    if (parentExecutionIds.length === 0) {
-      return 0;
-    }
-    const parentIds = new Set(parentExecutionIds);
-    const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_SOURCES_PER_QUERY },
-      request.spaceId,
-      request
-    );
-    const children = results.filter(({ context }) => {
-      const parentExecutionId = context?.parentWorkflowExecutionId;
-      return typeof parentExecutionId === 'string' && parentIds.has(parentExecutionId);
-    });
-    await Promise.all(
-      children.map(({ id }) =>
-        this.workflowExecutionService.cancelExecution({
-          id,
-          spaceId: request.spaceId,
-          request,
-        })
-      )
-    );
-    return children.length;
-  }
-
-  /**
    * Cancels every non-terminal onboarding execution of the request space.
+   * Used during teardown of the continuous KI onboarding workflow.
    *
    * @returns The number of executions that were canceled.
    */
