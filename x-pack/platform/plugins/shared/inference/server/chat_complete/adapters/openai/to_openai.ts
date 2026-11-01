@@ -54,8 +54,13 @@ function ensureArrayItems(schema: Record<string, unknown>): Record<string, unkno
   return result;
 }
 
+/**
+ * @param strictToolNames tools to send with `strict: true`; their schemas must already be in
+ * the shape OpenAI strict mode requires.
+ */
 export function toolsToOpenAI(
-  tools: ToolOptions['tools']
+  tools: ToolOptions['tools'],
+  strictToolNames: string[] = []
 ): OpenAI.ChatCompletionCreateParams['tools'] {
   return tools
     ? Object.entries(tools).map(([toolName, { description, schema }]) => {
@@ -71,6 +76,7 @@ export function toolsToOpenAI(
             parameters: ensureArrayItems(
               parameters as unknown as Record<string, unknown>
             ) as unknown as Record<string, unknown>,
+            ...(strictToolNames.includes(toolName) ? { strict: true } : {}),
           },
         };
       })

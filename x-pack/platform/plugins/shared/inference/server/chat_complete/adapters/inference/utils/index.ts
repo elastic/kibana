@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getProvider, getModelId, getElasticModelProvider } from './connector_config';
+export {
+  getProvider,
+  getModelId,
+  getElasticModelProvider,
+  isElasticOpenAiModelId,
+} from './connector_config';

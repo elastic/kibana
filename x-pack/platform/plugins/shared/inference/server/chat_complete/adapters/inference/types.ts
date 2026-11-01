@@ -11,4 +11,9 @@ import type { InferenceAdapterChatCompleteOptions } from '../../types';
 export type CreateOpenAIRequestOptions = Omit<
   InferenceAdapterChatCompleteOptions,
   'logger' | 'abortSignal' | 'executor' | 'functionCalling'
-> & { connector: InferenceConnector; simulatedFunctionCalling: boolean };
+> & {
+  connector: InferenceConnector;
+  simulatedFunctionCalling: boolean;
+  /** Tools whose schema was rewritten for, and should be sent with, OpenAI strict function calling. */
+  strictToolNames?: string[];
+};

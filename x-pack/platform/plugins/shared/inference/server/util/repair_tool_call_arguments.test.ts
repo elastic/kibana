@@ -6,7 +6,7 @@
  */
 
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import { repairJsonEncodedArguments } from './repair_json_encoded_arguments';
+import { repairToolCallArguments } from './repair_tool_call_arguments';
 
 // The tool-call tests in validate_tool_calls.test.ts cover the repair through the public path.
 // These cover the path shapes and partial failures that are awkward to reach from there.
@@ -29,11 +29,11 @@ const verdictsSchema = toZod({
   required: ['verdicts'],
 });
 
-describe('repairJsonEncodedArguments', () => {
+describe('repairToolCallArguments', () => {
   it('repairs the whole arguments object when it was sent as a JSON string', () => {
     // Double-encoded arguments fail at the root path, which has no key to report.
     expect(
-      repairJsonEncodedArguments(JSON.stringify({ verdicts: [{ id: 'a' }] }), verdictsSchema)
+      repairToolCallArguments(JSON.stringify({ verdicts: [{ id: 'a' }] }), verdictsSchema)
     ).toEqual({ repaired: { verdicts: [{ id: 'a' }] }, repairedPaths: ['<root>'] });
   });
 
@@ -41,7 +41,7 @@ describe('repairJsonEncodedArguments', () => {
     const valid = { id: 'b' };
 
     expect(
-      repairJsonEncodedArguments(
+      repairToolCallArguments(
         { verdicts: [JSON.stringify({ id: 'a' }), valid, JSON.stringify({ id: 'c' })] },
         verdictsSchema
       )
@@ -55,7 +55,7 @@ describe('repairJsonEncodedArguments', () => {
     // A partial repair must not be returned: the caller would otherwise accept arguments that
     // still break the schema.
     expect(
-      repairJsonEncodedArguments(
+      repairToolCallArguments(
         { verdicts: JSON.stringify([{ id: 'a' }]), count: 'three' },
         verdictsSchema
       )
@@ -65,20 +65,20 @@ describe('repairJsonEncodedArguments', () => {
   it('gives up when the string parses to the wrong structure', () => {
     // An object where the schema expects an array is not a JSON-encoded array.
     expect(
-      repairJsonEncodedArguments({ verdicts: JSON.stringify({ id: 'a' }) }, verdictsSchema)
+      repairToolCallArguments({ verdicts: JSON.stringify({ id: 'a' }) }, verdictsSchema)
     ).toBeUndefined();
   });
 
   it('gives up when a repaired value still fails inside', () => {
     expect(
-      repairJsonEncodedArguments({ verdicts: JSON.stringify([{ id: 1 }]) }, verdictsSchema)
+      repairToolCallArguments({ verdicts: JSON.stringify([{ id: 1 }]) }, verdictsSchema)
     ).toBeUndefined();
   });
 
   it('does not touch arguments that already validate', () => {
     const args = { verdicts: [{ id: 'a' }] };
 
-    expect(repairJsonEncodedArguments(args, verdictsSchema)).toEqual({
+    expect(repairToolCallArguments(args, verdictsSchema)).toEqual({
       repaired: args,
       repairedPaths: [],
     });

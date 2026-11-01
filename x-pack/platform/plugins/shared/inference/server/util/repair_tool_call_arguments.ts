@@ -31,6 +31,16 @@ const replaceAt = (value: unknown, path: readonly PropertyKey[], replacement: un
   return value;
 };
 
+/** Removes the property at `path`; its parent must be an object and its last key a string. */
+const removeAt = (value: unknown, path: readonly PropertyKey[]): unknown => {
+  const parentPath = path.slice(0, -1);
+  const { [path[path.length - 1] as string]: _removed, ...remaining } = valueAt(
+    value,
+    parentPath
+  ) as JsonObject;
+  return replaceAt(value, parentPath, remaining);
+};
+
 const isStructuredType = (expected: string): expected is 'object' | 'array' =>
   expected === 'object' || expected === 'array';
 
@@ -45,13 +55,20 @@ const parseJsonEncodedValue = (value: unknown, expected: 'object' | 'array'): un
   }
 };
 
+type Repair = { path: readonly PropertyKey[]; parsed: unknown } | { path: readonly PropertyKey[] };
+
 /**
- * Models sometimes send an object or array argument as a JSON string. Parses such strings, but
- * only at the paths where validation reported an object or array was expected, so a value that
- * passed validation is never changed. Repeats while it makes progress, for strings nested in
- * strings. Returns the repaired arguments and their paths, or undefined if they cannot be repaired.
+ * Repairs tool call arguments that fail validation in ways models commonly produce, only at the
+ * paths where validation failed, so a value that passed validation is never changed:
+ * - an object or array argument sent as a JSON string is parsed, where validation expected an
+ *   object or array;
+ * - a `null` the schema does not accept is dropped, so an optional property falls back to being
+ *   absent. OpenAI strict function calling sends `null` for every optional property the model
+ *   does not set.
+ * Repeats while it makes progress, for strings nested in strings. Returns the repaired arguments
+ * and their paths, or undefined if they cannot be repaired.
  */
-export const repairJsonEncodedArguments = (
+export const repairToolCallArguments = (
   args: unknown,
   zodSchema: z.ZodType
 ): { repaired: unknown; repairedPaths: string[] } | undefined => {
@@ -60,16 +77,27 @@ export const repairJsonEncodedArguments = (
   let result = zodSchema.safeParse(repaired);
 
   while (!result.success) {
-    const repairs = result.error.issues.flatMap((issue) => {
+    const repairs = result.error.issues.flatMap((issue): Repair[] => {
+      const value = valueAt(repaired, issue.path);
+      if (
+        value === null &&
+        typeof issue.path[issue.path.length - 1] === 'string' &&
+        isJsonObject(valueAt(repaired, issue.path.slice(0, -1)))
+      ) {
+        return [{ path: issue.path }];
+      }
       if (issue.code !== 'invalid_type' || !isStructuredType(issue.expected)) return [];
-      const parsed = parseJsonEncodedValue(valueAt(repaired, issue.path), issue.expected);
+      const parsed = parseJsonEncodedValue(value, issue.expected);
       return parsed === undefined ? [] : [{ path: issue.path, parsed }];
     });
     if (repairs.length === 0) return undefined;
 
-    for (const { path, parsed } of repairs) {
-      repaired = replaceAt(repaired, path, parsed);
-      repairedPaths.push(path.length > 0 ? path.join('.') : '<root>');
+    for (const repair of repairs) {
+      repaired =
+        'parsed' in repair
+          ? replaceAt(repaired, repair.path, repair.parsed)
+          : removeAt(repaired, repair.path);
+      repairedPaths.push(repair.path.length > 0 ? repair.path.join('.') : '<root>');
     }
     result = zodSchema.safeParse(repaired);
   }
