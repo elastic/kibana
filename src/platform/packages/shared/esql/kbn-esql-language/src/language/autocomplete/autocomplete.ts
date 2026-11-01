@@ -56,9 +56,11 @@ export async function suggest(
     return [];
   }
 
-  // Use the appropriate AST context for field retrieval
-  // When in a subquery, use the subquery's AST to get only its fields
-  const astForFields = astContext.astForContext;
+  // Keep the current pipeline's fields and the outer header commands completed before the cursor.
+  const astForFields = {
+    ...astContext.astForContext,
+    header: root.header?.filter(({ location }) => location.max < offset),
+  };
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
     getQueryForFields(innerText, astForFields),
