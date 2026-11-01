@@ -10,13 +10,14 @@
 import { get, isString } from 'lodash';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
-import { loadAlertDocuments } from './load_alert_documents';
+import { assertWithinRunLimit } from './fetch_by_ids';
 import type {
   AlertEventRule,
   AlertSelection,
   AlertTriggerInput,
 } from '../../../../../common/types/alert_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
+import { loadAlertDocuments } from '../../../lib/load_alert_documents';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
@@ -120,6 +121,8 @@ export async function preprocessAlertInputs(
   if (!event || event.triggerType !== 'alert' || !event.alertIds || event.alertIds.length === 0) {
     return inputs;
   }
+
+  assertWithinRunLimit(event.alertIds.length, 'alerts');
 
   logger.debug(`Preprocessing ${event.alertIds.length} alert(s) for workflow execution`);
 

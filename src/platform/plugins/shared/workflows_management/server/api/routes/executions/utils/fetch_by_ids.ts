@@ -61,8 +61,6 @@ export const fetchAlertSourcesByIds = async ({
     return [];
   }
 
-  assertWithinRunLimit(selections.length, 'alerts');
-
   try {
     const response = await esClient.mget<Record<string, unknown>>({
       docs: selections.map(({ _id, _index }) => ({ _id, _index })),

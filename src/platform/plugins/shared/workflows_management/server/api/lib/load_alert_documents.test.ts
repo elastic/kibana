@@ -13,8 +13,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { AlertDocumentsTooLargeError } from './alert_documents_too_large_error';
 import type { AlertRuleTypes } from './load_alert_documents';
-import { loadAlertDocuments, MAX_LOAD_ALERT_IDS } from './load_alert_documents';
-import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
+import { loadAlertDocuments, MAX_LOAD_ALERT_DOCUMENTS } from './load_alert_documents';
+import { TooManyAlertDocumentsError } from './too_many_alert_documents_error';
 
 const INDEX = '.alerts-security.alerts-default';
 
@@ -106,6 +106,22 @@ describe('loadAlertDocuments', () => {
         })
       );
     });
+
+    it('rejects more selections than the load limit before querying', async () => {
+      const selections = Array.from({ length: MAX_LOAD_ALERT_DOCUMENTS + 1 }, (_, i) => ({
+        _id: `id-${i}`,
+        _index: INDEX,
+      }));
+
+      const load = loadAlertDocuments({ alerts: { selections }, esClient, ruleTypes, logger });
+
+      await expect(load).rejects.toBeInstanceOf(TooManyAlertDocumentsError);
+      await expect(load).rejects.toMatchObject({
+        limit: MAX_LOAD_ALERT_DOCUMENTS,
+        requestedCount: MAX_LOAD_ALERT_DOCUMENTS + 1,
+      });
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
   });
 
   describe('by ids within an index', () => {
@@ -143,12 +159,32 @@ describe('loadAlertDocuments', () => {
     });
 
     it('rejects more ids than the load limit before querying', async () => {
-      const ids = Array.from({ length: MAX_LOAD_ALERT_IDS + 1 }, (_, i) => `id-${i}`);
+      const ids = Array.from({ length: MAX_LOAD_ALERT_DOCUMENTS + 1 }, (_, i) => `id-${i}`);
 
       await expect(
         loadAlertDocuments({ alerts: { ids, index: INDEX }, esClient, ruleTypes, logger })
-      ).rejects.toThrow(WorkflowTriggerInputError);
+      ).rejects.toBeInstanceOf(TooManyAlertDocumentsError);
       expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('stops searching once a chunk exceeds maxBytes', async () => {
+      const ids = Array.from({ length: 250 }, (_, i) => `id-${i}`);
+      esClient.search.mockResponseOnce(
+        searchResponse(
+          ids.slice(0, 100).map((_id) => ({ _id, _source: { message: 'x'.repeat(50) } }))
+        )
+      );
+
+      const load = loadAlertDocuments({
+        alerts: { ids, index: INDEX },
+        maxBytes: 1000,
+        esClient,
+        ruleTypes,
+        logger,
+      });
+
+      await expect(load).rejects.toBeInstanceOf(AlertDocumentsTooLargeError);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
     });
   });
 

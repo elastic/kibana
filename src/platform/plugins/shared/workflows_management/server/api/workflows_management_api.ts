@@ -17,12 +17,7 @@ import type {
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type {
-  CustomRequestHandlerContext,
-  ElasticsearchClient,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
+import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AccessControlInput } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
 import {
@@ -80,14 +75,11 @@ import {
 } from './external_resume/external_resume_service';
 import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
+import type { LoadAlertDocumentsRequest, LoadedAlertDocuments } from './lib/load_alert_documents';
+import { loadAlertDocuments } from './lib/load_alert_documents';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import type {
-  LoadAlertDocumentsRequest,
-  LoadedAlertDocuments,
-} from './routes/executions/utils/load_alert_documents';
-import { loadAlertDocuments } from './routes/executions/utils/load_alert_documents';
 import {
   ALL_TRIGGER_SELECTION_KINDS,
   preprocessTriggerInputs,
@@ -800,16 +792,19 @@ export class WorkflowsManagementApi {
 
   /**
    * Loads alert documents in the same shape alert-triggered workflows receive, so steps that load
-   * alerts themselves see identical documents. `esClient` must be scoped to the requesting user.
+   * alerts themselves see identical documents. Reads run as the user behind `request`.
    */
   public async loadAlertDocuments({
-    esClient,
-    ...request
-  }: LoadAlertDocumentsRequest & { esClient: ElasticsearchClient }): Promise<LoadedAlertDocuments> {
-    const { alerting } = await this.workflowsService.getPluginsStart();
+    request,
+    ...loadRequest
+  }: LoadAlertDocumentsRequest & { request: KibanaRequest }): Promise<LoadedAlertDocuments> {
+    const [coreStart, { alerting }] = await Promise.all([
+      this.workflowsService.getCoreStart(),
+      this.workflowsService.getPluginsStart(),
+    ]);
     return loadAlertDocuments({
-      ...request,
-      esClient,
+      ...loadRequest,
+      esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
       ruleTypes: alerting?.listTypes() ?? new Map(),
       logger: this.logger,
     });

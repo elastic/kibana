@@ -15,12 +15,13 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_RULE_TYPE_ID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { AlertDocumentsTooLargeError } from './alert_documents_too_large_error';
-import type { FetchedSource } from './fetch_by_ids';
-import { fetchAlertSourcesByIds } from './fetch_by_ids';
-import type { DocumentSelection } from '../../../../../common/types/document_types';
-import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
+import { TooManyAlertDocumentsError } from './too_many_alert_documents_error';
+import type { DocumentSelection } from '../../../common/types/document_types';
+import type { FetchedSource } from '../routes/executions/utils/fetch_by_ids';
+import { fetchAlertSourcesByIds } from '../routes/executions/utils/fetch_by_ids';
 
-export const MAX_LOAD_ALERT_IDS = 1000;
+/** Most alerts one `loadAlertDocuments` call loads, in either lookup mode. */
+export const MAX_LOAD_ALERT_DOCUMENTS = 1000;
 
 const SEARCH_CHUNK_SIZE = 100;
 
@@ -68,6 +69,12 @@ const withFormatFields = (
 ): readonly string[] | undefined =>
   sourceIncludes ? Array.from(new Set([...sourceIncludes, ...FORMAT_ALERT_FIELDS])) : undefined;
 
+const assertWithinLoadLimit = (requestedCount: number): void => {
+  if (requestedCount > MAX_LOAD_ALERT_DOCUMENTS) {
+    throw new TooManyAlertDocumentsError(MAX_LOAD_ALERT_DOCUMENTS, requestedCount);
+  }
+};
+
 const searchAlertSourcesByIds = async ({
   ids,
   index,
@@ -79,20 +86,17 @@ const searchAlertSourcesByIds = async ({
   esClient: ElasticsearchClient;
   sourceIncludes?: readonly string[];
 }): Promise<FetchedSource[]> => {
+  const response = await esClient.search<Record<string, unknown>>({
+    index,
+    ignore_unavailable: true,
+    size: ids.length,
+    query: { ids: { values: [...ids] } },
+    ...(sourceIncludes ? { _source: { includes: [...sourceIncludes] } } : {}),
+  });
   const documents: FetchedSource[] = [];
-  for (let start = 0; start < ids.length; start += SEARCH_CHUNK_SIZE) {
-    const chunk = ids.slice(start, start + SEARCH_CHUNK_SIZE);
-    const response = await esClient.search<Record<string, unknown>>({
-      index,
-      ignore_unavailable: true,
-      size: chunk.length,
-      query: { ids: { values: [...chunk] } },
-      ...(sourceIncludes ? { _source: { includes: [...sourceIncludes] } } : {}),
-    });
-    for (const { _id, _index, _source } of response.hits.hits) {
-      if (_id && _source) {
-        documents.push({ _id, _index, _source });
-      }
+  for (const { _id, _index, _source } of response.hits.hits) {
+    if (_id && _source) {
+      documents.push({ _id, _index, _source });
     }
   }
   return documents;
@@ -111,20 +115,22 @@ const formatAndExpand = (
   return { _id, _index, ...(expandFlattenedAlert(alert) as Record<string, unknown>) };
 };
 
-const assertWithinByteBudget = (
-  alerts: readonly LoadedAlertDocument[],
+/** Returns a check that adds documents to a running byte total and throws once it exceeds `maxBytes`. */
+const createByteBudget = (
   maxBytes: number | undefined
-): void => {
-  if (maxBytes === undefined) {
-    return;
-  }
+): ((alerts: readonly LoadedAlertDocument[]) => void) => {
   let loadedBytes = 0;
-  for (const alert of alerts) {
-    loadedBytes += Buffer.byteLength(JSON.stringify(alert), 'utf8');
-    if (loadedBytes > maxBytes) {
-      throw new AlertDocumentsTooLargeError(maxBytes, loadedBytes);
+  return (alerts) => {
+    if (maxBytes === undefined) {
+      return;
     }
-  }
+    for (const alert of alerts) {
+      loadedBytes += Buffer.byteLength(JSON.stringify(alert), 'utf8');
+      if (loadedBytes > maxBytes) {
+        throw new AlertDocumentsTooLargeError(maxBytes, loadedBytes);
+      }
+    }
+  };
 };
 
 /**
@@ -140,34 +146,40 @@ export const loadAlertDocuments = async ({
   logger,
 }: LoadAlertDocumentsParams): Promise<LoadedAlertDocuments> => {
   const includes = withFormatFields(sourceIncludes);
+  const chargeByteBudget = createByteBudget(maxBytes);
+  const loaded: LoadedAlertDocument[] = [];
+  const addDocuments = (documents: readonly FetchedSource[]): void => {
+    const formatted = documents.map((document) => formatAndExpand(document, ruleTypes));
+    chargeByteBudget(formatted);
+    loaded.push(...formatted);
+  };
 
   let requestedIds: readonly string[];
-  let documents: FetchedSource[];
   if ('selections' in lookup) {
+    assertWithinLoadLimit(lookup.selections.length);
     requestedIds = lookup.selections.map(({ _id }) => _id);
-    documents = await fetchAlertSourcesByIds({
-      selections: [...lookup.selections],
-      esClient,
-      logger,
-      sourceIncludes: includes,
-    });
+    addDocuments(
+      await fetchAlertSourcesByIds({
+        selections: [...lookup.selections],
+        esClient,
+        logger,
+        sourceIncludes: includes,
+      })
+    );
   } else {
     requestedIds = Array.from(new Set(lookup.ids));
-    if (requestedIds.length > MAX_LOAD_ALERT_IDS) {
-      throw new WorkflowTriggerInputError(
-        `Cannot load more than ${MAX_LOAD_ALERT_IDS} alerts at once (received ${requestedIds.length}).`
+    assertWithinLoadLimit(requestedIds.length);
+    for (let start = 0; start < requestedIds.length; start += SEARCH_CHUNK_SIZE) {
+      addDocuments(
+        await searchAlertSourcesByIds({
+          ids: requestedIds.slice(start, start + SEARCH_CHUNK_SIZE),
+          index: lookup.index,
+          esClient,
+          sourceIncludes: includes,
+        })
       );
     }
-    documents = await searchAlertSourcesByIds({
-      ids: requestedIds,
-      index: lookup.index,
-      esClient,
-      sourceIncludes: includes,
-    });
   }
-
-  const loaded = documents.map((document) => formatAndExpand(document, ruleTypes));
-  assertWithinByteBudget(loaded, maxBytes);
 
   const foundIds = new Set(loaded.map(({ _id }) => _id));
   const missingIds = Array.from(new Set(requestedIds.filter((id) => !foundIds.has(id))));

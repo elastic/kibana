@@ -31,5 +31,6 @@ export type {
   LoadAlertDocumentsRequest,
   LoadedAlertDocument,
   LoadedAlertDocuments,
-} from './api/routes/executions/utils/load_alert_documents';
-export { AlertDocumentsTooLargeError } from './api/routes/executions/utils/alert_documents_too_large_error';
+} from './api/lib/load_alert_documents';
+export { AlertDocumentsTooLargeError } from './api/lib/alert_documents_too_large_error';
+export { TooManyAlertDocumentsError } from './api/lib/too_many_alert_documents_error';
