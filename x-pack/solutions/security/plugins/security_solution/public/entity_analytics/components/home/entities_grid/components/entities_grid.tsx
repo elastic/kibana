@@ -219,6 +219,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     () => ({
       columns: [{ id: readableSortField, direction: readableSortDirection }],
       onSort: (cols: Array<{ id: string; direction: SortDir }>) => {
+        // Unsort removes the active column from EUI's list; fall back to the grid default.
+        if (cols.length === 0) {
+          onSortChange(RISK_SCORE_NORM_FIELD, 'desc');
+          return;
+        }
         // EUI passes every sorted column; the one the user just picked isn't the current sort.
         const col = cols.find((c) => c.id !== readableSortField) ?? cols[0];
         if (!col) return;
