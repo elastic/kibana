@@ -25,7 +25,7 @@ import type { SuggestedUser } from './types';
 /**
  * Service account IDs have the `namespace/service` form, for example `kibana/nightshift`.
  */
-const SERVICE_ACCOUNT_ID_PATTERN = /^[^/\s]+\/[^/\s]+$/;
+export const SERVICE_ACCOUNT_ID_PATTERN = /^[^/\s]+\/[^/\s]+$/;
 const SEARCH_DEBOUNCE_MS = 250;
 
 export interface PrincipalPickerProps {
@@ -52,7 +52,7 @@ export const PrincipalPicker = ({
   label,
   helpText,
   isDisabled,
-  allowServiceAccounts = true,
+  allowServiceAccounts = false,
   'data-test-subj': dataTestSubj = 'accessPanelPrincipalPicker',
 }: PrincipalPickerProps) => {
   const [searchValue, setSearchValue] = useState('');
@@ -150,10 +150,14 @@ export const PrincipalPicker = ({
       }
       helpText={
         helpText ??
-        i18n.translate('accessControlUi.principalPicker.helpText', {
-          defaultMessage:
-            'Users appear after their first sign-in. To add a service account, type its ID, such as kibana/my-service.',
-        })
+        (allowServiceAccounts
+          ? i18n.translate('accessControlUi.principalPicker.helpTextWithServiceAccounts', {
+              defaultMessage:
+                'Users appear after their first sign-in. To pick a service account, type its ID, such as kibana/my-service.',
+            })
+          : i18n.translate('accessControlUi.principalPicker.helpText', {
+              defaultMessage: 'Users appear after their first sign-in.',
+            }))
       }
     >
       <EuiComboBox<SuggestedUser>

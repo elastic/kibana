@@ -84,10 +84,7 @@ describe('ConnectorAccessSection', () => {
 
     // The accordion button's accessible name is unreliable: EUI's test IDs are static.
     await userEvent.click(screen.getByRole('heading', { name: 'Access' }));
-    await userEvent.type(
-      within(screen.getByTestId('accessPanelPrincipalPicker')).getByRole('combobox'),
-      'kibana/svc{enter}'
-    );
+    await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/svc{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
       general_access: 'use',

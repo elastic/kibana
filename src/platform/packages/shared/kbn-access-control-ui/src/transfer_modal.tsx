@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { Principal } from '@kbn/access-control';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { AccessList } from './access_list';
+import { OwnerRow } from './access_list';
 import type { AccessCopy } from './copy';
 import { PrincipalPicker } from './principal_picker';
 import type { SuggestedUser } from './types';
@@ -76,13 +76,12 @@ export const TransferModal = ({
         </EuiText>
         <EuiSpacer size="m" />
         {newOwner ? (
-          <AccessList
+          <OwnerRow
+            label={i18n.translate('accessControlUi.transfer.newOwner', {
+              defaultMessage: 'New owner',
+            })}
             owner={newOwner.principal}
-            entries={[]}
-            entryLevels={[]}
             profiles={new Map(newOwner.user ? [[newOwner.user.uid, newOwner.user]] : [])}
-            warnings={new Set()}
-            copy={copy}
           />
         ) : (
           <PrincipalPicker
