@@ -17,6 +17,8 @@ import {
 
 export interface CollectedAlerts {
   ids: string[];
+  /** Alert tags the batches reference: they also hold every alert that carries one of them. */
+  tags: string[];
   /** Alerts whose attachment carries their concrete index. */
   descriptors: Map<string, DocumentDescriptor>;
   /** Rule names the attachments carry, by alert id. */
@@ -43,6 +45,7 @@ export const collectAlerts = (attachments: readonly UnknownAttachment[]): Collec
   const descriptors = new Map<string, DocumentDescriptor>();
   const names = new Map<string, string>();
   const ids = new Set<string>();
+  const tags = new Set<string>();
   let createdAt: string | undefined;
 
   for (const attachment of attachments) {
@@ -51,9 +54,15 @@ export const collectAlerts = (attachments: readonly UnknownAttachment[]): Collec
       createdAt = attachmentCreatedAt;
     }
 
-    const alertIds = (attachment.data as { alertIds?: unknown } | undefined)?.alertIds;
+    const { alertIds, tags: alertTags } = (attachment.data ?? {}) as {
+      alertIds?: unknown;
+      tags?: unknown;
+    };
     if (Array.isArray(alertIds)) {
       alertIds.filter(isString).forEach((id) => ids.add(id));
+    }
+    if (Array.isArray(alertTags)) {
+      alertTags.filter(isString).forEach((tag) => tags.add(tag));
     }
 
     if (attachment.type === SecurityAgentBuilderAttachments.alert) {
@@ -76,5 +85,5 @@ export const collectAlerts = (attachments: readonly UnknownAttachment[]): Collec
     }
   }
 
-  return { ids: [...ids], descriptors, names, createdAt };
+  return { ids: [...ids], tags: [...tags], descriptors, names, createdAt };
 };

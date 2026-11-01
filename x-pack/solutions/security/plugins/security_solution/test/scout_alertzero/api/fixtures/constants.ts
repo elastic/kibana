@@ -12,6 +12,7 @@ import {
   FIND_OR_CREATE_INVESTIGATION_URL,
   HUNT_COORDINATOR_URL,
   HUNT_INDEX_SCOPE_URL,
+  HUNT_WORKER_INDEX_COVERAGE_URL,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
@@ -35,9 +36,13 @@ export const HUNT_WORKER_URL = buildWorkerUrl(
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
 );
 
-/** The seven hunt internal routes covered by the authz table. */
+/** The hunt internal routes read with GET. */
+export const HUNT_GET_ROUTES = [HUNT_INDEX_SCOPE_URL, HUNT_WORKER_INDEX_COVERAGE_URL] as const;
+
+/** The eight hunt internal routes covered by the authz table. */
 export const HUNT_READ_ROUTES = [
   HUNT_INDEX_SCOPE_URL,
+  HUNT_WORKER_INDEX_COVERAGE_URL,
   CANDIDATES_URL,
   HUNT_FOR_THREAT_URL,
 ] as const;
@@ -87,6 +92,25 @@ export const SECURITY_READ_ONLY_ROLE: KibanaRole = {
     {
       base: [],
       feature: { siem: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * AlertZero read plus index read, but no cluster privileges: it can resolve the hunt
+ * patterns itself yet cannot read a role (`read_security`), so the worker coverage route
+ * cannot compare against the built-in role.
+ */
+export const ALERTZERO_READ_NO_SECURITY_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logs-*', 'custom-edr-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { siem: ['read'], alertzero: ['read'] },
       spaces: ['*'],
     },
   ],

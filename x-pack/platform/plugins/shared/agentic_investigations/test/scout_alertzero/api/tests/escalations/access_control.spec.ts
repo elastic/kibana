@@ -62,9 +62,8 @@ async function resolveProfileUid(
 
 /**
  * A collaborator with Agentic Investigations access but no Escalations sub-feature and no
- * AlertZero. The built-in `editor` role has every feature, and on the shared `alertzero`
- * server that includes AlertZero All, which grants `manage_escalations`. This role keeps the
- * 403 expectation true wherever the suite runs.
+ * escalation privileges. The Escalations sub-feature is opt-in (`includeIn: 'none'` for
+ * manage), so a role built this way keeps the 403 expectation independent of built-in roles.
  */
 const COLLABORATOR_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },

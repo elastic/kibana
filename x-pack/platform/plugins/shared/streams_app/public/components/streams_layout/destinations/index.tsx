@@ -14,7 +14,7 @@ import { DeleteDestinationConfirmation } from './delete_destination_confirmation
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
 
 export const DestinationsTab = () => {
@@ -69,10 +69,11 @@ export const DestinationsTab = () => {
           [
             destination.name,
             destination.id,
-            destination.index,
+            ...(destination.type === 'elasticsearch'
+              ? [destination.index, destination.mode]
+              : [destination.bucket]),
             destination.signals.join(' '),
-            destination.mode,
-            LOCAL_ELASTICSEARCH_LABEL,
+            getDestinationTypeLabel(destination.type),
           ]
             .join(' ')
             .toLowerCase()

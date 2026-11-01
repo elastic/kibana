@@ -35,6 +35,14 @@ const StatusSchema = schema.oneOf(
 
 const DataFormatSchema = schema.oneOf([schema.literal('ecs'), schema.literal('otel')]);
 
+const EcfServiceConfigSchema = schema.object({
+  serviceId: schema.string({ minLength: 1, maxLength: 128 }),
+  bucketArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), { maxSize: 1000 }),
+  logGroupArns: schema.arrayOf(schema.string({ minLength: 1, maxLength: 2048 }), {
+    maxSize: 1000,
+  }),
+});
+
 const EcfStackSchema = schema.object({
   family: schema.oneOf([
     schema.literal('unified'),
@@ -51,6 +59,8 @@ const EcfStackSchema = schema.object({
   serviceIds: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), { maxSize: 1000 })
   ),
+  /** Stack-relevant settings per service when the stack was last launched or updated. Used for settings drift detection on session resume. */
+  serviceConfigs: schema.maybe(schema.arrayOf(EcfServiceConfigSchema, { maxSize: 1000 })),
 });
 
 const SharedFields = {
@@ -103,6 +113,28 @@ export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchema
     schema.string({ maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH })
   ),
   description: schema.maybe(schema.string({ maxLength: 2048 })),
+});
+
+// ── V4: namespace ────────────────────────────────────────────────────────────
+// Global data stream namespace from the Service settings step. Not in mappings.properties
+// (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchemaV3.extends({
+  namespace: schema.maybe(schema.string({ maxLength: 100 })),
+});
+
+// ── V5: instances ────────────────────────────────────────────────────────────
+// The service instances (originals and duplicates) of the last deploy, so a resumed onboarding
+// rebuilds the Service settings rows. Not in mappings.properties (dynamic: false), so no mapping
+// change is needed.
+const PersistedInstanceSchema = schema.object({
+  instanceId: schema.string({ minLength: 1, maxLength: 255 }),
+  serviceId: schema.string({ minLength: 1, maxLength: 255 }),
+  name: schema.string({ maxLength: 255 }),
+  isDuplicate: schema.boolean(),
+});
+
+export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchemaV4.extends({
+  instances: schema.maybe(schema.arrayOf(PersistedInstanceSchema, { maxSize: 1000 })),
 });
 
 // ── V1 ───────────────────────────────────────────────────────────────────────

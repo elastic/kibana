@@ -15,10 +15,14 @@ import type {
 } from '../../../common/types/domain';
 import type { DocumentResponse, UnifiedAttachmentsFindResponse } from '../../../common/types/api';
 import {
-  DocumentResponseRt,
-  UnifiedAttachmentsFindQueryParamsRt,
-  UnifiedAttachmentsFindResponseRt,
+  DocumentResponseSchema,
+  UnifiedAttachmentsFindQueryParamsSchema,
+  UnifiedAttachmentsFindResponseSchema,
 } from '../../../common/types/api';
+import {
+  UnifiedAttachmentSchema,
+  AttachmentsSchemaV2,
+} from '../../../common/types/domain/attachment/v2';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 
@@ -31,7 +35,7 @@ import type {
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import {
   defaultSortField,
   flattenAttachmentSavedObject,
@@ -43,7 +47,6 @@ import { getCaseReferenceId } from '../../common/references';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { UnifiedAttachmentRt, AttachmentsRtV2 } from '../../../common/types/domain';
 import { buildAttachmentTypeFilter } from './type_filter';
 
 const normalizeDocumentResponse = (
@@ -71,7 +74,7 @@ const decodeUnifiedAttachment = (
   logger: CasesClientArgs['logger']
 ): UnifiedAttachment | undefined => {
   try {
-    return decodeOrThrow(UnifiedAttachmentRt)(attachment);
+    return decodeOrThrowZod(UnifiedAttachmentSchema)(attachment);
   } catch (error) {
     logger.warn(`Failed to decode attachment id ${attachment.id} as unified: ${error}`);
     return undefined;
@@ -122,7 +125,7 @@ export const getAllDocumentsAttachedToCase = async (
 
     const res = normalizeDocumentResponse(documents);
 
-    return decodeOrThrow(DocumentResponseRt)(res);
+    return decodeOrThrowZod(DocumentResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get documents attached to case id: ${caseId}: ${error}`,
@@ -147,7 +150,7 @@ export async function find(
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(UnifiedAttachmentsFindQueryParamsRt)(
+    const queryParams = decodeWithExcessOrThrowZod(UnifiedAttachmentsFindQueryParamsSchema)(
       findQueryParams
     );
 
@@ -192,7 +195,7 @@ export async function find(
       total: theAttachments.total,
     };
 
-    return decodeOrThrow(UnifiedAttachmentsFindResponseRt)(res);
+    return decodeOrThrowZod(UnifiedAttachmentsFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find attachments case id: ${caseID}: ${error}`,
@@ -279,7 +282,7 @@ export async function getAll(
 
     const res = flattenAttachmentSavedObjects(comments.saved_objects);
 
-    return decodeOrThrow(AttachmentsRtV2)(res);
+    return decodeOrThrowZod(AttachmentsSchemaV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

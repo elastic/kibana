@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import type { DateRange } from '../models';
@@ -16,7 +15,7 @@ import {
 } from '../models/time_window';
 
 export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date()): DateRange => {
-  if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
+  if (timeWindow.type === 'calendarAligned') {
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
     const from = moment.utc(currentDate).startOf(unit);
     const to = moment.utc(currentDate).endOf(unit);
@@ -24,7 +23,7 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date
     return { from: from.toDate(), to: to.toDate() };
   }
 
-  if (rollingTimeWindowSchema.is(timeWindow)) {
+  if (timeWindow.type === 'rolling') {
     const unit = toRollingTimeWindowMomentUnit(timeWindow);
     const now = moment.utc(currentDate).startOf('minute');
     const from = now.clone().subtract(timeWindow.duration.value, unit);

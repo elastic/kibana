@@ -48,6 +48,24 @@ describe('createBaseHandlerContext', () => {
     expect(mocks.workflowLogger.logInfo).toHaveBeenCalledWith('hello', { meta: true });
   });
 
+  it('renders KQL conditions through the condition renderer', () => {
+    const mocks = createHandlerTestMocks();
+    const context = createBaseHandlerContext(
+      {},
+      {},
+      {},
+      defaultTestNode as any,
+      mocks.stepExecutionRuntime as any,
+      mocks.workflowLogger as any
+    );
+
+    context.contextManager.renderKqlConditionTemplate?.('a: {{ x }}', { x: 1 });
+
+    expect(
+      mocks.stepExecutionRuntime.contextManager.renderConditionAccordingToContext
+    ).toHaveBeenCalledWith('a: {{ x }}', { x: 1 });
+  });
+
   it('creates a renderer that snapshots the workflow context once', () => {
     const mocks = createHandlerTestMocks();
     const workflowContext = { workflow: { id: 'workflow-id' } };

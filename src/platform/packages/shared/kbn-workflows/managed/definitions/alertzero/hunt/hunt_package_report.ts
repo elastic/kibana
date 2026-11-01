@@ -28,10 +28,10 @@ export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID = 'system-security-hunt-p
  * of the tags, matching `hunt.yaml` and `find_or_create_investigation.yaml`.
  */
 export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 3,
   yaml: HUNT_PACKAGE_REPORT_YAML,
 } as const satisfies ManagedWorkflowDefinition;

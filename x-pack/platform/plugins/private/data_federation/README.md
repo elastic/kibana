@@ -21,13 +21,13 @@ For S3, the user can set up the AWS side either by running the manual AWS CLI st
 
 ## Advanced setting
 
-`dataFederation:enabled` (registered by this plugin, disabled by default) controls whether the management app is enabled in the browser. The app also requires the `manageFederatedData` capability and, in stateful, an Enterprise license. It only affects the UI: data sources and datasets keep working through the API and in ES|QL queries. It is the user-facing switch, as opposed to `xpack.dataFederation.enabled`, which is a deploy-time kill switch resolved by core: when it is `false` the plugin is not loaded at all, so neither the routes nor the advanced setting exist.
+`dataFederation:enabled` (registered by this plugin, enabled by default) controls whether the management app is enabled in the browser. The app also requires the `manageFederatedData` capability and, in stateful, an Enterprise license. It only affects the UI: data sources and datasets keep working through the API and in ES|QL queries. It is the user-facing switch, as opposed to `xpack.dataFederation.enabled`, which is a deploy-time kill switch resolved by core: when it is `false` the plugin is not loaded at all, so neither the routes nor the advanced setting exist.
 
 ## Feature flags
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `xpack.dataFederation.enabled` | `true` | Loads the plugin. The management UI is hidden until the `dataFederation:enabled` advanced setting is turned on |
+| `xpack.dataFederation.enabled` | `true` | Loads the plugin. The management UI is hidden when the `dataFederation:enabled` advanced setting is turned off |
 | `xpack.dataFederation.enableFederatedIdentityAuth` | `false` | No effect; federated identity auth is controlled by `xpack.dataFederation.workloadIdentityIssuerUrl` |
 | `xpack.dataFederation.enableGoogleCloudStorageDataSourceType` | `false` | Show GCS as a data source type |
 | `xpack.dataFederation.enableAzureDataSourceType` | `false` | Show Azure Blob as a data source type |

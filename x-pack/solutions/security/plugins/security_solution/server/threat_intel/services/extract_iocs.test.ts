@@ -1778,7 +1778,7 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
 // ── Adjudication context window ──────────────────────────────────────────────
 //
 // adjudicate_iocs.ts no longer re-finds a value in the article: it judges
-// whatever `context` window extract_iocs attaches to url/domain candidates,
+// whatever `context` window extract_iocs attaches to url/domain/hash candidates,
 // built from the exact offset the regex matched. These tests cover picking
 // the best occurrence and the field's shape, not any re-matching logic (there
 // is none left to test).
@@ -1803,10 +1803,52 @@ describe('extract_iocs — adjudication context window', () => {
     expect(ioc?.context).toContain('evil.com');
   });
 
-  it('does not attach a context window to non-url/domain candidates', () => {
+  it('emits a context window around a hash candidate', () => {
     const hash = 'a'.repeat(64);
-    const result = extractIocs({ text: `Payload SHA-256: ${hash}` });
-    const ioc = result.iocs.find((entry) => entry.type === 'hash');
+    const result = extractIocs({ text: `The malware sample hash is ${hash} in this campaign.` });
+    const ioc = result.iocs.find((entry) => entry.type === 'hash' && entry.value === hash);
+
+    expect(ioc?.context).toContain('malware sample hash');
+    expect(ioc?.context).toContain(hash);
+  });
+
+  it('attaches the right context window when a URL and email appear before the hash', () => {
+    // URL and email consume earlier spans; the hash offset must still land on the
+    // hash value after maskConsumedSpans, not on the preceding tokens. Pad so the
+    // earlier values fall outside the ±240-char window.
+    const url = 'https://evil.example/payload';
+    const email = 'analyst@example.com';
+    const hash = 'b'.repeat(64);
+    const result = extractIocs({
+      text:
+        `See ${url} and contact ${email}. ` +
+        `${'filler prose. '.repeat(40)}` +
+        `The malware sample hash is ${hash}.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'hash' && entry.value === hash);
+
+    expect(ioc?.context).toContain('malware sample hash');
+    expect(ioc?.context).toContain(hash);
+    expect(ioc?.context).not.toContain(url);
+  });
+
+  it('prefers a hash occurrence with an attribution cue over a bare mention', () => {
+    const hash = 'c'.repeat(64);
+    const result = extractIocs({
+      text:
+        `Checksum listed as ${hash} in the appendix. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `The malware sample hash is ${hash} from the dropper.`,
+    });
+    const ioc = result.iocs.find((entry) => entry.type === 'hash' && entry.value === hash);
+
+    expect(ioc?.context).toContain('malware sample hash');
+    expect(ioc?.context).not.toContain('Checksum listed');
+  });
+
+  it('does not attach a context window to non-url/domain/hash candidates', () => {
+    const result = extractIocs({ text: 'C2 IP: 203.0.113.5' });
+    const ioc = result.iocs.find((entry) => entry.type === 'ip' && entry.value === '203.0.113.5');
 
     expect(ioc?.context).toBeUndefined();
   });

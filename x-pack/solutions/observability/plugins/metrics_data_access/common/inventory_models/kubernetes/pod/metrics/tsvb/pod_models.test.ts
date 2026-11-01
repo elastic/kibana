@@ -63,11 +63,23 @@ describe('pod TSVB models', () => {
     const overview = podOverview(timeField, indexPattern, interval, { schema: 'semconv' });
     const rx = overview.series.find((series) => series.id === 'rx');
     const tx = overview.series.find((series) => series.id === 'tx');
-    expect(rx?.split_mode).toBe('filter');
-    expect(tx?.split_mode).toBe('filter');
+    // The network series sums per-interface rates (split on `interface` + series_agg
+    // sum) so multi-interface pods are not under-reported by a single `max`.
+    expect(rx?.split_mode).toBe('terms');
+    expect(tx?.split_mode).toBe('terms');
+    expect(rx?.terms_field).toBe('interface');
+    expect(tx?.terms_field).toBe('interface');
     expect(rx?.filter).toEqual({ query: 'direction: receive', language: 'kuery' });
     expect(tx?.filter).toEqual({ query: 'direction: transmit', language: 'kuery' });
     expect(rx?.metrics[0]).toMatchObject({ field: SEMCONV_K8S_POD_NETWORK_IO, type: 'max' });
+    expect(rx?.metrics[rx.metrics.length - 1]).toMatchObject({
+      type: 'series_agg',
+      function: 'sum',
+    });
+    expect(tx?.metrics[tx.metrics.length - 1]).toMatchObject({
+      type: 'series_agg',
+      function: 'sum',
+    });
     expect(overview.series[0].metrics[0]).toMatchObject({
       field: SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
     });

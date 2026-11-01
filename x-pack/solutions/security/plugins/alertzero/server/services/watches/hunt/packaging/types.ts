@@ -25,6 +25,11 @@ export interface CurrentRunHost {
    * `capabilities` means nothing is known rather than that the endpoint reports none.
    */
   capabilitiesSource?: CapabilitiesSource;
+  /**
+   * The remote cluster aliases (never empty), set when the hunt saw this host only on remote
+   * clusters. Such a host is never resolved against local Fleet.
+   */
+  remoteClusters?: string[];
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */
@@ -44,6 +49,8 @@ export interface ProcessSelector {
   /** Full executable path (`process.executable`) when the source document carried one. */
   processExecutable?: string;
   observedAt?: string;
+  /** When the process exited; absent if it is live or unknown. */
+  exitedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's
    * `matched.technique_id`), when the event that produced this selector carried one. Lets the

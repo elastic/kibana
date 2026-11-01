@@ -18,7 +18,6 @@ import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -35,9 +34,14 @@ import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { SLO_CREATED_EBT_EVENT_TYPE, toSloDefinitionEbtData } from '../lib/telemetry';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
-import { retryTransientEsErrors } from '../utils/retry';
+import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
+import type { RollbackOperation } from '../utils/run_rollback';
+import { runRollback } from '../utils/run_rollback';
+import { REQUEST_DEADLINE_MS, withDeadline } from '../utils/with_deadline';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
@@ -55,44 +59,62 @@ export class CreateSLO {
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private username: string
+    private username: string,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
+    return withDeadline(REQUEST_DEADLINE_MS, (signal) => this.create(params, signal));
+  }
+
+  private async create(params: CreateSLOParams, signal: AbortSignal): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
     addTransactionLabels(getSloApmLabels(slo));
     validateSLO(slo);
 
     await Promise.all([
       this.assertSLOInexistant(slo),
-      assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser),
+      assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser, {
+        signal,
+      }),
     ]);
 
-    const rollbackOperations = [];
+    const rollbackOperations: RollbackOperation[] = [];
     const createPromise = this.repository.create(slo);
-    rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo, this.spaceId));
-      rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
+      const sloPipelinePromise = this.createPipeline(
+        getSLIPipelineTemplate(slo, this.spaceId),
+        signal
+      );
+      rollbackOperations.push((rollbackSignal) =>
+        this.deletePipeline(getSLOPipelineId(slo.id, slo.revision), rollbackSignal)
+      );
 
-      const rollupTransformPromise = this.transformManager.install(slo);
-      rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
+      const rollupTransformPromise = this.transformManager.install(slo, { signal });
+      rollbackOperations.push((rollbackSignal) =>
+        this.transformManager.uninstall(rollupTransformId, { signal: rollbackSignal })
+      );
 
       const summaryPipelinePromise = this.createPipeline(
-        getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+        getSummaryPipelineTemplate(slo, this.spaceId, this.basePath),
+        signal
       );
-      rollbackOperations.push(() =>
-        this.deletePipeline(getSLOSummaryPipelineId(slo.id, slo.revision))
+      rollbackOperations.push((rollbackSignal) =>
+        this.deletePipeline(getSLOSummaryPipelineId(slo.id, slo.revision), rollbackSignal)
       );
 
-      const summaryTransformPromise = this.summaryTransformManager.install(slo);
-      rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
+      const summaryTransformPromise = this.summaryTransformManager.install(slo, { signal });
+      rollbackOperations.push((rollbackSignal) =>
+        this.summaryTransformManager.uninstall(summaryTransformId, { signal: rollbackSignal })
+      );
 
-      const tempDocPromise = this.createTempSummaryDocument(slo);
-      rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
+      const tempDocPromise = this.createTempSummaryDocument(slo, signal);
+      rollbackOperations.push((rollbackSignal) =>
+        this.deleteTempSummaryDocument(slo, rollbackSignal)
+      );
 
       await allSettledOrThrow([
         createPromise,
@@ -105,8 +127,8 @@ export class CreateSLO {
 
       // transforms can only be started after the related pipelines are created
       await allSettledOrThrow([
-        this.transformManager.start(rollupTransformId),
-        this.summaryTransformManager.start(summaryTransformId),
+        this.transformManager.start(rollupTransformId, { signal }),
+        this.summaryTransformManager.start(summaryTransformId, { signal }),
       ]);
     } catch (err) {
       this.logger.warn('Cannot create the SLO. Rolling back.', {
@@ -119,10 +141,10 @@ export class CreateSLO {
         error: err,
       });
 
-      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
-        try {
-          await operation();
-        } catch (rollbackErr) {
+      await runRollback({
+        operations: rollbackOperations,
+        finalOperation: () => this.repository.deleteById(slo.id, { ignoreNotFound: true }),
+        onError: (rollbackErr) => {
           this.logger.warn('Rollback operation failed.', {
             service: { name: 'create_slo' },
             labels: {
@@ -132,7 +154,7 @@ export class CreateSLO {
             },
             error: rollbackErr,
           });
-        }
+        },
       });
 
       if (err.meta?.body?.error?.type === 'security_exception') {
@@ -141,6 +163,8 @@ export class CreateSLO {
 
       throw err;
     }
+
+    this.telemetry.report(SLO_CREATED_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(slo));
 
     return this.toResponse(slo);
   }
@@ -160,20 +184,23 @@ export class CreateSLO {
     }
   }
 
-  private async createTempSummaryDocument(slo: SLODefinition) {
+  private async createTempSummaryDocument(slo: SLODefinition, signal: AbortSignal) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.index({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
-          refresh: true,
-        }),
-      { logger: this.logger }
+        this.scopedClusterClient.asCurrentUser.index(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
+            refresh: true,
+          },
+          { signal }
+        ),
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 
-  private async deleteTempSummaryDocument(slo: SLODefinition) {
+  private async deleteTempSummaryDocument(slo: SLODefinition, signal: AbortSignal) {
     return retryTransientEsErrors(
       () =>
         this.scopedClusterClient.asCurrentUser.delete(
@@ -182,27 +209,27 @@ export class CreateSLO {
             id: `slo-${slo.id}`,
             refresh: true,
           },
-          { ignore: [404] }
+          { ignore: [404], signal }
         ),
-      { logger: this.logger }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 
-  private async createPipeline(params: IngestPutPipelineRequest) {
+  private async createPipeline(params: IngestPutPipelineRequest, signal: AbortSignal) {
     return retryTransientEsErrors(
-      () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params),
-      { logger: this.logger }
+      () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params, { signal }),
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 
-  private async deletePipeline(id: string) {
+  private async deletePipeline(id: string, signal: AbortSignal) {
     return retryTransientEsErrors(
       () =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id },
-          { ignore: [404] }
+          { ignore: [404], signal }
         ),
-      { logger: this.logger }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS, signal }
     );
   }
 

@@ -43,7 +43,7 @@ export interface AgentTurnItem {
   pendingPrompts?: PromptRequest[];
   /** Highest version of every attachment referenced up to and including this turn's trigger. */
   attachmentRefs?: AttachmentVersionRef[];
-  /** The trigger message's own refs, including attachments the agent created in this turn. */
+  /** Legacy trigger refs, then the attachments the agent added or updated in this turn. */
   triggerAttachmentRefs?: AttachmentVersionRef[];
 }
 
@@ -52,6 +52,8 @@ export interface UserMessageItem {
   key: string;
   event: UserMessageEvent;
   isPending?: boolean;
+  /** Legacy refs, then the refs of the attachments sent with the message. */
+  attachmentRefs?: AttachmentVersionRef[];
 }
 
 /**
@@ -108,4 +110,6 @@ export interface ExecutionAccumulator {
   /** The half-written answer, while the run is still streaming. */
   streaming?: ExecutionStreamingEventData;
   attachmentRefs?: AttachmentVersionRef[];
+  /** The attachments the turn's agent added or updated. */
+  agentAttachmentRefs?: AttachmentVersionRef[];
 }

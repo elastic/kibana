@@ -24,6 +24,10 @@ export type { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_
 export { ComponentTemplateName } from './src/lib/apm/client/apm_synthtrace_es_client';
 export type { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
 export type { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
+export type {
+  OtelDocument,
+  OtelSynthtraceEsClient,
+} from './src/lib/otel/otel_synthtrace_es_client';
 export type { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
 export {
   addObserverVersionTransform,
