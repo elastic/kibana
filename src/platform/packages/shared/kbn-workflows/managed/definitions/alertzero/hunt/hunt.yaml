@@ -262,9 +262,7 @@ steps:
   #
   # Gated on the coordinator having finished with a result, not on
   # `completed_successfully`: that flag is false for an `incomplete_retryable`
-  # run too, which still has findings the analyst must see. Only the evidence
-  # write below keys off `completed_successfully`, so a retryable run keeps the
-  # report eligible without hiding what it found.
+  # run too, which still has findings the analyst must see.
   - name: write_hunt_results_message
     type: workflow.execute
     if: "${{ steps.read_hunt_result.output.data.state == 'completed' }}"
@@ -295,10 +293,15 @@ steps:
   # (asInternalUser) rather than a plain `elasticsearch.update`, which would run as whichever
   # identity enabled the workflow and 403 for every non-superuser. Kept after a successful
   # poll (not inside the detached coordinator job): a child that gives up must not leave a
-  # background stamp on a run it reports as failed.
+  # background write on a run it reports as failed.
+  #
+  # Runs for every finished coordinator result, not only `completed_successfully`: the route
+  # decides what the run settles. A confirmed hit is stamped whatever the completeness, and the
+  # techniques the run searched are recorded so a retry does not repeat them, while a retryable run
+  # that found nothing leaves the hunt-once gate unset and the report eligible.
   - name: write_evidence
     type: kibana.request
-    if: "${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}"
+    if: "${{ steps.read_hunt_result.output.data.state == 'completed' }}"
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/write_hunt_evidence"
@@ -312,6 +315,12 @@ steps:
         hasConfirmedHit: "${{ steps.read_hunt_result.output.data.result.has_confirmed_hit }}"
         completeness: "{{ steps.read_hunt_result.output.data.result.completeness }}"
         totalHits: "${{ steps.read_hunt_result.output.data.result.tier1.counts.total_hits }}"
+        # `compact` turns a nil (Tier 2 never ran) into `[]`, which the route treats as no ledger update.
+        searchedTechniqueIds: "${{ steps.read_hunt_result.output.data.result.searched_technique_ids | compact }}"
+        # Deliberately not `compact`: a missing field renders as undefined, so the key is dropped from
+        # the body and the report keeps its recorded pending list. `[]` says Tier 2 ran and left none.
+        pendingTechniqueIds: "${{ steps.read_hunt_result.output.data.result.pending_technique_ids }}"
+        replayedWholeReport: "${{ steps.read_hunt_result.output.data.result.replayed_whole_report }}"
     on-failure:
       continue: true
 
@@ -324,7 +333,7 @@ steps:
       # what it was asked to. Both incomplete kinds report `partial`, because
       # packaging reads this field to decide whether the absence of a finding is
       # a verdict about the environment, and neither kind supports that claim --
-      # `incomplete_retryable` left a transient gap and wrote no hunt evidence,
+      # `incomplete_retryable` left a transient gap and did not mark the report hunted,
       # `incomplete_final` left a gap that reproduces, so the report retires
       # having never been fully searched. Gating on `completed_successfully`
       # instead would call that second case a success, which is the same
@@ -356,8 +365,10 @@ steps:
         {%- elsif steps.read_hunt_result.output.data.state != 'completed' -%}
         Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution {{ execution.id }}.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "complete" -%}
+        {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" and steps.read_hunt_result.output.data.result.has_confirmed_hit == true -%}
+        The confirmed hit {% if steps.write_evidence.error == nil %}was recorded on the report{% else %}could not be recorded on the report ({{ steps.write_evidence.error.message }}){% endif %}, but part of the hunt did not run ({{ steps.read_hunt_result.output.data.result.message }}), so this run is not a statement about everything the report describes.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" -%}
-        The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
+        The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" -%}
         The hunt left a gap a later run could not close ({{ steps.read_hunt_result.output.data.result.message }}), so the report is retired without having been fully searched and its evidence is recorded as incomplete rather than clean.
         {%- else -%}

@@ -467,11 +467,13 @@ export const openDescriptorAsStart = (
         entityName: d.entityName,
         entityId: d.entityId,
         ...(d.subTab ? { subTab: d.subTab as RiskScoreLeftPanelSubTab } : {}),
+        scopeId: d.scopeId,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
+          scopeId: d.scopeId,
         }),
       });
       break;

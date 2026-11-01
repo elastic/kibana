@@ -333,6 +333,19 @@ export const ALERTING_LOG_CODES = {
   EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED:
     'EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED',
   /**
+   * The alert-status-changed → workflow subscriber failed to emit the
+   * `alerting.alertStatusChanged` workflow event. The status change is already
+   * persisted; only the workflow fan-out for this change was lost.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_WORKFLOW_SUBSCRIBER_FAILED:
+    'EVENTS_ALERT_STATUS_CHANGED_WORKFLOW_SUBSCRIBER_FAILED',
+  /**
+   * The alert events client stored an alert event but failed to publish its
+   * status change. The write already succeeded; only the workflow fan-out for
+   * this change was lost.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED: 'EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED',
+  /**
    * The rule-changes-history subscriber failed to record a change entry for a
    * rule domain event. The rule operation itself already succeeded; only the
    * audit entry for this change was lost.
@@ -350,6 +363,12 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * An integration's `alerting.alertStatusChanged` opt-in check threw. It is
+   * treated as disabled and the remaining opt-ins are still asked; the rule
+   * run or alert write is unaffected.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED: 'EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED',
   /**
    * The action policy client could not read the policies around a bulk write
    * or a bulk delete. The write already succeeded; its domain events are
@@ -541,6 +560,13 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /**
+   * Publishing the alert status changes of a stored batch failed. The batch
+   * is already stored and the run continues; only the workflow fan-out for
+   * those changes was lost.
+   */
+  RULE_EXECUTION_ALERT_STATUS_CHANGES_PUBLISH_FAILED:
+    'RULE_EXECUTION_ALERT_STATUS_CHANGES_PUBLISH_FAILED',
   /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
   RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
   /**
@@ -663,6 +689,12 @@ export const ALERTING_LOG_CODES = {
     'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
   /** `manage_rule` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `attach_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_RULE_FAILED: 'AGENT_BUILDER_ATTACH_RULE_FAILED',
+  /** `attach_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED: 'AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED',
+  /** `find_action_policies` tool failed; returns an error result. */
+  AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED: 'AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
@@ -682,6 +714,13 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * A background task that could not be removed.
+   * if the task exists from an earlier start it
+   * keeps running until the next removal attempt.
+   * The task type is carried in `labels.task_id`.
+   */
+  TASKS_REMOVE_FAILED: 'TASKS_REMOVE_FAILED',
   /**
    * The pending API-key invalidation background task run failed. Keys queued
    * for invalidation remain until the next scheduled run.

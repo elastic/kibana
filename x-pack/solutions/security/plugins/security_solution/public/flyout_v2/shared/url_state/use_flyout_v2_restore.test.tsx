@@ -824,6 +824,26 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('opens entityRiskInputs with the scopeId when present on the descriptor', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'host',
+          entityName: 'h',
+          entityId: 'eid',
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
+    );
+  });
+
   it('restores the tool header source context by passing an onShowEntity that reopens the host', () => {
     renderRestore(
       buildUrl([{ kind: 'entityRiskInputs', entityType: 'host', entityName: 'h', entityId: 'eid' }])
