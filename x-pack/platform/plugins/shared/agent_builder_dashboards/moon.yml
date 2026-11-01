@@ -17,15 +17,18 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
   - '@kbn/custom-content-common'
   - '@kbn/custom-content-server'
+  - '@kbn/esql-types'
   - '@kbn/agent-builder-server'
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/dashboard-plugin'
@@ -47,7 +50,6 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-transforms'
-  - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/presentation-publishing'
   - '@kbn/scout'
@@ -60,6 +62,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

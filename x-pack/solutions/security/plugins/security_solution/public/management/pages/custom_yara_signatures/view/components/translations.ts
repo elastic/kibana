@@ -84,6 +84,20 @@ export const DEFINITION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const COMMENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.commentsTitle',
+  {
+    defaultMessage: 'Comments',
+  }
+);
+
+export const COMMENTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.customYaraSignatures.form.commentsDescription',
+  {
+    defaultMessage: 'Add a comment to your YARA signature.',
+  }
+);
+
 export const SIGNATURE_EDITOR_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.customYaraSignatures.form.signatureEditorAriaLabel',
   {
