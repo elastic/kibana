@@ -582,6 +582,23 @@ Inputs are parsed with the action's schema first. Auth secrets the test leaves o
 
 `AuthContext` and `ActionContext` have an optional `fetchTestOnly`, set only by contract contexts (never in Kibana, where the global `fetch` is used). It exists so auth helpers that exchange tokens themselves, such as GCP's, can reach the mock, which answers token URLs. Do not use it for vendor calls: those must go through `client`, which applies Kibana's proxy and SSL settings. While a contract context configures its auth type or runs an action, the global `fetch` throws, so a request that bypasses the mock fails instead of reaching the network.
 
+Connectors that lease a native client with `ctx.getClient`, such as the database connectors, don't send their traffic through `client`, so the mock can't answer it. By default `getClient` throws in a contract context, so a contract test opens no connection it didn't ask for. Pass `clientTypes` to build clients with, either a fake or a production client type whose config points at a test server:
+
+```typescript
+const { runAction, close } = await createContractContext({
+  connector: MysqlConnector,
+  config: { host: '127.0.0.1', port: 3306, database: 'app' },
+  secrets: { username: 'reader', password: 'test' },
+  specs: [],
+  clientTypes: { mysql: mysqlClientType },
+});
+
+await runAction('listDatabases', {});
+await close(); // terminates the clients getClient built
+```
+
+Each client type builds once per context, as a lease from the actions plugin's pool would, with a `BuildContext` that mirrors the plugin's: the connector config parsed with its schema, the auth type's own `getAuthHeaders` as the credential, and network settings that allow every host, use no proxy and verify certificates. Override them with `networkSettings`, for example `getSslSettings` to trust a test server's certificate authority. SRV lookups fail, so give the hosts. `recordActions` passes `clientTypes` through and closes each context after its run.
+
 ## Vendor API artifacts
 
 Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema, and records the vendor operations each one calls. The inputs are:

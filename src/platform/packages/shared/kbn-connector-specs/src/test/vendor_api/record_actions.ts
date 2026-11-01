@@ -196,12 +196,14 @@ export const recordActions = async ({
           brokenAuthTypes.set(id, errorMessage(error));
           break;
         }
-        const { mock, runAction } = context;
+        const { mock, runAction, close } = context;
         try {
           await runAction(action, input);
           worked = true;
         } catch (error) {
           errors.push(errorMessage(error));
+        } finally {
+          await close();
         }
         // Token requests authenticate the run; they aren't vendor operations the action calls.
         const vendorCalls = mock.calls.filter(({ token }) => !token);

@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
+import type { ClientTypeSpec } from '../../lib/clients';
 import { recordActions } from './record_actions';
 
 const item = { type: 'object', required: ['name'], properties: { name: { type: 'string' } } };
@@ -111,6 +112,51 @@ describe('recordActions', () => {
       refined: [],
       tooMany: [{ source: 'v1', method: 'get', path: '/items' }],
     });
+  });
+
+  it('builds the clients actions lease from the given client types, terminating them after each run', async () => {
+    let builds = 0;
+    let terminated = 0;
+    const statements: string[] = [];
+    const mysql = {
+      id: 'mysql',
+      build: async () => {
+        builds++;
+        return {
+          query: async (sql: string) => {
+            statements.push(sql);
+            return [[], []];
+          },
+        };
+      },
+      terminate: async () => {
+        terminated++;
+      },
+    } as unknown as ClientTypeSpec<never>;
+    const database: ConnectorSpec = {
+      metadata: { ...connector.metadata, id: '.database' },
+      auth: { types: ['none'] },
+      test: connector.test,
+      actions: {
+        ping: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async (ctx) => (await ctx.getClient('mysql')).query('SELECT 1'),
+        },
+      },
+    };
+
+    const { operations, findings } = await recordActions({
+      connector: database,
+      specs,
+      clientTypes: { mysql },
+    });
+
+    expect(findings).toEqual([]);
+    expect(operations).toEqual({ ping: [] });
+    expect(statements.length).toBeGreaterThan(0);
+    expect(statements.every((sql) => sql === 'SELECT 1')).toBe(true);
+    expect(terminated).toBe(builds);
   });
 
   it('records requests that match no operation, and the handler errors they cause', async () => {
