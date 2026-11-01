@@ -102,13 +102,15 @@ describe('AccessDraftEditor', () => {
   it('adds a typed service account ID', async () => {
     render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
 
-    await userEvent.type(getPickerInput(), 'kibana/x{enter}');
+    await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/x');
+    await userEvent.click(screen.getByTestId('accessPanelServiceAccountAdd'));
 
     expect(onChange).toHaveBeenLastCalledWith({
       general_access: 'use',
       entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
     });
     expect(screen.getByTestId('accessPanelEntry-kibana/x')).toHaveTextContent('Service account');
+    expect(screen.getByTestId('accessPanelServiceAccountInput')).toHaveValue('');
   });
 
   it.each(['not-a-service-account', 'kibana/x/y', 'kibana/'])(
@@ -116,11 +118,36 @@ describe('AccessDraftEditor', () => {
     async (id) => {
       render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
 
-      await userEvent.type(getPickerInput(), `${id}{enter}`);
+      await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), `${id}{enter}`);
 
       expect(onChange).not.toHaveBeenCalled();
+      expect(screen.getByText(/namespace\/service form/)).toBeInTheDocument();
     }
   );
+
+  it('rejects a service account that already has access', async () => {
+    render(
+      <Host
+        initialValue={{
+          general_access: 'use',
+          entries: [{ type: 'service_account', id: 'kibana/x', access: 'use' }],
+        }}
+      />
+    );
+
+    await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/x{enter}');
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText('This service account already has access.')).toBeInTheDocument();
+  });
+
+  it('searches only people in the people picker', async () => {
+    render(<Host initialValue={{ general_access: 'use', entries: [] }} />);
+
+    await userEvent.type(getPickerInput(), 'kibana/x{enter}');
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
 
   it('rejects a service account that already has an entry', async () => {
     render(

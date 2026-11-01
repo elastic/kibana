@@ -120,10 +120,7 @@ describe('CreateConnectorFlyout with object-level access control', () => {
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccess'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('accessPanelGeneralAccessOption-none'));
-    await userEvent.type(
-      within(screen.getByTestId('accessPanelPrincipalPicker')).getByRole('combobox'),
-      'kibana/svc{enter}'
-    );
+    await userEvent.type(screen.getByTestId('accessPanelServiceAccountInput'), 'kibana/svc{enter}');
     expect(screen.getByTestId('connectorAccessSection')).toHaveTextContent(
       'Only people with access, 1 more person'
     );

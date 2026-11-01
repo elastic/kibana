@@ -13,10 +13,11 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { compareLevels, MAX_ACL_ENTRIES, type Principal } from '@kbn/access-control';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { AccessList, getPrincipalKey } from './access_list';
+import { AccessList, getPrincipalKey, OwnerRow } from './access_list';
 import type { AccessCopy } from './copy';
 import { GeneralAccessSelect } from './general_access_select';
 import { PrincipalPicker } from './principal_picker';
+import { ServiceAccountField } from './service_account_field';
 import type { AccessDraft, AccessPolicyResponse, SuggestedUser } from './types';
 
 export interface AccessDraftEditorProps {
@@ -86,8 +87,25 @@ export const AccessDraftEditor = ({
         ).length
       : 0;
 
+  const excluded = [...(owner ? [owner] : []), ...value.entries];
+  const isFull = value.entries.length >= MAX_ACL_ENTRIES;
+  const addEntry = (principal: Principal) =>
+    onChange({ ...value, entries: [...value.entries, { ...principal, access: newEntryLevel }] });
+
   return (
     <>
+      {owner ? (
+        <>
+          <OwnerRow
+            owner={owner}
+            isOwnerSelf={isOwnerSelf}
+            profiles={profilesByUid}
+            onTransfer={onTransfer}
+            isDisabled={isDisabled}
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <GeneralAccessSelect
         allowed={policy.general_access.allowed}
         value={value.general_access}
@@ -114,29 +132,25 @@ export const AccessDraftEditor = ({
       <PrincipalPicker
         suggest={suggestPrincipals}
         level={newEntryLevel}
-        excluded={[...(owner ? [owner] : []), ...value.entries]}
-        isDisabled={isDisabled || value.entries.length >= MAX_ACL_ENTRIES}
+        excluded={excluded}
+        isDisabled={isDisabled || isFull}
         onSelect={(principal, user) => {
           if (user) {
             setPickedUsers((users) => [...users.filter(({ uid }) => uid !== user.uid), user]);
           }
-          onChange({
-            ...value,
-            entries: [...value.entries, { ...principal, access: newEntryLevel }],
-          });
+          addEntry(principal);
         }}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
+      <ServiceAccountField excluded={excluded} isDisabled={isDisabled || isFull} onAdd={addEntry} />
+      <EuiSpacer size="m" />
       <AccessList
-        owner={owner}
-        isOwnerSelf={isOwnerSelf}
         entries={value.entries}
         entryLevels={policy.entry_levels}
         profiles={profilesByUid}
         warnings={warningKeys}
         copy={copy}
         isDisabled={isDisabled}
-        onTransfer={onTransfer}
         onChangeLevel={(changed, access) =>
           onChange({
             ...value,

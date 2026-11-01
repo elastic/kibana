@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiAvatar,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiFormRow,
   EuiIconTip,
-  EuiPanel,
   EuiSelect,
   EuiText,
   EuiToolTip,
@@ -34,9 +33,6 @@ import { getEntryLevelCopy, type AccessCopy } from './copy';
 import type { AccessDraftEntry } from './types';
 
 export interface AccessListProps {
-  owner?: Principal;
-  /** Whether the current principal is the owner. */
-  isOwnerSelf?: boolean;
   entries: AccessDraftEntry[];
   entryLevels: EntryLevel[];
   /** Known user profiles, by profile UID. A missing profile is shown by its raw ID. */
@@ -46,7 +42,6 @@ export interface AccessListProps {
   copy: AccessCopy;
   onChangeLevel?: (entry: AccessDraftEntry, access: EntryLevel) => void;
   onRemove?: (entry: AccessDraftEntry) => void;
-  onTransfer?: () => void;
   isDisabled?: boolean;
 }
 
@@ -57,11 +52,84 @@ const REMOVE_LABEL = i18n.translate('accessControlUi.accessList.remove', {
 export const getPrincipalKey = ({ type, id }: Principal) => `${type}:${id}`;
 
 /**
- * Lists the owner and the named entries of an object, with controls for access managers.
+ * Shows a person or a service account, with optional controls on the right.
  */
-export const AccessList = ({
+export const PrincipalRow = ({
+  principal,
+  profiles,
+  isSelf,
+  children,
+  'data-test-subj': dataTestSubj,
+}: {
+  principal: Principal;
+  profiles: Map<string, UserProfileWithAvatar>;
+  isSelf?: boolean;
+  children?: React.ReactNode;
+  'data-test-subj'?: string;
+}) => (
+  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} data-test-subj={dataTestSubj}>
+    <EuiFlexItem grow={false}>
+      <PrincipalAvatar principal={principal} profiles={profiles} />
+    </EuiFlexItem>
+    <EuiFlexItem
+      css={css`
+        min-width: 0;
+      `}
+    >
+      <PrincipalName principal={principal} profiles={profiles} isSelf={isSelf} />
+    </EuiFlexItem>
+    {children}
+  </EuiFlexGroup>
+);
+
+/**
+ * Shows the owner of an object, with the transfer action for people who can transfer ownership.
+ */
+export const OwnerRow = ({
   owner,
   isOwnerSelf,
+  profiles,
+  onTransfer,
+  isDisabled,
+  label = i18n.translate('accessControlUi.accessList.owner', { defaultMessage: 'Owner' }),
+}: {
+  owner: Principal;
+  isOwnerSelf?: boolean;
+  profiles: Map<string, UserProfileWithAvatar>;
+  onTransfer?: () => void;
+  isDisabled?: boolean;
+  label?: string;
+}) => (
+  <EuiFormRow fullWidth label={label}>
+    <PrincipalRow
+      principal={owner}
+      profiles={profiles}
+      isSelf={isOwnerSelf}
+      data-test-subj="accessPanelOwner"
+    >
+      {onTransfer ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="merge"
+            onClick={onTransfer}
+            isDisabled={isDisabled}
+            data-test-subj="accessPanelTransfer"
+          >
+            {i18n.translate('accessControlUi.accessList.transfer', {
+              defaultMessage: 'Transfer ownership',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      ) : null}
+    </PrincipalRow>
+  </EuiFormRow>
+);
+
+/**
+ * Lists the named entries of an object, with controls for access managers.
+ */
+export const AccessList = ({
   entries,
   entryLevels,
   profiles,
@@ -69,63 +137,52 @@ export const AccessList = ({
   copy,
   onChangeLevel,
   onRemove,
-  onTransfer,
   isDisabled,
 }: AccessListProps) => {
-  const rows = [
-    ...(owner ? [{ principal: owner, isOwner: true as const }] : []),
-    ...entries.map((entry) => ({ principal: entry, entry, isOwner: false as const })),
-  ];
-  if (rows.length === 0) {
+  const { euiTheme } = useEuiTheme();
+  if (entries.length === 0) {
     return null;
   }
 
   return (
-    <EuiPanel hasBorder paddingSize="none" data-test-subj="accessPanelList">
-      {rows.map((row, index) => (
-        <Fragment key={getPrincipalKey(row.principal)}>
-          {index > 0 ? <EuiHorizontalRule margin="none" /> : null}
-          <EuiPanel
-            hasShadow={false}
-            paddingSize="s"
-            color="transparent"
-            data-test-subj={
-              row.isOwner ? 'accessPanelOwner' : `accessPanelEntry-${row.principal.id}`
-            }
-          >
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <PrincipalAvatar principal={row.principal} profiles={profiles} />
-              </EuiFlexItem>
-              <EuiFlexItem
-                css={css`
-                  min-width: 0;
-                `}
-              >
-                <PrincipalName
-                  principal={row.principal}
-                  profiles={profiles}
-                  isSelf={row.isOwner && isOwnerSelf}
-                />
-              </EuiFlexItem>
-              {row.isOwner ? (
-                <OwnerControls onTransfer={onTransfer} isDisabled={isDisabled} />
-              ) : (
-                <EntryControls
-                  entry={row.entry}
-                  entryLevels={entryLevels}
-                  copy={copy}
-                  hasWarning={warnings.has(getPrincipalKey(row.entry))}
-                  onChangeLevel={onChangeLevel}
-                  onRemove={onRemove}
-                  isDisabled={isDisabled}
-                />
-              )}
-            </EuiFlexGroup>
-          </EuiPanel>
-        </Fragment>
-      ))}
-    </EuiPanel>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('accessControlUi.accessList.title', {
+        defaultMessage: 'Who has access',
+      })}
+    >
+      <ul
+        data-test-subj="accessPanelList"
+        css={css`
+          & > li {
+            padding-block: ${euiTheme.size.s};
+          }
+          & > li + li {
+            border-top: ${euiTheme.border.thin};
+          }
+        `}
+      >
+        {entries.map((entry) => (
+          <li key={getPrincipalKey(entry)}>
+            <PrincipalRow
+              principal={entry}
+              profiles={profiles}
+              data-test-subj={`accessPanelEntry-${entry.id}`}
+            >
+              <EntryControls
+                entry={entry}
+                entryLevels={entryLevels}
+                copy={copy}
+                hasWarning={warnings.has(getPrincipalKey(entry))}
+                onChangeLevel={onChangeLevel}
+                onRemove={onRemove}
+                isDisabled={isDisabled}
+              />
+            </PrincipalRow>
+          </li>
+        ))}
+      </ul>
+    </EuiFormRow>
   );
 };
 
@@ -206,37 +263,6 @@ const PrincipalName = ({
     </>
   );
 };
-
-const OwnerControls = ({
-  onTransfer,
-  isDisabled,
-}: {
-  onTransfer?: () => void;
-  isDisabled?: boolean;
-}) => (
-  <>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" color="subdued">
-        {i18n.translate('accessControlUi.accessList.owner', { defaultMessage: 'Owner' })}
-      </EuiText>
-    </EuiFlexItem>
-    {onTransfer ? (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="merge"
-          onClick={onTransfer}
-          isDisabled={isDisabled}
-          data-test-subj="accessPanelTransfer"
-        >
-          {i18n.translate('accessControlUi.accessList.transfer', {
-            defaultMessage: 'Transfer ownership',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    ) : null}
-  </>
-);
 
 const EntryControls = ({
   entry,
