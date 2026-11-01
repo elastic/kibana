@@ -10,7 +10,7 @@
 import { randomUUID } from 'node:crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
@@ -37,6 +37,19 @@ const SETTLED_ADMISSION_STATUSES = new Set<string>([
   ExecutionStatus.FAILED,
   ExecutionStatus.TIMED_OUT,
 ]);
+
+type AdmissionExecution = WorkflowExecutionDto & { createdAt?: string };
+
+const compareAdmissionOrder = (left: AdmissionExecution, right: AdmissionExecution): number => {
+  const createdAtOrder = (left.createdAt ?? '').localeCompare(right.createdAt ?? '');
+  if (createdAtOrder !== 0) {
+    return createdAtOrder;
+  }
+  return left.id.localeCompare(right.id);
+};
+
+const waitingStep = (execution: WorkflowExecutionDto): WorkflowStepExecutionDto | undefined =>
+  execution.stepExecutions.find((step) => step.status === ExecutionStatus.WAITING_FOR_INPUT);
 
 const countByStatus = (executions: WorkflowExecutionDto[]): Record<string, number> => {
   const counts: Record<string, number> = {};
@@ -79,10 +92,14 @@ settings:
     max: 1
 steps:
   - name: hold
-    type: wait
+    type: waitForInput
     with:
-      # Stay under the 5s engine threshold so the winner sleeps in-process.
-      duration: 2s
+      message: hold the slot
+      schema:
+        type: object
+        properties:
+          ok:
+            type: boolean
   - name: log
     type: console
     with:
@@ -203,16 +220,47 @@ spaceTest.describe(
           SIMULTANEOUS_CANCEL_RUNS
         );
 
-        const executions = await Promise.all(
+        await waitForAdmissionToSettle(
+          apiServices.workflowsApi,
+          workflow.id,
+          SIMULTANEOUS_CANCEL_RUNS
+        );
+        const admitted = (
+          await Promise.all(
+            executionIds.map((workflowExecutionId) =>
+              apiServices.workflowsApi.getExecution(workflowExecutionId)
+            )
+          )
+        ).filter((execution): execution is AdmissionExecution => execution != null);
+        const ranked = [...admitted].sort(compareAdmissionOrder);
+        expect(ranked.map((execution) => execution.status)).toStrictEqual([
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.WAITING_FOR_INPUT,
+        ]);
+        const winner = ranked[SIMULTANEOUS_CANCEL_RUNS - 1];
+        expect(typeof winner.createdAt).toBe('string');
+
+        const holdStep = waitingStep(winner);
+        expect(typeof holdStep?.id).toBe('string');
+        const resumeResponse = await apiServices.workflowsApi.rawResume(
+          winner.id,
+          { ok: true },
+          { stepExecutionId: holdStep?.id }
+        );
+        expect(resumeResponse.status).toBe(200);
+
+        const completed = await apiServices.workflowsApi.waitForTermination({
+          workflowExecutionId: winner.id,
+          timeout: CANCEL_TERMINATION_TIMEOUT_MS,
+        });
+        expect(completed?.status).toStrictEqual(ExecutionStatus.COMPLETED);
+        const finished = await Promise.all(
           executionIds.map((workflowExecutionId) =>
-            apiServices.workflowsApi.waitForTermination({
-              workflowExecutionId,
-              timeout: CANCEL_TERMINATION_TIMEOUT_MS,
-            })
+            apiServices.workflowsApi.getExecution(workflowExecutionId)
           )
         );
-
-        expect(countByStatus(executions.filter((execution) => execution != null))).toStrictEqual({
+        expect(countByStatus(finished.filter((execution) => execution != null))).toStrictEqual({
           [ExecutionStatus.CANCELLED]: SIMULTANEOUS_CANCEL_RUNS - 1,
           [ExecutionStatus.COMPLETED]: 1,
         });

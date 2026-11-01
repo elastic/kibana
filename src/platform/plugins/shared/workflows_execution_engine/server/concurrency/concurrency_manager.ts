@@ -12,6 +12,7 @@ import {
   ConcurrencySlotOccupyingExecutionStatuses,
   DEFAULT_CONCURRENCY_QUEUE_SIZE,
   ExecutionStatus,
+  isTerminalStatus,
 } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
@@ -22,6 +23,12 @@ const QUEUE_ADMISSION_STATUSES: readonly ExecutionStatus[] = [
   ...ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus.QUEUED,
 ];
+
+/**
+ * Matches the default page of `getRunningExecutionsByConcurrencyGroup`. A full page that does not
+ * contain this run is truncated, so its rank is not known.
+ */
+const ADMISSION_ID_PAGE_SIZE = 5000;
 
 /**
  * Rank of `currentExecutionId` in an oldest-first id list.
@@ -106,6 +113,7 @@ export class ConcurrencyManager {
    * For 'cancel-in-progress':
    * - The newest `max` runs proceed. A run with `max` or more newer peers cancels itself.
    * - A winner cancels the oldest runs that do not fit in the remaining slots.
+   * - A run missing from the snapshot does not proceed and does not cancel peers.
    *
    * For 'drop':
    * - Rank below `max` proceeds. A later rank is SKIPPED, even when newer peers are also pending.
@@ -140,21 +148,28 @@ export class ConcurrencyManager {
         spaceId,
         QUEUE_ADMISSION_STATUSES
       );
-      const { rank } = placeInAdmissionOrder(orderedIds, currentExecutionId);
-      if (rank < maxConcurrency) {
-        return true;
-      }
-
       const queueMax = concurrencySettings['queue-size'] ?? DEFAULT_CONCURRENCY_QUEUE_SIZE;
-      if (rank < maxConcurrency + queueMax) {
-        await this.workflowExecutionRepository.updateWorkflowExecution(
-          {
-            id: currentExecutionId,
-            status: ExecutionStatus.QUEUED,
-          },
-          { refresh: 'wait_for' }
-        );
-        return false;
+      const pageTruncated =
+        orderedIds.length >= ADMISSION_ID_PAGE_SIZE && !orderedIds.includes(currentExecutionId);
+      if (pageTruncated) {
+        if (await this.currentRunAlreadyTerminal(currentExecutionId, spaceId)) {
+          return false;
+        }
+      } else {
+        const { rank } = placeInAdmissionOrder(orderedIds, currentExecutionId);
+        if (rank < maxConcurrency) {
+          return true;
+        }
+        if (rank < maxConcurrency + queueMax) {
+          await this.workflowExecutionRepository.updateWorkflowExecution(
+            {
+              id: currentExecutionId,
+              status: ExecutionStatus.QUEUED,
+            },
+            { refresh: 'wait_for' }
+          );
+          return false;
+        }
       }
 
       const skipTimestamp = new Date().toISOString();
@@ -174,6 +189,19 @@ export class ConcurrencyManager {
       spaceId,
       ConcurrencySlotOccupyingExecutionStatuses
     );
+    if (strategy === 'cancel-in-progress' && !orderedIds.includes(currentExecutionId)) {
+      // A cancel that already landed removes this run from the slot snapshot. Treating that
+      // miss as "newest" would cancel the winner and start this run anyway.
+      if (await this.currentRunAlreadyTerminal(currentExecutionId, spaceId)) {
+        return false;
+      }
+      await this.cancelCurrentRun(
+        currentExecutionId,
+        `Cancelled due to concurrency limit (max: ${maxConcurrency})`
+      );
+      return false;
+    }
+
     const { rank, olderIds, newerCount } = placeInAdmissionOrder(orderedIds, currentExecutionId);
 
     // Drop ignores newer pending peers. Counting them would skip every simultaneous run.
@@ -201,15 +229,10 @@ export class ConcurrencyManager {
     if (strategy === 'cancel-in-progress') {
       // A newer run owns the slot. Cancelling peers here would cancel that newer run too.
       if (newerCount >= maxConcurrency) {
-        const cancellationTimestamp = new Date().toISOString();
-        await this.workflowExecutionRepository.updateWorkflowExecution({
-          id: currentExecutionId,
-          status: ExecutionStatus.CANCELLED,
-          cancelRequested: true,
-          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency})`,
-          cancelledAt: cancellationTimestamp,
-          cancelledBy: 'system',
-        });
+        await this.cancelCurrentRun(
+          currentExecutionId,
+          `Cancelled due to concurrency limit (max: ${maxConcurrency})`
+        );
         return false;
       }
 
@@ -239,6 +262,32 @@ export class ConcurrencyManager {
     }
 
     return true;
+  }
+
+  private async currentRunAlreadyTerminal(
+    currentExecutionId: string,
+    spaceId: string
+  ): Promise<boolean> {
+    const current = await this.workflowExecutionRepository.getWorkflowExecutionById(
+      currentExecutionId,
+      spaceId
+    );
+    return current == null || isTerminalStatus(current.status);
+  }
+
+  private async cancelCurrentRun(
+    currentExecutionId: string,
+    cancellationReason: string
+  ): Promise<void> {
+    const cancellationTimestamp = new Date().toISOString();
+    await this.workflowExecutionRepository.updateWorkflowExecution({
+      id: currentExecutionId,
+      status: ExecutionStatus.CANCELLED,
+      cancelRequested: true,
+      cancellationReason,
+      cancelledAt: cancellationTimestamp,
+      cancelledBy: 'system',
+    });
   }
 
   private listAdmissionIds(
