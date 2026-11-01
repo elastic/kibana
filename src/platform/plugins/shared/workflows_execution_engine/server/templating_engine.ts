@@ -75,7 +75,7 @@ export class WorkflowTemplatingEngine {
   }
 
   /**
-   * Same as {@link render}, but yields to the event loop before each string at any depth.
+   * Same as {@link render}, but yields to the event loop before each value at any depth.
    */
   public async renderAsync<T>(obj: T, context: Record<string, unknown>): Promise<T> {
     return (await this.renderValueRecursivelyAsync(obj, context)) as T;
@@ -167,8 +167,9 @@ export class WorkflowTemplatingEngine {
     value: unknown,
     context: Record<string, unknown>
   ): Promise<unknown> {
+    await yieldToEventLoop();
+
     if (typeof value === 'string') {
-      await yieldToEventLoop();
       return this.renderValueRecursively(value, context);
     }
 

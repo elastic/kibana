@@ -95,17 +95,33 @@ describe('WorkflowTemplatingEngine', () => {
       );
     });
 
-    it('yields to the event loop before each string at any depth', async () => {
-      // Every clock read is past the yield budget, so each string yields.
+    describe('when every clock read is past the yield budget', () => {
+      let setImmediateSpy: jest.SpyInstance;
+      // Keep the mocked clock increasing across tests: the yielder keeps its last yield time.
       let now = 1e12;
-      jest.spyOn(performance, 'now').mockImplementation(() => (now += 30));
-      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
-      const obj = { top: '{{ a }}', nested: { deep: { leaf: '{{ b }}' } }, list: [1, '{{ c }}'] };
 
-      const rendered = await templatingEngine.renderAsync(obj, { a: 'A', b: 'B', c: 'C' });
+      beforeEach(() => {
+        jest.spyOn(performance, 'now').mockImplementation(() => (now += 30));
+        setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      });
 
-      expect(rendered).toEqual({ top: 'A', nested: { deep: { leaf: 'B' } }, list: [1, 'C'] });
-      expect(setImmediateSpy).toHaveBeenCalledTimes(3);
+      it('yields before each value at any depth', async () => {
+        // 6 values: the root object, `top`, `nested`, `leaf`, `list`, and its string item.
+        const obj = { top: '{{ a }}', nested: { leaf: '{{ b }}' }, list: ['{{ c }}'] };
+
+        const rendered = await templatingEngine.renderAsync(obj, { a: 'A', b: 'B', c: 'C' });
+
+        expect(rendered).toEqual({ top: 'A', nested: { leaf: 'B' }, list: ['C'] });
+        expect(setImmediateSpy).toHaveBeenCalledTimes(6);
+      });
+
+      it('yields for a payload without strings', async () => {
+        // 7 values: the root object, `counts` and its 3 items, `flags` and its 1 item.
+        const obj = { counts: [1, 2, 3], flags: { enabled: null } };
+
+        expect(await templatingEngine.renderAsync(obj, {})).toEqual(obj);
+        expect(setImmediateSpy).toHaveBeenCalledTimes(7);
+      });
     });
   });
 

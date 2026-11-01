@@ -225,7 +225,7 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Same as {@link renderValueAccordingToContext}, but yields to the event loop between template strings at any depth.
+   * Same as {@link renderValueAccordingToContext}, but yields to the event loop between values at any depth.
    * The context is read synchronously, before the first yield.
    */
   public renderObjectAccordingToContextAsync(
