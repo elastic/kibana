@@ -55,6 +55,14 @@ const scopesOf = (token: string, prefix: string): string[] | undefined => {
 export const grantedScopes = (token: string): readonly string[] | undefined =>
   scopesOf(token, ACCESS_TOKEN);
 
+/**
+ * An access token as the mock's token URLs issue it for `scope` (space-delimited), for code that
+ * stands in for a token exchange, such as a connector's `getToken`. Without a scope, the token
+ * gets the vendor's defaults, so it isn't scope checked.
+ */
+export const issueAccessToken = (scope?: string): string =>
+  withScopes(ACCESS_TOKEN, parseScopes(scope));
+
 // RFC 7523, which service accounts (e.g. Google's) use to trade a signed JWT for a token.
 const JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
