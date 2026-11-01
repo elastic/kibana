@@ -16,7 +16,7 @@ import type {
 import { TaskCost, throwRetryableError } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { ObservablesService } from '../../services/observables';
 import { runCleanupPhase } from './cleanup_phase';
@@ -226,6 +226,9 @@ export class ObservablesSyncTaskManager {
       ? ['copy', 'cleanup', 'pending']
       : ['cleanup', 'pending'];
     const passVersion = isFullPass ? OBSERVABLES_SYNC_PASS_VERSION : undefined;
+    // Once the pass has completed the index is the source of truth, and a later release with a higher
+    // cap may have written cases whose case field is only a preview. Maintenance leaves those alone.
+    const maxIndexedDocuments = isFullPass ? undefined : MAX_OBSERVABLES_PER_CASE;
     const record: ObservablesSyncState = {
       completedPassVersion: previousState.completedPassVersion,
       completedAt: previousState.completedAt,
@@ -271,6 +274,7 @@ export class ObservablesSyncTaskManager {
           after: cleanupAfter,
           caseBudget,
           shouldPause,
+          maxIndexedDocuments,
           onOutcome: (outcome) => this.tally(progress.counts, outcome),
           onOrphan: (deletedDocuments) => {
             progress.counts.orphanedCases++;
@@ -293,7 +297,15 @@ export class ObservablesSyncTaskManager {
           caseBudget,
           shouldPause,
           handleCase: (caseSO) =>
-            this.syncOneCase({ repo, observablesService, caseSO, phase, progress, signal }),
+            this.syncOneCase({
+              repo,
+              observablesService,
+              caseSO,
+              phase,
+              progress,
+              maxIndexedDocuments,
+              signal,
+            }),
         });
         progress.scanned += result.scanned;
         paused = result.outcome === 'paused';
@@ -385,6 +397,7 @@ export class ObservablesSyncTaskManager {
     caseSO,
     phase,
     progress,
+    maxIndexedDocuments,
     signal,
   }: {
     repo: ISavedObjectsRepository;
@@ -392,10 +405,18 @@ export class ObservablesSyncTaskManager {
     caseSO: SavedObject<CasePersistedAttributes>;
     phase: ObservablesSyncPhase;
     progress: PassProgress;
+    maxIndexedDocuments?: number;
     signal: AbortSignal;
   }): Promise<void> {
     try {
-      const outcome = await syncCaseObservables({ repo, observablesService, caseSO, signal });
+      const outcome = await syncCaseObservables({
+        repo,
+        observablesService,
+        caseSO,
+        logger: this.logger,
+        maxIndexedDocuments,
+        signal,
+      });
       this.tally(progress.counts, outcome);
       if (outcome.status === 'pending') {
         progress.counts.casesFlaggedPending++;
@@ -451,6 +472,9 @@ export class ObservablesSyncTaskManager {
   }
 
   private tally(counts: ObservablesSyncCounts, outcome: SyncCaseOutcome): void {
+    if (outcome.status === 'skipped') {
+      return;
+    }
     if (outcome.status === 'case_deleted') {
       counts.orphanedCases++;
       counts.documentsDeleted += outcome.deleted;
