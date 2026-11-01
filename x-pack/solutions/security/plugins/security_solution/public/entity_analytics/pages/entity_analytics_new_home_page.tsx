@@ -906,9 +906,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       newEntityEntityIds,
     ]
   );
+  // A tile stands for groups, and individual rows show their aliases, which the search matches on
+  // their own, so only resolved rows narrow the tiles.
+  const tileSearchExpression = rowsMode === 'resolved' ? searchExpression : undefined;
   const { searchedTileEntityIds, isPending: isTilesSearchPending } = useSearchedTileEntityIds({
     spaceId: resolvedSpaceId,
-    searchExpression,
+    searchExpression: tileSearchExpression,
     isReady:
       !isSearchPending &&
       !alertBasedPending &&
@@ -1294,7 +1297,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   // The search can't narrow a tile's delta and sparkline (counts over time), so a search hides them.
   const shownSignalCards = useMemo(
     (): SignalCardData[] =>
-      searchExpression
+      tileSearchExpression
         ? signalCards.map((card) => ({
             ...card,
             value: shownTileEntityIds[card.id].length,
@@ -1305,7 +1308,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             trend: undefined,
           }))
         : signalCards,
-    [signalCards, searchExpression, shownTileEntityIds, isTilesSearchPending]
+    [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
   );
 
   const onGroupChange = useCallback(

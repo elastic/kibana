@@ -62,6 +62,7 @@ const mockAddWarning = jest.fn();
 jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({ addWarning: mockAddWarning }),
 }));
+let mockRowsMode: 'resolved' | 'individual' = 'individual';
 jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state', () => ({
   useEntityAnalyticsUrlState: () => ({
     timeRange: '7d',
@@ -71,7 +72,7 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
     setEntityFilters: jest.fn(),
     groupsSelected: ['none'],
     setGroupsSelected: jest.fn(),
-    rowsMode: 'individual',
+    rowsMode: mockRowsMode,
     setRowsMode: jest.fn(),
     sortField: 'entity.risk.calculated_score_norm',
     sortDirection: 'desc',
@@ -600,6 +601,7 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
 describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRowsMode = 'resolved';
     mockPrivileges();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
@@ -647,6 +649,18 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     rerender(<EntityAnalyticsNewHomePage />);
 
     expect(mockAddWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the tiles as they are on individual rows, which show the aliases the search matches', () => {
+    mockRowsMode = 'individual';
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchPending: false,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(lastOptions('useSearchedTileEntityIds').searchExpression).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')).toMatchObject({ value: 5, delta: 1 });
   });
 
   it('keeps the counts, deltas and sparklines without a search', () => {
