@@ -8,6 +8,7 @@
  */
 
 export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
+export { issueAccessToken } from './src/openapi/token_endpoints';
 export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';

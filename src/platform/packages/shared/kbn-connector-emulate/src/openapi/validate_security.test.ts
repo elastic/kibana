@@ -8,6 +8,7 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
+import { issueAccessToken } from './token_endpoints';
 import { loadContractOperations } from '.';
 
 const ok = { '200': { description: 'ok' } };
@@ -237,5 +238,36 @@ describe('validateSecurity with checkScopes', () => {
     });
 
     expect(write.status).toBe(200);
+  });
+
+  it('answers as usual with checkScopes report, listing the missing scopes on the call', async () => {
+    const reporting = createEmulatorFetch({ specs: [scoped], checkScopes: 'report' });
+    const token = issueAccessToken('a');
+
+    const write = await reporting.fetch('https://api.example.com/write', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    const read = await reporting.fetch('https://api.example.com/read', {
+      headers: { authorization: `Bearer ${token}` },
+    });
+
+    expect([write.status, read.status]).toEqual([200, 200]);
+    expect(reporting.calls.map(({ requestViolations }) => requestViolations)).toEqual([[], []]);
+    expect(reporting.calls.map(({ scopeViolations }) => scopeViolations)).toEqual([
+      [
+        {
+          path: ['security'],
+          code: 'insufficient_scope',
+          message: 'Token was granted a, but the operation also needs b (requires a b)',
+        },
+      ],
+      undefined,
+    ]);
+  });
+
+  it('issues tokens for a scope as the token URLs do', async () => {
+    expect(issueAccessToken('a b')).toBe(await tokenFor('a b'));
+    expect(issueAccessToken()).toBe(await tokenFor());
   });
 });

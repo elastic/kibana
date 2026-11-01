@@ -67,6 +67,11 @@ export interface ContractCall {
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
+  /**
+   * Set with `checkScopes: 'report'` when the bearer token lacks scopes the operation needs; the
+   * request was answered as if the token had them.
+   */
+  readonly scopeViolations?: readonly Violation[];
 }
 
 /**
@@ -103,8 +108,10 @@ export interface EmulatorOptions extends PaginationOptions {
   /**
    * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
    * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
+   * `'report'` answers the request as usual and lists the missing scopes in the call's
+   * `scopeViolations`, so a recorder sees every request a handler would send.
    */
-  readonly checkScopes?: boolean;
+  readonly checkScopes?: boolean | 'report';
 }
 
 export interface Emulator {
@@ -291,7 +298,9 @@ export const createEmulatorFetch = ({
     { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
     engine.respond
   );
-  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, {
+    checkScopes: checkScopes !== false,
+  });
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();
   const contextFor = (operation: ContractOperation, request: ContractRequest) => {
@@ -332,7 +341,16 @@ export const createEmulatorFetch = ({
     const { operation } = routed;
     const name = operation.id;
     const matched = toOperationRef(operation);
-    const authViolations = contract.authenticate(routed, request);
+    const checked = contract.authenticate(routed, request);
+    // Reported scope shortfalls don't stop the request, so the rest of it is still checked.
+    const reportScopes = checkScopes === 'report';
+    const authViolations = reportScopes
+      ? checked.filter(({ code }) => code !== 'insufficient_scope')
+      : checked;
+    const scopeViolations = reportScopes
+      ? checked.filter(({ code }) => code === 'insufficient_scope')
+      : [];
+    const scopeReport = scopeViolations.length > 0 ? { scopeViolations } : {};
     const requestViolations =
       authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
@@ -352,6 +370,7 @@ export const createEmulatorFetch = ({
         status: response.statusCode,
         requestViolations,
         responseViolations: [],
+        ...scopeReport,
       });
       return response;
     }
@@ -365,6 +384,7 @@ export const createEmulatorFetch = ({
       status: response.statusCode,
       requestViolations,
       responseViolations,
+      ...scopeReport,
     });
     // HEAD responses carry the headers of a GET, without its body.
     return request.method === 'head'
