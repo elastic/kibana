@@ -44,6 +44,8 @@ export interface OnboardingSpace {
   spaceId: string;
   api: AlertZeroApi;
   stub?: { connectorId: string; cleanup: () => Promise<void> };
+  /** Records an account id this fixture created, so cleanup deletes it even if the baseline is empty/unreadable. */
+  trackOwnedAccountId: (id: string) => void;
   cleanup: () => Promise<void>;
 }
 
@@ -89,13 +91,20 @@ const buildOnboardingSpace = async (
   let stub: StubModel | undefined;
   let supplyBaseline: SupplyBaseline | undefined;
   let serviceAccountBaseline: Set<string> | undefined;
+  /** Every account id this fixture itself created (via `enableFirstWorker`); owned regardless of the baseline. */
+  const createdAccountIds = new Set<string>();
 
   const cleanup = () =>
     runSteps([
       { name: 'disable workers', run: () => resetOnboardingState(api, spaceId) },
       {
         name: 'delete worker service accounts',
-        run: () => deleteWorkerServiceAccounts(api, spaceId, serviceAccountBaseline),
+        run: () =>
+          deleteWorkerServiceAccounts(api, spaceId, {
+            // Unreachable when undefined: setup throws before returning the space.
+            baselineIds: serviceAccountBaseline ?? new Set<string>(),
+            ownedIds: createdAccountIds,
+          }),
       },
       {
         name: 'restore Hunt supply workflows',
@@ -114,6 +123,13 @@ const buildOnboardingSpace = async (
 
   try {
     serviceAccountBaseline = await listServiceAccountIds(api);
+    if (!serviceAccountBaseline) {
+      // An unreadable ownership snapshot must not silently degrade into
+      // "delete nothing" — the fixture then leaks every account it creates.
+      throw new Error(
+        'Could not read the service-account baseline: listing returned a non-200 response'
+      );
+    }
     // The app is unsupported (404s, hidden) outside a Security-solution space.
     await spaces.setSolutionView({ id: spaceId, solution: 'security' });
     // Worker routes 404 until the per-space gate is on; seeding and every later
@@ -134,6 +150,7 @@ const buildOnboardingSpace = async (
     spaceId,
     api,
     stub: stub ? { connectorId: stub.connectorId, cleanup: stub.cleanup } : undefined,
+    trackOwnedAccountId: (id: string) => createdAccountIds.add(id),
     cleanup,
   };
 };
@@ -170,6 +187,10 @@ export const enableFirstWorker = async (space: OnboardingSpace): Promise<void> =
   const workers = await listWorkers(space.api, space.spaceId);
   const target = workers[0];
   const account = await createWorkerServiceAccount(space.api, target.id);
+  // Ownership is tracked explicitly, so the account is cleaned up even if the
+  // space's baseline snapshot is empty (and even if the PATCH below fails and
+  // no worker ever references it).
+  space.trackOwnedAccountId(account.id);
   try {
     ok(
       await patchWorker(space.api, space.spaceId, target.id, {
@@ -215,25 +236,27 @@ export const resetOnboardingState = async (api: AlertZeroApi, spaceId: string): 
  * accounts and their credentials are cluster-scoped and survive space deletion,
  * so without this step every enable leaks a global account. But the onboarding
  * UI reuses an existing account with the built-in worker name, so a referenced
- * account may predate the run or serve other spaces. Only referenced ids absent
- * from `baselineIds` (the accounts that existed before any enable) are deleted;
- * when the baseline could not be read nothing is deleted, since leaking a
- * throwaway account is cheaper than breaking a shared one.
+ * account may predate the run or serve other spaces. Two ownership signals,
+ * unioned: `ownedIds` (accounts this fixture itself created — deleted
+ * unconditionally, they are throwaway by construction) and referenced ids absent
+ * from `baselineIds` (accounts created by an enable through the UI — deleted
+ * only when the before-any-enable snapshot is available, since leaking a
+ * throwaway account is cheaper than breaking a shared one).
  */
 const deleteWorkerServiceAccounts = async (
   api: AlertZeroApi,
   spaceId: string,
-  baselineIds: ReadonlySet<string> | undefined
+  { baselineIds, ownedIds }: { baselineIds: ReadonlySet<string>; ownedIds: ReadonlySet<string> }
 ): Promise<void> => {
-  if (!baselineIds) return;
   const workers = await listWorkers(api, spaceId);
   const accountIds = [
-    ...new Set(
-      workers
+    ...new Set([
+      ...ownedIds,
+      ...workers
         .map((worker) => worker.settings?.serviceAccountId)
         .filter((id): id is string => Boolean(id))
-        .filter((id) => !baselineIds.has(id))
-    ),
+        .filter((id) => !baselineIds.has(id)),
+    ]),
   ];
   const failures: string[] = [];
   for (const accountId of accountIds) {
