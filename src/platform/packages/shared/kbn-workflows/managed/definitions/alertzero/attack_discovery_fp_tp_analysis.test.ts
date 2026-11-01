@@ -836,8 +836,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       .trim();
     const searchFailed = { message: 'search failed' };
 
-    const eventsFailed = (steps: Record<string, unknown>): unknown =>
-      createWorkflowLiquidEngine().evalValueSync(eventsFailedExpression, { steps });
+    const eventsFailed = (stepOutputs: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(eventsFailedExpression, { steps: stepOutputs });
 
     it('is false when the local retry succeeds', () => {
       expect(
