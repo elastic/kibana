@@ -1301,6 +1301,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         ? signalCards.map((card) => ({
             ...card,
             value: shownTileEntityIds[card.id].length,
+            entityIds: shownTileEntityIds[card.id],
             isLoading: card.isLoading || isTilesSearchPending,
             delta: undefined,
             isDeltaLoading: false,
@@ -1433,7 +1434,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <GenerateAiBriefButton
-                  cards={signalCards}
+                  cards={shownSignalCards}
                   timeRange={timeRange}
                   entityFilters={entityFilters}
                   focusTileId={activeTile ?? undefined}

@@ -115,8 +115,12 @@ jest.mock('../components/home/entities_table', () => ({
   EntitiesTableSection: () => null,
 }));
 jest.mock('./entity_analytics_home_header', () => ({ EntityAnalyticsHomeHeader: () => null }));
+const mockBriefButton = jest.fn();
 jest.mock('../components/home/ai_brief/generate_ai_brief_button', () => ({
-  GenerateAiBriefButton: () => null,
+  GenerateAiBriefButton: (props: unknown) => {
+    mockBriefButton(props);
+    return null;
+  },
 }));
 jest.mock('./entity_store_disabled_empty_prompt', () => ({
   EntityStoreDisabledEmptyPrompt: () => null,
@@ -199,6 +203,11 @@ const mockPrivileges = ({
 
 const getCard = (id: SignalCardData['id']): SignalCardData | undefined => {
   const { calls } = (SignalCards as jest.Mock).mock;
+  return calls[calls.length - 1][0].cards.find((card: SignalCardData) => card.id === id);
+};
+
+const getBriefCard = (id: SignalCardData['id']): SignalCardData | undefined => {
+  const { calls } = mockBriefButton.mock;
   return calls[calls.length - 1][0].cards.find((card: SignalCardData) => card.id === id);
 };
 
@@ -649,6 +658,31 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     rerender(<EntityAnalyticsNewHomePage />);
 
     expect(mockAddWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives the brief the searched count and entities of each tile', () => {
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchPending: false,
+    });
+    hooks.useSearchedTileEntityIds.mockReturnValue({
+      searchedTileEntityIds: {
+        entitiesWithAlerts: ['host:a'],
+        entitiesWithAnomalies: [],
+        riskMovers: [],
+        newlyHighCritical: [],
+        watchlisted: [],
+        newEntity: [],
+      },
+      isPending: false,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getBriefCard('entitiesWithAlerts')).toMatchObject({
+      value: 1,
+      entityIds: ['host:a'],
+      delta: undefined,
+    });
   });
 
   it('leaves the tiles as they are on individual rows, which show the aliases the search matches', () => {
