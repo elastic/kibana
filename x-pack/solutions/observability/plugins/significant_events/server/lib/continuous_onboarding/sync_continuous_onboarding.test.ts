@@ -173,6 +173,7 @@ describe('syncContinuousOnboarding', () => {
         enabled,
         request,
         spaceId: request.spaceId,
+        ...(enabled ? {} : { skipExecutionDrain: true }),
       });
     }
   );

@@ -76,5 +76,8 @@ export const syncContinuousOnboarding = async ({
     spaceId: event.request.spaceId,
     enabled,
     logger,
+    // Last-source reconciliation cancels that source's run. This listener only stops future
+    // schedules so the source DELETE does not wait for or race a space-wide execution drain.
+    ...(enabled ? {} : { skipExecutionDrain: true }),
   });
 };
