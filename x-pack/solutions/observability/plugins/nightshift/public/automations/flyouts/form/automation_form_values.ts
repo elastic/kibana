@@ -45,7 +45,13 @@ export type TriggerFormValues =
       endTime: string;
       timezone: string;
     }
-  | { kind: SlackTriggerKind; channels: string[]; users: string[]; messageFilter: string };
+  | {
+      kind: SlackTriggerKind;
+      channels: string[];
+      users: string[];
+      bots: string[];
+      messageFilter: string;
+    };
 
 export type SlackTriggerFormValues = Extract<TriggerFormValues, { kind: SlackTriggerKind }>;
 
@@ -76,7 +82,7 @@ const WEEKDAYS = [1, 2, 3, 4, 5];
 
 export const createTriggerFormValues = (kind: TriggerFormValues['kind']): TriggerFormValues => {
   if (isSlackTriggerKind(kind)) {
-    return { kind, channels: [], users: [], messageFilter: '' };
+    return { kind, channels: [], users: [], bots: [], messageFilter: '' };
   }
   if (kind === 'alert') {
     return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
@@ -147,6 +153,7 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           kind: SLACK_EVENT_TO_FORM_KIND[row.event],
           channels: row.channels ?? [],
           users: row.users ?? [],
+          bots: row.bots ?? [],
           messageFilter: row.messageFilter ?? '',
         }
       : preset

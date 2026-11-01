@@ -389,12 +389,23 @@ function DiscoverDocumentsComponent({
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
+  const {
+    result: documentsResult,
+    dataSource: documentsDataSource,
+    fetchStatus: documentsFetchStatus,
+    approximationApplied: documentsApproximationApplied,
+  } = documentState;
   const { table: esqlTable } = useMemo(
     () =>
       getEsqlDatatableFromDocuments({
-        documentsValue: documentState,
+        documentsValue: {
+          result: documentsResult,
+          dataSource: documentsDataSource,
+          fetchStatus: documentsFetchStatus,
+          approximationApplied: documentsApproximationApplied,
+        },
       }),
-    [documentState]
+    [documentsResult, documentsDataSource, documentsFetchStatus, documentsApproximationApplied]
   );
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
@@ -650,12 +661,10 @@ function DiscoverDocumentsComponent({
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             externalAdditionalControls={
               approximationApplied ? (
-                <span style={{ marginRight: 4 }}>
-                  <ApproximationBadge
-                    isApproximationApplied
-                    data-test-subj="discoverApproximationApplied"
-                  />
-                </span>
+                <ApproximationBadge
+                  isApproximationApplied
+                  data-test-subj="discoverApproximationApplied"
+                />
               ) : undefined
             }
             renderDocumentView="external"

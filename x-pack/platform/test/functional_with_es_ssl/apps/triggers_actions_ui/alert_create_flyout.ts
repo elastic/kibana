@@ -20,13 +20,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const rules = getService('rules');
-  const toasts = getService('toasts');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const monacoEditor = getService('monacoEditor');
 
-  async function getAlertsByName(name: string) {
+  async function searchAlerts(name: string) {
     const {
       body: { data: alerts },
     } = await supertest
@@ -34,6 +33,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .expect(200);
 
     return alerts;
+  }
+
+  async function getAlertsByName(name: string) {
+    const alerts = await searchAlerts(name);
+    return alerts.filter((a: { name: string }) => a.name === name);
+  }
+
+  async function waitForRuleCreated(name: string) {
+    await retry.waitForWithTimeout(`rule "${name}" to be created`, 15000, async () => {
+      const created = await getAlertsByName(name);
+      return created.length > 0;
+    });
+  }
+
+  async function getRuleActionBodies(ruleName: string): Promise<Array<string | undefined>> {
+    const [rule] = await getAlertsByName(ruleName);
+    expect(rule).not.to.be(undefined);
+    return rule.actions.map(({ params }: { params: { body?: string } }) => params.body);
   }
 
   async function deleteAlerts(alertIds: string[]) {
@@ -151,9 +168,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     async function deleteGeneratedRules() {
       for (const name of generatedRuleNames) {
         try {
-          const alerts = await getAlertsByName(name);
-          const exactMatches = alerts.filter((a: { name: string }) => a.name === name);
-          await deleteAlerts(exactMatches.map((a: { id: string }) => a.id));
+          const alerts = (await getAlertsByName(name)) as Array<{ id: string }>;
+          await deleteAlerts(alerts.map(({ id }) => id));
         } catch (error) {
           log.error(`Failed to clean up generated rule "${name}": ${error}`);
         }
@@ -214,6 +230,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('rulePageFooterSaveButton');
 
+      // check that the rule was saved with the first action
+      await retry.try(async () => {
+        expect(await getRuleActionBodies(ruleName)).to.eql(['myUniqueKey']);
+      });
+
       // add new action and remove first one
       await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('openEditRuleFlyoutButton');
@@ -244,15 +265,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const cardButton = await webhookCard.findByCssSelector('button');
       await cardButton.click();
 
-      await find.setValueByClass('kibanaCodeEditor', 'myUniqueKey1');
+      // both action accordions are open, so target the editor of the newly added (second) action
+      await retry.try(async () => {
+        const actionBodyEditors = await find.allByCssSelector(
+          '[data-test-subj="ruleActionsItem"] .kibanaCodeEditor'
+        );
+        expect(actionBodyEditors.length).to.eql(2);
+        await actionBodyEditors[1].click();
+        const secondActionBodyInput = await find.activeElement();
+        await secondActionBodyInput.clearValue();
+        await secondActionBodyInput.type('myUniqueKey1');
+      });
 
       await find.clickByCssSelector(
         '[data-test-subj="ruleActionsItem"] [data-test-subj="ruleActionsItemDeleteButton"]'
       );
+      await testSubjects.click('rulePageFooterSaveButton');
 
       // check that the removed action is the right one
-      const doesExist = await find.existsByXpath(".//*[text()='myUniqueKey']");
-      expect(doesExist).to.eql(false);
+      await retry.try(async () => {
+        expect(await getRuleActionBodies(ruleName)).to.eql(['myUniqueKey1']);
+      });
     });
 
     it('should create an alert', async () => {
@@ -312,8 +345,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('queryInput', '_id: *');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+
+      await waitForRuleCreated(alertName);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
@@ -394,22 +427,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('queryInput', '_id: *');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+
+      await waitForRuleCreated(alertName);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
       await testSubjects.click('rulesTab');
+
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
-      const searchResultAfterSave = searchResultsAfterSave[0];
-      expect(omit(searchResultAfterSave, 'duration')).to.eql({
+      const { name, tags, interval, duration } = searchResultsAfterSave[0];
+      expect({ name, tags, interval }).to.eql({
         name: `${alertName}Index threshold`,
         tags: '',
         interval: '1 min',
       });
-      expect(searchResultAfterSave.duration).to.match(/\d{2,}:\d{2}/);
+      expect(duration).to.match(/\d{2,}:\d{2}/);
     });
 
     it('should create an alert with DSL filter for conditional action', async () => {
@@ -444,8 +478,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await filterBar.addDslFilter(filter);
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
       await testSubjects.click('app-menu-overflow-button');
       await testSubjects.click('openEditRuleFlyoutButton');
@@ -454,6 +486,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.scrollIntoView('globalQueryBar');
 
       await filterBar.hasFilter('query', filter, true);
+
+      const alerts = await getAlertsByName(alertName);
+      expect(alerts[0].actions.length).to.be.greaterThan(0);
+      const actionAlertsFilterQuery = alerts[0].actions[0].alerts_filter?.query;
+      expect(JSON.stringify(actionAlertsFilterQuery.filters)).to.contain(alertName);
     });
 
     it('should create an alert with actions in multiple groups', async () => {
@@ -484,8 +521,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).type('some text ');
 
       await testSubjects.click('rulePageFooterSaveButton');
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+
+      await waitForRuleCreated(alertName);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
@@ -518,20 +555,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmCreateRuleModal');
 
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
+      await waitForRuleCreated(alertName);
 
       await pageObjects.common.navigateToApp('management', {
         path: 'insightsAndAlerting/triggersActions',
       });
       await testSubjects.click('rulesTab');
 
-      await retry.waitForWithTimeout(`rule "${alertName}" to appear in list`, 15000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(alertName);
-        const results = await pageObjects.triggersActionsUI.getAlertsList();
-        return results.length > 0 && results[0].name.startsWith(alertName);
-      });
-
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
       expect(omit(searchResultAfterSave, 'duration')).to.eql({

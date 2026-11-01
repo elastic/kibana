@@ -7,29 +7,9 @@
 
 import type { PresetSchedule } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
-import {
-  createAutomationFormValues,
-  toAutomationFormValues,
-  toPresetSchedule,
-} from './automation_form_values';
+import { toAutomationFormValues, toPresetSchedule } from './automation_form_values';
 
 describe('automation form values', () => {
-  describe('createAutomationFormValues', () => {
-    it('starts with empty, disabled values', () => {
-      expect(createAutomationFormValues()).toEqual({
-        name: '',
-        tags: [],
-        description: '',
-        trigger: undefined,
-        dailyDispatchLimit: '20',
-        instructions: '',
-        mode: 'investigate',
-        slackAction: undefined,
-        isEnabled: false,
-      });
-    });
-  });
-
   it.each(['invalid', '25:00'])('ignores invalid schedules when loading the form: %s', (time) => {
     const automation: Automation = {
       id: 'automation-1',
@@ -88,6 +68,7 @@ describe('automation form values', () => {
             event: 'message',
             channels: ['#oncall'],
             users: ['U1'],
+            bots: ['A1'],
             messageFilter: 'outage',
           },
         ],
@@ -108,6 +89,7 @@ describe('automation form values', () => {
         kind: 'slack_message',
         channels: ['#oncall'],
         users: ['U1'],
+        bots: ['A1'],
         messageFilter: 'outage',
       },
       dailyDispatchLimit: '12',

@@ -5,9 +5,25 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import moment from 'moment';
 
+import type { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
@@ -18,6 +34,7 @@ import { getSharedParamsMock } from '../__mocks__/shared_params';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { getMvExpandFields } from '@kbn/securitysolution-utils';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
@@ -47,6 +64,7 @@ describe('esqlExecutor', () => {
     licensing = licensingMock.createSetup();
     ruleServices = createPersistenceExecutorOptionsMock();
     getDataTierFilterMock.mockResolvedValue([]);
+    (getMvExpandFields as jest.Mock).mockReturnValue([]);
 
     mockedArguments = {
       sharedParams,
@@ -206,10 +224,104 @@ describe('esqlExecutor', () => {
       ]);
     });
 
-    it('should store lastQuery in returned state', async () => {
+    it('should store lastQuery in returned state when query has mv_expand', async () => {
+      (getMvExpandFields as jest.Mock).mockReturnValue(['agent.name']);
+
       const result = await esqlExecutor(mockedArguments);
 
       expect(result.state).toHaveProperty('lastQuery', params.query);
+    });
+
+    it('should not store lastQuery in returned state when query has no mv_expand', async () => {
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.state.lastQuery).toBeUndefined();
+    });
+  });
+
+  describe('shard failures', () => {
+    const commonAlertFields: CommonAlertFieldsLatest = {
+      [ALERT_RULE_PARAMETERS]: {},
+      [ALERT_RULE_CATEGORY]: 'ES|QL Rule',
+      [ALERT_RULE_CONSUMER]: SERVER_APP_ID,
+      [ALERT_RULE_EXECUTION_UUID]: '97e8f53a-4971-4935-bb54-9b8f86930cc7',
+      [ALERT_RULE_NAME]: 'rule-name',
+      [ALERT_RULE_PRODUCER]: 'siem',
+      [ALERT_RULE_REVISION]: 0,
+      [ALERT_RULE_TYPE_ID]: 'siem.esqlRule',
+      [ALERT_RULE_UUID]: '2e051244-b3c6-4779-a241-e1b4f0beceb9',
+      [SPACE_IDS]: ['default'],
+      [ALERT_RULE_TAGS]: [],
+      [TIMESTAMP]: '2020-04-20T21:27:45+0000',
+    };
+    const emptySearchResponse: estypes.SearchResponse = {
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: { hits: [] },
+    };
+
+    it('should add a warning and still create alerts when a non-aggregating query returns partial results', async () => {
+      const shardFailure: estypes.EsqlEsqlShardFailure = {
+        shard: 0,
+        index: 'packetbeat-000001',
+        reason: { type: 'script_exception', reason: 'runtime error' },
+      };
+      const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
+        .asyncQuery as unknown as jest.Mock;
+      asyncQueryMock.mockResolvedValue({
+        id: 'QUERY-ID',
+        is_running: false,
+        is_partial: true,
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['doc-1']],
+        _clusters: { details: { '(local)': { failures: [shardFailure] } } },
+      });
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResponse(emptySearchResponse);
+      ruleServices.alertWithPersistence.mockResolvedValue({
+        createdAlerts: [
+          {
+            _id: 'alert-1',
+            _index: '.internal.alerts-security.alerts-default-000001',
+            ...commonAlertFields,
+          },
+        ],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(asyncQueryMock.mock.calls[0][0]).toHaveProperty('allow_partial_results', true);
+      expect(result.warningMessages).toEqual([
+        `The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards: ${JSON.stringify(
+          [shardFailure]
+        )}`,
+      ]);
+      expect(result.errors).toEqual([]);
+      expect(result.success).toBe(true);
+      expect(ruleServices.alertWithPersistence).toHaveBeenCalledTimes(1);
+      expect(ruleServices.alertWithPersistence.mock.calls[0][0]).toHaveLength(1);
+      expect(result.createdSignalsCount).toBe(1);
+    });
+
+    it('should disallow partial results and fail the run for an aggregating query when ES rejects it', async () => {
+      mockedArguments.sharedParams = getSharedParamsMock({
+        ruleParams: getEsqlRuleParams({ query: 'from auditbeat* | stats count() by host.name' }),
+      });
+      const asyncQueryMock = ruleServices.scopedClusterClient.asCurrentUser.esql
+        .asyncQuery as unknown as jest.Mock;
+      asyncQueryMock.mockRejectedValue(
+        new Error('Error while performing ES|QL search: script_exception')
+      );
+
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(asyncQueryMock.mock.calls[0][0]).toHaveProperty('allow_partial_results', false);
+      expect(result.success).toBe(false);
+      expect(result.errors).toEqual([expect.stringContaining('script_exception')]);
+      expect(result.warningMessages).toEqual([]);
+      expect(ruleServices.alertWithPersistence).not.toHaveBeenCalled();
     });
   });
 

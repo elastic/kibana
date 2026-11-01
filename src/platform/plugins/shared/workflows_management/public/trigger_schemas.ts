@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CustomTriggerSchemaConfig, toCustomTriggerSchemaConfigs } from '@kbn/workflows';
+import {
+  type CustomTriggerSchemaConfig,
+  getTriggerName,
+  toCustomTriggerSchemaConfigs,
+} from '@kbn/workflows';
 import type {
   PublicTriggerDefinition,
   WorkflowsExtensionsPublicPluginStart,
@@ -37,6 +41,11 @@ class TriggerSchemas {
    */
   public getTriggerDefinition(triggerType: string): PublicTriggerDefinition | undefined {
     return this.extensions?.getTriggerDefinition(triggerType);
+  }
+
+  /** Display name: registered title, then the built-in label, then the type id. */
+  public getTriggerName(triggerType: string): string {
+    return getTriggerName(triggerType, this.getTriggerDefinition(triggerType)?.title);
   }
 
   /**

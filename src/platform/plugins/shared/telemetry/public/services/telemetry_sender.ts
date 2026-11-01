@@ -144,7 +144,7 @@ export class TelemetrySender {
         // exponentially backoff the time between subsequent retries to up to 19 attempts, after which we give up until the next report is due
         window.setTimeout(this.sendUsageData, TelemetrySender.getRetryDelay(this.retryCount));
       } else {
-        /* eslint no-console: ["error", { allow: ["warn"] }] */
+        // eslint-disable-next-line no-console
         console.warn(
           `TelemetrySender.sendUsageData exceeds number of retry attempts with ${err.message}`
         );

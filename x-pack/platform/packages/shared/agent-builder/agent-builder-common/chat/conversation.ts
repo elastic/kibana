@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -60,11 +60,13 @@ export interface RoundInput {
    */
   attachments?: Attachment[];
   /**
-   * References to versioned conversation-level attachments.
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_refs?: AttachmentVersionRef[];
   /**
-   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   * @deprecated Written before attachment events became the source of truth; read-only, rendered
+   * by the legacy path only.
    */
   attachment_context?: string;
 }
@@ -80,13 +82,9 @@ export interface ConverseInput {
   /**
    * Optional attachments to provide to the agent.
    * Use `origin` without `data` for by-reference types that implement `resolve`.
-   * @deprecated Use attachment_refs with conversation-level attachments instead
+   * @deprecated Use conversation-level attachments instead
    */
   attachments?: AttachmentInput[];
-  /**
-   * References to versioned conversation-level attachments.
-   */
-  attachment_refs?: AttachmentVersionRef[];
   /**
    * Response from the user to prompt requests.
    */
@@ -139,6 +137,16 @@ export interface ToolCallProgress {
 }
 
 /**
+ * How the model reached a tool.
+ */
+export enum ToolCallInvocation {
+  /** Bound to the model as a native tool. */
+  native = 'native',
+  /** Reached through the `execute_dynamic_tool` meta-tool. */
+  dynamic = 'dynamic',
+}
+
+/**
  * Represents a tool call with the corresponding result.
  */
 export interface ToolCallWithResult {
@@ -173,6 +181,13 @@ export interface ToolCallWithResult {
    * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
    */
   interrupted?: true;
+  /**
+   * How the model reached the tool; absent means `native` (steps persisted before this field
+   * existed have none). For `dynamic`, `tool_id` and `params` are the inner tool's; the
+   * `execute_dynamic_tool` wrapper is restored when the call is rendered back to the model or
+   * re-run on resume. Use `isDynamicToolCall` rather than comparing the value.
+   */
+  invocation?: ToolCallInvocation;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -189,6 +204,11 @@ export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): Tool
 
 export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallStep => {
   return step.type === ConversationRoundStepType.toolCall;
+};
+
+/** True when the call went through the `execute_dynamic_tool` meta-tool. */
+export const isDynamicToolCall = (call: Pick<ToolCallWithResult, 'invocation'>): boolean => {
+  return call.invocation === ToolCallInvocation.dynamic;
 };
 
 export const createReasoningStep = (reasoningStepWithResult: ReasoningStepData): ReasoningStep => {
@@ -299,6 +319,9 @@ export const createInjectedContextStep = (data: InjectedContextStepData): Inject
 export const isInjectedContextStep = (step: ConversationRoundStep): step is InjectedContextStep => {
   return step.type === ConversationRoundStepType.injectedContext;
 };
+
+/** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
+export const relevantSkillsHookId = 'relevant-skills';
 
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
@@ -605,6 +628,9 @@ export interface ConversationRoundAuthor {
   type?: UserPrincipalType;
 }
 
+/** The display-only part of an author a writer may supply. */
+export type ConversationRoundAuthorDecoration = Pick<ConversationRoundAuthor, 'full_name'>;
+
 export const getConversationRoundAuthorDisplayName = (
   author?: Pick<ConversationRoundAuthor, 'id' | 'username' | 'full_name'>
 ): string | undefined => {
@@ -762,6 +788,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
 
+/** Maximum length of the display name a workflow may record on a user message it writes. */
+export const USER_MESSAGE_AUTHOR_NAME_MAX_LENGTH = 256;
+
 /** Maximum accepted length for a conversation metadata key */
 export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
 
@@ -800,6 +829,8 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /** The run lock held by the conversation's current execution. */
+  active_execution?: ActiveExecution;
   /**
    * Identifier of the bash/VFS workspace for this conversation.
    */

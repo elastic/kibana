@@ -8,10 +8,8 @@
  */
 
 import React from 'react';
-import { of } from 'rxjs';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { UnifiedHistogramServices } from '../types';
 import { allSuggestionsMock } from './suggestions';
@@ -63,17 +61,6 @@ export const unifiedHistogramServicesMock = {
     set: jest.fn(),
     remove: jest.fn(),
     clear: jest.fn(),
-  },
-  expressions: {
-    ...expressionsPluginMock.createStartContract(),
-    run: jest.fn(() =>
-      of({
-        partial: false,
-        result: {
-          rows: [{}, {}, {}],
-        },
-      })
-    ),
   },
   capabilities: {
     dashboard: {

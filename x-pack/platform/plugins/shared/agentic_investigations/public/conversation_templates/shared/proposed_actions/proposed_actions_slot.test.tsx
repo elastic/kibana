@@ -27,6 +27,8 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useDismissProposal: jest.fn(),
   useIsApprovingProposal: jest.fn(),
   useIsDecliningProposal: jest.fn(),
+  useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
+  useIsReopeningProposal: jest.fn(() => false),
 }));
 
 jest.mock('../../../user_profiles', () => ({
@@ -306,6 +308,26 @@ describe('ProposedActionsSlot', () => {
     expect(
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
     ).toBeInTheDocument();
+  });
+
+  it('keeps the modal open when a failed action is replaced by its retry proposal', () => {
+    mockConversationProposalsPage([{ ...mockProposal, rootProposalId: 'proposal-1' }]);
+    const { rerender } = renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // The failed proposal is superseded, so the next fetch returns its retry under a new id.
+    mockConversationProposalsPage([
+      {
+        ...mockProposal,
+        id: 'proposal-3',
+        rootProposalId: 'proposal-1',
+        previousExecutionError: 'Suspend process failed.',
+      },
+    ]);
+    rerender(<ProposedActionsSlot conversationId="conversation-1" />);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('shows the reason form in the same modal instead of dismissing directly', () => {

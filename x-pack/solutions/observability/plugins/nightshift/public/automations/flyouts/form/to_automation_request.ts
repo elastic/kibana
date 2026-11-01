@@ -39,6 +39,7 @@ const toTriggerRow = (
       event: SLACK_TRIGGER_EVENTS[trigger.kind],
       ...(trigger.channels.length ? { channels: trigger.channels } : {}),
       ...(trigger.users.length ? { users: trigger.users } : {}),
+      ...(trigger.bots.length ? { bots: trigger.bots } : {}),
       ...(messageFilter ? { messageFilter } : {}),
     };
   }

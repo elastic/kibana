@@ -10,7 +10,7 @@ import { Form, useForm, useFormData } from '@kbn/es-ui-shared-plugin/static/form
 
 import type { ActionConnector } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import { NONE_CONNECTOR_ID } from '../../../../common/constants';
 import { getConnectorById } from '../../utils';
 import { Connector } from '../../case_form_fields/connector';

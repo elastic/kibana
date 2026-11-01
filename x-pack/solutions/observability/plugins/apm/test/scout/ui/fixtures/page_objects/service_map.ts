@@ -31,7 +31,8 @@ export class ServiceMapPage {
   public serviceMapPopoverContent: Locator;
   public serviceMapPopoverTitle: Locator;
   public serviceMapDependencyDetailsButton: Locator;
-  public serviceMapEdgeExploreTracesButton: Locator;
+  public requestFlyout: Locator;
+  public requestFlyoutTitle: Locator;
   public serviceMapOptionsPanel: Locator;
   public serviceMapHideControlsButton: Locator;
   public serviceMapShowControlsButton: Locator;
@@ -71,9 +72,8 @@ export class ServiceMapPage {
     this.serviceMapDependencyDetailsButton = page.testSubj.locator(
       'apmDependencyContentsDependencyDetailsButton'
     );
-    this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
-      'apmEdgeContentsOpenInDiscoverButton'
-    );
+    this.requestFlyout = page.testSubj.locator('requestFlyout');
+    this.requestFlyoutTitle = page.testSubj.locator('requestFlyoutHeader');
     this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
     this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
     this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');
@@ -246,10 +246,10 @@ export class ServiceMapPage {
     await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  async openEdgePopover(edgeId: string) {
+  async openEdgeFlyout(edgeId: string) {
     await this.settleServiceMapLayout();
     await this.clickEdge(edgeId);
-    await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.requestFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   getNodeById(nodeId: string) {
