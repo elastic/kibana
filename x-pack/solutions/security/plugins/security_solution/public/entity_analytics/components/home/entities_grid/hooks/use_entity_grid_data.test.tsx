@@ -160,7 +160,7 @@ describe('useEntityGridData', () => {
       );
       expect(mockFetchSortPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityExpression: `(${FILTERED_OPTIONS.entityExpression}) OR entity.id IN ("e9")`,
+          entityExpression: `((${FILTERED_OPTIONS.entityExpression}) OR entity.id IN ("e9"))`,
         }),
         expect.anything()
       );

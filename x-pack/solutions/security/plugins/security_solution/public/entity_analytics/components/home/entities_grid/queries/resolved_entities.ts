@@ -238,7 +238,10 @@ export const fetchResolvedEntityFilterOverrides = async (
   );
 };
 
-/** Entity docs hold own values, so the filters add or drop the resolved entities that pass differently. */
+/**
+ * Entity docs hold own values, so the filters add or drop the resolved entities that pass differently.
+ * The result is wrapped when it holds an `OR`, so that joining it with `AND` keeps its meaning.
+ */
 export const applyResolvedEntityFilterOverrides = (
   expression: string,
   { include = [], exclude = [] }: Partial<ResolvedEntityFilterOverrides> = {}
@@ -246,7 +249,7 @@ export const applyResolvedEntityFilterOverrides = (
   const passing = exclude.length
     ? `(${expression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
     : expression;
-  return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
+  return include.length ? `((${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)}))` : passing;
 };
 
 /** The DSL form of `applyResolvedEntityFilterOverrides`, for the reads that run on DSL. */

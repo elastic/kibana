@@ -7,6 +7,7 @@
 
 import type { QueryArgs, Row } from '../common';
 import type { EntityAggregation } from './esql';
+import { joinAnd } from './esql';
 import {
   applyResolvedEntityFilterOverrides,
   fetchResolvedEntityFilterOverrides,
@@ -239,7 +240,17 @@ describe('applyResolvedEntityFilterOverrides', () => {
   it('adds the resolved entities that pass, though their main entity does not', () => {
     expect(
       applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, { include: ['host:b'], exclude: [] })
-    ).toBe(`(${CRITICALITY_FILTER}) OR entity.id IN ("host:b")`);
+    ).toBe(`((${CRITICALITY_FILTER}) OR entity.id IN ("host:b"))`);
+  });
+
+  it('keeps its meaning when it is joined with AND', () => {
+    const patched = applyResolvedEntityFilterOverrides(CRITICALITY_FILTER, {
+      include: ['host:b'],
+    });
+
+    expect(joinAnd(patched, 'group == "x"')).toBe(
+      `((${CRITICALITY_FILTER}) OR entity.id IN ("host:b")) AND group == "x"`
+    );
   });
 
   it('removes and adds resolved entities', () => {
@@ -248,7 +259,9 @@ describe('applyResolvedEntityFilterOverrides', () => {
         include: ['host:b'],
         exclude: ['host:a'],
       })
-    ).toBe(`((${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
+    ).toBe(
+      `(((${CRITICALITY_FILTER}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b"))`
+    );
   });
 });
 
