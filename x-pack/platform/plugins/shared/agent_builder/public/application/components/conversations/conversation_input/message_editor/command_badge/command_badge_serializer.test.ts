@@ -98,6 +98,23 @@ describe('serializeEditorContent', () => {
     expect(serializeEditorContent(div)).toBe('Hi can you tell\nme the\nwheather ?');
   });
 
+  it('skips the trailing <br> the browser adds to keep the last line visible', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('line1\nline2\n'));
+    div.appendChild(document.createElement('br'));
+
+    expect(serializeEditorContent(div)).toBe('line1\nline2\n');
+  });
+
+  it('skips a trailing <br> followed by an empty text node', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('ALL'));
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createTextNode(''));
+
+    expect(serializeEditorContent(div)).toBe('ALL');
+  });
+
   it('preserves line breaks adjacent to badges', () => {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode('Use '));
@@ -125,7 +142,7 @@ describe('serializeEditorContent', () => {
     });
     div.appendChild(badge);
 
-    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://entry-1)');
+    expect(serializeEditorContent(div)).toBe('[#visualization/Pacific Sales](sml://entry-1)');
   });
 
   it('serializes an image placeholder element', () => {
@@ -252,6 +269,22 @@ describe('deserializeInputSegments', () => {
   });
 
   it('parses an SML badge', () => {
+    const segments = deserializeInputSegments('[#visualization/Pacific Sales](sml://entry-1)');
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Sml,
+          label: 'visualization/Pacific Sales',
+          id: 'entry-1',
+          metadata: {},
+        },
+      },
+    ]);
+  });
+
+  it('drops the previous trigger from the label of a badge serialized with it', () => {
     const segments = deserializeInputSegments('[@visualization/Pacific Sales](sml://entry-1)');
 
     expect(segments).toEqual([
@@ -333,7 +366,7 @@ describe('round-trip serialization', () => {
   });
 
   it('round-trips SML badge', () => {
-    const original = 'Ref [@visualization/Pacific Sales](sml://entry-1) here';
+    const original = 'Ref [#visualization/Pacific Sales](sml://entry-1) here';
     const segments = deserializeInputSegments(original);
 
     const div = document.createElement('div');

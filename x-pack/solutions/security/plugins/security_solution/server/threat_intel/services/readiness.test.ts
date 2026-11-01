@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import {
+  HUNT_USABLE_FILTER,
+  INDICATOR_ELIGIBLE_FILTER,
+  THREAT_REPORTS_INDEX as SHARED_THREAT_REPORTS_INDEX,
+} from '@kbn/alertzero-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   httpServerMock,
 } from '@kbn/core/server/mocks';
-import { DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID } from '../../../common/threat_intel';
-import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
+import {
+  DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
+  THREAT_REPORTS_INDEX,
+} from '../../../common/threat_intel';
 import { getThreatIntelReadiness, type ReadinessDeps } from './readiness';
 
 const logger = loggingSystemMock.createLogger();
@@ -20,16 +27,13 @@ const logger = loggingSystemMock.createLogger();
 const semanticFieldMappings = {
   '.kibana-threat-reports': {
     mappings: {
-      'content.title': {
-        full_name: 'content.title',
-        mapping: {
-          title: { type: 'semantic_text', inference_id: '.default-embedding' },
-        },
-      },
-      'content.body_text': {
-        full_name: 'content.body_text',
-        mapping: {
-          body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+      dynamic: 'strict',
+      properties: {
+        content: {
+          properties: {
+            title: { type: 'semantic_text', inference_id: '.default-embedding' },
+            body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+          },
         },
       },
     },
@@ -70,10 +74,11 @@ const buildDefaultDeps = (
 } => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.indices.exists.mockResolvedValue(true);
-  esClient.indices.getMapping.mockResolvedValue({
-    '.kibana-threat-reports': { mappings: { dynamic: 'strict' } },
-  } as never);
-  esClient.indices.getFieldMapping.mockResolvedValue(semanticFieldMappings as never);
+  esClient.indices.getMapping.mockResolvedValue(semanticFieldMappings as never);
+  // Serverless answers 410 api_not_available_exception for this API.
+  esClient.indices.getFieldMapping.mockRejectedValue(
+    new Error('api_not_available_exception: 410') as never
+  );
   esClient.inference.get.mockResolvedValue({} as never);
   esClient.search.mockResolvedValue(buildUsableStatsResponse() as never);
 
@@ -256,6 +261,51 @@ describe('getThreatIntelReadiness', () => {
     expect(result.reasonCodes).toContain('embedding_endpoint_unavailable');
   });
 
+  it('resolves embedding endpoints via getMapping and never calls getFieldMapping (serverless 410)', async () => {
+    const deps = buildDefaultDeps();
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result.reasonCodes).not.toContain('embedding_endpoint_unavailable');
+    expect(deps.esClient.indices.getFieldMapping).not.toHaveBeenCalled();
+    expect(deps.esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+    expect(deps.esClient.indices.getMapping).toHaveBeenCalledWith({
+      index: '.kibana-threat-reports',
+      expand_wildcards: ['open', 'hidden'],
+    });
+  });
+
+  it('reads the reports mapping once per readiness evaluation', async () => {
+    const deps = buildDefaultDeps();
+
+    await getThreatIntelReadiness(deps);
+
+    expect(deps.esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns degraded with embedding_endpoint_unavailable when a semantic field has no inference_id', async () => {
+    const deps = buildDefaultDeps();
+    deps.esClient.indices.getMapping.mockResolvedValue({
+      '.kibana-threat-reports': {
+        mappings: {
+          dynamic: 'strict',
+          properties: {
+            content: {
+              properties: {
+                title: { type: 'semantic_text' },
+                body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+              },
+            },
+          },
+        },
+      },
+    } as never);
+
+    const result = await getThreatIntelReadiness(deps);
+
+    expect(result.reasonCodes).toContain('embedding_endpoint_unavailable');
+  });
+
   it('returns degraded with no_enrich_connector when the enrich feature has no endpoint', async () => {
     const deps = buildDefaultDeps({
       getSearchInferenceEndpoints: jest.fn().mockReturnValue({
@@ -404,5 +454,11 @@ describe('getThreatIntelReadiness', () => {
         }),
       })
     );
+  });
+});
+
+describe('threat reports index constant', () => {
+  it('stays aligned with the copy shared through @kbn/alertzero-common', () => {
+    expect(SHARED_THREAT_REPORTS_INDEX).toBe(THREAT_REPORTS_INDEX);
   });
 });

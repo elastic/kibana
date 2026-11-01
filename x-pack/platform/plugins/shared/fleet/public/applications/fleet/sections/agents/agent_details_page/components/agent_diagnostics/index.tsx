@@ -39,15 +39,25 @@ import {
   useStartServices,
   sendDeleteAgentUpload,
 } from '../../../../../hooks';
-import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
+import type {
+  AgentDiagnostics,
+  Agent,
+  AgentPolicy,
+} from '../../../../../../../../common/types/models';
 import { AgentRequestDiagnosticsModal } from '../../../components/agent_request_diagnostics_modal';
 
 export interface AgentDiagnosticsProps {
   agent: Agent;
+  agentPolicy?: AgentPolicy;
 }
 
-export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({ agent }) => {
+export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({
+  agent,
+  agentPolicy,
+}) => {
   const authz = useAuthz();
+  // agentless agents are managed by Elastic: users can't request diagnostics for them
+  const isAgentless = agentPolicy?.supports_agentless === true;
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
   const [isLoading, setIsLoading] = useState(true);
@@ -273,7 +283,9 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       onClick={() => {
         setIsRequestDiagnosticsModalOpen(true);
       }}
-      disabled={!isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents}
+      disabled={
+        isAgentless || !isAgentRequestDiagnosticsSupported(agent) || !authz.fleet.readAgents
+      }
     >
       <FormattedMessage
         id="xpack.fleet.requestDiagnostics.diagnosticsOneButton"
@@ -312,7 +324,18 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          {isAgentRequestDiagnosticsSupported(agent) ? (
+          {isAgentless ? (
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.fleet.requestDiagnostics.agentlessNotSupportedTooltip"
+                  defaultMessage="Requesting agent diagnostics is not supported for managed agents."
+                />
+              }
+            >
+              {requestDiagnosticsButton}
+            </EuiToolTip>
+          ) : isAgentRequestDiagnosticsSupported(agent) ? (
             requestDiagnosticsButton
           ) : (
             <EuiToolTip

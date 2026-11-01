@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
-import type { DismissReason } from '@kbn/proposals-common';
+import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
 import { ApprovalContentHeader } from './approval_content_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
@@ -27,6 +27,7 @@ import {
   getProposalTone,
   isProposalExpired,
 } from './proposal_helpers';
+import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
 
 export interface ApprovalContentProps {
@@ -60,7 +61,8 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve", disabled once the
+   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("I've applied" for a
+   * to-do proposal, see `isTodoProposal`), disabled once the
    * proposal has expired — both derived here rather than supplied by the caller, so every host's
    * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
    * which hides the button entirely rather than leaving it inert.
@@ -73,9 +75,18 @@ export interface ApprovalContentProps {
    * button; clicking it swaps the body for `DeclineReasonForm` and the footer for Cancel/Decline,
    * entirely within this component — so a host never renders `DeclineReasonForm` itself or tracks
    * its own declining mode. The same flow renders identically whether this is placed inside a
-   * modal or an Agent Builder chat card. Disabled whenever the Approve button is.
+   * modal or an Agent Builder chat card. Disabled whenever the Approve button is. Not offered
+   * for a to-do proposal (`isTodoProposal`), whose only decision is "I've applied".
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
+  /**
+   * Marks a to-do proposal that was marked as applied as not applied again. When set, such a
+   * proposal shows a "Mark as not applied" action in place of the footer it no longer has.
+   * Disabled with `readOnly`; a rejection is shown in the card like a failed decision.
+   */
+  onReopen?: () => Promise<void>;
+  /** Whether this proposal's `onReopen` is in flight, from the host's mutation cache. */
+  isReopening?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -112,6 +123,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     onApprove,
     secondaryActions,
     onDismiss,
+    onReopen,
+    isReopening = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -135,10 +148,16 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
+    // A to-do is the analyst's to carry out, so there is nothing to approve or decline: the one
+    // decision left is the human confirming they did it.
+    const isTodo = isTodoProposal(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
       ? {
-          label: APPROVAL_MODAL_TRANSLATIONS.approve,
+          label: isTodo
+            ? APPROVAL_MODAL_TRANSLATIONS.markApplied
+            : APPROVAL_MODAL_TRANSLATIONS.approve,
+          ...(isTodo && { iconType: 'check' as const }),
           onClick: onApprove,
           color: 'primary',
           isDisabled: isReplaced || isExpired || readOnly,
@@ -197,7 +216,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           ]
         : [
             ...(secondaryActions ?? []),
-            ...(onDismiss
+            ...(onDismiss && !isTodo
               ? [
                   {
                     label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
@@ -237,10 +256,39 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
+    // Only a human's own "I've applied" can be taken back: nothing ran, so nothing is undone.
+    const canReopen =
+      Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
+    const reopenAction: ApprovalAction | undefined =
+      canReopen && onReopen
+        ? {
+            label: APPROVAL_MODAL_TRANSLATIONS.markNotApplied,
+            color: 'text',
+            iconType: 'undo',
+            isDisabled: readOnly,
+            isLoading: isReopening,
+            onClick: async () => {
+              setActionError(undefined);
+              try {
+                await onReopen();
+              } catch (err) {
+                setActionError(
+                  err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
+                );
+              }
+            },
+            'data-test-subj': dataTestSubj ? `${dataTestSubj}-reopen` : undefined,
+          }
+        : undefined;
+
+    const hasReplacedCaption = isReplaced && getProposalCaption(proposal) !== undefined;
     const headerCaption = decision?.actorName ? (
       <>
-        {replacedCaption && `${replacedCaption} • `}
+        {hasReplacedCaption && (
+          <>
+            <ProposalCaption proposal={proposal} /> •{' '}
+          </>
+        )}
         <ApprovalActorTime
           actorName={decision.actorName}
           at={decision.decidedAt}
@@ -250,7 +298,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     ) : !isReplaced && isSubmitting && since ? (
       <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
-      getProposalCaption(proposal, { includeRiskDetails: !isReplaced })
+      getProposalCaption(proposal, { includeRiskDetails: !isReplaced }) && (
+        <ProposalCaption proposal={proposal} includeRiskDetails={!isReplaced} />
+      )
     );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
@@ -318,6 +368,14 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           <ApprovalContentFooter
             secondaryActions={resolvedSecondaryActions}
             primaryAction={resolvedPrimaryAction}
+            defaultButtonColor={defaultButtonColor}
+            onPrimaryClick={handlePrimaryClick}
+          />
+        )}
+
+        {reopenAction && (
+          <ApprovalContentFooter
+            secondaryActions={[reopenAction]}
             defaultButtonColor={defaultButtonColor}
             onPrimaryClick={handlePrimaryClick}
           />

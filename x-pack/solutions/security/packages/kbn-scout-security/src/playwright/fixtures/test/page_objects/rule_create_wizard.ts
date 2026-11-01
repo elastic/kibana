@@ -6,7 +6,11 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { RuleSeverity } from '../../../constants/detection_rules';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import { expect } from '../../../../../ui';
+
+export type MitreFramework = 'enterprise' | 'atlas';
 
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
@@ -19,6 +23,18 @@ export class RuleCreateWizardPage {
   readonly aboutContinue: Locator;
   readonly scheduleContinue: Locator;
   readonly createWithoutEnabling: Locator;
+  readonly createAndEnable: Locator;
+  readonly aboutSeveritySelect: Locator;
+  readonly aboutRiskScoreInput: Locator;
+  readonly aboutReferenceUrls: Locator;
+  readonly aboutAddReferenceUrlButton: Locator;
+  readonly aboutFalsePositives: Locator;
+  readonly aboutAddFalsePositiveButton: Locator;
+  readonly aboutInvestigationNote: Locator;
+  readonly scheduleIntervalAmount: Locator;
+  readonly scheduleIntervalUnit: Locator;
+  readonly scheduleLookbackAmount: Locator;
+  readonly scheduleLookbackUnit: Locator;
   readonly queryInput: Locator;
   readonly advancedSettingsToggle: Locator;
   readonly mitreLoadingSpinner: Locator;
@@ -29,6 +45,9 @@ export class RuleCreateWizardPage {
   readonly savedThreatTactics: Locator;
   readonly savedThreatTechniques: Locator;
   readonly savedThreatSubtechniques: Locator;
+  readonly addMitreFrameworkButton: Locator;
+  readonly editAboutTab: Locator;
+  readonly editSubmitButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -42,6 +61,29 @@ export class RuleCreateWizardPage {
     this.aboutContinue = this.page.testSubj.locator('about-continue');
     this.scheduleContinue = this.page.testSubj.locator('schedule-continue');
     this.createWithoutEnabling = this.page.testSubj.locator('create-enabled-false');
+    this.createAndEnable = this.page.testSubj.locator('create-enable');
+    this.aboutSeveritySelect = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleSeverity')
+      .locator('[data-test-subj="select"]');
+    // The test subject is shared by the range slider and its number input
+    this.aboutRiskScoreInput = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleRiskScore-defaultRiskRange')
+      .and(this.page.locator('[type="number"]'));
+    const referenceUrls = this.page.testSubj.locator('detectionEngineStepAboutRuleReferenceUrls');
+    this.aboutReferenceUrls = referenceUrls.locator('input');
+    this.aboutAddReferenceUrlButton = referenceUrls.getByRole('button', { name: /add/i });
+    const falsePositives = this.page.testSubj.locator('detectionEngineStepAboutRuleFalsePositives');
+    this.aboutFalsePositives = falsePositives.locator('input');
+    this.aboutAddFalsePositiveButton = falsePositives.getByRole('button', { name: /add/i });
+    this.aboutInvestigationNote = this.page.testSubj
+      .locator('detectionEngineStepAboutRuleNote')
+      .locator('textarea');
+    const scheduleInterval = this.page.testSubj.locator('detectionEngineStepScheduleRuleInterval');
+    const scheduleLookback = this.page.testSubj.locator('detectionEngineStepScheduleRuleFrom');
+    this.scheduleIntervalAmount = scheduleInterval.locator('[data-test-subj="interval"]');
+    this.scheduleIntervalUnit = scheduleInterval.locator('[data-test-subj="timeType"]');
+    this.scheduleLookbackAmount = scheduleLookback.locator('[data-test-subj="interval"]');
+    this.scheduleLookbackUnit = scheduleLookback.locator('[data-test-subj="timeType"]');
     this.queryInput = this.page.testSubj
       .locator('defineRuleFormStepQueryEditor')
       .locator('[data-test-subj="queryInput"]')
@@ -61,6 +103,78 @@ export class RuleCreateWizardPage {
     this.savedThreatSubtechniques = aboutSection.locator(
       '[data-test-subj="threatSubtechniqueLink"]'
     );
+    this.addMitreFrameworkButton = this.page.testSubj.locator('addMitreFramework');
+    this.editAboutTab = this.page.testSubj.locator('edit-rule-about-tab');
+    this.editSubmitButton = this.page.testSubj.locator('ruleEditSubmitButton');
+  }
+
+  /** Locator for the MITRE picker section of one framework on the About step. */
+  mitreFrameworkSection(framework: MitreFramework): Locator {
+    return this.page.testSubj.locator(`mitreFrameworkSection-${framework}`);
+  }
+
+  /** Locator for one framework's threat block in the rule details About section. */
+  savedThreatFrameworkGroup(framework: MitreFramework): Locator {
+    return this.page.testSubj
+      .locator('aboutRule')
+      .locator(`[data-test-subj="threatFrameworkGroup-${framework}"]`);
+  }
+
+  /** Adds a framework section through the "Add framework" popover and waits for it to load. */
+  async addMitreFramework(framework: MitreFramework): Promise<void> {
+    await this.addMitreFrameworkButton.click();
+    await this.page.testSubj.locator(`addMitreFramework-${framework}`).click();
+    const section = this.mitreFrameworkSection(framework);
+    await section.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
+    await section
+      .locator('[data-test-subj="mitreAttackLoading"]')
+      .waitFor({ state: 'hidden', timeout: DATA_LOAD_TIMEOUT_MS });
+  }
+
+  /** Selects a tactic by id inside one framework section. */
+  async selectMitreTacticByIdInSection(framework: MitreFramework, tacticId: string): Promise<void> {
+    await this.page.components
+      .superSelect('mitreAttackTactic', this.mitreFrameworkSection(framework))
+      .selectOptionByValue(tacticId);
+  }
+
+  /** Clicks "Add technique" inside one framework section, then selects the technique by id. */
+  async addAndSelectMitreTechniqueByIdInSection(
+    framework: MitreFramework,
+    techniqueId: string
+  ): Promise<void> {
+    const section = this.mitreFrameworkSection(framework);
+    await section.locator('[data-test-subj="addMitreAttackTechnique"]').click();
+    await this.page.components
+      .superSelect('mitreAttackTechnique', section)
+      .selectOptionByValue(techniqueId);
+  }
+
+  /** Clicks "Add subtechnique" inside one framework section, then selects the subtechnique by id. */
+  async addAndSelectMitreSubtechniqueByIdInSection(
+    framework: MitreFramework,
+    subtechniqueId: string
+  ): Promise<void> {
+    const section = this.mitreFrameworkSection(framework);
+    await section.locator('[data-test-subj="addMitreAttackSubtechnique"]').click();
+    await this.page.components
+      .superSelect('mitreAttackSubtechnique', section)
+      .selectOptionByValue(subtechniqueId);
+  }
+
+  /** Opens the rule edit page on the About tab and waits for the name field. */
+  async gotoEditAbout(ruleId: string): Promise<void> {
+    await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
+    await this.editAboutTab.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+    await this.editAboutTab.click();
+    await this.aboutRuleName.waitFor({ state: 'visible' });
+  }
+
+  /** Renames the rule on the edit page, saves, and waits for the details page. */
+  async renameAndSaveEditedRule(name: string): Promise<void> {
+    await this.aboutRuleName.fill(name);
+    await this.editSubmitButton.click();
+    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
   /**
@@ -175,5 +289,65 @@ export class RuleCreateWizardPage {
     await this.page.components
       .superSelect('mitreAttackSubtechnique')
       .selectOptionByValue(subtechniqueId);
+  }
+
+  /** Picks a severity in the About step. */
+  async selectSeverity(severity: RuleSeverity): Promise<void> {
+    await this.aboutSeveritySelect.click();
+    await this.page.testSubj.locator(`severityOption-${severity}`).click();
+  }
+
+  async addTags(tagNames: readonly string[]): Promise<void> {
+    await this.page.components
+      .comboBox('input', this.page.testSubj.locator('detectionEngineStepAboutRuleTags'))
+      .setCustomSelectedOptions([...tagNames]);
+  }
+
+  /** Types each URL into the reference URLs list, adding a row for every one but the last. */
+  async addReferenceUrls(urls: readonly string[]): Promise<void> {
+    await this.fillRepeatableInput(this.aboutReferenceUrls, this.aboutAddReferenceUrlButton, urls);
+  }
+
+  /** Types each example into the false positives list, adding a row for every one but the last. */
+  async addFalsePositives(examples: readonly string[]): Promise<void> {
+    await this.fillRepeatableInput(
+      this.aboutFalsePositives,
+      this.aboutAddFalsePositiveButton,
+      examples
+    );
+  }
+
+  private async fillRepeatableInput(
+    inputs: Locator,
+    addButton: Locator,
+    values: readonly string[]
+  ): Promise<void> {
+    for (const [index, value] of values.entries()) {
+      const rows = await inputs.all();
+      await rows[index].fill(value);
+      if (index < values.length - 1) {
+        await addButton.click();
+        await expect.poll(() => inputs.count()).toBeGreaterThan(index + 1);
+      }
+    }
+  }
+
+  async setSchedule(params: {
+    interval: { amount: string; unit: string };
+    lookback: { amount: string; unit: string };
+  }): Promise<void> {
+    const { interval, lookback } = params;
+    await this.scheduleIntervalAmount.fill(interval.amount);
+    await this.scheduleIntervalUnit.selectOption(interval.unit);
+    await this.scheduleLookbackAmount.fill(lookback.amount);
+    await this.scheduleLookbackUnit.selectOption(lookback.unit);
+  }
+
+  /** Clicks "Create and enable rule" and waits for the app to open the created rule. */
+  async createAndEnableRule(): Promise<void> {
+    await this.createAndEnable.click();
+    // The page title also exists on the create page, so the URL is the reliable signal
+    await this.page.waitForURL(/\/rules\/id\//, { timeout: DATA_LOAD_TIMEOUT_MS });
+    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 }

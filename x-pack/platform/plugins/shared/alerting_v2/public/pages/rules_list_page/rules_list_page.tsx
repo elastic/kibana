@@ -16,7 +16,7 @@ import { UserCapabilities } from '../../services/user_capabilities';
 import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
@@ -48,7 +48,6 @@ export const RulesListPage = () => {
     confirmationModal,
     openCreateFlyout,
     openCreateBuilderFlyout,
-    openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
     isOpen: isAuthoringFlyoutOpen,
@@ -58,8 +57,8 @@ export const RulesListPage = () => {
     onDismiss: closeCreateOptionsFlyout,
   });
 
-  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const showBuildSequence = useAlertingV2ExperimentalFeatures();
   const { rulesLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
@@ -75,6 +74,10 @@ export const RulesListPage = () => {
   const onCreateWithAgentFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
+  };
+  const onBuildSequenceFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToSequenceBuilder();
   };
   const onCreateThresholdRuleFromOptionsFlyout = () => {
     openCreateBuilderFlyout('threshold');
@@ -163,7 +166,6 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
-          onBuildSequence={navigateToSequenceBuilder}
         />
         <UniversalAlertingIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
@@ -188,6 +190,7 @@ export const RulesListPage = () => {
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+          onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
         />
       ) : null}
       {flyout}

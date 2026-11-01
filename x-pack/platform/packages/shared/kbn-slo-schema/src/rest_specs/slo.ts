@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import {
   allOrAnyString,
   groupingsSchema,
@@ -14,35 +14,17 @@ import {
   sloDefinitionSchema,
   summarySchema,
 } from '../schema';
-import {
-  allOrAnyString as allOrAnyStringZod,
-  groupingsSchema as groupingsSchemaZod,
-  metaSchema as metaSchemaZod,
-  remoteSchema as remoteSchemaZod,
-  sloDefinitionSchema as sloDefinitionSchemaZod,
-  summarySchema as summarySchemaZod,
-} from '../schema/zod';
 import type { SLODefinitionResponse } from './routes/find_definition';
 
-const sloWithDataResponseSchema = t.intersection([
-  sloDefinitionSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema, instanceId: allOrAnyString }),
-  t.partial({
-    meta: metaSchema,
-    remote: remoteSchema,
-  }),
-]);
-
-// Zod twin — io-ts version stays alive until its last consumer (test_helpers/fixtures.ts) is updated.
-const sloWithDataResponseSchemaZod = sloDefinitionSchemaZod.extend({
-  summary: summarySchemaZod,
-  groupings: groupingsSchemaZod,
-  instanceId: allOrAnyStringZod,
-  meta: metaSchemaZod.optional(),
-  remote: remoteSchemaZod.optional(),
+const sloWithDataResponseSchema = sloDefinitionSchema.extend({
+  summary: summarySchema,
+  groupings: groupingsSchema,
+  instanceId: allOrAnyString,
+  meta: metaSchema.optional(),
+  remote: remoteSchema.optional(),
 });
 
-type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
+type SLOWithSummaryResponse = z.input<typeof sloWithDataResponseSchema>;
 
-export { sloWithDataResponseSchema, sloWithDataResponseSchemaZod };
+export { sloWithDataResponseSchema };
 export type { SLODefinitionResponse, SLOWithSummaryResponse };

@@ -25,7 +25,7 @@ export const registerGetUnreadStatusRoute = ({
     .addVersion(
       { version: NOTIFICATION_CENTER_API_VERSION, validate: false },
       async (_context, request, response) => {
-        const [{ dataStreams, userStorage }] = await core.getStartServices();
+        const [{ elasticsearch, userStorage }] = await core.getStartServices();
         const client = userStorage.asScoped(request);
         if (!client) {
           return response.forbidden({
@@ -41,7 +41,10 @@ export const registerGetUnreadStatusRoute = ({
           });
         }
 
-        const result = await queryUnreadStatus({ dataStreams, logger }, readState);
+        const result = await queryUnreadStatus(
+          { esClient: elasticsearch.client.asInternalUser, logger },
+          readState
+        );
         return response.ok({ body: result });
       }
     );

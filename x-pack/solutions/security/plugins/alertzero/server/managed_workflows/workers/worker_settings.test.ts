@@ -34,6 +34,9 @@ const TRIAGE_DEFAULT_EXTRAS = {
   autoCloseConfidenceScoreMinThreshold: 0.85,
   budgetPerHour: 1300,
   lookbackHours: 24,
+  minSeverity: 'low',
+  excludeBuildingBlocks: false,
+  excludedRuleTags: [],
 };
 
 const SCHEDULED_WORKER_IDS: string[] = [

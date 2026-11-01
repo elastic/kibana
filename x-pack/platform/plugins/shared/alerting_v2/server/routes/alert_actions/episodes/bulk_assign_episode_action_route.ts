@@ -19,4 +19,5 @@ export const BulkAssignEpisodeActionRoute = createBulkEpisodeActionRouteForType(
   bodySchema: bulkAssignEpisodeActionBodySchema,
   oasOperationObject: bulkAssignEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
 });

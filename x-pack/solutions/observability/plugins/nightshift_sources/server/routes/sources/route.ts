@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { isBoom } from '@hapi/boom';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   createSourceRequestSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
+  validateSourceQueryRequestSchema,
   type DeleteSourceResponse,
   type ListSourcesResponse,
   type SourceMutationResponse,
   type SourceWithHealth,
+  type ValidateSourceQueryResponse,
 } from '@kbn/nightshift-shared';
 import { createNightshiftSourcesServerRoute } from '../create_server_route';
 
@@ -64,6 +67,38 @@ const createSourceRoute = createNightshiftSourcesServerRoute({
     const client = await getSourcesClient({ request });
     const source = await client.create(params.body);
     return { source };
+  },
+});
+
+const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
+  endpoint: 'POST /internal/nightshift/sources/_validate',
+  options: {
+    access: 'internal',
+    summary: 'Validate a Nightshift source query',
+    description:
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A query create would reject comes back with `valid: false` and the reason.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      body: validateSourceQueryRequestSchema,
+    })
+  ),
+  handler: async ({ params, request, getSourcesClient }): Promise<ValidateSourceQueryResponse> => {
+    const client = await getSourcesClient({ request });
+    try {
+      const { type, indexExists } = await client.validateQuery(params.body);
+      return { valid: true, type, index_exists: indexExists };
+    } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 400) {
+        return { valid: false, error: error.message };
+      }
+      throw error;
+    }
   },
 });
 
@@ -183,6 +218,7 @@ const disableSourceRoute = createNightshiftSourcesServerRoute({
 export const sourcesRoutes = {
   ...listSourcesRoute,
   ...createSourceRoute,
+  ...validateSourceQueryRoute,
   ...getSourceRoute,
   ...updateSourceRoute,
   ...deleteSourceRoute,

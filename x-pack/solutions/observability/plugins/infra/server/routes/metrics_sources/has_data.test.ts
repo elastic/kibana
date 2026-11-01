@@ -208,8 +208,21 @@ describe('getHasData', () => {
 
       await getHasData({ infraMetricsClient: client, source: 'all', logger });
 
-      // One exists clause per supported entity type.
-      expect(search.mock.calls[0][0].query.bool.should).toHaveLength(7);
+      // One exists clause per supported entity type, plus the SemConv pod id
+      // (`k8s.pod.uid`) so OTel/SemConv-only clusters are not shown onboarding.
+      expect(search.mock.calls[0][0].query.bool.should).toHaveLength(8);
+    });
+
+    it('matches SemConv pods (k8s.pod.uid) for source=all so OTel-only clusters report data', async () => {
+      const { client, search } = createClient(makeHitsResponse(1));
+
+      await getHasData({ infraMetricsClient: client, source: 'all', logger });
+
+      const should = search.mock.calls[0][0].query.bool.should;
+      // The ECS pod id alone leaves SemConv-only clusters stuck on onboarding;
+      // the SemConv identity must be ORed in alongside it.
+      expect(should).toEqual(expect.arrayContaining([{ exists: { field: 'kubernetes.pod.uid' } }]));
+      expect(should).toEqual(expect.arrayContaining([{ exists: { field: 'k8s.pod.uid' } }]));
     });
 
     it('produces no entity clauses when source is omitted', async () => {

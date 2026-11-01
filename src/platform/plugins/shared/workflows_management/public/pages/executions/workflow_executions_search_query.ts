@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 const escapeKqlValue = (value: string): string => {
-  if (/[\s:()*"\\]/.test(value)) {
+  if (value === '' || /[\s:()*"\\]/.test(value)) {
     return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }
   return value;
@@ -26,7 +26,10 @@ const filterToKqlClause = (filter: Filter): string | undefined => {
 
   switch (type) {
     case 'phrase': {
-      const v = value ?? '';
+      // The unformatted value lives in meta.params.query; meta.value is only a display value
+      // and is not set for filters created from the search bar's filter editor.
+      const v = (params as { query?: unknown } | undefined)?.query ?? value;
+      if (v == null) return undefined;
       return `${prefix}${key}: ${escapeKqlValue(String(v))}`;
     }
     case 'phrases': {
@@ -75,6 +78,6 @@ export const isWorkflowExecutionsIndexNotFoundError = (error: unknown): boolean 
   getElasticsearchErrorType(error) === 'index_not_found_exception';
 
 export const getWorkflowExecutionsFetchErrorMessage = (): string =>
-  i18n.translate('workflowsManagement.executionsPage.fetchError', {
+  i18n.translate('workflows.executionsPage.fetchError', {
     defaultMessage: 'Failed to load executions',
   });

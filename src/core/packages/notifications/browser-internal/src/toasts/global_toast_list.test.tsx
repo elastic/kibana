@@ -27,6 +27,7 @@ const sharedProps = {
   toasts$: EMPTY,
   dismissToast: jest.fn(),
   reportEvent: toastsTelemetry.start({ analytics: mockAnalytics }),
+  notifyScreenReader: jest.fn(),
 };
 
 function RenderToastList(props: Partial<ComponentProps<typeof GlobalToastList>> = {}) {

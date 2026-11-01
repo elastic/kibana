@@ -24,8 +24,8 @@ export const deleteAllAttachmentsRoute = createCasesRoute({
     }),
   },
   routerOptions: {
-    // TODO(security-team#15572): flip to 'public' once this API is ready to ship.
-    access: 'internal',
+    access: 'public',
+    availability: { stability: 'tech_preview', since: '9.6.0' },
     summary: `Delete all case attachments`,
     tags: ['oas-tag:cases'],
     description: 'Deletes all attachments from a case.',

@@ -17,6 +17,11 @@ export const THREAT_FRAMEWORK_NAME: Record<MitreFramework, string> = {
   atlas: 'MITRE ATLAS',
 };
 
+/** Framework string carried by MITRE ATT&CK Enterprise threat entries on rules and alerts. */
+export const MITRE_ATTACK_FRAMEWORK = THREAT_FRAMEWORK_NAME.enterprise;
+/** Framework string carried by MITRE ATLAS threat entries on rules and alerts. */
+export const MITRE_ATLAS_FRAMEWORK = THREAT_FRAMEWORK_NAME.atlas;
+
 const MITRE_FRAMEWORK_BY_THREAT_NAME = new Map<string, MitreFramework>(
   (Object.entries(THREAT_FRAMEWORK_NAME) as Array<[MitreFramework, string]>).map(
     ([framework, name]) => [name, framework]

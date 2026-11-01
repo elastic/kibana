@@ -24,7 +24,8 @@ const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
   {
     id: CommandId.Sml,
     scheme: 'sml',
-    sequence: '@',
+    sequence: '#',
+    legacySequences: ['@'],
     name: semanticKnowledgeCommandName,
     menuComponent: Sml,
     experimental: true,
@@ -49,7 +50,7 @@ export const getCommandDefinitionByScheme = (scheme: string) => {
 /**
  * Returns the list of command definitions available based on feature flags.
  * The `/` skill command is always available (GA).
- * The `@` SML command lives inside Agent Builder, so it requires only the
+ * The `#` SML command lives inside Agent Builder, so it requires only the
  * Agent Builder experimental flag.
  */
 export const useAvailableCommandDefinitions = (): readonly CommandDefinition[] => {

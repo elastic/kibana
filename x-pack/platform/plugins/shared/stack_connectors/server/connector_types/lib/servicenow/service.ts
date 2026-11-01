@@ -15,6 +15,7 @@ import type {
 } from '@kbn/connector-schemas/servicenow';
 import type {
   ExternalService,
+  ExternalServiceChoices,
   ExternalServiceParamsCreate,
   ExternalServiceParamsUpdate,
   ImportSetApiResponse,
@@ -39,6 +40,30 @@ export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
 const TABLE_GET: RequestContext = { endpoint: 'table', method: 'get' };
 const HEALTH_GET: RequestContext = { endpoint: 'health', method: 'get' };
+
+interface TableChoice extends ExternalServiceChoices {
+  name?: string;
+}
+
+/**
+ * Choices are fetched from both the parent `task` table and the specific table. ServiceNow does not
+ * merge the two by value: once the specific table defines any choice for a field, the `task` choices
+ * for that field are ignored. The `task` choices are only used for fields the specific table does not define.
+ */
+const selectTableChoices = (choices: TableChoice[], table: string): ExternalServiceChoices[] => {
+  const elementsDefinedByTable = new Set(
+    choices.filter(({ name }) => name === table).map(({ element }) => element)
+  );
+
+  return choices
+    .filter(({ name, element }) => name === table || !elementsDefinedByTable.has(element))
+    .map(({ label, value, dependent_value, element }) => ({
+      label,
+      value,
+      dependent_value,
+      element,
+    }));
+};
 
 export const createExternalService: ServiceFactory = ({
   credentials,
@@ -104,7 +129,7 @@ export const createExternalService: ServiceFactory = ({
       .slice(1)
       .reduce((acc, field) => `${acc}^ORelement=${field}`, `element=${fields[0]}`);
 
-    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element`;
+    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}^language=en&sysparm_fields=label,value,dependent_value,element,name`;
   };
 
   const checkInstance = (res: AxiosResponse) => {
@@ -413,7 +438,7 @@ export const createExternalService: ServiceFactory = ({
         connectorUsageCollector,
       });
       checkInstance(res);
-      return res.data.result;
+      return selectTableChoices(res.data.result, table);
     } catch (error) {
       throw addServiceMessageToError(error, 'Unable to get choices', TABLE_GET);
     }

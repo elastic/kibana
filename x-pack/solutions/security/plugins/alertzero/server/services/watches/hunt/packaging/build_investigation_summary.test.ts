@@ -32,7 +32,15 @@ const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   allEventsActionable: false,
   hasProcessBearingEvent: false,
   manualRemediation: [],
-  hosts: [{ name: 'WIN-ANALYST01', enrolled: true, agentId: 'a1', capabilities: [] }],
+  hosts: [
+    {
+      name: 'WIN-ANALYST01',
+      enrolled: true,
+      agentId: 'a1',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
+  ],
   processSelectors: [],
   evidence: { tier1HitCount: 0, tier2Confirmed: [{ techniqueId: 'T1078.004', rowCount: 2 }] },
   ...overrides,
@@ -67,6 +75,29 @@ describe('buildInvestigationSummary', () => {
   it('lists the full user names', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Users: escalated-role, dev-user'
+    );
+  });
+
+  it('names the implicated identities and says criticality is left to the analyst', () => {
+    const summary = buildInvestigationSummary({
+      state: state({ services: ['svc-role'] }),
+      decided,
+    });
+    expect(summary).toContain('Services: svc-role');
+    expect(summary).toContain(
+      'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
+    );
+  });
+
+  it('adds no criticality note when nothing was confirmed', () => {
+    expect(
+      buildInvestigationSummary({ state: state({ hasConfirmedHit: false }), decided })
+    ).not.toContain('Asset criticality');
+  });
+
+  it('adds no criticality note when no user or service is implicated', () => {
+    expect(buildInvestigationSummary({ state: state({ users: [] }), decided })).not.toContain(
+      'Asset criticality'
     );
   });
 

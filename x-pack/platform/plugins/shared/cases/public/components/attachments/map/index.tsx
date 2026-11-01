@@ -11,7 +11,7 @@ import {
   MapAttachmentPayloadSchema,
   type MapAttachmentData,
   type MapAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/map/v2';
+} from '../../../../common/types/domain/attachment/map/v2';
 import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
@@ -75,6 +75,7 @@ export const getMapAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: MapAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.MAPS_COUNT(count),
     schema: MapAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),
