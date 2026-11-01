@@ -1010,6 +1010,15 @@ export class SyntheticsPrivateLocation {
     };
   }
 
+  async getAgentPolicyRevision(agentPolicyId: string): Promise<number | undefined> {
+    const [agentPolicy] = await this.server.fleet.agentPolicyService.getByIds(
+      this.server.coreStart.savedObjects.createInternalRepository(),
+      [{ id: agentPolicyId, spaceId: ALL_SPACES_ID }],
+      { ignoreMissing: true, fields: ['revision'] }
+    );
+    return agentPolicy?.revision;
+  }
+
   async bumpAgentPolicyRevision(agentPolicyId: string): Promise<void> {
     await bumpAgentPolicyRevision(this.server, agentPolicyId);
   }
