@@ -1242,7 +1242,11 @@ describe('optimistic concurrency on observable writes', () => {
       const result = await applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs);
 
       expect(result).toBeUndefined();
+      // The lost attempt already wrote its own copy to the index, so the case is flagged for the sync.
       expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockCaseService.flagObservablesSyncPending).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+      });
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
 
@@ -1258,7 +1262,11 @@ describe('optimistic concurrency on observable writes', () => {
       ).catch((e) => e);
 
       expect(Boom.isBoom(error, 409)).toBe(true);
+      // Three versioned attempts, then the pending flag for what they left in the index.
       expect(mockCaseService.patchCase).toHaveBeenCalledTimes(3);
+      expect(mockCaseService.flagObservablesSyncPending).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+      });
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
 
@@ -1270,7 +1278,12 @@ describe('optimistic concurrency on observable writes', () => {
         applyObservablesToCase(caseSO.id, [newObservablePost], mockClientArgs)
       ).rejects.toThrow('write failed');
 
+      // One versioned attempt, no retry, then the case is flagged for the sync.
       expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockCaseService.patchCase.mock.calls[0][0].version).toBe('v1');
+      expect(mockCaseService.flagObservablesSyncPending).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+      });
     });
 
     it('retries bulkDeleteObservables against the refreshed case', async () => {
@@ -1293,6 +1306,7 @@ describe('optimistic concurrency on observable writes', () => {
       expect(secondWrite.updatedAttributes).toEqual({
         observables: [mockObservable2, mockObservable3],
         total_observables: 2,
+        observables_sync_pending: true,
       });
       expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
         userAction: expect.objectContaining({
@@ -1318,7 +1332,11 @@ describe('optimistic concurrency on observable writes', () => {
         )
       ).rejects.toThrow(`observable id ${mockObservable.id} not found`);
 
+      // The lost attempt already mirrored the edit, so the case is flagged for the sync.
       expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockCaseService.flagObservablesSyncPending).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+      });
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
 
@@ -1362,6 +1380,7 @@ describe('optimistic concurrency on observable writes', () => {
       expect(secondWrite.updatedAttributes).toEqual({
         observables: [mockObservable2],
         total_observables: 1,
+        observables_sync_pending: true,
       });
       expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
     });
@@ -1376,6 +1395,9 @@ describe('optimistic concurrency on observable writes', () => {
         deleteObservable(caseSO.id, mockObservable.id, mockClientArgs, mockCasesClient)
       ).rejects.toThrow(`observable id ${mockObservable.id} not found`);
 
+      expect(mockCaseService.flagObservablesSyncPending).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+      });
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
   });
@@ -1527,6 +1549,158 @@ describe('observables index mirror', () => {
         expect.objectContaining({
           observables: [expect.objectContaining({ value: 'fits' })],
         })
+      );
+    });
+  });
+
+  describe('when a write loses the race for the case version', () => {
+    const conflictError = () => SavedObjectsErrorHelpers.createConflictError('cases', caseSO.id);
+    const withObservables = (version: string, observables: Observable[]) => ({
+      ...caseSO,
+      version,
+      attributes: { ...caseSO.attributes, observables },
+    });
+
+    // Failure scenario: the sync task removed the mirrored document while this write was in flight
+    // and its versioned update made this write conflict. Only a redone index write brings it back.
+    it('writes to the index again on the next attempt, for what that attempt adds', async () => {
+      mockCaseService.getCase
+        .mockResolvedValueOnce(withObservables('v1', []))
+        .mockResolvedValueOnce(withObservables('v2', [mockObservable2]));
+      mockCaseService.patchCase
+        .mockRejectedValueOnce(conflictError())
+        .mockResolvedValueOnce(caseSOWithObservables);
+
+      await applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs);
+
+      expect(observablesService.createObservables).toHaveBeenCalledTimes(2);
+      const [first, second] = observablesService.createObservables.mock.calls.map(([args]) => args);
+      expect(first.observables).toEqual([expect.objectContaining({ value: '10.0.0.1' })]);
+      expect(second.observables).toEqual([expect.objectContaining({ value: '10.0.0.1' })]);
+      expect(observablesService.createObservables.mock.invocationCallOrder[1]).toBeLessThan(
+        mockCaseService.patchCase.mock.invocationCallOrder[1]
+      );
+    });
+
+    // Failure scenario: a concurrent add filled the case between the attempts, so the retry adds
+    // fewer observables than the first attempt already wrote to the index.
+    it('flags the case when the retry keeps fewer observables than the lost attempt wrote', async () => {
+      const filler = (count: number, prefix: string): Observable[] =>
+        Array.from({ length: count }, (_, index) => ({
+          ...mockObservable,
+          id: `${prefix}-${index}`,
+          value: `${prefix}-${index}`,
+        }));
+      mockCaseService.getCase
+        .mockResolvedValueOnce(withObservables('v1', filler(MAX_OBSERVABLES_PER_CASE - 2, 'a')))
+        .mockResolvedValueOnce(withObservables('v2', filler(MAX_OBSERVABLES_PER_CASE - 1, 'b')));
+      mockCaseService.patchCase
+        .mockRejectedValueOnce(conflictError())
+        .mockResolvedValueOnce(caseSOWithObservables);
+
+      const result = await applyObservablesToCase(
+        caseSO.id,
+        [
+          { ...newObservable, value: 'first' },
+          { ...newObservable, value: 'second' },
+        ],
+        mockClientArgs
+      );
+
+      const [first, second] = observablesService.createObservables.mock.calls.map(([args]) => args);
+      expect(first.observables).toHaveLength(2);
+      expect(second.observables).toEqual([expect.objectContaining({ value: 'first' })]);
+      expect(mockCaseService.patchCase.mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          version: 'v2',
+          updatedAttributes: expect.objectContaining({
+            total_observables: MAX_OBSERVABLES_PER_CASE,
+            observables_sync_pending: true,
+          }),
+        })
+      );
+      expect(result?.newlyAddedObservables).toHaveLength(1);
+    });
+
+    it('does not flag the case when the first attempt wins', async () => {
+      mockCaseService.getCase.mockResolvedValueOnce(withObservables('v1', []));
+
+      await applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs);
+
+      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(patchedAttributes()).not.toHaveProperty('observables_sync_pending');
+    });
+
+    // Failure scenario: the case was deleted while the write was in flight. The sync removes the
+    // documents of deleted cases, so there is nothing to flag.
+    it('does not flag a case that was deleted during the write', async () => {
+      mockCaseService.getCase.mockResolvedValueOnce(withObservables('v1', []));
+      mockCaseService.patchCase.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('cases', caseSO.id)
+      );
+
+      await expect(
+        applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs)
+      ).rejects.toThrow();
+
+      expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
+      expect(mockCaseService.flagObservablesSyncPending).not.toHaveBeenCalled();
+    });
+
+    // Failure scenario: Elasticsearch times out when the case is read again for a retry. The lost
+    // attempt already wrote to the index, so the case must still be flagged for the sync.
+    it('flags the case when it cannot be read again for a retry', async () => {
+      mockCaseService.getCase
+        .mockResolvedValueOnce(withObservables('v1', []))
+        .mockRejectedValueOnce(new Error('timeout'));
+      mockCaseService.patchCase.mockRejectedValueOnce(conflictError());
+
+      await expect(
+        applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs)
+      ).rejects.toThrow('timeout');
+
+      expect(mockCaseService.flagObservablesSyncPending).toHaveBeenCalledWith({
+        caseId: caseSO.id,
+      });
+    });
+
+    it('does not flag the case when it was deleted before the retry', async () => {
+      mockCaseService.getCase
+        .mockResolvedValueOnce(withObservables('v1', []))
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('cases', 'x'));
+      mockCaseService.patchCase.mockRejectedValueOnce(conflictError());
+
+      await expect(
+        applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs)
+      ).rejects.toThrow();
+
+      expect(mockCaseService.flagObservablesSyncPending).not.toHaveBeenCalled();
+    });
+
+    it('does not flag the case when the first read fails, before anything was written', async () => {
+      mockCaseService.getCase.mockRejectedValueOnce(new Error('timeout'));
+
+      await expect(
+        applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs)
+      ).rejects.toThrow('timeout');
+
+      expect(mockCaseService.flagObservablesSyncPending).not.toHaveBeenCalled();
+    });
+
+    // Failure scenario: Elasticsearch is down, so flagging the case fails too. The original error is
+    // reported and the failed flag is logged, so an operator knows the index can differ.
+    it('reports the original error and logs when the case cannot be flagged either', async () => {
+      mockCaseService.getCase.mockResolvedValueOnce(withObservables('v1', []));
+      mockCaseService.patchCase.mockRejectedValueOnce(new Error('write failed'));
+      mockCaseService.flagObservablesSyncPending.mockRejectedValueOnce(new Error('flag failed'));
+
+      await expect(
+        applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs)
+      ).rejects.toThrow('write failed');
+
+      expect(mockClientArgs.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(`Failed to flag case ${caseSO.id} as pending sync`),
+        { error: { stack_trace: expect.any(String) } }
       );
     });
   });

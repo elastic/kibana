@@ -199,6 +199,36 @@ describe('CasesService', () => {
   });
 
   describe('execution', () => {
+    describe('flagObservablesSyncPending', () => {
+      // Failure scenario: the flag is written after a write ran out of retries, so the case the caller
+      // holds is out of date. Sending its references would undo a connector change made in between.
+      it('writes only the flag, without a version or references', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+
+        await service.flagObservablesSyncPending({ caseId: 'case-1' });
+
+        expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toEqual([
+          CASE_SAVED_OBJECT,
+          'case-1',
+          { observables_sync_pending: true },
+        ]);
+      });
+
+      it('logs and rethrows a failure', async () => {
+        unsecuredSavedObjectsClient.update.mockRejectedValue(new Error('boom'));
+
+        await expect(service.flagObservablesSyncPending({ caseId: 'case-1' })).rejects.toThrow(
+          'boom'
+        );
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Error on flagging case case-1 as pending observables sync')
+        );
+      });
+    });
+
     describe('bulkCreateCases', () => {
       it('return cases with the SO errors correctly', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({

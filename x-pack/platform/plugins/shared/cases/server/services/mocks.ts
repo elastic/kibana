@@ -68,6 +68,7 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     createCase: jest.fn(),
     bulkCreateCases: jest.fn(),
     patchCase: jest.fn(),
+    flagObservablesSyncPending: jest.fn().mockResolvedValue(undefined),
     patchCases: jest.fn(),
     findCasesGroupedByID: jest.fn(),
     searchCasesGroupedByID: jest.fn(),

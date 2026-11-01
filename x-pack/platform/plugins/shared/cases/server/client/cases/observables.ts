@@ -74,7 +74,7 @@ interface ObservablesWrite<TResult> {
 interface ObservablesWriteArgs<TResult, TComputed extends ObservablesWrite<TResult> | undefined> {
   caseId: string;
   prefetchedCase?: CaseSavedObjectTransformed;
-  caseService: CasesClientArgs['services']['caseService'];
+  clientArgs: CasesClientArgs;
   compute: (retrievedCase: CaseSavedObjectTransformed) => TComputed;
 }
 
@@ -93,6 +93,12 @@ interface ObservablesWriteOutcome<TResult> {
  * version conflict it causes brings the document back. `compute` returns undefined when there is
  * nothing to write.
  *
+ * An attempt that wrote to the index and then lost the race can leave documents that no later
+ * attempt keeps, for example observables that no longer fit under the cap, or its own copy of an
+ * observable another writer added with a different id. Every write after such an attempt flags the
+ * case so the sync task makes the index match the case again. So does a write whose case update
+ * fails after its index write.
+ *
  * The case is not re-authorized on a re-read: authorization ran on the first read and the owner
  * of a case cannot change.
  */
@@ -105,17 +111,34 @@ function writeObservablesWithRetry<TResult>(
 async function writeObservablesWithRetry<TResult>({
   caseId,
   prefetchedCase,
-  caseService,
+  clientArgs,
   compute,
 }: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>): Promise<
   ObservablesWriteOutcome<TResult> | undefined
 > {
+  const { caseService } = clientArgs.services;
+  let indexTouchedByLostAttempt = false;
+
   for (let attempt = 1; attempt <= MAX_OBSERVABLES_WRITE_ATTEMPTS; attempt++) {
     const retrievedCase =
-      attempt === 1 && prefetchedCase ? prefetchedCase : await caseService.getCase({ id: caseId });
+      attempt === 1 && prefetchedCase
+        ? prefetchedCase
+        : await readCaseForAttempt({ clientArgs, caseId, indexTouchedByLostAttempt });
 
-    const write = compute(retrievedCase);
+    let write: ObservablesWrite<TResult> | undefined;
+    try {
+      write = compute(retrievedCase);
+    } catch (error) {
+      if (indexTouchedByLostAttempt) {
+        await flagCasePendingSync({ clientArgs, caseId });
+      }
+      throw error;
+    }
+
     if (!write) {
+      if (indexTouchedByLostAttempt) {
+        await flagCasePendingSync({ clientArgs, caseId });
+      }
       return;
     }
 
@@ -130,21 +153,80 @@ async function writeObservablesWithRetry<TResult>({
           observables: write.observables,
           total_observables: write.observables.length,
           ...syncAttributes,
+          ...(indexTouchedByLostAttempt ? { observables_sync_pending: true } : {}),
         },
       });
 
       return { retrievedCase, patchedCase, result: write.result };
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        // A deleted case has nothing left to flag: the sync removes the documents of deleted cases.
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+          await flagCasePendingSync({ clientArgs, caseId });
+        }
         throw error;
       }
+      indexTouchedByLostAttempt = true;
     }
   }
+
+  await flagCasePendingSync({ clientArgs, caseId });
 
   throw Boom.conflict(
     `The observables of case ${caseId} were modified concurrently ${MAX_OBSERVABLES_WRITE_ATTEMPTS} times in a row. Retry the request.`
   );
 }
+
+/**
+ * Reads the case again for a retry. When an earlier attempt already wrote to the index and the read
+ * fails, the case is flagged before the error is rethrown, so the sync task repairs what that attempt
+ * left. A deleted case needs no flag: the sync removes the documents of deleted cases.
+ */
+const readCaseForAttempt = async ({
+  clientArgs,
+  caseId,
+  indexTouchedByLostAttempt,
+}: {
+  clientArgs: CasesClientArgs;
+  caseId: string;
+  indexTouchedByLostAttempt: boolean;
+}): Promise<CaseSavedObjectTransformed> => {
+  try {
+    return await clientArgs.services.caseService.getCase({ id: caseId });
+  } catch (error) {
+    if (indexTouchedByLostAttempt && !SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+      await flagCasePendingSync({ clientArgs, caseId });
+    }
+    throw error;
+  }
+};
+
+/**
+ * Flags a case for the sync task after a write that may have left the observables index different
+ * from the case. Only the flag is written, without a version: writers only ever set the flag, and the
+ * sync task clears it with a versioned update once it has made the index match the case.
+ */
+const flagCasePendingSync = async ({
+  clientArgs,
+  caseId,
+}: {
+  clientArgs: CasesClientArgs;
+  caseId: string;
+}): Promise<void> => {
+  const {
+    services: { caseService },
+    logger,
+  } = clientArgs;
+
+  try {
+    await caseService.flagObservablesSyncPending({ caseId });
+  } catch (error) {
+    logger.error(
+      `[observables] Failed to flag case ${caseId} as pending sync after an observable write that did not complete. The observables index can differ from the case until the next full sync pass. Error: ${error}`,
+      { error: { stack_trace: error instanceof Error ? error.stack : undefined } }
+    );
+  }
+};
 
 /**
  * License-agnostic core that dedupes, caps, persists, and records a user action
@@ -167,7 +249,7 @@ export const applyObservablesToCase = async (
   source: ObservableSource = getObservableSource(clientArgs.clientSource)
 ) => {
   const {
-    services: { caseService, userActionService, observablesService },
+    services: { userActionService, observablesService },
     user,
     logger,
     spaceId,
@@ -180,7 +262,7 @@ export const applyObservablesToCase = async (
   const written = await writeObservablesWithRetry({
     caseId,
     prefetchedCase,
-    caseService,
+    clientArgs,
     compute: (retrievedCase) => {
       const currentObservables = retrievedCase.attributes.observables ?? [];
       // Build a key-set from existing observables so we never overwrite or collapse
@@ -375,7 +457,7 @@ export const updateObservable = async (
     const written = await writeObservablesWithRetry({
       caseId,
       prefetchedCase: retrievedCase,
-      caseService,
+      clientArgs,
       compute: (currentCase) => {
         const currentObservables = currentCase.attributes.observables ?? [];
 
@@ -486,7 +568,7 @@ export const deleteObservable = async (
     const { retrievedCase: latestCase } = await writeObservablesWithRetry({
       caseId,
       prefetchedCase: retrievedCase,
-      caseService,
+      clientArgs,
       compute: (currentCase) => {
         const updatedObservables = currentCase.attributes.observables.filter(
           (observable) => observable.id !== observableId
@@ -636,7 +718,7 @@ export const bulkDeleteObservables = async (
   } = await writeObservablesWithRetry({
     caseId: paramArgs.caseId,
     prefetchedCase: retrievedCase,
-    caseService,
+    clientArgs,
     compute: (currentCase) => {
       const currentObservables = currentCase.attributes.observables ?? [];
       const currentIdSet = new Set(currentObservables.map(({ id }) => id));
