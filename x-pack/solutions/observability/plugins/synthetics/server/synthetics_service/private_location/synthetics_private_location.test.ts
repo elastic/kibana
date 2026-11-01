@@ -488,6 +488,9 @@ describe('SyntheticsPrivateLocation', () => {
     expect(deleteMock).not.toHaveBeenCalled();
   });
 
+  const checkedInAgents = (...ids: string[]) =>
+    ids.map((id) => ({ id, last_checkin: new Date().toISOString() }));
+
   describe('generateNewPolicy condition sharding', () => {
     const conditionLocation = {
       id: 'condition-location',
@@ -498,6 +501,182 @@ describe('SyntheticsPrivateLocation', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+
+    it.each([
+      ['a new monitor gets no pin', 'http', ['agent-a'], [], undefined, undefined],
+      ['an existing pin is kept', 'http', ['agent-a'], [], 'agent-a', agentIdCondition('agent-a')],
+      ['a browser on a complete agent gets no pin', 'browser', ['c'], ['c'], undefined, undefined],
+      [
+        'a browser without a complete agent stays parked',
+        'browser',
+        ['basic'],
+        [],
+        undefined,
+        UNASSIGNED_CONDITION,
+      ],
+    ])(
+      'with a single enrolled agent, %s',
+      async (_, type, agentIds, completeAgentIds, pinned, expected) => {
+        const config = (
+          type === 'browser' ? { ...dummyBrowserConfig, id: 'browser-id' } : testConfig
+        ) as HeartbeatConfig;
+
+        const policy = await new SyntheticsPrivateLocation(serverMock).generateNewPolicy(
+          config,
+          conditionLocation,
+          testMonitorPolicy,
+          'default',
+          {},
+          [],
+          undefined,
+          undefined,
+          { agentIds, completeAgentIds },
+          pinned ? agentIdCondition(pinned) : undefined,
+          'active'
+        );
+
+        expect(policy?.condition).toBe(expected);
+      }
+    );
+
+    it('pins a browser monitor when the only checked-in agent cannot run it', async () => {
+      const browserConfig = {
+        ...dummyBrowserConfig,
+        id: 'browser-id',
+      } as unknown as HeartbeatConfig;
+
+      const policy = await new SyntheticsPrivateLocation(serverMock).generateNewPolicy(
+        browserConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        {
+          agentIds: ['basic', 'offline-complete'],
+          completeAgentIds: ['offline-complete'],
+          checkedInAgentIds: ['basic'],
+        },
+        undefined,
+        'active'
+      );
+
+      expect(policy?.condition).toBe(agentIdCondition('offline-complete'));
+    });
+
+    it('does not pin when the second enrolled agent is an offline leftover', async () => {
+      const listAgents = jest.fn().mockResolvedValue({
+        agents: [
+          ...checkedInAgents('agent-a'),
+          { id: 'old-agent', last_checkin: new Date(Date.now() - 60 * 60_000).toISOString() },
+        ],
+        total: 2,
+      });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          licensing: enterpriseLicensing,
+          taskManager: { get: jest.fn().mockResolvedValue({ state: {} }) },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const bulkCreate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [], failed: [] });
+
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: { ...testConfig, locations: [conditionLocation] }, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      expect(bulkCreate.mock.calls[0][0].newPolicies[0].condition).toBeUndefined();
+    });
+
+    it('reads the agent policy revision wherever the agent policy lives', async () => {
+      const getByIds = jest.fn().mockResolvedValue([{ id: 'ap-1', revision: 7 }]);
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: { ...serverMock.fleet, agentPolicyService: { getByIds } },
+      } as unknown as SyntheticsServerSetup);
+
+      await expect(syntheticsPrivateLocation.getAgentPolicyRevision('ap-1')).resolves.toBe(7);
+      expect(getByIds).toHaveBeenCalledWith(expect.anything(), [{ id: 'ap-1', spaceId: '*' }], {
+        ignoreMissing: true,
+        fields: ['revision'],
+      });
+    });
+
+    it('does not count parking a browser monitor as a first pin', async () => {
+      jest.spyOn(PackagePolicyService.prototype, 'listByAgentPolicy').mockResolvedValue([
+        {
+          id: 'browser-loc-1',
+          spaceIds: ['default'],
+          version: 'WzAsMV0=',
+          revision: 1,
+          name: 'browser-loc-1',
+          policy_ids: ['ap-1'],
+          inputs: [{ type: 'synthetics/browser', enabled: true }],
+        },
+      ]);
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a', 'agent-b'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(
+        bulkUpdateInSpace.mock.calls[0][0].policiesToUpdate[0].update.attributes.condition
+      ).toBe(UNASSIGNED_CONDITION);
+      expect(result.newlyPinned).toBe(0);
+    });
+
+    it('counts only landed first pins as newly pinned', async () => {
+      const pkgPolicy = (id: string, condition?: string) => ({
+        id,
+        condition,
+        spaceIds: ['default'],
+        version: 'WzAsMV0=',
+        revision: 1,
+        name: id,
+        policy_ids: ['ap-1'],
+        inputs: [{ type: 'synthetics/http', enabled: true }],
+      });
+      jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue([
+          pkgPolicy('moved-loc-1', agentIdCondition('gone-agent')),
+          pkgPolicy('first-loc-1'),
+          pkgPolicy('rejected-loc-1'),
+        ]);
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([{ update: { id: 'rejected-loc-1' } }] as never);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a', 'agent-b'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(result).toEqual(expect.objectContaining({ moved: 2, newlyPinned: 1 }));
     });
 
     it('keeps the single agent policy binding and assigns a new monitor to one enrolled agent', async () => {
@@ -883,7 +1062,9 @@ describe('SyntheticsPrivateLocation', () => {
 
     it('stamps agent conditions when editing monitors onto a newly sharded location', async () => {
       const policyId = `testId-${conditionLocation.id}`;
-      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const listAgents = jest
+        .fn()
+        .mockResolvedValue({ agents: checkedInAgents('agent-a', 'agent-b'), total: 2 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
@@ -921,7 +1102,7 @@ describe('SyntheticsPrivateLocation', () => {
           policiesToUpdate: [
             expect.objectContaining({
               id: policyId,
-              condition: agentIdCondition('agent-a'),
+              condition: assignAgentById(testConfig.id, ['agent-a', 'agent-b'])?.condition,
             }),
           ],
         })
@@ -1175,6 +1356,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result.get('condition-location')).toEqual({
         agentIds: ['basic', 'complete', 'missing-flag'],
         completeAgentIds: ['complete'],
+        checkedInAgentIds: [],
       });
     });
 
@@ -1281,7 +1463,9 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('uses an enrolled agent condition when inspecting a scalable location', async () => {
-      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const listAgents = jest
+        .fn()
+        .mockResolvedValue({ agents: checkedInAgents('agent-a', 'agent-b'), total: 2 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
@@ -1309,18 +1493,22 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(inspect).toHaveBeenCalledWith(
         expect.objectContaining({
-          packagePolicy: expect.objectContaining({ condition: agentIdCondition('agent-a') }),
+          packagePolicy: expect.objectContaining({
+            condition: assignAgentById(testConfig.id, ['agent-a', 'agent-b'])?.condition,
+          }),
         })
       );
     });
 
     it.each([
-      ['enterprise', agentIdCondition('agent-a')],
-      ['trial', agentIdCondition('agent-a')],
+      ['enterprise', assignAgentById('testId', ['agent-a', 'agent-b'])?.condition],
+      ['trial', assignAgentById('testId', ['agent-a', 'agent-b'])?.condition],
       ['platinum', undefined],
       ['basic', undefined],
     ] as const)('with a %s license, sets the create condition to %s', async (type, expected) => {
-      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const listAgents = jest
+        .fn()
+        .mockResolvedValue({ agents: checkedInAgents('agent-a', 'agent-b'), total: 2 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {

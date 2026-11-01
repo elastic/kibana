@@ -8,8 +8,13 @@
 import type { PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyPartialUpdate } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
-import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
+import {
+  agentIdCondition,
+  agentIdFromCondition,
+  configIdOf,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
+import { getMonitorCostMib, UNASSIGNED_AGENT_ID, type MonitorPlacement } from './assign_shards';
 
 export { configIdOf };
 
@@ -172,11 +177,18 @@ export const toConditionUpdate = (
  * Note both the new-format and legacy package policies of one monitor are
  * updated (they map to the same config id); only the cost accounting in
  * {@link toMonitorPlacements} dedupes them.
+ *
+ * With `pinUnpinned` false (a single-agent location) monitors without an agent
+ * pin get none: it adds nothing there, and pinning running monitors can stop
+ * them (elastic/elastic-agent#17714). Parking is not a pin (Fleet Server strips
+ * the unassigned condition from every agent), so a browser monitor is still
+ * parked without a browser-capable agent and unparked once one exists.
  */
 export const toConditionUpdates = (
   pkgPolicies: ShardedPackagePolicy[],
   assignment: ReadonlyMap<string, string>,
-  locationId: string
+  locationId: string,
+  pinUnpinned = true
 ): Map<string, ConditionUpdate[]> => {
   const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {
@@ -188,7 +200,17 @@ export const toConditionUpdates = (
     if (!desiredAgentId) {
       continue; // unplaceable (no healthy target) → leave as-is, no write
     }
-    const desiredCondition = agentIdCondition(desiredAgentId);
+    let desiredCondition: string | null = agentIdCondition(desiredAgentId);
+    if (
+      !pinUnpinned &&
+      !agentIdFromCondition(pkgPolicy.condition) &&
+      desiredAgentId !== UNASSIGNED_AGENT_ID
+    ) {
+      if (pkgPolicy.condition !== UNASSIGNED_CONDITION) {
+        continue;
+      }
+      desiredCondition = null;
+    }
     if (pkgPolicy.condition === desiredCondition) {
       continue; // already pinned to the right agent → no write
     }
