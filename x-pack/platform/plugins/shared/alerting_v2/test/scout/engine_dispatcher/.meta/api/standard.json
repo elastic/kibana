@@ -1,9 +1,22 @@
 {
-  "sha1": "2ab6852f16aba4ad50ff7bb51b9c14c72a5fe830",
+  "sha1": "f6796baf7eaf4b21970634372da49f1f1dfe1ff8",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "251e13322fcccc8-8914be317eb17c6",
+      "title": "Dispatcher runs the workflow of an action policy in a non-default space a breaching rule fires the policy and its workflow runs the space-only connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatch_workflow_execution_space.spec.ts",
+        "line": 112,
+        "column": 25
+      }
+    },
     {
       "id": "99c74a111068925-4e8d7b869f4b346",
       "title": "Dispatcher runs the workflow of an action policy a breaching rule fires the policy and its workflow runs to completion",
