@@ -19,6 +19,7 @@ import type {
 import { Listr, ListrDefaultRendererLogLevels } from 'listr2';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { testTargets } from '@kbn/scout-info';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { CheckResult, DoctorCheck, DoctorCheckGroup, Fix } from './types';
 import { fail } from './types';
 import { environmentChecks } from './checks/environment';
@@ -196,6 +197,32 @@ const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
   log.write(chalk.dim(`\n Or let doctor run them: node scripts/scout doctor --fix`));
 };
 
+const QAF_PROJECT_NAME = 'my-scout-project';
+const QAF_DEPLOYMENT_NAME = 'my-scout-deployment';
+
+const printQafCommands = (log: ToolingLog, arch: DoctorArch) => {
+  const [create, target] =
+    arch === 'serverless'
+      ? [
+          `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_PROJECT_NAME}`,
+          `--ec-project-name ${QAF_PROJECT_NAME}`,
+        ]
+      : [
+          `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_DEPLOYMENT_NAME}`,
+          `--ec-deployment-name ${QAF_DEPLOYMENT_NAME}`,
+        ];
+
+  log.write(
+    `   Or let QAF create a ${arch === 'serverless' ? 'project' : 'deployment'} and run tests:`
+  );
+  log.write(`   ${chalk.cyan(create)}`);
+  log.write(
+    `   ${chalk.cyan(
+      `qaf kibana scout run-config ${target} --kibana-repo-root . --no-checkout --config <playwright_config_path>`
+    )}`
+  );
+};
+
 const printNextSteps = (
   log: ToolingLog,
   location: DoctorLocation,
@@ -219,27 +246,23 @@ const printNextSteps = (
       )}`
     );
     log.write(chalk.dim(`   other domains: ${otherDomains.join(', ')}`));
+    if (location === 'cloud') {
+      printQafCommands(log, arch);
+    }
+    log.write('');
   }
 
-  if (!readyArchs.length) {
-    return;
-  }
-  if (location === 'cloud') {
-    log.write(`\n Or with Playwright directly (ech for stateful, mki for serverless):`);
+  if (location === 'local' && readyArchs.length) {
+    log.write(` To keep the servers running between test runs:`);
+    log.write(
+      `   ${chalk.cyan('node scripts/scout start-server --arch <arch> --domain <domain>')}`
+    );
     log.write(
       `   ${chalk.cyan(
-        'node scripts/playwright test --config <playwright_config_path> --project <ech|mki>'
+        'node scripts/playwright test --config <playwright_config_path> --project local'
       )}\n`
     );
-    return;
   }
-  log.write(`\n To keep the servers running between test runs:`);
-  log.write(`   ${chalk.cyan('node scripts/scout start-server --arch <arch> --domain <domain>')}`);
-  log.write(
-    `   ${chalk.cyan(
-      'node scripts/playwright test --config <playwright_config_path> --project local'
-    )}\n`
-  );
 };
 
 export const runDoctor = async (
