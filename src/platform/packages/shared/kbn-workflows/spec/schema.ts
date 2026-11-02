@@ -1401,47 +1401,49 @@ export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 // The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
 // We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
 // Base schema without transform - can be extended
-const WorkflowSchemaForAutocompleteBase = z
-  .object({
-    version: z.literal('1').optional(),
-    name: z.string().min(1).optional(),
-    'run-name': WorkflowSchemaBase.shape['run-name'],
-    description: z.string().optional(),
-    settings: WorkflowSettingsSchema.optional(),
-    enabled: z.boolean().default(true).optional(),
-    tags: z.array(z.string()).optional(),
-    triggers: z
-      .array(z.object({ type: z.string().catch('') }).passthrough())
-      .catch([])
-      .default([]),
-    outputs: z
-      .union([
-        JsonModelSchema,
-        z.array(
+const WorkflowSchemaForAutocompleteBase = lazySchema(() =>
+  z
+    .object({
+      version: z.literal('1').optional(),
+      name: z.string().min(1).optional(),
+      'run-name': WorkflowSchemaBase.shape['run-name'],
+      description: z.string().optional(),
+      settings: WorkflowSettingsSchema.optional(),
+      enabled: z.boolean().default(true).optional(),
+      tags: z.array(z.string()).optional(),
+      triggers: z
+        .array(z.object({ type: z.string().catch('') }).passthrough())
+        .catch([])
+        .default([]),
+      outputs: z
+        .union([
+          JsonModelSchema,
+          z.array(
+            z
+              .object({
+                name: z.string().catch(''),
+                type: z.string().catch(''),
+              })
+              .passthrough()
+          ),
+        ])
+        .optional()
+        .catch(undefined),
+      consts: WorkflowConstsSchema.optional(),
+      steps: z
+        .array(
           z
             .object({
-              name: z.string().catch(''),
               type: z.string().catch(''),
+              name: z.string().catch(''),
             })
             .passthrough()
-        ),
-      ])
-      .optional()
-      .catch(undefined),
-    consts: WorkflowConstsSchema.optional(),
-    steps: z
-      .array(
-        z
-          .object({
-            type: z.string().catch(''),
-            name: z.string().catch(''),
-          })
-          .passthrough()
-      )
-      .catch([])
-      .default([]),
-  })
-  .passthrough();
+        )
+        .catch([])
+        .default([]),
+    })
+    .passthrough()
+);
 
 // Final schema with transform - ensure version default is applied
 export const WorkflowSchemaForAutocomplete = WorkflowSchemaForAutocompleteBase.transform(
