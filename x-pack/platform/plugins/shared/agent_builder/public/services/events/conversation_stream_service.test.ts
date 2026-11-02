@@ -89,7 +89,7 @@ const messageOf = (events: TimelineDisplayEvent[]): string | undefined => {
 };
 
 /**
- * Drives the fold the way a mutation does: a stream (a Subject here) piped through `trackStream`.
+ * Drives the reducer the way a mutation does: a stream (a Subject here) piped through `trackStream`.
  * `start` subscribes, which marks the run as running; `end` completes the stream, which is what
  * a completed, errored or aborted connection does through `finalize`.
  */
@@ -117,7 +117,7 @@ describe('ConversationStreamService', () => {
     const service = new ConversationStreamService();
     const stream$ = new Subject<ChatEvent>();
 
-    // Obtained but never subscribed - nothing folds and nothing is retained.
+    // Obtained but never subscribed - nothing is reduced and nothing is retained.
     const tracked$ = stream$.pipe(service.trackStream('A'));
     stream$.next(executionStartedEvent());
     stream$.next(messageChunkEvent('missed'));
@@ -171,8 +171,8 @@ describe('ConversationStreamService', () => {
     expect(fromA.every((state) => messageOf(state) !== 'b1')).toBe(true);
   });
 
-  it('a second stream for the same conversation folds into the same state', () => {
-    // Two connections to one run in one view never happen, but the fold does not care which
+  it('a second stream for the same conversation is added to the same state', () => {
+    // Two connections to one run in one view never happen, but the reducer does not care which
     // connection an event came from: it is one state per conversation.
     const service = new ConversationStreamService();
     const first = makeRun(service, 'A');
@@ -187,11 +187,11 @@ describe('ConversationStreamService', () => {
     expect(messageOf(service.getSnapshot('A'))).toBe('one two');
   });
 
-  it('late subscriber immediately receives current folded state (BehaviorSubject replay)', () => {
+  it('late subscriber immediately receives the current state (BehaviorSubject replay)', () => {
     const service = new ConversationStreamService();
     const run = makeRun(service, 'A');
 
-    // First subscriber drives the fold to "Hello"
+    // First subscriber drives the state to "Hello"
     service.getActiveStream$('A').subscribe(() => {});
     run.start();
     run.push(executionStartedEvent());
@@ -206,7 +206,7 @@ describe('ConversationStreamService', () => {
     lateSub.unsubscribe();
   });
 
-  it('keeps folding a run in flight after the consumer leaves, so a new consumer catches up', () => {
+  it('keeps updating from a run in flight after the consumer leaves, so a new consumer catches up', () => {
     const service = new ConversationStreamService();
     const run = makeRun(service, 'A');
 
@@ -216,7 +216,7 @@ describe('ConversationStreamService', () => {
     run.push(messageChunkEvent('first'));
     sub.unsubscribe();
 
-    // Still in flight: the state is held and keeps folding.
+    // Still in flight: the state is held and keeps updating.
     run.push(messageChunkEvent(' half'));
 
     let state: TimelineDisplayEvent[] | undefined;
@@ -265,7 +265,7 @@ describe('ConversationStreamService', () => {
     second.push(messageChunkEvent('second'));
     sub.unsubscribe();
 
-    // Run 2 is still in flight, so the state must survive and keep folding
+    // Run 2 is still in flight, so the state must survive and keep updating
     second.push(messageChunkEvent(' half'));
 
     let state: TimelineDisplayEvent[] | undefined;

@@ -111,7 +111,7 @@ describe('useSendMessageMutation', () => {
     jest.clearAllMocks();
   });
 
-  it('folds each streamed chunk into the live events exactly once, before the run ends', async () => {
+  it('adds each streamed chunk to the live events exactly once, before the run ends', async () => {
     const { source, result, conversationStreamService } = setup();
 
     act(() => result.current.mutate(vars));

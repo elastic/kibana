@@ -108,7 +108,7 @@ jest.mock('./agent_turn', () => ({
 
 const conversationId = 'conv-1';
 const mockStreamService = new ConversationStreamService();
-// One stream per test, fed into the service the way a mutation feeds its own view's fold.
+// One stream per test, fed into the service the way a mutation feeds its own copy of the UI.
 let chatEvents$ = new Subject<ChatEvent>();
 const streamEnded$ = { next: () => chatEvents$.complete() };
 

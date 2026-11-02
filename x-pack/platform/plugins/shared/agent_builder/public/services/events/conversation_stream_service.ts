@@ -19,9 +19,9 @@ interface ConversationStream {
 }
 
 /**
- * Holds the live events of the runs this view streams, one fold per conversation. A stream feeds
- * its own view's fold through `trackStream`; nothing arrives from other views or from the public
- * events broadcast.
+ * Holds the live events of the runs this copy of the UI streams, one state per conversation. A
+ * mutation feeds its stream in through `trackStream`; nothing arrives from other copies of the UI
+ * or from the public events broadcast.
  */
 export class ConversationStreamService {
   private readonly streams = new Map<string, ConversationStream>();
