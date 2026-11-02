@@ -461,13 +461,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
-    if (yAxisColumn?.meta.type === 'number_range' && args.gridConfig.ySortPredicate) {
-      chartData = sortRowsByRangeLowerBound(
-        chartData,
-        yAxisColumn.id,
-        args.gridConfig.ySortPredicate === 'asc'
-      );
-    }
+    chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);
+    chartData = sortRowsByRangeLowerBound(chartData, yAxisColumn, args.gridConfig.ySortPredicate);
 
     const xScaleType = isTimeBasedX ? ScaleType.Time : args.gridConfig.xScaleType;
 

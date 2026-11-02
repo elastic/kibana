@@ -239,9 +239,14 @@ describe('getSortPredicate', () => {
 
 describe('sortRowsByRangeLowerBound', () => {
   const rows = [{ bucket: '50.0..100.0' }, { bucket: '0.0..50.0' }, { bucket: '100.0..150.0' }];
+  const column = {
+    id: 'bucket',
+    name: 'bucket',
+    meta: { type: 'number_range' },
+  } as DatatableColumn;
 
   it('should sort by the range lower bound in descending order', () => {
-    expect(sortRowsByRangeLowerBound(rows, 'bucket', false)).toEqual([
+    expect(sortRowsByRangeLowerBound(rows, column, 'desc')).toEqual([
       { bucket: '100.0..150.0' },
       { bucket: '50.0..100.0' },
       { bucket: '0.0..50.0' },
@@ -249,10 +254,14 @@ describe('sortRowsByRangeLowerBound', () => {
   });
 
   it('should sort by the range lower bound in ascending order', () => {
-    expect(sortRowsByRangeLowerBound(rows, 'bucket', true)).toEqual([
+    expect(sortRowsByRangeLowerBound(rows, column, 'asc')).toEqual([
       { bucket: '0.0..50.0' },
       { bucket: '50.0..100.0' },
       { bucket: '100.0..150.0' },
     ]);
+  });
+
+  it('should keep the rows as they are without a sort predicate', () => {
+    expect(sortRowsByRangeLowerBound(rows, column)).toEqual(rows);
   });
 });
