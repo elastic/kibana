@@ -73,7 +73,9 @@ describe('buildGroupValueBucketQuery', () => {
   });
 
   it('matches the Unknown bucket as the stored value, not as a missing level', () => {
-    const query = JSON.stringify(buildGroupValueBucketQuery('entity.risk.calculated_level', 'Unknown'));
+    const query = JSON.stringify(
+      buildGroupValueBucketQuery('entity.risk.calculated_level', 'Unknown')
+    );
 
     expect(query).toContain('"Unknown"');
     expect(query).not.toContain('{"exists":{"field":"entity.risk.calculated_level"}}');
