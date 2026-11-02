@@ -675,6 +675,73 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         expect(events).toEqual(['validate name 1', 'event loop after name 1', 'validate name 2']);
       });
+
+      describe('validation summary log', () => {
+        let now: number;
+        let nowSpy: jest.SpyInstance;
+
+        const createValidateFn = (
+          durationsMsByName: Record<string, number>,
+          invalidName?: string
+        ) =>
+          jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+            now += durationsMsByName[item.name];
+            if (item.name === invalidName) {
+              throw new Error('invalid item');
+            }
+          });
+
+        beforeEach(() => {
+          now = 0;
+          nowSpy = jest.spyOn(performance, 'now').mockImplementation(() => now);
+        });
+
+        afterEach(() => {
+          nowSpy.mockRestore();
+        });
+
+        it('should log a debug summary with the slowest items', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            { items: [item1Mock(), item2Mock()], lists: [] },
+            createValidateFn({ 'name 1': 200, 'name 2': 300 })
+          );
+
+          expect(logger.warn).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalledTimes(1);
+          const debugArg = logger.debug.mock.calls[0][0];
+          expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
+            'Validated 2 items of [list id 1, list id 2] for import in 0.5s (0 invalid). Slowest: itemId2 (300ms), itemId1 (200ms)'
+          );
+        });
+
+        it('should log a warning when validation takes more than 10s', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            { items: [item1Mock(), item2Mock()], lists: [] },
+            createValidateFn({ 'name 1': 4000, 'name 2': 7000 }, 'name 1')
+          );
+
+          expect(logger.debug).not.toHaveBeenCalled();
+          expect(logger.warn).toHaveBeenCalledWith(
+            'Validated 2 items of [list id 1, list id 2] for import in 11.0s (1 invalid). Slowest: itemId2 (7000ms), itemId1 (4000ms)'
+          );
+        });
+
+        it('should not log when there are no items to validate', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            { items: [new Error('decode error')], lists: [] },
+            jest.fn()
+          );
+
+          expect(logger.debug).not.toHaveBeenCalled();
+          expect(logger.warn).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('#validateCanImportGlobalArtifacts()', () => {

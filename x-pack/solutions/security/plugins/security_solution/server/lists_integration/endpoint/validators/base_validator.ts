@@ -116,6 +116,10 @@ export const BasicEndpointExceptionDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/** Import validation slower than this is logged as a warning (otherwise as debug), together with the slowest items. */
+const IMPORT_VALIDATION_WARN_THRESHOLD_MS = 10_000;
+const IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED = 5;
+
 /**
  * Provides base methods for doing validation that apply across endpoint exception entries
  */
@@ -573,6 +577,10 @@ export class BaseValidator {
     validator: (item: ExceptionItemLikeOptions) => Promise<void>
   ): Promise<void> {
     const validatedItems: PromiseFromStreams['items'] = [];
+    const itemDurations: Array<{ itemId: string; durationMs: number }> = [];
+    const listIds = new Set<string>();
+    let invalidItemCount = 0;
+    const started = performance.now();
 
     for (const _item of items.items) {
       if (_item instanceof Error) {
@@ -593,6 +601,9 @@ export class BaseValidator {
         // trigger any I/O: release the event loop between items so Kibana keeps serving requests.
         await new Promise<void>((resolve) => setImmediate(resolve));
 
+        listIds.add(_item.list_id);
+        const itemStarted = performance.now();
+
         try {
           await validator(item);
 
@@ -609,12 +620,61 @@ export class BaseValidator {
             list_id: item.listId ?? _item.list_id,
           });
         } catch (error) {
+          invalidItemCount++;
           validatedItems.push(new ExceptionItemImportError(error, _item.list_id, _item.item_id));
+        } finally {
+          itemDurations.push({
+            itemId: _item.item_id,
+            durationMs: performance.now() - itemStarted,
+          });
         }
       }
     }
 
     items.items = validatedItems;
+
+    this.logImportValidationSummary({
+      listIds,
+      itemDurations,
+      invalidItemCount,
+      totalDurationMs: performance.now() - started,
+    });
+  }
+
+  private logImportValidationSummary({
+    listIds,
+    itemDurations,
+    invalidItemCount,
+    totalDurationMs,
+  }: {
+    listIds: Set<string>;
+    itemDurations: Array<{ itemId: string; durationMs: number }>;
+    invalidItemCount: number;
+    totalDurationMs: number;
+  }): void {
+    if (itemDurations.length === 0) {
+      return;
+    }
+
+    const buildMessage = (): string => {
+      const slowestItems = [...itemDurations]
+        .sort((a, b) => b.durationMs - a.durationMs)
+        .slice(0, IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED)
+        .map(({ itemId, durationMs }) => `${itemId} (${Math.round(durationMs)}ms)`)
+        .join(', ');
+
+      return `Validated ${itemDurations.length} items of [${[...listIds].join(
+        ', '
+      )}] for import in ${(totalDurationMs / 1000).toFixed(
+        1
+      )}s (${invalidItemCount} invalid). Slowest: ${slowestItems}`;
+    };
+
+    if (totalDurationMs > IMPORT_VALIDATION_WARN_THRESHOLD_MS) {
+      this.logger.warn(buildMessage());
+    } else {
+      this.logger.debug(buildMessage);
+    }
   }
 
   protected async removeInvalidPolicyIds(item: ExceptionItemLikeOptions): Promise<void> {
