@@ -124,13 +124,16 @@ export const OnboardingInstancesTable: React.FunctionComponent<{
   // Matches the authz of DELETE /api/fleet/cloud_onboarding_deployments/{id}.
   const canDelete = authz.fleet.allAgentPolicies || authz.integrations.all;
   const canReadAgents = authz.fleet.readAgents;
+  // The status also needs the package policies, for the agentless agent policies of managed
+  // instances: same authz as POST /api/fleet/package_policies/_bulk_get.
+  const canReadAgentStatus = canReadAgents && authz.integrations.readIntegrationPolicies;
   const {
     agentsByOnboardingInstance,
     agentPolicyIdsByOnboardingInstance,
     isTruncated: isAgentsTruncated,
     isLoading: isAgentsLoading,
     error: agentsError,
-  } = useOnboardingInstancesAgents(onboardingInstances, { enabled: canReadAgents });
+  } = useOnboardingInstancesAgents(onboardingInstances, { enabled: canReadAgentStatus });
   const [flyoutAgent, setFlyoutAgent] = useState<OnboardingInstanceAgent | null>(null);
 
   useEffect(() => {
@@ -243,7 +246,7 @@ export const OnboardingInstancesTable: React.FunctionComponent<{
           EMPTY_CELL
         ),
     },
-    ...(canReadAgents
+    ...(canReadAgentStatus
       ? [
           {
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.statusColumn', {
@@ -259,6 +262,10 @@ export const OnboardingInstancesTable: React.FunctionComponent<{
                 />
               ),
           },
+        ]
+      : []),
+    ...(canReadAgents
+      ? [
           {
             field: 'agentCount',
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.agentsColumn', {

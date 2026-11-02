@@ -73,6 +73,13 @@ describe('OnboardingInstanceStatusCell', () => {
     expect(screen.getByTestId('instanceAgentStatusMore')).toHaveTextContent('+2');
   });
 
+  it('shows an orphaned agent before a healthy one', () => {
+    render([onboardingInstanceAgent('a', 'online'), onboardingInstanceAgent('b', 'orphaned')]);
+
+    expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('b:orphaned');
+    expect(screen.getByTestId('instanceAgentStatusMore')).toHaveTextContent('+1');
+  });
+
   it('opens the status of the shown agent', async () => {
     const onOpen = jest.fn();
     const agents = [onboardingInstanceAgent('a', 'online'), onboardingInstanceAgent('b', 'error')];

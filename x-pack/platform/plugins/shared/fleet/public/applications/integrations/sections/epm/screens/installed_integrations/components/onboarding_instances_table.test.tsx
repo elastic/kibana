@@ -61,9 +61,10 @@ const authzWith = ({
   allAgentPolicies = false,
   allIntegrations = false,
   readAgents = false,
+  readIntegrationPolicies = false,
 } = {}) => ({
   fleet: { allAgentPolicies, readAgents },
-  integrations: { all: allIntegrations },
+  integrations: { all: allIntegrations, readIntegrationPolicies },
 });
 
 const makeOnboardingInstance = (
@@ -330,7 +331,7 @@ describe('OnboardingInstancesTable', () => {
     };
 
     beforeEach(() => {
-      mockUseAuthz.mockReturnValue(authzWith({ readAgents: true }));
+      mockUseAuthz.mockReturnValue(authzWith({ readAgents: true, readIntegrationPolicies: true }));
       mockUseOnboardingInstancesAgents.mockReturnValue({
         agentsByOnboardingInstance: new Map([
           [
@@ -352,7 +353,21 @@ describe('OnboardingInstancesTable', () => {
       });
     });
 
-    it('is shown to users who can read agents', () => {
+    it('is hidden from users who cannot read integration policies, unlike the agent count', () => {
+      // Agents read without Agent policies read: the package policies cannot be loaded, so
+      // managed instances would have no agents to show.
+      mockUseAuthz.mockReturnValue(authzWith({ readAgents: true }));
+      renderTable([makeOnboardingInstance()]);
+
+      expect(screen.queryByText('Status')).not.toBeInTheDocument();
+      expect(mockUseOnboardingInstancesAgents).toHaveBeenCalledWith(expect.any(Array), {
+        enabled: false,
+      });
+      expect(screen.getByText('Agents')).toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    it('is shown to users who can read agents and integration policies', () => {
       renderTable([makeOnboardingInstance()]);
 
       expect(screen.getByText('Status')).toBeInTheDocument();

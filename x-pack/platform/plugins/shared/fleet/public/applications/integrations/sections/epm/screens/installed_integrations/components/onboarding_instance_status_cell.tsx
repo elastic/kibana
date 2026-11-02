@@ -19,6 +19,7 @@ const STATUS_ORDER: Partial<Record<Agent['status'] & string, number>> = {
   error: 0,
   degraded: 0,
   offline: 1,
+  orphaned: 1,
   updating: 2,
   enrolling: 2,
   unenrolling: 2,
