@@ -15,9 +15,11 @@ import { queryKeys } from '../query_keys';
 export const useUserProfiles = ({
   uids,
   enabled = true,
+  keepPreviousData = false,
 }: {
   uids: string[];
   enabled?: boolean;
+  keepPreviousData?: boolean;
 }) => {
   const {
     services: { userProfile },
@@ -31,6 +33,7 @@ export const useUserProfiles = ({
   return useQuery({
     queryKey: queryKeys.security.userProfiles(dedupedUids),
     enabled: enabled && Boolean(userProfile) && dedupedUids.length > 0,
+    keepPreviousData,
     queryFn: async (): Promise<UserProfileWithAvatar[]> => {
       return await userProfile.bulkGet<{ avatar?: UserProfileAvatarData }>({
         uids: new Set(dedupedUids),

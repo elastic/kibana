@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { isHuntEligibleIoc } from '@kbn/alertzero-common';
 
 /**
  * Reads a slice of the threat report (title, severity, extracted techniques / IOCs /
@@ -75,7 +76,8 @@ const asIocs = (value: unknown): ReportIoc[] =>
             typeof item?.type === 'string' &&
             item.type.length > 0 &&
             typeof item?.value === 'string' &&
-            item.value.length > 0
+            item.value.length > 0 &&
+            isHuntEligibleIoc(item)
         )
         .slice(0, MAX_LOADED_IOCS)
         .map(({ type, value: iocValue }) => ({ type, value: iocValue }))

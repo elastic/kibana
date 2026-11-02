@@ -20,6 +20,7 @@ import { executionStepsQuerySchema } from './get_execution_steps';
 import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
+import { WorkflowRequiresDelegatedIdentityError } from '../../workflow_requires_delegated_identity_error';
 import type { RouteDependencies } from '../types';
 import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from '../utils/route_constants';
 import { executionIdParamSchema } from '../utils/schemas';
@@ -31,6 +32,7 @@ describe('Execution Routes', () => {
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockRouter: IRouter;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let mockBulkGetProfiles: jest.Mock;
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -95,6 +97,7 @@ describe('Execution Routes', () => {
     jest.clearAllMocks();
     routeHandlers = {};
     mockLogger = loggingSystemMock.createLogger();
+    mockBulkGetProfiles = jest.fn().mockResolvedValue([]);
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
@@ -162,6 +165,11 @@ describe('Execution Routes', () => {
     registerExecutionRoutes({
       router,
       api: mockApi as any,
+      workflowsService: {
+        getCoreStart: jest
+          .fn()
+          .mockResolvedValue({ userProfile: { bulkGet: mockBulkGetProfiles } }),
+      },
       logger: mockLogger,
       spaces: mockSpaces as any,
       audit: createWorkflowManagementAuditLogMock(),
@@ -257,6 +265,27 @@ describe('Execution Routes', () => {
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: 'Workflow is disabled. Enable it to run it.' },
       });
+    });
+
+    it('should return 403 when the workflow delegates its execution identity', async () => {
+      mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(
+        new WorkflowRequiresDelegatedIdentityError(
+          "Workflow 'wf-1' delegates its execution identity to a parent workflow and cannot be run standalone."
+        )
+      );
+      const h = handler('POST', path)!;
+      const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message:
+            "Workflow 'wf-1' delegates its execution identity to a parent workflow and cannot be run standalone.",
+        },
+      });
+      expect(mockResponse.customError).not.toHaveBeenCalled();
     });
 
     it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {
@@ -456,8 +485,65 @@ describe('Execution Routes', () => {
       expect(handler('GET', path)).toBeDefined();
     });
 
+    it('should attach the executor profile resolved server-side to each result', async () => {
+      const profile = { uid: 'u_1', enabled: true, user: { username: 'jdoe' }, data: {} };
+      mockBulkGetProfiles.mockResolvedValue([profile]);
+      mockApi.getWorkflowExecutions.mockResolvedValue({
+        results: [
+          { id: 'ex-1', executedBy: 'u_1' },
+          { id: 'ex-2', executedBy: 'jdoe' },
+          { id: 'ex-3' },
+        ],
+        page: 1,
+        size: 100,
+        total: 3,
+      });
+      const h = handler('GET', path)!;
+
+      const result = await h(
+        mockContext,
+        { params: { workflowId: 'wf-1' }, query: {} } as any,
+        mockResponse as any
+      );
+
+      expect(mockBulkGetProfiles).toHaveBeenCalledWith({
+        uids: new Set(['u_1', 'jdoe']),
+        dataPath: 'avatar',
+      });
+      expect(result.body).toEqual({
+        results: [
+          { id: 'ex-1', executedBy: 'u_1', executedByProfile: profile },
+          { id: 'ex-2', executedBy: 'jdoe' },
+          { id: 'ex-3' },
+        ],
+        page: 1,
+        size: 100,
+        total: 3,
+      });
+    });
+
+    it('should still return the executions when the profile lookup fails', async () => {
+      mockBulkGetProfiles.mockRejectedValue(new Error('profiles unavailable'));
+      const page = { results: [{ id: 'ex-1', executedBy: 'u_1' }], page: 1, size: 100, total: 1 };
+      mockApi.getWorkflowExecutions.mockResolvedValue(page);
+      const h = handler('GET', path)!;
+
+      const result = await h(
+        mockContext,
+        { params: { workflowId: 'wf-1' }, query: {} } as any,
+        mockResponse as any
+      );
+
+      expect(result).toEqual({ type: 'ok', body: page });
+    });
+
     it('should call api.getWorkflowExecutions with search params and space id', async () => {
-      mockApi.getWorkflowExecutions.mockResolvedValue({ executions: [] });
+      mockApi.getWorkflowExecutions.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 100,
+        total: 0,
+      });
       const h = handler('GET', path)!;
       const request = {
         params: { workflowId: 'wf-1' },
@@ -569,6 +655,21 @@ describe('Execution Routes', () => {
 
     it('should register the route handler', () => {
       expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should attach the executor profile resolved server-side', async () => {
+      const profile = { uid: 'u_1', enabled: true, user: { username: 'jdoe' }, data: {} };
+      mockBulkGetProfiles.mockResolvedValue([profile]);
+      mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', executedBy: 'u_1' });
+      const h = handler('GET', path)!;
+
+      const result = await h(
+        mockContext,
+        { params: { executionId: 'ex-1' }, query: {} } as any,
+        mockResponse as any
+      );
+
+      expect(result.body).toEqual({ id: 'ex-1', executedBy: 'u_1', executedByProfile: profile });
     });
 
     it('should call api.getWorkflowExecution with execution id, space, and include flags', async () => {

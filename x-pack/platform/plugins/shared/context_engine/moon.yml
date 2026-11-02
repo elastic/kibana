@@ -87,12 +87,14 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/ebt-click'
   - '@kbn/usage-collection-plugin'
+  - '@kbn/unsaved-changes-prompt'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
