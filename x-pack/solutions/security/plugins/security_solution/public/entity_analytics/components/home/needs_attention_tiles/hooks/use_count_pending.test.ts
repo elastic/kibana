@@ -299,3 +299,37 @@ describe('useEntitiesWithAnomaliesCount', () => {
     ).toBe(false);
   });
 });
+
+describe('useAlertBasedTiles in a space with no alerts index', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { search: { search: jest.fn() } } },
+    });
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: { indexName: '.entities-v1' },
+      isLoading: false,
+    });
+  });
+
+  const renderWithQueryError = (error: Error) => {
+    mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error });
+    return renderHook(() => useAlertBasedTiles({ spaceId: 'default' })).result.current;
+  };
+
+  it('says the alerts index is missing, without an error or a count', () => {
+    const result = renderWithQueryError(
+      new Error('no such index [.alerts-security.alerts-default]')
+    );
+    expect(result.isMissingIndex).toBe(true);
+    expect(result.error).toBeUndefined();
+    expect(result.hasCount).toBe(false);
+  });
+
+  it('reports any other failure as an error', () => {
+    const error = new Error('boom');
+    const result = renderWithQueryError(error);
+    expect(result.isMissingIndex).toBe(false);
+    expect(result.error).toBe(error);
+  });
+});
