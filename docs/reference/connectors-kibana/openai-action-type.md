@@ -71,6 +71,11 @@ When using the `Other` provider (for example, to [connect a local LLM](#connect-
 - For `OpenAI` and `Azure OpenAI`, only `apiKey` is supported for authentication.
 
 #### Additional request body (Other provider only) [openai-connector-extra-body]
+```{applies_to}
+serverless: ga
+stack: ga 9.7+
+```
+
 
 Self-hosted OpenAI-compatible servers such as vLLM and SGLang accept provider-specific request parameters that {{kib}} doesn't set. With the `Other` provider, you can add them to every chat completion request the connector sends by setting **Additional request body** (`extraBody`) to a JSON object.
 
