@@ -16,7 +16,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
@@ -425,31 +424,14 @@ export const AgentsList: React.FC = () => {
           },
         },
         {
-          // Have to use a custom action to display the danger color
-          // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
-          render: (agent) => {
-            return (
-              <EuiToolTip position="right" content={actionLabels.deleteDescription}>
-                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiIcon type="trash" color="danger" aria-hidden={true} />
-                  <EuiLink
-                    data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
-                    onClick={() => {
-                      deleteAgent({ agent });
-                    }}
-                    color="danger"
-                    {...getEbtProps({
-                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                      action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_DELETE,
-                      detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-                    })}
-                  >
-                    {actionLabels.delete}
-                  </EuiLink>
-                </EuiFlexGroup>
-              </EuiToolTip>
-            );
-          },
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          name: actionLabels.delete,
+          description: actionLabels.deleteDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListDelete-${agent.id}`,
+          showOnHover: true,
+          onClick: (agent) => deleteAgent({ agent }),
           available: canEditAgent,
         },
       ],
