@@ -846,6 +846,7 @@ describe('ApprovalContent', () => {
         />
       );
       expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('card-comment')).toHaveTextContent(baseProposal.comment ?? '');
       expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining • You$/);
     });
   });
