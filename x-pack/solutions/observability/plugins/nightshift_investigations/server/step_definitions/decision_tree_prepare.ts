@@ -8,17 +8,20 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { withToolResults } from '../investigation_round';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
 
 export const decisionTreePrepareStepDefinition = ({
   getTelemetryConnectorId,
+  getSavedObjects,
+  getUiSettings,
   logger,
   isEnabled,
 }: {
@@ -26,6 +29,8 @@ export const decisionTreePrepareStepDefinition = ({
     request: KibanaRequest,
     conversationId?: string
   ) => string | undefined | Promise<string | undefined>;
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -53,10 +58,19 @@ export const decisionTreePrepareStepDefinition = ({
       tool_results: toolResultsSchema.describe(
         'Results of the investigator tool calls, keyed by tool_call_id.'
       ),
+      background_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe('Deterministic T_background trace id from materialize.'),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
       tree_count: z.number().describe('Number of decision trees the agent may edit.'),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical symptom:<slug> tree ids opened by the investigator this round.'),
       turn_kind: z
         .enum(['initial_investigation', 'feedback_reinforcement'])
         .describe('Whether this round seeds the trees or follows up on them.'),
@@ -95,18 +109,49 @@ export const decisionTreePrepareStepDefinition = ({
         context.contextManager.getFakeRequest(),
         context.input.conversation_id
       );
-      const { spaceId } = context.contextManager.getContext().workflow;
-      const { message, treeCount, turnKind } = await prepareReinforcementTurn({
-        response,
-        connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
-        esClient: context.contextManager.getScopedEsClient(),
-        logger,
-        spaceId,
-        toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
-      });
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const executionId = workflowContext.execution?.id;
+      const { message, treeCount, turnKind, openedTreeIds } = await withNightshiftBackgroundSpan(
+        {
+          name: 'nightshift.decisionTreePrepare',
+          traceId: context.input.background_trace_id || executionId,
+          spaceId,
+          workflowExecutionId: executionId,
+          request: context.contextManager?.getFakeRequest?.(),
+          getSavedObjects,
+          getUiSettings,
+          logger,
+        },
+        async (span) => {
+          const res = await prepareReinforcementTurn({
+            response,
+            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            esClient: context.contextManager.getScopedEsClient(),
+            logger,
+            spaceId,
+            toolCalls: withToolResults(
+              (toolCalls ?? []) as InvestigationToolCall[],
+              toolResults ?? []
+            ),
+          });
+          span?.setAttribute('nightshift.tree_count', res.treeCount);
+          span?.setAttribute('nightshift.turn_kind', res.turnKind);
+          if (res.openedTreeIds) {
+            span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
+          }
+          return res;
+        }
+      );
 
       return {
-        output: { message, tree_count: treeCount, turn_kind: turnKind, skipped: false },
+        output: {
+          message,
+          tree_count: treeCount,
+          turn_kind: turnKind,
+          skipped: false,
+          ...(openedTreeIds && openedTreeIds.length > 0 ? { opened_ids: openedTreeIds } : {}),
+        },
       };
     },
   });
