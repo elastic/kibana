@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { useKibana } from '../hooks/use_kibana';
+import { InvestigationIdentitySection } from './components/investigation_identity_section';
 import { RunLimitsSection } from './components/run_limits_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
 import { SettingsSection, SettingsSectionRow } from './components/settings_section';
@@ -68,6 +69,8 @@ export const InvestigationsSettingsTab = ({
           onSave={saveRunLimits}
           onConfirmSave={confirmRunLimits}
         />
+        <EuiHorizontalRule margin="l" />
+        <InvestigationIdentitySection />
         {onCustomContextClick && (
           <>
             <EuiHorizontalRule margin="l" />

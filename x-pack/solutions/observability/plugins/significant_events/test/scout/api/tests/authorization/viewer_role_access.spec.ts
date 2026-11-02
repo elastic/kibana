@@ -77,6 +77,7 @@ apiTest.describe(
     });
 
     apiTest('lists and opens significant events', async ({ apiClient }) => {
+      // Nightshift opens an event by filtering the collection route by event_id.
       await expect
         .poll(async () => {
           const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
@@ -91,13 +92,6 @@ apiTest.describe(
           };
         }, POLL_OPTIONS)
         .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
-
-      const response = await apiClient.get(`${EVENTS_ENDPOINT}/${eventId}`, {
-        headers,
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ event_id: eventId });
     });
 
     apiTest('lists detections', async ({ apiClient }) => {

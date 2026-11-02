@@ -288,7 +288,10 @@ describe('resolveModelsForFeature', () => {
   });
 
   it('prepends the default connector without parameters when it is not recommended', async () => {
-    const recommended = { ...inferenceConnector('rec'), parameters: { temperature: 0.2 } };
+    const recommended = {
+      ...inferenceConnector('rec'),
+      parameters: { reasoning: { effort: 'low' as const } },
+    };
     const defaultConnector = inferenceConnector('default');
     getForFeature.mockResolvedValue({
       endpoints: [recommended],

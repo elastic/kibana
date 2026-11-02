@@ -7,6 +7,7 @@
 
 import type { Attributes } from '@opentelemetry/api';
 import { metrics, ValueType } from '@opentelemetry/api';
+import { ActionExecutionSourceType } from './action_execution_source';
 
 const meter = metrics.getMeter('kibana.actions');
 
@@ -64,10 +65,21 @@ export type ConnectorAuthErrorType =
 /** `initiate` starts the OAuth flow, `authorize` is the callback that completes it. */
 export type ConnectorAuthPhase = 'initiate' | 'authorize' | 'token' | 'execute';
 
+/** How an execution was triggered, derived from the execution source type. */
+export type ConnectorExecuteOrigin =
+  | 'saved_object'
+  | 'http_request'
+  | 'notification'
+  | 'background_task'
+  | 'agent_builder'
+  | 'none';
+
 /** Who is responsible for a failed execution. */
 export type ConnectorErrorSource = 'user' | 'framework';
 
 const NO_AUTH_TYPE = 'none';
+/** Sub-action reported for connectors that have a single operation and no sub-actions. */
+export const DEFAULT_SUB_ACTION = 'default';
 const UNKNOWN_LABEL = 'unknown';
 
 /** Bounds a request-supplied label: values that aren't known to the server are reported as "unknown". */
@@ -84,6 +96,26 @@ export const getConnectorAuthType = ({
 }): string => {
   const authType = secrets?.authType ?? config?.authType;
   return typeof authType === 'string' && authType.length > 0 ? authType : NO_AUTH_TYPE;
+};
+
+/** Maps an execution source type onto a bounded origin label. */
+export const getConnectorExecuteOrigin = (
+  sourceType?: ActionExecutionSourceType
+): ConnectorExecuteOrigin => {
+  switch (sourceType) {
+    case ActionExecutionSourceType.SAVED_OBJECT:
+      return 'saved_object';
+    case ActionExecutionSourceType.HTTP_REQUEST:
+      return 'http_request';
+    case ActionExecutionSourceType.NOTIFICATION:
+      return 'notification';
+    case ActionExecutionSourceType.BACKGROUND_TASK:
+      return 'background_task';
+    case ActionExecutionSourceType.AGENT_BUILDER:
+      return 'agent_builder';
+    default:
+      return 'none';
+  }
 };
 
 /** Maps an HTTP status carried by a thrown Boom error onto a connector create error type. */
@@ -122,17 +154,21 @@ export const getConnectorAuthInitiateErrorType = (statusCode: number): Connector
 export interface RecordConnectorCreateOpts {
   connectorType: string;
   authType: string;
+  /** Whether the connector type is defined by a connector spec (v2) rather than a legacy connector type (v1). */
+  specBased: boolean;
   errorType?: ConnectorCreateErrorType;
 }
 
 export const recordConnectorCreate = ({
   connectorType,
   authType,
+  specBased,
   errorType,
 }: RecordConnectorCreateOpts): void => {
   connectorCreateCounter.add(1, {
     'connector.type': connectorType,
     'connector.auth_type': authType,
+    'connector.spec_based': specBased,
     success: errorType === undefined,
     ...(errorType ? { 'error.type': errorType } : {}),
   });
@@ -140,6 +176,9 @@ export const recordConnectorCreate = ({
 
 export interface RecordConnectorExecuteOpts {
   connectorType: string;
+  /** Whether the connector type is defined by a connector spec (v2) rather than a legacy connector type (v1). */
+  specBased: boolean;
+  origin: ConnectorExecuteOrigin;
   subAction?: string;
   errorType?: ConnectorExecuteErrorType;
   errorSource?: ConnectorErrorSource;
@@ -148,6 +187,8 @@ export interface RecordConnectorExecuteOpts {
 
 export const recordConnectorExecute = ({
   connectorType,
+  specBased,
+  origin,
   subAction,
   errorType,
   errorSource,
@@ -155,6 +196,8 @@ export const recordConnectorExecute = ({
 }: RecordConnectorExecuteOpts): void => {
   const attributes: Attributes = {
     'connector.type': connectorType,
+    'connector.spec_based': specBased,
+    'connector.origin': origin,
     ...(subAction ? { 'connector.sub_action': subAction } : {}),
     success: errorType === undefined,
     ...(errorType ? { 'error.type': errorType } : {}),

@@ -1,5 +1,5 @@
 {
-  "sha1": "1e5082e415fc811e15673b7436f1d52d8d1713fa",
+  "sha1": "473b011978e18ebb29e74ae4cebfb9181b0f2dca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -153,7 +153,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 34
       }
     },
@@ -166,7 +166,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 241,
+        "line": 242,
         "column": 8
       }
     },
@@ -179,7 +179,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 34
       }
     },
@@ -192,7 +192,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 241,
+        "line": 242,
         "column": 8
       }
     },
@@ -205,7 +205,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 303,
+        "line": 304,
         "column": 28
       }
     },
@@ -218,7 +218,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 321,
+        "line": 322,
         "column": 28
       }
     },
@@ -231,7 +231,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 303,
+        "line": 304,
         "column": 28
       }
     },
@@ -244,7 +244,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 321,
+        "line": 322,
         "column": 28
       }
     },
@@ -257,7 +257,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 344,
+        "line": 345,
         "column": 24
       }
     },
@@ -270,7 +270,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 344,
+        "line": 345,
         "column": 24
       }
     },
@@ -283,7 +283,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 379,
+        "line": 380,
         "column": 18
       }
     },
@@ -296,7 +296,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 436,
+        "line": 437,
         "column": 25
       }
     },
@@ -309,7 +309,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 466,
+        "line": 467,
         "column": 16
       }
     },
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 466,
+        "line": 467,
         "column": 16
       }
     },
@@ -335,7 +335,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 520,
+        "line": 521,
         "column": 13
       }
     },
@@ -348,7 +348,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 520,
+        "line": 521,
         "column": 13
       }
     },
@@ -361,7 +361,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 555,
+        "line": 556,
         "column": 30
       }
     },
@@ -374,7 +374,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 555,
+        "line": 556,
         "column": 30
       }
     },
@@ -387,7 +387,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 578,
+        "line": 579,
         "column": 32
       }
     },
@@ -400,7 +400,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 578,
+        "line": 579,
         "column": 32
       }
     },
@@ -413,7 +413,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 621,
+        "line": 622,
         "column": 19
       }
     },
@@ -426,7 +426,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 644,
+        "line": 645,
         "column": 23
       }
     },
@@ -439,7 +439,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 658,
+        "line": 659,
         "column": 26
       }
     },
@@ -452,8 +452,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 688,
+        "line": 689,
         "column": 16
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-55412dfefd455b6",
+      "title": "Managed child service account inheritance refuses a standalone run of an unconditional inherit parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 697,
+        "column": 67
       }
     },
     {
@@ -465,8 +478,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 693,
-        "column": 27
+        "line": 712,
+        "column": 78
       }
     },
     {
@@ -478,8 +491,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 701,
-        "column": 27
+        "line": 723,
+        "column": 9
       }
     },
     {
@@ -491,8 +504,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 730,
-        "column": 57
+        "line": 754,
+        "column": 34
       }
     },
     {
