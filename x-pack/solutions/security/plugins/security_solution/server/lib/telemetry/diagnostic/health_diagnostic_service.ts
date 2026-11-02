@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'crypto';
 import semver from 'semver';
+import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
   bufferCount,
