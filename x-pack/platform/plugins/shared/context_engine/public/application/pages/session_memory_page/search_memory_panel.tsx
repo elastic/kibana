@@ -32,14 +32,14 @@ import type {
   SessionMemoryMediaItem,
 } from '../../../../common/http_api/session_memory';
 import { useSearchSessionMemory } from '../../hooks/use_session_memory_mutations';
-import { IMAGE_FILE_ACCEPT } from './media_file';
+import { MEDIA_FILE_ACCEPT } from './media_file';
 import { MediaFilePicker } from './media_file_picker';
 import { useSessionContext } from './session_context';
 import type { SessionContextValue } from './session_context';
 import { PanelHeader } from './panel_header';
 import { SessionMemoryCard } from './session_memory_card';
 
-type QueryMode = 'text' | 'image';
+type QueryMode = 'text' | 'file';
 
 /** Which parts of the session context narrow the search. */
 export type SearchFilterKey = 'user' | 'session' | 'agent' | 'aiIndex';
@@ -59,8 +59,8 @@ const labels = {
   textMode: i18n.translate('xpack.contextEngine.sessionMemory.search.textMode', {
     defaultMessage: 'Text',
   }),
-  imageMode: i18n.translate('xpack.contextEngine.sessionMemory.search.imageMode', {
-    defaultMessage: 'Image',
+  fileMode: i18n.translate('xpack.contextEngine.sessionMemory.search.fileMode', {
+    defaultMessage: 'Image or PDF',
   }),
   text: i18n.translate('xpack.contextEngine.sessionMemory.search.text', {
     defaultMessage: 'Search text',
@@ -68,11 +68,11 @@ const labels = {
   textPlaceholder: i18n.translate('xpack.contextEngine.sessionMemory.search.textPlaceholder', {
     defaultMessage: 'e.g. what does the user prefer?',
   }),
-  image: i18n.translate('xpack.contextEngine.sessionMemory.search.image', {
-    defaultMessage: 'Search image',
+  file: i18n.translate('xpack.contextEngine.sessionMemory.search.file', {
+    defaultMessage: 'Search file',
   }),
-  imageHelp: i18n.translate('xpack.contextEngine.sessionMemory.search.imageHelp', {
-    defaultMessage: 'PNG, JPEG, WebP, or GIF under 1 MB.',
+  fileHelp: i18n.translate('xpack.contextEngine.sessionMemory.search.fileHelp', {
+    defaultMessage: 'PNG, JPEG, WebP, GIF, or PDF under 1 MB. The file is embedded as the query.',
   }),
   filters: i18n.translate('xpack.contextEngine.sessionMemory.search.filters', {
     defaultMessage: 'Only memories from',
@@ -120,12 +120,12 @@ export const SearchMemoryPanel = () => {
   const session = useSessionContext();
   const [mode, setMode] = useState<QueryMode>('text');
   const [text, setText] = useState('');
-  const [image, setImage] = useState<SessionMemoryMediaItem | undefined>();
+  const [file, setFile] = useState<SessionMemoryMediaItem | undefined>();
   const [filters, setFilters] = useState<SearchFilters>(DEFAULT_SEARCH_FILTERS);
   const [size, setSize] = useState(DEFAULT_SESSION_MEMORY_SEARCH_SIZE);
   const { mutate, isLoading, data } = useSearchSessionMemory();
 
-  const query = mode === 'text' ? text.trim() : image;
+  const query = mode === 'text' ? text.trim() : file;
   const maxScore = data ? Math.max(0, ...data.results.map((hit) => hit._score)) : 0;
   const canSubmit = Boolean(query) && size >= 1 && size <= MAX_SESSION_MEMORY_SEARCH_SIZE;
 
@@ -174,7 +174,7 @@ export const SearchMemoryPanel = () => {
         description={
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.search.description"
-            defaultMessage="Find memories by meaning with free text or an image. Filters narrow the candidates before the vector search."
+            defaultMessage="Find memories by meaning with free text, an image, or a PDF. Filters narrow the candidates before the vector search."
           />
         }
       />
@@ -192,9 +192,9 @@ export const SearchMemoryPanel = () => {
                 'data-test-subj': 'contextSessionMemorySearch-mode-text',
               },
               {
-                id: 'image',
-                label: labels.imageMode,
-                'data-test-subj': 'contextSessionMemorySearch-mode-image',
+                id: 'file',
+                label: labels.fileMode,
+                'data-test-subj': 'contextSessionMemorySearch-mode-file',
               },
             ]}
             isDisabled={isLoading}
@@ -215,12 +215,12 @@ export const SearchMemoryPanel = () => {
           </EuiFormRow>
         ) : (
           <MediaFilePicker
-            label={labels.image}
-            helpText={labels.imageHelp}
-            accept={IMAGE_FILE_ACCEPT}
-            onChange={setImage}
+            label={labels.file}
+            helpText={labels.fileHelp}
+            accept={MEDIA_FILE_ACCEPT}
+            onChange={setFile}
             isDisabled={isLoading}
-            data-test-subj="contextSessionMemorySearch-image"
+            data-test-subj="contextSessionMemorySearch-file"
           />
         )}
         <EuiFormRow label={labels.filters} fullWidth>

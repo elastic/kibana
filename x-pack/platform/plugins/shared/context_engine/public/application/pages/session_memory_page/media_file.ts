@@ -15,8 +15,6 @@ const PDF_MIME_TYPE = 'application/pdf';
 
 export const MEDIA_FILE_ACCEPT = [...IMAGE_MIME_TYPES, PDF_MIME_TYPE].join(',');
 
-export const IMAGE_FILE_ACCEPT = IMAGE_MIME_TYPES.join(',');
-
 export class MediaFileError extends Error {}
 
 const unsupportedTypeMessage = i18n.translate(

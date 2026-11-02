@@ -9,7 +9,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { useSearchSessionMemory } from '../../hooks/use_session_memory_mutations';
 import { SearchMemoryPanel } from './search_memory_panel';
-import { buildSessionContext, pngFile, renderWithProviders } from './test_helpers';
+import { buildSessionContext, pdfFile, pngFile, renderWithProviders } from './test_helpers';
 
 jest.mock('../../hooks/use_session_memory_mutations', () => ({
   useSearchSessionMemory: jest.fn(),
@@ -102,15 +102,36 @@ describe('SearchMemoryPanel', () => {
     mockUseSearchSessionMemory.mockReturnValue(mutationResult({ mutate }));
     renderWithProviders(<SearchMemoryPanel />);
 
-    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-mode-image'));
-    fireEvent.change(screen.getByTestId('contextSessionMemorySearch-image'), {
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-mode-file'));
+    fireEvent.change(screen.getByTestId('contextSessionMemorySearch-file'), {
       target: { files: [pngFile()] },
     });
-    await screen.findByTestId('contextSessionMemorySearch-image-preview');
+    await screen.findByTestId('contextSessionMemorySearch-file-preview');
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
 
     expect(mutate).toHaveBeenCalledWith({
       query: { type: 'image', value: 'data:image/png;base64,iVBORw==', format: 'base64' },
+      user_id: 'kathleen',
+      space: 'default',
+      size: 10,
+    });
+  });
+
+  it('searches by an uploaded PDF', async () => {
+    const mutate = jest.fn();
+    mockUseSearchSessionMemory.mockReturnValue(mutationResult({ mutate }));
+    renderWithProviders(<SearchMemoryPanel />);
+
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-mode-file'));
+    fireEvent.change(screen.getByTestId('contextSessionMemorySearch-file'), {
+      target: { files: [pdfFile()] },
+    });
+    await screen.findByTestId('contextSessionMemorySearch-file-pdf');
+    expect(screen.getByTestId('contextSessionMemorySearch-file-pdf')).toHaveTextContent('deck.pdf');
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
+
+    expect(mutate).toHaveBeenCalledWith({
+      query: { type: 'pdf', value: 'data:application/pdf;base64,JVBERg==', format: 'base64' },
       user_id: 'kathleen',
       space: 'default',
       size: 10,

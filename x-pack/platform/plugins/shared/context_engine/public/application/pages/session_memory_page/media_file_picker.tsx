@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFilePicker, EuiFormRow, EuiImage, EuiSpacer } from '@elastic/eui';
+import { EuiFilePicker, EuiFormRow, EuiIcon, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFilePickerProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
@@ -15,6 +15,12 @@ import { readMediaFile } from './media_file';
 const previewAlt = i18n.translate('xpack.contextEngine.sessionMemory.media.previewAlt', {
   defaultMessage: 'Selected image preview',
 });
+
+const pdfReadyLabel = (name: string) =>
+  i18n.translate('xpack.contextEngine.sessionMemory.media.pdfReady', {
+    defaultMessage: 'PDF ready: {name}',
+    values: { name },
+  });
 
 interface MediaFilePickerProps {
   label: string;
@@ -37,12 +43,14 @@ export const MediaFilePicker = ({
 }: MediaFilePickerProps) => {
   const [error, setError] = useState<string | undefined>();
   const [preview, setPreview] = useState<string | undefined>();
+  const [pdfName, setPdfName] = useState<string | undefined>();
 
   const handleChange = useCallback<NonNullable<EuiFilePickerProps['onChange']>>(
     async (files) => {
       const file = files?.[0];
       setError(undefined);
       setPreview(undefined);
+      setPdfName(undefined);
       if (!file) {
         onChange(undefined);
         return;
@@ -50,6 +58,7 @@ export const MediaFilePicker = ({
       try {
         const media = await readMediaFile(file);
         setPreview(media.type === 'image' ? media.value : undefined);
+        setPdfName(media.type === 'pdf' ? file.name : undefined);
         onChange(media);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
@@ -90,6 +99,14 @@ export const MediaFilePicker = ({
             hasShadow
             data-test-subj={`${dataTestSubj}-preview`}
           />
+        </>
+      )}
+      {pdfName && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" data-test-subj={`${dataTestSubj}-pdf`}>
+            <EuiIcon type="document" aria-hidden={true} /> {pdfReadyLabel(pdfName)}
+          </EuiText>
         </>
       )}
     </>

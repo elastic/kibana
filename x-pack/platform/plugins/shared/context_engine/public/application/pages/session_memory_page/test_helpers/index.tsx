@@ -53,3 +53,5 @@ export const renderWithProviders = (
 
 export const pngFile = () =>
   new File([Uint8Array.from([137, 80, 78, 71])], 'pic.png', { type: 'image/png' });
+
+export const pdfFile = () => new File(['%PDF'], 'deck.pdf', { type: 'application/pdf' });

@@ -9,7 +9,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useRememberSessionMemory } from '../../hooks/use_session_memory_mutations';
 import { RememberMemoryPanel } from './remember_memory_panel';
-import { buildSessionContext, pngFile, renderWithProviders } from './test_helpers';
+import { buildSessionContext, pdfFile, pngFile, renderWithProviders } from './test_helpers';
 
 jest.mock('../../hooks/use_session_memory_mutations', () => ({
   useRememberSessionMemory: jest.fn(),
@@ -91,6 +91,27 @@ describe('RememberMemoryPanel', () => {
       agent_id: 'elastic-agent',
       space: 'default',
       media: [{ type: 'image', value: 'data:image/png;base64,iVBORw==', format: 'base64' }],
+    });
+  });
+
+  it('submits an uploaded PDF as a pdf media item', async () => {
+    const mutate = jest.fn();
+    mockUseRememberSessionMemory.mockReturnValue(mutationResult({ mutate }));
+    renderWithProviders(<RememberMemoryPanel />);
+
+    fireEvent.change(screen.getByTestId('contextSessionMemoryRemember-file'), {
+      target: { files: [pdfFile()] },
+    });
+
+    await screen.findByTestId('contextSessionMemoryRemember-file-pdf');
+    fireEvent.click(screen.getByTestId('contextSessionMemoryRemember-submit'));
+
+    expect(mutate).toHaveBeenCalledWith({
+      session_id: 'session-1',
+      user_id: 'kathleen',
+      agent_id: 'elastic-agent',
+      space: 'default',
+      media: [{ type: 'pdf', value: 'data:application/pdf;base64,JVBERg==', format: 'base64' }],
     });
   });
 
