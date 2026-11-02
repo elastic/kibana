@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 // only read by the lazily loaded overview tab and header.
 
 export const OVERVIEW_SECTION_LABELS = Object.freeze({
-  subjects: i18n.translate('xpack.alertzero.detailsFlyout.sections.subjects', {
+  subjects: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.subjects', {
     defaultMessage: 'Subject',
   }),
-  loading: i18n.translate('xpack.alertzero.detailsFlyout.sections.loading', {
+  loading: i18n.translate('xpack.agenticInvestigations.detailsFlyout.sections.loading', {
     defaultMessage: 'Still investigating. This flyout will update with new findings.',
   }),
 });
