@@ -12,7 +12,7 @@ export {
 } from './constants';
 export type { StreamsTourStepId } from './constants';
 export { getTourStepsConfig } from './tour_steps_config';
-export type { TourStepConfig, TourStepsOptions } from './tour_steps_config';
+export type { TourStepConfig } from './tour_steps_config';
 export { StreamsTourProvider, useStreamsTour } from './streams_tour_provider';
 export type { StreamsTourStepProps } from './streams_tour_provider';
 export { WelcomeTourCallout } from './welcome_tour_callout';

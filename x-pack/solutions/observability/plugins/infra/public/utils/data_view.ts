@@ -73,18 +73,20 @@ export const resolveAdHocDataView = async ({
 }: AdhocDataView): Promise<ResolvedDataView> => {
   const { name, timeFieldName } = attributes;
 
-  const dataViewReference = await dataViewsService.get(dataViewId, false, true).catch(() => {
-    return dataViewsService.create(
-      {
-        id: dataViewId,
-        name,
-        title: dataViewId,
-        timeFieldName,
-      },
-      false,
-      false
-    );
-  });
+  // Use create() directly instead of get().catch(() => create()) to avoid a cache
+  // race condition: get()'s deferred cache cleanup can evict the data view that
+  // create() just cached, leaving subsequent get() calls unable to resolve it.
+  // create() already returns the cached data view when one exists.
+  const dataViewReference = await dataViewsService.create(
+    {
+      id: dataViewId,
+      name,
+      title: dataViewId,
+      timeFieldName,
+    },
+    false,
+    false
+  );
 
   return buildResolvedDataView(dataViewReference);
 };

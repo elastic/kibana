@@ -68,13 +68,13 @@ describe('Authentication Host Table Component', () => {
 
   describe('columns', () => {
     test('on hosts page, we expect to get all 9 columns', () => {
-      const { queryAllByRole, queryByText } = render(
+      const { queryAllByTestId, queryByText } = render(
         <TestProviders>
           <AuthenticationsHostTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(queryAllByRole('columnheader').length).toEqual(9);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toEqual(9);
 
       // it should have Last Successful Destination column
       expect(queryByText(i18n.LAST_SUCCESSFUL_DESTINATION)).toBeInTheDocument();
@@ -83,19 +83,38 @@ describe('Authentication Host Table Component', () => {
     });
 
     test('on hosts page, we expect to get 7 user details columns', () => {
-      const { queryAllByRole, queryByText } = render(
+      const { queryAllByTestId, queryByText } = render(
         <TestProviders>
           <AuthenticationsHostTable {...defaultProps} type={hostsModel.HostsType.details} />
         </TestProviders>
       );
 
-      expect(queryAllByRole('columnheader').length).toEqual(7);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toEqual(7);
 
       // it should not have Successful Destination column
       expect(queryByText(i18n.LAST_SUCCESSFUL_DESTINATION)).not.toBeInTheDocument();
       // it should not have Failed Destination column
       expect(queryByText(i18n.LAST_FAILED_DESTINATION)).not.toBeInTheDocument();
     });
+  });
+
+  it('labels the authentications query with the hosts page execution context', () => {
+    render(
+      <TestProviders>
+        <AuthenticationsHostTable {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseAuthentications).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'authentications',
+          },
+        },
+      })
+    );
   });
 
   it('toggleStatus=true, do not skip', () => {

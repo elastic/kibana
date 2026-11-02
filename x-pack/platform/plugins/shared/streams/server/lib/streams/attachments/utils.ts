@@ -8,9 +8,11 @@
 import objectHash from 'object-hash';
 import type {
   SavedObject,
+  SavedObjectBulkResult,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { SanitizedRule } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
@@ -45,10 +47,13 @@ export const getAttachmentDocument = (attachment: {
 };
 
 const processDashboardResults = (
-  savedObjects: Array<SavedObject<DashboardSOAttributes>>
+  savedObjects: Array<SavedObjectBulkResult<DashboardSOAttributes>>
 ): AttachmentData[] => {
   return savedObjects
-    .filter((savedObject) => !savedObject.error)
+    .filter(
+      (savedObject): savedObject is SavedObject<DashboardSOAttributes> =>
+        !isSavedObjectErrorResult(savedObject)
+    )
     .map((savedObject) => ({
       id: savedObject.id,
       redirectId: savedObject.id,
@@ -61,9 +66,14 @@ const processDashboardResults = (
     }));
 };
 
-const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): AttachmentData[] => {
+const processSloResults = (
+  savedObjects: Array<SavedObjectBulkResult<SloSOAttributes>>
+): AttachmentData[] => {
   return savedObjects
-    .filter((savedObject) => !savedObject.error)
+    .filter(
+      (savedObject): savedObject is SavedObject<SloSOAttributes> =>
+        !isSavedObjectErrorResult(savedObject)
+    )
     .map((savedObject) => ({
       id: savedObject.id,
       redirectId: savedObject.attributes.id,
@@ -82,7 +92,7 @@ export const processRuleResults = (rules: SanitizedRule[]): AttachmentData[] => 
     redirectId: rule.id,
     type: 'rule',
     title: rule.name,
-    tags: rule.tags,
+    tags: [],
     createdAt: rule.createdAt.toISOString(),
     updatedAt: rule.updatedAt.toISOString(),
   }));
@@ -155,7 +165,7 @@ export const getRulesByIds = async ({
     const { rules } = await rulesClient.bulkGetRules({ ids });
     return processRuleResults(rules);
   } catch (error) {
-    if (error.message === 'No rules found for bulk get') {
+    if (error instanceof Error && error.message === 'No rules found for bulk get') {
       return [];
     }
     throw error;

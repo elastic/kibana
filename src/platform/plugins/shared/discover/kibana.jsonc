@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discover-plugin",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -34,6 +34,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "dataVisualizer",
       "home",
       "share",
@@ -48,18 +49,20 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "embeddableEnhanced",
       "apmSourcesAccess",
       "fileUpload",
-      "metricsExperience"
+      "cps",
+      "alertingVTwo",
+      "feedback",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects",
-      "controls",
-      "presentationPanel"
+      "presentationUtil",
+      "esql",
+      "share"
     ],
     "extraPublicDirs": [
       "common"

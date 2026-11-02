@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { SO_SEARCH_LIMIT } from '../../../common';
+
 import { getPackagePolicySavedObjectType } from '../package_policy';
 
 export async function getPackagePoliciesCountByPackageName(soClient: SavedObjectsClientContract) {
@@ -18,11 +20,22 @@ export async function getPackagePoliciesCountByPackageName(soClient: SavedObject
   >({
     type: savedObjectType,
     perPage: 0,
-    filter: `${savedObjectType}.attributes.latest_revision:true`,
+    // Query across all spaces so the count reflects cluster-wide usage, not
+    // just the current space. Required because the caller uses a client with
+    // the Spaces extension excluded; without an explicit namespaces value
+    // Core defaults to ['default'] rather than all spaces.
+    namespaces: ['*'],
+    // Use NOT false instead of :true so that policies without the field
+    // (8.x policies where latest_revision was never persisted to ES) are
+    // treated as current revisions and included in the count.
+    filter: `NOT ${savedObjectType}.attributes.latest_revision:false`,
     aggs: {
       count_by_package_name: {
         terms: {
           field: `${savedObjectType}.attributes.package.name`,
+          // Without an explicit size, ES defaults to 10 buckets and silently
+          // truncates results when more than 10 distinct package names exist.
+          size: SO_SEARCH_LIMIT,
         },
       },
     },

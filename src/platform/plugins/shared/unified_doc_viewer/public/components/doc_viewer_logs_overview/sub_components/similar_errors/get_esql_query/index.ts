@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { fieldConstants } from '@kbn/discover-utils';
-import { where } from '@kbn/esql-composer';
+import { esqlColumn } from '../../../../../utils/esql_column';
+import {
+  type NonEmptyArray,
+  esqlAnd,
+  esqlEquals,
+  esqlFunction,
+  esqlString,
+} from '../../../../../utils/esql_expressions';
 
 interface ErrorField {
   fieldName: string;
@@ -19,72 +27,56 @@ function needsNormalization(message: string): boolean {
   return /\n|\t|\r/.test(message);
 }
 
-function normalizeAndEscapeMessage(message: string): string {
-  return message
-    .replace(/\t/g, '\\t')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n')
-    .replace(/"/g, '\\"');
-}
-
 export function getEsqlQuery({
   serviceName,
   culprit,
   message,
   type,
+  level,
 }: {
   serviceName?: string;
   culprit?: string;
   message?: ErrorField;
   type?: ErrorField;
-}) {
-  const conditions: string[] = [];
-  const params: Record<string, string> = {};
-
-  if (serviceName) {
-    const paramName = 'serviceName';
-    conditions.push(`${fieldConstants.SERVICE_NAME_FIELD} == ?${paramName}`);
-    params[paramName] = serviceName;
-  } else {
+  level?: { fieldName: string; value: string };
+}): ESQLAstExpression | undefined {
+  if (!serviceName) {
     return undefined;
   }
 
+  const conditions: NonEmptyArray<ESQLAstExpression> = [
+    esqlEquals(fieldConstants.SERVICE_NAME_FIELD, serviceName),
+  ];
+
   if (culprit) {
-    const paramName = 'culprit';
-    conditions.push(`${fieldConstants.ERROR_CULPRIT_FIELD} == ?${paramName}`);
-    params[paramName] = culprit;
+    conditions.push(esqlEquals(fieldConstants.ERROR_CULPRIT_FIELD, culprit));
   }
 
   if (message?.value !== undefined && message?.fieldName) {
     const messageValue = String(message.value);
-    if (needsNormalization(messageValue)) {
-      const normalizedAndEscapedMessage = normalizeAndEscapeMessage(messageValue);
-      conditions.push(`MATCH_PHRASE(${message.fieldName}, "${normalizedAndEscapedMessage}")`);
-    } else {
-      const paramName = 'message';
-      conditions.push(`${message.fieldName} == ?${paramName}`);
-      params[paramName] = messageValue;
-    }
+    conditions.push(
+      needsNormalization(messageValue)
+        ? esqlFunction('MATCH_PHRASE', [esqlColumn(message.fieldName), esqlString(messageValue)])
+        : esqlEquals(message.fieldName, messageValue)
+    );
   }
 
   if (type?.value !== undefined && type?.fieldName) {
-    const typeFieldName = type.fieldName;
     if (Array.isArray(type.value)) {
-      const matchConditions = type.value.map((val) => {
-        const stringValue = String(val);
-        return `MATCH(${typeFieldName}, "${stringValue}")`;
-      });
-      conditions.push(matchConditions.join(' AND '));
+      conditions.push(
+        ...type.value.map((val) =>
+          esqlFunction('MATCH', [esqlColumn(type.fieldName), esqlString(String(val))])
+        )
+      );
     } else {
-      const paramName = 'type';
-      conditions.push(`${typeFieldName} == ?${paramName}`);
-      params[paramName] = type.value;
+      conditions.push(esqlEquals(type.fieldName, type.value));
     }
   }
 
-  if (conditions.length === 0) {
-    return undefined;
+  // MATCH instead of == so documents with a multivalued level (e.g. ["error", "fatal"]) still match.
+  if (level?.value && level?.fieldName) {
+    conditions.push(esqlFunction('MATCH', [esqlColumn(level.fieldName), esqlString(level.value)]));
   }
 
-  return where(conditions.join(' AND '), params);
+  return esqlAnd(conditions);
 }

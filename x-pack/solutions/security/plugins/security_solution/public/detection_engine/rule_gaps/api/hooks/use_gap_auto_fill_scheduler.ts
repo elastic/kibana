@@ -46,6 +46,7 @@ const transformGapAutoFillSchedulerResponseBody = (
     updatedBy: response.updated_by,
     createdAt: response.created_at,
     updatedAt: response.updated_at,
+    excludedReasons: response.excluded_reasons,
   };
 };
 
@@ -73,7 +74,7 @@ export const useCreateGapAutoFillScheduler = () => {
   const schedulerId = getSchedulerId(spaceId);
 
   return useMutation(
-    async () => {
+    async (params?: { excludedReasons?: string[] }) => {
       const fullBody = {
         id: schedulerId,
         name: '',
@@ -89,6 +90,7 @@ export const useCreateGapAutoFillScheduler = () => {
         maxBackfills: DEFAULT_GAP_AUTO_FILL_SCHEDULER_MAX_BACKFILLS,
         numRetries: DEFAULT_GAP_AUTO_FILL_SCHEDULER_NUM_RETRIES,
         scope: DEFAULT_GAP_AUTO_FILL_SCHEDULER_SCOPE,
+        excludedReasons: params?.excludedReasons,
       };
       const response = await createGapAutoFillScheduler(fullBody);
       return transformGapAutoFillSchedulerResponseBody(response);
@@ -122,6 +124,7 @@ export const useFindGapAutoFillSchedulerLogs = ({
   sortDirection,
   statuses,
   enabled,
+  staleTime,
 }: {
   page: number;
   perPage: number;
@@ -129,11 +132,10 @@ export const useFindGapAutoFillSchedulerLogs = ({
   sortDirection: string;
   statuses: string[];
   enabled: boolean;
+  staleTime?: number;
 }) => {
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
-
-  const { start, end } = getGapRange(defaultRangeValue);
 
   return useQuery(
     [
@@ -147,6 +149,8 @@ export const useFindGapAutoFillSchedulerLogs = ({
       ...statuses,
     ],
     async ({ signal }) => {
+      const { start, end } = getGapRange(defaultRangeValue);
+
       const response = await findGapAutoFillSchedulerLogs({
         id: schedulerId,
         signal,
@@ -179,6 +183,7 @@ export const useFindGapAutoFillSchedulerLogs = ({
     },
     {
       enabled,
+      staleTime,
     }
   );
 };

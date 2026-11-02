@@ -17,5 +17,5 @@ export interface ESQLEditorRestorableState {
   historySelectedTabId: HistoryTabId;
 }
 
-export const { withRestorableState, useRestorableState } =
+export const { withRestorableState, useRestorableState, useRestorableRef } =
   createRestorableStateProvider<ESQLEditorRestorableState>();

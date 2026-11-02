@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { elasticModelDictionary } from '@kbn/inference-common';
+import {
+  elasticModelDictionary,
+  InferenceConnectorType,
+  InferenceEndpointProvider,
+} from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import type { PromptArray, Prompt, GetPromptArgs, GetPromptsByGroupIdArgs } from './types';
 import { getProviderFromActionTypeId } from './utils';
 import { promptSavedObjectType } from './saved_object_mappings';
@@ -27,9 +29,8 @@ import { promptSavedObjectType } from './saved_object_mappings';
  * @param savedObjectsClient - saved objects client
  */
 export const getPromptsByGroupId = async ({
-  actionsClient,
-  connector,
   connectorId,
+  getInferenceConnectorById,
   localPrompts,
   model: providedModel,
   promptGroupId,
@@ -41,8 +42,7 @@ export const getPromptsByGroupId = async ({
     providedProvider,
     providedModel,
     connectorId,
-    actionsClient,
-    providedConnector: connector,
+    getInferenceConnectorById,
   });
 
   const prompts = await savedObjectsClient.find<Prompt>({
@@ -88,9 +88,8 @@ export const getPromptsByGroupId = async ({
  * @param savedObjectsClient - saved objects client
  */
 export const getPrompt = async ({
-  actionsClient,
-  connector,
   connectorId,
+  getInferenceConnectorById,
   localPrompts,
   model: providedModel,
   promptGroupId,
@@ -102,8 +101,7 @@ export const getPrompt = async ({
     providedProvider,
     providedModel,
     connectorId,
-    actionsClient,
-    providedConnector: connector,
+    getInferenceConnectorById,
   });
 
   const prompts = await savedObjectsClient.find<Prompt>({
@@ -133,40 +131,58 @@ export const resolveProviderAndModel = async ({
   providedProvider,
   providedModel,
   connectorId,
-  actionsClient,
-  providedConnector,
+  getInferenceConnectorById,
 }: {
   providedProvider?: string;
   providedModel?: string;
   connectorId?: string;
-  actionsClient?: PublicMethodsOf<ActionsClient>;
-  providedConnector?: Connector;
+  getInferenceConnectorById?: (id: string) => Promise<InferenceConnector>;
 }): Promise<{ provider?: string; model?: string }> => {
-  let model = providedModel;
-  let provider = providedProvider;
-  if (!provider || !model || provider === 'inference') {
-    let connector = providedConnector;
-    if (!connector && connectorId != null && actionsClient) {
-      connector = await actionsClient.get({ id: connectorId });
-    }
-    if (!connector) {
-      return {};
-    }
-    if (provider === 'inference' && connector.config) {
-      provider = connector.config.provider || provider;
-      model = connector.config.providerConfig?.model_id || model;
+  if (providedProvider && providedModel && providedProvider !== 'inference') {
+    return { provider: providedProvider, model: providedModel };
+  }
 
-      if (provider === 'elastic' && model) {
-        provider = elasticModelDictionary[model]?.provider || 'inference';
-        model = elasticModelDictionary[model]?.model;
-      }
-    } else if (connector.config) {
-      provider = provider || getProviderFromActionTypeId(connector.actionTypeId);
-      model = model || connector.config.defaultModel;
+  if (connectorId != null && getInferenceConnectorById) {
+    try {
+      return resolveFromInferenceConnector(await getInferenceConnectorById(connectorId));
+    } catch {
+      return { provider: providedProvider, model: providedModel };
     }
   }
 
-  return { provider: provider === 'inference' ? 'bedrock' : provider, model };
+  return { provider: providedProvider, model: providedModel };
+};
+
+// Maps ES inference endpoint service names to the provider names used in prompt lookup
+const inferenceServiceToProvider: Partial<Record<string, string>> = {
+  [InferenceEndpointProvider.AmazonBedrock]: 'bedrock',
+  [InferenceEndpointProvider.GoogleVertexAI]: 'gemini',
+  [InferenceEndpointProvider.OpenAI]: 'openai',
+  [InferenceEndpointProvider.AzureOpenAI]: 'openai',
+  [InferenceEndpointProvider.Elastic]: 'elastic',
+};
+
+const resolveFromInferenceConnector = ({
+  type,
+  config,
+}: InferenceConnector): { provider?: string; model?: string } => {
+  if (type === InferenceConnectorType.Inference) {
+    // .inference connectors: Kibana stack connectors use `provider`, native endpoints use `service`
+    const rawProvider: string | undefined =
+      config.provider || (config.service ? inferenceServiceToProvider[config.service] : undefined);
+    const rawModel: string | undefined = config.providerConfig?.model_id;
+    if (rawProvider === 'elastic' && rawModel) {
+      return {
+        provider: elasticModelDictionary[rawModel]?.provider || 'inference',
+        model: elasticModelDictionary[rawModel]?.model,
+      };
+    }
+    return { provider: rawProvider, model: rawModel };
+  }
+  return {
+    provider: getProviderFromActionTypeId(type),
+    model: config.defaultModel,
+  };
 };
 
 const findPrompt = ({

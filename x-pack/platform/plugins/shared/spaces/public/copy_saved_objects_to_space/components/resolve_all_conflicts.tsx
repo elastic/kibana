@@ -103,6 +103,12 @@ export class ResolveAllConflicts extends Component<ResolveAllConflictsProps, Sta
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.spaces.management.copyToSpace.resolveAllConflictsPopoverAriaLabel',
+          {
+            defaultMessage: 'Resolve all conflicts',
+          }
+        )}
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>

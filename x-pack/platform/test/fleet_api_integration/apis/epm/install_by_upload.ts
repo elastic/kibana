@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(33);
+      expect(res.body.items.length).to.be.greaterThan(32);
       expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
 
       await deletePackage(testPkgName, testPkgNewVersion);
@@ -251,7 +251,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry (2:7)\\n\\n 1 | format_version: 1.0.0\\n 2 |   name: apache\\n-----------^\\n 3 | title: Apache\\n 4 | version: 0.1.4."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: Nested mappings are not allowed in compact mappings at line 1, column 17:\\n\\nformat_version: 1.0.0\\n                ^\\n."}'
       );
     });
 

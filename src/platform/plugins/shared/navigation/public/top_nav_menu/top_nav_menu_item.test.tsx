@@ -36,11 +36,11 @@ describe('TopNavMenu', () => {
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(data.run).toBeCalledTimes(1);
+    expect(data.run).toHaveBeenCalledTimes(1);
     expect(data.run).toHaveBeenCalledWith(event.currentTarget);
 
     component.simulate('click', event);
-    expect(data.run).toBeCalledTimes(2);
+    expect(data.run).toHaveBeenCalledTimes(2);
   });
 
   it('Should render item with all attributes', () => {
@@ -66,7 +66,7 @@ describe('TopNavMenu', () => {
     const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       run: jest.fn(),
@@ -122,7 +122,7 @@ describe('TopNavMenu', () => {
     ensureMenuItemDisabled({
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       disableButton: true,
@@ -135,7 +135,7 @@ describe('TopNavMenu', () => {
     ensureMenuItemDisabled({
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       disableButton: () => true,
@@ -148,7 +148,7 @@ describe('TopNavMenu', () => {
     const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
-      iconType: 'beaker',
+      iconType: 'flask',
       iconSide: 'right',
       emphasize: true,
       isMobileMenu: true,

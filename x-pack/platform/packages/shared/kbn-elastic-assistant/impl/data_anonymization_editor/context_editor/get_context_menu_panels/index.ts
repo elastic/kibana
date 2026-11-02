@@ -84,7 +84,7 @@ export const getContextMenuPanels = ({
         },
         {
           disabled: disableAnonymize,
-          icon: 'eyeClosed',
+          icon: 'eyeSlash',
           name: i18n.ANONYMIZE,
           onClick: () => {
             closePopover();

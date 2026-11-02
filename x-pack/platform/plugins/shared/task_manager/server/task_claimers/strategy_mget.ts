@@ -7,14 +7,17 @@
 
 // Basic operation of this task claimer:
 // - search for candidate tasks to run, more than we actually can run
-// - initial search returns a slimmer task document for I/O efficiency (no params or state)
+// - initial search returns a slimmer task document for I/O efficiency (no params, state or
+//   API keys), so candidates are TaskClaimCandidate rather than ConcreteTaskInstance
 // - for each task found, do an mget to get the current seq_no and primary_term
 // - if the mget result doesn't match the search result, the task is stale
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
+// - the tasks we successfully claim are then hydrated into full task documents with a bulkGet
 
 import type { Logger } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
@@ -25,6 +28,7 @@ import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   PartialConcreteTaskInstance,
+  TaskClaimCandidate,
 } from '../task';
 import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
@@ -46,7 +50,9 @@ import {
 
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
+import { isUnreadableTaskError } from '../lib/errors';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
+import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 
@@ -69,19 +75,29 @@ const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
-  const apmTrans = apm.startTransaction(
-    TASK_MANAGER_MARK_AS_CLAIMED,
-    TASK_MANAGER_TRANSACTION_TYPE
-  );
+  return withActiveSpan(
+    'mark-task-as-claimed',
+    {
+      attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
+    async () => {
+      const apmTrans = apm.startTransaction(
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
+      );
 
-  try {
-    const result = await claimAvailableTasks(opts);
-    apmTrans.end('success');
-    return result;
-  } catch (err) {
-    apmTrans.end('failure');
-    throw err;
-  }
+      try {
+        const result = await claimAvailableTasks(opts);
+        apmTrans.end('success');
+        return result;
+      } catch (err) {
+        apmTrans.end('failure');
+        throw err;
+      }
+    }
+  );
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
@@ -119,9 +135,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
   // filter out stale and missing tasks
-  const currentTasks: ConcreteTaskInstance[] = [];
-  const staleTasks: ConcreteTaskInstance[] = [];
-  const missingTasks: ConcreteTaskInstance[] = [];
+  const currentTasks: TaskClaimCandidate[] = [];
+  const staleTasks: TaskClaimCandidate[] = [];
+  const missingTasks: TaskClaimCandidate[] = [];
 
   for (const searchDoc of docs) {
     const searchVersion = versionMap.get(searchDoc.id);
@@ -147,13 +163,13 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const candidateTasks = selectTasksByCapacity({ definitions, tasks: currentTasks, batches });
 
   // apply capacity constraint to candidate tasks
-  const tasksToRun: ConcreteTaskInstance[] = [];
-  const leftOverTasks: ConcreteTaskInstance[] = [];
-  const tasksWithMalformedData: ConcreteTaskInstance[] = [];
+  const tasksToRun: TaskClaimCandidate[] = [];
+  const leftOverTasks: TaskClaimCandidate[] = [];
+  const tasksWithMalformedData: TaskClaimCandidate[] = [];
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
-    const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
+    const taskCost = getTaskCost(task, definitions);
     if (capacityAccumulator + taskCost <= initialCapacity) {
       tasksToRun.push(task);
       capacityAccumulator += taskCost;
@@ -215,6 +231,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // perform an mget to get the full task instance for claiming
+  const unreadableTasks: PartialConcreteTaskInstance[] = [];
   const fullTasksToRun = (await taskStore.bulkGet(Object.keys(updatedTasks))).reduce<
     ConcreteTaskInstance[]
   >((acc, task) => {
@@ -229,9 +246,14 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       const { id, type, error } = task.error;
       logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
       bulkGetErrors++;
+      if (isUnreadableTaskError(error) && updatedTasks[id]) {
+        unreadableTasks.push(updatedTasks[id]);
+      }
     }
     return acc;
   }, []);
+
+  await markUnreadableTasksAsFailed({ taskStore, tasks: unreadableTasks, logger });
 
   // TODO: need a better way to generate stats
   const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;
@@ -258,8 +280,50 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   return finalResult;
 }
 
+interface MarkUnreadableTasksAsFailedOpts {
+  taskStore: TaskStore;
+  tasks: PartialConcreteTaskInstance[];
+  logger: Logger;
+}
+
+// An unreadable task fails the same way on every claim, so it's taken out of the claim cycle
+// instead of being left running until its retryAt.
+async function markUnreadableTasksAsFailed({
+  taskStore,
+  tasks,
+  logger,
+}: MarkUnreadableTasksAsFailedOpts): Promise<void> {
+  if (tasks.length === 0) return;
+
+  try {
+    const results = await taskStore.bulkPartialUpdate(
+      tasks.map(({ id, version, attempts = 0 }) => ({
+        id,
+        version,
+        status: TaskStatus.Failed,
+        attempts: Math.max(attempts - 1, 0),
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      }))
+    );
+    for (const result of results) {
+      if (!isOk(result)) {
+        const { id, type, error } = result.error;
+        logger.warn(
+          `Error marking unreadable task ${id}:${type} as failed during claim: ${JSON.stringify(
+            error
+          )}`
+        );
+      }
+    }
+  } catch (e) {
+    logger.warn(`Error marking unreadable tasks as failed during claim: ${e.message}`);
+  }
+}
+
 interface SearchAvailableTasksResponse {
-  docs: ConcreteTaskInstance[];
+  docs: TaskClaimCandidate[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 

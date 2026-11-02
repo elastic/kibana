@@ -8,7 +8,8 @@
  */
 
 import _ from 'lodash';
-import { ebtSpanFilter, type Payload } from './ebt_span_filter';
+import { ebtSpanFilter } from './ebt_span_filter';
+import type { Payload } from './types';
 import { mockedKibanaBrowserPayload, mockedRandomTransactionPayload } from './ebt_span_filter.mock';
 
 describe('ebtSpanFilter', () => {
@@ -28,7 +29,7 @@ describe('ebtSpanFilter', () => {
   });
 
   it('does not throw if payload is empty', () => {
-    const payload: Payload = {};
+    const payload: Payload = {} as Partial<Payload> as Payload;
     expect(() => ebtSpanFilter(payload)).not.toThrow();
     expect(ebtSpanFilter(payload)).toEqual({});
   });

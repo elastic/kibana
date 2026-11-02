@@ -6,35 +6,27 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiSpacer,
-  EuiIconTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiIconTip, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
 
 import {
   useStartServices,
-  sendDeleteAgentPolicy,
   useConfig,
   sendGetAgents,
   useMultipleAgentPolicies,
-  useLink,
   useDeletePackagePolicyMutation,
   sendDeletePackageDatastreamAssets,
 } from '../hooks';
-import { AGENTS_PREFIX } from '../../common/constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
 import { sendDeleteAgentlessPolicy } from '../hooks/use_request/agentless_policy';
-import { ExperimentalFeaturesService } from '../services';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
-  from?: 'fleet-policy-list' | undefined;
+  from?: 'fleet-policy-list' | 'installed-integrations' | undefined;
   packagePolicyPackage?: PackagePolicyPackage;
   isAgentlessPolicy?: boolean | null;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
@@ -58,8 +50,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const history = useHistory();
-  const { getPath } = useLink();
   const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
@@ -82,6 +72,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const hasMultipleAgentPolicies =
     canUseMultipleAgentPolicies && agentPolicies && agentPolicies.length > 1;
 
+  const isDeletingFleetServer = packagePolicyPackage?.name === FLEET_SERVER_PACKAGE;
+
   const fetchAgentsCount = useMemo(
     () => async () => {
       if (isLoadingAgentsCount || !isFleetEnabled || !agentPolicies) {
@@ -89,9 +81,11 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       }
       setIsLoadingAgentsCount(true);
 
-      const kuery = `(${agentPolicies
-        .map((policy) => `${AGENTS_PREFIX}.policy_id:"${policy.id}"`)
-        .join(' or ')})`;
+      const kuery = buildPolicyBaseIdsWithFallbackKuery(
+        agentPolicies.map((policy) => policy.id),
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      );
 
       const request = await sendGetAgents({
         kuery,
@@ -134,7 +128,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const deletePackagePolicies = useCallback(async () => {
     setIsLoading(true);
     try {
-      if (isAgentlessPolicy && ExperimentalFeaturesService.get().useAgentlessAPIInUI) {
+      if (isAgentlessPolicy) {
         for (const policyId of packagePolicies) {
           await sendDeleteAgentlessPolicy(policyId);
           notifications.toasts.addSuccess(
@@ -178,28 +172,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 values: { id: successfulResults[0].name || successfulResults[0].id },
               });
 
-          const agentlessPolicy = agentPolicies?.find(
-            (policy) => policy.supports_agentless === true
-          );
-
-          if (!!agentlessPolicy) {
-            try {
-              await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
-              if (from === 'fleet-policy-list') {
-                history.push(getPath('policies_list'));
-              }
-            } catch (e) {
-              notifications.toasts.addDanger(
-                i18n.translate(
-                  'xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle',
-                  {
-                    defaultMessage: 'Error deleting agentless deployment',
-                  }
-                )
-              );
-            }
-          }
-
           notifications.toasts.addSuccess(successMessage);
         }
 
@@ -234,11 +206,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     closeModal,
     deletePackagePolicyMutationAsync,
     packagePolicyPackage,
-    agentPolicies,
     notifications.toasts,
-    from,
-    history,
-    getPath,
     isAgentlessPolicy,
   ]);
 
@@ -300,12 +268,31 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {isDeletingFleetServer && (
+          <>
+            <KbnDangerCallout
+              announceOnMount={false}
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningTitle"
+                  defaultMessage="This may disconnect agents from Fleet"
+                />
+              }
+              data-test-subj="fleetServerDeleteCallOut"
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.fleetServerWarningMessage"
+                  defaultMessage="If this policy is assigned to any Fleet Servers, deleting the Fleet Server integration will stop them from running. Agents that depend on those Fleet Servers will lose their connection to Fleet — you won't be able to manage them or send policy updates until you re-enroll each agent individually."
+                />
+              }
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {packagePolicyPackage?.type === 'input' && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="alert"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.inputPackage.message"
@@ -319,10 +306,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         )}
         {(hasMultipleAgentPolicies || isShared) && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
-              color="warning"
-              iconType="alert"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies"
@@ -342,9 +327,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           />
         ) : agentsCount && agentPolicies ? (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
-              color="danger"
               data-test-subj="affectedAgentsCallOut"
               title={
                 !isAgentlessAgentPolicy && (
@@ -398,7 +382,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   }}
                 />
               )}
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer size="l" />
           </>
         ) : null}

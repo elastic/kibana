@@ -6,10 +6,10 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import type { FleetErrorType } from './types';
+import type { FleetErrorResponse } from './types';
 
 export class FleetError<TMeta = unknown> extends Error {
-  attributes?: { type: FleetErrorType };
+  attributes?: FleetErrorResponse['attributes'];
   constructor(message?: string, public readonly meta?: TMeta) {
     super(message);
     this.name = this.constructor.name; // for stack traces
@@ -45,3 +45,5 @@ export class AgentlessAgentCreateOverProvisionedError extends FleetError<{ limit
     super(`Error creating agentless agent in Fleet, ${message}`, { limit });
   }
 }
+
+export class PackageDependencyError extends FleetError {}

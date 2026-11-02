@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleExecutionSummaryAndChart } from './rule_execution_summary_and_chart';
@@ -43,7 +44,7 @@ describe('rule_execution_summary_and_chart', () => {
   });
 
   it('becomes a stateless component when "fetchRuleSummary" is false', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleExecutionSummaryAndChart
         ruleId={ruleMock.id}
         ruleType={ruleType}
@@ -56,49 +57,24 @@ describe('rule_execution_summary_and_chart', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
     // Does not fetch for the rule summary by itself
     expect(loadRuleSummaryMock).toHaveBeenCalledTimes(0);
 
-    (
-      wrapper
-        .find('[data-test-subj="executionDurationChartPanelSelect"]')
-        .first()
-        .prop('onChange') as any
-    )({
-      target: {
-        value: 30,
-      },
-    });
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    // Simulate change on duration select
+    const select = screen.getByTestId('executionDurationChartPanelSelect');
+    await userEvent.selectOptions(select, '30');
 
     // Calls the handler passed in via props
     expect(onChangeDurationMock).toHaveBeenCalledWith(30);
 
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiPanel[data-test-subj="avgExecutionDurationPanel"]').text()).toEqual(
-      'Average duration00:00:00.100'
-    );
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
-
-    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
-      '00:00:00.100'
-    );
+    expect(screen.getByTestId('avgExecutionDurationPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
+    expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleEventLogListAvgDuration')).toHaveTextContent('00:00:00.100');
   });
 
   it('becomes a container component when "fetchRuleSummary" is true', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleExecutionSummaryAndChart
         ruleId={ruleMock.id}
         ruleType={ruleType}
@@ -107,53 +83,29 @@ describe('rule_execution_summary_and_chart', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Fetches the rule summary by itself
+    await waitFor(() => {
+      expect(loadRuleSummaryMock).toHaveBeenCalledTimes(1);
     });
 
-    // Does not fetch for the rule summary by itself
-    expect(loadRuleSummaryMock).toHaveBeenCalledTimes(1);
+    // Simulate change on duration select — but onChangeDurationMock is not passed so should not be called
+    const select = screen.getByTestId('executionDurationChartPanelSelect');
+    await userEvent.selectOptions(select, '30');
 
-    await act(async () => {
-      (
-        wrapper
-          .find('[data-test-subj="executionDurationChartPanelSelect"]')
-          .first()
-          .prop('onChange') as any
-      )({
-        target: {
-          value: 30,
-        },
-      });
-    });
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    // Calls the handler passed in via props
+    // onChangeDuration not provided so mock should not be called
     expect(onChangeDurationMock).toHaveBeenCalledTimes(0);
 
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiPanel[data-test-subj="avgExecutionDurationPanel"]').text()).toEqual(
-      'Average duration00:00:00.100'
-    );
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
+    await screen.findByTestId('avgExecutionDurationPanel');
 
-    expect(wrapper.find('[data-test-subj="executionDurationChartPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleEventLogListAvgDuration"]').first().text()).toEqual(
-      '00:00:00.100'
-    );
+    expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
+    expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleEventLogListAvgDuration')).toHaveTextContent('00:00:00.100');
   });
 
   it('should show error if loadRuleSummary fails', async () => {
     loadRuleSummaryMock.mockRejectedValue('error!');
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleExecutionSummaryAndChart
         ruleId={ruleMock.id}
         ruleType={ruleType}
@@ -162,11 +114,8 @@ describe('rule_execution_summary_and_chart', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalled();
     });
-
-    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalled();
   });
 });

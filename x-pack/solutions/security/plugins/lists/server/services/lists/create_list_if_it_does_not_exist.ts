@@ -8,13 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
-  DeserializerOrUndefined,
   Id,
   Immutable,
   ListSchema,
   MetaOrUndefined,
   Name,
-  SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
@@ -26,8 +24,6 @@ export interface CreateListIfItDoesNotExistOptions {
   id: Id;
   type: Type;
   name: Name;
-  deserializer: DeserializerOrUndefined;
-  serializer: SerializerOrUndefined;
   description: Description;
   immutable: Immutable;
   esClient: ElasticsearchClient;
@@ -44,12 +40,10 @@ export const createListIfItDoesNotExist = async ({
   name,
   type,
   description,
-  deserializer,
   esClient,
   listIndex,
   user,
   meta,
-  serializer,
   dateNow,
   tieBreaker,
   version,
@@ -60,14 +54,12 @@ export const createListIfItDoesNotExist = async ({
     return createList({
       dateNow,
       description,
-      deserializer,
       esClient,
       id,
       immutable,
       listIndex,
       meta,
       name,
-      serializer,
       tieBreaker,
       type,
       user,

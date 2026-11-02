@@ -84,6 +84,21 @@ export const HAS_AUTH_LABEL = i18n.translate(
   }
 );
 
+export const ALLOW_HTML_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.email.allowHtmlSwitchLabel',
+  {
+    defaultMessage: 'Allow HTML content',
+  }
+);
+
+export const ALLOW_HTML_HELP = i18n.translate(
+  'xpack.stackConnectors.components.email.allowHtmlSwitchHelpText',
+  {
+    defaultMessage:
+      'Allows this connector to send email with HTML bodies. Enable only for connectors used with trusted content.',
+  }
+);
+
 export const SENDER_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.email.error.requiredFromText',
   {
@@ -143,7 +158,7 @@ export const USERNAME_REQUIRED = i18n.translate(
 export const TO_CC_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.email.error.requiredEntryText',
   {
-    defaultMessage: 'No To, Cc, or Bcc entry.  At least one entry is required.',
+    defaultMessage: 'At least one recipient is required.',
   }
 );
 

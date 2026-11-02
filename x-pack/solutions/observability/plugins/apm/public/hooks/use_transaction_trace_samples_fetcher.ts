@@ -20,7 +20,7 @@ export function useTransactionTraceSamplesFetcher({
   rangeFrom,
   rangeTo,
 }: {
-  transactionName: string;
+  transactionName: string | undefined;
   kuery: string;
   environment: string;
   rangeFrom: string;

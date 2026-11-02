@@ -91,7 +91,7 @@ export const AttackDiscoveryPanel = memo(
           <AttackDiscoveryDetails attackDiscovery={attackDiscovery} />
           <EuiButtonEmpty
             iconSide="right"
-            iconType="popout"
+            iconType="external"
             data-test-subj={ATTACK_DISCOVERY_VIEW_DETAILS_BUTTON_TEST_ID}
             onClick={handleNavigateToAttackDiscovery}
             css={css`

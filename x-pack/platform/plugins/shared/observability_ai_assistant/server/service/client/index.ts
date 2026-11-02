@@ -12,7 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   catchError,
   defer,
@@ -34,6 +35,7 @@ import type {
   ChatCompleteResponse,
   FunctionCallingMode,
   InferenceClient,
+  InferenceConnector,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
@@ -94,11 +96,12 @@ export class ObservabilityAIAssistantClient {
       core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
       actionsClient: PublicMethodsOf<ActionsClient>;
       uiSettingsClient: IUiSettingsClient;
-      namespace: string;
+      namespace: SpaceId;
       esClient: {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
+      getConnectorById: (connectorId: string) => Promise<InferenceConnector>;
       inferenceClient: InferenceClient;
       logger: Logger;
       user?: {
@@ -224,15 +227,17 @@ export class ObservabilityAIAssistantClient {
       const isConversationUpdate = persist && !!predefinedConversationId;
       const conversationId = persist ? predefinedConversationId || v4() : undefined;
       let resolveConversationRequest: (value: ConversationCreateRequest | undefined) => void;
+      let rejectConversationRequest: (err: Error) => void;
       const conversationRequestPromise = new Promise<ConversationCreateRequest | undefined>(
-        (resolve) => {
+        (resolve, reject) => {
           resolveConversationRequest = resolve;
+          rejectConversationRequest = reject;
         }
       );
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         const { namespace } = this.dependencies;
-        const spaceAwarePath = addSpaceIdToPath('/', namespace, '/app/observabilityAIAssistant');
+        const spaceAwarePath = `${getSpaceUrlPrefix(namespace)}/app/observabilityAIAssistant`;
 
         const conversationUrl = `${kibanaPublicUrl}${spaceAwarePath}/conversations/${conversationId}`;
 
@@ -281,12 +286,7 @@ export class ObservabilityAIAssistantClient {
       );
 
       const connector$ = defer(() =>
-        from(
-          this.dependencies.actionsClient.get({
-            id: connectorId,
-            throwIfSystemAction: true,
-          })
-        ).pipe(
+        from(this.dependencies.getConnectorById(connectorId)).pipe(
           catchError((error) => {
             this.dependencies.logger.debug(
               `Failed to fetch connector for analytics: ${error.message}`
@@ -486,7 +486,9 @@ export class ObservabilityAIAssistantClient {
       return {
         response$,
         getConversation: async () => {
-          const subscription = response$.subscribe();
+          const subscription = response$.subscribe({
+            error: (err) => rejectConversationRequest(err),
+          });
 
           try {
             const response = await conversationRequestPromise;

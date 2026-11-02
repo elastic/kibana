@@ -47,14 +47,11 @@ import {
   ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
-  AT_LEAST_ONE_INDEX_PATTERN,
-  AT_LEAST_ONE_VALID_MATCH,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
   CREATE_WITHOUT_ENABLING_BTN,
   CUSTOM_INDEX_PATTERN_INPUT,
   CUSTOM_QUERY_INPUT,
-  CUSTOM_QUERY_REQUIRED,
   DATA_VIEW_COMBO_BOX,
   DATA_VIEW_OPTION,
   DEFAULT_RISK_SCORE_INPUT,
@@ -69,7 +66,6 @@ import {
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
-  INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
   INVESTIGATIONS_INPUT,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
@@ -124,15 +120,12 @@ import {
   SEVERITY_OVERRIDE_ROW,
   SHOW_QUERY_BAR_BUTTON,
   TAGS_INPUT,
-  THREAT_COMBO_BOX_INPUT,
   THREAT_ITEM_ENTRY_DELETE_BUTTON,
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
-  THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
-  THREAT_MATCH_QUERY_REQUIRED,
   THREAT_MATCH_OPERATOR_SELECT,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   THRESHOLD_INPUT_AREA,
@@ -158,10 +151,10 @@ import { TIMELINE } from '../screens/timelines';
 import { COMBO_BOX_INPUT, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
-import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { fillComboBox } from './eui_form_interactions';
+import { refreshPage } from './security_header';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -470,7 +463,8 @@ export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
@@ -573,7 +567,8 @@ export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
 
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -622,7 +617,8 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
 export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
@@ -640,23 +636,28 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-const typeEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
-};
-
 /**
- * clears ES|QL search bar first
- * types new query
+ * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
+ * This avoids flakiness in the tests when typing in the ES|QL query bar.
  */
 export const fillEsqlQueryBar = (query: string) => {
-  // before typing anything in query bar, we need to clear it
-  // Since first click on ES|QL query bar trigger re-render. We need to clear search bar during second attempt
-  typeEsqlQueryBar(' ');
-  typeEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a{del}' : '{ctrl}a{del}');
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
 
-  // only after this query can be safely typed
-  typeEsqlQueryBar(query);
+  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
+
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', query);
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: dataTransfer,
+      bubbles: true,
+      cancelable: true,
+    });
+    $textarea[0].dispatchEvent(pasteEvent);
+  });
+
+  cy.get(ESQL_QUERY_BAR).contains(query);
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
@@ -685,7 +686,7 @@ export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) 
  * which row is valid or not.
  *
  * There are special tricks below with Eui combo box:
- * cy.get(`button[title="${indexField}"]`)
+ * cy.get(`.euiComboBoxOption[title="${indexField}"]`)
  * .should('be.visible')
  * .then(([e]) => e.click());
  *
@@ -716,14 +717,14 @@ export const fillIndicatorMatchRow = ({
     .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indexField}"]`).then(([e]) => e.click());
+    cy.get(`[data-test-subj="filterFieldOption-${indexField}"]`).click();
   }
   cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
     .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
+    cy.get(`[data-test-subj="filterFieldOption-${indicatorIndexField}"]`).click();
   }
 
   if (doesNotMatch) {
@@ -746,32 +747,12 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
-/** Returns the indicator index drop down field. Pass in row number, default is 1 */
-export const getIndicatorIndexComboField = (row = 1) =>
-  cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 2);
-
-/** Returns the indicator mapping drop down field. Pass in row number, default is 1 */
-export const getIndicatorMappingComboField = (row = 1) =>
-  cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 1);
-
 /** Returns the indicator matches DELETE button for the mapping. Pass in row number, default is 1  */
 export const getIndicatorDeleteButton = (row = 1) =>
   cy.get(THREAT_ITEM_ENTRY_DELETE_BUTTON).eq(row - 1);
 
 /** Returns the indicator matches AND button for the mapping */
 export const getIndicatorAndButton = () => cy.get(THREAT_MATCH_AND_BUTTON);
-
-/** Returns the indicator matches OR button for the mapping */
-export const getIndicatorOrButton = () => cy.get(THREAT_MATCH_OR_BUTTON);
-
-/** Returns the invalid match content. */
-export const getIndicatorInvalidationText = () => cy.contains(INVALID_MATCH_CONTENT);
-
-/** Returns that at least one valid match is required content */
-export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST_ONE_VALID_MATCH);
-
-/** Returns that at least one index pattern is required content */
-export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
@@ -796,21 +777,6 @@ export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT)
 
 /** Returns the custom query input */
 export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPUT).eq(0);
-
-/** Returns custom query required content */
-export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
-
-/** Returns threat match query required content */
-export const getThreatMatchQueryInvalidationText = () => cy.contains(THREAT_MATCH_QUERY_REQUIRED);
-
-/**
- * Fills in the define indicator match rules and then presses the continue button
- * @param rule The rule to use to fill in everything
- */
-export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCreateProps) => {
-  fillDefineIndicatorMatchRule(rule);
-  continueFromDefineStep();
-};
 
 export const fillDefineIndicatorMatchRule = (rule: ThreatMatchRuleCreateProps) => {
   if (rule.index) {
@@ -893,6 +859,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
       cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
@@ -955,8 +922,16 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
       cy.get(COMBO_BOX_OPTION).should('contain.text', field);
     }
 
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
+    // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
+    cy.contains(COMBO_BOX_OPTION, field).click();
+    // Wait for the field to be selected as a pill before closing the dropdown,
+    // otherwise {esc} can race with {enter} and cancel the selection
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
+      .find('[data-test-subj="euiComboBoxPill"]')
+      .should('contain.text', field);
   });
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
 };
 
 export const clearAlertSuppressionFields = () => {

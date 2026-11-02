@@ -6,16 +6,13 @@
  */
 
 import * as fs from 'fs';
-import type { Response } from 'node-fetch';
-import fetch from 'node-fetch';
 import { fetchArtifactVersions } from './fetch_artifact_versions';
 import type { ProductName } from '@kbn/product-doc-common';
 import { getArtifactName, DocumentationProduct } from '@kbn/product-doc-common';
 
-jest.mock('node-fetch');
 jest.mock('fs');
 
-const fetchMock = fetch as jest.MockedFn<typeof fetch>;
+const fetchMock = jest.spyOn(global, 'fetch');
 
 const createResponse = ({
   artifactNames,
@@ -181,7 +178,7 @@ describe('fetchArtifactVersions', () => {
   it('throws an error if the response is truncated', async () => {
     mockResponse(createResponse({ artifactNames: [], truncated: true }));
 
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError(
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrow(
       /bucket content is truncated/
     );
   });
@@ -189,6 +186,6 @@ describe('fetchArtifactVersions', () => {
   it('throws an error if the response is not valid xml', async () => {
     mockResponse('some plain text');
 
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError();
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrow();
   });
 });

@@ -41,7 +41,6 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-        allowExpensiveQueries: true,
       };
       expect(
         validationAggBuilder.buildAggregation(optionsListRequestBodyMock)
@@ -53,32 +52,46 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'coolTestField',
-        allowExpensiveQueries: true,
+
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
-          "validation": Object {
-            "filters": Object {
-              "filters": Object {
-                "coolOption1": Object {
-                  "match": Object {
-                    "coolTestField": "coolOption1",
+          "globalValidation": Object {
+            "aggs": Object {
+              "filteredValidation": Object {
+                "aggs": Object {
+                  "validation": Object {
+                    "filters": Object {
+                      "filters": Object {
+                        "coolOption1": Object {
+                          "match": Object {
+                            "coolTestField": "coolOption1",
+                          },
+                        },
+                        "coolOption2": Object {
+                          "match": Object {
+                            "coolTestField": "coolOption2",
+                          },
+                        },
+                        "coolOption3": Object {
+                          "match": Object {
+                            "coolTestField": "coolOption3",
+                          },
+                        },
+                      },
+                    },
                   },
                 },
-                "coolOption2": Object {
-                  "match": Object {
-                    "coolTestField": "coolOption2",
-                  },
-                },
-                "coolOption3": Object {
-                  "match": Object {
-                    "coolTestField": "coolOption3",
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [],
                   },
                 },
               },
             },
+            "global": Object {},
           },
         }
       `);
@@ -93,39 +106,53 @@ describe('options list queries', () => {
           type: 'string',
           subType: { nested: { path: 'path.to.nested' } },
         } as unknown as FieldSpec,
-        allowExpensiveQueries: true,
+
         selectedOptions: ['coolOption1', 'coolOption2', 'coolOption3'],
       };
       expect(validationAggBuilder.buildAggregation(optionsListRequestBodyMock))
         .toMatchInlineSnapshot(`
         Object {
-          "nestedValidation": Object {
+          "globalValidation": Object {
             "aggs": Object {
-              "validation": Object {
-                "filters": Object {
-                  "filters": Object {
-                    "coolOption1": Object {
-                      "match": Object {
-                        "coolTestField": "coolOption1",
+              "filteredValidation": Object {
+                "aggs": Object {
+                  "nestedValidation": Object {
+                    "aggs": Object {
+                      "validation": Object {
+                        "filters": Object {
+                          "filters": Object {
+                            "coolOption1": Object {
+                              "match": Object {
+                                "coolTestField": "coolOption1",
+                              },
+                            },
+                            "coolOption2": Object {
+                              "match": Object {
+                                "coolTestField": "coolOption2",
+                              },
+                            },
+                            "coolOption3": Object {
+                              "match": Object {
+                                "coolTestField": "coolOption3",
+                              },
+                            },
+                          },
+                        },
                       },
                     },
-                    "coolOption2": Object {
-                      "match": Object {
-                        "coolTestField": "coolOption2",
-                      },
+                    "nested": Object {
+                      "path": "path.to.nested",
                     },
-                    "coolOption3": Object {
-                      "match": Object {
-                        "coolTestField": "coolOption3",
-                      },
-                    },
+                  },
+                },
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [],
                   },
                 },
               },
             },
-            "nested": Object {
-              "path": "path.to.nested",
-            },
+            "global": Object {},
           },
         }
       `);
@@ -136,14 +163,18 @@ describe('options list queries', () => {
     test('parses validation result', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
       rawSearchResponseMock.aggregations = {
-        validation: {
-          buckets: {
-            cool1: { doc_count: 0 },
-            cool2: { doc_count: 15 },
-            cool3: { doc_count: 0 },
-            cool4: { doc_count: 2 },
-            cool5: { doc_count: 112 },
-            cool6: { doc_count: 0 },
+        globalValidation: {
+          filteredValidation: {
+            validation: {
+              buckets: {
+                cool1: { doc_count: 0 },
+                cool2: { doc_count: 15 },
+                cool3: { doc_count: 0 },
+                cool4: { doc_count: 2 },
+                cool5: { doc_count: 112 },
+                cool6: { doc_count: 0 },
+              },
+            },
           },
         },
       };
@@ -151,7 +182,7 @@ describe('options list queries', () => {
         validationAggBuilder.parse(rawSearchResponseMock, {
           size: 10,
           fieldName: 'coolTestField',
-          allowExpensiveQueries: true,
+
           fieldSpec: { type: 'string' } as FieldSpec,
         })
       ).toMatchInlineSnapshot(`
@@ -166,15 +197,19 @@ describe('options list queries', () => {
     test('parses validation result for nested field', () => {
       const validationAggBuilder = getValidationAggregationBuilder();
       rawSearchResponseMock.aggregations = {
-        nestedValidation: {
-          validation: {
-            buckets: {
-              cool1: { doc_count: 0 },
-              cool2: { doc_count: 15 },
-              cool3: { doc_count: 0 },
-              cool4: { doc_count: 0 },
-              cool5: { doc_count: 0 },
-              cool6: { doc_count: 112 },
+        globalValidation: {
+          filteredValidation: {
+            nestedValidation: {
+              validation: {
+                buckets: {
+                  cool1: { doc_count: 0 },
+                  cool2: { doc_count: 15 },
+                  cool3: { doc_count: 0 },
+                  cool4: { doc_count: 0 },
+                  cool5: { doc_count: 0 },
+                  cool6: { doc_count: 112 },
+                },
+              },
             },
           },
         },
@@ -187,7 +222,6 @@ describe('options list queries', () => {
             subType: { nested: { path: 'path.to.nested' } },
           } as unknown as FieldSpec,
           fieldName: 'coolTestField',
-          allowExpensiveQueries: true,
         })
       ).toMatchInlineSnapshot(`
         Array [

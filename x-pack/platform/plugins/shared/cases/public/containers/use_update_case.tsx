@@ -7,7 +7,7 @@
 
 import { useMutation } from '@kbn/react-query';
 
-import { patchCase } from './api';
+import { getCase, patchCase } from './api';
 import * as i18n from './translations';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesMutationsKeys } from './constants';
@@ -16,6 +16,7 @@ import type { UpdateByKey } from './types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { createUpdateSuccessToaster } from './utils';
 import { useToasts } from '../common/lib/kibana';
+import { rebaseCaseMutationOnConflict } from './conflict_rebase';
 
 export const useUpdateCase = () => {
   const toasts = useToasts();
@@ -24,10 +25,32 @@ export const useUpdateCase = () => {
 
   return useMutation(
     (request: UpdateByKey) =>
-      patchCase({
-        caseId: request.caseData.id,
-        updatedCase: { [request.updateKey]: request.updateValue },
-        version: request.caseData.version,
+      rebaseCaseMutationOnConflict({
+        request,
+        preRequestServerState: [request.caseData],
+        executeRequest: (retryRequest) =>
+          patchCase({
+            caseId: retryRequest.caseData.id,
+            updatedCase: { [retryRequest.updateKey]: retryRequest.updateValue },
+            version: retryRequest.caseData.version,
+          }),
+        fetchLatestCase: (caseId) => getCase({ caseId }),
+        buildRetryRequest: ({ request: retryRequest, latestCases }) => {
+          const latestCase = latestCases.get(retryRequest.caseData.id);
+
+          if (latestCase == null) {
+            return retryRequest;
+          }
+
+          return {
+            ...retryRequest,
+            caseData: {
+              ...retryRequest.caseData,
+              ...latestCase,
+              comments: retryRequest.caseData.comments,
+            },
+          };
+        },
       }),
     {
       mutationKey: casesMutationsKeys.updateCase,

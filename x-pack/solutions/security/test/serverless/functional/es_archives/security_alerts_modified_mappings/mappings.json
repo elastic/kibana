@@ -24,30 +24,6 @@
           "ignore_malformed": false,
           "type": "date"
         },
-        "actor": {
-          "properties": {
-            "entity": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            }
-          }
-        },
-        "target": {
-          "properties": {
-            "entity": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            }
-          }
-        },
         "agent": {
           "properties": {
             "build": {
@@ -1004,6 +980,22 @@
           "properties": {
             "version": {
               "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "target": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -2081,6 +2073,14 @@
                 },
                 "static_score_norm": {
                   "type": "float"
+                }
+              }
+            },
+            "target": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -8286,6 +8286,14 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "full_name": {
                   "fields": {
                     "text": {
@@ -8347,6 +8355,14 @@
                 "email": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "entity": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 },
                 "full_name": {
                   "fields": {
@@ -8671,13 +8687,16 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "hidden": "true",
         "mapping": {
           "ignore_malformed": "true",
           "total_fields": {
             "limit": "2500"
           }
-        }
+        },
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }

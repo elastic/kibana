@@ -3,14 +3,14 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo --- Check if all pipelines are in locations.yml
-cmd="ts-node .buildkite/pipeline-resource-definitions/scripts/fix-location-collection.ts"
+cmd="node .buildkite/pipeline-resource-definitions/scripts/fix-location-collection.ts"
 
 eval "$cmd"
 check_for_changed_files "$cmd" true
 
 if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then
   echo --- Check if all new pipelines are valid
-  AFFECTED_PIPELINES=$(gh pr view "$BUILDKITE_PULL_REQUEST" --json files --jq '.files.[].path' | \
+  AFFECTED_PIPELINES=$(gh pr view "$BUILDKITE_PULL_REQUEST" --json files --jq '.files.[] | select(.changeType != "DELETED") | .path' | \
     grep -E '^.buildkite/pipeline-resource-definitions/.*\.yml$' | \
     grep -Ev '(/locations.yml|_templates)' || true)
   echo "Pipelines affected by this PR: $AFFECTED_PIPELINES"

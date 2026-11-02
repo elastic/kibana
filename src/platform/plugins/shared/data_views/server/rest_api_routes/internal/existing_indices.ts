@@ -44,8 +44,8 @@ export const handler: RequestHandler<{}, { indices: string | string[] }, string[
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
     const indexPatterns = new IndexPatternsFetcher(elasticsearchClient);
 
-    const response: string[] = await indexPatterns.getExistingIndices(indexArray);
-    return res.ok({ body: response });
+    const { matchedIndexPatterns } = await indexPatterns.getIndexPatternMatches(indexArray);
+    return res.ok({ body: matchedIndexPatterns });
   } catch (error) {
     return res.badRequest();
   }
@@ -69,12 +69,15 @@ export const registerExistingIndicesPath = (router: IRouter): void => {
         validate: {
           request: {
             query: schema.object({
-              indices: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+              indices: schema.oneOf([
+                schema.string(),
+                schema.arrayOf(schema.string(), { maxSize: 50_000 }),
+              ]),
             }),
           },
           response: {
             200: {
-              body: () => schema.arrayOf(schema.string()),
+              body: () => schema.arrayOf(schema.string(), { maxSize: 500_000 }),
             },
           },
         },

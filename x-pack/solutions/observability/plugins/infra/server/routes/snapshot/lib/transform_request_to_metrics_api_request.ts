@@ -14,6 +14,7 @@ import {
 import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import { isDerivativeAgg } from '@kbn/metrics-data-access-plugin/common/inventory_models';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotRequest } from '../../../../common/http_api';
 import type { InfraSource } from '../../../lib/sources';
@@ -59,6 +60,12 @@ export const transformRequestToMetricsAPIRequest = async ({
     },
   };
 
+  const includeTimeseries =
+    snapshotRequest.includeTimeseries ||
+    Object.values(transformed).some((metric) =>
+      Object.values(metric.aggregations).some(isDerivativeAgg)
+    );
+
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
@@ -70,11 +77,11 @@ export const transformRequestToMetricsAPIRequest = async ({
       : compositeSize,
     alignDataToEnd: true,
     dropPartialBuckets: snapshotRequest.dropPartialBuckets ?? true,
-    includeTimeseries: snapshotRequest.includeTimeseries,
+    includeTimeseries,
     filters,
   };
 
-  const inventoryFields = findInventoryFields(snapshotRequest.nodeType);
+  const inventoryFields = findInventoryFields(snapshotRequest.nodeType, snapshotRequest.schema);
   if (snapshotRequest.groupBy) {
     const groupBy = snapshotRequest.groupBy.map((g) => g.field).filter(Boolean) as string[];
     metricsApiRequest.groupBy = [...groupBy, inventoryFields.id];

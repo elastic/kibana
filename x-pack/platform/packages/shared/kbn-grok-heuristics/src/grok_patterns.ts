@@ -143,7 +143,7 @@ export type GrokRegexMap = Record<
   }
 >;
 
-export function buildGrokRegexMap(overrides: Record<string, any>): GrokRegexMap {
+export function buildGrokRegexMap(overrides: Record<string, string>): GrokRegexMap {
   const map = getRawPatternMap();
   const { resolved: rawMap } = buildResolvedPatterns({
     ...map,

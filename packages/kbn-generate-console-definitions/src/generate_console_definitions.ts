@@ -16,6 +16,7 @@ import type {
   EndpointDescription,
 } from '@kbn/console-plugin/common/types';
 import { generateQueryParams } from './generate_query_params';
+import { generateBodyParams } from './generate_body_params';
 import { generateAvailability } from './generate_availability';
 import type { SpecificationTypes } from './types';
 import { findTypeDefinition } from './helpers';
@@ -44,9 +45,18 @@ const generatePatterns = (endpoint: SpecificationTypes.Endpoint): string[] => {
 const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string => {
   return endpoint.docUrl;
 };
+
+const generateServerlessDocumentation = (
+  endpoint: SpecificationTypes.Endpoint
+): string | undefined => {
+  const url = endpoint.docUrlServerless?.trim();
+  return url ? url : undefined;
+};
+
 interface GeneratedParameters {
   urlParams: DefinitionUrlParams;
   urlComponents: DefinitionUrlParams;
+  bodyParams: Record<string, unknown>;
 }
 const generateParameters = (
   endpoint: SpecificationTypes.Endpoint,
@@ -63,19 +73,27 @@ const generateParameters = (
 
   const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
   const urlComponents = generateUrlComponents(requestType as SpecificationTypes.Request, schema);
-  return { urlParams, urlComponents };
+  const bodyParams = generateBodyParams(
+    requestType as SpecificationTypes.Request,
+    schema,
+    endpoint.availability
+  );
+  return { urlParams, urlComponents, bodyParams };
 };
 
 const addParams = (
   definition: EndpointDescription,
   params: GeneratedParameters
 ): EndpointDescription => {
-  const { urlParams, urlComponents } = params;
+  const { urlParams, urlComponents, bodyParams } = params;
   if (Object.keys(urlParams).length > 0) {
     definition.url_params = urlParams;
   }
   if (Object.keys(urlComponents).length > 0) {
     definition.url_components = urlComponents;
+  }
+  if (Object.keys(bodyParams).length > 0) {
+    definition.data_autocomplete_rules = bodyParams;
   }
   return definition;
 };
@@ -87,13 +105,21 @@ const generateDefinition = (
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
+  const documentationServerless = generateServerlessDocumentation(endpoint);
   const availability = generateAvailability(endpoint);
   let definition: EndpointDescription = {};
   const params = generateParameters(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
-  definition = { ...definition, methods, patterns, documentation, availability };
+  definition = {
+    ...definition,
+    methods,
+    patterns,
+    documentation,
+    documentation_serverless: documentationServerless,
+    availability,
+  };
 
   return definition;
 };

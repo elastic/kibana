@@ -1,0 +1,312 @@
+# Elastic Ramen (Elastic Console Plugin)
+
+> **Experimental** — this feature is under active development and may change without notice.
+
+An OpenAI-compatible proxy that routes requests through Kibana-configured AI connectors. External tools (coding agents, CLI tools, IDE extensions) can talk to any Elasticsearch AI connector using the standard OpenAI chat completions API.
+
+## Enabling
+
+The plugin is gated behind **both** a feature flag and an advanced setting:
+
+1. **Feature flag**: `elasticConsole.enabled` must be `true`. In local dev, add to `kibana.dev.yml`:
+   ```yaml
+   feature_flags.overrides:
+     elasticConsole.enabled: true
+   ```
+2. **Advanced setting**: Go to **Stack Management > Advanced Settings**, search for **Elastic Ramen**, and toggle `elasticRamen:enabled` to `true`.
+
+Until both are enabled, every route returns `404`.
+
+## Authentication
+
+All API routes require a valid Kibana session or API key. The easiest way to get started is the setup endpoint or UI page (see below).
+
+### Setup endpoint
+
+```
+POST /internal/elastic_ramen/setup
+```
+
+Returns:
+```json
+{
+  "elasticsearchUrl": "https://my-cluster.es.cloud:443",
+  "kibanaUrl": "https://my-cluster.kb.cloud:443",
+  "apiKeyEncoded": "base64-encoded-api-key"
+}
+```
+
+The API key is scoped to the calling user's privileges and expires after 30 days.
+
+### Setup UI
+
+Navigate to `/app/elasticRamen` in Kibana. Click **Create credentials** to create an API key. Copy the JSON and paste it into the Elastic Ramen setup dialog.
+
+## Required headers
+
+All routes are internal Kibana APIs. Clients must include:
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `Authorization` | Yes | `ApiKey <base64-encoded-key>` or Kibana session cookie |
+| `x-elastic-internal-origin` | Yes | Must be `kibana`. Identifies the request as an internal API call. |
+| `kbn-xsrf` | POST/PUT only | Any non-empty value (e.g. `true`). Required for non-GET requests. |
+| `x-connector-id` | No | Override the connector ID to use for chat completions |
+| `x-session-id` / `x-session-affinity` | No | Session ID used for prompt caching (see [Prompt caching](#prompt-caching)) |
+
+### Example: curl
+
+```bash
+curl -X POST "https://my-kibana:5601/internal/elastic_ramen/v1/chat/completions" \
+  -H "Authorization: ApiKey YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "x-elastic-internal-origin: kibana" \
+  -H "kbn-xsrf: true" \
+  -d '{
+    "model": "default",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": false
+  }'
+```
+
+## API Endpoints
+
+### List models
+
+```
+GET /internal/elastic_ramen/v1/models
+```
+
+Returns available AI connectors in OpenAI model list format:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "connector-id-1",
+      "object": "model",
+      "owned_by": ".gen-ai",
+      ...
+    }
+  ]
+}
+```
+
+### Chat completions
+
+```
+POST /internal/elastic_ramen/v1/chat/completions
+```
+
+OpenAI-compatible chat completions endpoint. Supports:
+
+- **Streaming** (`"stream": true`) — returns `text/event-stream` with SSE chunks
+- **Non-streaming** (`"stream": false`) — returns a single JSON response
+- **Tools/function calling** — pass `tools` array and `tool_choice`
+- **Multi-turn conversations** — include full message history with `assistant` and `tool` role messages
+- **Image content** — base64 data URIs in user message content arrays
+
+Request bodies can be up to 20MB, to fit long agent conversations with large tool results or images.
+
+#### Request body
+
+```json
+{
+  "model": "default",
+  "messages": [
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "Hello!" }
+  ],
+  "stream": true,
+  "temperature": 0.7,
+  "tools": [],
+  "tool_choice": "auto"
+}
+```
+
+#### Connector resolution
+
+The `model` field is used to resolve which AI connector to use:
+
+1. If an `x-connector-id` header is present, that connector ID is used
+2. Otherwise, the `model` value is tried as a connector ID
+3. If neither works, the default inference connector is used
+4. As a last resort, the first available connector is used
+
+Use `"model": "default"` to always use the default connector.
+
+#### Prompt caching
+
+Clients can pass a stable, per-conversation session ID to enable prompt caching. It is forwarded to the inference plugin as `sessionId` together with an ephemeral `cacheControl` directive. Today, only Elastic-managed (EIS) inference endpoints honor these values; other connectors ignore them.
+
+The session ID is resolved from (first match wins):
+
+1. The `prompt_cache_key` body field (standard OpenAI field)
+2. The `x-session-id` header (OpenRouter convention)
+3. The `x-session-affinity` header
+
+The cache TTL defaults to `5m`. Set `"prompt_cache_retention": "24h"` to request the longest TTL supported by EIS (`1h`). Session IDs longer than 256 characters are ignored.
+
+Reuse the same session ID for every request of a conversation, and use a new one for each new conversation.
+
+### Conversations
+
+CRUD endpoints for Agent Builder conversations. RAMEN (and older clients) still send and receive `conversation_rounds`. Agent Builder itself now stores the canonical transcript as timeline `events` with `schema_version >= 1`.
+
+These routes sit on the Agent Builder conversation index and keep both shapes in sync:
+
+- **Read:** `GET` returns `conversation_rounds`. For an events-native document (`schema_version >= 1`) with events, the rounds are folded from the timeline (Agent Builder's live chat appends events without rewriting the stored rounds, so the events are authoritative). Each round id yields one round: HITL resume executions are merged into it, an unanswered pause is `awaiting_prompt` with its `pending_prompts`, a failed/aborted run carries `interruption`, and executions that are still running are omitted. The full round input (including `attachment_refs`) and stored round `feedback` are preserved. Legacy documents return their stored rounds unchanged.
+- **Write:** `POST` / `PUT` still accept only `conversation_rounds` in the request body. Unknown fields from newer RAMEN builds (`events`, `schema_version`) are stripped by the route schema. Each round is projected by status: `completed` → `responded` terminal, `awaiting_prompt` → `prompt_requested` terminal, `in_progress` → no terminal, `interruption` → `execution_failed` / `execution_aborted`. On `PUT` to an events-native document the submitted rounds are reconciled with the stored timeline rather than replacing it: additive/custom events are kept, rounds spanning a HITL resume keep their stored events, a terminated round is never regressed to in-progress, and running rounds the caller never saw are kept. Legacy documents get a fresh projection and are stamped with `schema_version`.
+- **Fidelity:** the fold is a simplified port of Agent Builder's converters. `ask_user_question` answers are not copied onto question steps when merging a resume, and HITL rounds cannot be edited from RAMEN (the stored timeline wins).
+- **Compatibility:** Older RAMEN clients that only send `conversation_rounds` keep working. Newer RAMEN (see [elastic-ramen#120](https://github.com/elastic/elastic-ramen/pull/120)) also hydrates rounds on the client so takeover works against Kibana versions that do not yet include this write-path change.
+
+#### List conversations
+
+```
+GET /internal/elastic_ramen/conversations?agent_id=<optional>
+```
+
+Returns conversations for the current space, sorted by `updated_at` descending (max 100). The `conversation_rounds` and `events` fields are excluded from list results.
+
+#### Get conversation
+
+```
+GET /internal/elastic_ramen/conversations/:id
+```
+
+Returns a single conversation with full `conversation_rounds` (hydrated from `events` when needed, as above).
+
+#### Create conversation
+
+```
+POST /internal/elastic_ramen/conversations
+```
+
+Body:
+```json
+{
+  "agent_id": "my-agent",
+  "title": "New conversation",
+  "conversation_rounds": []
+}
+```
+
+Returns `{ "id": "generated-uuid" }`. The stored document also includes `events` and `schema_version`.
+
+#### Update conversation
+
+```
+PUT /internal/elastic_ramen/conversations/:id
+```
+
+Body (all fields optional):
+```json
+{
+  "title": "Updated title",
+  "conversation_rounds": [...]
+}
+```
+
+Returns `{ "id": "conversation-id" }`. When `conversation_rounds` is present, `events` are reconciled with those rounds (see above) so Agent Builder stays in sync.
+
+## Configuration for external tools
+
+### OpenAI SDK (Python)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://my-kibana:5601/internal/elastic_ramen/v1",
+    api_key="YOUR_API_KEY",
+    default_headers={
+        "x-elastic-internal-origin": "kibana",
+        "kbn-xsrf": "true",
+    },
+)
+
+response = client.chat.completions.create(
+    model="default",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+
+### OpenAI SDK (TypeScript/Node)
+
+```typescript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'https://my-kibana:5601/internal/elastic_ramen/v1',
+  apiKey: 'YOUR_API_KEY',
+  defaultHeaders: {
+    'x-elastic-internal-origin': 'kibana',
+    'kbn-xsrf': 'true',
+  },
+});
+
+const response = await client.chat.completions.create({
+  model: 'default',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+console.log(response.choices[0].message.content);
+```
+
+### Claude Code / other agents
+
+Set the base URL to `https://my-kibana:5601/internal/elastic_ramen/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests. To benefit from prompt caching, send a per-conversation `prompt_cache_key` or `x-session-id` (see [Prompt caching](#prompt-caching)).
+
+### Pi coding agent
+
+Add a provider to `~/.pi/agent/models.json` and export the API key from the setup endpoint as `KIBANA_API_KEY`. The `sendSessionAffinityHeaders` / `sessionAffinityFormat` compat flags make pi send its session ID as an `x-session-id` header on each request, which enables prompt caching. Set `PI_CACHE_RETENTION=long` to request the `1h` TTL.
+
+```json
+{
+  "providers": {
+    "kibana": {
+      "baseUrl": "https://my-kibana:5601/internal/elastic_ramen/v1",
+      "api": "openai-completions",
+      "apiKey": "${KIBANA_API_KEY}",
+      "headers": {
+        "Authorization": "ApiKey ${KIBANA_API_KEY}",
+        "x-elastic-internal-origin": "kibana",
+        "kbn-xsrf": "true"
+      },
+      "compat": {
+        "sendSessionAffinityHeaders": true,
+        "sessionAffinityFormat": "openrouter",
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        {
+          "id": ".anthropic-claude-4.5-sonnet-chat_completion",
+          "name": "Claude Sonnet 4.5 (Kibana)",
+          "contextWindow": 200000,
+          "maxTokens": 16384
+        }
+      ]
+    }
+  }
+}
+```
+
+The model `id` is the Kibana connector ID; list them with `GET /internal/elastic_ramen/v1/models`.
+
+## Development
+
+The plugin lives at `x-pack/platform/plugins/shared/elastic_console/`.
+
+### Type check
+```
+pnpm test:type_check --project x-pack/platform/plugins/shared/elastic_console/tsconfig.json
+```
+
+### Lint
+```
+node scripts/eslint --fix x-pack/platform/plugins/shared/elastic_console/
+```

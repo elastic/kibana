@@ -16,7 +16,8 @@
       "securitySolution"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "kibanaUtils"
     ]
   }
 }

@@ -16,7 +16,6 @@ import type {
   ShareRegistryPublicApi,
   ShareActionIntents,
   InternalShareActionIntent,
-  ShareIntegration,
   ShareRegistryApiStart,
   ShareMenuProviderLegacy,
   RegisterShareIntegrationArgs,
@@ -126,7 +125,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     });
   }
 
-  private registerShareIntegration<I extends ShareIntegration>(
+  private registerShareIntegration<I>(
     ...args: [string, RegisterShareIntegrationArgs<I>] | [RegisterShareIntegrationArgs<I>]
   ): void {
     const [shareObject, shareActionIntent] =

@@ -8,12 +8,11 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiComboBox,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiHighlight,
   EuiIcon,
   EuiLink,
@@ -21,6 +20,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useMutation, useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
@@ -154,12 +154,16 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
   if (integrations.status === 'error') {
     return (
-      <EuiCallOut announceOnMount title="Error" color="danger">
-        <FormattedMessage
-          id="xpack.fleet.debug.integrationDebugger.fetchError"
-          defaultMessage="Error fetching installed Integrations"
-        />
-      </EuiCallOut>
+      <KbnDangerCallout
+        announceOnMount
+        title="Error"
+        text={
+          <FormattedMessage
+            id="xpack.fleet.debug.integrationDebugger.fetchError"
+            defaultMessage="Error fetching installed Integrations"
+          />
+        }
+      />
     );
   }
 
@@ -219,14 +223,12 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             isDisabled={integrations.status === 'loading'}
             prepend={
               selectedOptions.length > 0 ? (
-                <EuiButtonEmpty>
-                  <EuiIcon type={selectedOptions[0]?.icon ?? 'fleetApp'} />
-                </EuiButtonEmpty>
+                <EuiFormPrepend iconLeft={selectedOptions[0]?.icon ?? 'fleetApp'} />
               ) : undefined
             }
             renderOption={(option, searchValue, contentClassName) => (
               <span className={contentClassName}>
-                <EuiIcon type={(option as any).icon} />
+                <EuiIcon type={(option as any).icon} aria-hidden={true} />
                 &nbsp;
                 <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
               </span>

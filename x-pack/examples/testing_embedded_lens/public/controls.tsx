@@ -20,7 +20,9 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export type LensAttributesByType<VizType> = Extract<
@@ -145,7 +147,7 @@ export function OverrideSwitch({
           position="right"
         >
           <span tabIndex={0}>
-            {rowLabel} <EuiIcon type="question" color="subdued" />
+            {rowLabel} <EuiIcon type="question" color="subdued" aria-hidden={true} />
           </span>
         </EuiToolTip>
       }
@@ -195,11 +197,14 @@ export function AttributesMenu({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('testingEmbeddedLens.attributesMenu.ariaLabel', {
+        defaultMessage: 'Lens Attributes',
+      })}
       button={
         <EuiButton
           data-test-subj="lns-example-change-attributes"
           onClick={() => setAttributesPopoverOpen(!attributesPopoverOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           color="primary"
           isDisabled={!isSupportedChart(currentAttributes)}
@@ -344,14 +349,16 @@ export function OverridesMenu({
   setOverrides: (overrides: AllOverrides | undefined) => void;
 }) {
   const [overridesPopoverOpen, setOverridesPopoverOpen] = useState(false);
+  const overridesPopoverTitleId = useGeneratedHtmlId();
   const hasOverridesEnabled = Boolean(overrides) && !isDatatable(currentAttributes);
   return (
     <EuiPopover
+      aria-labelledby={overridesPopoverTitleId}
       button={
         <EuiButton
           data-test-subj="lns-example-change-overrides"
           onClick={() => setOverridesPopoverOpen(!overridesPopoverOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           Overrides{' '}
@@ -364,7 +371,7 @@ export function OverridesMenu({
       closePopover={() => setOverridesPopoverOpen(false)}
     >
       <div style={{ width: 400 }}>
-        <EuiPopoverTitle>Overrides</EuiPopoverTitle>
+        <EuiPopoverTitle id={overridesPopoverTitleId}>Overrides</EuiPopoverTitle>
         <EuiText size="s">
           <p>
             Overrides are local to the Embeddable and forgotten when the visualization is open in
@@ -496,13 +503,15 @@ export function PanelMenu({
   setEnableExtraAction: (v: boolean) => void;
 }) {
   const [panelPopoverOpen, setPanelPopoverOpen] = useState(false);
+  const panelPopoverTitleId = useGeneratedHtmlId();
   return (
     <EuiPopover
+      aria-labelledby={panelPopoverTitleId}
       button={
         <EuiButton
           data-test-subj="lns-example-change-overrides"
           onClick={() => setPanelPopoverOpen(!panelPopoverOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           Embeddable settings
@@ -512,7 +521,7 @@ export function PanelMenu({
       closePopover={() => setPanelPopoverOpen(false)}
     >
       <div style={{ width: 400 }}>
-        <EuiPopoverTitle>Embeddable settings</EuiPopoverTitle>
+        <EuiPopoverTitle id={panelPopoverTitleId}>Embeddable settings</EuiPopoverTitle>
         <EuiText size="s">
           <p>
             It is possible to control and customize how the Embeddables is shown, disabling the
@@ -585,7 +594,7 @@ export function PanelMenu({
               position="right"
             >
               <span tabIndex={0}>
-                Show custom action <EuiIcon type="question" color="subdued" />
+                Show custom action <EuiIcon type="question" color="subdued" aria-hidden={true} />
               </span>
             </EuiToolTip>
           }

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates } from '@kbn/lens-common';
+import type { ColumnState, GeneralDatasourceStates } from '@kbn/lens-common';
 import type { DatatableVisualizationState } from '../../../../../public';
-import type { ColumnState } from '../../../../expressions';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,
@@ -43,7 +42,7 @@ export const convertDatatableToRawColorMappings = (
 
   const convertedColumns = state.columns.map((column) => {
     if (column.colorMapping?.assignments || column.colorMapping?.specialAssignments) {
-      const columnMeta = getColumnMeta?.(state.layerId, column.columnId);
+      const columnMeta = getColumnMeta?.(state.layerId, [column.columnId]);
 
       return {
         ...column,

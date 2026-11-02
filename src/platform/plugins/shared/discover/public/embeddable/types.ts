@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   EmbeddableApiContext,
+  CanOverrideHoverActions,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDescription,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesSavedObjectId,
   PublishesWritableTitle,
@@ -26,19 +30,28 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type {
+  DiscoverSessionTab,
+  SavedSearch,
+  SerializableSavedSearch,
+} from '@kbn/saved-search-plugin/common/types';
+import type { EsqlSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
-import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { PublishesWritableDataSources } from '@kbn/presentation-publishing/interfaces/publishes_data_sources';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
-  DynamicActionsSerializedState,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import type {
-  EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
-  SearchEmbeddableState,
+  SearchEmbeddablePanelApiState,
 } from '../../common/embeddable/types';
+
+export type { SearchEmbeddablePanelApiState };
+
+/**
+ * Input state accepted by the search embeddable factory.
+ */
+export type SearchEmbeddableInputState = SearchEmbeddablePanelApiState & {
+  nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+};
 
 export type SearchEmbeddablePublicState = Pick<
   SerializableSavedSearch,
@@ -51,9 +64,12 @@ export type SearchEmbeddablePublicState = Pick<
   | 'viewMode'
   | 'grid'
   | 'density'
+  | 'documentsDisplayMode'
+  | 'jsonModeSettings'
 > & {
   rows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  /** The ES|QL source of the fetched rows, with the result columns. */
+  resultDataSource: EsqlSource | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
 };
@@ -66,36 +82,41 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  'rows' | 'resultDataSource' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
-  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
+  Pick<SerializableSavedSearch, 'serializedSearchSource' | 'tabTypeState'>;
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &
   SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> & {
-    rawSavedObjectAttributes?: EditableSavedSearchAttributes;
+  SerializedDrilldowns & {
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    selectedTabId?: string;
+    tabs?: DiscoverSessionTab[];
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
   Required<PublishesWritableTitle> &
   Required<PublishesDescription> &
   PublishesWritableSavedSearch &
-  PublishesWritableDataViews &
+  PublishesWritableDataSources<DataView> &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
+  PublishesEsql &
   HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
+  PublishesSelectedTabId &
+  CanCancelRequests &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
-  HasDynamicActions &
+  Partial<CanOverrideHoverActions> &
+  HasDrilldowns &
   HasSupportedTriggers;
 
 export interface PublishesSavedSearch {
@@ -112,6 +133,15 @@ export const apiPublishesSavedSearch = (
   const embeddable = api as PublishesSavedSearch;
   return Boolean(embeddable.savedSearch$);
 };
+
+/**
+ * Interface for publishing the selected tab ID
+ * @interface PublishesSelectedTabId
+ * @property {() => string | undefined} getSelectedTabId - Returns the ID of the selected tab
+ */
+export interface PublishesSelectedTabId {
+  getSelectedTabId: () => string | undefined;
+}
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;

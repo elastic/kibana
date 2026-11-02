@@ -1,0 +1,20 @@
+# UNARY OPERATORS
+
+The only unary operator is negation (`-`).
+
+## Syntax
+
+`UNARY OPERATORS()`
+
+### Parameters
+
+This syntax has no parameters.
+
+## Examples
+
+Use negation to return the negative value of a number:
+
+```esql
+ROW x = 5
+| EVAL y = -x
+```

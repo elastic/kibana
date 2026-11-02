@@ -16,6 +16,7 @@ import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-serv
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalContextSetup } from '@kbn/core-http-context-server-internal';
 import type { InternalDeprecationsServiceSetup } from '@kbn/core-deprecations-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { InternalHttpResourcesSetup } from '@kbn/core-http-resources-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
@@ -33,6 +34,8 @@ import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-i
 import type { PricingServiceSetup } from '@kbn/core-pricing-server';
 import type { InternalCoreDiServiceSetup } from '@kbn/core-di-internal';
 import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
+import type { InternalPubSubSetup } from '@kbn/core-pubsub-server-internal';
+import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -54,6 +57,7 @@ export interface InternalCoreSetup {
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
+  userActivity: InternalUserActivityServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
@@ -62,4 +66,7 @@ export interface InternalCoreSetup {
   pricing: PricingServiceSetup;
   injection: InternalCoreDiServiceSetup;
   dataStreams: DataStreamsSetup;
+  pubsub: InternalPubSubSetup;
+  userStorage: UserStorageServiceSetup;
+  _plugins?: Map<string, any>;
 }

@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": [
-    "@elastic/observability-ui"
-  ],
+  "owner": ["@elastic/observability-ui"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observability",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "alerting",
       "charts",
@@ -25,7 +20,6 @@
       "embeddable",
       "fieldFormats",
       "uiActions",
-      "presentationUtil",
       "features",
       "files",
       "inspector",
@@ -46,35 +40,42 @@
       "esql",
       "savedObjectsTagging",
       "streams",
+      "kql",
     ],
     "optionalPlugins": [
-      "onechat",
+      "observabilityAgentBuilder",
+      "agentBuilder",
       "aiops",
       "cases",
       "discover",
       "exploratoryView",
       "home",
+      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
       "serverless",
       "observabilityAIAssistant",
       "investigate",
+      "cps",
+      "ingestHub",
+      "significantEvents",
+      "nightshiftInvestigations",
+      "entityInventoryApp",
     ],
     "requiredBundles": [
       "aiops",
       "cases",
       "data",
       "discover",
+      "fleet",
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
+      "significantEvents",
       "stackAlerts",
-      "spaces"
+      "observabilityAgentBuilder",
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
-  }
+    "extraPublicDirs": ["common"],
+  },
 }

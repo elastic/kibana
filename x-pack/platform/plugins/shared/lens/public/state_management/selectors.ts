@@ -18,12 +18,15 @@ export const selectSearchSessionId = (state: LensState) => state.lens.searchSess
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 export const selectProjectRouting = (state: LensState) => state.lens.projectRouting;
-export const selectAdHocDataViews = (state: LensState) =>
-  Object.fromEntries(
-    Object.values(state.lens.dataViews.indexPatterns)
-      .filter((indexPattern) => !indexPattern.isPersisted)
-      .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
-  );
+export const selectAdHocDataViews = createSelector(
+  (state: LensState) => state.lens.dataViews.indexPatterns,
+  (indexPatterns) =>
+    Object.fromEntries(
+      Object.values(indexPatterns)
+        .filter((indexPattern) => !indexPattern.isPersisted)
+        .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
+    )
+);
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
@@ -41,12 +44,25 @@ export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
 
-let applyChangesCounter: number | undefined;
-export const selectTriggerApplyChanges = (state: LensState) => {
-  const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;
-  applyChangesCounter = state.lens.applyChangesCounter;
-  return shouldApply;
-};
+/**
+ * Selector to check if the text-based (ES|QL) editor should be hidden.
+ * This is set to true when the parent application (e.g., Discover) explicitly
+ * requests hiding the editor. Used primarily for flyout structure decisions.
+ */
+export const selectHideTextBasedEditor = (state: LensState) => state.lens.hideTextBasedEditor;
+
+/**
+ * Selector to determine if the user can edit a text-based (ES|QL) query.
+ * Returns true only when:
+ * 1. The editor is not explicitly hidden (hideTextBasedEditor is false)
+ * 2. The current query is an aggregate/ES|QL query type
+ *
+ * Used by ESQLEditor and ConfigPanel to decide whether to render the ES|QL editor.
+ */
+export const selectCanEditTextBasedQuery = (state: LensState) =>
+  !state.lens.hideTextBasedEditor && isOfAggregateQueryType(state.lens.query);
+
+export const selectApplyChangesCounter = (state: LensState) => state.lens.applyChangesCounter;
 
 // TODO - is there any point to keeping this around since we have selectExecutionSearchContext?
 export const selectExecutionContext = createSelector(
@@ -117,9 +133,10 @@ export const selectDatasourceLayers = createSelector(
     selectDatasourceStates,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
     selectDataViews,
+    selectActiveData,
   ],
-  (datasourceStates, datasourceMap, dataViews) =>
-    getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
+  (datasourceStates, datasourceMap, dataViews, activeData) =>
+    getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns, activeData)
 );
 
 export const selectFramePublicAPI = createSelector(
@@ -135,7 +152,8 @@ export const selectFramePublicAPI = createSelector(
       datasourceLayers: getDatasourceLayers(
         datasourceStates,
         datasourceMap,
-        dataViews.indexPatterns
+        dataViews.indexPatterns,
+        activeData
       ),
       activeData,
       dataViews,

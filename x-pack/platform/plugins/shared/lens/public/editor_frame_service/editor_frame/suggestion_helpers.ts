@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -24,6 +27,7 @@ import type {
   DatasourceStates,
   VisualizationState,
   DataViewsState,
+  DefaultVisualizationOverrides,
 } from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { LensDispatch } from '../../state_management';
@@ -50,6 +54,8 @@ export function getSuggestions({
   dataViews,
   mainPalette,
   allowMixed,
+  query,
+  defaultVisualizationOverrides,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -63,6 +69,9 @@ export function getSuggestions({
   dataViews: DataViewsState;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  /** Optional query (e.g. ES|QL) for context-aware suggestions (e.g. prefer line for time series). */
+  query?: AggregateQuery;
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -169,7 +178,9 @@ export function getSuggestions({
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData,
             allowMixed,
-            datasourceId
+            datasourceId,
+            query,
+            defaultVisualizationOverrides?.[visualizationId as keyof DefaultVisualizationOverrides]
           );
         });
     })
@@ -214,7 +225,7 @@ export function getVisualizeFieldSuggestions({
   // suggestions for visualizing textbased languages
   if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
     if (visualizeTriggerFieldContext.query) {
-      return suggestions.find((s) => s.datasourceId === 'textBased');
+      return suggestions.find((s) => s.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED);
     }
   }
 
@@ -240,7 +251,9 @@ function getVisualizationSuggestions(
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>,
   allowMixed?: boolean,
-  datasourceId?: string
+  datasourceId?: string,
+  query?: AggregateQuery,
+  defaultOverrides?: DefaultVisualizationOverrides[keyof DefaultVisualizationOverrides]
 ) {
   try {
     const isSubtypeSupported =
@@ -256,6 +269,8 @@ function getVisualizationSuggestions(
         activeData,
         allowMixed,
         datasourceId,
+        query,
+        defaultOverrides,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

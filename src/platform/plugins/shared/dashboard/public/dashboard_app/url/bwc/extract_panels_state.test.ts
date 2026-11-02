@@ -11,6 +11,73 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
+  describe('< 9.4 panels state', () => {
+    test('should switch `uid` to `id`', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            type: 'lens',
+            uid: 'panel1',
+            config: {},
+          },
+          {
+            title: 'Section 1',
+            grid: { y: 1, i: 'section1' },
+            uid: 'section1',
+            panels: [
+              {
+                grid: { x: 0, y: 2, w: 24, h: 15 },
+                type: 'lens',
+                config: {
+                  savedObjectId: 'byReference',
+                },
+                uid: 'panel2',
+              },
+            ],
+          },
+        ],
+      });
+      expect(panels).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "config": Object {},
+            "grid": Object {
+              "h": 15,
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "id": "panel1",
+            "type": "lens",
+          },
+          Object {
+            "grid": Object {
+              "y": 1,
+            },
+            "id": "section1",
+            "panels": Array [
+              Object {
+                "config": Object {
+                  "savedObjectId": "byReference",
+                },
+                "grid": Object {
+                  "h": 15,
+                  "w": 24,
+                  "x": 0,
+                  "y": 2,
+                },
+                "id": "panel2",
+                "type": "lens",
+              },
+            ],
+            "title": "Section 1",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('< 9.3 panels state', () => {
     test('should remove "i" from grid', () => {
       const { panels } = extractPanelsState({
@@ -43,13 +110,14 @@ describe('extractPanelsState', () => {
               "x": 0,
               "y": 0,
             },
+            "id": "panel1",
             "type": "lens",
-            "uid": "panel1",
           },
           Object {
             "grid": Object {
               "y": 1,
             },
+            "id": "section1",
             "panels": Array [
               Object {
                 "config": Object {},
@@ -59,12 +127,11 @@ describe('extractPanelsState', () => {
                   "x": 0,
                   "y": 2,
                 },
+                "id": "panelInSection",
                 "type": "lens",
-                "uid": "panelInSection",
               },
             ],
             "title": "Section 1",
-            "uid": "section1",
           },
         ]
       `);
@@ -91,7 +158,7 @@ describe('extractPanelsState', () => {
       ]);
     });
 
-    test('should move panelIndex to uid', () => {
+    test('should move panelIndex to id', () => {
       const { panels } = extractPanelsState({
         panels: [
           {
@@ -107,7 +174,7 @@ describe('extractPanelsState', () => {
           config: {},
           grid: { x: 0, y: 0, w: 24, h: 15 },
           type: 'lens',
-          uid: 'fizz',
+          id: 'fizz',
         },
       ]);
     });
@@ -238,7 +305,7 @@ describe('extractPanelsState', () => {
           },
           grid: {},
           type: 'map',
-          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+          id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
       ]);
     });
@@ -271,7 +338,7 @@ describe('extractPanelsState', () => {
           },
           grid: {},
           type: 'map',
-          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+          id: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
       ]);
     });

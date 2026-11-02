@@ -6,7 +6,7 @@
  */
 
 import type { MetricVisualizationState } from '../../../../public';
-import type { LensAttributes } from '../../../../server/content_management';
+import type { LensAttributes } from '../../../../server/content_management/v1';
 
 /**
  * Cleanup metric properties
@@ -32,7 +32,9 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
   };
 }
 
-const getUpdatedMetricState = (state: MetricVisualizationState): MetricVisualizationState => {
+export const getUpdatedMetricState = (
+  state: MetricVisualizationState
+): MetricVisualizationState => {
   const { secondaryPrefix, valuesTextAlign, ...restState } = state;
   let newState = { ...restState };
 
@@ -44,7 +46,9 @@ const getUpdatedMetricState = (state: MetricVisualizationState): MetricVisualiza
     };
   }
 
-  if (secondaryPrefix && !newState.secondaryLabel) {
+  // An empty prefix is the legacy `None` choice rather than an absent value, so it has to
+  // survive the move for downstream consumers to resolve the name as hidden
+  if (secondaryPrefix !== undefined && newState.secondaryLabel === undefined) {
     newState = {
       ...newState,
       secondaryLabel: secondaryPrefix,

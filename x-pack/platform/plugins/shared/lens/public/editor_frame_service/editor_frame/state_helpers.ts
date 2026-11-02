@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -34,14 +34,20 @@ import type {
   VisualizationState,
   DocumentToExpressionReturnType,
   LensDocument,
+  TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
 import { buildExpression } from './expression_helpers';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
+import {
+  loadIndexPatternRefs,
+  loadIndexPatterns,
+  ensureESQLTimeFieldOnAdHocDataViews,
+} from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
+import { applyStateHydration } from '../../state_hydration';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -235,6 +241,8 @@ export async function initializeSources(
     references,
     initialContext,
     adHocDataViews,
+    http,
+    projectRouting,
   }: {
     dataViews: DataViewsContract;
     eventAnnotationService: EventAnnotationServiceType;
@@ -247,6 +255,8 @@ export async function initializeSources(
     references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    http?: HttpStart;
+    projectRouting?: string;
   },
   options?: InitializationOptions
 ) {
@@ -254,6 +264,18 @@ export async function initializeSources(
     eventAnnotationService,
     references
   );
+
+  // Regenerate ESQL ad-hoc DataViews once at editor initialization.
+  // This replaces potentially stale persisted specs with fresh ones derived
+  // from the actual ES|QL queries, including time field detection via http.
+  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: dataViews,
+    http,
+    projectRouting,
+  });
 
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
     {
@@ -264,7 +286,7 @@ export async function initializeSources(
       storage,
       defaultIndexPatternId,
       references,
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
     options
@@ -279,19 +301,29 @@ export async function initializeSources(
     references,
   });
 
+  const initializedVisualizationState = initializeVisualization({
+    visualizationMap,
+    visualizationState,
+    datasourceStates,
+    references,
+    initialContext,
+    annotationGroups,
+  });
+
+  const hydratedState = applyStateHydration({
+    visualizationId: visualizationState.activeId,
+    visualizationState: initializedVisualizationState,
+    datasourceStates: initializedDatasourceStates,
+    context: 'editor',
+    indexPatterns,
+  });
+
   return {
     indexPatterns,
     indexPatternRefs,
     annotationGroups,
-    datasourceStates: initializedDatasourceStates,
-    visualizationState: initializeVisualization({
-      visualizationMap,
-      visualizationState,
-      datasourceStates,
-      references,
-      initialContext,
-      annotationGroups,
-    }),
+    datasourceStates: hydratedState.datasourceStates,
+    visualizationState: hydratedState.visualizationState,
   };
 }
 
@@ -369,6 +401,8 @@ export async function persistedStateToExpression(
     nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
     forceDSL?: boolean;
+    http?: HttpStart;
+    projectRouting?: string;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -405,6 +439,20 @@ export async function persistedStateToExpression(
       { isLoading: false, state },
     ])
   );
+
+  // Ensure ESQL ad-hoc DataViews have the correct time field before
+  // initializing DataViews — same as in initializeSources for the editor path.
+  const textBasedState = datasourceStatesFromSO.textBased?.state as
+    | TextBasedPersistedState
+    | undefined;
+  const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
+    adHocDataViews: adHocDataViews ?? {},
+    textBasedState,
+    dataViewsService: services.dataViews,
+    http: services.http,
+    projectRouting: services.projectRouting,
+  });
+
   const { indexPatterns, indexPatternRefs } = await initializeDataViews(
     {
       datasourceMap,
@@ -413,12 +461,12 @@ export async function persistedStateToExpression(
       dataViews: services.dataViews,
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
-      adHocDataViews,
+      adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
     { isFullEditor: false }
   );
-  const datasourceStates = initializeDatasources({
+  const initializedDatasourceStates = initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
     references: [...references, ...(internalReferences || [])],
@@ -426,19 +474,31 @@ export async function persistedStateToExpression(
     indexPatternRefs,
   });
 
-  const activeVisualizationState = initializeVisualization({
+  const initializedVisualizationState = initializeVisualization({
     visualizationMap: visualizations,
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
       selectedLayerId: null,
     },
-    datasourceStates,
+    datasourceStates: initializedDatasourceStates,
     annotationGroups,
     references: [...references, ...(internalReferences || [])],
   });
 
-  const datasourceLayers = getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
+  const hydratedState = applyStateHydration({
+    visualizationId: visualizationType,
+    visualizationState: initializedVisualizationState,
+    datasourceStates: initializedDatasourceStates,
+    context: 'expression',
+    indexPatterns,
+  });
+
+  const datasourceLayers = getDatasourceLayers(
+    hydratedState.datasourceStates,
+    datasourceMap,
+    indexPatterns
+  );
 
   const datasourceId = getActiveDatasourceIdFromDoc(doc);
   if (datasourceId == null) {
@@ -446,7 +506,7 @@ export async function persistedStateToExpression(
       ast: null,
       indexPatterns,
       indexPatternRefs,
-      activeVisualizationState,
+      activeVisualizationState: hydratedState.visualizationState,
       activeDatasourceState: null,
     };
   }
@@ -458,17 +518,17 @@ export async function persistedStateToExpression(
       title,
       description,
       visualization,
-      visualizationState: activeVisualizationState,
+      visualizationState: hydratedState.visualizationState,
       datasourceMap,
-      datasourceStates,
+      datasourceStates: hydratedState.datasourceStates,
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       forceDSL: services.forceDSL,
       nowInstant: services.nowProvider.get(),
     }),
-    activeVisualizationState,
-    activeDatasourceState: datasourceStates[datasourceId]?.state,
+    activeVisualizationState: hydratedState.visualizationState,
+    activeDatasourceState: hydratedState.datasourceStates[datasourceId]?.state,
     indexPatterns,
     indexPatternRefs,
   };

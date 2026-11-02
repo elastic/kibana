@@ -16,10 +16,6 @@ export function setHelpExtension({ chrome, http }: CoreStart) {
     }),
     links: [
       {
-        linkType: 'discuss',
-        href: 'https://discuss.elastic.co/c/apm',
-      },
-      {
         linkType: 'custom',
         href: getUpgradeAssistantHref(http.basePath),
         content: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {

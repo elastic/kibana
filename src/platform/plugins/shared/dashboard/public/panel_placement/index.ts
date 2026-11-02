@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerDashboardPanelSettings } from './panel_placement_registry';
-
-export type { GetPanelSettings as GetPanelPlacementSettings } from './types';
+export { getPlacementHints } from './get_placement_hints';
+export { placeClonePanel } from './place_clone_panel_strategy';
+export { runPanelPlacementStrategy } from './place_new_panel_strategies';

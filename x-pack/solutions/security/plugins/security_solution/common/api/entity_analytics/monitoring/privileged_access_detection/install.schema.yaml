@@ -9,6 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: InstallPrivilegedAccessDetectionPackage
       summary: Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      description: Installs the privileged access detection integration package and sets up the associated ML modules required for the Entity Analytics privileged user monitoring experience.
 
       responses:
         "200":
@@ -22,3 +23,8 @@ paths:
                 properties:
                   message:
                     type: string
+              examples:
+                InstallPrivilegedAccessDetectionPackageResponse:
+                  summary: Package installed successfully
+                  value:
+                    message: Privileged access detection package installed successfully

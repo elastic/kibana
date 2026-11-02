@@ -6,6 +6,7 @@
  */
 
 import type { ReactWrapper } from 'enzyme';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -25,7 +26,7 @@ let entityIDs: { origin: string; firstChild: string; secondChild: string };
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
 describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
       noAncestorsTwoChildenInIndexCalledAwesomeIndex();
@@ -41,10 +42,15 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},
     });
+  });
+
+  afterEach(() => {
+    simulator.unmount();
   });
 
   it('should render no processes', async () => {
@@ -58,7 +64,7 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
   });
 
   describe("when rerendered with the `indices` prop set to `['awesome_index'`]", () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       simulator.indices = ['awesome_index'];
     });
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
@@ -76,12 +82,12 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
         unselectedSecondChildCount: 1,
         nodePrimaryButtonCount: 3,
       });
-    });
+    }, 30000);
   });
 });
 
 describe('Resolver, when analyzing a tree that has no ancestors and 2 children', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
 
@@ -96,10 +102,15 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},
     });
+  });
+
+  afterEach(() => {
+    simulator.unmount();
   });
 
   describe('when it has loaded', () => {
@@ -110,19 +121,27 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
          * If you do them concurrently with each other, you'll have incorrect results.
          *
          * For example, there might be no loading element at one point, and 1 graph element at one point, but never a single time when there is both 1 graph element and 0 loading elements.
+         *
+         * nodeListLinkCount is included here so that the node list panel is also confirmed
+         * ready before any `it` in this describe runs. The node list may render one React
+         * cycle after the graph (e.g. when EUI's AutoSizer provides its size), so verifying
+         * it here ensures the "should show links to the 3 nodes in the node list" test
+         * sees an up-to-date enzyme wrapper in its synchronous assertion.
          */
         simulator.map(() => ({
           graphElements: simulator.testSubject('resolver:graph').length,
           graphLoadingElements: simulator.testSubject('resolver:graph:loading').length,
           graphErrorElements: simulator.testSubject('resolver:graph:error').length,
+          nodeListLinkCount: simulator.testSubject('resolver:node-list:node-link:title').length,
         }))
       ).toYieldEqualTo({
         // it should have 1 graph element, an no error or loading elements.
         graphElements: 1,
         graphLoadingElements: 0,
         graphErrorElements: 0,
+        nodeListLinkCount: 3,
       });
-    });
+    }, 30000);
 
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
     it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected.`, async () => {
@@ -139,7 +158,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         unselectedSecondChildCount: 1,
         nodePrimaryButtonCount: 3,
       });
-    });
+    }, 30000);
 
     it('should render 3 elements with "treeitem" roles, each owned by an element with a "tree" role', async () => {
       await expect(
@@ -169,12 +188,12 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           };
         })
       ).toYieldEqualTo({ treeCount: 1, nodesOwnedByTrees: 3 });
-    });
+    }, 30000);
 
-    it(`should show links to the 3 nodes in the node list.`, async () => {
-      await expect(
-        simulator.map(() => simulator.testSubject('resolver:node-list:node-link:title').length)
-      ).toYieldEqualTo(3);
+    it(`should show links to the 3 nodes in the node list.`, () => {
+      // The beforeEach already confirmed nodeListLinkCount === 3 and updated the enzyme wrapper,
+      // so a direct synchronous assertion is sufficient and avoids any async timeout risk.
+      expect(simulator.testSubject('resolver:node-list:node-link:title').length).toBe(3);
     });
 
     describe("when the second child node's first button has been clicked", () => {
@@ -186,7 +205,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         if (button) {
           button.simulate('click', { button: 0 });
         }
-      });
+      }, 30000);
       it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
         await expect(
           simulator.map(() => ({
@@ -209,7 +228,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           // The origin child is rendered and doesn't have `[aria-selected]`
           unselectedOriginNodeCount: 1,
         });
-      });
+      }, 30000);
     });
   });
 });
@@ -302,6 +321,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
         databaseDocumentID,
         dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -360,6 +380,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
         databaseDocumentID,
         dataAccessLayer: generatorDAL,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -420,7 +441,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
 });
 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // create a mock data access layer with related events
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
       noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
@@ -436,10 +457,15 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
       databaseDocumentID,
       dataAccessLayer,
       resolverComponentInstanceID,
+      history: createMemoryHistory(),
       indices: [],
       shouldUpdate: false,
       filters: {},
     });
+  });
+
+  afterEach(() => {
+    simulator.unmount();
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/170118

@@ -12,12 +12,12 @@ import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/
 import type { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1000 }),
 });
 
 const bodySchema = schema.object(
   {
-    type: schema.string(),
+    type: schema.string({ maxLength: 1000 }),
     isNew: schema.boolean(),
     isActive: schema.boolean(),
   },

@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { UnifiedHistogramChartProps } from '../components/chart/chart';
 import type {
   UnifiedHistogramExternalVisContextStatus,
@@ -38,6 +38,15 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  /**
+   * When false, hides the Lens edit and save toolbar actions on the chart.
+   * Defaults to true.
+   */
+  withLensActions?: boolean;
+  /**
+   * Options forwarded to Lens when opening the chart in the Lens editor or saving it
+   */
+  lensActionsOptions?: UnifiedHistogramChartProps['lensActionsOptions'];
   /**
    * Disabled action IDs for the Lens embeddable
    */
@@ -74,13 +83,15 @@ export type UnifiedHistogramApi = {
   fetch: (params: UnifiedHistogramFetchParamsExternal) => void;
 } & Pick<
   UnifiedHistogramStateService,
-  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTotalHits'
+  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTotalHits' | 'setLensRequestAdapter'
 >;
 
 export type UnifiedHistogramPartialLayoutProps = Omit<
   UnifiedHistogramLayoutProps,
   'container' | 'unifiedHistogramChart'
 >;
+
+type UnifiedHistogramPartialChartProps = Omit<UnifiedHistogramChartProps, 'renderToggleActions'>;
 
 export type UseUnifiedHistogramResult =
   | {
@@ -92,7 +103,7 @@ export type UseUnifiedHistogramResult =
   | {
       isInitialized: true;
       api: UnifiedHistogramApi;
-      chartProps: UnifiedHistogramChartProps;
+      chartProps: UnifiedHistogramPartialChartProps;
       layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
@@ -118,12 +129,17 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
 
   const isChartAvailable = checkChartAvailability({
     chart,
-    dataView: fetchParams?.dataView,
-    isPlainRecord: fetchParams?.isESQLQuery,
+    dataSource: fetchParams?.dataSource,
   });
 
-  const chartProps = useMemo<UnifiedHistogramChartProps | undefined>(() => {
-    return lensVisService && lensVisServiceState && fetchParams?.dataView
+  useEffect(() => {
+    if (!isChartAvailable) {
+      api.setLensRequestAdapter(undefined);
+    }
+  }, [api, isChartAvailable]);
+
+  const chartProps = useMemo<UnifiedHistogramPartialChartProps | undefined>(() => {
+    return lensVisService && lensVisServiceState && fetchParams?.dataSource
       ? {
           ...props,
           ...stateProps,

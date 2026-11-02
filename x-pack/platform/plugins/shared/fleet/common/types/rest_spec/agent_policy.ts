@@ -9,6 +9,7 @@ import { type TypeOf, schema } from '@kbn/config-schema';
 
 import type {
   AgentPolicy,
+  AgentPolicyPackagePoliciesSummary,
   NewAgentPolicy,
   FullAgentPolicy,
   OutputsForAgentPolicy,
@@ -21,10 +22,21 @@ export interface GetAgentPoliciesRequest {
     noAgentCount?: boolean;
     withAgentCount?: boolean;
     full?: boolean;
+    showAgentless?: boolean;
   };
 }
 
 export type GetAgentPoliciesResponseItem = AgentPolicy;
+
+export interface GetAgentPoliciesPackagePoliciesSummaryRequest {
+  body: {
+    ids: string[];
+  };
+}
+
+export interface GetAgentPoliciesPackagePoliciesSummaryResponse {
+  items: Record<string, AgentPolicyPackagePoliciesSummary>;
+}
 
 export type BulkGetAgentPoliciesResponse = BulkGetResult<GetAgentPoliciesResponseItem>;
 export type GetAgentPoliciesResponse = ListResult<GetAgentPoliciesResponseItem>;
@@ -54,6 +66,7 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
       failedUpgradeActionIds: schema.maybe(
         schema.arrayOf(schema.string(), {
           meta: { description: 'List of action IDs related to failed upgrades' },
+          maxSize: 1000,
         })
       ),
       inProgressUpgradeAgents: schema.number({
@@ -62,9 +75,11 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
       inProgressUpgradeActionIds: schema.maybe(
         schema.arrayOf(schema.string(), {
           meta: { description: 'List of action IDs related to in-progress upgrades' },
+          maxSize: 1000,
         })
       ),
-    })
+    }),
+    { maxSize: 10000 }
   ),
   totalAgents: schema.number(),
 });

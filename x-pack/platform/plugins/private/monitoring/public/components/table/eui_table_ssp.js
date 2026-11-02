@@ -56,7 +56,7 @@ export function EuiMonitoringSSPTable({
     footerContent = (
       <Fragment>
         <EuiSpacer size="m" />
-        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
+        <EuiButton iconType="pencil" onClick={() => setupMode.openFlyout({}, true)}>
           {i18n.translate('xpack.monitoring.euiSSPTable.setupNewButtonLabel', {
             defaultMessage: 'Set up monitoring for new {identifier}',
             values: {
@@ -111,6 +111,9 @@ export function EuiMonitoringSSPTable({
         onChange={onChange}
         columns={columns}
         loading={props.isLoading || isLoading}
+        tableCaption={i18n.translate('xpack.monitoring.euiSSPTable.tableCaption', {
+          defaultMessage: 'Monitored instances',
+        })}
       />
       {footerContent}
     </div>

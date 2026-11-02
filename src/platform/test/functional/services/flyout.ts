@@ -26,7 +26,7 @@ export class FlyoutService extends FtrService {
   }
 
   public async ensureClosed(dataTestSubj: string): Promise<void> {
-    if (await this.testSubjects.exists(dataTestSubj, { timeout: 1000 })) {
+    if (await this.testSubjects.exists(dataTestSubj)) {
       await this.close(dataTestSubj);
     }
   }
@@ -55,5 +55,20 @@ export class FlyoutService extends FtrService {
       flyoutElements = await this.find.allByCssSelector('.euiFlyout', 500);
       return flyoutElements.length === expectedFlyoutCount;
     });
+  }
+
+  /**
+   * Clicks the close button on a flyout, handling both managed and unmanaged flyout instances.
+   * @param testSubjectPrefix - Optional prefix for scoped test subjects (e.g., 'fieldEditor > ')
+   */
+  public async closeFlyout(testSubjectPrefix: string = ''): Promise<void> {
+    const managedFlyoutCloseButton = `${testSubjectPrefix}euiFlyoutCloseButton`;
+    const unmanagedFlyoutCloseButton = `${testSubjectPrefix}closeFlyoutButton`;
+
+    if (await this.testSubjects.exists(managedFlyoutCloseButton)) {
+      await this.testSubjects.click(managedFlyoutCloseButton);
+    } else {
+      await this.testSubjects.click(unmanagedFlyoutCloseButton);
+    }
   }
 }

@@ -26,7 +26,7 @@ export async function getAlertSummary(
   { id, dateStart, numberOfExecutions }: GetAlertSummaryParams
 ): Promise<AlertSummary> {
   context.logger.debug(`getAlertSummary(): getting alert ${id}`);
-  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id })) as SanitizedRuleWithLegacyId;
 
   await context.authorization.ensureAuthorized({
     ruleTypeId: rule.alertTypeId,

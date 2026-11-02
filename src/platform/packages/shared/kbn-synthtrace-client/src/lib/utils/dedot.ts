@@ -9,7 +9,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 
-export function dedot(source: Record<string, any>, target: Record<string, any>) {
+export function dedot(source: Record<string, unknown>, target: Record<string, unknown>) {
   // eslint-disable-next-line guard-for-in
   for (const key in source) {
     const val = source[key as keyof typeof source];

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-feature-flags-browser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-feature-flags-browser'
+  title: '@kbn/core-feature-flags-browser'
   description: Moon project for @kbn/core-feature-flags-browser
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/feature-flags/browser
+  sourceRoot: src/core/packages/feature-flags/browser
 dependsOn: []
 tags:
   - shared-browser

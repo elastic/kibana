@@ -19,7 +19,6 @@ import {
   SavedObjectConfig,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
-  type IndexTypesMap,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
@@ -27,7 +26,11 @@ import {
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
-import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  AgentManager,
+  configureClient,
+  getRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
@@ -83,7 +86,6 @@ export const prepareModelVersionTestKit = async ({
     client: esClient,
     loggerFactory,
     kibanaIndex,
-    defaultIndexTypesMap: {},
     hashToVersionMap: {},
     kibanaVersion,
     kibanaBranch,
@@ -208,6 +210,9 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
+    onRequest: getRequestHandlerFactory(false)({
+      logger: loggerFactory.get('elasticsearch'),
+    }),
   });
 };
 
@@ -216,7 +221,6 @@ const getMigrator = async ({
   client,
   kibanaIndex,
   typeRegistry,
-  defaultIndexTypesMap,
   hashToVersionMap,
   loggerFactory,
   kibanaVersion,
@@ -228,7 +232,6 @@ const getMigrator = async ({
   client: ElasticsearchClient;
   kibanaIndex: string;
   typeRegistry: ISavedObjectTypeRegistryInternal;
-  defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
@@ -255,7 +258,6 @@ const getMigrator = async ({
     client,
     kibanaIndex,
     typeRegistry,
-    defaultIndexTypesMap,
     hashToVersionMap,
     soMigrationsConfig: soConfig.migration,
     kibanaVersion,

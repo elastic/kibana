@@ -19,6 +19,7 @@ describe('ConnectorForm', () => {
   const onFormModifiedChange = jest.fn();
 
   const connector = {
+    id: 'test-connector',
     actionTypeId: 'test',
     isDeprecated: false,
     config: {},
@@ -144,6 +145,24 @@ describe('ConnectorForm', () => {
         submit: expect.anything(),
       });
     });
+  });
+
+  it('passes authMode from connector to the fields component', async () => {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      actionConnectorFields: lazy(() => import('./connector_mock')),
+    });
+
+    appMockRenderer.render(
+      <ConnectorForm
+        actionTypeModel={actionTypeModel}
+        isEdit={true}
+        connector={{ ...connector, authMode: 'per-user' }}
+        onChange={onChange}
+        onFormModifiedChange={onFormModifiedChange}
+      />
+    );
+
+    expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
   });
 
   it('passes the serializers from the connector type model to the underlying form', async () => {

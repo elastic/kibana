@@ -24,7 +24,7 @@ async function removeLifecycle(client: ElasticsearchClient, indexNames: string[]
 }
 
 const bodySchema = schema.object({
-  indexNames: schema.arrayOf(schema.string()),
+  indexNames: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
 });
 
 export function registerRemoveRoute({

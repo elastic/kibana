@@ -41,7 +41,7 @@ export function DeleteAnnotationsModal({
         setIsDeleteModalVisible(false);
         setSelection([]);
       }}
-      onConfirm={onDelete}
+      onConfirm={() => onDelete()}
       cancelButtonText={i18n.translate(
         'xpack.observability.deleteAnnotations.euiConfirmModal.cancelButtonLabel',
         { defaultMessage: 'Cancel' }

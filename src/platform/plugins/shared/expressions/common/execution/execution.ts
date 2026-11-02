@@ -14,21 +14,28 @@ import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
 import type { Subscription } from 'rxjs';
 import {
+  catchError,
   combineLatest,
   defer,
+  finalize,
   from,
   identity,
   isObservable,
   last,
+  map,
+  Observable,
   of,
+  pluck,
+  ReplaySubject,
+  shareReplay,
+  switchMap,
   takeWhile,
+  tap,
   throwError,
   timer,
-  Observable,
-  ReplaySubject,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
-import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortError, calculateObjectHash, now } from '@kbn/kibana-utils-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Executor } from '../executor';
 import type { ExecutionContainer } from './container';
@@ -42,8 +49,8 @@ import type {
   ExpressionAstFunction,
   ExpressionAstNode,
 } from '../ast';
-import { parse, formatExpression, parseExpression } from '../ast';
-import type { ExecutionContext, DefaultInspectorAdapters } from './types';
+import { formatExpression, parse, parseExpression } from '../ast';
+import type { DefaultInspectorAdapters, ExecutionContext } from './types';
 import type { Datatable } from '../expression_types';
 import { getType } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
@@ -171,8 +178,12 @@ function throttle<T>(timeout: number) {
 function takeUntilAborted<T>(signal: AbortSignal) {
   return (source: Observable<T>) =>
     new Observable<T>((subscriber) => {
-      const throwAbortError = () => {
-        subscriber.error(new AbortError());
+      const throwAbortError = (e?: Event) => {
+        const reason = (e?.target as AbortSignal)?.reason;
+        // For CANCELED, let the chain continue so partial results can flow through.
+        if (reason !== AbortReason.CANCELED) {
+          subscriber.error(new AbortError());
+        }
       };
 
       subscriber.add(source.subscribe(subscriber));
@@ -306,6 +317,15 @@ export class Execution<
       getExecutionContext: () => execution.params.executionContext,
     };
 
+    // Cancel children when this execution is aborted.
+    // Uses queueMicrotask so the parent's error path completes before child
+    // errors can re-enter the parent's chain.
+    this.abortController.signal.addEventListener('abort', () => {
+      queueMicrotask(() => {
+        this.childExecutions.forEach((child) => child.cancel(this.abortController.signal.reason));
+      });
+    });
+
     this.result = this.input$.pipe(
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
@@ -318,8 +338,6 @@ export class Execution<
       ),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
-          this.childExecutions.forEach((childExecution) => childExecution.cancel());
-
           return of({ result: createAbortErrorValue(), partial: false });
         }
 
@@ -339,8 +357,8 @@ export class Execution<
   /**
    * Stop execution of expression.
    */
-  cancel() {
-    this.abortController.abort();
+  cancel(reason?: AbortReason) {
+    this.abortController.abort(reason);
   }
 
   /**
@@ -709,7 +727,6 @@ export class Execution<
           variables: this.context.variables,
         });
         this.childExecutions.push(execution);
-
         return execution.start(input, true);
       case 'string':
       case 'number':

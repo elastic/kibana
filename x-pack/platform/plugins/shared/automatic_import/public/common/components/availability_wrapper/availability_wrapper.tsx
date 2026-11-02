@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React, { type PropsWithChildren } from 'react';
-import { LicensePaywallCard } from './license_paywall_card';
+import { LicensePaywallCard } from '../../../components/license_paywall/license_paywall_card';
 import { useAvailability } from '../../hooks/use_availability';
 
-type AvailabilityWrapperProps = PropsWithChildren<{}>;
+type AvailabilityWrapperProps = PropsWithChildren<object>;
 export const AvailabilityWrapper = React.memo<AvailabilityWrapperProps>(({ children }) => {
   const { hasLicense, renderUpselling } = useAvailability();
   if (renderUpselling) {

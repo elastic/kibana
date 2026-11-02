@@ -492,7 +492,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
         >
           <Settings
             onBrushEnd={viewMode !== VIEW_MODE.BRUSH ? (onBrushEnd as BrushEndListener) : undefined}
-            onElementClick={onElementClick}
+            onElementClick={nonInteractive ? undefined : onElementClick}
             onProjectionAreaChange={({ projection }) => {
               setMlBrushMarginLeft(projection.left);
               setMlBrushWidth(projection.width);
@@ -507,7 +507,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             id="aiops-histogram-bottom-axis"
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convert(value)}
+            tickFormat={(value) => xAxisFormatter.convertToText(value)}
             labelFormat={() => ''}
           />
           {adjustedChartPoints?.length && (

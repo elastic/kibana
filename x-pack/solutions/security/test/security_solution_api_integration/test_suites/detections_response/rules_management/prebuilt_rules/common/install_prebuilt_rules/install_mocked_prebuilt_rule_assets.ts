@@ -13,19 +13,25 @@ import {
   deleteAllPrebuiltRuleAssets,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
+  createDeprecatedPrebuiltRuleAssetSavedObjects,
   installPrebuiltRulesAndTimelines,
   getPrebuiltRulesAndTimelinesStatus,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   getInstalledRules,
+  reviewPrebuiltRulesToInstall,
+  initializeSecuritySolution,
 } from '../../../../utils';
+
+const DETECTION_RULE_INSTALL_EVENT = 'detection_rule_install';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
   const detectionsApi = getService('detectionsApi');
+  const ebtServer = getService('kibana_ebt_server');
 
   describe('@ess @serverless @skipInServerlessMKI Install from mocked prebuilt rule assets', () => {
     beforeEach(async () => {
@@ -43,13 +49,33 @@ export default ({ getService }: FtrProviderContext): void => {
       ];
       const RULES_COUNT = getRuleAssetSavedObjects().length;
 
-      it('installs prebuilt rules', async () => {
+      it('installs prebuilt rules and emits telemetry', async () => {
+        await ebtServer.setOptIn(true);
+        const fromTimestamp = new Date().toISOString();
         await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
         const body = await installPrebuiltRules(es, supertest);
+        const events = await ebtServer.getEvents(RULES_COUNT, {
+          eventTypes: [DETECTION_RULE_INSTALL_EVENT],
+          fromTimestamp,
+          withTimeoutMs: 10_000,
+        });
 
         expect(body.summary.succeeded).toBe(RULES_COUNT);
         expect(body.summary.failed).toBe(0);
         expect(body.summary.skipped).toBe(0);
+        expect(events).toHaveLength(RULES_COUNT);
+        expect(events.map(({ properties }) => properties)).toEqual(
+          expect.arrayContaining(
+            body.results.created.map(({ id }) =>
+              expect.objectContaining({
+                ruleId: id,
+                ruleType: 'query',
+                isPrebuilt: true,
+                isCustomized: false,
+              })
+            )
+          )
+        );
       });
 
       it('installs correct prebuilt rule versions', async () => {
@@ -292,6 +318,49 @@ export default ({ getService }: FtrProviderContext): void => {
             type: 'detection',
           }),
         ]);
+      });
+
+      describe('Deprecated rule exclusion', () => {
+        it('does not install deprecated rule assets when installing all rules', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'active-rule-1', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'active-rule-2', version: 1 }),
+          ]);
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          const body = await installPrebuiltRules(es, supertest);
+
+          const installedRuleIds = body.results.created.map((r) => r.rule_id);
+          expect(installedRuleIds).toContain('active-rule-1');
+          expect(installedRuleIds).toContain('active-rule-2');
+          expect(installedRuleIds).not.toContain('deprecated-rule-1');
+          expect(body.summary.succeeded).toBe(2);
+        });
+
+        it('installs zero rules when only deprecated rule assets are present', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          const body = await installPrebuiltRules(es, supertest);
+
+          expect(body.summary.succeeded).toBe(0);
+          expect(body.results.created).toHaveLength(0);
+        });
+
+        it('does not include deprecated rule assets in the install review after the bootstrap endpoint is called', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          await initializeSecuritySolution(supertest, ['init-prebuilt-rules']).expect(200);
+
+          const response = await reviewPrebuiltRulesToInstall(supertest);
+          const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+          expect(ruleIds).not.toContain('deprecated-rule-1');
+        });
       });
 
       describe('legacy (PUT /api/detection_engine/rules/prepackaged)', () => {

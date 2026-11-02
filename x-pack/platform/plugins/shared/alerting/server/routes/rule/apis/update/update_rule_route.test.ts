@@ -130,7 +130,6 @@ describe('updateRuleRoute', () => {
         alerts_filter: {
           query: {
             kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
             filters: [],
           },
         },
@@ -218,7 +217,6 @@ describe('updateRuleRoute', () => {
             "throttle": "10m",
           },
           "id": "1",
-          "isFlappingEnabled": true,
         },
       ]
     `);

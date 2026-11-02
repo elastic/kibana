@@ -16,6 +16,7 @@
       "_ml/anomaly_detectors"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-get-jobs",
     "availability": {
       "stack": true,
       "serverless": true

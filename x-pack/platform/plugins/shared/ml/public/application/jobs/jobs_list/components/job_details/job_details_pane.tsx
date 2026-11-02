@@ -91,7 +91,7 @@ const Section: FC<{ section: Section }> = ({ section }) => {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h4>{section.title}</h4>
+                <h2>{section.title}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{section.titleAction}</EuiFlexItem>

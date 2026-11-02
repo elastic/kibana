@@ -15,8 +15,8 @@ export const slashesRegex = /\/+/;
 export const ampersandRegex = /&/;
 export const equalsSignRegex = /=/;
 export const questionMarkRegex = /\?/;
-export const urlVariableTemplateRegex = /\${(\w+)}/g;
-export const dataVariableTemplateRegex = /"\${(\w+)}"/g;
+export const urlVariableTemplateRegex = /\${(\w+)}/;
+export const dataVariableTemplateRegex = /"\${(\w+)}"/;
 export const numberStartRegex = /[-\d]/;
 export const digitRegex = /[\d]/;
 export const lettersRegex = /[A-Za-z]/;
@@ -40,16 +40,27 @@ export const startsWithMethodRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)/i;
 export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._\-?=&]*[?=\/]$/i;
 /*
  * This regex matches a string that has
- * optional whitespace characters and a double quote, for example `  "`.
+ * optional whitespace characters and a double quote, for example `  "` or `  "cate`.
  * In this case autocomplete suggestions should be triggered for a property name.
  */
-export const propertyNameRegex = /^\s*"$/;
+export const propertyNameRegex = /^\s*"[^"]*$/;
 /*
  * This regex matches a string that has
- * a property name, a colon and an optional double quote, for example `"query" : "`.
+ * a property name after the line start or a body delimiter, a colon and an optional double quote,
+ * for example `{"query" : "`.
  * In this case autocomplete suggestions should be triggered for a property value.
  */
-export const propertyValueRegex = /^\s*"[a-zA-Z0-9_]+"\s*:\s*"?$/;
+export const propertyValueRegex = /(?:^|[{\[,])\s*"[a-zA-Z0-9_]+"\s*:\s*"?$/;
+/*
+ * This regex matches a string that ends with an opening object/array or a comma.
+ * In this case the cursor is at a new request-body completion position.
+ */
+export const lineEndsWithBodyContinuationRegex = /(?:\{|\[|,)\s*$/;
+/*
+ * Matches trimmed content that is only body closing tokens: an optional closing quote,
+ * closing braces/brackets, and an optional trailing comma.
+ */
+export const onlyBodyClosingTokensRegex = /^"?[}\]\s]*,?$/;
 
 /*
  * i18n for autocomplete labels

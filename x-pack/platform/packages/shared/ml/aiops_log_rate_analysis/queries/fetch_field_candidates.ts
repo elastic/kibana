@@ -60,6 +60,7 @@ export const fetchFieldCandidates = async ({
       filters: '-metadata,-parent',
       include_empty_fields: false,
       index: params.index,
+      ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
       index_filter: {
         range: {
           [params.timeFieldName]: {

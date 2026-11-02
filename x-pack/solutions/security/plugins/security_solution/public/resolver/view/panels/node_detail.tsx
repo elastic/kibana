@@ -6,31 +6,26 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  htmlIdGenerator,
+  EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
-  EuiTitle,
   EuiText,
   EuiTextColor,
-  EuiLink,
-  EuiInMemoryTable,
+  EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
+import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
+import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from '../generated_text';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import * as nodeDataModel from '../../models/node_data';
@@ -57,13 +52,24 @@ export const NodeDetail = memo(function ({
   id,
   nodeID,
   nodeEventOnClick,
+  renderCellActions,
 }: {
   id: string;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
+  renderCellActions: CellActionRenderer;
 }) {
+  const originTimestampMs = useSelector((state: State) =>
+    selectors.originTimestamp(state.analyzer[id])
+  );
   const processEvent = useSelector((state: State) =>
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+  );
+  const nameEvent = useSelector((state: State) =>
+    nodeDataModel.eventAtOrBefore(
+      selectors.nodeDataForID(state.analyzer[id])(nodeID),
+      originTimestampMs
+    )
   );
   const nodeStatus = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)
@@ -76,7 +82,9 @@ export const NodeDetail = memo(function ({
       id={id}
       nodeID={nodeID}
       processEvent={processEvent}
+      nameEvent={nameEvent}
       nodeEventOnClick={nodeEventOnClick}
+      renderCellActions={renderCellActions}
     />
   ) : (
     <PanelContentError id={id} translatedErrorMessage={nodeDetailError} />
@@ -96,15 +104,23 @@ export interface NodeDetailsTableView {
 export const NodeDetailView = memo(function ({
   id,
   processEvent,
+  nameEvent,
   nodeID,
   nodeEventOnClick,
+  renderCellActions,
 }: {
   id: string;
   processEvent: SafeResolverEvent;
+  /**
+   * The event whose process name is in effect at the analyzed event's time. Only used to derive the
+   * displayed process name; `processEvent` (the node's newest document) still drives the rest of the panel.
+   */
+  nameEvent?: SafeResolverEvent;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
+  renderCellActions: CellActionRenderer;
 }) {
-  const processName = eventModel.processNameSafeVersion(processEvent);
+  const processName = eventModel.processNameSafeVersion(nameEvent ?? processEvent);
   const nodeState = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );
@@ -268,21 +284,12 @@ export const NodeDetailView = memo(function ({
       ),
       'data-test-subj': 'resolver:node-detail:entry-description',
       render(data: NodeDetailsTableView) {
-        return (
-          <SecurityCellActions
-            data={{
-              field: data.title,
-              value: data.value ?? data.description,
-            }}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
-            mode={CellActionsMode.HOVER_DOWN}
-            visibleCellActions={5}
-            sourcererScopeId={getSourcererScopeId(id)}
-            metadata={{ scopeId: id }}
-          >
-            {data.description}
-          </SecurityCellActions>
-        );
+        return renderCellActions({
+          field: data.title,
+          value: data.value ?? data.description,
+          children: data.description,
+          scopeId: id,
+        });
       },
     },
   ];
@@ -330,6 +337,12 @@ export const NodeDetailView = memo(function ({
         items={processInfoEntry}
         columns={columns}
         sorting
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.endpoint.resolver.panel.nodeDetail.processMetadataCaption',
+          {
+            defaultMessage: 'Process metadata entries',
+          }
+        )}
       />
     </div>
   );

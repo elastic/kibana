@@ -7,6 +7,8 @@
 
 import type { Filter } from '@kbn/es-query';
 
+export { hostNameExistsFilter } from '../../../../common/components/visualization_actions/utils';
+
 export const getHostDetailsPageFilters = (hostName: string): Filter[] => [
   {
     meta: {
@@ -30,3 +32,32 @@ export const getHostDetailsPageFilters = (hostName: string): Filter[] => [
     },
   },
 ];
+
+/**
+ * Kibana {@link Filter} clauses for Events (and similar) views: one phrase match per
+ * non-empty identity field (AND semantics when combined in the query bar).
+ */
+export const getIdentityFieldsPageFilters = (identityFields: Record<string, string>): Filter[] =>
+  Object.entries(identityFields)
+    .filter(([, fieldValue]) => typeof fieldValue === 'string' && fieldValue.trim() !== '')
+    .map(([fieldKey, fieldValue]) => ({
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: fieldKey,
+        value: fieldValue,
+        params: {
+          query: fieldValue,
+        },
+      },
+      query: {
+        match: {
+          [fieldKey]: {
+            query: fieldValue,
+            type: 'phrase',
+          },
+        },
+      },
+    }));

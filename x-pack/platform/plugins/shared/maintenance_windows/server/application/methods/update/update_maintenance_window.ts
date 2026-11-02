@@ -7,17 +7,16 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../common';
-import { getScopedQueryErrorMessage } from '../../../../common';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
+import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import type { MaintenanceWindow } from '../../types';
 import {
   generateMaintenanceWindowEvents,
   shouldRegenerateEvents,
   mergeEvents,
   getMaintenanceWindowExpirationDate,
+  resolveScope,
 } from '../../lib';
 import { retryIfConflicts } from '../../../lib/retry_if_conflicts';
 import {
@@ -47,7 +46,7 @@ async function updateWithOCC(
 ): Promise<MaintenanceWindow> {
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { id, data } = params;
-  const { title, enabled, duration, rRule, categoryIds, scopedQuery } = data;
+  const { title, enabled, duration, rRule, schedule, scope, categoryIds } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -56,29 +55,16 @@ async function updateWithOCC(
     throw Boom.badRequest(`Error validating update maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scopedQuery;
-  try {
-    if (scopedQuery) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
-          esQueryConfig
-        )
-      );
-      scopedQueryWithGeneratedValue = {
-        ...scopedQuery,
-        dsl,
-      };
-    }
-  } catch (error) {
-    throw Boom.badRequest(
-      `Error validating update maintenance window data - ${getScopedQueryErrorMessage(
-        error.message
-      )}`
-    );
-  }
+  // Only resolve the scope when it's explicitly provided; omitted scope leaves stored scope intact.
+  const resolvedScope =
+    scope === undefined
+      ? undefined
+      : resolveScope({
+          scope,
+          esQueryConfig,
+          indexPattern: getAlertsDataViewBase(),
+          errorPrefix: 'Error validating update maintenance window data',
+        });
 
   try {
     const {
@@ -97,19 +83,17 @@ async function updateWithOCC(
     }
 
     const expirationDate: string = getMaintenanceWindowExpirationDate({
-      rRule: rRule ? rRule : maintenanceWindow.rRule,
-      duration: duration ? duration : maintenanceWindow.duration,
+      schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
     });
 
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
-      rRule: rRule || maintenanceWindow.rRule,
-      duration: typeof duration === 'number' ? duration : maintenanceWindow.duration,
+      schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
       expirationDate,
     });
 
-    if (!shouldRegenerateEvents({ maintenanceWindow, rRule, duration })) {
+    if (!shouldRegenerateEvents({ maintenanceWindow, schedule: schedule?.custom })) {
       events = mergeEvents({ oldEvents: maintenanceWindow.events, newEvents: events });
     }
 
@@ -119,15 +103,30 @@ async function updateWithOCC(
         ...(title ? { title } : {}),
         ...(rRule ? { rRule: rRule as MaintenanceWindow['rRule'] } : {}),
         ...(categoryIds !== undefined ? { categoryIds } : {}),
-        ...(scopedQueryWithGeneratedValue !== undefined
-          ? { scopedQuery: scopedQueryWithGeneratedValue }
-          : {}),
         ...(typeof duration === 'number' ? { duration } : {}),
         ...(typeof enabled === 'boolean' ? { enabled } : {}),
         expirationDate,
         events,
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
+        ...(schedule ? { schedule } : {}),
+        // scopedQuery mirrors scope.alerting for the v1 alerting consumer and telemetry.
+        // Both are tied together: updating scope clears the old scopedQuery too.
+        ...(resolvedScope !== undefined
+          ? {
+              scope: resolvedScope,
+              // scopedQuery mirrors scope.alerting for the legacy v1 alerting consumer and telemetry.
+              scopedQuery:
+                resolvedScope.alerting?.enabled &&
+                (resolvedScope.alerting.kql || resolvedScope.alerting.filters?.length)
+                  ? {
+                      kql: resolvedScope.alerting.kql ?? '',
+                      filters: resolvedScope.alerting.filters ?? [],
+                      dsl: resolvedScope.alerting.dsl,
+                    }
+                  : null,
+            }
+          : {}),
       });
 
     // We are deleting and then creating rather than updating because SO.update

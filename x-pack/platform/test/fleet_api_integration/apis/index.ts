@@ -17,10 +17,12 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup')); // ~ 6s
+    loadTestFile(require.resolve('./policy_base_id_backfill')); // ~ 1m
 
     loadTestFile(require.resolve('./policy_secrets')); // ~40s
 
     loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
+    loadTestFile(require.resolve('./enrollment_api_keys/bulk_delete')); // ~ 20s
     loadTestFile(require.resolve('./enrollment_api_keys/privileges')); // ~ 20s
 
     // Data Streams
@@ -53,11 +55,15 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     // Uninstall tokens
     loadTestFile(require.resolve('./uninstall_token/get')); // ~ 20s
     loadTestFile(require.resolve('./uninstall_token/privileges')); // ~ 20s
+    loadTestFile(require.resolve('./uninstall_token/rotate')); // ~ 20s
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
 
     // Cloud connectors
     loadTestFile(require.resolve('./cloud_connector'));
+
+    // Cloud onboarding deployments
+    loadTestFile(require.resolve('./cloud_onboarding_deployment'));
   });
 }

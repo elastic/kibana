@@ -14,7 +14,7 @@ import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../../flyout_v2/shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
 
 export const FindingsMisconfigurationPanel = ({

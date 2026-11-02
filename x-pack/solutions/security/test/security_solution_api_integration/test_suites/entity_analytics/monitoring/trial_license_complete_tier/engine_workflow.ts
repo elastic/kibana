@@ -8,7 +8,6 @@
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -51,10 +50,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     // Initialize and disable workflow tests
     describe('privMon init and disable engine workflow', () => {
-      beforeEach(async () => {
-        await enablePrivmonSetting(kibanaServer);
-      });
-
       afterEach(async () => {
         log.info('Cleaning up after test');
         try {
@@ -62,7 +57,6 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
-        await disablePrivmonSetting(kibanaServer);
       });
 
       it('should handle complete init-disable-reinit cycle', async () => {
@@ -108,10 +102,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     // Custom space init and disable engine workflow tests
     describe('privMon init and disable engine workflow in custom space', () => {
-      beforeEach(async () => {
-        await enablePrivmonSetting(kibanaServer, customSpace);
-      });
-
       afterEach(async () => {
         log.info('Cleaning up after test in custom space');
         try {
@@ -119,7 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach for custom space: ${err.message}`);
         }
-        await disablePrivmonSetting(kibanaServer, customSpace);
       });
 
       it('should handle complete init-disable-reinit cycle in custom space', async () => {

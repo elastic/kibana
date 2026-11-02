@@ -8,15 +8,20 @@ paths:
       summary: Download a file
       operationId: EndpointFileDownload
       description: |
-        Download a file associated with a response action.
+        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+        > info
+        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
         - name: action_id
           in: path
           required: true
+          description: The ID of the response action that generated the file.
           schema:
             type: string
+            minLength: 1
+            maxLength: 256
         - name: file_id
           in: path
           required: true
@@ -27,11 +32,17 @@ paths:
             - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
           schema:
             type: string
+            minLength: 1
+            maxLength: 256
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/octet-stream:
               schema:
                 type: string
                 format: binary
+              examples:
+                fileDownload:
+                  summary: Password-protected ZIP archive containing the response action file
+                  value: 'binary file content (password-protected .zip)'

@@ -25,7 +25,6 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
-    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
   // load specific test files for complete tier
   testFiles: [
@@ -34,4 +33,5 @@ export default createTestConfig({
     require.resolve('../test_suites/ftr/cloud_security_posture/graph_alerts_flyout'),
     require.resolve('../test_suites/ftr/cloud_security_posture/graph_events_flyout'),
   ],
+  enableFleetDockerRegistry: false,
 });

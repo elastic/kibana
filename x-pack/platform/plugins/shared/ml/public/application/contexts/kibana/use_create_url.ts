@@ -9,9 +9,9 @@ import { useCallback, useEffect, useState } from 'react';
 import type { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
 import { useUrlState } from '@kbn/ml-url-state';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { useMlKibana } from './kibana_context';
-import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
-import type { MlLocatorParams } from '../../../../common/types/locator';
 import { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';
 import type { NavigateToMlManagementLink } from '../../jobs/new_job/common/job_creator/util/general';
 

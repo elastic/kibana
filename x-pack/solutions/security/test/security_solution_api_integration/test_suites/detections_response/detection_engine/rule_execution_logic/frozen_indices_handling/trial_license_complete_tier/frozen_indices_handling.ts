@@ -78,11 +78,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   const getRuleExecutionResult = async (ruleId: string) => {
     const startDate = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const ruleExecutionsResultUrl = `/internal/detection_engine/rules/${ruleId}/execution/results`;
-    return await supertest
-      .get(`${ruleExecutionsResultUrl}?start=${startDate}&end=9999-12-31T23:59:59Z`)
-      .set('elastic-api-version', '1')
-      .send()
+    return await detectionsApi
+      .readRuleExecutionResults({
+        params: { ruleId },
+        body: { filter: { from: startDate, to: '9999-12-31T23:59:59.999Z' } },
+      })
       .expect(200);
   };
 
@@ -111,10 +111,10 @@ export default ({ getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const response = await getRuleExecutionResult(ruleId);
           expect(response.statusCode).to.be.equal(200);
-          const { total, events } = response.body;
+          const { total, data } = response.body;
           expect(total).to.be.equal(1);
-          expect(events[0].status).to.be.equal('success');
-          expect(events[0].frozen_indices_queried_count).to.be.equal(0);
+          expect(data[0].outcome.status).to.be.equal('success');
+          expect(data[0].metrics.frozen_indices_queried_count).to.be.equal(0);
         });
 
         cleanupStack.push(async () => {
@@ -139,10 +139,10 @@ export default ({ getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const response = await getRuleExecutionResult(ruleId);
           expect(response.statusCode).to.be.equal(200);
-          const { total, events } = response.body;
+          const { total, data } = response.body;
           expect(total).to.be.equal(1);
-          expect(events[0].status).to.be.equal('success');
-          expect(events[0].frozen_indices_queried_count).to.be.equal(1);
+          expect(data[0].outcome.status).to.be.equal('success');
+          expect(data[0].metrics.frozen_indices_queried_count).to.be.equal(1);
         });
 
         cleanupStack.push(async () => {
@@ -178,10 +178,10 @@ export default ({ getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const response = await getRuleExecutionResult(ruleId);
           expect(response.statusCode).to.be.equal(200);
-          const { total, events } = response.body;
+          const { total, data } = response.body;
           expect(total).to.be.equal(1);
-          expect(events[0].status).to.be.equal('success');
-          expect(events[0].frozen_indices_queried_count).to.be.equal(0);
+          expect(data[0].outcome.status).to.be.equal('success');
+          expect(data[0].metrics.frozen_indices_queried_count).to.be.equal(0);
         });
 
         cleanupStack.push(async () => {

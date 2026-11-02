@@ -9,13 +9,13 @@
 
 import * as Fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import https from 'https';
+import { Agent } from 'undici';
 
 export function getFetchAgent(url: string) {
   const urlObj = new URL(url);
   const isHTTPS = urlObj.protocol === 'https:';
   const isLocalhost = urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1';
-  return isHTTPS && isLocalhost ? new https.Agent({ rejectUnauthorized: false }) : undefined;
+  return isHTTPS && isLocalhost ? new Agent({ connect: { rejectUnauthorized: false } }) : undefined;
 }
 
 export function getEsClientTlsSettings(url: string, insecure: boolean = false) {

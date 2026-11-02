@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type { AnonymizationRegexWorkerTaskPayload } from '../chat_complete/anonymization/types';
-import type { AnonymizationState } from '../chat_complete/anonymization/types';
-import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { DetectedMatch, RegexWorkerService } from '@kbn/ai-anonymization-server';
 
 export const createRegexWorkerServiceMock = () => {
   const mock = {
-    run: jest.fn(
-      ({ records }: AnonymizationRegexWorkerTaskPayload): Promise<AnonymizationState> =>
-        Promise.resolve({ records, anonymizations: [] })
-    ),
+    run: jest.fn((): Promise<DetectedMatch[]> => Promise.resolve([])),
     stop: jest.fn().mockResolvedValue(undefined),
   };
   return mock as unknown as RegexWorkerService;

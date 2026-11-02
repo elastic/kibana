@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { toStoredFilters, fromStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -30,24 +31,27 @@ import {
   distinctUntilChanged,
   finalize,
   map,
-  of,
+  merge,
+  skip,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { dataService } from '../services/kibana_services';
+import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import type { DashboardCreationOptions } from './types';
-import type { DashboardState } from '../../common';
-import { cleanFiltersForSerialize } from '../../common';
+import type { DashboardApi, DashboardCreationOptions } from './types';
+import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
+  userActivity$: DashboardApi['userActivity$'],
   creationOptions?: DashboardCreationOptions
 ) {
   const {
@@ -56,13 +60,16 @@ export function initializeUnifiedSearchManager(
     timefilter: { timefilter: timefilterService },
   } = dataService.query;
 
-  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const reload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
+  const query$ = new BehaviorSubject<Query | undefined>(
+    initialState.query ? toStoredQuery(initialState.query) : undefined
+  );
+  const asCodeQuery$ = new BehaviorSubject<DashboardState['query']>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
-  function setQuery(query: Query) {
+  function setQuery(query: Query | undefined) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
+      asCodeQuery$.next(query ? toAsCodeQuery(query) : undefined);
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
@@ -94,50 +101,20 @@ export function initializeUnifiedSearchManager(
       timefilterService.setTime(timeRangeOrDefault);
     }
   }
+
+  const asCodeFilters$ = new BehaviorSubject<AsCodeFilter[] | undefined>(initialState.filters);
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
+  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(
+    toStoredFilters(initialState.filters, logger)
+  );
+
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
-      unifiedSearchFilters$.next(unifiedSearchFilters);
+      unifiedSearchFilters$.next(cleanFiltersForSerialize(unifiedSearchFilters));
+      asCodeFilters$.next(fromStoredFilters(unifiedSearchFilters, logger));
     }
   }
-
-  // --------------------------------------------------------------------------------------
-  // Set up control group integration
-  // --------------------------------------------------------------------------------------
-  const controlGroupSubscriptions: Subscription = new Subscription();
-  const controlGroupFilters$ = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.filters$ : of(undefined)))
-  );
-  const controlGroupTimeslice$ = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) => (controlGroupApi ? controlGroupApi.timeslice$ : of(undefined)))
-  );
-
-  // forward ESQL variables from the control group. TODO, this is overcomplicated by the fact that
-  // the control group API is a publishing subject. Instead, the control group API should be a constant
-  const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-  const controlGroupEsqlVariables$ = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) =>
-      controlGroupApi ? controlGroupApi.esqlVariables$ : of([] as ESQLControlVariable[])
-    )
-  );
-  controlGroupSubscriptions.add(
-    controlGroupEsqlVariables$.subscribe((latestVariables) => esqlVariables$.next(latestVariables))
-  );
-
-  controlGroupSubscriptions.add(
-    combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
-      ([unifiedSearchFilters, controlGroupFilters]) => {
-        filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
-      }
-    )
-  );
-  controlGroupSubscriptions.add(
-    controlGroupTimeslice$.subscribe((timeslice) => {
-      if (timeslice !== timeslice$.value) timeslice$.next(timeslice);
-    })
-  );
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.
@@ -191,7 +168,7 @@ export function initializeUnifiedSearchManager(
           query: query$.value ?? dataService.query.queryString.getDefaultQuery(),
         }),
         set: ({ filters: newFilters, query: newQuery }) => {
-          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters));
+          setUnifiedSearchFilters(newFilters);
           setQuery(newQuery);
         },
         state$: combineLatest([query$, unifiedSearchFilters$]).pipe(
@@ -267,8 +244,8 @@ export function initializeUnifiedSearchManager(
   const comparators = {
     filters: (a, b) =>
       compareFilters(
-        (a ?? []).filter((f) => !isFilterPinned(f)),
-        (b ?? []).filter((f) => !isFilterPinned(f)),
+        toStoredFilters(a, logger) ?? [],
+        toStoredFilters(b, logger) ?? [],
         COMPARE_ALL_OPTIONS
       ),
     query: 'deepEquality',
@@ -289,8 +266,8 @@ export function initializeUnifiedSearchManager(
     DashboardState,
     'filters' | 'query' | 'refresh_interval' | 'time_range'
   > => {
-    // pinned filters are not serialized when saving the dashboard
-    const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
+    const serializableFilters = asCodeFilters$.value;
+    const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -309,18 +286,24 @@ export function initializeUnifiedSearchManager(
         : undefined;
 
     return {
-      query: query$.value,
+      ...(asCodeQuery && { query: asCodeQuery }),
       ...(serializableFilters?.length && { filters: serializableFilters }),
       ...(refreshInterval && { refresh_interval: refreshInterval }),
       ...(timeRange && { time_range: timeRange }),
     };
   };
 
+  const anyStateChange$ = merge(
+    asCodeFilters$.pipe(skip(1)),
+    asCodeQuery$.pipe(skip(1)),
+    refreshInterval$.pipe(skip(1)),
+    timeRange$.pipe(skip(1)),
+    timeRestore$.pipe(skip(1))
+  ).pipe(map(() => undefined));
+
   return {
     api: {
       reload$,
-      filters$,
-      esqlVariables$,
       forceRefresh: () => {
         reload$.next();
       },
@@ -331,25 +314,24 @@ export function initializeUnifiedSearchManager(
       setTimeRange: setAndSyncTimeRange,
       timeRange$,
       timeslice$,
-      unifiedSearchFilters$,
     },
     internalApi: {
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([
-          unifiedSearchFilters$,
-          query$,
-          refreshInterval$,
-          timeRange$,
-          timeRestore$,
-        ]).pipe(
+      anyStateChange$,
+      unifiedSearchFilters$,
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+        return anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(COMPARE_DEBOUNCE),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          map(([filters, query, refresh_interval, time_range]) => ({
-            filters,
-            query,
-            refresh_interval,
-            time_range,
-          })),
+          map(() => {
+            return {
+              filters: asCodeFilters$.getValue(),
+              query: asCodeQuery$.getValue(),
+              refresh_interval: refreshInterval$.getValue(),
+              time_range: timeRange$.getValue(),
+            };
+          }),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
@@ -359,11 +341,10 @@ export function initializeUnifiedSearchManager(
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
-          ...(lastSavedState.filters ?? []),
+          ...(toStoredFilters(lastSavedState.filters, logger) ?? []),
         ]);
-        if (lastSavedState.query) {
-          setQuery(lastSavedState.query);
-        }
+        const storedQuery = lastSavedState.query ? toStoredQuery(lastSavedState.query) : undefined;
+        setQuery(storedQuery);
         if (lastSavedState.time_range) {
           setAndSyncTimeRange(lastSavedState.time_range);
         }
@@ -374,7 +355,6 @@ export function initializeUnifiedSearchManager(
       getState,
     },
     cleanup: () => {
-      controlGroupSubscriptions.unsubscribe();
       unifiedSearchSubscriptions.unsubscribe();
       stopSyncingWithUrl?.();
       stopSyncingAppFilters?.();

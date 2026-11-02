@@ -11,6 +11,23 @@ import { render, act, screen } from '@testing-library/react';
 import React from 'react';
 import { TimeIntervalSelector } from './time_interval_selector';
 
+const getRenderedOptions = () =>
+  screen.getAllByRole('option').map((option) => {
+    // EUI sets the label `title` on the inner text element rather than on the option
+    // itself, so that it doesn't turn into the option's accessible description.
+    const labelElement = option.querySelector<HTMLElement>('[title]');
+
+    if (!labelElement) {
+      throw new Error(`Option "${option.getAttribute('value')}" is missing its label element`);
+    }
+
+    return {
+      label: labelElement.title,
+      value: option.getAttribute('value'),
+      selected: option.getAttribute('aria-selected'),
+    };
+  });
+
 describe('TimeIntervalSelector', () => {
   it('should render correctly', () => {
     const onTimeIntervalChange = jest.fn();
@@ -31,58 +48,51 @@ describe('TimeIntervalSelector', () => {
       button.click();
     });
 
-    const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(getRenderedOptions()).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "true",
           "label": "Auto",
+          "selected": "true",
           "value": "auto",
         },
         Object {
-          "checked": "false",
           "label": "Millisecond",
+          "selected": "false",
           "value": "ms",
         },
         Object {
-          "checked": "false",
           "label": "Second",
+          "selected": "false",
           "value": "s",
         },
         Object {
-          "checked": "false",
           "label": "Minute",
+          "selected": "false",
           "value": "m",
         },
         Object {
-          "checked": "false",
           "label": "Hour",
+          "selected": "false",
           "value": "h",
         },
         Object {
-          "checked": "false",
           "label": "Day",
+          "selected": "false",
           "value": "d",
         },
         Object {
-          "checked": "false",
           "label": "Week",
+          "selected": "false",
           "value": "w",
         },
         Object {
-          "checked": "false",
           "label": "Month",
+          "selected": "false",
           "value": "M",
         },
         Object {
-          "checked": "false",
           "label": "Year",
+          "selected": "false",
           "value": "y",
         },
       ]
@@ -108,58 +118,51 @@ describe('TimeIntervalSelector', () => {
       button.click();
     });
 
-    const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(getRenderedOptions()).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "false",
           "label": "Auto",
+          "selected": "false",
           "value": "auto",
         },
         Object {
-          "checked": "false",
           "label": "Millisecond",
+          "selected": "false",
           "value": "ms",
         },
         Object {
-          "checked": "false",
           "label": "Second",
+          "selected": "false",
           "value": "s",
         },
         Object {
-          "checked": "false",
           "label": "Minute",
+          "selected": "false",
           "value": "m",
         },
         Object {
-          "checked": "false",
           "label": "Hour",
+          "selected": "false",
           "value": "h",
         },
         Object {
-          "checked": "false",
           "label": "Day",
+          "selected": "false",
           "value": "d",
         },
         Object {
-          "checked": "false",
           "label": "Week",
+          "selected": "false",
           "value": "w",
         },
         Object {
-          "checked": "false",
           "label": "Month",
+          "selected": "false",
           "value": "M",
         },
         Object {
-          "checked": "true",
           "label": "Year",
+          "selected": "true",
           "value": "y",
         },
       ]

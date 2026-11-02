@@ -6,17 +6,20 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   '[search serverless] POST api/painless_lab/execute',
-  { tag: ['@svlSearch'] },
+  { tag: tags.serverless.search },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
+
     apiTest('should return 404', async ({ apiClient }) => {
       const response = await apiClient.post('api/painless_lab/execute', {
         headers: {
@@ -26,7 +29,7 @@ apiTest.describe(
         responseType: 'json',
         body: TEST_INPUT.script,
       });
-      expect(response.statusCode).toBe(404);
+      expect(response).toHaveStatusCode(404);
       expect(response.body.message).toBe('Not Found');
     });
   }

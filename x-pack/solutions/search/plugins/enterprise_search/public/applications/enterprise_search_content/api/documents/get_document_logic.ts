@@ -18,7 +18,9 @@ export interface GetDocumentsArgs {
 export type GetDocumentsResponse = GetResponse<unknown>;
 
 export const getDocument = async ({ indexName, documentId }: GetDocumentsArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/document/${documentId}`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/document/${encodeURIComponent(documentId)}`;
 
   return await HttpLogic.values.http.get<GetDocumentsResponse>(route);
 };

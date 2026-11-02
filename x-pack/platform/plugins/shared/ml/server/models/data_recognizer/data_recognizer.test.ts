@@ -11,7 +11,7 @@ import type {
   IScopedClusterClient,
 } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { Module } from '../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -26,6 +26,11 @@ const mlClusterClient = {
 
 const mlClient = callAs as unknown as MlClient;
 
+const serverlessMock = {
+  isServerless: false,
+  cpsEnabled: false,
+};
+
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
     mlClusterClient,
@@ -37,7 +42,8 @@ describe('ML - data recognizer', () => {
     { find: jest.fn() } as unknown as DataViewsService,
     {} as MLSavedObjectService,
     { headers: { authorization: '' } } as unknown as KibanaRequest,
-    null
+    null,
+    serverlessMock
   );
 
   describe('jobOverrides', () => {

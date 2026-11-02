@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { cloneDeep } from 'lodash';
 import React from 'react';
-import { useActionModal } from '../../../context/action_modal';
+import { screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SloHealthCallout } from './slo_health_callout';
+import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
+import { useRepairSlo } from '../../../hooks/use_repair_slo';
+import { usePermissions } from '../../../hooks/use_permissions';
+import { render } from '../../../utils/test_helper';
+import { useKibana } from '../../../hooks/use_kibana';
+import { cloneDeep } from 'lodash';
 import { baseSlo } from '../../../data/slo';
 import {
   aConflictingTransformHealth,
@@ -20,15 +24,15 @@ import {
   aMissingTransformHealth,
   anUnhealthyTransformHealth,
 } from '../../../data/slo/health';
-import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
-import { SloHealthCallout } from './slo_health_callout';
 
 jest.mock('../../../hooks/use_fetch_slo_health');
-jest.mock('../../../context/action_modal');
-jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('../../../hooks/use_repair_slo');
+jest.mock('../../../hooks/use_permissions');
+jest.mock('../../../hooks/use_kibana');
 
 const mockUseFetchSloHealth = useFetchSloHealth as jest.MockedFunction<typeof useFetchSloHealth>;
-const mockUseActionModal = useActionModal as jest.MockedFunction<typeof useActionModal>;
+const mockUseRepairSlo = useRepairSlo as jest.MockedFunction<typeof useRepairSlo>;
+const mockUsePermissions = usePermissions as jest.MockedFunction<typeof usePermissions>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockSlo: SLOWithSummaryResponse = cloneDeep({
@@ -37,36 +41,70 @@ const mockSlo: SLOWithSummaryResponse = cloneDeep({
   name: 'Test SLO',
 });
 
-const mockTriggerAction = jest.fn();
-const mockCreateUrl = jest.fn().mockReturnValue('#/management/data/transform/slo-test-slo-id-1');
+const mockRepairSlo = jest.fn();
 
 describe('SloHealthCallout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseActionModal.mockReturnValue({
-      triggerAction: mockTriggerAction,
+    mockUseRepairSlo.mockReturnValue({
+      mutate: mockRepairSlo,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
     } as any);
     mockUseKibana.mockReturnValue({
       services: {
+        application: {
+          capabilities: {
+            [sloFeatureId]: { read: true, write: true },
+          },
+        },
+        notifications: {
+          toasts: {
+            addSuccess: jest.fn(),
+            addError: jest.fn(),
+            addDanger: jest.fn(),
+          },
+        },
         share: {
           url: {
             locators: {
               get: () => ({
-                getRedirectUrl: mockCreateUrl,
+                getRedirectUrl: jest.fn(),
               }),
             },
           },
         },
       },
     } as any);
+
+    // Default mock for useFetchSloHealth - individual tests will override this
+    mockUseFetchSloHealth.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [],
+    });
+
+    // Default mock for usePermissions - individual tests can override this
+    mockUsePermissions.mockReturnValue({
+      isLoading: false,
+      data: {
+        hasAllWriteRequested: true,
+        hasAllReadRequested: true,
+        capabilities: {
+          read: true,
+          write: true,
+        },
+        privileges: {
+          read: true,
+          write: true,
+        },
+      },
+    });
   });
 
   const renderComponent = (slo = mockSlo) => {
-    return render(
-      <I18nProvider>
-        <SloHealthCallout slo={slo} />
-      </I18nProvider>
-    );
+    return render(<SloHealthCallout slo={slo} />);
   };
 
   it('should not render when SLO health is loading', () => {
@@ -162,8 +200,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/slo-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
-    expect(screen.getByText('Reset')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with conflicting state for rollup transform', () => {
@@ -188,10 +225,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(/slo-test-slo-id-1 \((conflicting state: should be started)\)/)
-    ).toBeInTheDocument();
-    expect(screen.getByText('Inspect')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with unhealthy summary transform', () => {
@@ -242,8 +276,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/slo-summary-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
-    expect(screen.getByText('Reset')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with conflicting state for summary transform', () => {
@@ -268,10 +301,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(/slo-summary-test-slo-id-1 \((conflicting state: should be started)\)/)
-    ).toBeInTheDocument();
-    expect(screen.getByText('Inspect')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with both unhealthy and missing transforms - rollup unhealthy, summary missing', () => {
@@ -296,15 +326,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
-
-    // Should show both transforms
-    expect(screen.getByText(/slo-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
-    expect(screen.getByText(/slo-summary-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
-
-    // Should show both action buttons
-    expect(screen.getByText('Inspect')).toBeInTheDocument();
-    expect(screen.getByText('Reset')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with both unhealthy and missing transforms - rollup missing, summary unhealthy', () => {
@@ -329,15 +351,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
-
-    // Should show both transforms
-    expect(screen.getByText(/slo-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
-    expect(screen.getByText(/slo-summary-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
-
-    // Should show both action buttons
-    expect(screen.getByText('Inspect')).toBeInTheDocument();
-    expect(screen.getByText('Reset')).toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
   it('should render callout with both transforms unhealthy', () => {
@@ -362,15 +376,9 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
-
-    // Should show both transforms as unhealthy
     expect(screen.getByText(/slo-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
     expect(screen.getByText(/slo-summary-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
-
-    // Should show only inspect buttons (no reset for unhealthy)
     expect(screen.getAllByText('Inspect')).toHaveLength(2);
-    expect(screen.queryByText('Reset')).not.toBeInTheDocument();
   });
 
   it('should render callout with both transforms missing', () => {
@@ -395,18 +403,10 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
-
-    // Should show both transforms as missing
-    expect(screen.getByText(/slo-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
-    expect(screen.getByText(/slo-summary-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
-
-    // Should show only reset buttons (no inspect for missing)
-    expect(screen.getAllByText('Reset')).toHaveLength(2);
-    expect(screen.queryByText('Inspect')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sloSloHealthCalloutRepairButton')).toBeInTheDocument();
   });
 
-  it('should trigger reset action when reset button is clicked', () => {
+  it('should call repairSlo when repair button is clicked', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -427,41 +427,12 @@ describe('SloHealthCallout', () => {
 
     renderComponent();
 
-    const resetButton = screen.getByText('Reset');
-    fireEvent.click(resetButton);
+    expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
+    const repairButton = screen.getByTestId('sloSloHealthCalloutRepairButton');
+    expect(repairButton).toBeInTheDocument();
 
-    expect(mockTriggerAction).toHaveBeenCalledWith({
-      type: 'reset',
-      item: mockSlo,
-    });
-  });
+    fireEvent.click(repairButton);
 
-  it('should generate correct transform management URLs', () => {
-    mockUseFetchSloHealth.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: [
-        {
-          id: 'test-slo-id',
-          instanceId: 'irrelevant',
-          revision: 1,
-          name: 'Test SLO',
-          health: {
-            isProblematic: true,
-            rollup: anUnhealthyTransformHealth,
-            summary: aHealthyTransformHealth,
-          },
-        },
-      ],
-    });
-
-    renderComponent();
-
-    const inspectLink = screen.getByTestId('sloHealthCalloutInspectLink');
-    expect(inspectLink).toHaveAttribute('href');
-
-    // URL should contain the transform ID
-    const href = inspectLink.getAttribute('href');
-    expect(href).toContain('slo-test-slo-id-1');
+    expect(mockRepairSlo).toHaveBeenCalledWith();
   });
 });

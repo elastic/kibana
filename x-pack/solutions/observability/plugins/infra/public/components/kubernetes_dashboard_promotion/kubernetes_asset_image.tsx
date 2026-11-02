@@ -10,6 +10,7 @@ import { EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
+import { DEFAULT_SCHEMA } from '../../../common/constants';
 
 const imageSets = {
   ecs: {
@@ -32,7 +33,7 @@ interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt' | 'c
   type?: 'ecs' | 'semconv';
 }
 
-export function KubernetesAssetImage({ type = 'ecs', ...props }: AssetImageProps) {
+export function KubernetesAssetImage({ type = DEFAULT_SCHEMA, ...props }: AssetImageProps) {
   const { colorMode } = useEuiTheme();
   const { alt, dark, light } = imageSets[type];
 

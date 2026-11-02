@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import type { EuiFormRowProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';

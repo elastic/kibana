@@ -10,6 +10,7 @@ import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
+import { i18n } from '@kbn/i18n';
 
 interface DropDownLabel {
   label: string;
@@ -65,6 +66,9 @@ export const RareFieldSelect: FC<Props> = ({
       placeholder={placeholder}
       data-test-subj={testSubject}
       isClearable={false}
+      aria-label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.rareField.ariaLabel', {
+        defaultMessage: 'Rare field select',
+      })}
     />
   );
 };

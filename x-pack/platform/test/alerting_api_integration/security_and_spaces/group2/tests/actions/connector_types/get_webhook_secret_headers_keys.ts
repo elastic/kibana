@@ -93,6 +93,7 @@ export default function getWebhookSecretHeaderKeys({ getService }: FtrProviderCo
         config: {
           url: 'https://some.non.existent.com',
           hasAuth: false,
+          authType: null,
         },
       })
       .expect(200);
@@ -122,6 +123,7 @@ export default function getWebhookSecretHeaderKeys({ getService }: FtrProviderCo
           createIncidentUrl: 'https://some.non.existent.com/rest/api/2/issue',
           getIncidentResponseExternalTitleKey: 'key',
           hasAuth: true,
+          authType: 'webhook-authentication-basic',
           headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
           viewIncidentUrl: 'https://some.non.existent.com/browse/{{{external.system.title}}}',
           getIncidentUrl: 'https://some.non.existent.com/rest/api/2/issue/{{{external.system.id}}}',

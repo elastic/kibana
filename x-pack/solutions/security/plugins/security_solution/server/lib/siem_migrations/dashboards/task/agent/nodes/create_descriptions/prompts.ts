@@ -62,6 +62,7 @@ PANELS:
 </example_user>
 <example_ai>
 Please find the match JSON object below:
+
 \`\`\`json
 {{
   "dashboard_description": "Monitors the reliability of web services by tracking server errors and endpoint latency using access logs.",
@@ -75,5 +76,4 @@ Please find the match JSON object below:
 </example>
 `,
   ],
-  ['ai', 'Please find the match JSON object below:'],
 ]);

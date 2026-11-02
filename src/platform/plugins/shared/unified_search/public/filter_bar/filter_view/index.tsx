@@ -14,8 +14,8 @@ import type { FC } from 'react';
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { stringHash } from '@kbn/ml-string-hash';
+import type { FilterableSource } from '@kbn/data-source';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
 
@@ -28,7 +28,7 @@ interface Props {
   errorMessage?: string;
   hideAlias?: boolean;
   [propName: string]: any;
-  dataViews: DataView[];
+  dataViews: FilterableSource[];
 }
 
 export const FilterView: FC<Props> = ({
@@ -94,7 +94,7 @@ export const FilterView: FC<Props> = ({
         ),
       };
 
-  const FilterPill = () => (
+  const filterBadge = (
     <FilterBadge
       filter={filter}
       dataViews={dataViews}
@@ -110,12 +110,10 @@ export const FilterView: FC<Props> = ({
   return readOnly ? (
     <EuiToolTip position="bottom" content={title}>
       <span ref={ref} tabIndex={0}>
-        <FilterPill />
+        {filterBadge}
       </span>
     </EuiToolTip>
   ) : (
-    <span ref={ref}>
-      <FilterPill />
-    </span>
+    <span ref={ref}>{filterBadge}</span>
   );
 };

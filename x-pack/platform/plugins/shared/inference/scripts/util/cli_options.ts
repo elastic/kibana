@@ -20,12 +20,42 @@ export const elasticsearchOption = {
   describe: 'Where Elasticsearch is running',
   string: true as const,
   default: format({
-    ...parse(config['elasticsearch.hosts']),
+    ...parse(
+      Array.isArray(config['elasticsearch.hosts'])
+        ? config['elasticsearch.hosts'][0]
+        : config['elasticsearch.hosts']
+    ),
     auth: `${config['elasticsearch.username']}:${config['elasticsearch.password']}`,
   }),
+};
+
+export const inferenceIdOption = {
+  describe: 'Elasticsearch chat_completion inference endpoint id used for the LLM',
+  string: true as const,
 };
 
 export const connectorIdOption = {
   describe: 'The ID of the connector',
   string: true as const,
 };
+
+export function resolveInferenceId({
+  inferenceId,
+  connectorId,
+  log,
+}: {
+  inferenceId?: string;
+  connectorId?: string;
+  log: { warning: (message: string) => void };
+}): string | undefined {
+  if (inferenceId) {
+    return inferenceId;
+  }
+  if (connectorId) {
+    log.warning(
+      '--connectorId is deprecated. Pass the Elasticsearch inference endpoint id with --inferenceId.'
+    );
+    return connectorId;
+  }
+  return undefined;
+}

@@ -61,22 +61,18 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${ATestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('elastic-api-version', '1')
+        .set('elastic-api-version', '2023-10-31')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
         .post(`/s/${ATestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('elastic-api-version', '1')
+        .set('elastic-api-version', '2023-10-31')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
@@ -91,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
               count: 2,
               type: 'dashboard',
               displayName: 'Dashboard',
-              icon: 'dashboardApp',
+              icon: 'productDashboard',
             },
           ]);
           expect(total).to.eql(2);
@@ -103,11 +99,9 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/s/${BTestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('elastic-api-version', '1')
+        .set('elastic-api-version', '2023-10-31')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
@@ -128,12 +122,12 @@ export default function ({ getService }: FtrProviderContext) {
               count: 1,
               type: 'dashboard',
               displayName: 'Dashboard',
-              icon: 'dashboardApp',
+              icon: 'productDashboard',
             },
             {
               count: 1,
               displayName: 'data view',
-              icon: 'indexPatternApp',
+              icon: 'table',
               type: 'index-pattern',
             },
           ]);

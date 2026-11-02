@@ -18,10 +18,10 @@ describe('Synthtrace ES Client indexer', () => {
   let apmEsClient: ApmSynthtraceEsClient;
   let datasource: Readable;
 
-  async function toArray(readable: Readable) {
-    const arr: any[] = [];
+  async function toArray<T>(readable: Readable): Promise<T[]> {
+    const arr: T[] = [];
     for await (const chunk of readable) {
-      arr.push(chunk);
+      arr.push(chunk as T);
     }
     return arr;
   }
@@ -44,7 +44,7 @@ describe('Synthtrace ES Client indexer', () => {
           },
         },
         helpers: {
-          bulk: async (options: any) => {
+          bulk: async (options: { datasource: Readable }) => {
             datasource = options.datasource;
             return undefined;
           },
@@ -115,7 +115,7 @@ describe('Synthtrace ES Client indexer', () => {
 
     const expectedTotalCalls = 30;
 
-    const events: any[] = [];
+    const events: Array<Record<string, unknown>> = [];
 
     for await (const event of datasource) {
       events.push(event);
@@ -165,9 +165,19 @@ describe('Synthtrace ES Client indexer', () => {
 
     await apmEsClient.index(generator);
 
-    const events = await toArray(datasource);
+    interface TestIndexedEvent {
+      processor?: { event?: string };
+      metricset?: { name?: string; interval?: string };
+      service?: { name?: string };
+      _doc_count?: number;
+      transaction?: {
+        duration?: { histogram?: { values?: number[]; counts?: number[] } };
+      };
+    }
 
-    const transactions = events.filter((event) => event.processor.event === 'transaction');
+    const events = await toArray<TestIndexedEvent>(datasource);
+
+    const transactions = events.filter((event) => event.processor?.event === 'transaction');
 
     expect(transactions.length).toBe(RATE * CARDINALITY * MINUTES);
 
@@ -177,7 +187,7 @@ describe('Synthtrace ES Client indexer', () => {
 
     expect(txMetrics.length).toBe(MINUTES * CARDINALITY);
 
-    const txMetricsForA = txMetrics.filter((event) => event.service.name === 'service-a');
+    const txMetricsForA = txMetrics.filter((event) => event.service?.name === 'service-a');
 
     expect(txMetricsForA.length).toBe(MINUTES);
 
@@ -185,10 +195,13 @@ describe('Synthtrace ES Client indexer', () => {
 
     const values = txMetricsForA.flatMap((metric) => {
       const vals: number[] = [];
-      metric.transaction.duration.histogram.values.forEach((value: number, index: number) => {
-        const counts = metric.transaction.duration.histogram.counts[index];
-        vals.push(...range(0, counts).fill(value));
-      });
+      const histogram = metric.transaction?.duration?.histogram;
+      if (histogram?.values && histogram?.counts) {
+        histogram.values.forEach((value: number, index: number) => {
+          const counts = histogram.counts![index];
+          vals.push(...range(0, counts).fill(value));
+        });
+      }
       return vals;
     });
 

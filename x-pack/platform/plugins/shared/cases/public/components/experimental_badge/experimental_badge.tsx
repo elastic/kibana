@@ -27,7 +27,7 @@ const ExperimentalBadgeComponent: React.FC<Props> = ({
   const props: EuiBetaBadgeProps = {
     label: compact ? null : EXPERIMENTAL_LABEL,
     size,
-    ...((icon || compact) && { iconType: 'beaker' }),
+    ...((icon || compact) && { iconType: 'flask' }),
     tooltipContent: EXPERIMENTAL_DESC,
     tooltipPosition: 'bottom' as const,
     'data-test-subj': testSubj,

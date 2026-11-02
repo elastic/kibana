@@ -434,7 +434,9 @@ describe('TaskValidator', () => {
       const task = taskManagerMock.createTask({ state: { foo: 'foo', bar: 'bar' } });
       expect(() =>
         taskValidator.getValidatedTaskInstanceForUpdating(task)
-      ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+      );
     });
   });
 

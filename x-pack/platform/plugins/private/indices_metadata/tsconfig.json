@@ -9,7 +9,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/task-manager-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/telemetry-plugin"
   ],
   "exclude": [
     "target/**/*"

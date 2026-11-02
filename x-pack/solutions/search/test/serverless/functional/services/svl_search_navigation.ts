@@ -20,7 +20,7 @@ export function SvlSearchNavigationServiceProvider({
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
         // Wait for the side nav, since the landing page will sometimes redirect to index management now
-        await testSubjects.existOrFail('~svlSearchSideNav', { timeout: 2000 });
+        await testSubjects.existOrFail('~esSideNav', { timeout: 2000 });
       });
     },
     async navigateToElasticsearchHome() {
@@ -41,27 +41,19 @@ export function SvlSearchNavigationServiceProvider({
     },
     async navigateToIndexDetailPage(indexName: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
+        await PageObjects.common.navigateToApp('indexManagement', {
+          path: 'indices/index_details',
+          search: `indexName=${indexName}`,
           shouldLoginIfPrompted: false,
         });
+        // The first load of the index details page can exceed a single short wait, so
+        // keep the content check inside the retry to re-navigate on slow loads.
+        await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
       });
-      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage() {
       await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
         shouldLoginIfPrompted: false,
-      });
-    },
-    async navigateToSearchPlaygroundList() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('searchPlayground');
-        await testSubjects.existOrFail('playgroundsListPage', { timeout: 2000 });
-      });
-    },
-    async navigateToSearchPlayground() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
-        await testSubjects.existOrFail('svlPlaygroundPage', { timeout: 2000 });
       });
     },
   };

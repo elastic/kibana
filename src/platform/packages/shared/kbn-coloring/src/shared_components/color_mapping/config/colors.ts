@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KbnPaletteId } from '@kbn/palettes';
+
 /**
  * Defines explicit color specified as a CSS color datatype (rgb/a,hex,keywords,lab,lch etc)
  */
@@ -20,7 +22,7 @@ export interface ColorCode {
  */
 export interface CategoricalColor {
   type: 'categorical';
-  paletteId: string;
+  paletteId: KbnPaletteId;
   colorIndex: number;
 }
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
+import { sanitizeWithInlinedStyles } from './inline_svg_styles';
 
 export function isBase64Encoded(str: unknown): boolean {
   if (typeof str !== 'string' || str.length === 0) {
@@ -43,7 +42,20 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
       }
     }
 
-    // Create a DOM environment
+    // Create a DOM environment - both packages are loaded lazily to avoid paying
+    // the ~494 CJS module startup cost in processes that never sanitize SVGs.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { JSDOM } = require('jsdom') as typeof import('jsdom');
+    // dompurify's CJS bundle uses `module.exports = purify` (no `default` key),
+    // while its ESM bundle exposes the factory as `default`. Handle both shapes.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const dompurifyModule = require('dompurify') as
+      | typeof import('dompurify')
+      | typeof import('dompurify')['default'];
+    const DOMPurify =
+      typeof dompurifyModule === 'function'
+        ? dompurifyModule
+        : (dompurifyModule as typeof import('dompurify')).default;
     const window = new JSDOM('').window;
     const purify = DOMPurify(window);
 
@@ -68,7 +80,10 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     });
 
     // Sanitize and convert the result back to a Buffer
-    return Buffer.from(purify.sanitize(contentToSanitize), 'utf8');
+    return Buffer.from(
+      sanitizeWithInlinedStyles(contentToSanitize, window, (svg) => purify.sanitize(svg)),
+      'utf8'
+    );
   } catch (error) {
     throw new Error(`SVG sanitization failed: ${error.message}`);
   }

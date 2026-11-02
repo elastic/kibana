@@ -15,6 +15,7 @@ import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-hel
 import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 import { ToolingLog } from '@kbn/tooling-log';
 import { setTimeout as timer } from 'timers/promises';
+import { withTimeout } from '@kbn/std';
 import type { Root } from '@kbn/core-root-server-internal';
 
 export async function startElasticsearch(): Promise<TestElasticsearchUtils> {
@@ -31,9 +32,9 @@ export async function startElasticsearch(): Promise<TestElasticsearchUtils> {
   return await startES();
 }
 
-export async function setupKibana(): Promise<Root> {
+export async function getKibanaServer(): Promise<Root> {
   const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
-  const kibanaRoot = createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       logging: {
         loggers: [
@@ -63,17 +64,6 @@ export async function setupKibana(): Promise<Root> {
       dev: true,
     }
   );
-  await kibanaRoot.preboot();
-  await kibanaRoot.setup();
-  return kibanaRoot;
-}
-
-export async function stopKibana(kibanaServer: Root) {
-  await timer(2_000);
-  await runWithTimeout(
-    kibanaServer.shutdown.bind(kibanaServer),
-    'Timeout waiting for Kibana to stop'
-  );
 }
 
 export async function stopElasticsearch(esServer: TestElasticsearchUtils) {
@@ -86,9 +76,8 @@ async function runWithTimeout(
   message: string,
   millis: number = 5_000
 ): Promise<void> {
-  const timeout = async () => {
-    await timer(millis);
+  const outcome = await withTimeout({ promise: task(), timeoutMs: millis });
+  if (outcome.timedout) {
     throw new Error(message);
-  };
-  await Promise.race([task(), timeout()]);
+  }
 }

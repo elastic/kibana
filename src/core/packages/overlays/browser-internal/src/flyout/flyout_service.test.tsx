@@ -34,21 +34,23 @@ const mountText = (text: string) => (container: HTMLElement) => {
   return () => {};
 };
 
-const getServiceStart = () => {
+const getService = () => {
   const service = new FlyoutService();
-  return service.start({
+  const flyouts = service.start({
     analytics: analyticsMock,
     i18n: i18nMock,
     theme: themeMock,
     userProfile: userProfileMock,
     targetDomElement: document.createElement('div'),
   });
+  return { service, flyouts };
 };
 
 describe('FlyoutService', () => {
   let flyouts: OverlayFlyoutStart;
+  let service: FlyoutService;
   beforeEach(() => {
-    flyouts = getServiceStart();
+    ({ service, flyouts } = getService());
   });
 
   describe('openFlyout()', () => {
@@ -70,7 +72,7 @@ describe('FlyoutService', () => {
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         const { container } = render(mockReactDomRender.mock.calls[1][0]);
         expect(container.innerHTML).toMatchSnapshot();
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
       it('resolves onClose on the previous ref', async () => {
@@ -78,10 +80,28 @@ describe('FlyoutService', () => {
         ref1.onClose.then(onCloseComplete);
         flyouts.open(mountText('Flyout content 2'));
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
   });
+  describe('closeAllFlyouts()', () => {
+    it('closes the active flyout and resolves onClose', async () => {
+      const ref = flyouts.open(mountText('Flyout content'));
+      const onCloseComplete = jest.fn();
+      ref.onClose.then(onCloseComplete);
+
+      service.closeAllFlyouts();
+
+      await ref.onClose;
+      expect(onCloseComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('is a no-op when no flyout is open', () => {
+      expect(() => service.closeAllFlyouts()).not.toThrow();
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+    });
+  });
+
   describe('FlyoutRef#close()', () => {
     it('resolves the onClose Promise', async () => {
       const ref = flyouts.open(mountText('Flyout content'));
@@ -107,8 +127,8 @@ describe('FlyoutService', () => {
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();
-      expect(mockReactDomUnmount).toBeCalledTimes(0);
-      expect(onCloseComplete).toBeCalledTimes(0);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(0);
+      expect(onCloseComplete).toHaveBeenCalledTimes(0);
     });
   });
 });

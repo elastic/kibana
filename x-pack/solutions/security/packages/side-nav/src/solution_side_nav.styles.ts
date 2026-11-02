@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { transparentize, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
+
+export type SolutionSideNavSelectedAppearance = 'default' | 'primary';
 
 export const SolutionSideNavItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {
     // EuiListGroupItem changes the links font-weight, we need to override it
     font-weight: ${euiTheme.font.weight.regular};
-  }
-  &.solutionSideNavItem--isSelected {
-    background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
-    & * {
-      font-weight: ${euiTheme.font.weight.medium};
-    }
   }
   // Needed to place the icon on the right side
   span.euiListGroupItem__label {

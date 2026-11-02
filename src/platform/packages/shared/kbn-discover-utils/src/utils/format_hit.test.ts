@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataViewMock } from '../__mocks__';
-import { formatHit } from './format_hit';
+import {
+  dataViewMock,
+  createDataViewWithBytesField,
+  createDataViewWithoutCustomField,
+  esqlSourceOverridingBytesType,
+  esqlSourceWithCustomField,
+  createFormatFieldValueReactSpy,
+  expectFieldCallToMatch,
+} from '../__mocks__';
+import { formatHitReact } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
+import { MAX_RENDERED_FIELD_VALUE_LENGTH } from './truncate_field_value';
 
-describe('formatHit', () => {
+describe('formatHitReact', () => {
   let row: DataTableRecord;
   let hit: EsHitRecord;
   beforeEach(() => {
@@ -29,17 +38,18 @@ describe('formatHit', () => {
     };
     row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
-      convert: (value: unknown) => `formatted:${value}`,
+      convertToReact: (value: unknown) => `formatted:${value}`,
     });
   });
 
-  it('formats a document as expected', () => {
-    const formatted = formatHit(
+  it('formats a document as expected using convertToReact', () => {
+    const formatted = formatHitReact(
       row,
       dataViewMock,
-      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png', 'extension'],
@@ -59,12 +69,38 @@ describe('formatHit', () => {
       dataViewMock
     );
 
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       highlightHit,
       dataViewMock,
-      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
+    );
+    expect(formatted.map(([fieldName]) => fieldName)).toEqual([
+      'message',
+      'extension',
+      'object.value',
+      '_index',
+      '_score',
+    ]);
+  });
+
+  it('orders inline highlights first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        inline_highlights: { message: { preTag: '<em>', postTag: '</em>' } },
+      },
+      dataViewMock
+    );
+    const formatted = formatHitReact(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
+      220,
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted.map(([fieldName]) => fieldName)).toEqual([
       'message',
@@ -76,12 +112,13 @@ describe('formatHit', () => {
   });
 
   it('only limits count of pairs based on advanced setting', () => {
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       row,
       dataViewMock,
-      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       2,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png', 'extension'],
@@ -90,13 +127,25 @@ describe('formatHit', () => {
     ]);
   });
 
+  it('passes the max display length to formatFieldValueReact', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+
+    formatHitReact(row, dataViewMock, () => true, 220, fieldFormatsMock, undefined);
+
+    expect(formatFieldValueReactSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH })
+    );
+    formatFieldValueReactSpy.mockRestore();
+  });
+
   it('should not include fields not mentioned in fieldsToShow', () => {
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       row,
       dataViewMock,
-      (fieldName) => ['message', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['message', 'formatted:foobar', 'message'],
@@ -120,12 +169,13 @@ describe('formatHit', () => {
       dataViewMock
     );
 
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       highlightHit,
       dataViewMock,
-      (fieldName) => ['object'].includes(fieldName),
+      (fieldName) => ['_index', 'object'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
 
     expect(formatted).toEqual([
@@ -137,17 +187,149 @@ describe('formatHit', () => {
   });
 
   it('should filter fields based on their real name not displayName', () => {
-    const formatted = formatHit(
+    const formatted = formatHitReact(
       row,
       dataViewMock,
-      (fieldName) => ['bytes'].includes(fieldName),
+      (fieldName) => ['_index', 'bytes'].includes(fieldName),
       220,
-      fieldFormatsMock
+      fieldFormatsMock,
+      undefined
     );
     expect(formatted).toEqual([
       ['bytesDisplayName', 'formatted:123', 'bytes'],
       ['_index', 'formatted:logs', '_index'],
       ['_score', undefined, '_score'],
     ]);
+  });
+
+  it('skips nullish values before limiting fields when configured', () => {
+    const rowWithNullishFields = buildDataTableRecord(
+      {
+        _id: 'doc-001',
+        _source: {
+          field_1: null,
+          field_2: undefined,
+          source: 'void_realm',
+          status: 'missing_in_action',
+        },
+      },
+      dataViewMock
+    );
+
+    formatHitReact(rowWithNullishFields, dataViewMock, () => true, 2, fieldFormatsMock, undefined);
+
+    const formatted = formatHitReact(
+      rowWithNullishFields,
+      dataViewMock,
+      () => true,
+      2,
+      fieldFormatsMock,
+      undefined,
+      { skipNullishValues: true }
+    );
+
+    expect(
+      formatted.map(([fieldDisplayName, , fieldName]) => [fieldDisplayName, fieldName])
+    ).toEqual([
+      ['source', 'source'],
+      ['status', 'status'],
+    ]);
+  });
+
+  it('keeps non-nullish falsy values when skipping nullish values', () => {
+    const rowWithFalsyFields = buildDataTableRecord(
+      {
+        _id: 'doc-002',
+        _source: {
+          field_1: null,
+          a_empty_string: '',
+          b_zero: 0,
+          c_false_value: false,
+          d_source: 'void_realm',
+        },
+      },
+      dataViewMock
+    );
+
+    const formatted = formatHitReact(
+      rowWithFalsyFields,
+      dataViewMock,
+      () => true,
+      3,
+      fieldFormatsMock,
+      undefined,
+      { skipNullishValues: true }
+    );
+
+    expect(
+      formatted.map(([fieldDisplayName, , fieldName]) => [fieldDisplayName, fieldName])
+    ).toEqual([
+      ['a_empty_string', 'a_empty_string'],
+      ['b_zero', 'b_zero'],
+      ['c_false_value', 'c_false_value'],
+      ['and 1 more field', null],
+    ]);
+  });
+
+  describe('with ES|QL columns', () => {
+    let formatFieldValueReactSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    });
+
+    afterEach(() => {
+      formatFieldValueReactSpy.mockRestore();
+    });
+
+    it('should pass data view field to formatFieldValueReact without ES|QL columns', () => {
+      const testDataView = createDataViewWithBytesField();
+      const testHit = buildDataTableRecord(
+        { _id: '1', _index: 'logs', fields: { bytes: [100] } },
+        testDataView
+      );
+
+      formatHitReact(testHit, testDataView, () => true, 220, fieldFormatsMock, undefined);
+
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+    });
+
+    it('should pass field with the ES|QL column type to formatFieldValueReact when types differ', () => {
+      const testDataView = createDataViewWithBytesField();
+      const testHit = buildDataTableRecord(
+        { _id: '1', _index: 'logs', fields: { bytes: ['100'] } },
+        testDataView
+      );
+
+      formatHitReact(
+        testHit,
+        testDataView,
+        () => true,
+        220,
+        fieldFormatsMock,
+        esqlSourceOverridingBytesType
+      );
+
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    });
+
+    it('should pass field created from the ES|QL column to formatFieldValueReact for fields not in data view', () => {
+      const testDataView = createDataViewWithoutCustomField();
+      const testHit = buildDataTableRecord(
+        { _id: '1', _index: 'logs', fields: { custom_esql_field: [42] } },
+        testDataView
+      );
+
+      formatHitReact(
+        testHit,
+        testDataView,
+        () => true,
+        220,
+        fieldFormatsMock,
+        esqlSourceWithCustomField
+      );
+
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
+    });
   });
 });

@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/transform-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/transform-plugin'
+  title: '@kbn/transform-plugin'
   description: Moon project for @kbn/transform-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/transform
+  sourceRoot: x-pack/platform/plugins/private/transform
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/saved-objects-management-plugin'
-  - '@kbn/saved-objects-finder-plugin'
   - '@kbn/ml-route-utils'
   - '@kbn/core-lifecycle-server'
   - '@kbn/security-plugin'
@@ -68,7 +67,6 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/unified-field-list'
   - '@kbn/ebt-tools'
-  - '@kbn/content-management-plugin'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-plugins-server'
   - '@kbn/data-view-editor-plugin'
@@ -81,7 +79,6 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/test-jest-helpers'
-  - '@kbn/monaco'
   - '@kbn/json-schemas'
   - '@kbn/ml-field-stats-flyout'
   - '@kbn/ml-validators'
@@ -91,29 +88,31 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/licensing-types'
   - '@kbn/react-query'
+  - '@kbn/kql'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
+  - '@kbn/cps'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/cps-utils'
+  - '@kbn/core-notifications-browser'
+  - '@kbn/cps-common'
+  - '@kbn/mock-idp-utils'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_cps_local/**/*
     - public/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

@@ -17,7 +17,7 @@ const showPanelButtonTitle = i18n.translate(
   }
 );
 
-export const ShowPanelButton = memo(({ showPanelOnClick }: { showPanelOnClick: () => void }) => {
+export const ShowPanelButton = memo(({ onClick }: { onClick: () => void }) => {
   const colorMap = useColors();
 
   return (
@@ -26,8 +26,8 @@ export const ShowPanelButton = memo(({ showPanelOnClick }: { showPanelOnClick: (
       size="m"
       title={showPanelButtonTitle}
       aria-label={showPanelButtonTitle}
-      onClick={showPanelOnClick}
-      iconType={'list'}
+      onClick={onClick}
+      iconType={'listBullet'}
       $backgroundColor={colorMap.graphControlsBackground}
       $iconColor={colorMap.graphControls}
       $borderColor={colorMap.graphControlsBorderColor}

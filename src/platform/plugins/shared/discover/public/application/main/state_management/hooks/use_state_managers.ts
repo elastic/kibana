@@ -38,13 +38,14 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
-  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
+  const tabsEnabled = !services.embeddableEditor.isByValueEditor();
 
   // syncing with the _tab part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
+      profileStateRegistry: services.profileStateRegistry,
       enabled: tabsEnabled,
     })
   );

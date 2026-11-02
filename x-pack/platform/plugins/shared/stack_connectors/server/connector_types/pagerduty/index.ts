@@ -9,7 +9,7 @@ import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -46,6 +46,7 @@ export type PagerDutyConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type PagerDutyConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -250,7 +251,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
   };
 
   if (params.links) {
-    data.links = params.links;
+    data.links = params.links.filter(({ href }) => !!href && href.trim() !== '');
   }
 
   return data;

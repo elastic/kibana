@@ -16,7 +16,7 @@ import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
-  useTableFilters,
+  useTableFiltersState,
 } from '../../../doc_viewer_table/table_filters';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import {
@@ -36,7 +36,7 @@ export interface AttributeField {
 
 export function AttributesOverview({
   columns,
-  columnsMeta,
+  dataSource,
   hit,
   dataView,
   textBasedHits,
@@ -49,7 +49,7 @@ export function AttributesOverview({
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const { searchTerm, onChangeSearchTerm } = useTableFilters({
+  const { searchTerm, onChangeSearchTerm } = useTableFiltersState({
     storage,
     storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
   });
@@ -58,8 +58,9 @@ export function AttributesOverview({
   const flattened = hit.flattened;
 
   const shouldShowFieldHandler = useMemo(
-    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
-    [flattened, dataView, showMultiFields]
+    () =>
+      getShouldShowFieldHandler(Object.keys(flattened), dataView, isEsqlMode || showMultiFields),
+    [flattened, dataView, isEsqlMode, showMultiFields]
   );
 
   const attributesTitle = getAttributesTitle(hit);
@@ -235,7 +236,7 @@ export function AttributesOverview({
                     hit={hit}
                     dataView={dataView}
                     columns={columns}
-                    columnsMeta={columnsMeta}
+                    dataSource={dataSource}
                     searchTerm={searchTerm}
                     onAddColumn={onAddColumn}
                     onRemoveColumn={onRemoveColumn}

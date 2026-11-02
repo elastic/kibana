@@ -8,5 +8,5 @@
 import { schema } from '@kbn/config-schema';
 
 export const GetMetadataRequestSchema = {
-  params: schema.object({ id: schema.string() }),
+  params: schema.object({ id: schema.string({ maxLength: 256 }) }),
 };

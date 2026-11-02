@@ -21,8 +21,9 @@ import {
   getStartEndParams,
   hasStartEndParams,
 } from '@kbn/esql-utils';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { getTime } from '@kbn/data-plugin/public';
@@ -262,7 +263,12 @@ export class ESQLSource
       params.params = namedParams;
     }
 
-    params.filter = buildEsQuery(undefined, query, filters, getEsQueryConfig(getUiSettings()));
+    const esQueryConfigs = getEsQueryConfig(getUiSettings());
+
+    params.filter = buildEsQuery(undefined, query, filters, esQueryConfigs);
+    params.time_zone = esQueryConfigs.dateFormatTZ
+      ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
+      : 'UTC';
 
     const requestResponder = inspectorAdapters.requests!.start(
       getLayerFeaturesRequestName(layerName),
@@ -272,12 +278,18 @@ export class ESQLSource
     );
     requestResponder.json(params);
 
+    const abortController = new AbortController();
+    registerCancelCallback(() => abortController.abort());
+
     const { rawResponse, requestParams } = await lastValueFrom(
       getData()
         .search.search(
           { params },
           {
-            strategy: 'esql',
+            strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+            abortSignal: abortController.signal,
+            sessionId: requestMeta.searchSessionId,
+            projectRouting: requestMeta.projectRouting,
           }
         )
         .pipe(
@@ -298,6 +310,7 @@ export class ESQLSource
     return {
       data: convertToGeoJson(esqlSearchResponse),
       meta: {
+        approximationApplied: esqlSearchResponse.approximation_applied,
         resultsCount,
         areResultsTrimmed: resultsCount >= limit,
       },

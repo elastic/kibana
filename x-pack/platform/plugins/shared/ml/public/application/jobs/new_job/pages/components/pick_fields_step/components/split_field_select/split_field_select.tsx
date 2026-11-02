@@ -20,7 +20,8 @@ interface Props {
   isClearable: boolean;
   testSubject?: string;
   placeholder?: string;
-  titleId: string;
+  titleId?: string;
+  'aria-label'?: string;
 }
 
 export const SplitFieldSelect: FC<Props> = ({
@@ -31,6 +32,7 @@ export const SplitFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
   titleId,
+  'aria-label': ariaLabel,
 }) => {
   const { optionCss } = useFieldStatsTrigger();
   const options: DropDownLabel[] = fields.map(
@@ -66,6 +68,7 @@ export const SplitFieldSelect: FC<Props> = ({
       placeholder={placeholder}
       data-test-subj={testSubject}
       titleId={titleId}
+      aria-label={ariaLabel}
     />
   );
 };

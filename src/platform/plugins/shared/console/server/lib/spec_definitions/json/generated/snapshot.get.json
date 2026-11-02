@@ -21,7 +21,9 @@
         "desc"
       ],
       "offset": "",
-      "size": "",
+      "size": [
+        "-1"
+      ],
       "slm_policy_filter": "",
       "sort": [
         "start_time",

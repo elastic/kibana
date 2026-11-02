@@ -46,7 +46,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
-          q: schema.maybe(schema.string()),
+          q: schema.maybe(schema.string({ maxLength: 1000 })),
           size: schema.number({ defaultValue: 10, min: 1 }),
         }),
       },
@@ -85,7 +85,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         params: schema.object({
-          engine_name: schema.string(),
+          engine_name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -122,13 +122,16 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
-          name: schema.maybe(schema.string()),
+          indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+          name: schema.maybe(schema.string({ maxLength: 1000 })),
           template: schema.maybe(
             schema.object({
               script: schema.object({
-                source: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
-                lang: schema.string(),
+                source: schema.oneOf([
+                  schema.string({ maxLength: 10000 }),
+                  schema.object({}, { unknowns: 'allow' }),
+                ]),
+                lang: schema.string({ maxLength: 512 }),
                 params: schema.maybe(schema.object({}, { unknowns: 'allow' })),
                 options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
               }),
@@ -136,7 +139,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
           ),
         }),
         params: schema.object({
-          engine_name: schema.string(),
+          engine_name: schema.string({ maxLength: 1024 }),
         }),
         query: schema.object({
           create: schema.maybe(schema.boolean()),
@@ -228,7 +231,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         params: schema.object({
-          engine_name: schema.string(),
+          engine_name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -254,7 +257,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
         params: schema.object({
-          engine_name: schema.string(),
+          engine_name: schema.string({ maxLength: 1024 }),
           from: schema.maybe(schema.number()),
           size: schema.maybe(schema.number()),
         }),
@@ -280,10 +283,10 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         body: schema.object({
-          keyName: schema.string(),
+          keyName: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
-          engine_name: schema.string(),
+          engine_name: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -309,7 +312,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
           reason: 'This route delegates authorization to the scoped ES client',
         },
       },
-      validate: { params: schema.object({ engine_name: schema.string() }) },
+      validate: { params: schema.object({ engine_name: schema.string({ maxLength: 1024 }) }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;

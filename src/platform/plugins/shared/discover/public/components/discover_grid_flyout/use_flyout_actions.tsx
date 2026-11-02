@@ -8,57 +8,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FlyoutActionItem, FlyoutCustomization } from '../../customizations';
+import { useMemo } from 'react';
 import type { UseNavigationProps } from '../../hooks/use_navigation_props';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
+import type { FlyoutActionItem } from './types';
 
-interface UseFlyoutActionsParams extends UseNavigationProps {
-  actions?: FlyoutCustomization['actions'];
-}
-
-export const useFlyoutActions = ({
-  actions,
-  ...props
-}: UseFlyoutActionsParams): { flyoutActions: FlyoutActionItem[] } => {
+export const useFlyoutActions = (
+  props: UseNavigationProps
+): { flyoutActions: FlyoutActionItem[] } => {
   const { dataView } = props;
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
     useNavigationProps(props);
 
-  const {
-    viewSingleDocument = { disabled: false },
-    viewSurroundingDocument = { disabled: false },
-  } = actions?.defaultActions ?? {};
-  const customActions = [...(actions?.getActionItems?.() ?? [])];
+  const flyoutActions = useMemo(() => {
+    const actions: FlyoutActionItem[] = [
+      {
+        id: 'singleDocument',
+        enabled: true,
+        dataTestSubj: 'docTableRowAction',
+        iconType: 'document',
+        href: singleDocHref,
+        onClick: onOpenSingleDoc,
+        label: i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkLabel', {
+          defaultMessage: 'View single document',
+        }),
+      },
+      {
+        id: 'surroundingDocument',
+        enabled: Boolean(dataView.isTimeBased() && dataView.id),
+        dataTestSubj: 'docTableRowAction',
+        iconType: 'documents',
+        href: contextViewHref,
+        onClick: onOpenContextView,
+        label: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkLabel', {
+          defaultMessage: 'View surrounding documents',
+        }),
+        helpText: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsHover', {
+          defaultMessage:
+            'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+        }),
+      },
+    ];
 
-  const flyoutActions: FlyoutActionItem[] = [
-    {
-      id: 'singleDocument',
-      enabled: !viewSingleDocument.disabled,
-      dataTestSubj: 'docTableRowAction',
-      iconType: 'document',
-      href: singleDocHref,
-      onClick: onOpenSingleDoc,
-      label: i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkLabel', {
-        defaultMessage: 'View single document',
-      }),
-    },
-    {
-      id: 'surroundingDocument',
-      enabled: Boolean(!viewSurroundingDocument.disabled && dataView.isTimeBased() && dataView.id),
-      dataTestSubj: 'docTableRowAction',
-      iconType: 'documents',
-      href: contextViewHref,
-      onClick: onOpenContextView,
-      label: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkLabel', {
-        defaultMessage: 'View surrounding documents',
-      }),
-      helpText: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsHover', {
-        defaultMessage:
-          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
-      }),
-    },
-    ...customActions,
-  ];
+    return actions.filter((action) => action.enabled);
+  }, [contextViewHref, dataView, onOpenContextView, onOpenSingleDoc, singleDocHref]);
 
-  return { flyoutActions: flyoutActions.filter((action) => action.enabled) };
+  return { flyoutActions };
 };

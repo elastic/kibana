@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics';
@@ -29,6 +29,7 @@ import { convertRangeToISO } from '../tasks/helpers';
 import { buildRiskScoreServiceForRequest } from './helpers';
 import { getFieldForIdentifier } from '../helpers';
 import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
   context: SecuritySolutionRequestHandlerContext,
@@ -56,7 +57,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
 
   const riskScoreService = buildRiskScoreServiceForRequest(securityContext, coreContext, logger);
 
-  const { identifier_type: identifierType, identifier, refresh } = request.body;
+  const { identifier_type: identifierType, identifier } = request.body;
 
   try {
     const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -104,24 +105,33 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
 
     const filter = isEmpty(userFilter) ? [identifierFilter] : [userFilter, identifierFilter];
 
-    const result = await riskScoreService.calculateAndPersistScores({
-      pageSize,
-      identifierType: identifierType as EntityType,
-      index,
-      filter: {
-        bool: {
-          filter,
-        },
+    const result = await runWithSpan({
+      name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
+      namespace: securityContext.getSpaceId(),
+      attributes: {
+        'entity_analytics.operation': 'entity_calculation',
+        'entity_analytics.entity_type': identifierType,
       },
-      range,
-      runtimeMappings,
-      weights: [],
-      alertSampleSizePerShard,
-      excludeAlertStatuses,
-      excludeAlertTags,
-      afterKeys,
-      returnScores: true,
-      refresh,
+      cb: () =>
+        riskScoreService.calculateAndPersistScores({
+          pageSize,
+          identifierType: identifierType as EntityType,
+          index,
+          filter: {
+            bool: {
+              filter,
+            },
+          },
+          range,
+          runtimeMappings,
+          weights: [],
+          alertSampleSizePerShard,
+          excludeAlertStatuses,
+          excludeAlertTags,
+          afterKeys,
+          returnScores: true,
+          refresh: 'wait_for',
+        }),
     });
 
     if (result.errors.length) {

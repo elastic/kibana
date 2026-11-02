@@ -7,6 +7,7 @@
 
 import type { HistogramIndicator } from '@kbn/slo-schema';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow } from '../transform_generators/common';
 
 type HistogramIndicatorDef =
@@ -14,11 +15,11 @@ type HistogramIndicatorDef =
   | HistogramIndicator['params']['total'];
 
 export class GetHistogramIndicatorAggregation {
-  constructor(private indicator: HistogramIndicator) {}
+  constructor(private indicator: HistogramIndicator, private dataView?: DataView) {}
 
   private buildAggregation(indicator: HistogramIndicatorDef): AggregationsAggregationContainer {
     const filter = indicator.filter
-      ? getElasticsearchQueryOrThrow(indicator.filter)
+      ? getElasticsearchQueryOrThrow(indicator.filter, this.dataView)
       : { match_all: {} };
     if (indicator.aggregation === 'value_count') {
       return {

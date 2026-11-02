@@ -41,6 +41,8 @@ export interface FetchAggIntervalsParams {
     samplerShardSize: number;
     /** Optional runtime mappings for the query. */
     runtimeMappings?: estypes.MappingRuntimeFields;
+    /** Optional project routing for the query. */
+    projectRouting?: string;
     /** Optional probability for random sampling. */
     randomSamplerProbability?: number;
     /** Optional seed for random sampling. */
@@ -56,13 +58,15 @@ export interface FetchAggIntervalsParams {
 export const fetchAggIntervals = async (
   params: FetchAggIntervalsParams
 ): Promise<NumericColumnStatsMap> => {
-  const { esClient, abortSignal, arguments: args } = params;
+  const { esClient, abortSignal } = params;
+  const args = params.arguments;
   const {
     indexPattern,
     query,
     fields,
     samplerShardSize,
     runtimeMappings,
+    projectRouting,
     randomSamplerProbability,
     randomSamplerSeed,
   } = args;
@@ -108,6 +112,7 @@ export const fetchAggIntervals = async (
           ? buildSamplerAggregation(minMaxAggs, samplerShardSize)
           : wrap(minMaxAggs),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

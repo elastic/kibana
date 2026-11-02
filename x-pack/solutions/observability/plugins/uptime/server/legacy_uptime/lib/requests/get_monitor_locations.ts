@@ -119,7 +119,6 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   let totalDowns = 0;
 
   const monLocs: MonitorLocation[] = [];
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   locations.forEach(({ most_recent: mostRecent, up_history, down_history }: any) => {
     const mostRecentLocation = mostRecent.hits.hits[0]._source;
     totalUps += up_history.value;

@@ -5,48 +5,40 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import type { AppHeaderMenu } from '@kbn/app-header';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiButton,
-  EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiLoadingElastic,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isEmpty } from 'lodash';
-import type { OverlayRef } from '@kbn/core/public';
 import { Streams } from '@kbn/streams-schema';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
+import { isEmpty } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { StreamsTreeTable } from './tree_table';
-import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
-import { useTimefilter } from '../../hooks/use_timefilter';
-import { GroupStreamModificationFlyout } from '../group_stream_modification_flyout/group_stream_modification_flyout';
-import { GroupStreamsCards } from './group_streams_cards';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { StreamsAppContextProvider } from '../streams_app_context_provider';
-import { StreamsSettingsFlyout } from './streams_settings_flyout';
-import { FeedbackButton } from '../feedback_button';
+import { useTimefilter } from '../../hooks/use_timefilter';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
 import { WelcomeTourCallout } from '../streams_tour';
+import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
+import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
+import { StreamsSettingsFlyout } from './streams_settings_flyout';
+import { StreamsTreeTable } from './tree_table';
+import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
+import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
+import { getFormattedError } from '../../util/errors';
 
 export function StreamListView() {
-  const { euiTheme } = useEuiTheme();
   const context = useKibana();
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient },
+        streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
       },
     },
     core,
   } = context;
+  const streamsDocsLink = core.docLinks.links.observability.logsStreams;
+  const { onPageReady } = usePerformanceContext();
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -62,8 +54,48 @@ export function StreamListView() {
   );
 
   const {
-    features: { groupStreams },
+    ui: { manage: canManageStreamsKibana },
+    features: { queryStreams },
   } = useStreamsPrivileges();
+
+  const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
+    useState<boolean>(false);
+  const [wiredStreamsStatus, setWiredStreamsStatus] = useState<WiredStreamsStatus | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    const fetchClassicStatus = async () => {
+      try {
+        const status = await getClassicStatus();
+        setCanManageClassicElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(getFormattedError(error), {
+          title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching classic streams status',
+          }),
+        });
+      }
+    };
+    fetchClassicStatus();
+  }, [getClassicStatus, core.notifications.toasts]);
+
+  const refreshWiredStatus = React.useCallback(async () => {
+    try {
+      const status = await getWiredStatus();
+      setWiredStreamsStatus(status);
+    } catch (error) {
+      core.notifications.toasts.addError(getFormattedError(error), {
+        title: i18n.translate('xpack.streams.streamsListView.fetchWiredStatusErrorToastTitle', {
+          defaultMessage: 'Error fetching wired streams status',
+        }),
+      });
+    }
+  }, [getWiredStatus, core.notifications.toasts]);
+
+  useEffect(() => {
+    refreshWiredStatus();
+  }, [refreshWiredStatus]);
 
   const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
@@ -76,80 +108,128 @@ export function StreamListView() {
     };
   }, [streamsListFetch.value?.streams]);
 
-  const overlayRef = React.useRef<OverlayRef | null>(null);
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
+      const streams = streamsListFetch.value.streams ?? [];
+      const classicStreamsCount = streams.filter((item) =>
+        Streams.ClassicStream.Definition.is(item.stream)
+      ).length;
+      const wiredStreamsCount = streams.filter((item) =>
+        Streams.WiredStream.Definition.is(item.stream)
+      ).length;
+
+      onPageReady({
+        customMetrics: {
+          key1: 'total_streams_count',
+          value1: streams.length,
+          key2: 'classic_streams_count',
+          value2: classicStreamsCount,
+          key3: 'wired_streams_count',
+          value3: wiredStreamsCount,
+        },
+      });
+    }
+  }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
+  const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
+    React.useState(false);
+  const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
+    React.useState(false);
 
-  function openGroupStreamModificationFlyout() {
-    overlayRef.current?.close();
-    overlayRef.current = core.overlays.openFlyout(
-      toMountPoint(
-        <StreamsAppContextProvider context={context}>
-          <GroupStreamModificationFlyout
-            client={streamsRepositoryClient}
-            streamsList={streamsListFetch.value?.streams}
-            refresh={() => {
-              streamsListFetch.refresh();
-              overlayRef.current?.close();
-            }}
-            notifications={core.notifications}
-          />
-        </StreamsAppContextProvider>,
-        core
-      ),
-      { size: 's' }
-    );
-  }
+  const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
+    defaultMessage: 'Streams',
+  });
+  const settingsLabel = i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+    defaultMessage: 'Settings',
+  });
+  const createClassicStreamLabel = i18n.translate(
+    'xpack.streams.streamsListView.createClassicStreamButtonLabel',
+    { defaultMessage: 'Create classic stream' }
+  );
+  const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
+    defaultMessage: 'Create',
+  });
+  const queryStreamMenuItemLabel = i18n.translate(
+    'xpack.streams.streamsListView.queryStreamMenuItemLabel',
+    { defaultMessage: 'Query stream' }
+  );
+  const classicStreamMenuItemLabel = i18n.translate(
+    'xpack.streams.streamsListView.classicStreamMenuItemLabel',
+    { defaultMessage: 'Classic stream' }
+  );
+
+  const showQueryStreams = Boolean(queryStreams?.enabled);
+  const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
+
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const items: NonNullable<AppHeaderMenu['items']> = [
+      {
+        id: 'settings',
+        order: 1,
+        label: settingsLabel,
+        iconType: 'gear',
+        run: () => setIsSettingsFlyoutOpen(true),
+        overflow: true,
+        testId: 'streamsAppSettingsButton',
+      },
+    ];
+
+    if (showQueryStreams) {
+      return {
+        primaryActionItem: {
+          id: 'createStream',
+          label: createLabel,
+          iconType: 'plus',
+          testId: 'streamsAppCreateStreamButton',
+          items: [
+            {
+              id: 'createClassicStream',
+              order: 1,
+              label: classicStreamMenuItemLabel,
+              run: () => setIsClassicStreamCreationFlyoutOpen(true),
+              disableButton: !canCreateClassicStream,
+              testId: 'streamsAppCreateClassicStreamButton',
+            },
+            {
+              id: 'createQueryStream',
+              order: 2,
+              label: queryStreamMenuItemLabel,
+              run: () => setIsQueryStreamCreationFlyoutOpen(true),
+              testId: 'streamsAppCreateQueryStreamButton',
+            },
+          ],
+        },
+        items,
+      };
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'createClassicStream',
+        label: createClassicStreamLabel,
+        iconType: 'plus',
+        run: () => setIsClassicStreamCreationFlyoutOpen(true),
+        disableButton: !canCreateClassicStream,
+        testId: 'streamsAppCreateClassicStreamButton',
+      },
+      items,
+    };
+  }, [
+    canCreateClassicStream,
+    classicStreamMenuItemLabel,
+    createClassicStreamLabel,
+    createLabel,
+    queryStreamMenuItemLabel,
+    settingsLabel,
+    showQueryStreams,
+  ]);
 
   return (
     <>
-      <StreamsAppPageTemplate.Header
-        bottomBorder="extended"
-        css={css`
-          background: ${euiTheme.colors.backgroundBasePlain};
-        `}
-        pageTitle={
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            gutterSize="s"
-            responsive={false}
-            alignItems="center"
-          >
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
-                  defaultMessage: 'Streams',
-                })}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {groupStreams?.enabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
-                  {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
-                    defaultMessage: 'Create Group stream',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="gear"
-                size="s"
-                onClick={() => setIsSettingsFlyoutOpen(true)}
-                aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                  defaultMessage: 'Settings',
-                })}
-              >
-                {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                  defaultMessage: 'Settings',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <FeedbackButton />
-          </EuiFlexGroup>
-        }
-      />
-      <StreamsAppPageTemplate.Body grow>
+      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} />
+      <StreamsAppPageTemplate.Body grow paddingSize="m">
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
             icon={<EuiLoadingElastic size="xl" />}
@@ -169,17 +249,16 @@ export function StreamListView() {
               hasClassicStreams={hasClassicStreams}
               firstClassicStreamName={firstClassicStreamName}
             />
+            <LegacyLogsDeprecationCallout
+              streamsStatus={wiredStreamsStatus}
+              openFlyout={() => setIsSettingsFlyoutOpen(true)}
+            />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
-              canReadFailureStore={streamsListFetch.value?.canReadFailureStore}
+              wiredStreamsStatus={wiredStreamsStatus}
+              openFlyout={() => setIsSettingsFlyoutOpen(true)}
             />
-            {groupStreams?.enabled && (
-              <>
-                <EuiSpacer size="l" />
-                <GroupStreamsCards streams={streamsListFetch.value?.streams} />
-              </>
-            )}
           </>
         )}
       </StreamsAppPageTemplate.Body>
@@ -187,6 +266,17 @@ export function StreamListView() {
         <StreamsSettingsFlyout
           onClose={() => setIsSettingsFlyoutOpen(false)}
           refreshStreams={streamsListFetch.refresh}
+          streamsStatus={wiredStreamsStatus}
+          onRefreshStatus={refreshWiredStatus}
+        />
+      )}
+      {isClassicStreamCreationFlyoutOpen && (
+        <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
+      )}
+      {isQueryStreamCreationFlyoutOpen && (
+        <CreateQueryStreamFlyoutContent
+          onClose={() => setIsQueryStreamCreationFlyoutOpen(false)}
+          onQueryStreamCreated={streamsListFetch.refresh}
         />
       )}
     </>

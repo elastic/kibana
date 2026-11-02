@@ -6,6 +6,15 @@ paths:
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/api/security_ai_assistant/anonymization_fields/_bulk_action' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"create":[{"field":"host.name","allowed":true,"anonymized":false}]}'
       x-labels: [ess, serverless]
       operationId: PerformAnonymizationFieldsBulkAction
       summary: Apply a bulk action to anonymization fields
@@ -51,6 +60,28 @@ paths:
                   - id: field9
                     allowed: false
                     anonymized: true
+            examples:
+              PerformAnonymizationFieldsBulkActionRequest:
+                value:
+                  create:
+                    - field: host.name
+                      allowed: true
+                      anonymized: false
+                    - field: user.name
+                      allowed: false
+                      anonymized: true
+                  delete:
+                    query: 'field: host.name'
+                    ids:
+                      - 'field5'
+                      - 'field6'
+                  update:
+                    - id: field8
+                      allowed: true
+                      anonymized: false
+                    - id: field9
+                      allowed: false
+                      anonymized: true
       responses:
         200:
           description: Indicates a successful call.
@@ -58,48 +89,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
-              example:
-                success: true
-                status_code: 200
-                message: Bulk action completed successfully
-                anonymization_fields_count: 5
-                attributes:
-                  results:
-                    updated:
-                      - id: field8
-                        field: "url.domain"
-                        allowed: true
-                        anonymized: false
-                        timestamp: '2023-10-31T12:00:00Z'
-                        updatedAt: '2023-10-31T12:00:00Z'
-                        updatedBy: user1
-                        createdAt: '2023-10-31T12:00:00Z'
-                        createdBy: user1
-                        namespace: default
-                    created:
-                      - id: field2
-                        field: "host.name"
-                        allowed: false
-                        anonymized: true
-                        timestamp: '2023-10-31T12:00:00Z'
-                        updatedAt: '2023-10-31T12:00:00Z'
-                        updatedBy: user1
-                        createdAt: '2023-10-31T12:00:00Z'
-                        createdBy: user1
-                        namespace: default
-                    deleted:
-                      - field3
-                    skipped:
-                      - id: field4
-                        name: "user.name"
-                        skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
-                  summary:
-                    failed: 1
-                    skipped: 1
-                    succeeded: 2
-                    total: 5
+              examples:
+                PerformAnonymizationFieldsBulkActionResponse200Example:
+                  value:
+                    success: true
+                    status_code: 200
+                    message: Bulk action completed successfully
+                    anonymization_fields_count: 4
+                    attributes:
+                      results:
+                        updated:
+                          - id: field8
+                            field: "url.domain"
+                            allowed: true
+                            anonymized: false
+                            timestamp: '2023-10-31T12:00:00Z'
+                            updatedAt: '2023-10-31T12:00:00Z'
+                            updatedBy: user1
+                            createdAt: '2023-10-31T12:00:00Z'
+                            createdBy: user1
+                            namespace: "default"
+                        created:
+                          - id: field2
+                            field: "host.name"
+                            allowed: false
+                            anonymized: true
+                            timestamp: '2023-10-31T12:00:00Z'
+                            updatedAt: '2023-10-31T12:00:00Z'
+                            updatedBy: user1
+                            createdAt: '2023-10-31T12:00:00Z'
+                            createdBy: user1
+                            namespace: "default"
+                        deleted:
+                          - field3
+                        skipped:
+                          - id: field4
+                            name: "user.name"
+                            skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 3
+                        total: 4
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -114,10 +147,12 @@ paths:
                   message:
                     type: string
                     description: Detailed error message.
-              example:
-                statusCode: 400
-                error: Bad Request
-                message: Invalid request body
+              examples:
+                PerformAnonymizationFieldsBulkActionResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: Invalid request body
 
 components:
   schemas:

@@ -10,10 +10,7 @@ import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
@@ -29,7 +26,6 @@ import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
@@ -39,6 +35,7 @@ export interface Props {
   loading: boolean;
   error: boolean;
   refetchRules: () => void;
+  isInteractive?: boolean;
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -63,7 +60,14 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
-export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
+export function SloCardItem({
+  slo,
+  rules,
+  activeAlerts,
+  historicalSummary,
+  refetchRules,
+  isInteractive = true,
+}: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -125,20 +129,24 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
               rules={rules}
               activeAlerts={activeAlerts}
               handleCreateRule={handleCreateRule}
+              isInteractive={isInteractive}
             />
           }
+          isInteractive={isInteractive}
         />
-        <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
-          <SloCardItemActions
-            slo={slo}
-            rules={rules}
-            isActionsPopoverOpen={isActionsPopoverOpen}
-            setIsActionsPopoverOpen={setIsActionsPopoverOpen}
-            setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
-            setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
-            setDashboardAttachmentReady={setDashboardAttachmentReady}
-          />
-        </div>
+        {isInteractive && (
+          <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
+            <SloCardItemActions
+              slo={slo}
+              rules={rules}
+              isActionsPopoverOpen={isActionsPopoverOpen}
+              setIsActionsPopoverOpen={setIsActionsPopoverOpen}
+              setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+              setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+              setDashboardAttachmentReady={setDashboardAttachmentReady}
+            />
+          </div>
+        )}
       </EuiPanel>
 
       <BurnRateRuleFlyout
@@ -180,11 +188,13 @@ export function SloCardChart({
   badges,
   onClick,
   historicalSliData,
+  isInteractive = true,
 }: {
   badges: React.ReactNode;
   slo: SLOWithSummaryResponse;
   historicalSliData?: Array<{ key?: number; value?: number }>;
   onClick?: () => void;
+  isInteractive?: boolean;
 }) {
   const {
     application: { navigateToUrl },
@@ -205,15 +215,17 @@ export function SloCardChart({
             iconAlign: 'right',
           },
         }}
-        onElementClick={([d]) => {
-          if (onClick) {
-            onClick();
-          } else {
-            if (isMetricElementEvent(d)) {
-              navigateToUrl(sloDetailsUrl);
+        {...(isInteractive && {
+          onElementClick: ([d]) => {
+            if (onClick) {
+              onClick();
+            } else {
+              if (isMetricElementEvent(d)) {
+                navigateToUrl(sloDetailsUrl);
+              }
             }
-          }
-        }}
+          },
+        })}
         locale={i18n.getLocale()}
       />
       <Metric
@@ -244,7 +256,7 @@ export function SloCardChart({
                   }}
                 />
               ),
-              icon: () => <EuiIcon type="visGauge" size="l" />,
+              icon: () => <EuiIcon type="chartGauge" size="l" aria-hidden={true} />,
               color: cardColor,
               body: badges,
             },

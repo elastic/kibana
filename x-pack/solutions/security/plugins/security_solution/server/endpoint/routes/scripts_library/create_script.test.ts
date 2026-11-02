@@ -87,14 +87,10 @@ describe('POST: create script API route', () => {
 
       expect(
         apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient
-      ).toHaveBeenCalledWith('space_a', 'unknown', expect.any(Object));
+      ).toHaveBeenCalledWith('space_a', 'unknown');
 
       expect(
-        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient(
-          '',
-          '',
-          apiTestSetup.getEsClientMock()
-        ).create
+        apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').create
       ).toHaveBeenCalledWith(httpRequestMock.body);
     });
 

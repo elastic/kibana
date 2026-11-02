@@ -23,6 +23,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   const retry = getService('retry');
   const header = getPageObject('header');
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const cases = getService('cases');
 
   return {
@@ -125,15 +126,24 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async clickDocumentCountChart(chartClickCoordinates: [number, number]) {
       await elasticChart.waitForRenderComplete();
-      const el = await elasticChart.getCanvas();
 
-      await browser
-        .getActions()
-        .move({ x: chartClickCoordinates[0], y: chartClickCoordinates[1], origin: el._webElement })
-        .click()
-        .perform();
+      // The chart re-renders once the change point annotation arrives, which can swallow a
+      // click that happens at the same time. Retry the click until the brushes show up.
+      await retry.tryForTime(30 * 1000, async () => {
+        const el = await elasticChart.getCanvas();
 
-      await this.assertHistogramBrushesExist();
+        await browser
+          .getActions()
+          .move({
+            x: chartClickCoordinates[0],
+            y: chartClickCoordinates[1],
+            origin: el._webElement,
+          })
+          .click()
+          .perform();
+
+        await this.assertHistogramBrushesExist();
+      });
     },
 
     async clickNoAutoRunButton() {
@@ -331,7 +341,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logRateAnalysis');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async getBrushSelectionWidth(selector: string) {
@@ -413,14 +423,10 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
 
       // make sure the dashboard page actually loaded
+      await header.waitUntilLoadingHasFinished();
       const dashboardItemCount = await dashboardPage.getSharedItemsCount();
       expect(dashboardItemCount).to.not.eql(undefined);
 

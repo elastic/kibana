@@ -173,7 +173,7 @@ NotListOfValues
   = Not partial:ListOfValues {
     if (partial.type === 'cursor') {
       return {
-        ...list,
+        ...partial,
         suggestionTypes: ['value']
       };
     }
@@ -287,8 +287,11 @@ EscapedSpecialCharacter
 EscapedKeyword
   = '\\' keyword:('or'i / 'and'i / 'not'i) { return keyword; }
 
+// We don't use the And/Or/Not rules here because they cause recursive backtracking.
 Keyword
-  = Or / And / Not
+  = Space 'or'i Space
+  / Space 'and'i Space
+  / 'not'i Space
 
 SpecialCharacter
   = [\\():<>"*{}]

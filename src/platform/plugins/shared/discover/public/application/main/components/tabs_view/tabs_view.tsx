@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { i18n } from '@kbn/i18n';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { ChromeAppHeader, useIsProjectChromeStyle } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -18,12 +24,12 @@ import {
   selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  getDataViewOfSource,
   useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
-
-const MAX_TABS_COUNT = 25;
+import { useAppMenuData } from './use_app_menu_data';
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
@@ -34,11 +40,19 @@ export const TabsView = (props: SingleTabViewProps) => {
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-
-  const scopedEbtManager = useCurrentTabRuntimeState(
-    props.runtimeStateManager,
-    (state) => state.scopedEbtManager$
+  const currentDataSource = useCurrentTabRuntimeState((tab) => tab.currentDataSource$);
+  const currentDataView = useMemo(
+    () => getDataViewOfSource(currentDataSource),
+    [currentDataSource]
   );
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const isProjectChromeStyle = useIsProjectChromeStyle();
+  const { euiTheme } = useEuiTheme();
+
+  const { getTopTabMenuItems, getAdditionalTabMenuItems, topNavMenuItems, shareAction } =
+    useAppMenuData({
+      currentDataView,
+    });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -67,21 +81,82 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
+  const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
+    if (isProjectChromeStyle) {
+      return (tabsBar) => {
+        // Vertical rule separator.
+        const tabsBarWithDelimiter = (
+          <>
+            {tabsBar}
+            {tabsBar && (
+              <span
+                aria-hidden="true"
+                css={css`
+                  width: ${euiTheme.border.width.thin};
+                  height: ${euiTheme.size.base};
+                  background-color: ${euiTheme.colors.borderBasePlain};
+                  margin-left: ${euiTheme.size.xs};
+                `}
+              />
+            )}
+          </>
+        );
+        return (
+          <ChromeAppHeader
+            menu={topNavMenuItems}
+            share={shareAction}
+            tabsBar={tabsBarWithDelimiter}
+          />
+        );
+      };
+    }
+  }, [isProjectChromeStyle, topNavMenuItems, shareAction, euiTheme]);
+
+  const appendRight = useMemo(() => {
+    if (!isProjectChromeStyle) {
+      return <AppMenuComponent config={topNavMenuItems} />;
+    }
+    return undefined;
+  }, [isProjectChromeStyle, topNavMenuItems]);
+
+  const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
+    (droppedCount: number) => {
+      services.toastNotifications.addWarning({
+        title: i18n.translate('discover.tabs.tabLimitReachedWarningTitle', {
+          defaultMessage: 'Tab limit reached',
+        }),
+        text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
+          defaultMessage:
+            'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
+          values: { droppedCount, maxTabs: MAX_DISCOVER_SESSION_TABS },
+        }),
+      });
+    },
+    [services.toastNotifications]
+  );
+
   return (
-    <UnifiedTabs
-      services={services}
-      items={items}
-      selectedItemId={currentTabId}
-      recentlyClosedItems={recentlyClosedItems}
-      unsavedItemIds={unsavedTabIds}
-      maxItemsCount={MAX_TABS_COUNT}
-      hideTabsBar={hideTabsBar}
-      createItem={createItem}
-      getPreviewData={getPreviewData}
-      renderContent={renderContent}
-      onChanged={onChanged}
-      onEBTEvent={onEvent}
-      onClearRecentlyClosed={onClearRecentlyClosed}
-    />
+    <div className="eui-fullHeight">
+      <UnifiedTabs
+        services={services}
+        items={items}
+        selectedItemId={currentTabId}
+        recentlyClosedItems={recentlyClosedItems}
+        unsavedItemIds={unsavedTabIds}
+        maxItemsCount={MAX_DISCOVER_SESSION_TABS}
+        hideTabsBar={hideTabsBar}
+        createItem={createItem}
+        getPreviewData={getPreviewData}
+        renderContent={renderContent}
+        onChanged={onChanged}
+        onEBTEvent={onEvent}
+        onClearRecentlyClosed={onClearRecentlyClosed}
+        onTabLimitReached={onTabLimitReached}
+        getTopTabMenuItems={getTopTabMenuItems}
+        getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+        wrapTabsBar={wrapTabsBar}
+        appendRight={appendRight}
+      />
+    </div>
   );
 };

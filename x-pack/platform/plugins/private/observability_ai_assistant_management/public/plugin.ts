@@ -122,8 +122,9 @@ export class AiAssistantManagementObservabilityPlugin
     if (licensing) {
       this.licensingSubscription = licensing.license$.subscribe((license) => {
         const isEnterprise = license?.hasAtLeast('enterprise');
-
-        if (isEnterprise) {
+        const isAiAssistantEnabled =
+          coreStart.application.capabilities.observabilityAIAssistant?.show;
+        if (isEnterprise && isAiAssistantEnabled) {
           this.registeredApp?.enable();
         } else {
           this.registeredApp?.disable();

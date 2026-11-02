@@ -12,7 +12,7 @@ import { useProductFeatureKeys } from './use_product_feature_keys';
 /**
  * Hook to determine if the user has the required license for graph visualization feature.
  *
- * In ESS/Self-Managed: Requires Enterprise license or higher
+ * In ESS/Self-Managed: Requires Platinum license or higher
  * In Serverless: Requires Security Analytics Complete tier (not Essentials)
  *
  * @returns boolean indicating if graph visualization is available
@@ -23,6 +23,6 @@ export const useHasGraphVisualizationLicense = (): boolean => {
 
   return (
     productFeatureKeys.has(ProductFeatureSecurityKey.graphVisualization) &&
-    licenseService.isEnterprise()
+    licenseService.isPlatinumPlus()
   );
 };

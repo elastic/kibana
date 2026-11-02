@@ -5,18 +5,31 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
+import type { SearchGettingStartedSetupDependencies } from './types';
+import { registerSearchSkills } from './skills/register_search_skills';
 
-export class SearchGettingStartedPlugin implements Plugin {
-  constructor(_initContext: PluginInitializerContext) {}
+export class SearchGettingStartedPlugin
+  implements Plugin<{}, {}, SearchGettingStartedSetupDependencies>
+{
+  private readonly logger: Logger;
 
-  public setup(core: CoreSetup) {
-    // Minimal server plugin - no setup needed
+  constructor(initContext: PluginInitializerContext) {
+    this.logger = initContext.logger.get();
+  }
+
+  public setup(_core: CoreSetup, plugins: SearchGettingStartedSetupDependencies) {
+    registerSearchSkills({ plugins, logger: this.logger });
     return {};
   }
 
-  public start(core: CoreStart) {
-    // Minimal server plugin - no start logic needed
+  public start(_core: CoreStart) {
     return {};
   }
 }

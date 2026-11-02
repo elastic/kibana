@@ -33,6 +33,7 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { HOST_NAME_FIELD, HOST_HOSTNAME_FIELD } from '../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import type {
   InfraWaffleMapNode,
@@ -40,6 +41,7 @@ import type {
 } from '../../../../../common/inventory/types';
 import { getUptimeUrl } from '../../lib/get_uptime_url';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -54,18 +56,15 @@ export const NodeContextMenu = withEuiTheme(
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const { preferredSchema } = useWaffleOptionsContext();
+    const effectiveSchema = getInventoryRequestSchema(preferredSchema);
     const inventoryModel = findInventoryModel(nodeType);
+    const { id: nodeIdField } = findInventoryFields(nodeType, effectiveSchema);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
     const { application, share } = services;
     const logsLocator = getLogsLocatorFromUrlService(share.url)!;
     const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
     const uiCapabilities = application?.capabilities;
-    // Due to the changing nature of the fields between APM and this UI,
-    // We need to have some exceptions until 7.0 & ECS is finalized. Reference
-    // #26620 for the details for these fields.
-    // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-    const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;
 
     const showDetail = inventoryModel.crosslinkSupport.details;
     const showLogsLink =
@@ -93,14 +92,13 @@ export const NodeContextMenu = withEuiTheme(
           };
         }
       } else {
-        const { id } = findInventoryFields(nodeType);
         return {
-          label: <EuiCode>{id}</EuiCode>,
+          label: <EuiCode>{nodeIdField}</EuiCode>,
           value: node.id,
         };
       }
       return { label: '', value: '' };
-    }, [nodeType, node.ip, node.id]);
+    }, [nodeType, node.ip, node.id, nodeIdField]);
 
     const nodeDetailMenuItemLinkProps = getAssetDetailUrl({
       entityType: nodeType,
@@ -110,13 +108,17 @@ export const NodeContextMenu = withEuiTheme(
         to: currentTime,
         name: node.name,
       },
+      preferredSchema: effectiveSchema,
     });
 
     const apmTracesMenuItemLinkProps = useLinkProps({
       app: 'apm',
       hash: 'traces',
       search: {
-        kuery: `${apmField}:"${node.id}"`,
+        kuery:
+          nodeType === 'host'
+            ? `${HOST_NAME_FIELD}:"${node.id}" OR ${HOST_HOSTNAME_FIELD}:"${node.id}"`
+            : `${nodeIdField}:"${node.id}"`,
       },
     });
 
@@ -131,7 +133,7 @@ export const NodeContextMenu = withEuiTheme(
       }),
       href: logsLocator.getRedirectUrl({
         query: getNodeQuery({
-          nodeField: findInventoryFields(nodeType).id,
+          nodeField: nodeIdField,
           nodeId: node.id,
         }),
         timeRange: getTimeRange(currentTime),
@@ -227,7 +229,7 @@ export const NodeContextMenu = withEuiTheme(
 
         {flyoutVisible && (
           <AlertFlyout
-            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
+            filter={`${nodeIdField}: "${node.id}"`}
             options={options}
             nodeType={nodeType}
             setVisible={setFlyoutVisible}

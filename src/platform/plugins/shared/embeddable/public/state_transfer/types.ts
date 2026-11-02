@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
-
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
+
+/**
+ * A serializable breadcrumb entry passed from the originating app to editor apps.
+ * Uses href instead of onClick for sessionStorage serialization.
+ * @public
+ */
+export interface EmbeddableEditorBreadcrumb {
+  text: string;
+  href: string;
+}
 
 /**
  * A state package that contains information an editor will need to create or edit an embeddable then redirect back.
@@ -17,7 +25,30 @@ export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
  */
 export interface EmbeddableEditorState {
   originatingApp: string;
+  /**
+   * The path within the originating app to navigate back to when the user saves or cancels.
+   *
+   * When provided, editors must show a "Save and return" button.
+   *
+   * On save, the editor
+   * navigates back using stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
+   *   path: originatingPath,
+   *   state: [{ embeddableId, type, serializedState }],
+   * }), carrying the updated embeddable state so the originating app can update the panel.
+   *
+   * On cancel, the editor navigates back with no embeddable state via
+   * application.navigateToApp(originatingApp, { path: originatingPath }).
+   */
   originatingPath?: string;
+  /**
+   * Type of the container the editor was opened from (e.g. 'dashboard')
+   */
+  originatingContainer?: string;
+  /**
+   * Breadcrumbs from the originating app context (e.g. [Dashboards, Visualizations]).
+   * Consumers prepend these to their own breadcrumbs.
+   */
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   embeddableId?: string;
   valueInput?: object;
 
@@ -38,9 +69,9 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  * A state package that contains all fields necessary to create or update an embeddable by reference or by value in a container.
  * @public
  */
-export interface EmbeddablePackageState<SerializedStateType extends object = object> {
+export interface EmbeddablePackageState<SerializedState extends object = object> {
   type: string;
-  serializedState: SerializedPanelState<SerializedStateType>;
+  serializedState: SerializedState;
   embeddableId?: string;
   size?: {
     width?: number;

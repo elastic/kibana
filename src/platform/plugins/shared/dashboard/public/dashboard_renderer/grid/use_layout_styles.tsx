@@ -36,10 +36,6 @@ export const useLayoutStyles = () => {
       --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
         ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
 
-      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        ${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
-        0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
-
       .kbnGridSection--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
@@ -53,12 +49,42 @@ export const useLayoutStyles = () => {
       // styles for the area where the panel and/or section header will be dropped
       .kbnGridPanel--dragPreview,
       .kbnGridSection--dragPreview {
-        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
 
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
       }
 
-      .kbnGridPanel--resizeHandle {
+      // allows embeddables (specifically the control embeddables in this case) to hide the drag handle icon
+      .kbnGridPanel:has(.kbnGridLayout--hideDragHandle) {
+        .kbnGridPanel--resizeHandle::after {
+          display: none !important;
+        }
+      }
+
+      // styles for the panel grid size gauge that appears when resizing
+      .kbnGridPanel--resizeGauge {
+        padding: ${euiTheme.size.xxs};
+        z-index: ${euiTheme.levels.menu};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-top-right-radius: ${euiTheme.border.radius.control};
+
+        & .kbnGridPanel--resizeGauge--inner {
+          padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
+          height: ${euiTheme.size.l};
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+          border-radius: ${euiTheme.border.radius.control};
+        }
+
+        & .kbnGridPanel--resizeGauge--text {
+          font-weight: ${euiTheme.font.weight.medium};
+          color: ${euiTheme.colors.textAccentSecondary};
+        }
+      }
+
+      .kbnGridPanel:hover .kbnGridPanel--resizeHandle {
         z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show
@@ -85,7 +111,6 @@ export const useLayoutStyles = () => {
       .kbnGridPanel--active {
         // overwrite the border style on panels + hover actions for active panels
         --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
-        --hoverActionsBoxShadowStyle: var(--dashboardHoverActionsActivePanelBoxShadow);
         --hoverActionsSingleWrapperBoxShadowStyle: var(
           --dashboardHoverActionsActivePanelBoxShadow--singleWrapper
         );
@@ -100,7 +125,7 @@ export const useLayoutStyles = () => {
       .kbnGridSectionHeader--active {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         outline: var(--dashboardActivePanelBorderStyle);
-        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
         padding-left: 8px;
         // hide accordian arrow + panel count text when row is being dragged
         & .kbnGridSectionTitle--button svg,

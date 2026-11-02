@@ -271,6 +271,20 @@
         "user_provided_metadata": {
           "enabled": false,
           "type": "object"
+        },
+        "upgrade": {
+          "properties":{
+            "rollbacks":{
+              "properties": {
+                "valid_until": {
+                  "type": "date"
+                },
+                "version": {
+                  "type": "version"
+                }
+              }
+            }
+          }
         }
       }
     },

@@ -68,6 +68,7 @@ async function updateIndexTemplate(
   if (!indexTemplate) {
     return false;
   }
+
   if (isLegacy) {
     merge(indexTemplate, { settings });
   } else {
@@ -82,14 +83,17 @@ async function updateIndexTemplate(
     // @ts-expect-error Types of property auto_expand_replicas are incompatible.
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
+  // Remove properties from the GET response that cannot be in the PUT request
+  const { created_date_millis, modified_date_millis, ...safeTemplate } =
+    indexTemplate as TemplateSerialized;
   // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.
-  return client.indices.putIndexTemplate({ name: templateName, body: indexTemplate });
+  return client.indices.putIndexTemplate({ name: templateName, body: safeTemplate });
 }
 
 const bodySchema = schema.object({
-  templateName: schema.string(),
-  policyName: schema.string(),
-  aliasName: schema.maybe(schema.string()),
+  templateName: schema.string({ maxLength: 1000 }),
+  policyName: schema.string({ maxLength: 1000 }),
+  aliasName: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 
 const querySchema = schema.object({

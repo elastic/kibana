@@ -260,12 +260,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: false,
               look_back_window: 5,
               status_change_threshold: 5,
             },
           });
 
         expect(updatedRule.flapping).eql({
+          enabled: false,
           look_back_window: 5,
           status_change_threshold: 5,
         });
@@ -310,7 +312,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(updatedRule.flapping).eql(null);
       });
 
-      it('should throw if flapping is updated when global flapping is off', async () => {
+      it('should not throw if flapping is updated when global flapping is off', async () => {
         const response = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -327,7 +329,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             status_change_threshold: 5,
           });
 
-        await supertest
+        const { body: updatedRule } = await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
           .set('kbn-xsrf', 'foo')
           .send({
@@ -341,72 +343,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             flapping: {
+              enabled: true,
               look_back_window: 5,
               status_change_threshold: 5,
             },
-          })
-          .expect(400);
-      });
-
-      it('should allow rule to be updated when global flapping is off if not updating flapping', async () => {
-        const response = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              flapping: {
-                look_back_window: 5,
-                status_change_threshold: 5,
-              },
-            })
-          );
-
-        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
-
-        await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            enabled: false,
-            look_back_window: 5,
-            status_change_threshold: 5,
           });
 
-        await supertest
-          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'updated name 1',
-            tags: ['foo'],
-            params: {
-              foo: true,
-            },
-            schedule: { interval: '12s' },
-            actions: [],
-            throttle: '1m',
-            notify_when: 'onThrottleInterval',
-          })
-          .expect(200);
-
-        await supertest
-          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${response.body.id}`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'updated name 2',
-            tags: ['foo'],
-            params: {
-              foo: true,
-            },
-            schedule: { interval: '12s' },
-            actions: [],
-            throttle: '1m',
-            notify_when: 'onThrottleInterval',
-            flapping: {
-              look_back_window: 5,
-              status_change_threshold: 5,
-            },
-          })
-          .expect(200);
+        expect(updatedRule.flapping).eql({
+          enabled: true,
+          look_back_window: 5,
+          status_change_threshold: 5,
+        });
       });
 
       it('should throw if flapping is invalid', async () => {
@@ -460,24 +407,29 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      it('should not return dashboards in the response', async () => {
-        const expectedArtifacts = {
-          artifacts: {
-            dashboards: [
-              {
-                id: 'dashboard-1',
-              },
-            ],
-            investigation_guide: {
-              blob: '## Summary',
+      it('should return artifacts in the response', async () => {
+        const createArtifacts = {
+          dashboards: [
+            {
+              id: 'dashboard-1',
             },
+          ],
+          investigation_guide: {
+            blob: '## Summary',
+          },
+        };
+
+        const updateArtifacts = {
+          dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+          investigation_guide: {
+            blob: '## Summary',
           },
         };
 
         const createResponse = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData(expectedArtifacts))
+          .send(getTestRuleData({ artifacts: createArtifacts }))
           .expect(200);
 
         const esResponse = await es.get<SavedObject<RawRule>>(
@@ -507,16 +459,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
-            artifacts: {
-              dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
-              investigation_guide: {
-                blob: '## Summary',
-              },
-            },
+            artifacts: updateArtifacts,
           })
           .expect(200);
 
-        expect(updateResponse.body.artifacts).to.be(undefined);
+        expect(updateResponse.body.artifacts).to.eql(updateArtifacts);
 
         const esUpdateResponse = await es.get<SavedObject<RawRule>>(
           {
@@ -525,6 +472,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           },
           { meta: true }
         );
+
         expect((esUpdateResponse.body._source as any)?.alert.artifacts.dashboards ?? {}).to.eql([
           {
             refId: 'dashboard_0',
@@ -533,9 +481,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             refId: 'dashboard_1',
           },
         ]);
-        expect((esUpdateResponse.body._source as any)?.alert.artifacts.investigation_guide).to.eql({
-          blob: '## Summary',
-        });
       });
 
       it('should not allow updating of dashboards with > dashboard length limit', async () => {

@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { merge } from 'rxjs';
+import { merge, EMPTY } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -84,7 +84,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, executionContext, data } = services;
+  const { uiSettings, executionContext, data, cps } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -231,6 +231,9 @@ export const useESQLDataVisualizerData = (
       }
 
       // Ensure that we don't query frozen data
+      if (!filter) {
+        filter = { bool: {} };
+      }
       if (filter.bool === undefined) {
         filter.bool = Object.create(null);
       }
@@ -298,7 +301,8 @@ export const useESQLDataVisualizerData = (
       const timeUpdateSubscription = merge(
         timefilter.getTimeUpdate$(),
         timefilter.getAutoRefreshFetch$(),
-        mlTimefilterRefresh$
+        mlTimefilterRefresh$,
+        cps?.cpsManager?.getProjectRouting$() ?? EMPTY
       ).subscribe(() => {
         setGlobalState({
           time: timefilter.getTime(),
@@ -650,7 +654,7 @@ export const useESQLDataVisualizerData = (
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
               timeFieldName={timeFieldName}
-              onAddFilter={input.onAddFilter}
+              onAddFilter={input.isInteractive ? input.onAddFilter : undefined}
               onVisibilityChange={onVisibilityChange}
             />
           );
@@ -659,7 +663,14 @@ export const useESQLDataVisualizerData = (
       }, {} as ItemIdToExpandedRowMap);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentDataView, totalCount, query.esql, timeFieldName, onVisibilityChange]
+    [
+      currentDataView,
+      totalCount,
+      query.esql,
+      timeFieldName,
+      onVisibilityChange,
+      input.isInteractive,
+    ]
   );
 
   const combinedProgress = useMemo(

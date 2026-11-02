@@ -1,0 +1,36 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postCreateCustomIntegrationRequestExample:
+          description: 'Create a new custom integration'
+          value:
+            integrationName: 'my_custom_logs'
+            datasets:
+              - name: 'my_custom_logs.access'
+                type: 'logs'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postCreateCustomIntegrationExample:
+            description: 'Custom integration successfully created'
+            value:
+              items:
+                - id: 'my_custom_logs-logs-my_custom_logs.access'
+                  type: 'index_template'
+              _meta:
+                install_source: 'custom'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

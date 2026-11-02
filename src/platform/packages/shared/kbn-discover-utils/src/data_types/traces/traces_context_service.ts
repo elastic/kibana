@@ -25,7 +25,10 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS = ['trace', 'traces'];
 
 export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
   DEFAULT_ALLOWED_TRACES_BASE_PATTERNS,
-  'data'
+  'data',
+  // Observability traces live in `traces-*` indices, so only match names that start with the base
+  // pattern (e.g. `traces-*`), not names where it appears later (e.g. `shipping-traces`).
+  { allowPrefix: false }
 );
 
 export const createTracesContextService = ({
@@ -39,9 +42,17 @@ export const createTracesContextService = ({
 
   const { transaction, span } = indices;
   const allTraceIndices = getAllIndices(transaction, span);
-
   const tracesIndexPattern = allTraceIndices.join();
-  const allowedDataSources = [...allTraceIndices, DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
+
+  // Allow:
+  // - each individual configured traces index pattern (e.g. `traces-apm*`)
+  // - the full combined list (e.g. `traces-apm*,apm-*,traces-*.otel-*`)
+  // - generic `trace|traces` base patterns (fallback)
+  const allowedDataSources = [
+    tracesIndexPattern,
+    ...allTraceIndices,
+    DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
+  ];
 
   return getTracesContextService({ tracesIndexPattern, allowedDataSources });
 };

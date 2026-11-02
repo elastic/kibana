@@ -26,7 +26,6 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { CanvasAppLocatorDefinition } from '../common/locator';
@@ -36,7 +35,6 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import type { CanvasApi } from './plugin_api';
 import { getPluginApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
-import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { getHasWorkpads } from './services/get_has_workpads';
 
@@ -66,7 +64,6 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesPluginStart;
   contentManagement: ContentManagementPublicStart;
 }
@@ -128,10 +125,9 @@ export class CanvasPlugin
 
         srcPlugin.start(coreStart, startPlugins);
 
-        const { expressions, presentationUtil } = startPlugins;
-        await presentationUtil.registerExpressionsLanguage(
-          Object.values(expressions.getFunctions())
-        );
+        const { expressions } = startPlugins;
+        const languages = await import('./components/expression_input/language');
+        languages.registerExpressionsLanguage(Object.values(expressions.getFunctions()));
 
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
@@ -180,8 +176,6 @@ export class CanvasPlugin
       const { transitions } = await import('./transitions');
       return transitions;
     });
-
-    setupPlugins.uiActions.registerTrigger(addCanvasElementTrigger);
 
     return {
       ...canvasApi,

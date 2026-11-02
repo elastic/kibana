@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
@@ -29,13 +29,14 @@ export const useAddToExistingCase = ({
   const attachments = useMemo(() => {
     return [
       {
-        persistableStateAttachmentState: {
-          attributes: lensAttributes,
-          timeRange,
-          metadata: lensMetadata,
+        type: LENS_ATTACHMENT_TYPE,
+        data: {
+          state: {
+            attributes: lensAttributes,
+            timeRange,
+            metadata: lensMetadata,
+          },
         },
-        persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-        type: AttachmentType.persistableState as const,
       },
     ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, lensMetadata, timeRange]);

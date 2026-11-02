@@ -10,10 +10,16 @@
 import { z } from '@kbn/zod/v4';
 import {
   AtomicGraphNodeSchema,
+  DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
-  HttpGraphNodeSchema,
   KibanaGraphNodeSchema,
+  SyntheticGraphNodeSchema,
+  WaitForApprovalGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
   WaitGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -21,7 +27,13 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
-import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
+import { LoopBreakNodeSchema, LoopContinueNodeSchema } from './flow_control_nodes';
+import {
+  EnterForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitForeachNodeSchema,
+  ExitWhileNodeSchema,
+} from './loop_nodes';
 import {
   EnterContinueNodeSchema,
   EnterFallbackPathNodeSchema,
@@ -39,19 +51,38 @@ import {
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
 } from './on_failure_nodes';
+import { EnterParallelNodeSchema, ExitParallelNodeSchema } from './parallel_nodes';
+import {
+  EnterCaseBranchNodeSchema,
+  EnterDefaultBranchNodeSchema,
+  EnterSwitchNodeSchema,
+  ExitCaseBranchNodeSchema,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNodeSchema,
+} from './switch_nodes';
 
 const GraphNodeUnionSchema = z.discriminatedUnion('type', [
+  SyntheticGraphNodeSchema,
   AtomicGraphNodeSchema,
+  DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
-  HttpGraphNodeSchema,
   WaitGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
+  WaitForApprovalGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
   ExitConditionBranchNodeSchema,
   EnterForeachNodeSchema,
   ExitForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitWhileNodeSchema,
+  EnterParallelNodeSchema,
+  ExitParallelNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,
@@ -67,6 +98,14 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   OnFailureNodeSchema,
   StepLevelOnFailureNodeSchema,
   WorkflowLevelOnFailureNodeSchema,
+  EnterSwitchNodeSchema,
+  EnterCaseBranchNodeSchema,
+  ExitCaseBranchNodeSchema,
+  EnterDefaultBranchNodeSchema,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNodeSchema,
+  LoopBreakNodeSchema,
+  LoopContinueNodeSchema,
 ]);
 
 export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;

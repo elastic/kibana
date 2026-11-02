@@ -418,19 +418,19 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           -1,
           'rgba(0,0,0,0)',
           0,
-          '#d8e7ff',
+          '#e0ecff',
           12.5,
-          '#c8ddff',
+          '#cfe1ff',
           25,
-          '#b8d4ff',
+          '#bed7ff',
           37.5,
-          '#a8caff',
+          '#adccff',
           50,
-          '#98c0ff',
+          '#9bc2ff',
           62.5,
-          '#87b6ff',
+          '#89b7ff',
           75,
-          '#75acff',
+          '#76adff',
           87.5,
           '#61a2ff',
         ]);
@@ -710,5 +710,54 @@ describe('renderDataMappingPopover', () => {
 
     const legendRow = colorStyle.renderDataMappingPopover(() => {});
     expect(legendRow).toMatchSnapshot();
+  });
+});
+
+describe('getValueSuggestions', () => {
+  test('should return empty array when field is null', async () => {
+    const colorProperty = new DynamicColorProperty(
+      {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        colorCategory: 'palette_0',
+        fieldMetaOptions,
+      },
+      VECTOR_STYLES.FILL_COLOR,
+      null,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
+      () => {
+        return (value: RawValue) => value + '_format';
+      }
+    );
+
+    const suggestions = await colorProperty.getValueSuggestions('');
+    expect(suggestions).toEqual([]);
+  });
+
+  test('should return suggestions from field source', async () => {
+    const expectedSuggestions = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
+    const mockSource = {
+      getValueSuggestions: jest.fn().mockResolvedValue(expectedSuggestions),
+    };
+    const fieldWithSource = {
+      ...mockField,
+      getSource: () => mockSource,
+    } as unknown as IField;
+
+    const colorProperty = new DynamicColorProperty(
+      {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        colorCategory: 'palette_0',
+        fieldMetaOptions,
+      },
+      VECTOR_STYLES.FILL_COLOR,
+      fieldWithSource,
+      new MockLayer(new MockStyle()) as unknown as IVectorLayer,
+      () => {
+        return (value: RawValue) => value + '_format';
+      }
+    );
+
+    const suggestions = await colorProperty.getValueSuggestions('');
+    expect(suggestions).toEqual(['ios', 'osx', 'win 7', 'win 8', 'win xp']);
   });
 });

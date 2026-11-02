@@ -72,7 +72,29 @@ export const StreamNameInput = ({
     [validationError, parts]
   );
 
-  const getConnectedInputStyles = (isFirst: boolean, isLast: boolean) => {
+  const inputStyles = css`
+    .euiFormControlLayout__prepend,
+    .euiFormControlLayout__append {
+      /* Prevent truncation on labels */
+      max-width: none;
+      background: ${euiTheme.components.forms.backgroundReadOnly};
+
+      &::before {
+        height: 100%;
+      }
+    }
+
+    .euiFormControlLayout__prepend + .euiFormControlLayout__childrenWrapper {
+      border-start-start-radius: 0;
+      border-end-start-radius: 0;
+
+      .euiFieldText {
+        border-radius: inherit;
+      }
+    }
+  `;
+
+  const getConnectedInputStyles = (isFirst: boolean, isLast: boolean, isInvalid: boolean) => {
     return css`
       flex: 1 1 0%;
 
@@ -89,19 +111,13 @@ export const StreamNameInput = ({
       }
 
       /* Remove border on connected sides to prevent double borders */
-      /* We use margin-right: -1px to overlap borders instead of removing them, */
-      /* which keeps the focus ring intact and correct */
-      ${!isLast ? 'margin-right: -1px;' : ''}
+      /* We use margin-right: -1px to overlap borders, but not when invalid */
+      /* because the outline needs to be fully visible on all sides */
+      ${!isLast && !isInvalid ? 'margin-right: -1px;' : ''}
 
       /* Ensure the focused element is on top */
       &:focus-within {
         z-index: 1;
-      }
-
-      /* Prevent truncation on labels */
-      .euiFormControlLayout__prepend,
-      .euiFormControlLayout__append {
-        max-width: none;
       }
     `;
   };
@@ -126,23 +142,25 @@ export const StreamNameInput = ({
   if (!hasMultipleWildcards && inputGroups.length === 1) {
     const group = inputGroups[0];
     return (
-      <EuiFieldText
-        autoFocus
-        value={parts[group.wildcardIndex] ?? ''}
-        onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
-        placeholder="*"
-        fullWidth
-        isInvalid={isInputInvalid(group.wildcardIndex)}
-        prepend={group.prepend}
-        append={group.append}
-        aria-label={i18n.translate(
-          'xpack.createClassicStreamFlyout.streamNameInput.singleWildcardAriaLabel',
-          {
-            defaultMessage: 'Stream name',
-          }
-        )}
-        data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
-      />
+      <div css={inputStyles}>
+        <EuiFieldText
+          autoFocus
+          value={parts[group.wildcardIndex] ?? ''}
+          onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
+          placeholder="*"
+          fullWidth
+          isInvalid={isInputInvalid(group.wildcardIndex)}
+          prepend={group.prepend}
+          append={group.append}
+          aria-label={i18n.translate(
+            'xpack.createClassicStreamFlyout.streamNameInput.singleWildcardAriaLabel',
+            {
+              defaultMessage: 'Stream name',
+            }
+          )}
+          data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
+        />
+      </div>
     );
   }
 
@@ -158,11 +176,12 @@ export const StreamNameInput = ({
       {inputGroups.map((group, index) => {
         const isFirst = index === 0;
         const isLast = index === inputGroups.length - 1;
+        const isInvalid = isInputInvalid(group.wildcardIndex);
 
         return (
           <EuiFlexItem
             key={`wildcard-${group.wildcardIndex}`}
-            css={getConnectedInputStyles(isFirst, isLast)}
+            css={[inputStyles, getConnectedInputStyles(isFirst, isLast, isInvalid)]}
           >
             <EuiFieldText
               autoFocus={isFirst}
@@ -170,7 +189,7 @@ export const StreamNameInput = ({
               onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"
               fullWidth
-              isInvalid={isInputInvalid(group.wildcardIndex)}
+              isInvalid={isInvalid}
               prepend={group.prepend}
               append={group.append}
               aria-label={i18n.translate(

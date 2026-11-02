@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as z from '@kbn/zod';
-
+import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import type { RuleSnooze, GapFillStatus } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
@@ -25,6 +25,11 @@ import type {
 } from '../../../../common/api/detection_engine/model/rule_schema';
 import type {
   CoverageOverviewFilter,
+  GranularRulesFilter,
+  SearchRulesAggregations,
+  SearchRulesResponse,
+  SearchRulesSearchAfterItem,
+  GranularRulesSearch,
   PatchRuleRequestBody,
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
@@ -55,17 +60,20 @@ export interface PatchRuleProps {
 export type Rule = RuleResponse;
 
 export type PaginationOptions = z.infer<typeof PaginationOptions>;
-export const PaginationOptions = z.object({
-  page: z.number().int().min(0),
-  perPage: z.number().int().min(0),
-  total: z.number().int().min(0),
-});
+export const PaginationOptions = lazySchema(() =>
+  z.object({
+    page: z.number().int().min(0),
+    perPage: z.number().int().min(0),
+    total: z.number().int().min(0),
+  })
+);
 
 export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
   signal?: AbortSignal;
+  schedulerId?: string;
 }
 
 // Rule snooze settings map keyed by rule SO's id (not ruleId) and valued by rule snooze settings
@@ -88,10 +96,12 @@ export interface RulesSnoozeSettingsBatchResponse {
 }
 
 export type SortingOptions = z.infer<typeof SortingOptions>;
-export const SortingOptions = z.object({
-  field: FindRulesSortField,
-  order: SortOrder,
-});
+export const SortingOptions = lazySchema(() =>
+  z.object({
+    field: FindRulesSortField,
+    order: SortOrder,
+  })
+);
 
 export interface FilterOptions {
   filter: string;
@@ -111,10 +121,43 @@ export interface FetchRulesResponse {
   perPage: number;
   total: number;
   data: RuleResponse[];
+  warnings?: WarningSchema[];
 }
+
+export interface FetchSearchRulesProps {
+  pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  fields?: string[];
+  filter?: GranularRulesFilter;
+  search?: GranularRulesSearch;
+  sort_field?: z.infer<typeof FindRulesSortField>;
+  sort_order?: z.infer<typeof SortOrder>;
+  aggregations?: SearchRulesAggregations;
+  search_after?: SearchRulesSearchAfterItem[];
+  gap_fill_statuses?: GapFillStatus[];
+  gaps_range_start?: string;
+  gaps_range_end?: string;
+  gap_auto_fill_scheduler_id?: string;
+  signal?: AbortSignal;
+}
+
+export type FetchSearchRulesResponse = SearchRulesResponse;
 
 export interface FetchRuleProps {
   id: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchRuleHistoryProps {
+  ruleId: string;
+  page: number;
+  perPage: number;
+  signal?: AbortSignal;
+}
+
+export interface RestoreRuleFromHistoryProps {
+  ruleId: string;
+  changeId: string;
+  revision?: number;
   signal?: AbortSignal;
 }
 

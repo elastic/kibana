@@ -13,13 +13,14 @@ interface InfraLoadingProps {
   text: string | JSX.Element;
   height: number | string;
   width: number | string;
+  'data-test-subj'?: string;
 }
 
 export class InfraLoadingPanel extends React.PureComponent<InfraLoadingProps, {}> {
   public render() {
-    const { height, text, width } = this.props;
+    const { height, text, width, 'data-test-subj': dataTestSubj } = this.props;
     return (
-      <InfraLoadingStaticPanel style={{ height, width }}>
+      <InfraLoadingStaticPanel style={{ height, width }} data-test-subj={dataTestSubj}>
         <InfraLoadingStaticContentPanel>
           <EuiPanel>
             <EuiLoadingChart size="m" />

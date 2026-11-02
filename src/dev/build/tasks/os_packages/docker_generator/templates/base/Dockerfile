@@ -12,10 +12,15 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN microdnf install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip{{#tarZstd}} zstd{{/tarZstd}}
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add curl
+RUN for iter in 1 2 3 4 5; do \
+      apk --no-cache add curl gnutar=1.35-r8{{#tarZstd}} zstd{{/tarZstd}} && break; \
+      echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
+      sleep $((iter * 10)); \
+      [ $iter -eq 5 ] && exit 1; \
+    done
 {{/wolfi}}
 
 {{#usePublicArtifact}}
@@ -27,20 +32,21 @@ RUN cd /tmp && \
   cd -
 {{/usePublicArtifact}}
 {{^usePublicArtifact}}
-COPY {{artifactTarball}} /tmp/kibana.tar.gz
+COPY {{artifactTarball}} /tmp/kibana.{{tarExt}}
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar \
-  --strip-components=1 \
-  -zxf /tmp/kibana.tar.gz
-
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
-RUN chmod -R g=u /usr/share/kibana
+# The chmod runs in the same layer as the extraction so overlayfs does not
+# copy every file up into a new layer just to change its mode.
+RUN tar \
+  --strip-components=1 \
+  {{#tarZstd}}-I zstd -xf{{/tarZstd}}{{^tarZstd}}-zxf{{/tarZstd}} /tmp/kibana.{{tarExt}} && \
+  chmod -R g=u /usr/share/kibana
 
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
@@ -92,7 +98,15 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
+# Wolfi updated glibc from 2.42 to 2.43, which changed memory allocation behavior. This flag disables the new behavior.
+ENV GLIBC_TUNABLES=glibc.malloc.hugetlb=0
+
+RUN for iter in 1 2 3 4 5; do \
+      apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}} && break; \
+      echo "apk add failed (attempt $iter/5), retrying in $((iter * 10))s..."; \
+      sleep $((iter * 10)); \
+      [ $iter -eq 5 ] && exit 1; \
+    done
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -143,7 +157,7 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 # Provide a non-root user to run the process.
 RUN groupadd --gid 1000 kibana && \
-    useradd --uid 1000 --gid 1000 -G 0 \
+    useradd --uid 1000 --gid 1000{{^serverless}} -G 0{{/serverless}} \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
 

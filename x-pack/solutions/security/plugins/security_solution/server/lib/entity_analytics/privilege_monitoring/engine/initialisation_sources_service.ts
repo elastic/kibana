@@ -6,12 +6,16 @@
  */
 
 import type { AuditLogger, Logger } from '@kbn/core/server';
-import { isEqual } from 'lodash';
 import {
   defaultMonitoringUsersIndex,
   getPrivilegedMonitorUsersIndex,
 } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
+import type {
+  MonitoringEntitySource,
+  MonitoringEntitySourceAttributes,
+  MonitoringEntitySourceType,
+} from '../../../../../common/api/entity_analytics';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { IntegrationType } from '../data_sources';
 import {
@@ -22,9 +26,11 @@ import {
   oktaLastFullSyncMarkersIndex,
 } from '../data_sources';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
-import { monitoringEntitySourceTypeName } from '../saved_objects';
+import { MANAGED_SOURCES_VERSION, monitoringEntitySourceTypeName } from '../saved_objects';
 import { createPrivMonAuditLogger } from '../audit_logger';
 import { createPrivMonLogger } from '../logger';
+
+type RequiredSource = MonitoringEntitySourceAttributes & { name: string };
 
 export type InitialisationSourcesService = ReturnType<typeof createInitialisationSourcesService>;
 
@@ -40,22 +46,33 @@ export const createInitialisationSourcesService = (deps: {
 
     try {
       // required sources to initialize privileged monitoring engine
-      const requiredInitSources = buildRequiredSources(namespace, index);
-      const existing = await deps.descriptorClient.findAll({});
+      const requiredInitSources = buildRequiredSources(namespace, index, MANAGED_SOURCES_VERSION);
+      const { total: existingTotal } = await deps.descriptorClient.list({
+        per_page: 1,
+      });
 
       // create all sources, if none exist already
-      if (existing.length === 0) {
+      if (existingTotal === 0) {
         await deps.descriptorClient.bulkCreate(requiredInitSources);
         logger.log('debug', `Created all ${requiredInitSources.length} default sources`);
         return;
       }
       const requiredIntegrationNames = requiredInitSources.map(({ name }) => name).sort();
-      const installedIntegration = await deps.descriptorClient.findByQuery(
-        buildFilterByIntegrationNames(requiredIntegrationNames)
-      );
-      const installedIntegrationsNames = installedIntegration.map(({ name }) => name).sort();
+      const { sources: installedIntegrations } = await deps.descriptorClient.listByKuery({
+        kuery: buildFilterByIntegrationNames(requiredIntegrationNames),
+        perPage: requiredIntegrationNames.length,
+      });
 
-      if (!isEqual(requiredIntegrationNames, installedIntegrationsNames)) {
+      const installedByName = new Map<string, MonitoringEntitySource>();
+      for (const source of installedIntegrations) {
+        if (source.name) {
+          installedByName.set(source.name, source);
+        }
+      }
+
+      const requiresUpsert = shouldUpsertManagedSources(requiredInitSources, installedByName);
+
+      if (requiresUpsert) {
         const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
           requiredInitSources
         );
@@ -79,6 +96,21 @@ export const createInitialisationSourcesService = (deps: {
   };
 };
 
+/**
+ * Checks if any required source is missing or if a managed source version changed.
+ * @param requiredSources
+ * @param installedByName
+ * @returns
+ */
+export const shouldUpsertManagedSources = (
+  requiredSources: RequiredSource[],
+  installedByName: Map<string, MonitoringEntitySource>
+): boolean =>
+  requiredSources.some((source) => {
+    const existing = installedByName.get(source.name);
+    return !existing || existing?.managedVersion !== source.managedVersion;
+  });
+
 const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
   if (integration === 'entityanalytics_ad') {
     return getStreamPatternFor(integration, namespace);
@@ -87,28 +119,43 @@ const getLastFullSyncMarkersIndex = (namespace: string, integration: Integration
   return oktaLastFullSyncMarkersIndex(namespace);
 };
 
-const makeIntegrationSource = (namespace: string, integration: IntegrationType) => ({
-  type: 'entity_analytics_integration' as const,
+function buildRequiredSources(
+  namespace: string,
+  indexPattern: string,
+  managedVersion: number
+): RequiredSource[] {
+  const integrationsSources = INTEGRATION_TYPES.map((integration) =>
+    buildIntegrationSource(namespace, integration, managedVersion)
+  );
+  const indexSource = buildDefaultIndexSource(namespace, indexPattern, managedVersion);
+  return [indexSource, ...integrationsSources];
+}
+
+const buildDefaultIndexSource = (
+  namespace: string,
+  name: string,
+  managedVersion: number
+): RequiredSource => ({
+  type: 'index' as const,
   managed: true,
+  managedVersion,
+  indexPattern: defaultMonitoringUsersIndex(namespace),
+  name,
+});
+
+const buildIntegrationSource = (
+  namespace: string,
+  integration: IntegrationType,
+  managedVersion: number
+): RequiredSource => ({
+  type: 'entity_analytics_integration' as MonitoringEntitySourceType,
+  managed: true,
+  managedVersion,
   indexPattern: getStreamPatternFor(integration, namespace),
   name: integrationsSourceIndex(namespace, integration),
   matchers: getMatchersFor(integration),
   integrationName: integration,
   integrations: { syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integration) },
-});
-
-function buildRequiredSources(namespace: string, indexPattern: string) {
-  const integrations = INTEGRATION_TYPES.map((integration) =>
-    makeIntegrationSource(namespace, integration)
-  );
-  return [makeDefaultIndexSource(namespace, indexPattern), ...integrations];
-}
-
-const makeDefaultIndexSource = (namespace: string, name: string) => ({
-  type: 'index' as const,
-  managed: true,
-  indexPattern: defaultMonitoringUsersIndex(namespace),
-  name,
 });
 
 const buildFilterByIntegrationNames = (requiredIntegrationNames: string[]): string => {

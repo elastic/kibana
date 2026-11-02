@@ -8,7 +8,6 @@
  */
 
 import type { FetchIndexResponse } from '../actions/fetch_indices';
-import type { BaseState } from '../state';
 import {
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,
@@ -18,11 +17,9 @@ import {
   buildRemoveAliasActions,
   versionMigrationCompleted,
   MigrationType,
-  getTempIndexName,
   createBulkIndexOperationTuple,
   hasLaterVersionAlias,
   aliasVersion,
-  getIndexTypes,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -388,27 +385,6 @@ describe('buildRemoveAliasActions', () => {
 describe('createBulkIndexOperationTuple', () => {
   it('creates the proper request body to bulk index a document', () => {
     const document = { _id: '', _source: { type: 'cases', title: 'a case' } };
-    const typeIndexMap = {
-      cases: '.kibana_cases_8.8.0_reindex_temp',
-    };
-    expect(createBulkIndexOperationTuple(document, typeIndexMap)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "index": Object {
-            "_id": "",
-            "_index": ".kibana_cases_8.8.0_reindex_temp",
-          },
-        },
-        Object {
-          "title": "a case",
-          "type": "cases",
-        },
-      ]
-    `);
-  });
-
-  it('does not include the index property if it is not specified in the typeIndexMap', () => {
-    const document = { _id: '', _source: { type: 'cases', title: 'a case' } };
     expect(createBulkIndexOperationTuple(document)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -432,9 +408,9 @@ describe('createBulkIndexOperationTuple', () => {
       _source: { type: 'cases', title: 'no originId' },
     };
     const [operation] = createBulkIndexOperationTuple(document);
-    expect(operation.index).toBeDefined();
-    expect((operation.index as any).if_seq_no).toBe(10);
-    expect((operation.index as any).if_primary_term).toBe(20);
+    expect(operation!.index).toBeDefined();
+    expect((operation!.index as any).if_seq_no).toBe(10);
+    expect((operation!.index as any).if_primary_term).toBe(20);
   });
 
   it('includes if_seq_no and if_primary_term when originId === _id', () => {
@@ -445,9 +421,9 @@ describe('createBulkIndexOperationTuple', () => {
       _source: { type: 'cases', title: 'originId equals _id', originId: 'doc2' },
     };
     const [operation] = createBulkIndexOperationTuple(document);
-    expect(operation.index).toBeDefined();
-    expect((operation.index as any).if_seq_no).toBe(11);
-    expect((operation.index as any).if_primary_term).toBe(21);
+    expect(operation!.index).toBeDefined();
+    expect((operation!.index as any).if_seq_no).toBe(11);
+    expect((operation!.index as any).if_primary_term).toBe(21);
   });
 
   it('does NOT include if_seq_no and if_primary_term when originId !== _id', () => {
@@ -458,9 +434,9 @@ describe('createBulkIndexOperationTuple', () => {
       _source: { type: 'cases', title: 'originId not equal _id', originId: 'other-id' },
     };
     const [operation] = createBulkIndexOperationTuple(document);
-    expect(operation.index).toBeDefined();
-    expect((operation.index as any).if_seq_no).toBeUndefined();
-    expect((operation.index as any).if_primary_term).toBeUndefined();
+    expect(operation!.index).toBeDefined();
+    expect((operation!.index as any).if_seq_no).toBeUndefined();
+    expect((operation!.index as any).if_primary_term).toBeUndefined();
   });
 });
 
@@ -479,24 +455,4 @@ describe('getMigrationType', () => {
       );
     }
   );
-});
-
-describe('getTempIndexName', () => {
-  it('composes a temporary index name for reindexing', () => {
-    expect(getTempIndexName('.kibana_cases', '8.8.0')).toEqual('.kibana_cases_8.8.0_reindex_temp');
-  });
-});
-
-describe('getIndexTypes', () => {
-  it("returns the list of types that belong to a migrator's index, based on its state", () => {
-    const baseState = {
-      indexPrefix: '.kibana_task_manager',
-      indexTypesMap: {
-        '.kibana': ['foo', 'bar'],
-        '.kibana_task_manager': ['task'],
-      },
-    };
-
-    expect(getIndexTypes(baseState as unknown as BaseState)).toEqual(['task']);
-  });
 });

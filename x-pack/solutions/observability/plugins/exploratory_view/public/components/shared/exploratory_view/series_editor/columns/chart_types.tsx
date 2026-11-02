@@ -89,7 +89,7 @@ export function XYChartTypesSelect({
     const LabelWithIcon = (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>{fullLabel || label}</EuiFlexItem>
       </EuiFlexGroup>

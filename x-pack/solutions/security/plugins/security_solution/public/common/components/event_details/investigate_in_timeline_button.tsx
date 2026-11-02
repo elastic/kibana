@@ -34,10 +34,18 @@ export interface InvestigateInTimelineButtonProps {
    * Whether to keep the current data view or reset it to the default.
    */
   keepDataView?: boolean;
+  /**
+   * Optional data view id to use for the timeline.
+   */
+  dataViewId?: string;
   isDisabled?: boolean;
   iconType?: IconType;
   children?: React.ReactNode;
   flush?: EuiButtonEmptyProps['flush'];
+  /**
+   * Size of the empty button. Defaults to `xs`.
+   */
+  size?: EuiButtonEmptyProps['size'];
   /**
    * Data test subject string for testing
    */
@@ -57,8 +65,10 @@ export const InvestigateInTimelineButton: FC<
   filters,
   timeRange,
   keepDataView,
+  dataViewId,
   iconType,
   flush,
+  size = 'xs',
   isDisabled,
   'data-test-subj': dataTestSubj,
   ...rest
@@ -70,8 +80,9 @@ export const InvestigateInTimelineButton: FC<
       filters,
       timeRange,
       keepDataView,
+      dataViewId,
     });
-  }, [dataProviders, filters, timeRange, keepDataView, investigateInTimeline]);
+  }, [dataProviders, filters, timeRange, keepDataView, dataViewId, investigateInTimeline]);
   const {
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
@@ -83,7 +94,7 @@ export const InvestigateInTimelineButton: FC<
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       onClick={openTimelineCallback}
       flush={flush ?? 'right'}
-      size="xs"
+      size={size}
       iconType={iconType}
       disabled={disabled}
       data-test-subj={dataTestSubj}

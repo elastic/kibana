@@ -6,7 +6,8 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { withTimeout } from '@kbn/std';
 import type { Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
@@ -22,6 +23,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { v4 as uuidv4 } from 'uuid';
+import { getInferenceConnectorById } from '../../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
@@ -29,6 +31,8 @@ import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
   getIsKnowledgeBaseInstalled,
+  getSystemPromptFromPromptId,
+  getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -107,6 +111,8 @@ export const chatCompleteRoute = (
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
+          const promptsDataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
+
           let messages;
           const existingConversationId = request.body.conversationId;
           const connectorId = request.body.connectorId;
@@ -120,10 +126,12 @@ export const chatCompleteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          const connector = connectors.length > 0 ? connectors[0] : undefined;
-          actionTypeId = connector?.actionTypeId ?? '.gen-ai';
-          const isOssModel = isOpenSourceModel(connector);
+          const inferenceConnector = await getInferenceConnectorById(
+            inference,
+            request
+          )(connectorId).catch(() => undefined);
+          actionTypeId = inferenceConnector?.type ?? '.inference';
+          const isOssModel = isOpenSourceModel(inferenceConnector);
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
           // replacements
@@ -193,18 +201,41 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const timeout = new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(
-                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
-              );
-            }, config?.responseTimeout as number);
-          }) as unknown as IKibanaResponse;
+          const responseTimeoutMs = config?.responseTimeout as number;
+          const responseDeadline = Date.now() + responseTimeoutMs;
 
           // Do not persist conversation messages if `persist = false`
           const conversationId = request.body.persist
             ? existingConversationId ?? newConversation?.id
             : undefined;
+
+          const systemPromptParts: string[] = [];
+
+          if (conversationsDataClient && promptsDataClient && existingConversationId) {
+            const conversationSystemPrompt = await getSystemPromptFromUserConversation({
+              conversationsDataClient,
+              conversationId: existingConversationId,
+              promptsDataClient,
+            });
+
+            if (conversationSystemPrompt) {
+              systemPromptParts.push(conversationSystemPrompt);
+            }
+          }
+
+          if (promptsDataClient && request.body.promptId) {
+            const requestSystemPrompt = await getSystemPromptFromPromptId({
+              promptId: request.body.promptId,
+              promptsDataClient,
+            });
+
+            if (requestSystemPrompt) {
+              systemPromptParts.push(requestSystemPrompt);
+            }
+          }
+
+          const systemPrompt =
+            systemPromptParts.length > 0 ? systemPromptParts.join('\n\n') : undefined;
 
           const contentReferencesStore = newContentReferencesStore({
             disabled: contentReferencesDisabled ?? false,
@@ -212,6 +243,7 @@ export const chatCompleteRoute = (
 
           const onLlmResponse: OnLlmResponse = async ({
             content,
+            refusal,
             traceData = {},
             isError = false,
           }): Promise<void> => {
@@ -225,6 +257,7 @@ export const chatCompleteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
@@ -233,8 +266,8 @@ export const chatCompleteRoute = (
             }
           };
 
-          return await Promise.race([
-            langChainExecute({
+          const outcome = await withTimeout({
+            promise: langChainExecute({
               abortSignal,
               isStream: request.body.isStream ?? false,
               actionsClient,
@@ -256,10 +289,15 @@ export const chatCompleteRoute = (
               telemetry,
               responseLanguage: request.body.responseLanguage,
               savedObjectsClient,
+              systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
-            timeout,
-          ]);
+            timeoutMs: Math.max(0, responseDeadline - Date.now()),
+          });
+          if (outcome.timedout) {
+            throw new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout');
+          }
+          return outcome.value;
         } catch (err) {
           const error = transformError(err as Error);
           const kbDataClient =

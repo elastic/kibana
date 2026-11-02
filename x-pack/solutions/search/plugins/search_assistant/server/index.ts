@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { SearchAssistantPlugin } from './plugin';
 
 export { config } from './config';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SearchAssistantPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { SearchAssistantPlugin } = await import('./plugin');
+  return new SearchAssistantPlugin(initializerContext);
+};
 
 export type { SearchAssistantPluginSetup, SearchAssistantPluginStart } from './types';

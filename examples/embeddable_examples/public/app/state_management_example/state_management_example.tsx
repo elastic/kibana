@@ -12,14 +12,14 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { BehaviorSubject, of } from 'rxjs';
 import type { BookApi } from '../../react_embeddables/saved_book/types';
 import { savedStateManager, unsavedStateManager } from './session_storage';
@@ -43,23 +43,15 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
           return unsavedSavedBookState ? unsavedSavedBookState : lastSavedbookState;
         }
 
-        return {
-          rawState: {},
-          references: [],
-        };
+        return {};
       },
       lastSavedStateForChild$: (childId: string) => {
         return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$ : of(undefined);
       },
       getLastSavedStateForChild: (childId: string) => {
-        return childId === BOOK_EMBEDDABLE_ID
-          ? lastSavedBookState$.value
-          : {
-              rawState: {},
-              references: [],
-            };
+        return childId === BOOK_EMBEDDABLE_ID ? lastSavedBookState$.value : {};
       },
-      setLastSavedBookState: (savedState: SerializedPanelState<BookEmbeddableState>) => {
+      setLastSavedBookState: (savedState: BookEmbeddableState) => {
         lastSavedBookState$.next(savedState);
       },
     };
@@ -87,48 +79,51 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
 
   return (
     <div>
-      <EuiCallOut>
-        <p>
-          Each embeddable manages its own state. The page is only responsible for persisting and
-          providing the last saved state or last unsaved state to the embeddable.
-        </p>
+      <KbnInfoCallout
+        title="State management example"
+        text={
+          <>
+            <p>
+              Each embeddable manages its own state. The page is only responsible for persisting and
+              providing the last saved state or last unsaved state to the embeddable.
+            </p>
 
-        <p>
-          The page renders the embeddable with <strong>EmbeddableRenderer</strong> component.
-          EmbeddableRender passes the embeddableApi to the page by calling{' '}
-          <strong>onApiAvailable</strong>.
-        </p>
+            <p>
+              The page renders the embeddable with <strong>EmbeddableRenderer</strong> component.
+              EmbeddableRender passes the embeddableApi to the page by calling{' '}
+              <strong>onApiAvailable</strong>.
+            </p>
 
-        <p>
-          The page subscribes to <strong>embeddableApi.hasUnsavedChanges</strong> to by notified of
-          unsaved changes. The page persists unsaved changes in session storage. The page provides
-          unsaved changes to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>
-          .
-        </p>
+            <p>
+              The page subscribes to <strong>embeddableApi.hasUnsavedChanges</strong> to by notified
+              of unsaved changes. The page persists unsaved changes in session storage. The page
+              provides unsaved changes to the embeddable with{' '}
+              <strong>pageApi.getSerializedStateForChild</strong>.
+            </p>
 
-        <p>
-          The page gets embeddable state by calling <strong>embeddableApi.serializeState</strong>.
-          The page persists embeddable state in session storage.
-        </p>
+            <p>
+              The page gets embeddable state by calling{' '}
+              <strong>embeddableApi.serializeState</strong>. The page persists embeddable state in
+              session storage.
+            </p>
 
-        <p>
-          The page provides unsaved state or last saved state to the embeddable with{' '}
-          <strong>pageApi.getSerializedStateForChild</strong>.
-        </p>
-
-        <p>
-          <EuiButtonEmpty
-            color={'warning'}
-            onClick={() => {
+            <p>
+              The page provides unsaved state or last saved state to the embeddable with{' '}
+              <strong>pageApi.getSerializedStateForChild</strong>.
+            </p>
+          </>
+        }
+        actionProps={{
+          primary: {
+            children: 'Reset example',
+            onClick: () => {
               savedStateManager.clear();
               unsavedStateManager.clear();
               window.location.reload();
-            }}
-          >
-            Reset example
-          </EuiButtonEmpty>
-        </p>
-      </EuiCallOut>
+            },
+          },
+        }}
+      />
 
       <EuiSpacer size="m" />
 
@@ -142,7 +137,9 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
               <EuiButtonEmpty
                 disabled={!bookApi}
                 onClick={() => {
-                  bookApi?.resetUnsavedChanges();
+                  bookApi?.applySerializedState(
+                    parentApi.getLastSavedStateForChild(BOOK_EMBEDDABLE_ID) as BookEmbeddableState
+                  );
                 }}
               >
                 Reset

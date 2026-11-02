@@ -1,18 +1,35 @@
 {
-  "lastModified": "2025-12-11T10:19:33.520Z",
-  "sha1": "94c8c7b5ebaa78824c2f7c5684d4d6a4bff4842c",
+  "sha1": "993a540ea93354623e764f5f4082caf4d1f8e259",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "01827b5a57152a5-eaaf5032684392c",
       "title": "Set up Profiling Resources and Data",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 11,
-        "column": 16
+        "line": 6,
+        "column": 1
+      }
+    },
+    {
+      "id": "c649c775b388af1-8f5df355442d174",
+      "title": "Add data page switches between the OpenTelemetry and Universal Profiling instructions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/add_data/add_data.spec.ts",
+        "line": 17,
+        "column": 20
       }
     },
     {
@@ -20,12 +37,13 @@
       "title": "Differential Functions page show gained performance when comparison data has less samples than baseline",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 13,
+        "column": 34
       }
     },
     {
@@ -33,12 +51,13 @@
       "title": "Differential Functions page show lost performance when comparison data has more samples than baseline",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 25,
+        "column": 11
       }
     },
     {
@@ -46,12 +65,41 @@
       "title": "Differential Functions page adds kql filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 110,
+        "line": 93,
         "column": 7
+      }
+    },
+    {
+      "id": "1b328b6212635cc-c818742761ad34b",
+      "title": "Flamegraph page opens flamegraph page and shows chart when WebGL is available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
+        "line": 13,
+        "column": 20
+      }
+    },
+    {
+      "id": "1b328b6212635cc-d965561cd176846",
+      "title": "Flamegraph page displays WebGL warning when WebGL is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
+        "line": 19,
+        "column": 8
       }
     },
     {
@@ -59,12 +107,13 @@
       "title": "Functions page opens /topN page when navigating to /functions page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 13,
+        "column": 20
       }
     },
     {
@@ -72,12 +121,13 @@
       "title": "Functions page validates and interacts with TopN functions table and its content and actions",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 15,
+        "column": 28
       }
     },
     {
@@ -85,12 +135,13 @@
       "title": "Functions page shows function details when action button is clicked on the table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 39,
+        "column": 24
       }
     },
     {
@@ -98,12 +149,13 @@
       "title": "Functions page adds kql filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 147,
+        "column": 24
       }
     },
     {
@@ -111,12 +163,13 @@
       "title": "Functions page accesses settings page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 115,
-        "column": 7
+        "line": 163,
+        "column": 24
       }
     },
     {
@@ -124,12 +177,13 @@
       "title": "Functions page navigates to differential functions tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 125,
-        "column": 7
+        "line": 170,
+        "column": 24
       }
     },
     {
@@ -137,12 +191,13 @@
       "title": "Functions page accesses frame information window",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 140,
-        "column": 7
+        "line": 116,
+        "column": 56
       }
     },
     {
@@ -150,12 +205,13 @@
       "title": "Functions page accesses settings modal and updates CO2 settings",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 151,
-        "column": 7
+        "line": 191,
+        "column": 24
       }
     },
     {
@@ -163,12 +219,13 @@
       "title": "Home page opens Profiling UI when user has privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 14,
+        "column": 25
       }
     },
     {
@@ -176,12 +233,41 @@
       "title": "Home page navigates through the tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 19,
+        "column": 5
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-a4f4995d739e7c8",
+      "title": "Profiling schema selector keeps the selected schema while moving across the profiling sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 22,
+        "column": 8
+      }
+    },
+    {
+      "id": "24e91bc4697a2cc-bd5e314c3c11812",
+      "title": "Profiling schema selector recovers from a selected schema without data by selecting another schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
+        "line": 74,
+        "column": 14
       }
     },
     {
@@ -189,12 +275,13 @@
       "title": "Settings page opens setting page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/settings/settings.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 18,
+        "column": 8
       }
     },
     {
@@ -202,12 +289,13 @@
       "title": "Settings page updates values",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/settings/settings.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 32,
+        "column": 11
       }
     },
     {
@@ -215,12 +303,27 @@
       "title": "Storage explorer page loads storage explorer with real data",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 15,
+        "column": 20
+      }
+    },
+    {
+      "id": "98843aa33e8d554-ae6e48a8d1f4eff",
+      "title": "Storage explorer page remembers that the OpenTelemetry callout was dismissed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
+        "line": 17,
+        "column": 28
       }
     },
     {
@@ -228,12 +331,13 @@
       "title": "Storage explorer page Host agent breakdown tab displays host agent details",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 34,
+        "column": 18
       }
     },
     {
@@ -241,12 +345,13 @@
       "title": "Storage explorer page Summary stats tab will still load with kuery",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 51,
-        "column": 7
+        "line": 39,
+        "column": 13
       }
     },
     {
@@ -254,12 +359,27 @@
       "title": "Storage explorer page Data breakdown tab displays correct values per index",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 45,
+        "column": 11
+      }
+    },
+    {
+      "id": "12b5169bc361214-95d4bf5100c0857",
+      "title": "Reset profiling state after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

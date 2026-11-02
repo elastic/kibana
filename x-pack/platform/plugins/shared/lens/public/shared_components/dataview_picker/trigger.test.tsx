@@ -75,7 +75,7 @@ describe('TriggerButton', () => {
           dataTestSubj="test-id"
           extraIcons={[
             {
-              component: <EuiIcon type={'filterIgnore'} color={'red'} />,
+              component: <EuiIcon type={'filterIgnore'} color={'red'} aria-hidden={true} />,
               tooltipValue: 'Ignore global filters',
               'data-test-subj': 'ignore-global-filters',
             },
@@ -94,7 +94,7 @@ describe('TriggerButton', () => {
           label={'Trigger label'}
           dataTestSubj="test-id"
           extraIcons={indexes.map((index) => ({
-            component: <EuiIcon type={'filterIgnore'} color={'red'} />,
+            component: <EuiIcon type={'filterIgnore'} color={'red'} aria-hidden={true} />,
             tooltipValue: 'Ignore global filters',
             'data-test-subj': `ignore-global-filters-${index}`,
           }))}
@@ -114,7 +114,7 @@ describe('TriggerButton', () => {
           dataTestSubj="test-id"
           extraIcons={[
             {
-              component: <EuiIcon type={'filterIgnore'} color={'red'} />,
+              component: <EuiIcon type={'filterIgnore'} color={'red'} aria-hidden={true} />,
               tooltipValue: 'Ignore global filters',
               'data-test-subj': 'ignore-global-filters',
               value: 'Ignore filters',

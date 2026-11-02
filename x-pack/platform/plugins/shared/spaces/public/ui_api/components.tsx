@@ -16,6 +16,7 @@ import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
 import { getEmbeddableLegacyUrlConflict, getLegacyUrlConflict } from '../legacy_urls';
 import type { PluginsStart } from '../plugin';
 import { getShareToSpaceFlyoutComponent } from '../share_saved_objects_to_space';
+import { getSolutionViewSwitchCalloutComponent } from '../solution_view_switch';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
@@ -60,5 +61,8 @@ export const getComponents = ({
     ),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
+    getSolutionViewSwitchCallout: wrapLazy(() =>
+      getSolutionViewSwitchCalloutComponent({ spacesManager, getStartServices })
+    ),
   };
 };

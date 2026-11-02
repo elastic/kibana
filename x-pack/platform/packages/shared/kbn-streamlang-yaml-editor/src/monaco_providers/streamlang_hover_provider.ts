@@ -23,7 +23,8 @@ export class StreamlangHoverProvider implements monaco.languages.HoverProvider {
 
   async provideHover(
     model: monaco.editor.ITextModel,
-    position: monaco.Position
+    position: monaco.Position,
+    token: monaco.CancellationToken
   ): Promise<monaco.languages.Hover | null> {
     try {
       const content = model.getValue();
@@ -43,7 +44,7 @@ export class StreamlangHoverProvider implements monaco.languages.HoverProvider {
 
       // Generate hover content
       const hoverContent = await this.actionHandler.generateHoverContent(context);
-      if (!hoverContent) {
+      if (!hoverContent || model.isDisposed() || token.isCancellationRequested) {
         return null;
       }
 

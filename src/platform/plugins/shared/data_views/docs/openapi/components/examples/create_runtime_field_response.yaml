@@ -1,4 +1,5 @@
 summary: The API returns created runtime field object array and updated data view object.
+description: The response includes the newly created runtime field as an array and the full updated data view object.
 value: 
   {
     "data_view": {...},

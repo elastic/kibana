@@ -83,7 +83,7 @@ describe('UserRepresentation', () => {
 
     await userEvent.click(screen.getByTestId('remove-button'));
 
-    expect(onRemoveItem).toBeCalled();
+    expect(onRemoveItem).toHaveBeenCalled();
   });
 
   it('sets the dataTestSubjPrefix correctly', () => {

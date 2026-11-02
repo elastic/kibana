@@ -15,7 +15,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const comboBox = getService('comboBox');
 
   return {
@@ -346,16 +346,32 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async clickHostsAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesHostComboBoxItem');
       await testSubjects.click('anomaliesHostComboBoxItem');
     },
     async clickK8sAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesK8sComboBoxItem');
       await testSubjects.click('anomaliesK8sComboBoxItem');
     },
     async findAnomalies() {
       return testSubjects.findAll('anomalyRow');
     },
     async setAnomaliesDate(date: string) {
+      if (await pageObjects.timePicker.isNewDateRangePicker()) {
+        // New DateRangePicker: open custom range panel and set the start date,
+        // leaving the existing end date untouched.
+        await testSubjects.click('dateRangePickerControlButton');
+        await testSubjects.click('dateRangePickerCustomRangeNavItem');
+        await testSubjects.existOrFail('dateRangePickerCustomRangePanel', { timeout: 5000 });
+        await testSubjects.click('dateRangePickerStartAbsoluteTab');
+        const startInput = await testSubjects.find('dateRangePickerStartAbsoluteInput');
+        await startInput.clearValueWithKeyboard();
+        await startInput.type(date);
+        await testSubjects.click('dateRangePickerCustomRangeApplyButton');
+        await testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
+        return;
+      }
       await testSubjects.click('superDatePickerShowDatesButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
@@ -397,9 +413,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async dismissDatePickerTooltip() {
       const datePicker = await this.getDatePickerInput();
       return retry.try(async () => {
-        const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-          timeout: 3000,
-        });
+        const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`);
 
         if (isTooltipOpen) {
           await datePicker.pressKeys(browser.keys.ESCAPE);
@@ -486,10 +500,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.find('infraSuggestionsPanel');
     },
 
-    async ensureInventoryFeedbackLinkIsVisible() {
-      await testSubjects.existOrFail('infraInventoryFeedbackLink');
-    },
-
     async ensureKubernetesTourIsVisible() {
       const container = await testSubjects.find('infra-kubernetesTour-text');
       const containerText = await container.getVisibleText();
@@ -500,16 +510,31 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
     },
 
-    async ensureKubernetesFeedbackLinkIsVisible() {
-      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
-    },
-
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
     },
 
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    /**
+     * Closes the host/asset details flyout using Escape (EuiFlyout closes on Escape).
+     * Retries until the flyout is closed or timeout, then waits for the overlay mask
+     * to disappear so the next click (e.g. open flyout button) is not intercepted.
+     */
+    async closeFlyoutWithEscape() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton'));
+        if (!flyoutClosed) {
+          throw new Error('Flyout still open');
+        }
+      });
+      await retry.waitFor('flyout overlay mask to disappear', async () => {
+        const overlays = await find.allByCssSelector('.euiOverlayMask', 1000);
+        return overlays.length === 0;
+      });
     },
 
     async clickCustomMetricDropdown() {

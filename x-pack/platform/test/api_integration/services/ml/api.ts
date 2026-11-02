@@ -11,21 +11,22 @@ import type { ProvidedType } from '@kbn/test';
 import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
 import type { Calendar } from '@kbn/ml-plugin/server/models/calendar';
-import type { Annotation } from '@kbn/ml-plugin/common/types/annotations';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
 import {
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '@kbn/ml-plugin/common/constants/index_patterns';
-import type { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
+import type { PutTrainedModelConfig } from '@kbn/ml-common-types/trained_models';
 import { getCommonRequestHeader } from './common_api';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -858,10 +859,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         await this.deleteDatafeedES(datafeedId);
       }
 
-      const { body, status } = await esSupertest
-        .delete(`/_ml/anomaly_detectors/${jobId}`)
-        .query({ force: true });
-      this.assertResponseStatusCode(200, status, body);
+      await retry.tryForTime(30 * 1000, async () => {
+        const { body, status } = await esSupertest
+          .delete(`/_ml/anomaly_detectors/${jobId}`)
+          .query({ force: true });
+        this.assertResponseStatusCode(200, status, body);
+      });
 
       await this.waitForAnomalyDetectionJobNotToExist(jobId);
       log.debug('> AD job deleted.');
@@ -939,10 +942,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteDatafeedES(datafeedId: string) {
       log.debug(`Deleting datafeed with id '${datafeedId}' ...`);
-      const { body, status } = await esSupertest
-        .delete(`/_ml/datafeeds/${datafeedId}`)
-        .query({ force: true });
-      this.assertResponseStatusCode(200, status, body);
+      await retry.tryForTime(30 * 1000, async () => {
+        const { body, status } = await esSupertest
+          .delete(`/_ml/datafeeds/${datafeedId}`)
+          .query({ force: true });
+        // Force-deleting a sibling job can remove a shared results index mid-cleanup,
+        // making ES answer 404 even though the datafeed itself is gone.
+        if (status === 404) {
+          const { status: getStatus } = await esSupertest.get(`/_ml/datafeeds/${datafeedId}`);
+          if (getStatus === 404) {
+            return;
+          }
+        }
+        this.assertResponseStatusCode(200, status, body);
+      });
 
       await this.waitForDatafeedToNotExist(datafeedId);
       log.debug('> Datafeed deleted.');

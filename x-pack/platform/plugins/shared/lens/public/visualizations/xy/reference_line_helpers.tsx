@@ -15,7 +15,7 @@ import type { DatasourceLayers, FramePublicAPI, Visualization } from '@kbn/lens-
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type {
-  XYState,
+  XYVisualizationState,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   YAxisMode,
@@ -31,6 +31,7 @@ import {
 } from './visualization_helpers';
 import { generateId } from '../../id_generator';
 import { defaultReferenceLineColor } from './color_assignment';
+import { isEsqlChart } from '../../utils';
 
 export interface ReferenceLineBase {
   label: 'x' | 'yRight' | 'yLeft';
@@ -43,7 +44,7 @@ export interface ReferenceLineBase {
  */
 export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
   referenceLayers: T[],
-  state: XYState | undefined,
+  state: XYVisualizationState | undefined,
   datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): Array<T & { valid: boolean }> {
@@ -63,7 +64,7 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
  */
 export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   referenceLayers: T[],
-  state: XYState | undefined,
+  state: XYVisualizationState | undefined,
   datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): T[] {
@@ -262,7 +263,7 @@ function computeStaticValueForGroup(
 }
 
 export const getReferenceSupportedLayer = (
-  state?: XYState,
+  state?: XYVisualizationState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
 ) => {
   const referenceLineGroupIds = [
@@ -333,7 +334,7 @@ export const getReferenceSupportedLayer = (
   };
 };
 
-export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
+export const setReferenceDimension: Visualization<XYVisualizationState>['setDimension'] = ({
   prevState,
   layerId,
   columnId,
@@ -404,7 +405,7 @@ export const getReferenceConfiguration = ({
   layer,
   sortedAccessors,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
@@ -450,6 +451,10 @@ export const getReferenceConfiguration = ({
     frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
+  // Static reference layers reuse the form-based datasource without exposing DSL operations.
+  const staticValueOnly =
+    isEsqlChart(frame.datasourceLayers) &&
+    !frame.datasourceLayers[layer.layerId]?.isTextBasedLanguage();
   return {
     // Each reference lines layer panel will have sections for each available axis
     // (horizontal axis, vertical axis left, vertical axis right).
@@ -472,6 +477,7 @@ export const getReferenceConfiguration = ({
       requiredMinDimensionCount: 0,
       enableDimensionEditor: true,
       supportStaticValue: true,
+      staticValueOnly,
       paramEditorCustomProps: {
         labels: [
           i18n.translate('xpack.lens.indexPattern.staticValue.label', {

@@ -22,12 +22,13 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import { DOCUMENT_FIELD_NAME, LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
-  XYState,
+  XYVisualizationState,
   DateHistogramIndexPatternColumn,
   DatatableVisualizationState,
   HeatmapVisualizationState,
@@ -41,6 +42,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { StartDependencies } from './plugin';
 import type { AllOverrides, LensAttributesByType } from './controls';
 import { AttributesMenu, OverridesMenu, PanelMenu } from './controls';
@@ -177,12 +179,12 @@ function getBaseAttributes(
 function getLensAttributesXY(
   defaultIndexPattern: DataView,
   fields: FieldsMap,
-  chartType: XYState['preferredSeriesType'],
+  chartType: XYVisualizationState['preferredSeriesType'],
   color: string
 ): LensAttributesByType<'lnsXY'> {
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields);
 
-  const xyConfig: XYState = {
+  const xyConfig: XYVisualizationState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
     fittingFunction: 'None',
     gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -586,7 +588,7 @@ export const App = (props: {
                             props.plugins.lens.navigateToPrefilledEditor(
                               {
                                 id: '',
-                                timeRange: time,
+                                time_range: time,
                                 attributes: currentAttributes,
                               },
                               {

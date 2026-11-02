@@ -21,8 +21,8 @@ describe('defend insights data client helpers', () => {
         ids: ['insight-id1', 'insight-id2'],
         endpoint_ids: ['endpoint-id1', 'endpoint-id2'],
         connector_id: 'connector-id1',
-        type: DefendInsightType.Enum.incompatible_antivirus,
-        status: DefendInsightStatus.Enum.succeeded,
+        type: DefendInsightType.enum.incompatible_antivirus,
+        status: DefendInsightStatus.enum.succeeded,
       };
     }
 

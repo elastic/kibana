@@ -32,6 +32,12 @@ jest.mock('./report_attack_discovery_success_telemetry', () => ({
   ...jest.requireActual('./report_attack_discovery_success_telemetry'),
   reportAttackDiscoverySuccessTelemetry: jest.fn(),
 }));
+jest.mock('./filter_hallucinated_alerts', () => ({
+  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
+    // By default, pass through all discoveries (no filtering)
+    return Promise.resolve(attackDiscoveries);
+  }),
+}));
 jest.mock('../../../lib/attack_discovery/persistence/deduplication', () => ({
   deduplicateAttackDiscoveries: jest
     .fn()
@@ -213,7 +219,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         withReplacements: false,
       });
 
-      expect(handleGraphError).not.toBeCalled();
+      expect(handleGraphError).not.toHaveBeenCalled();
     });
 
     it('should return valid results', async () => {
@@ -296,6 +302,32 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         );
       }
     );
+
+    it('calls filterHallucinatedAlerts with the expected parameters', async () => {
+      const { filterHallucinatedAlerts } = jest.requireMock('./filter_hallucinated_alerts');
+      const executionUuid = 'test-1';
+
+      await generateAndUpdateAttackDiscoveries({
+        actionsClient: mockActionsClient,
+        authenticatedUser: mockAuthenticatedUser,
+        config: mockConfig,
+        dataClient: mockDataClient,
+        enableFieldRendering: true,
+        esClient: mockEsClient,
+        executionUuid,
+        logger: mockLogger,
+        savedObjectsClient: mockSavedObjectsClient,
+        telemetry: mockTelemetry,
+        withReplacements: false,
+      });
+
+      expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
+        alertsIndexPattern: mockConfig.alertsIndexPattern,
+        attackDiscoveries: mockAttackDiscoveries,
+        esClient: mockEsClient,
+        logger: mockLogger,
+      });
+    });
   });
 
   describe('when `generateAttackDiscoveries` throws an error', () => {
@@ -345,7 +377,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         withReplacements: false,
       });
 
-      expect(reportAttackDiscoverySuccessTelemetry).not.toBeCalled();
+      expect(reportAttackDiscoverySuccessTelemetry).not.toHaveBeenCalled();
     });
 
     it('should return an error', async () => {
@@ -393,7 +425,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         withReplacements: false,
       });
 
-      expect(handleGraphError).not.toBeCalled();
+      expect(handleGraphError).not.toHaveBeenCalled();
     });
 
     it('should return valid results', async () => {

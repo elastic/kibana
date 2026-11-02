@@ -9,7 +9,7 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
-import { retryTransientEsErrors } from '../utils/retry';
+import { ignoreAlreadyExistsAfterAmbiguousFailure, retryTransientEsErrors } from '../utils/retry';
 import type { TransformGenerator } from './transform_generators';
 
 type TransformId = string;
@@ -29,29 +29,43 @@ export class DefaultTransformManager implements TransformManager {
     private generators: Record<IndicatorTypes, TransformGenerator>,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
-    private abortController: AbortController = new AbortController()
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.debug(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      this.logger.debug('No transform generator found for indicator type.', {
+        service: { name: 'transform_manager' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'unsupported_indicator_type',
+        },
+      });
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
     const transformParams = await generator.getTransformParams(slo);
     try {
       await retryTransientEsErrors(
-        () =>
+        ignoreAlreadyExistsAfterAmbiguousFailure(() =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
-            signal: this.abortController.signal,
-          }),
+            signal: this.signal,
+          })
+        ),
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(
-        `Cannot create SLO transform for indicator type [${slo.indicator.type}]. ${err}`
-      );
+      this.logger.warn('Cannot install SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'transform_install_failed',
+        },
+        error: err,
+      });
       if (err.meta?.body?.error?.type === 'security_exception') {
         throw new SecurityException(err.meta.body.error.reason);
       }
@@ -78,12 +92,16 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(`Cannot preview SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot preview SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_preview_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -94,13 +112,17 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
-            { ignore: [409], signal: this.abortController.signal }
+            { ignore: [409], signal: this.signal }
           ),
         { logger: this.logger }
       );
       await this.scheduleNowTransform(transformId);
     } catch (err) {
-      this.logger.debug(`Cannot start SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot start SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_start_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -116,12 +138,16 @@ export class DefaultTransformManager implements TransformManager {
               force: true,
               allow_no_match: true,
             },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(`Cannot stop SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot stop SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_stop_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -132,12 +158,16 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
-            { ignore: [404], signal: this.abortController.signal }
+            { ignore: [404], signal: this.signal }
           ),
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(`Cannot delete SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot uninstall SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_uninstall_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -148,7 +178,7 @@ export class DefaultTransformManager implements TransformManager {
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
             { transform_id: transformId },
-            { signal: this.abortController.signal }
+            { signal: this.signal }
           ),
         { logger: this.logger }
       );
@@ -163,19 +193,27 @@ export class DefaultTransformManager implements TransformManager {
         return undefined;
       }
 
-      this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
+      this.logger.warn('Cannot retrieve SLO transform version.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_get_version_failed' },
+        error: err,
+      });
       throw err;
     }
   }
 
   private async scheduleNowTransform(transformId: TransformId) {
     this.scopedClusterClient.asSecondaryAuthUser.transform
-      .scheduleNowTransform({ transform_id: transformId }, { signal: this.abortController.signal })
+      .scheduleNowTransform({ transform_id: transformId }, { signal: this.signal })
       .then(() => {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
       })
       .catch((e) => {
-        this.logger.debug(`Cannot schedule now SLO transform [${transformId}]. ${e}`);
+        this.logger.warn('Cannot schedule now SLO transform.', {
+          service: { name: 'transform_manager' },
+          labels: { transform_id: transformId, error_type: 'transform_schedule_failed' },
+          error: e,
+        });
       });
   }
 }

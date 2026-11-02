@@ -84,7 +84,7 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
                   defaultMessage="Documentation"
                 />
                 &nbsp;
-                <EuiIcon type="link" />
+                <EuiIcon type="link" aria-hidden={true} />
               </EuiLink>
             </span>
           }

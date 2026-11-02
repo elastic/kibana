@@ -64,6 +64,31 @@ describe('useMonitorDetailLocator', () => {
     expect(result.current).toBe(mockUrl);
   });
 
+  it('should pass `remoteName` through to the locator when provided', async () => {
+    const mockUrl = 'http://example.com/monitor?remoteName=remote-1';
+    mockLocator.getRedirectUrl.mockReturnValue(mockUrl);
+
+    const { result } = renderHook(() =>
+      useMonitorDetailLocator({
+        configId: 'test-config',
+        locationId: 'test-location',
+        remoteName: 'remote-1',
+      })
+    );
+
+    await waitFor(() => {
+      expect(mockLocator.getRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          configId: 'test-config',
+          locationId: 'test-location',
+          remoteName: 'remote-1',
+        })
+      );
+    });
+
+    expect(result.current).toBe(mockUrl);
+  });
+
   it('should return undefined if locator is not available', async () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {

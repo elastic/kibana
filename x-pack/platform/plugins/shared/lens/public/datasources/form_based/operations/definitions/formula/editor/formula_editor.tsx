@@ -103,7 +103,7 @@ export function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
-  unifiedSearch,
+  kql,
   dataViews,
   toggleFullscreen,
   isFullscreen,
@@ -457,7 +457,7 @@ export function FormulaEditor({
             context,
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
-            unifiedSearch,
+            kql,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
             timefilter: data.query.timefilter.timefilter,
@@ -470,7 +470,7 @@ export function FormulaEditor({
           context,
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
-          unifiedSearch,
+          kql,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
           timefilter: data.query.timefilter.timefilter,
@@ -489,7 +489,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
+    [indexPattern, visibleOperationsMap, kql, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(
@@ -657,7 +657,7 @@ export function FormulaEditor({
       minimap: { enabled: false },
       wordWrap: isWordWrapped ? 'on' : 'off',
       // Disable suggestions that appear when we don't provide a default suggestion
-      wordBasedSuggestions: false,
+      wordBasedSuggestions: 'off',
       autoIndent: 'brackets',
       wrappingIndent: 'none',
       dimension: { width: 320, height: 200 },
@@ -670,21 +670,22 @@ export function FormulaEditor({
 
   useEffect(() => {
     // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
-    const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+    // Note: Don't destructure dispose - Monaco 0.54.0 requires the full disposable object
+    const disposable1 = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
       triggerCharacters: ['.', '(', '=', ' ', ':', `'`],
       provideCompletionItems,
     });
-    const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
+    const disposable2 = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
       signatureHelpTriggerCharacters: ['(', '='],
       provideSignatureHelp,
     });
-    const { dispose: dispose3 } = monaco.languages.registerHoverProvider(LANGUAGE_ID, {
+    const disposable3 = monaco.languages.registerHoverProvider(LANGUAGE_ID, {
       provideHover,
     });
     return () => {
-      dispose1();
-      dispose2();
-      dispose3();
+      disposable1.dispose();
+      disposable2.dispose();
+      disposable3.dispose();
     };
   }, [provideCompletionItems, provideSignatureHelp, provideHover]);
 
@@ -801,7 +802,7 @@ export function FormulaEditor({
             </EuiFlexGroup>
           </div>
 
-          <div className="lnsFormula__editorContent">
+          <div className="lnsFormula__editorContent" data-test-subj="lnsFormulaEditor">
             <CodeEditor
               {...codeEditorOptions}
               transparentBackground={true}
@@ -853,7 +854,6 @@ export function FormulaEditor({
                             defaultMessage: 'Show function reference',
                           })
                     }
-                    delay="long"
                     position="top"
                   >
                     <EuiLink
@@ -865,8 +865,11 @@ export function FormulaEditor({
                       color="text"
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
-                      <EuiIcon type="documentation" />
-                      <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
+                      <EuiIcon type="documentation" aria-hidden={true} />
+                      <EuiIcon
+                        type={isHelpOpen ? 'chevronSingleDown' : 'chevronSingleUp'}
+                        aria-hidden={true}
+                      />
                     </EuiLink>
                   </EuiToolTip>
                 ) : (
@@ -893,6 +896,12 @@ export function FormulaEditor({
               {errorCount || warningCount ? (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.lens.formula.editorWarningsPopoverAriaLabel',
+                      {
+                        defaultMessage: 'Formula errors and warnings',
+                      }
+                    )}
                     ownFocus={false}
                     isOpen={isWarningOpen}
                     closePopover={() => setIsWarningOpen(false)}

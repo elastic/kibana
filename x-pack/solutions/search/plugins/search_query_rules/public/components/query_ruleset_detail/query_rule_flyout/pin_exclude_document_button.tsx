@@ -23,7 +23,7 @@ export const ExcludePinDocumentButton: React.FC<ExcludePinDocumentButtonProps> =
   return (
     <EuiButton
       data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       color={documentCount === 0 ? 'primary' : 'text'}
       size="s"
       onClick={addNewAction}
@@ -32,23 +32,23 @@ export const ExcludePinDocumentButton: React.FC<ExcludePinDocumentButtonProps> =
       {pinType === 'pinned' ? (
         documentCount === 0 ? (
           <FormattedMessage
-            id="xpack.search.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButton"
+            id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButton"
             defaultMessage="Pin document"
           />
         ) : (
           <FormattedMessage
-            id="xpack.search.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButtonMore"
+            id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButtonMore"
             defaultMessage="Pin 1 more document"
           />
         )
       ) : documentCount === 0 ? (
         <FormattedMessage
-          id="xpack.search.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButton"
+          id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButton"
           defaultMessage="Exclude document"
         />
       ) : (
         <FormattedMessage
-          id="xpack.search.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButtonMore"
+          id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButtonMore"
           defaultMessage="Exclude 1 more document"
         />
       )}

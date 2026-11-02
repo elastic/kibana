@@ -20,7 +20,6 @@ import {
   INSTALL_PREBUILT_RULE_PREVIEW,
   RULES_MANAGEMENT_TABLE,
 } from '../../../../../screens/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
 import {
   installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
@@ -52,7 +51,10 @@ import {
   closePrebuiltRuleInstallFlyout,
   openPrebuiltRuleInstallFlyoutFor,
 } from '../../../../../tasks/prebuilt_rules_preview';
-import { visitAddRulesPage } from '../../../../../tasks/rules_management';
+import {
+  navigateBackToRulesManagement,
+  visitAddRulesPage,
+} from '../../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deleteDataView,
@@ -109,7 +111,7 @@ describe(
         assertRuleInstallationSuccessToastShown([PREBUILT_RULE_ASSET]);
 
         // Go back to rules table and assert that the rules are installed
-        cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
+        navigateBackToRulesManagement();
         expectRulesInTable(RULES_MANAGEMENT_TABLE, [PREBUILT_RULE_NAME]);
 
         clickAddElasticRulesButton();
@@ -526,7 +528,7 @@ const MACHINE_LEARNING_PREBUILT_RULE_ASSET = omit(
     ...commonProperties,
     type: 'machine_learning',
     anomaly_threshold: 65,
-    machine_learning_job_id: ['auth_high_count_logon_events', 'auth_high_count_logon_fails'],
+    machine_learning_job_id: ['auth_high_count_logon_events_ea', 'auth_high_count_logon_fails_ea'],
     alert_suppression: {
       group_by: ['host.name'],
       duration: { unit: 'm', value: 5 },

@@ -120,6 +120,7 @@ export const applicationUsageSchema = {
   // OSS
   dashboards: commonSchema,
   dev_tools: commonSchema,
+  digital_experience: commonSchema,
   discover: commonSchema,
   home: commonSchema,
   kibana: commonSchema, // It's a forward app so we'll likely never report it
@@ -130,19 +131,25 @@ export const applicationUsageSchema = {
   status: commonSchema,
   kibanaOverview: commonSchema,
   r: commonSchema,
+  workflows: commonSchema,
 
   // X-Pack
   agent_builder: commonSchema,
   apm: commonSchema,
+  automaticImport: commonSchema,
   canvas: commonSchema,
+  clientApps: commonSchema,
   cloud_connect: commonSchema,
+  context_engine: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
-  searchInferenceEndpoints: commonSchema,
+  /**
+   * @deprecated legacy key retained because persisted application usage totals for the removed Playground app are never expired
+   */
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
-  elasticsearchIndices: commonSchema,
+  elasticRamen: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
@@ -154,34 +161,45 @@ export const applicationUsageSchema = {
   metrics: commonSchema,
   fleet: commonSchema,
   integrations: commonSchema,
+  ingestHub: commonSchema,
   ingestManager: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
+  nightshift: commonSchema,
   'observability-log-explorer': commonSchema,
   'observability-logs-explorer': commonSchema,
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
+  observabilityAlerting: commonSchema,
+  onboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,
   profiling: commonSchema,
   slo: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
+  rules: commonSchema,
   security_access_agreement: commonSchema,
   security_capture_url: commonSchema, // It's a forward app so we'll likely never report it
   security_logged_out: commonSchema,
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
+  security_reset_session: commonSchema,
+  security_unauthenticated: commonSchema,
   securitySolutionUI: commonSchema,
   /**
    * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
    * @removeBy 9.0.0
    */
   siem: commonSchema,
+  /**
+   * @deprecated legacy key retained because persisted application usage totals for the removed Significant Events app are never expired
+   */
+  significantEvents: commonSchema,
   space_selector: commonSchema,
   streams: commonSchema,
   uptime: commonSchema,

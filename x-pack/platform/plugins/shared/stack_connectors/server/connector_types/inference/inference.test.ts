@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { InferenceConnector } from './inference';
+import { text as streamToString } from 'node:stream/consumers';
+import { errors } from '@elastic/elasticsearch';
+import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
+import { InferenceConnector, type InferenceConnectorDependencies } from './inference';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -13,7 +16,7 @@ import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
-
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 
@@ -72,7 +75,7 @@ describe('InferenceConnector', () => {
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         telemetryMetadata: { pluginId: 'security_ai_assistant' },
       });
-      expect(mockEsClient.transport.request).toBeCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           body: {
@@ -86,12 +89,16 @@ describe('InferenceConnector', () => {
           },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
+          signal: undefined,
           headers: {
             'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+            'accept-encoding': 'identity',
           },
         }
       );
@@ -107,6 +114,24 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletion({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
     });
   });
 
@@ -183,6 +208,7 @@ describe('InferenceConnector', () => {
 
     const services = actionsMock.createServices();
     services.scopedClusterClient = mockEsClient;
+    const textEmbeddingLogger = loggingSystemMock.createLogger();
     const connectorTextEmbedding = new InferenceConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
@@ -196,7 +222,7 @@ describe('InferenceConnector', () => {
         taskTypeConfig: {},
       },
       secrets: { providerSecrets: {} },
-      logger: loggingSystemMock.createLogger(),
+      logger: textEmbeddingLogger,
       services,
     });
 
@@ -216,7 +242,7 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponse.text_embedding);
+      expect(response).toEqual([]);
     });
 
     it('errors during API calls are properly handled', async () => {
@@ -229,6 +255,29 @@ describe('InferenceConnector', () => {
           inputType: 'ingest',
         })
       ).rejects.toThrow('API Error');
+    });
+
+    it('redacts upstream credentials before they reach the server log', async () => {
+      const secret = 'AKIAIOSFODNN7EXAMPLE';
+      jest.mocked(textEmbeddingLogger.error).mockClear();
+      mockEsClient.inference.inference.mockRejectedValueOnce(
+        new Error(`upstream rejected request signed with ${secret}`)
+      );
+
+      await expect(
+        connectorTextEmbedding.performApiTextEmbedding({
+          input: 'Hello world',
+          inputType: 'ingest',
+        })
+      ).rejects.toThrow();
+
+      const logged = jest
+        .mocked(textEmbeddingLogger.error)
+        .mock.calls.map(([message]) => String(message))
+        .join('\n');
+      expect(logged).toContain('error perform inference endpoint API');
+      expect(logged).toContain('[redacted]');
+      expect(logged).not.toContain(secret);
     });
   });
 
@@ -284,7 +333,7 @@ describe('InferenceConnector', () => {
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
       });
-      expect(mockEsClient.transport.request).toBeCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           body: {
@@ -298,10 +347,16 @@ describe('InferenceConnector', () => {
           },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'inference',
+            'accept-encoding': 'identity',
+          },
         }
       );
     });
@@ -323,11 +378,17 @@ describe('InferenceConnector', () => {
           body: { messages: [{ content: 'Hello world', role: 'user' }], n: undefined },
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
+          querystring: { timeout: '180s' },
         },
         {
           asStream: true,
           meta: true,
+          requestTimeout: 180_000,
           signal,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'inference',
+            'accept-encoding': 'identity',
+          },
         }
       );
     });
@@ -343,6 +404,43 @@ describe('InferenceConnector', () => {
       ).rejects.toThrow('API Error');
     });
 
+    it('marks 429 errors as user errors', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"insufficient_quota\",\"message\":\"Received a rate limit status code for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Error message: [You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.]\",\"type\":\"insufficient_quota\"}}`,
+        ]),
+        statusCode: 400,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      }
+    });
+
+    it('keeps a 429 without the quota marker framework-side', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"rate_limit_exceeded\",\"message\":\"Rate limit reached for request from inference entity id [openai-chat_completion-1p3u6iyzmes] status [429]. Please try again later.\"}}`,
+        ]),
+        statusCode: 429,
+      });
+
+      try {
+        await connector.performApiUnifiedCompletionStream({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        });
+        throw new Error('expected the 429 to be thrown');
+      } catch (e) {
+        expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+      }
+    });
+
     it('responds with a readable stream', async () => {
       const stream = Readable.from([
         `data: {"id":"chatcmpl-AbLKRuRMZCAcMMQdl96KMTUgAfZNg","choices":[{"delta":{"content":" you"},"index":0}],"model":"gpt-4o-2024-08-06","object":"chat.completion.chunk"}\n\n`,
@@ -356,6 +454,202 @@ describe('InferenceConnector', () => {
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
       });
       expect(response instanceof Readable).toEqual(true);
+    });
+  });
+
+  describe('streaming preference', () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asCurrentUser;
+    const mockInternalEsClient = elasticsearchClientMock.createClusterClient().asInternalUser;
+    const uiSettingsGet = jest.fn();
+    const getUiSettingsClient = jest.fn().mockResolvedValue({ get: uiSettingsGet });
+    const getInternalEsClient = jest.fn().mockResolvedValue(mockInternalEsClient);
+    const servicesCall = { method: 'GET', path: '/_inference/_services' };
+    const servicesResponse = [
+      { service: 'openai', features: { non_streaming_chat: { supported: true } } },
+      { service: 'anthropic' },
+    ];
+    const completion = {
+      id: 'chatcmpl-1',
+      model: 'gpt-4o',
+      object: 'chat.completion',
+      choices: [
+        { index: 0, finish_reason: 'stop', message: { role: 'assistant', content: 'Full answer' } },
+      ],
+      usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+    };
+    const streamCall = expect.objectContaining({ path: '_inference/chat_completion/test/_stream' });
+
+    const createConnector = (
+      provider: string,
+      dependencies: InferenceConnectorDependencies = { getUiSettingsClient, getInternalEsClient }
+    ) => {
+      const services = actionsMock.createServices();
+      services.scopedClusterClient = mockEsClient;
+      return new InferenceConnector(
+        {
+          configurationUtilities: actionsConfigMock.create(),
+          connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+          config: {
+            provider,
+            providerConfig: {},
+            taskType: 'chat_completion',
+            inferenceId: 'test',
+            taskTypeConfig: {},
+          },
+          secrets: { providerSecrets: {} },
+          logger: loggingSystemMock.createLogger(),
+          services,
+        },
+        dependencies
+      );
+    };
+
+    const invoke = (connector: InferenceConnector, signal?: AbortSignal) =>
+      connector.performApiUnifiedCompletionStream({
+        body: { messages: [{ content: 'Hello', role: 'user' }] },
+        signal,
+        telemetryMetadata: { pluginId: 'security_ai_assistant' },
+      });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      uiSettingsGet.mockResolvedValue(false);
+      mockInternalEsClient.transport.request.mockResolvedValue(servicesResponse);
+      mockEsClient.transport.request.mockImplementation(async (request) => {
+        if (request.path?.endsWith('/_stream')) {
+          return { body: Readable.from([`data: [DONE]\n\n`]), statusCode: 200 };
+        }
+        return completion;
+      });
+    });
+
+    it('streams when no uiSettings client is available', async () => {
+      await invoke(createConnector('openai', { getInternalEsClient }));
+
+      expect(mockInternalEsClient.transport.request).not.toHaveBeenCalled();
+      expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+    });
+
+    it('streams when no internal ES client is available', async () => {
+      await invoke(createConnector('openai', { getUiSettingsClient }));
+
+      expect(uiSettingsGet).not.toHaveBeenCalled();
+      expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+    });
+
+    it('streams unless the space setting explicitly turns streaming off', async () => {
+      for (const settingValue of [true, undefined]) {
+        jest.clearAllMocks();
+        uiSettingsGet.mockResolvedValue(settingValue);
+
+        await invoke(createConnector('openai'));
+
+        expect(uiSettingsGet).toHaveBeenCalledWith(GEN_AI_SETTINGS_INFERENCE_STREAMING);
+        expect(mockInternalEsClient.transport.request).not.toHaveBeenCalled();
+        expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+      }
+    });
+
+    it('calls the endpoint without _stream when streaming is off and the service supports it', async () => {
+      const signal = new AbortController().signal;
+
+      const response = await invoke(createConnector('openai'), signal);
+
+      // the services lookup uses the internal client, never the caller-scoped one
+      expect(mockInternalEsClient.transport.request).toHaveBeenCalledWith(servicesCall);
+      expect(mockEsClient.transport.request).not.toHaveBeenCalledWith(servicesCall);
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: '_inference/chat_completion/test',
+          querystring: { timeout: '180s' },
+          body: { messages: [{ content: 'Hello', role: 'user' }], n: undefined },
+        },
+        {
+          requestTimeout: 180_000,
+          signal,
+          headers: { 'X-Elastic-Product-Use-Case': 'security_ai_assistant' },
+        }
+      );
+      expect(mockEsClient.transport.request).not.toHaveBeenCalledWith(
+        streamCall,
+        expect.anything()
+      );
+
+      const events = (await streamToString(response as unknown as Readable))
+        .split('\n\n')
+        .filter(Boolean);
+      expect(events).toHaveLength(3);
+      expect(JSON.parse(events[0].replace('data: ', ''))).toMatchObject({
+        object: 'chat.completion.chunk',
+        choices: [{ delta: { content: 'Full answer' } }],
+      });
+      expect(events[2]).toBe('data: [DONE]');
+    });
+
+    it('keeps streaming when the service does not support non-streaming', async () => {
+      await invoke(createConnector('anthropic'));
+
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+    });
+
+    it('keeps streaming when the setting or the services API cannot be read', async () => {
+      uiSettingsGet.mockRejectedValueOnce(new Error('ui settings down'));
+      await invoke(createConnector('openai'));
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(streamCall, expect.anything());
+
+      mockInternalEsClient.transport.request.mockRejectedValueOnce(new Error('no permission'));
+      await invoke(createConnector('openai'));
+      expect(mockEsClient.transport.request).toHaveBeenLastCalledWith(
+        streamCall,
+        expect.anything()
+      );
+    });
+
+    it('returns the full message through performApiUnifiedCompletion', async () => {
+      const response = await createConnector('openai').performApiUnifiedCompletion({
+        body: { messages: [{ content: 'Hello', role: 'user' }] },
+      });
+
+      expect(response.choices[0].message.content).toBe('Full answer');
+      expect(response.usage).toEqual({ prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 });
+    });
+
+    it('maps non-streaming response errors to task run errors', async () => {
+      const respondWith = (statusCode: number, body: unknown) =>
+        mockEsClient.transport.request.mockImplementation(async () => {
+          throw new errors.ResponseError({ statusCode, body, warnings: null, meta: {} as never });
+        });
+
+      const invokeAndCatch = async () => {
+        try {
+          await invoke(createConnector('openai'));
+          throw new Error('expected the request to fail');
+        } catch (e) {
+          return e as Error;
+        }
+      };
+
+      respondWith(400, {
+        error: {
+          code: 'insufficient_quota',
+          message:
+            'Received a rate limit status code for request from inference entity id [test] status [429]. Error message: [You exceeded your current quota]',
+          type: 'insufficient_quota',
+        },
+      });
+      const userError = await invokeAndCatch();
+      expect(getErrorSource(userError)).toBe(TaskErrorSource.USER);
+      expect(userError.message).toContain('exceeded your current quota');
+
+      respondWith(502, { error: { type: 'status_exception', reason: 'upstream unavailable' } });
+      const frameworkError = await invokeAndCatch();
+      expect(getErrorSource(frameworkError)).toBe(TaskErrorSource.FRAMEWORK);
+      expect(frameworkError.message).toContain('returned status code 502');
+      expect(frameworkError.message).toContain('upstream unavailable');
     });
   });
 });

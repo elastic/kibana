@@ -7,23 +7,13 @@
 
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring Engine Health', () => {
     describe('health', () => {
-      before(async () => {
-        await enablePrivmonSetting(kibanaServer);
-      });
-
-      after(async () => {
-        await disablePrivmonSetting(kibanaServer);
-      });
-
       it('should be healthy', async () => {
         log.info('Checking health of privilege monitoring');
         const res = await api.privMonHealth();

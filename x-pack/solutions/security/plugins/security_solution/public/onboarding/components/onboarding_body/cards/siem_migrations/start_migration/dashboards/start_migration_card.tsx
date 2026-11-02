@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DashboardMigrationDataInputWrapper } from '../../../../../../../siem_migrations/dashboards/components/data_input_flyout/wrapper';
 import { UploadDashboardsSectionPanel } from '../../../../../../../siem_migrations/dashboards/components/status_panels/upload_panel';
 import {
@@ -14,14 +14,12 @@ import {
   MissingPrivilegesDescription,
 } from '../../../../../../../common/components/missing_privileges';
 import { useUpsellingComponent } from '../../../../../../../common/hooks/use_upselling';
-import { PanelText } from '../../../../../../../common/components/panel_text';
 import { CenteredLoadingSpinner } from '../../../../../../../common/components/centered_loading_spinner';
 import { OnboardingCardId } from '../../../../../../constants';
 import type { OnboardingCardComponent } from '../../../../../../types';
 import { OnboardingCardContentPanel } from '../../../common/card_content_panel';
 import type { StartMigrationCardMetadata } from '../common/types';
 import { useStyles } from '../common/start_migration_card.styles';
-import { START_MIGRATION_CARD_FOOTER_NOTE } from '../common/translations';
 import { DashboardMigrationsPanels } from './dashboard_migrations_panels';
 import { useLatestStats } from '../../../../../../../siem_migrations/dashboards/service/hooks/use_latest_stats';
 
@@ -58,10 +56,6 @@ const StartDashboardMigrationBody: OnboardingCardComponent = React.memo(
               expandConnectorsCard={expandConnectorsCard}
             />
           )}
-          <EuiSpacer size="m" />
-          <PanelText size="xs" subdued cursive>
-            <p>{START_MIGRATION_CARD_FOOTER_NOTE}</p>
-          </PanelText>
         </OnboardingCardContentPanel>
       </DashboardMigrationDataInputWrapper>
     );

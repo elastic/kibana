@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import type { CaseUI } from './types';
 import { type GetAttachments } from '../components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
 export interface UseCheckAlertAttachmentsProps {
@@ -15,38 +16,59 @@ export interface UseCheckAlertAttachmentsProps {
   getAttachments?: GetAttachments;
 }
 
-function hasDocumentId<T>(
-  arg: T
-): arg is T & { alertId?: string[] | string; eventId?: string | string[] } {
-  const candidate = arg as unknown;
+interface DocumentReference {
+  alertId?: string[] | string;
+  eventId?: string | string[];
+  externalReferenceId?: string | string[];
+  attachmentId?: string | string[];
+}
 
-  if (candidate === null || typeof candidate !== 'object') {
+export const hasDocReferences = <T>(arg: T): arg is T & DocumentReference => {
+  if (arg === null || typeof arg !== 'object') {
     return false;
   }
 
-  const hasAlertId =
-    'alertId' in candidate &&
-    (Array.isArray(candidate.alertId) || typeof candidate.alertId === 'string');
+  const candidate = arg as DocumentReference;
+  const idFields = ['alertId', 'eventId', 'externalReferenceId', 'attachmentId'] as const;
 
-  const hasEventId =
-    'eventId' in candidate &&
-    (Array.isArray(candidate.eventId) || typeof candidate.eventId === 'string');
+  for (const fieldName of idFields) {
+    if (
+      fieldName in candidate &&
+      (Array.isArray(candidate[fieldName]) || typeof candidate[fieldName] === 'string')
+    ) {
+      return true;
+    }
+  }
 
-  return hasAlertId || hasEventId;
-}
+  return false;
+};
 
 export const useCheckDocumentAttachments = ({
   cases,
   getAttachments,
 }: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
-  const selectedDocuments = (getAttachments?.({ theCase: undefined }) ?? [])
-    .filter(hasDocumentId)
-    .map(({ alertId, eventId }) => [alertId, eventId])
-    .flatMap((arrayOrString) => arrayOrString)
-    .filter(Boolean) as string[];
+  const { owner } = useCasesContext();
+  // getAttachments is called here without a real case to collect the document IDs it
+  // would attach, so we can flag cases that already contain them. Callers that branch on
+  // `theCase` (e.g. to resolve the owner) need a non-undefined value, so synthesize one from
+  // the current context owner. Only the ID fields matter here, not the attachment `type`,
+  // so any owner in scope is safe to use even when multiple owners are active.
+  const attachmentOwner = owner[0];
+  const selectedDocumentIds = (
+    getAttachments?.({
+      theCase: attachmentOwner ? ({ owner: attachmentOwner } as CaseUI) : undefined,
+    }) ?? []
+  )
+    .filter(hasDocReferences)
+    .flatMap(({ alertId, eventId, externalReferenceId, attachmentId }) =>
+      [alertId, eventId, externalReferenceId, attachmentId].flat()
+    )
+    .filter(
+      (reference): reference is string => typeof reference === 'string' && reference.length > 0
+    );
 
   const { data, isFetching } = useFindCasesContainingAllSelectedDocuments(
-    selectedDocuments,
+    selectedDocumentIds,
     cases.map(({ id }) => id)
   );
 

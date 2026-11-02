@@ -17,6 +17,7 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
   RouterDeprecatedApiDetails,
+  KibanaRequest,
 } from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
@@ -25,6 +26,11 @@ import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
 import type { RateLimiterConfig } from './rate_limiter';
+import type { HttpConfig } from './http_config';
+import type {
+  SelfClientOwnClientAuthenticationCheck,
+  SelfClientUiamAttestationGetter,
+} from './self_client';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -57,6 +63,7 @@ export interface InternalHttpServiceSetup
   staticAssets: InternalStaticAssets;
   externalUrl: ExternalUrlConfig;
   prototypeHardening: boolean;
+  config: HttpConfig;
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
     plugin?: PluginOpaqueId
@@ -85,6 +92,13 @@ export interface InternalHttpServiceStart extends Omit<HttpServiceStart, 'static
   generateOas: (args: GenerateOasArgs) => Promise<object>;
   /** Indicates if the http server is listening on the configured port */
   isListening: () => boolean;
+  setRedactedSessionIdGetter: (
+    getter: (request: KibanaRequest) => Promise<string | undefined>
+  ) => void;
+  setSelfClientUiamAttestationGetter: (getter: SelfClientUiamAttestationGetter) => void;
+  setSelfClientOwnClientAuthenticationCheck: (
+    check: SelfClientOwnClientAuthenticationCheck
+  ) => void;
 }
 
 /** @internal */

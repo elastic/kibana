@@ -8,6 +8,7 @@
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type {
   Datatable,
+  DatatableColumn,
   DefaultInspectorAdapters,
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
@@ -127,7 +128,7 @@ describe('datatableFn', () => {
       ...table,
       columns: shuffle([
         ...table.columns,
-        { id: 'unknown', name: 'unknown', meta: { type: 'number' } },
+        { id: 'unknown', name: 'unknown', meta: { type: 'number' } } as DatatableColumn,
       ]),
     };
     const args = buildArgs();
@@ -145,5 +146,27 @@ describe('datatableFn', () => {
       'metric2',
       'unknown',
     ]);
+  });
+
+  it('should ask inspector Data to show the table dash for missing values', async () => {
+    const tables = {
+      reset: jest.fn(function (this: { missingValueDisplay: 'text' | 'table' }) {
+        this.missingValueDisplay = 'text';
+      }),
+      allowCsvExport: false,
+      missingValueDisplay: 'text' as const,
+      logDatatable: jest.fn(),
+    };
+    const ctx = {
+      ...context,
+      inspectorAdapters: { tables },
+    } as unknown as ExecutionContext<DefaultInspectorAdapters>;
+
+    await datatableFn(() => mockFormatFactory)(buildTable(), buildArgs(), ctx);
+
+    expect(tables.reset).toHaveBeenCalled();
+    expect(tables.allowCsvExport).toBe(true);
+    expect(tables.missingValueDisplay).toBe('table');
+    expect(tables.logDatatable).toHaveBeenCalled();
   });
 });

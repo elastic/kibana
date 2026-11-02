@@ -7,7 +7,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -53,13 +52,6 @@ export const renderApp = ({
   isDev?: boolean;
 }) => {
   const { element, history } = appMountParameters;
-
-  core.chrome.setHelpExtension({
-    appName: i18n.translate('xpack.exploratoryView.feedbackMenu.appName', {
-      defaultMessage: 'Observability',
-    }),
-    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
-  });
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);

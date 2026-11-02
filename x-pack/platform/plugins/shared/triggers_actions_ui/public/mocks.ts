@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
@@ -12,6 +13,7 @@ import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
+import { getAddConnectorFormLazy } from './common/get_add_connector_form';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import type {
   ActionTypeModel,
@@ -33,6 +35,7 @@ import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import type { CreateConnectorFormProps } from './application/sections/action_connector_form/create_connector_form';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import { getActionFormLazy } from './common/get_action_form';
 import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -40,11 +43,12 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
-import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+
+const ClassicRulesPageStub = () => null;
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -68,6 +72,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry, connectorServices });
+    },
+    getAddConnectorForm: (props: Omit<CreateConnectorFormProps, 'actionTypeRegistry'>) => {
+      return getAddConnectorFormLazy({ ...props, actionTypeRegistry, connectorServices });
     },
     getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getEditConnectorFlyoutLazy({
@@ -122,9 +129,6 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleSnoozeModal: (props) => {
       return getRuleSnoozeModalLazy(props);
     },
-    getRulesSettingsLink: (props) => {
-      return getRulesSettingsLinkLazy(props);
-    },
     getUntrackModal: (props) => {
       return getUntrackModalLazy(props);
     },
@@ -139,6 +143,13 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         }),
       };
     },
+    getAlertFormatter: (ruleTypeId: string) => {
+      if (ruleTypeRegistry.has(ruleTypeId)) {
+        return undefined;
+      }
+      return ruleTypeRegistry.get(ruleTypeId).format;
+    },
+    getClassicRulesPage: (props) => React.createElement(ClassicRulesPageStub, props),
   };
 }
 

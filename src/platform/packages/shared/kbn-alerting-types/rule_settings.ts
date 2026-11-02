@@ -21,6 +21,7 @@ export interface RulesSettingsFlappingProperties {
 }
 
 export interface RuleSpecificFlappingProperties {
+  enabled?: boolean;
   lookBackWindow: number;
   statusChangeThreshold: number;
 }

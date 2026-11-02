@@ -169,7 +169,7 @@ describe('fieldExamplesCalculator', function () {
     it('should throw an error if any value is a plain object', function () {
       expect(function () {
         groupValues([{}, true, false]);
-      }).toThrowError();
+      }).toThrow();
     });
 
     it('should handle values with dots in them', function () {
@@ -256,11 +256,11 @@ describe('fieldExamplesCalculator', function () {
     it('fails to analyze attachment types', function () {
       params.field = dataView.fields.getByName('request_body')!;
       params.values = getFieldValues(hits, params.field, dataView);
-      expect(() => getFieldExampleBuckets(params)).toThrowError();
+      expect(() => getFieldExampleBuckets(params)).toThrow();
 
       params.field = dataView.fields.getByName('_score')!;
       params.values = getFieldValues(hits, params.field, dataView);
-      expect(() => getFieldExampleBuckets(params)).toThrowError();
+      expect(() => getFieldExampleBuckets(params)).toThrow();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
@@ -293,14 +293,14 @@ describe('fieldExamplesCalculator', function () {
           field: { name: 'message', type: 'string', esTypes: ['text'] } as DataViewField,
           isEsqlQuery: true,
         })
-      ).toThrowError();
+      ).toThrow();
       expect(() =>
         getFieldExampleBuckets({
           values: [['a'], ['b'], ['a'], ['a']],
           field: { name: 'message', type: 'string', esTypes: ['keyword'] } as DataViewField,
           isEsqlQuery: true,
         })
-      ).toThrowError();
+      ).toThrow();
     });
   });
 });

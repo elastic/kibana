@@ -81,34 +81,52 @@ export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultT
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: P;
   private options: ObjectTypeOptions<P>;
-  private propSchemas: Record<string, AnySchema>;
 
   constructor(props: P, options: ObjectTypeOptions<P> = {}) {
-    const schemaKeys = {} as Record<string, AnySchema>;
+    options = { ...options };
+    const clonedProps = { ...props };
     const { unknowns, ...typeOptions } = options;
-    for (const [key, value] of Object.entries(props)) {
-      schemaKeys[key] = value.getSchema();
-    }
-    let schema = internals.object().keys(schemaKeys).default().optional();
-
-    // We need to specify the `.unknown` property only when we want to override the default `forbid`
-    // or it will break `stripUnknown` functionality.
-    if (unknowns === 'allow') {
-      schema = schema.unknown(unknowns === 'allow');
-    }
-
-    // Only set stripUnknown if we have an explicit value of `unknowns`
-    if (unknowns) {
-      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
-    }
-
-    if (options.meta?.id) {
-      schema = schema.id(options.meta.id);
+    const seenIds = new Map<string, Type<any>>();
+    for (const value of Object.values(clonedProps)) {
+      const id = value?.getMeta?.()?.id;
+      const registersJoiId =
+        value instanceof ObjectType ||
+        value?.constructor?.name === 'ArrayType' ||
+        value?.constructor?.name === 'UnionType';
+      if (id !== undefined && registersJoiId) {
+        const existing = seenIds.get(id);
+        if (existing && existing !== value) {
+          throw new Error(`Cannot add different schemas with the same id: ${id}`);
+        }
+        seenIds.set(id, value);
+      }
     }
 
-    super(schema, typeOptions);
-    this.props = props;
-    this.propSchemas = schemaKeys;
+    super(() => {
+      const schemaKeys = {} as Record<string, AnySchema>;
+      for (const [key, value] of Object.entries(clonedProps)) {
+        schemaKeys[key] = value.getSchema();
+      }
+      let schema = internals.object().keys(schemaKeys).default().optional();
+
+      // We need to specify the `.unknown` property only when we want to override the default `forbid`
+      // or it will break `stripUnknown` functionality.
+      if (unknowns === 'allow') {
+        schema = schema.unknown(unknowns === 'allow');
+      }
+
+      // Only set stripUnknown if we have an explicit value of `unknowns`
+      if (unknowns) {
+        schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+      }
+
+      if (options.meta?.id) {
+        schema = schema.id(options.meta.id);
+      }
+
+      return schema;
+    }, typeOptions);
+    this.props = clonedProps;
     this.options = options;
   }
 
@@ -212,7 +230,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     return new ObjectType(extendedProps, extendedOptions);
   }
 
-  protected handleError(type: string, { reason, value }: Record<string, any>) {
+  protected handleError(type: string, { reason, value, child }: Record<string, any>) {
     switch (type) {
       case 'any.required':
       case 'object.base':
@@ -220,7 +238,9 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.parse':
         return `could not parse object value from json input`;
       case 'object.unknown':
-        return `definition for this key is missing`;
+        return child
+          ? `Additional properties are not allowed ('${child}' was unexpected)`
+          : `Additional properties are not allowed (an unexpected property was found)`;
       case 'object.child':
         return reason[0];
     }
@@ -234,10 +254,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   }
 
   validateKey(key: string, value: any) {
-    if (!this.propSchemas[key]) {
+    if (!this.props[key]) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
-    const { value: validatedValue, error } = this.propSchemas[key].validate(value);
+    const { value: validatedValue, error } = this.props[key].getSchema().validate(value);
     if (error) {
       throw new ValidationError(error as any, key);
     }

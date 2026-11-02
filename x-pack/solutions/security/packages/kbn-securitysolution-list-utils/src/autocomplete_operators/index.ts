@@ -12,6 +12,11 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { OperatorOption } from '../types';
 
+/**
+ * The "is" operator (UI label) uses MATCH type in the code.
+ * This renders AutocompleteFieldMatchComponent in the UI.
+ * Note: The "matches" operator uses WILDCARD type (not MATCH) despite the similar name.
+ */
 export const isOperator: OperatorOption = {
   message: i18n.translate('lists.exceptions.isOperatorLabel', {
     defaultMessage: 'is',
@@ -21,6 +26,10 @@ export const isOperator: OperatorOption = {
   value: 'is',
 };
 
+/**
+ * The "is not" operator (UI label) uses MATCH type in the code.
+ * This renders AutocompleteFieldMatchComponent in the UI.
+ */
 export const isNotOperator: OperatorOption = {
   message: i18n.translate('lists.exceptions.isNotOperatorLabel', {
     defaultMessage: 'is not',
@@ -84,6 +93,12 @@ export const isNotInListOperator: OperatorOption = {
   value: 'is_not_in_list',
 };
 
+/**
+ * The "matches" operator (UI label) uses WILDCARD type in the code (not MATCH type).
+ * This is because "matches" supports wildcard patterns (*, ?) and renders
+ * AutocompleteFieldWildcardComponent in the UI.
+ * Note: The "is" operator uses MATCH type and renders AutocompleteFieldMatchComponent.
+ */
 export const matchesOperator: OperatorOption = {
   message: i18n.translate('lists.exceptions.matchesOperatorLabel', {
     defaultMessage: 'matches',
@@ -93,6 +108,10 @@ export const matchesOperator: OperatorOption = {
   value: 'matches',
 };
 
+/**
+ * The "does not match" operator supports wildcard patterns (*, ?) and uses WILDCARD type.
+ * This renders AutocompleteFieldWildcardComponent in the UI.
+ */
 export const doesNotMatchOperator: OperatorOption = {
   message: i18n.translate('lists.exceptions.doesNotMatchOperatorLabel', {
     defaultMessage: 'does not match',

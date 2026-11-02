@@ -24,11 +24,37 @@ export {
   FLEET_SERVER_CERT_PATH,
   FLEET_SERVER_P12_PATH,
   FLEET_SERVER_P12_PASSWORD,
+  RELAY_KEY_PATH,
+  RELAY_CERT_PATH,
+  RELAY_P12_PATH,
+  RELAY_P12_PASSWORD,
+  PKI_INTERMEDIATE_CA_CERT_PATH,
+  PKI_INTERMEDIATE_CA_2_CERT_PATH,
+  PKI_INTERMEDIATE_CLIENT_CERT_PATH,
+  PKI_INTERMEDIATE_CLIENT_KEY_PATH,
+  PKI_INTERMEDIATE_2_CLIENT_CERT_PATH,
+  PKI_INTERMEDIATE_2_CLIENT_KEY_PATH,
+  PKI_UNTRUSTED_CA_CERT_PATH,
+  PKI_UNTRUSTED_CLIENT_CERT_PATH,
+  PKI_UNTRUSTED_CLIENT_KEY_PATH,
+  KBN_SERVERLESS_UIAM_CERTS,
+  getKbnServerlessUiamCert,
 } from './src/certs';
+export type { KbnServerlessProjectType, KbnServerlessUiamCert } from './src/certs';
 export * from './src/dev_service_account';
 export * from './src/axios';
 export * from './src/plugin_list';
 export * from './src/streams';
 export * from './src/extract';
 export * from './src/diff_strings';
+export * from './src/git';
+export {
+  parseAndResolveValidationContract,
+  VALIDATION_PROFILE_DEFAULTS,
+  type ValidationDownstreamMode,
+  type ValidationProfile,
+  type ResolvedValidationContract,
+  type ValidationScope,
+  type ValidationTestMode,
+} from './src/validation_run_contract';
 export * from './src/worker';

@@ -10,16 +10,23 @@ import type {
   ResponseActionParametersWithProcessName,
 } from '../../../../../common/endpoint/types';
 
-export const parsedKillOrSuspendParameter = (parameters: {
-  pid?: string[];
-  entityId?: string[];
-  processName?: string[];
-}):
+export const parsedKillOrSuspendParameter = (
+  parameters: {
+    pid?: string[];
+    entityId?: string[];
+    processName?: string[];
+  },
+  /** Only applicable to the `kill-process` command for the `endpoint` agent type */
+  killDescendants?: boolean
+):
   | ResponseActionParametersWithPid
   | ResponseActionParametersWithEntityId
   | ResponseActionParametersWithProcessName => {
   if (parameters.pid) {
-    return { pid: Number(parameters.pid[0]) };
+    return {
+      pid: Number(parameters.pid[0]),
+      ...(killDescendants ? { kill_descendants: true } : {}),
+    };
   }
 
   if (parameters.processName) {
@@ -30,6 +37,7 @@ export const parsedKillOrSuspendParameter = (parameters: {
 
   return {
     entity_id: parameters?.entityId?.[0] ?? '',
+    ...(killDescendants ? { kill_descendants: true } : {}),
   };
 };
 
@@ -45,6 +53,9 @@ const convertToSeconds = (value: number, unit: 'h' | 'm' | 's'): number =>
 const EXECUTE_TIMEOUT_REGEX = /^\d+(?=(h|m|s){1}$)/;
 export const validateUnitOfTime = (value: string): boolean => EXECUTE_TIMEOUT_REGEX.test(value);
 
+/**
+ * Parses and converts a timeout string into a numerical value representing seconds.
+ */
 export const parsedExecuteTimeout = (timeout?: string): undefined | number => {
   const timeoutMatch = timeout?.trim().match(EXECUTE_TIMEOUT_REGEX);
   if (!timeoutMatch) {

@@ -20,6 +20,7 @@ export const noCasesPermissions = () =>
     createComment: false,
     reopenCase: false,
     assign: false,
+    manageTemplates: false,
   });
 
 export const readCasesPermissions = () =>
@@ -34,6 +35,7 @@ export const readCasesPermissions = () =>
     createComment: false,
     reopenCase: false,
     assign: false,
+    manageTemplates: false,
   });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
 export const noCreateCommentCasesPermissions = () =>
@@ -94,6 +96,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
   const reopenCase = overrides.reopenCase ?? true;
   const createComment = overrides.createComment ?? true;
   const assign = overrides.assign ?? true;
+  const manageTemplates = overrides.manageTemplates ?? true;
   const all =
     create &&
     read &&
@@ -104,7 +107,8 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     connectors &&
     reopenCase &&
     assign &&
-    createComment;
+    createComment &&
+    manageTemplates;
 
   return {
     all,
@@ -118,6 +122,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     reopenCase,
     createComment,
     assign,
+    manageTemplates,
   };
 };
 
@@ -134,6 +139,7 @@ export const noCasesCapabilities = () =>
     create_comment: false,
     case_reopen: false,
     cases_assign: false,
+    cases_manage_templates: false,
   });
 export const readCasesCapabilities = () =>
   buildCasesCapabilities({
@@ -145,6 +151,7 @@ export const readCasesCapabilities = () =>
     create_comment: false,
     case_reopen: false,
     cases_assign: false,
+    cases_manage_templates: false,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({
@@ -164,5 +171,6 @@ export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) =
     create_comment: overrides?.create_comment ?? true,
     case_reopen: overrides?.case_reopen ?? true,
     cases_assign: overrides?.cases_assign ?? true,
+    cases_manage_templates: overrides?.cases_manage_templates ?? true,
   };
 };

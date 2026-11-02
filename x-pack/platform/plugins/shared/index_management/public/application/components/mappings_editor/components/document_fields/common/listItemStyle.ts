@@ -13,7 +13,7 @@ export const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>)
   `,
   field: css`
     border-bottom: ${border.thin};
-    height: calc(${size.xl} * 2);
+    min-height: calc(${size.xl} * 2);
     margin-top: ${size.xs};
   `,
   fieldEnabled: css`
@@ -37,7 +37,7 @@ export const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>)
     padding-left: ${size.m};
   `,
   content: css`
-    height: calc(${size.xl} * 2);
+    min-height: calc(${size.xl} * 2);
     position: relative;
   `,
   contentIndent: css`

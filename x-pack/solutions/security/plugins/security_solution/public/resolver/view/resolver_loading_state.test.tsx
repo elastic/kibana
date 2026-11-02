@@ -6,6 +6,7 @@
  */
 
 import { Simulator } from '../test_utilities/simulator';
+import { createMemoryHistory } from 'history';
 import { pausifyMock } from '../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
@@ -27,6 +28,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -60,6 +62,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -92,6 +95,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -124,6 +128,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},
@@ -141,7 +146,7 @@ describe('Resolver: data loading and resolution states', () => {
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
-        resolverEmptyMessage: 1,
+        resolverEmptyMessage: 2,
         resolverGraphNodes: 0,
       });
     });
@@ -158,6 +163,7 @@ describe('Resolver: data loading and resolution states', () => {
         dataAccessLayer,
         databaseDocumentID,
         resolverComponentInstanceID,
+        history: createMemoryHistory(),
         indices: [],
         shouldUpdate: false,
         filters: {},

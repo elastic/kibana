@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { MaintenanceWindowResponse, MaintenanceWindowUI } from '../../common';
+
+export const transformMaintenanceWindowResponse = (
+  response: MaintenanceWindowResponse
+): MaintenanceWindowUI => {
+  return {
+    title: response.title,
+    enabled: response.enabled,
+    duration: response.duration,
+    expirationDate: response.expiration_date,
+    events: response.events,
+    rRule: response.r_rule,
+    ...(response.category_ids !== undefined ? { categoryIds: response.category_ids } : {}),
+    ...(response.scoped_query != null
+      ? {
+          // `enabled` is not in the domain AlertsFilterQueryAttributes — it is a route-layer
+          // convenience that we drop here. The UI reads enabled from scope.alerting.enabled.
+          scopedQuery: {
+            kql: response.scoped_query.kql ?? '',
+            filters: response.scoped_query.filters ?? [],
+            dsl: response.scoped_query.dsl,
+          },
+        }
+      : {}),
+    ...(response.scope !== undefined
+      ? {
+          scope: {
+            ...(response.scope.alerting !== undefined
+              ? {
+                  alerting: {
+                    ...response.scope.alerting,
+                    enabled: response.scope.alerting.enabled ?? true,
+                  },
+                }
+              : {}),
+            ...(response.scope.alerting_v2 !== undefined
+              ? { alertingV2: response.scope.alerting_v2 }
+              : {}),
+          },
+        }
+      : {}),
+    createdBy: response.created_by,
+    updatedBy: response.updated_by,
+    createdAt: response.created_at,
+    updatedAt: response.updated_at,
+    status: response.status as MaintenanceWindowUI['status'],
+    eventStartTime: response.event_start_time,
+    eventEndTime: response.event_end_time,
+    id: response.id,
+  };
+};

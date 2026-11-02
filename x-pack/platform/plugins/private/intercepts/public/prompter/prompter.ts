@@ -25,14 +25,19 @@ type ProductInterceptPrompterStartDeps = Omit<
   InterceptServiceStartDeps,
   'persistInterceptRunId' | 'staticAssetsHelper' | 'resetInterceptTimingRecord'
 > &
-  Pick<CoreStart, 'http'>;
+  Pick<CoreStart, 'http'> & {
+    userAllowsFeedback: boolean;
+    isChromeVisible$: Rx.Observable<boolean>;
+  };
 
 export class InterceptPrompter {
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
-  // observer for page visibility changes, shared across all intercepts
+  // observer for page visibility changes, shared across all intercepts.
+  // Hidden chrome (embed, fullscreen, print) counts as hidden, since nobody may be there to interact with the intercept.
   private pageHidden$?: Rx.Observable<boolean>;
+  private userAllowsFeedback?: boolean;
 
   // Registry for intercept timers, used to track activation of a particular intercept for each user
   private interceptTimerRegistry = new Proxy<Record<Intercept['id'], { timerStart: Date }>>(
@@ -72,7 +77,14 @@ export class InterceptPrompter {
     return {};
   }
 
-  start({ http, ...dialogServiceDeps }: ProductInterceptPrompterStartDeps) {
+  start({
+    http,
+    userAllowsFeedback,
+    isChromeVisible$,
+    ...dialogServiceDeps
+  }: ProductInterceptPrompterStartDeps) {
+    this.userAllowsFeedback = userAllowsFeedback;
+
     const { getUserTriggerData$, updateUserTriggerData } =
       this.userInterceptRunPersistenceService.start(http);
 
@@ -83,10 +95,13 @@ export class InterceptPrompter {
       resetInterceptTimingRecord: this.clearInterceptTimerStartRecord.bind(this),
     }));
 
-    this.pageHidden$ = Rx.fromEvent(document, 'visibilitychange').pipe(
-      Rx.map(() => document.hidden),
-      Rx.startWith(document.hidden)
-    );
+    this.pageHidden$ = Rx.combineLatest([
+      Rx.fromEvent(document, 'visibilitychange').pipe(
+        Rx.map(() => document.hidden),
+        Rx.startWith(document.hidden)
+      ),
+      isChromeVisible$,
+    ]).pipe(Rx.map(([documentHidden, isChromeVisible]) => documentHidden || !isChromeVisible));
 
     return {
       /**
@@ -108,6 +123,8 @@ export class InterceptPrompter {
       config: () => Promise<Omit<Intercept, 'id'>>;
     }
   ) {
+    if (!this.userAllowsFeedback) return Rx.EMPTY;
+
     return Rx.from(
       http.post<NonNullable<TriggerInfo>>(TRIGGER_INFO_API_ROUTE, {
         body: JSON.stringify({

@@ -1,0 +1,175 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo } from 'react';
+import { EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import type { RelatedEpisodesScope } from '../../../queries/related_episodes_query';
+import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
+import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
+import {
+  useFetchEpisodesDataQuery,
+  withEpisodesData,
+} from '../../../hooks/use_fetch_episodes_data_query';
+import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
+import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
+import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
+import { RelatedAlertEpisodesList } from './related_list';
+import * as i18n from './translations';
+
+interface RelatedEpisodesRuleSubsectionServices {
+  notifications: CoreStart['notifications'];
+  expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
+}
+
+export interface RelatedEpisodesRuleSubsectionProps {
+  currentEpisodeId: string | undefined;
+  currentGroupHash: string | undefined;
+  ruleState: RuleState;
+  scope: RelatedEpisodesScope;
+  getEpisodeDetailsHref: (episodeId: string) => string;
+  /**
+   * When `true`, drop the inner horizontal padding so the subsection sits
+   * flush with its consumer's edges. Useful when rendering inside a container
+   * that already provides outer padding (e.g. a narrow flyout body).
+   */
+  compressed?: boolean;
+}
+
+const getTitle = (scope: RelatedEpisodesScope, currentGroupHash: string | undefined) => {
+  if (scope.type === 'source') {
+    return currentGroupHash
+      ? i18n.RELATED_OTHER_GROUPS_SOURCE_TITLE
+      : i18n.RELATED_SOURCE_ONLY_LIST_TITLE;
+  }
+  return currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE;
+};
+
+const getDescription = (scope: RelatedEpisodesScope, currentGroupHash: string | undefined) => {
+  if (scope.type === 'source') {
+    return currentGroupHash
+      ? i18n.RELATED_OTHER_GROUPS_SOURCE_DESCRIPTION
+      : i18n.RELATED_SOURCE_ONLY_LIST_DESCRIPTION;
+  }
+  return currentGroupHash
+    ? i18n.RELATED_OTHER_GROUPS_DESCRIPTION
+    : i18n.RELATED_RULE_ONLY_LIST_DESCRIPTION;
+};
+
+/**
+ * Related episodes for the same rule (or the same source when there is no rule): other group_hash values, or all other rule episodes if there is no group.
+ */
+export function RelatedEpisodesRuleSubsection({
+  currentEpisodeId,
+  currentGroupHash,
+  ruleState,
+  scope,
+  getEpisodeDetailsHref,
+  compressed = false,
+}: RelatedEpisodesRuleSubsectionProps) {
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { notifications, expressions, spaces },
+  } = useKibana<RelatedEpisodesRuleSubsectionServices>();
+  const toastDanger = useCallback(
+    (message: string) => {
+      notifications.toasts.addDanger(message);
+    },
+    [notifications]
+  );
+
+  const ruleId = getRuleIdFromRuleState(ruleState);
+
+  const { data: otherGroupRows = [], isLoading: isLoadingOtherGroupRows } =
+    useFetchSameRuleEpisodesQuery({
+      scope,
+      excludeEpisodeId: currentEpisodeId,
+      pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
+      currentGroupHash,
+      services: { expressions, spaces },
+      toastDanger,
+    });
+
+  const otherEpisodeIds = useMemo(
+    () => otherGroupRows.map((row) => row['episode.id']).filter(Boolean) as string[],
+    [otherGroupRows]
+  );
+
+  const otherGroupHashes = useMemo(
+    () => [
+      ...new Set(
+        otherGroupRows.map((row) => row.group_hash).filter((hash): hash is string => Boolean(hash))
+      ),
+    ],
+    [otherGroupRows]
+  );
+
+  // Loaded on its own, so the rows show up without waiting for it. Without the
+  // data the rows just miss the grouping badges.
+  const { data: otherEpisodesData } = useFetchEpisodesDataQuery({
+    episodeIds: otherEpisodeIds,
+    services: { expressions, spaces },
+  });
+  const otherGroupRowsWithData = useMemo(
+    () => withEpisodesData(otherGroupRows, otherEpisodesData),
+    [otherGroupRows, otherEpisodesData]
+  );
+
+  const { data: otherEpisodeActionsMap } = useFetchEpisodeActions({
+    episodeIds: otherEpisodeIds,
+    services: { expressions, spaces },
+  });
+
+  const { data: otherGroupActionsMap } = useFetchGroupActions({
+    groupHashes: otherGroupHashes,
+    services: { expressions, spaces },
+  });
+
+  return (
+    <div data-test-subj="alertingV2RelatedEpisodesRuleSubsection">
+      <EuiTitle size={compressed ? 'xxs' : 'xs'}>
+        <h4>{getTitle(scope, currentGroupHash)}</h4>
+      </EuiTitle>
+      <EuiText
+        size={compressed ? 'xs' : 's'}
+        color="subdued"
+        css={{ marginBlockStart: euiTheme.size.xs }}
+      >
+        {getDescription(scope, currentGroupHash)}
+      </EuiText>
+      <EuiSpacer size="s" />
+      {isLoadingOtherGroupRows ? (
+        <AlertEpisodeCardListSkeleton data-test-subj="alertingV2RelatedEpisodesRuleLoading" />
+      ) : otherGroupRows.length === 0 ? (
+        <EuiPanel
+          color="subdued"
+          hasShadow={false}
+          paddingSize="m"
+          data-test-subj="alertingV2RelatedEpisodesRuleEmpty"
+        >
+          <EuiText size="s" color="subdued" textAlign="center">
+            {i18n.RELATED_OTHER_GROUPS_EMPTY}
+          </EuiText>
+        </EuiPanel>
+      ) : (
+        <RelatedAlertEpisodesList
+          rows={otherGroupRowsWithData}
+          ruleState={ruleState}
+          getEpisodeAction={(id) => otherEpisodeActionsMap?.get(id)}
+          getGroupAction={(gh) => getGroupAction(otherGroupActionsMap, ruleId, gh)}
+          getEpisodeDetailsHref={getEpisodeDetailsHref}
+          compressed={compressed}
+        />
+      )}
+    </div>
+  );
+}

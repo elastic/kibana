@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { getId } from '../../lib/get_id';
 import { Tag } from '../tag';
 import type { TagSpec } from '../../lib/tag';
@@ -38,9 +37,3 @@ export const TagList: FunctionComponent<Props> = ({ tags = [], tagType = 'health
       : null}
   </Fragment>
 );
-
-TagList.propTypes = {
-  tags: PropTypes.array,
-  tagType: PropTypes.oneOf(['health', 'badge']),
-  getTag: PropTypes.func.isRequired,
-};

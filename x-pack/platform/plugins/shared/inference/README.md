@@ -41,18 +41,33 @@ The following concepts are commonly used throughout the plugin:
 - **tools**: a set of tools that the LLM can choose to use when generating the next message. In essence, it allows the consumer of the API to define a schema for structured output instead of plain text, and having the LLM select the most appropriate one.
 - **tool call**: when the LLM has chosen a tool (schema) to use for its output, and returns a document that matches the schema, this is referred to as a tool call.
 
-## Inference connectors
+## Inference connectors and endpoints
 
-Performing inference, or more globally communicating with the LLM, is done using stack connectors.
+The `connectorId` parameter accepted by `chatComplete`, `output`, and `prompt` APIs accepts both
+Kibana stack connector IDs and Elasticsearch inference endpoint IDs. The system automatically
+resolves which pipeline to use based on the provided identifier:
 
-The subset of connectors that can be used for inference are called `genAI`, or `inference` connectors. 
-Calling any inference APIs with the ID of a connector that is not inference-compatible will result in the API throwing an error.
+- If the ID matches a known inference endpoint, the request is routed through the Elasticsearch Inference API.
+- Otherwise, it is routed through the Kibana stack connector pipeline.
 
-The list of inference connector types:
+The `getConnectorList` API returns both stack connectors with the `chat_completion` task type and inference endpoints in a unified list.
+Inference endpoints have `isInferenceEndpoint: true` set on the returned `InferenceConnector` object.
+
+The `getConnectorById` API resolves both stack connectors and inference endpoints using the same unified
+IDs returned by `getConnectorList`. When the returned `InferenceConnector` has `isInferenceEndpoint: true`,
+the object represents an Elasticsearch inference endpoint rather than a Kibana stack connector. For stack
+connectors the `config` field contains the connector's configuration, while for inference endpoints it may
+be empty. If no connector or endpoint matches the given ID, a 404 `InferenceTaskRequestError` is thrown.
+
+The list of supported stack connector types:
 - `.gen-ai`: OpenAI connector
 - `.bedrock`: Bedrock Claude connector
 - `.gemini`: Vertex Gemini connector
-- `.inference`: Elastic Inference Endpoint connector
+- `.inference`: Elastic Inference Endpoint connector (Kibana connector type)
+
+Note that `.inference` refers to the Kibana stack connector type (its connector ID prefix), not to be confused
+with Elasticsearch inference endpoints. Elasticsearch inference endpoints are separate entries in the unified
+list returned by `getConnectorList` and are identified by the `isInferenceEndpoint: true` flag.
 
 ## Usage examples
 
@@ -149,6 +164,26 @@ const chatResponse = await inferenceClient.chatComplete({
 const { content, tokens } = chatResponse;
 // do something with the output
 ```
+
+#### Using a feature's configured model
+
+On the server, an unbound client from `getClient({ request })` also accepts a `featureId` instead of a `connectorId`.
+The inference plugin calls the feature's top endpoint, using the `temperature` and `reasoning` configured for that endpoint.
+
+```ts
+const chatResponse = await inferenceClient.chatComplete({
+  featureId: 'my_feature',
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+```
+
+The top endpoint is the first one returned by `searchInferenceEndpoints.endpoints.getForFeature`, which applies the default AI connector settings, the admin's model settings for the feature, and the feature's `recommendedEndpoints`. When that endpoint has no configured parameters, it is called without `temperature` and `reasoning`.
+
+- The feature must be registered with `searchInferenceEndpoints` with the `chat_completion` task type.
+- `connectorId`, `temperature` and `reasoning` cannot be passed together with `featureId`.
+- `stream: true` and tools work the same way as with `connectorId`.
+- `featureId` is not supported by clients bound to a connector or by `getClientWithoutRequest`.
+- The call fails with a request error (400) when the feature is not registered, is not a chat completion feature, or has no endpoint, and with an internal error when the `searchInferenceEndpoints` plugin is disabled.
 
 #### Streaming mode
 
@@ -375,7 +410,6 @@ Type guards for each type of error are exposed from the `@kbn/inference-common` 
 - `isInferenceRequestError`
 - ...`isXXXError`
 
-
 ## Anonymization
 
 To avoid sending personally identifiable or other sensitive information to LLMs, the anonymization pipeline built into the Inference plugin replaces selected pieces of text with deterministic masks before the messages are sent and restores (de-anonymises) the original values in the responses.
@@ -419,18 +453,20 @@ There are **two** kinds of rules and both share the common `{ enabled: boolean }
   The referenced inference model is executed server-side to find entities in free text.  Only classes
   listed in `allowedEntityClasses` are taken into account (omit the field to accept all).
 
-> Currently this feature has only been validated with Elastic’s publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).  
+> Currently this feature has only been validated with Elastic's publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).  
 
 Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, the first matching rule wins and later ones are skipped for that entity. 
 
 ### Configuring rules
 
-1.  Navigate to **Management ➜ Advanced Settings** and search for
-    **“Anonymization Settings”** (category *Observability*).
+1.  Navigate to **Management ➜ Anonymization** (sibling page to **GenAI Settings**), or to
+    **Management ➜ Advanced Settings** and search for **"Anonymization Settings"**.
 2.  Paste a JSON object with a `rules` array similar to the examples above.  The default template that
     ships with the plugin looks like:
     ```jsonc
     {
+      "maskingEnabled": false,   // master switch: no rule runs while this is false
+      "onFailure": "block",      // "block" fails the request when a regex rule cannot run; "allow_unsafe" skips a rule with an invalid pattern and still applies the others (if regex masking cannot run at all, the request is sent unmasked)
       "rules": [
         {
           "entityClass": "EMAIL",
@@ -447,9 +483,9 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
       ]
     }
     ```
-3.  Toggle `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
+3.  Set `maskingEnabled` to `true`, toggle each rule's `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
 
-If **no rules are enabled**, anonymization does not run.
+If `maskingEnabled` is `false`, or **no rules are enabled**, anonymization does not run. Settings saved before `maskingEnabled` existed have no such key; for those, anonymization runs exactly when at least one rule is enabled.
 
 > Note: Each request is processed with whatever rules are active at the time of the request, and those rules are applied to all messages included in that request – including any previous conversation history passed along.
 

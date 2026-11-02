@@ -24,6 +24,7 @@ const createClientMock = (): jest.Mocked<PackageClient> => ({
   reinstallEsAssets: jest.fn(),
   getInstalledPackages: jest.fn().mockReturnValue(Promise.resolve({ items: [], total: 0 })),
   rollbackPackage: jest.fn(),
+  getPackageAsset: jest.fn(),
 });
 
 const createServiceMock = (): DeeplyMockedKeys<PackageService> => ({

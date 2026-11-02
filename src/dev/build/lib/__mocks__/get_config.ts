@@ -13,6 +13,8 @@ export function getMockConfig() {
   return new Config(
     true,
     false,
+    false,
+    false,
     {
       version: '8.0.0',
       engines: {

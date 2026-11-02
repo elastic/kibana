@@ -45,9 +45,15 @@ export const getCspBenchmarkRulesStatesHandler = async (
         return newCspSettings.attributes.rules;
       } catch (createErr) {
         const createError = transformError(createErr);
-        // If user doesn't have permission to create settings (read-only user), return empty rules
         if (createError.statusCode === 403) {
           return {};
+        }
+        if (createError.statusCode === 409) {
+          const existingSettings = await encryptedSoClient.get<CspSettings>(
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
+          );
+          return existingSettings.attributes.rules;
         }
         throw createErr;
       }

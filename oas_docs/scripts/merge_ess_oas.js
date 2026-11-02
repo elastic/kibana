@@ -10,13 +10,15 @@
 require('@kbn/setup-node-env');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const checkBundle = require('./check_bundles');
 
 (async () => {
+  checkBundle(`${REPO_ROOT}/oas_docs/bundle.json`);
   await merge({
     sourceGlobs: [
       `${REPO_ROOT}/oas_docs/bundle.json`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/alerting/docs/openapi/bundled.yaml`,
-      `${REPO_ROOT}/x-pack/platform/plugins/shared/cases/docs/openapi/bundled.yaml`,
+      `${REPO_ROOT}/x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml`,
       `${REPO_ROOT}/src/platform/plugins/shared/data_views/docs/openapi/bundled.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/features/docs/openapi/feature_apis.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/shared/ml/common/openapi/ml_apis.yaml`,
@@ -32,8 +34,6 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/slo/docs/openapi/slo/bundled.yaml`,
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/uptime/docs/openapi/uptime_apis.yaml`,
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/observability_ai_assistant_app/docs/openapi/observability_ai_assistant_app_apis.yaml`,
-      `${REPO_ROOT}/x-pack/solutions/observability/plugins/synthetics/docs/openapi/synthetic_apis.yaml`,
-
       // Security solution
       `${REPO_ROOT}/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/solutions/security/packages/kbn-securitysolution-lists-common/docs/openapi/ess/*.schema.yaml`,

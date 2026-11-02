@@ -1,0 +1,187 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Client, estypes } from '@elastic/elasticsearch';
+
+export interface TransformApiService {
+  createTransform: (request: estypes.TransformPutTransformRequest) => Promise<void>;
+  createTransformWithSecondaryAuth: (
+    request: estypes.TransformPutTransformRequest,
+    secondaryAuthValue: string
+  ) => Promise<void>;
+  getTransform: (
+    request: estypes.TransformGetTransformRequest
+  ) => Promise<estypes.TransformGetTransformTransformSummary>;
+  getTransformStats: (
+    request: estypes.TransformGetTransformStatsRequest
+  ) => Promise<estypes.TransformGetTransformStatsTransformStats>;
+  deleteTransform: (
+    request: estypes.TransformDeleteTransformRequest,
+    options?: { ignoreErrors?: boolean }
+  ) => Promise<void>;
+  cleanTransformIndices: () => Promise<void>;
+  deleteTransforms: (transformIds: string[]) => Promise<void>;
+  deleteIndices: (request: estypes.IndicesDeleteRequest) => Promise<void>;
+  startTransform: (transformId: string, options?: { ignoreErrors?: boolean }) => Promise<void>;
+  createAndRunTransform: (request: estypes.TransformPutTransformRequest) => Promise<void>;
+}
+
+const TRANSFORM_STATE_TIMEOUT_MS = 2 * 60 * 1000;
+const TRANSFORM_STATE_POLL_INTERVAL_MS = 1000;
+
+export function getTransformApiService(esClient: Client): TransformApiService {
+  return {
+    async createTransform(request: estypes.TransformPutTransformRequest) {
+      try {
+        await esClient.transform.putTransform(request);
+      } catch (error) {
+        throw new Error(`Failed to create transform ${request.transform_id}: ${error}`);
+      }
+    },
+    async createTransformWithSecondaryAuth(
+      request: estypes.TransformPutTransformRequest,
+      secondaryAuthEncodedApiKey: string
+    ) {
+      try {
+        await esClient.transform.putTransform(request, {
+          headers: {
+            'es-secondary-authorization': `ApiKey ${secondaryAuthEncodedApiKey}`,
+          },
+        });
+      } catch (error) {
+        throw new Error(`Failed to create transform ${request.transform_id}: ${error}`);
+      }
+    },
+
+    async getTransform(request: estypes.TransformGetTransformRequest) {
+      try {
+        const response = await esClient.transform.getTransform(request);
+        return response.transforms[0];
+      } catch (error) {
+        throw new Error(`Failed to get transform ${request.transform_id}: ${error}`);
+      }
+    },
+
+    async getTransformStats(request: estypes.TransformGetTransformStatsRequest) {
+      try {
+        const response = await esClient.transform.getTransformStats({
+          ...request,
+        });
+        return response.transforms[0];
+      } catch (error) {
+        throw new Error(`Failed to get transform stats for ${request.transform_id}: ${error}`);
+      }
+    },
+
+    async deleteTransform(
+      request: estypes.TransformDeleteTransformRequest,
+      options?: { ignoreErrors?: boolean }
+    ) {
+      try {
+        // A forced delete works in any state, so there's no need to stop the transform first.
+        await esClient.transform.deleteTransform({ ...request, force: true });
+      } catch (error) {
+        if (options?.ignoreErrors) {
+          return;
+        }
+        throw new Error(`Failed to delete transform ${request.transform_id}: ${error}`);
+      }
+    },
+
+    async deleteTransforms(transformIds: string[]) {
+      for (const transformId of transformIds) {
+        await this.deleteTransform({ transform_id: transformId }, { ignoreErrors: true });
+      }
+    },
+
+    async cleanTransformIndices() {
+      // Get all transforms
+      const transforms = await esClient.transform.getTransform();
+
+      // Stop and delete each transform
+      for (const transform of transforms.transforms) {
+        try {
+          await esClient.transform.stopTransform({
+            transform_id: transform.id,
+            force: true,
+            wait_for_completion: true,
+          });
+
+          await esClient.transform.deleteTransform({
+            transform_id: transform.id,
+          });
+        } catch (error) {
+          throw new Error(`Failed to delete transform ${transform.id}: ${error}`);
+        }
+      }
+
+      // Delete transform notification indices - resolve wildcard first
+      try {
+        const indices = await esClient.cat.indices({
+          index: '.transform-notifications-*',
+          format: 'json',
+        });
+
+        if (indices && Array.isArray(indices) && indices.length > 0) {
+          const indexNames = indices.map((idx: any) => idx.index);
+          await esClient.indices.delete({
+            index: indexNames,
+            ignore_unavailable: true,
+          });
+        }
+      } catch (error) {
+        throw new Error(`Failed to delete transform notification indices: ${error}`);
+      }
+    },
+
+    async deleteIndices(request: estypes.IndicesDeleteRequest) {
+      try {
+        await esClient.indices.delete({
+          ...request,
+          ignore_unavailable: true,
+        });
+      } catch (error) {
+        throw new Error(`Failed to delete indices ${request.index}: ${error}`);
+      }
+    },
+
+    async startTransform(transformId: string, options?: { ignoreErrors?: boolean }) {
+      try {
+        await esClient.transform.startTransform({ transform_id: transformId });
+      } catch (error) {
+        if (options?.ignoreErrors) {
+          return;
+        }
+        throw new Error(`Failed to start transform ${transformId}: ${error}`);
+      }
+    },
+
+    async createAndRunTransform(request: estypes.TransformPutTransformRequest) {
+      const transformId = request.transform_id;
+      await this.createTransform(request);
+      await this.startTransform(transformId);
+
+      // Batch transforms stop on their own after the first checkpoint; continuous ones keep running.
+      const isDone = (stats: estypes.TransformGetTransformStatsTransformStats) =>
+        request.sync === undefined
+          ? stats.state === 'stopped' && stats.checkpointing.last.checkpoint === 1
+          : stats.state !== 'stopped';
+
+      const deadline = Date.now() + TRANSFORM_STATE_TIMEOUT_MS;
+      let stats = await this.getTransformStats({ transform_id: transformId });
+      while (!isDone(stats)) {
+        if (Date.now() > deadline) {
+          throw new Error(
+            `Transform ${transformId} did not reach the expected state (state: ${stats.state}, checkpoint: ${stats.checkpointing.last.checkpoint})`
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, TRANSFORM_STATE_POLL_INTERVAL_MS));
+        stats = await this.getTransformStats({ transform_id: transformId });
+      }
+    },
+  };
+}

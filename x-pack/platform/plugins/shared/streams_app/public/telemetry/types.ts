@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { FeatureType } from '@kbn/streams-schema';
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
-type StreamType = 'wired' | 'classic' | 'unknown';
+type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
+
+type ConfigurationMode = 'interactive' | 'yaml' | 'json';
 
 type StreamsAttachmentCountProps = {
   name: string;
@@ -83,6 +84,7 @@ interface WiredStreamsStatusChangedProps {
 interface StreamsProcessingSavedProps {
   processors_count: number;
   stream_type: StreamType;
+  configuration_mode: ConfigurationMode;
 }
 
 interface StreamsRetentionChangedProps {
@@ -99,59 +101,28 @@ interface StreamsSchemaUpdatedProps {
   stream_type: StreamType;
 }
 
-interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
-  duration_ms: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  count: number;
-  count_by_feature_type: Record<FeatureType, number>;
-  features_selected: number;
-  features_total: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsSignificantEventsCreatedProps {
-  count: number;
-  count_by_feature_type: Record<FeatureType, number>;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsFeatureIdentificationIdentifiedProps {
-  count: number;
-  count_by_type: Record<FeatureType, number>;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
-  count_by_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
-}
-
-interface StreamsDescriptionGeneratedProps {
-  stream_name: string;
-  stream_type: StreamType;
-  input_tokens_used: number;
-  output_tokens_used: number;
 }
 
 interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   stream_name: string;
   stream_type: StreamType;
   data_source_type: EnrichmentDataSource['type'];
+  duration_ms: number;
+}
+
+interface StreamsPartitioningSamplesFetchLatencyProps {
+  stream_name: string;
+  stream_type: StreamType;
   duration_ms: number;
 }
 
@@ -168,10 +139,12 @@ interface StreamsTabVisitedProps {
     text_structure: boolean;
     read_failure_store: boolean;
     manage_failure_store: boolean;
+    create_snapshot_repository: boolean;
   };
 }
 
 export {
+  type ConfigurationMode,
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
   type StreamsAttachmentLinkChangedProps,
@@ -186,13 +159,10 @@ export {
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,
   type StreamsSchemaUpdatedProps,
-  type StreamsSignificantEventsSuggestionsGeneratedEventProps,
-  type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
-  type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
-  type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
+  type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
 };

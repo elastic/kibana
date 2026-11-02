@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const findSLOInstancesParamsSchema = t.type({
-  path: t.type({ id: t.string }),
-  query: t.union([
-    t.undefined,
-    t.partial({
-      search: t.string,
-      size: t.string,
-      searchAfter: t.string,
-    }),
-  ]),
+const findSLOInstancesParamsSchema = z.object({
+  path: z.object({ id: z.string() }),
+  query: z
+    .object({
+      search: z.string().optional(),
+      size: z.coerce.number().optional(),
+      searchAfter: z.string().optional(),
+      remoteName: z.string().optional(),
+    })
+    .optional(),
 });
 
 interface FindSLOInstancesResponse {
-  results: Array<{ instanceId: string }>;
+  results: Array<{ instanceId: string; groupings: Record<string, string | number> }>;
   searchAfter?: string;
 }
 
@@ -29,6 +29,7 @@ interface FindSLOInstancesParams {
   search?: string;
   size?: number;
   searchAfter?: string;
+  remoteName?: string;
 }
 
 export { findSLOInstancesParamsSchema };

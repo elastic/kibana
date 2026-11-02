@@ -3,3 +3,6 @@
 * [Elastic Managed LLMs](/reference/connectors-kibana/elastic-managed-llm.md): Send a request to Elastic Managed LLMs.
 * [{{gemini}}](/reference/connectors-kibana/gemini-action-type.md): Send a request to {{gemini}}.
 * [OpenAI](/reference/connectors-kibana/openai-action-type.md): Send a request to OpenAI.
+
+**External MCP Server**
+* [MCP](/reference/connectors-kibana/mcp-action-type.md): Connect to MCP servers and call their tools. {applies_to}`stack: preview =9.3` {applies_to}`serverless: preview`

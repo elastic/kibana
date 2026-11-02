@@ -18,7 +18,7 @@ export const SkipValidationButton: FC<{
   nextActive ? null : (
     <EuiButtonEmpty
       onClick={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
-      iconType="arrowRight"
+      iconType="chevronSingleRight"
       iconSide="right"
       data-test-subj="mlJobWizardNavButtonPrevious"
     >

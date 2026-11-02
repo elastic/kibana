@@ -7,21 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { storedFilterSchema, querySchema } from '@kbn/es-query-server';
-import type { Writable } from '@kbn/utility-types';
-import type {
-  getDashboardStateSchema,
-  getPanelSchema,
-  getSectionSchema,
-  optionsSchema,
-  panelGridSchema,
-} from './dashboard_state_schemas';
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
+import type { z } from '@kbn/zod';
+import type { warningsSchema } from './warnings_schema';
 
-export type DashboardFilter = TypeOf<typeof storedFilterSchema>;
-export type DashboardQuery = TypeOf<typeof querySchema>;
-export type DashboardOptions = TypeOf<typeof optionsSchema>;
-export type GridData = TypeOf<typeof panelGridSchema>;
-export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
-export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
-export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
+export type Warnings = z.output<typeof warningsSchema>;
+
+export type Operation = 'create' | 'read' | 'update' | 'search';
+
+/** The request-scoped core services that dashboard writes use; routes pass their core request handler context. */
+export interface DashboardRequestServices {
+  savedObjects: Pick<CoreRequestHandlerContext['savedObjects'], 'client' | 'typeRegistry'>;
+  security: { authc: Pick<CoreRequestHandlerContext['security']['authc'], 'getCurrentUser'> };
+}

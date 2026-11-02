@@ -36,13 +36,29 @@ paths:
                   items:
                     $ref: '../model/components.schema.yaml#/components/schemas/TimelineSavedToReturnObject'
                     nullable: true
+            examples:
+              emptyArrays:
+                summary: Installer payload shape
+                value:
+                  timelinesToInstall: []
+                  timelinesToUpdate: []
+                  prepackagedTimelines: []
       responses:
         '200':
-          description: Indicates the installation of prepackaged Timelines was successful.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+              examples:
+                installResult:
+                  summary: Install result counts
+                  value:
+                    success: true
+                    success_count: 10
+                    timelines_installed: 8
+                    timelines_updated: 2
+                    errors: []
         '500':
           description: Indicates the installation of prepackaged Timelines was unsuccessful.
           content:
@@ -54,3 +70,9 @@ paths:
                     type: string
                   statusCode:
                     type: number
+              examples:
+                serverError:
+                  summary: Server error
+                  value:
+                    body: Internal error
+                    statusCode: 500

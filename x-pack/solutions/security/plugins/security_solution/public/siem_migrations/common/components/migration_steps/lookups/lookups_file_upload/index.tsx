@@ -6,36 +6,53 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import {
+  EuiButtonEmpty,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiText,
+} from '@elastic/eui';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../..';
 import { FILE_UPLOAD_ERROR } from '../../../../translations/file_upload_error';
 import type { SiemMigrationResourceData } from '../../../../../../../common/siem_migrations/model/common.gen';
 import * as i18n from './translations';
+import {
+  assertMissingLookups,
+  convertQradarReferenceSetToLookup,
+  convertSentinelWatchlistToResource,
+} from '../utils';
+import { MigrationSource } from '../../../../types';
+import { useRuleMigrationVendorCopy } from '../../../../../rules/hooks/use_rule_migration_vendor_copy';
 
 export interface LookupsFileUploadProps {
   createResources: (resources: SiemMigrationResourceData[]) => void;
   apiError?: string;
   isLoading?: boolean;
+  migrationSource: MigrationSource;
+  /** Lookup names from the list above. Uploaded names must match one of these. */
+  missingLookups: readonly string[];
+  onSkip?: () => void;
 }
+
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
-  ({ createResources, apiError, isLoading }) => {
+  ({ createResources, apiError, isLoading, migrationSource, missingLookups, onSkip }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const [isParsing, setIsParsing] = useState<boolean>(false);
+    const [fileErrors, setErrors] = useState<string[]>([]);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
+    const { lookupsFileUpload } = useRuleMigrationVendorCopy(migrationSource);
+
+    const addError = useCallback((error: string) => {
+      setErrors((current) => [...current, error]);
+    }, []);
 
     const createLookups = useCallback(() => {
       filePickerRef.current?.removeFiles();
       createResources(lookupResources);
     }, [createResources, lookupResources]);
-
-    const [isParsing, setIsParsing] = useState<boolean>(false);
-    const [fileErrors, setErrors] = useState<string[]>([]);
-    const addError = useCallback((error: string) => {
-      setErrors((current) => [...current, error]);
-    }, []);
 
     const parseFile = useCallback(
       async (files: FileList | null) => {
@@ -48,7 +65,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
         const lookups = await Promise.all(
           Array.from(files).map((file) => {
-            return new Promise<SiemMigrationResourceData>((resolve) => {
+            return new Promise<SiemMigrationResourceData | undefined>((resolve) => {
               const reader = new FileReader();
 
               reader.onloadstart = () => setIsParsing(true);
@@ -60,6 +77,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
                 if (content == null) {
                   addError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
+                  resolve(undefined);
                   return;
                 }
 
@@ -67,10 +85,46 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                   // V8-based browsers can't handle large files and return an empty string
                   // instead of an error; see https://stackoverflow.com/a/61316641
                   addError(FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
+                  resolve(undefined);
                   return;
                 }
 
                 const name = file.name.replace(/\.[^/.]+$/, '').trim();
+
+                try {
+                  if (migrationSource === MigrationSource.QRADAR) {
+                    resolve(
+                      convertQradarReferenceSetToLookup({
+                        fileContent: content,
+                        fallbackName: name,
+                      })
+                    );
+                    return;
+                  }
+
+                  if (migrationSource === MigrationSource.SENTINEL) {
+                    resolve(
+                      convertSentinelWatchlistToResource({
+                        fileContent: content,
+                        fallbackName: name,
+                      })
+                    );
+                    return;
+                  }
+                } catch (error) {
+                  addError(
+                    error instanceof Error ? error.message : FILE_UPLOAD_ERROR.CAN_NOT_PARSE
+                  );
+                  resolve(undefined);
+                  return;
+                }
+
+                if (!name) {
+                  addError(i18n.emptyLookupNameError(file.name));
+                  resolve(undefined);
+                  return;
+                }
+
                 resolve({ type: 'lookup', name, content });
               };
 
@@ -81,6 +135,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
                 } else {
                   addError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
                 }
+                resolve(undefined);
               };
 
               reader.onerror = handleReaderError;
@@ -93,10 +148,18 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           addError(e.message);
           return [];
         });
-        // Set the loaded lookups to the state
-        setLookupResources((current) => [...current, ...lookups]);
+        const validLookups = lookups.flatMap((resource): SiemMigrationResourceData[] =>
+          resource !== undefined ? [resource] : []
+        );
+        const resourcesToStore = assertMissingLookups(
+          validLookups,
+          missingLookups,
+          migrationSource,
+          addError
+        );
+        setLookupResources((current) => [...current, ...resourcesToStore]);
       },
-      [addError]
+      [addError, migrationSource, missingLookups]
     );
 
     const errors = useMemo(() => {
@@ -108,13 +171,17 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
 
     const showLoader = isParsing || isLoading;
     const isButtonDisabled = showLoader || lookupResources.length === 0;
-
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow
-            helpText={errors.map((error) => (
-              <EuiText color="danger" size="xs">
+            helpText={errors.map((error, index) => (
+              <EuiText
+                color="danger"
+                size="xs"
+                key={`${index}-${error}`}
+                data-test-subj="lookupsFileUploadError"
+              >
                 {error}
               </EuiText>
             ))}
@@ -123,28 +190,39 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
           >
             <EuiFilePicker
               isInvalid={errors.length > 0}
-              id="lookupsFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              id={lookupsFileUpload.filePickerId}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                  {lookupsFileUpload.prompt}
                 </EuiText>
               }
               accept="application/text"
               onChange={parseFile}
               multiple
               display="large"
-              aria-label="Upload lookups files"
+              aria-label={lookupsFileUpload.label}
               isLoading={showLoader}
               disabled={showLoader}
-              data-test-subj="lookupsFilePicker"
+              data-test-subj={lookupsFileUpload.filePickerId}
               data-loading={isParsing}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            {onSkip && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={onSkip}
+                  aria-label={i18n.SKIP_BUTTON_ARIA_LABEL}
+                  data-test-subj="lookupsUploadSkipButton"
+                >
+                  {i18n.SKIP_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <UploadFileButton
                 onClick={createLookups}

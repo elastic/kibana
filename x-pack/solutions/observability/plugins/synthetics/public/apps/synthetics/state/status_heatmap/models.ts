@@ -11,4 +11,5 @@ export interface MonitorStatusHeatmapActionArgs {
   interval: number;
   monitorId: string;
   location: string;
+  remoteName?: string;
 }

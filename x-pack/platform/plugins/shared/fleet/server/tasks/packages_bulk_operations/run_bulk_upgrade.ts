@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { installPackage } from '../../services/epm/packages';
 import { appContextService, packagePolicyService } from '../../services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
@@ -20,7 +24,6 @@ export interface BulkUpgradeTaskParams {
   type: 'bulk_upgrade';
   packages: Array<{ name: string; version?: string }>;
   spaceId?: string;
-  authorizationHeader: HTTPAuthorizationHeader | null;
   force?: boolean;
   prerelease?: boolean;
   upgradePackagePolicies?: boolean;
@@ -40,18 +43,19 @@ interface BulkUpgradeTaskState {
 }
 
 export async function _runBulkUpgradeTask({
-  abortController,
+  signal,
   taskParams,
   logger,
+  request,
 }: {
   taskParams: BulkUpgradeTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
+  request: KibanaRequest;
 }) {
   const {
     packages,
     spaceId = DEFAULT_SPACE_ID,
-    authorizationHeader,
     force,
     prerelease,
     upgradePackagePolicies,
@@ -63,19 +67,13 @@ export async function _runBulkUpgradeTask({
 
   for (const pkg of packages) {
     // Throw between package install if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {
       const installResult = await installPackage({
         spaceId,
-        authorizationHeader: authorizationHeader
-          ? new HTTPAuthorizationHeader(
-              authorizationHeader.scheme,
-              authorizationHeader.credentials,
-              authorizationHeader.username
-            )
-          : undefined,
+        request,
         installSource: 'registry', // Upgrade can only happens from the registry,
         esClient,
         savedObjectsClient,
@@ -128,6 +126,9 @@ async function bulkUpgradePackagePolicies({
   });
 
   if (policyIdsToUpgrade.items.length) {
+    // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
+    // the public legacy policy APIs, not this system path. Same engine the agentless API uses, and
+    // the periodic deployment-sync task reconciles the workload by revision.
     const upgradePackagePoliciesResults = await packagePolicyService.bulkUpgrade(
       savedObjectsClient,
       esClient,
@@ -144,7 +145,12 @@ async function bulkUpgradePackagePolicies({
 
 export async function scheduleBulkUpgrade(
   taskManagerStart: TaskManagerStartContract,
-  taskParams: Omit<BulkUpgradeTaskParams, 'type'>
+  taskParams: Omit<BulkUpgradeTaskParams, 'type'>,
+  request: KibanaRequest
 ) {
-  return scheduleBulkOperationTask(taskManagerStart, { ...taskParams, type: 'bulk_upgrade' });
+  return scheduleBulkOperationTask(
+    taskManagerStart,
+    { ...taskParams, type: 'bulk_upgrade' },
+    request
+  );
 }

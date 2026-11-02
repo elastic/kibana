@@ -51,9 +51,7 @@ describe('CopyToDashboardModal', () => {
         type: 'testPanelType',
         grid: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
         serializedState: {
-          rawState: {
-            title: 'Panel One',
-          },
+          title: 'Panel One',
         },
       }),
     },
@@ -120,9 +118,7 @@ describe('CopyToDashboardModal', () => {
           state: [
             {
               serializedState: {
-                rawState: {
-                  title: 'Panel One',
-                },
+                title: 'Panel One',
               },
               size: {
                 height: 1,
@@ -167,9 +163,7 @@ describe('CopyToDashboardModal', () => {
           state: [
             {
               serializedState: {
-                rawState: {
-                  title: 'Panel One',
-                },
+                title: 'Panel One',
               },
               size: {
                 height: 1,

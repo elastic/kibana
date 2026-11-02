@@ -1,0 +1,435 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerService } from '../../services/logger_service/logger_service';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import {
+  createActionPolicy,
+  createAlert,
+  createDispatcherPipelineState,
+  createRule,
+  createRuleScopedActionPolicy,
+} from '../fixtures/test_utils';
+import type { Alert, ActionPolicy, ActionPolicyId, MatchedPair, Rule, RuleId } from '../types';
+import { EvaluateMatchersStep } from './evaluate_matchers_step';
+
+describe('EvaluateMatchersStep', () => {
+  let loggerService: LoggerService;
+  let mockLogger: jest.Mocked<Logger>;
+  let step: EvaluateMatchersStep;
+
+  beforeEach(() => {
+    ({ loggerService, mockLogger } = createLoggerService());
+    step = new EvaluateMatchersStep();
+  });
+
+  const runStep = async (
+    dispatchable: Alert[],
+    rules: Map<RuleId, Rule>,
+    policies: Map<ActionPolicyId, ActionPolicy>
+  ): Promise<MatchedPair[]> => {
+    const state = createDispatcherPipelineState({
+      dispatchable,
+      rules,
+      policies,
+    });
+    const result = await step.execute(state, loggerService);
+    if (result.type !== 'continue') {
+      throw new Error(`expected step output 'continue', got '${result.type}'`);
+    }
+    return result.data?.matched ?? [];
+  };
+
+  it('returns matched pairs for alerts with global catch-all policies', async () => {
+    const alert = createAlert({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p1' });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+    expect(matched[0].alert).toBe(alert);
+    expect(matched[0].policy).toBe(policy);
+  });
+
+  it('returns empty when no alerts', async () => {
+    const state = createDispatcherPipelineState({
+      dispatchable: [],
+      rules: new Map(),
+      policies: new Map(),
+    });
+
+    const result = await step.execute(state, loggerService);
+
+    expect(result).toEqual({ type: 'continue', data: { matched: [] } });
+  });
+
+  it('matches alert to all global catch-all policies', async () => {
+    const alert = createAlert({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const p1 = createActionPolicy({ id: 'p1' });
+    const p2 = createActionPolicy({ id: 'p2' });
+
+    const matched = await runStep(
+      [alert],
+      new Map([['r1', rule]]),
+      new Map([
+        ['p1', p1],
+        ['p2', p2],
+      ])
+    );
+
+    expect(matched.map(({ policy }) => policy)).toEqual([p1, p2]);
+  });
+
+  it('does not match when KQL matcher evaluates to false', async () => {
+    const alert = createAlert({ rule_id: 'r1', alert_status: 'inactive' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'alert_status: active' },
+    });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(0);
+  });
+
+  it('matches when KQL matcher evaluates to true', async () => {
+    const alert = createAlert({ rule_id: 'r1', alert_status: 'active' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'alert_status: active' },
+    });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+    expect(matched[0].alert).toBe(alert);
+    expect(matched[0].policy).toBe(policy);
+  });
+
+  it.each([
+    ['alert_id: "alert-1" and alert_status: active', 1],
+    ['episode_id: "alert-1"', 0],
+    ['episode_status: active', 0],
+  ])('matches %s against %i alert', async (expression, expectedMatches) => {
+    const alert = createAlert({
+      rule_id: 'r1',
+      alert_id: 'alert-1',
+      alert_status: 'active',
+    });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p1', matcher: { expression } });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(expectedMatches);
+  });
+
+  it('matches with complex KQL using AND operator', async () => {
+    const alert = createAlert({
+      rule_id: 'r1',
+      alert_status: 'active',
+      group_hash: 'critical-group',
+    });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'alert_status: active and group_hash: critical-group' },
+    });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+  });
+
+  it('skips disabled policies', async () => {
+    const alert = createAlert({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({ id: 'p1', enabled: false });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(0);
+  });
+
+  it('skips snoozed policies when snoozedUntil is in the future', async () => {
+    const alert = createAlert({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const futureDate = new Date(Date.now() + 3_600_000).toISOString();
+    const policy = createActionPolicy({ id: 'p1', snoozedUntil: futureDate });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(0);
+  });
+
+  it('matches policies when snoozedUntil is in the past', async () => {
+    const alert = createAlert({ rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const pastDate = new Date(Date.now() - 3_600_000).toISOString();
+    const policy = createActionPolicy({ id: 'p1', snoozedUntil: pastDate });
+
+    const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+    expect(matched).toHaveLength(1);
+  });
+
+  it('skips policies with invalid KQL matchers and logs a warning without the matcher', async () => {
+    const alert = createAlert({ alert_id: 'ep-42', rule_id: 'r1', space_id: 'default' });
+    const rule = createRule({ id: 'r1' });
+    const policy = createActionPolicy({
+      id: 'p-broken',
+      matcher: { expression: 'invalid kql (((' },
+    });
+
+    const matched = await runStep(
+      [alert],
+      new Map([['r1', rule]]),
+      new Map([['p-broken', policy]])
+    );
+
+    expect(matched).toHaveLength(0);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Policy matcher failed to evaluate; treating as no-match',
+      {
+        labels: {
+          policy_id: 'p-broken',
+          alert_id: 'ep-42',
+          rule_id: 'r1',
+          space_id: 'default',
+          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+        },
+      }
+    );
+  });
+
+  it('continues evaluating sibling policies when one matcher throws', async () => {
+    const alert = createAlert({ rule_id: 'r1', alert_status: 'active' });
+    const rule = createRule({ id: 'r1' });
+    const badPolicy = createActionPolicy({
+      id: 'p-bad',
+      matcher: { expression: 'invalid kql (((' },
+    });
+    const goodPolicy = createActionPolicy({
+      id: 'p-good',
+      matcher: { expression: 'alert_status: active' },
+    });
+
+    const matched = await runStep(
+      [alert],
+      new Map([['r1', rule]]),
+      new Map([
+        ['p-bad', badPolicy],
+        ['p-good', goodPolicy],
+      ])
+    );
+
+    expect(matched).toHaveLength(1);
+    expect(matched[0].policy).toBe(goodPolicy);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('continues evaluating subsequent alerts when a matcher throws on a previous alert', async () => {
+    const e1 = createAlert({ alert_id: 'e1', rule_id: 'r1' });
+    const e2 = createAlert({ alert_id: 'e2', rule_id: 'r1' });
+    const rule = createRule({ id: 'r1' });
+    const badPolicy = createActionPolicy({
+      id: 'p-bad',
+      matcher: { expression: 'invalid kql (((' },
+    });
+    const catchAllPolicy = createActionPolicy({ id: 'p-catchall' });
+
+    const matched = await runStep(
+      [e1, e2],
+      new Map([['r1', rule]]),
+      new Map([
+        ['p-bad', badPolicy],
+        ['p-catchall', catchAllPolicy],
+      ])
+    );
+
+    expect(matched).toHaveLength(2);
+    expect(matched.map(({ alert }) => alert)).toEqual([e1, e2]);
+    expect(matched.every(({ policy }) => policy === catchAllPolicy)).toBe(true);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(2);
+  });
+
+  describe('external alert matching', () => {
+    it('external alert with null rule_id is matched by a space-scoped catch-all policy', async () => {
+      const alert = createAlert({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'pd-1',
+        alert_id: 'pd-ep-1',
+      });
+      const policy = createActionPolicy({ id: 'p1', spaceId: 'space-a' });
+
+      const matched = await runStep([alert], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+      expect(matched[0].alert).toBe(alert);
+      expect(matched[0].policy).toBe(policy);
+    });
+
+    it('external alert is not matched when the policy is in a different space', async () => {
+      const alert = createAlert({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'space-a',
+        group_hash: 'pd-1',
+        alert_id: 'pd-ep-1',
+      });
+      const policy = createActionPolicy({ id: 'p1', spaceId: 'space-b' });
+
+      const matched = await runStep([alert], new Map(), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+  });
+
+  describe('tag-based matching', () => {
+    it('matches when the rule has a routing tag in matcher.tags', async () => {
+      const alert = createAlert({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', routingTags: ['production', 'critical'] });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { tags: ['production'] },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('matches when both tags and expression are satisfied', async () => {
+      const alert = createAlert({ rule_id: 'r1', alert_status: 'active' });
+      const rule = createRule({ id: 'r1', routingTags: ['production'] });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { tags: ['production'], expression: 'alert_status: active' },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when tags match but expression does not', async () => {
+      const alert = createAlert({ rule_id: 'r1', alert_status: 'inactive' });
+      const rule = createRule({ id: 'r1', routingTags: ['production'] });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { tags: ['production'], expression: 'alert_status: active' },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+  });
+
+  describe('data field KQL matching', () => {
+    it('matches on data.severity', async () => {
+      const alert = createAlert({
+        rule_id: 'r1',
+        data: { severity: 'critical' },
+      });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { expression: 'data.severity: "critical"' },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when alert has no data', async () => {
+      const alert = createAlert({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { expression: 'data.severity: "critical"' },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('top-level severity matching', () => {
+    it('matches on top-level severity when alert severity equals the matcher value', async () => {
+      const alert = createAlert({ rule_id: 'r1', severity: 'critical' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { expression: 'severity: "critical"' },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match and does not throw when alert has no severity', async () => {
+      const alert = createAlert({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: { expression: 'severity: "critical"' },
+      });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('tag-scoped policy via matcher.tags', () => {
+    it('skips a tag-scoped policy when the rule does not have the required tag', async () => {
+      const alert = createAlert({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', routingTags: ['notify-r1'] });
+      const policy = createRuleScopedActionPolicy('notify-r2', { id: 'p1' });
+
+      const matched = await runStep([alert], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('mixes global and tag-scoped policies correctly', async () => {
+      const alert = createAlert({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', routingTags: ['notify-r1'] });
+      const globalPolicy = createActionPolicy({ id: 'g1' });
+      const scoped1 = createRuleScopedActionPolicy('notify-r1', { id: 's1' });
+      const scoped2 = createRuleScopedActionPolicy('notify-r2', { id: 's2' });
+
+      const matched = await runStep(
+        [alert],
+        new Map([['r1', rule]]),
+        new Map<ActionPolicyId, ActionPolicy>([
+          ['g1', globalPolicy],
+          ['s1', scoped1],
+          ['s2', scoped2],
+        ])
+      );
+
+      const matchedIds = matched.map(({ policy }) => policy.id).sort();
+      expect(matchedIds).toEqual(['g1', 's1']);
+    });
+  });
+});

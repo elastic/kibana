@@ -13,12 +13,16 @@ import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import type { InternalConnectorContract } from '@kbn/workflows';
-import { isInternalConnector } from '@kbn/workflows';
+import { buildElasticsearchRequest, isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
-import type { ElasticsearchRequestInfo } from '../elasticsearch_step_utils';
-import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
+
+interface ElasticsearchRequestInfo {
+  method: string;
+  url: string;
+  data?: string[];
+}
 
 /**
  * Monaco connector handler for Elasticsearch APIs
@@ -47,7 +51,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
 
       // Get Elasticsearch request information
       const withParams = this.extractWithParams(stepContext.stepNode);
-      const requestInfo = getElasticsearchRequestInfo(connectorType, withParams);
+      const requestInfo = this.getElasticsearchRequestInfo(connectorType, withParams);
 
       // Get connector contract
       const connector = this.getConnectorContract(connectorType);
@@ -61,8 +65,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // Generate console format
       const consoleFormat = this.generateConsoleFormat(requestInfo, withParams);
 
-      // Create hover content with enhanced formatting and shadowed icons
-      const content = [
+      const bodyLines = [
         `**Endpoint**: \`${requestInfo.method} ${requestInfo.url}\``,
         '',
         this.getDescription(connector, requestInfo),
@@ -79,11 +82,11 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
         '',
         '---',
         `<span style="text-shadow: 0 0 3px rgba(255,255,0,0.4); opacity: 0.7;">💡</span> _Click Ctrl+Space (Ctrl+I on Mac) inside the "with:" block to see all available options_`,
-      ]
-        .filter((line) => line !== null)
-        .join('\n');
+      ].filter((line) => line !== null);
 
-      return this.createMarkdownContent(content);
+      return this.createMarkdownContent(
+        this.prependStabilityBadgeToContent(connector.stability, bodyLines)
+      );
     } catch (error) {
       // console.warn('ElasticsearchMonacoConnectorHandler: Error generating hover content', error);
       return null;
@@ -198,6 +201,22 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
     return withParams;
   }
 
+  /**
+   * Get Elasticsearch request info using the shared buildRequestFromConnector utility
+   */
+  private getElasticsearchRequestInfo(
+    stepType: string,
+    withParams?: Record<string, unknown>
+  ): ElasticsearchRequestInfo {
+    const { method, path, body } = buildElasticsearchRequest(stepType, withParams || {});
+
+    return {
+      method,
+      url: decodeURIComponent(path),
+      data: body ? [JSON.stringify(body, null, 2)] : undefined,
+    };
+  }
+
   private getConnectorContract(connectorType: string): InternalConnectorContract | null {
     const allConnectors = getAllConnectors();
     if (!allConnectors) {
@@ -218,8 +237,8 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
       // Remove "Documentation: " from the description as we add it manually to hover content
       return connector.description.replace(/Documentation: .*$/, '');
     }
-    return i18n.translate('xpack.workflows.monaco.elasticsearch.connector.fallbackDescription', {
-      defaultMessage: 'Execute {{method}} request to {{path}}',
+    return i18n.translate('workflows.monaco.elasticsearch.connector.fallbackDescription', {
+      defaultMessage: 'Execute {method} request to {path}',
       values: {
         method: requestInfo.method,
         path: requestInfo.url,

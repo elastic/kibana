@@ -55,6 +55,7 @@ const CollapsiblePanelTitle = ({
                 <EuiIcon
                   type={iconType}
                   size="xl"
+                  aria-hidden={true}
                   css={css`
                     margin-right: ${euiTheme.size.s};
                     vertical-align: text-bottom;

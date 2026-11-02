@@ -14,6 +14,9 @@ import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useWhichFlyout } from '../../../../flyout/document_details/shared/hooks/use_which_flyout';
 import { NetworkPanelKey } from '../../../../flyout/network_details';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -21,10 +24,26 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         telemetry: mockedTelemetry,
+        uiSettings: {
+          get: jest.fn().mockReturnValue(false),
+        },
       },
     }),
+    useUiSetting: () => false,
   };
 });
+
+jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: jest.fn().mockReturnValue({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -34,6 +53,8 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => ({
   useWhichFlyout: jest.fn(),
 }));
+jest.mock('../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -49,6 +70,8 @@ describe('Port', () => {
   beforeEach(() => {
     jest.mocked(useWhichFlyout).mockReturnValue(null);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('renders correctly against snapshot', () => {

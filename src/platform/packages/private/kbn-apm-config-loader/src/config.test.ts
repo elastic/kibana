@@ -17,6 +17,7 @@ import {
 } from './config.test.mocks';
 
 import { ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG } from './config';
+import { shouldInstrumentClient } from './rum_agent_configuration';
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
@@ -222,13 +223,10 @@ describe('ApmConfiguration', () => {
     it('ELASTIC_APM_KIBANA_FRONTEND_ACTIVE', () => {
       process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE = 'false';
       const config = new ApmConfiguration(mockedRootDir, {}, false);
-      const serverConfig = config.getConfig('servicesOverrides');
-      // @ts-ignore
-      expect(serverConfig.servicesOverrides).toEqual({
-        'kibana-frontend': {
-          active: false,
-        },
-      });
+      const frontendConfig = config.getConfig('kibana-frontend');
+      expect(frontendConfig.active).toBe(false);
+      expect(frontendConfig).not.toHaveProperty('servicesOverrides');
+      expect(shouldInstrumentClient(frontendConfig)).toBe(false);
     });
 
     it('does not override the environment from NODE_ENV if already set in the config file', () => {
@@ -474,6 +472,101 @@ describe('ApmConfiguration', () => {
 
       const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
       expect(config.isUsersRedactionEnabled()).toEqual(false);
+    });
+  });
+
+  describe('OTel tracing affects the default config', () => {
+    let config: ApmConfiguration;
+    const kibanaConfig = {
+      telemetry: {
+        enabled: true,
+        tracing: {
+          enabled: true,
+          sample_rate: 1,
+          exporters: [],
+        },
+      },
+    };
+
+    beforeAll(() => {
+      config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+    });
+
+    it('sets "active: false" for the server service', () => {
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig.active).toBe(false);
+      expect(serverConfig).not.toHaveProperty('servicesOverrides');
+    });
+
+    it('sets "active: true" for the "kibana-frontend" service', () => {
+      const frontendConfig = config.getConfig('kibana-frontend');
+      expect(frontendConfig.active).toBe(true);
+      expect(frontendConfig).not.toHaveProperty('servicesOverrides');
+      expect(shouldInstrumentClient(frontendConfig)).toBe(true);
+    });
+
+    it('disables kibana-frontend when ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=false', () => {
+      process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE = 'false';
+      const configWithEnv = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      const frontendConfig = configWithEnv.getConfig('kibana-frontend');
+      expect(frontendConfig.active).toBe(false);
+      expect(frontendConfig).not.toHaveProperty('servicesOverrides');
+      expect(shouldInstrumentClient(frontendConfig)).toBe(false);
+    });
+
+    it('does not throw when elastic.apm.active is false and contextPropagationOnly is omitted', () => {
+      const configWithActiveFalse = new ApmConfiguration(
+        mockedRootDir,
+        {
+          ...kibanaConfig,
+          elastic: {
+            apm: {
+              active: false,
+            },
+          },
+        },
+        false
+      );
+
+      const serverConfig = configWithActiveFalse.getConfig('serviceName');
+      expect(serverConfig).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
+
+      const frontendConfig = configWithActiveFalse.getConfig('kibana-frontend');
+      expect(frontendConfig).toEqual(
+        expect.objectContaining({
+          active: true,
+          contextPropagationOnly: false,
+        })
+      );
+      expect(shouldInstrumentClient(frontendConfig)).toBe(true);
+    });
+
+    it('disables kibana-frontend when overridden in elastic.apm.servicesOverrides', () => {
+      const configWithYamlOverride = new ApmConfiguration(
+        mockedRootDir,
+        {
+          ...kibanaConfig,
+          elastic: {
+            apm: {
+              servicesOverrides: {
+                'kibana-frontend': {
+                  active: false,
+                },
+              },
+            },
+          },
+        },
+        false
+      );
+      const frontendConfig = configWithYamlOverride.getConfig('kibana-frontend');
+      expect(frontendConfig.active).toBe(false);
+      expect(frontendConfig).not.toHaveProperty('servicesOverrides');
+      expect(shouldInstrumentClient(frontendConfig)).toBe(false);
     });
   });
 });

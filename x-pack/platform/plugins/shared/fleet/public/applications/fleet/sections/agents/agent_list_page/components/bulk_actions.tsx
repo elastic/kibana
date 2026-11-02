@@ -6,28 +6,32 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
+  AgentRemoveCollectorModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense } from '../../../../hooks';
+import { useAuthz, useLicense, useRestartAgentAction, useStartServices } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
   LICENSE_FOR_AGENT_MIGRATION,
+  LICENSE_FOR_AGENT_ROLLBACK,
 } from '../../../../../../../common/constants';
 import { getCommonTags } from '../utils';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { useExportCSV } from '../hooks/export_csv';
 import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
+import { AgentRollbackModal } from '../../components/agent_rollback_modal';
+import { AgentRestartModal } from '../../components/agent_restart_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -67,10 +71,14 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
+  const { reporting } = useStartServices();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
+  const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+  const agentRollbackEnabled = ExperimentalFeaturesService.get().enableAgentRollback;
 
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -90,6 +98,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isMigrateModalOpen, setIsMigrateModalOpen] = useState<boolean>(false);
   const [isAgentPrivilegeChangeModalOpen, setIsAgentPrivilegeChangeModalOpen] =
     useState<boolean>(false);
+  const [isRollbackModalOpen, setIsRollbackModalOpen] = useState<boolean>(false);
+  const [isRestartModalOpen, setIsRestartModalOpen] = useState<boolean>(false);
+  const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
@@ -111,10 +122,110 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
 
-  const { generateReportingJobCSV } = useExportCSV();
+  const generateReportingJobCSV = useExportCSV();
+
+  const exportMenuItem: MenuItem = useMemo(
+    () => ({
+      id: 'export',
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.exportAgents"
+          defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+          values={{ agentCount }}
+        />
+      ),
+      icon: 'upload',
+      disabled: !authz.fleet.generateAgentReports || !reporting,
+      onClick: () => {
+        setIsExportCSVModalOpen(true);
+      },
+      'data-test-subj': 'bulkAgentExportBtn',
+    }),
+    [agentCount, authz.fleet.generateAgentReports, reporting]
+  );
+
+  const maintainanceItems: MenuItem[] = useMemo(() => {
+    return [
+      {
+        id: 'migrate',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+            defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+            values={{ agentCount }}
+          />
+        ),
+        icon: 'cluster',
+        disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
+        onClick: () => {
+          setIsMigrateModalOpen(true);
+        },
+        'data-test-subj': 'agentBulkActionsBulkMigrate',
+      },
+      {
+        id: 'diagnostics',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.requestDiagnostics"
+            defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+            values={{ agentCount }}
+          />
+        ),
+        icon: 'download',
+        disabled: !authz.fleet.readAgents,
+        onClick: () => {
+          setIsRequestDiagnosticsModalOpen(true);
+        },
+        'data-test-subj': 'agentBulkActionsRequestDiagnostics',
+      },
+      exportMenuItem,
+    ];
+  }, [
+    agentCount,
+    authz.fleet.allAgents,
+    authz.fleet.readAgents,
+    doesLicenseAllowMigration,
+    exportMenuItem,
+  ]);
 
   // Build hierarchical menu items
   const menuItems: MenuItem[] = useMemo(() => {
+    const hasOpAMPAgents = Array.isArray(agents)
+      ? agents.some((agent) => agent.type === 'OPAMP')
+      : false;
+    const hasNonOpAMPAgents = Array.isArray(agents)
+      ? agents.some((agent) => agent.type !== 'OPAMP')
+      : false;
+
+    // Mixed selection (OpAMP + Elastic Agents): only show actions applicable to both.
+    // Export is the only universal action.
+    if (hasOpAMPAgents && hasNonOpAMPAgents) {
+      return [exportMenuItem];
+    }
+
+    if (hasOpAMPAgents) {
+      const items: MenuItem[] = [exportMenuItem];
+      if (authz.fleet.allAgents) {
+        items.push({
+          id: 'remove-collectors',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentBulkActions.removeCollectors"
+              defaultMessage="Remove {agentCount, plural, one {# collector} other {# collectors}}"
+              values={{ agentCount }}
+            />
+          ),
+          icon: 'trash',
+          iconColor: 'danger',
+          onClick: () => {
+            setIsRemoveCollectorModalOpen(true);
+          },
+          'data-test-subj': 'agentBulkActionsRemoveCollectors',
+        });
+      }
+      return items;
+    }
+
     const items: MenuItem[] = [
       // Top-level items
       {
@@ -165,6 +276,33 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         },
         'data-test-subj': 'agentBulkActionsUpgrade',
       },
+      ...(isRestartAgentActionEnabled
+        ? [
+            {
+              id: 'restart',
+              name: (
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.restartAgents"
+                      defaultMessage="Restart {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge label="Beta" size="s" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              icon: 'refresh',
+              disabled: !authz.fleet.allAgents,
+              onClick: () => {
+                setIsRestartModalOpen(true);
+              },
+              'data-test-subj': 'agentBulkActionsRestart',
+            } as MenuItem,
+          ]
+        : []),
       // Upgrade management submenu
       {
         id: 'upgrade-management',
@@ -185,7 +323,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                 values={{ agentCount }}
               />
             ),
-            icon: 'timeRefresh',
+            icon: 'refreshTime',
             disabled: !authz.fleet.allAgents || !isLicenceAllowingScheduleUpgrade,
             onClick: () => {
               setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
@@ -208,6 +346,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             },
             'data-test-subj': 'agentBulkActionsRestartUpgrade',
           },
+          ...(agentRollbackEnabled
+            ? [
+                {
+                  id: 'rollback-upgrade',
+                  name: (
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.rollbackUpgradeAgents"
+                      defaultMessage="Roll back upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  ),
+                  icon: 'clockCounter',
+                  disabled: !authz.fleet.allAgents || !doesLicenseAllowRollback,
+                  onClick: () => {
+                    setIsRollbackModalOpen(true);
+                  },
+                  'data-test-subj': 'agentBulkActionsRollbackUpgrade',
+                },
+              ]
+            : []),
         ],
       },
       // Maintenance and diagnostics submenu
@@ -220,56 +378,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         ),
         panelTitle: 'Maintenance and diagnostics',
-        children: [
-          {
-            id: 'migrate',
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
-                defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount }}
-              />
-            ),
-            icon: 'cluster',
-            disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
-            onClick: () => {
-              setIsMigrateModalOpen(true);
-            },
-            'data-test-subj': 'agentBulkActionsBulkMigrate',
-          },
-          {
-            id: 'diagnostics',
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.requestDiagnostics"
-                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
-                values={{ agentCount }}
-              />
-            ),
-            icon: 'download',
-            disabled: !authz.fleet.readAgents,
-            onClick: () => {
-              setIsRequestDiagnosticsModalOpen(true);
-            },
-            'data-test-subj': 'agentBulkActionsRequestDiagnostics',
-          },
-          {
-            id: 'export',
-            name: (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.exportAgents"
-                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
-                values={{ agentCount }}
-              />
-            ),
-            icon: 'exportAction',
-            disabled: !authz.fleet.readAgents,
-            onClick: () => {
-              setIsExportCSVModalOpen(true);
-            },
-            'data-test-subj': 'bulkAgentExportBtn',
-          },
-        ],
+        children: maintainanceItems,
       },
       // Security and removal submenu
       {
@@ -289,7 +398,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                   name: (
                     <FormattedMessage
                       id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
-                      defaultMessage="Remove root access for {agentCount, plural, one {# agent} other {# agents}}"
+                      defaultMessage="Remove root privilege for {agentCount, plural, one {# agent} other {# agents}}"
                       values={{ agentCount }}
                     />
                   ),
@@ -326,12 +435,16 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     return items;
   }, [
     authz.fleet.allAgents,
-    authz.fleet.readAgents,
     agentCount,
-    isTagAddVisible,
     isLicenceAllowingScheduleUpgrade,
-    doesLicenseAllowMigration,
+    agentRollbackEnabled,
+    doesLicenseAllowRollback,
+    maintainanceItems,
     agentPrivilegeLevelChangeEnabled,
+    isTagAddVisible,
+    agents,
+    exportMenuItem,
+    isRestartAgentActionEnabled,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(
@@ -345,6 +458,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         <EuiPortal>
           <AgentReassignAgentPolicyModal
             agents={agents}
+            agentCount={agentCount}
             onClose={() => {
               setIsReassignFlyoutOpen(false);
               refreshAgents();
@@ -360,6 +474,18 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             onClose={() => {
               setIsUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRemoveCollectorModalOpen && (
+        <EuiPortal>
+          <AgentRemoveCollectorModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRemoveCollectorModalOpen(false);
+              refreshAgents();
             }}
           />
         </EuiPortal>
@@ -453,6 +579,28 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         </EuiPortal>
       )}
+      {isRollbackModalOpen && (
+        <EuiPortal>
+          <AgentRollbackModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRollbackModalOpen(false);
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRestartModalOpen && (
+        <EuiPortal>
+          <AgentRestartModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRestartModalOpen(false);
+            }}
+          />
+        </EuiPortal>
+      )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <HierarchicalActionsMenu
@@ -462,7 +610,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             onToggle={setIsMenuOpen}
             button={{
               props: {
-                iconType: 'arrowDown',
+                iconType: 'chevronSingleDown',
                 iconSide: 'right',
                 fill: true,
               },

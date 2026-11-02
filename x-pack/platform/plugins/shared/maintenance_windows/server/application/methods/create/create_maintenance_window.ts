@@ -7,12 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../lib/get_es_query_config';
+import { getAlertsDataViewBase } from '../../../lib/get_alerts_data_view_base';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../common';
-import { getScopedQueryErrorMessage } from '../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import type { CreateMaintenanceWindowParams } from './types';
 import {
@@ -21,7 +19,7 @@ import {
 } from '../../transforms';
 import { createMaintenanceWindowSo } from '../../../data';
 import { createMaintenanceWindowParamsSchema } from './schemas';
-import { getMaintenanceWindowExpirationDate } from '../../lib';
+import { getMaintenanceWindowExpirationDate, resolveScope } from '../../lib';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -29,7 +27,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, duration, rRule, categoryIds, scopedQuery, enabled = true } = data;
+  const { title, schedule, scope, rRule, categoryIds, duration, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -38,51 +36,50 @@ export async function createMaintenanceWindow(
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scopedQuery;
-
-  try {
-    if (scopedQuery) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
-          esQueryConfig
-        )
-      );
-
-      scopedQueryWithGeneratedValue = {
-        ...scopedQuery,
-        dsl,
-      };
-    }
-  } catch (error) {
-    throw Boom.badRequest(
-      `Error validating create maintenance window data - ${getScopedQueryErrorMessage(
-        error.message
-      )}`
-    );
-  }
+  // Back-compat: a caller that omits `scope` gets today's behaviour (v1 selected, no filter).
+  const effectiveScope = scope ?? { alerting: { enabled: true } };
+  const resolvedScope = resolveScope({
+    scope: effectiveScope,
+    esQueryConfig,
+    indexPattern: getAlertsDataViewBase(),
+    errorPrefix: 'Error validating create maintenance window data',
+  });
 
   const id = SavedObjectsUtils.generateId();
 
   const expirationDate = getMaintenanceWindowExpirationDate({
-    rRule,
-    duration,
+    schedule: schedule.custom,
   });
 
   const modificationMetadata = await getModificationMetadata();
 
-  const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
+  const events = generateMaintenanceWindowEvents({
+    schedule: schedule.custom,
+    expirationDate,
+  });
+
+  // scopedQuery mirrors scope.alerting for the v1 alerting consumer and telemetry.
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
     enabled,
     expirationDate,
     categoryIds,
-    scopedQuery: scopedQueryWithGeneratedValue,
-    rRule: rRule as MaintenanceWindow['rRule'],
+    // scopedQuery mirrors scope.alerting for the legacy v1 alerting consumer and telemetry.
+    // Only set when alerting v1 is enabled with KQL or filters (null = selected but unfiltered).
+    scopedQuery:
+      resolvedScope.alerting?.enabled &&
+      (resolvedScope.alerting.kql || resolvedScope.alerting.filters?.length)
+        ? {
+            kql: resolvedScope.alerting.kql ?? '',
+            filters: resolvedScope.alerting.filters ?? [],
+            dsl: resolvedScope.alerting.dsl,
+          }
+        : null,
+    rRule,
     duration,
     events,
+    schedule,
+    scope: resolvedScope,
     ...modificationMetadata,
   });
 

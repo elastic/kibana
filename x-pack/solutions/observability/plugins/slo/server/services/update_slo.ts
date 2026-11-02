@@ -7,6 +7,7 @@
 
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { UpdateSLOParams, UpdateSLOResponse } from '@kbn/slo-schema';
 import { updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
@@ -27,22 +28,31 @@ import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_p
 import type { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import {
+  SLO_UPDATED_EBT_EVENT_TYPE,
+  getChangedFields,
+  toSloDefinitionEbtData,
+} from '../lib/telemetry';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
+import { getSloApmLabels } from './utils';
 
 export class UpdateSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private userId: string
+    private userId: string,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -52,6 +62,7 @@ export class UpdateSLO {
       groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
       settings: Object.assign({}, originalSlo.settings, params.settings),
     });
+    addTransactionLabels(getSloApmLabels(updatedSlo));
 
     if (isEqual(originalSlo, updatedSlo)) {
       return this.toResponse(originalSlo);
@@ -89,15 +100,29 @@ export class UpdateSLO {
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
         );
       } catch (err) {
-        this.logger.debug(
-          `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. ${err}`
-        );
+        this.logger.warn('Cannot update the SLO summary pipeline. Rolling back.', {
+          service: { name: 'update_slo' },
+          labels: {
+            slo_id: updatedSlo.id,
+            indicator_type: updatedSlo.indicator.type,
+            error_type: 'update_failed',
+          },
+          error: err,
+        });
 
         await asyncForEach(rollbackOperations.reverse(), async (operation) => {
           try {
             await operation();
           } catch (rollbackErr) {
-            this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+            this.logger.warn('Rollback operation failed.', {
+              service: { name: 'update_slo' },
+              labels: {
+                slo_id: updatedSlo.id,
+                indicator_type: updatedSlo.indicator.type,
+                error_type: 'rollback_failed',
+              },
+              error: rollbackErr,
+            });
           }
         });
 
@@ -107,6 +132,8 @@ export class UpdateSLO {
 
         throw err;
       }
+
+      this.reportUpdated(originalSlo, updatedSlo);
 
       return this.toResponse(updatedSlo);
     }
@@ -140,7 +167,7 @@ export class UpdateSLO {
       const tempDocPromise = this.createTempSummaryDocument(updatedSlo);
       rollbackOperations.push(() => this.deleteTempSummaryDocument(updatedSlo));
 
-      await Promise.all([
+      await allSettledOrThrow([
         sloPipelinePromise,
         rollupTransformPromise,
         summaryPipelinePromise,
@@ -149,20 +176,34 @@ export class UpdateSLO {
       ]);
 
       // transforms can only be started after the pipelines are created
-      await Promise.all([
+      await allSettledOrThrow([
         this.transformManager.start(updatedRollupTransformId),
         this.summaryTransformManager.start(updatedSummaryTransformId),
       ]);
     } catch (err) {
-      this.logger.debug(
-        `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back. ${err}`
-      );
+      this.logger.warn('Cannot update the SLO. Rolling back.', {
+        service: { name: 'update_slo' },
+        labels: {
+          slo_id: updatedSlo.id,
+          indicator_type: updatedSlo.indicator.type,
+          error_type: 'update_failed',
+        },
+        error: err,
+      });
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.warn('Rollback operation failed.', {
+            service: { name: 'update_slo' },
+            labels: {
+              slo_id: updatedSlo.id,
+              indicator_type: updatedSlo.indicator.type,
+              error_type: 'rollback_failed',
+            },
+            error: rollbackErr,
+          });
         }
       });
 
@@ -175,7 +216,17 @@ export class UpdateSLO {
 
     await this.deleteOriginalSLO(originalSlo);
 
+    this.reportUpdated(originalSlo, updatedSlo);
+
     return this.toResponse(updatedSlo);
+  }
+
+  private reportUpdated(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
+    this.telemetry.report(SLO_UPDATED_EBT_EVENT_TYPE, () => ({
+      ...toSloDefinitionEbtData(updatedSlo),
+      revision_bumped: updatedSlo.revision !== originalSlo.revision,
+      changed_fields: getChangedFields(originalSlo, updatedSlo),
+    }));
   }
 
   private async isRevisionBumpRequired(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
@@ -208,8 +259,18 @@ export class UpdateSLO {
 
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
-      // Any errors here should not prevent moving forward.
-      // Worst case we keep rolling up data for the previous revision number.
+      this.logger.warn(
+        'Failed to clean up resources for previous SLO revision. Old resources may continue producing data.',
+        {
+          service: { name: 'update_slo' },
+          labels: {
+            slo_id: slo.id,
+            indicator_type: slo.indicator.type,
+            error_type: 'cleanup_failed',
+          },
+          error: err,
+        }
+      );
     }
   }
 
@@ -276,11 +337,14 @@ export class UpdateSLO {
   private async deleteTempSummaryDocument(slo: SLODefinition) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
+        this.scopedClusterClient.asCurrentUser.delete(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            refresh: true,
+          },
+          { ignore: [404] }
+        ),
       { logger: this.logger }
     );
   }

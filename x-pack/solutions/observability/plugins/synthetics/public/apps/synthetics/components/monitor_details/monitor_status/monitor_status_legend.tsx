@@ -34,7 +34,7 @@ export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
         }}
         grow={false}
       >
-        <EuiIcon type={iconType} color={color} />
+        <EuiIcon type={iconType} color={color} aria-hidden={true} />
         <EuiText size="xs">{label}</EuiText>
       </EuiFlexItem>
     );

@@ -137,7 +137,7 @@ describe('TinesConnector', () => {
 
     it('should request Tines stories', async () => {
       await connector.getStories(undefined, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(storiesGetRequestExpected);
     });
 
@@ -193,7 +193,7 @@ describe('TinesConnector', () => {
     it('should request Tines webhook actions', async () => {
       await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
 
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(agentsGetRequestExpected);
     });
 
@@ -240,7 +240,7 @@ describe('TinesConnector', () => {
         connectorUsageCollector
       );
 
-      expect(mockRequest).toBeCalledTimes(2);
+      expect(mockRequest).toHaveBeenCalledTimes(2);
       expect(mockRequest).toHaveBeenNthCalledWith(1, actionGetRequestExpected);
       expect(mockRequest).toHaveBeenNthCalledWith(2, {
         ...ignoredRequestFields,
@@ -264,7 +264,7 @@ describe('TinesConnector', () => {
         connectorUsageCollector
       );
 
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'post',
@@ -275,6 +275,74 @@ describe('TinesConnector', () => {
         },
         connectorUsageCollector,
       });
+    });
+  });
+
+  describe('logging', () => {
+    it('should log debug messages for api requests', async () => {
+      mockRequest.mockReturnValue({ data: { stories: [], meta: { pages: 1 } } });
+      await connector.getStories(undefined, connectorUsageCollector);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[tinesApiRequest]. URL: ${url}/api/v1/stories`)
+      );
+    });
+
+    it('should log debug messages for getStories', async () => {
+      mockRequest.mockReturnValue({ data: { stories: [], meta: { pages: 1 } } });
+      await connector.getStories(undefined, connectorUsageCollector);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[getStories] URL: ${url}/api/v1/stories`)
+      );
+    });
+
+    it('should log debug messages for webhook parameters', async () => {
+      mockRequest
+        .mockReturnValueOnce({
+          data: {
+            ...webhookAgent,
+          },
+        })
+        .mockReturnValueOnce({ data: { took: 5, requestId: '123', status: 'ok' } });
+
+      await connector.runWebhook(
+        {
+          webhook: webhookResult,
+          body: '[]',
+        },
+        connectorUsageCollector
+      );
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `[getWebhookParameters] URL: ${url}/api/v1/actions/${webhookAgent.id}`
+        )
+      );
+    });
+
+    it('should log debug messages for run webhook', async () => {
+      mockRequest.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
+      await connector.runWebhook(
+        {
+          webhookUrl,
+          body: '[]',
+        },
+        connectorUsageCollector
+      );
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[runWebhook] URL: ${webhookUrl}`)
+      );
+    });
+
+    it('should log debug messages for getWebhooks', async () => {
+      mockRequest.mockReturnValue({ data: { agents: [], meta: { pages: 1 } } });
+      await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[getWebhooks] URL: ${url}/api/v1/agents, STORY_ID: ${story.id}`)
+      );
     });
   });
 });

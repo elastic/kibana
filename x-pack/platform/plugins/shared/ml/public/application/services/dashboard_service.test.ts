@@ -18,8 +18,8 @@ describe('DashboardService', () => {
     },
     findDashboardsService: jest.fn().mockResolvedValue({
       search: jest.fn().mockResolvedValue({
-        total: 0,
-        dashboards: [],
+        meta: { total: 0 },
+        data: [],
       }),
     }),
   };
@@ -42,7 +42,7 @@ describe('DashboardService', () => {
     // assert
     const searchDashboard = (await dashboard.findDashboardsService()).search;
     expect(searchDashboard).toHaveBeenCalledWith({
-      search: 'test',
+      query: 'test',
       per_page: 1000,
     });
     expect(resp).toEqual([]);

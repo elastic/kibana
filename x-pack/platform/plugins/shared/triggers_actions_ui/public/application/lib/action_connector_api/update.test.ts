@@ -21,6 +21,7 @@ describe('updateActionConnector', () => {
       connector_type_id: 'te/st',
       is_preconfigured: false,
       is_deprecated: false,
+      is_missing_secrets: false,
       is_system_action: false,
       is_connector_type_deprecated: false,
       name: 'My test',
@@ -35,6 +36,7 @@ describe('updateActionConnector', () => {
       name: 'My test',
       config: {},
       secrets: {},
+      isMissingSecrets: false,
     });
     const resolvedValue = { ...connector, id };
 
@@ -45,6 +47,69 @@ describe('updateActionConnector', () => {
         "/api/actions/connector/12%2F3",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+        },
+      ]
+    `);
+  });
+
+  test('should map auth_mode from the API response to authMode', async () => {
+    const id = '123';
+    const apiResponse = {
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_system_action: false,
+      is_connector_type_deprecated: false,
+      name: 'My test',
+      config: {},
+      secrets: {},
+      id,
+      auth_mode: 'shared',
+    };
+    http.put.mockResolvedValueOnce(apiResponse);
+
+    const connector: ActionConnectorWithoutId<{}, {}> = createMockActionConnector({
+      actionTypeId: 'test',
+      name: 'My test',
+      config: {},
+      secrets: {},
+    });
+
+    const result = await updateActionConnector({ http, connector, id });
+    expect(result).toMatchObject({ authMode: 'shared' });
+  });
+
+  test('should map is_inbound_events_enabled on the request and response', async () => {
+    const id = '123';
+    const apiResponse = {
+      connector_type_id: '.dual',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_system_action: false,
+      is_connector_type_deprecated: false,
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      id,
+      is_inbound_events_enabled: false,
+    };
+    http.put.mockResolvedValueOnce(apiResponse);
+
+    const connector: ActionConnectorWithoutId<{}, {}> = createMockActionConnector({
+      actionTypeId: '.dual',
+      name: 'My dual',
+      config: {},
+      secrets: {},
+      isInboundEventsEnabled: false,
+    });
+
+    const result = await updateActionConnector({ http, connector, id });
+    expect(result).toMatchObject({ isInboundEventsEnabled: false });
+    expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/actions/connector/123",
+        Object {
+          "body": "{\\"name\\":\\"My dual\\",\\"config\\":{},\\"secrets\\":{},\\"is_inbound_events_enabled\\":false}",
         },
       ]
     `);

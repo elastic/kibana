@@ -22,8 +22,6 @@ export interface SaveWorkspaceServices
 export type SaveWorkspaceHandler = (
   saveOptions: {
     confirmOverwrite: boolean;
-    isTitleDuplicateConfirmed: boolean;
-    onTitleDuplicate: () => void;
   },
   dataConsent: boolean,
   services: SaveWorkspaceServices
@@ -35,12 +33,14 @@ export function openSaveModal({
   workspace,
   saveWorkspace,
   services,
+  onClose,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
   saveWorkspace: SaveWorkspaceHandler;
   services: SaveWorkspaceServices;
+  onClose: () => void;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
@@ -48,8 +48,6 @@ export function openSaveModal({
     newTitle,
     newDescription,
     newCopyOnSave,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
     dataConsent,
   }: OnSaveGraphProps): Promise<SaveResult> => {
     workspace.title = newTitle;
@@ -57,8 +55,6 @@ export function openSaveModal({
     workspace.copyOnSave = newCopyOnSave;
     const saveOptions = {
       confirmOverwrite: false,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
     };
     return saveWorkspace(saveOptions, dataConsent, services).then((response) => {
       // If the save wasn't successful, put the original values back.
@@ -72,10 +68,12 @@ export function openSaveModal({
 
   showSaveModal(
     <SaveModal
+      lastSavedTitle={workspace.id ? workspace.title : ''}
+      contentClient={services.contentClient}
       savePolicy={savePolicy}
       hasData={hasData}
       onSave={onSave}
-      onClose={() => {}}
+      onClose={onClose}
       title={workspace.title}
       description={workspace.description}
       showCopyOnSave={Boolean(workspace.id)}

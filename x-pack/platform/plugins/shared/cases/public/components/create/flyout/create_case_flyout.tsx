@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
-import type { CasePostRequest, ObservablePost } from '../../../../common/types/api';
+import type { CasePostRequest } from '../../../../common/types/api';
 import * as i18n from '../translations';
 import type { CaseUI } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
@@ -26,40 +26,40 @@ export interface CreateCaseFlyoutProps {
   onClose?: () => void;
   onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
+  /**
+   * Alternative to `attachments` when the correct attachment type depends on the
+   * case owner chosen by the user. Called with the created case's owner after the
+   * case is saved. Mutually exclusive with `attachments` — prefer this form when
+   * the consumer cannot determine the owner at attachment-build time.
+   */
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
-  observables?: ObservablePost[];
 }
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   ({
     afterCaseCreated,
     attachments,
+    getAttachments,
     headerContent,
     initialValue,
     onClose,
     onSuccess,
-    observables = [],
   }) => {
+    const { euiTheme } = useEuiTheme();
     const handleCancel = onClose || noop;
     const handleOnSuccess = onSuccess || noop;
-
-    const { euiTheme } = useEuiTheme();
-    const maskProps = useMemo(
-      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-      [euiTheme.levels.flyout]
-    );
 
     return (
       <>
         <ReactQueryDevtools initialIsOpen={false} />
         <EuiFlyout
           onClose={handleCancel}
+          session="never"
           tour-step="create-case-flyout"
           aria-label={i18n.CREATE_CASE_LABEL}
           data-test-subj="create-case-flyout"
-          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps={maskProps}
         >
           <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">
@@ -89,11 +89,11 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               <CreateCaseForm
                 afterCaseCreated={afterCaseCreated}
                 attachments={attachments}
+                getAttachments={getAttachments}
                 onCancel={handleCancel}
                 onSuccess={handleOnSuccess}
                 withSteps={false}
                 initialValue={initialValue}
-                observables={observables}
               />
             </div>
           </EuiFlyoutBody>

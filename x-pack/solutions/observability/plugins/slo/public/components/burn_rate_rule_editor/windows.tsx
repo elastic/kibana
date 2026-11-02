@@ -6,16 +6,17 @@
  */
 import React, { useState } from 'react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiSelect,
   EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
@@ -200,20 +201,24 @@ function Window({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
-          <EuiButtonIcon
-            data-test-subj="sloBurnRateRuleDeleteWindowButton"
-            iconType="trash"
-            color="danger"
-            style={{ marginBottom: '-1em' }}
-            onClick={() => onDelete(id)}
-            disabled={disableDelete}
-            title={i18n.translate('xpack.slo.rules.deleteWindowLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.slo.rules.deleteWindowLabel', {
               defaultMessage: 'Delete window',
             })}
-            aria-label={i18n.translate('xpack.slo.rules.deleteWindowLabel', {
-              defaultMessage: 'Delete window',
-            })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="sloBurnRateRuleDeleteWindowButton"
+              iconType="trash"
+              color="danger"
+              style={{ marginBottom: '-1em' }}
+              onClick={() => onDelete(id)}
+              disabled={disableDelete}
+              aria-label={i18n.translate('xpack.slo.rules.deleteWindowLabel', {
+                defaultMessage: 'Delete window',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
@@ -339,7 +344,7 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
             data-test-subj="sloBurnRateRuleAddWindowButton"
             color={'primary'}
             size="s"
-            iconType={'plusInCircleFilled'}
+            iconType={'plusCircle'}
             onClick={handleAddWindow}
             isDisabled={windows.length === (totalNumberOfWindows || 4)}
             aria-label={i18n.translate('xpack.slo.rules.addWindowAriaLabel', {

@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiSpacer,
-  EuiTextColor,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiPanel, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
 import { HiddenField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -36,22 +28,23 @@ const additionalSettingsStyles = css`
 `;
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
-  const { euiTheme } = useEuiTheme();
   const additionalSettingsId = useGeneratedHtmlId({ prefix: 'additionalSettings' });
   const { emptyField, urlField } = fieldValidators;
   const [isOpen, toggleIsOpen] = useToggle(false);
 
   const form = useFormContext();
-  const { getFormData, updateFieldValues } = form;
+  const { getFormData, updateFieldValues, getFieldDefaultValue } = form;
   const [{ id: connectorId }] = useFormData({
     watch: ['id'],
   });
+
+  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
   const {
     data: secretHeaderKeys = [],
     isLoading,
     isFetching,
-  } = useSecretHeaders(connectorId, {
+  } = useSecretHeaders(connectorId, isEdit, {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -97,17 +90,17 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         }}
         onToggle={toggleIsOpen}
         forceState={isOpen ? 'open' : 'closed'}
-        buttonContent={
-          <EuiTextColor color={euiTheme.colors.link}>
-            {mcpFieldStrings.additionalSettings.label}
-          </EuiTextColor>
-        }
+        buttonContent={mcpFieldStrings.additionalSettings.label}
         initialIsOpen={isEdit}
       >
         <EuiSpacer size="m" />
         <EuiPanel hasShadow={false} hasBorder={true}>
           {/* Workaround to resolve updates to the headers field for secrets */}
-          <Field path="__internal__.hasHeaders" component={HiddenField} />
+          <Field
+            path="__internal__.hasHeaders"
+            component={HiddenField}
+            config={{ defaultValue: hasHeadersDefaultValue }}
+          />
           <HeaderFields readOnly={readOnly} required={false} />
         </EuiPanel>
       </EuiAccordion>

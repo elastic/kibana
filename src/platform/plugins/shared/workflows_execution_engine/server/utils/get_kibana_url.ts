@@ -10,33 +10,49 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 
-export function getKibanaUrl(coreStart?: CoreStart, cloudSetup?: CloudSetup): string {
-  if (coreStart?.http?.basePath?.publicBaseUrl) {
-    return coreStart.http.basePath.publicBaseUrl;
+const LOCALHOST_FALLBACK = 'http://localhost:5601';
+
+export function getKibanaUrl(
+  coreStart?: CoreStart,
+  cloudSetup?: CloudSetup,
+  use_server_info: boolean = false,
+  use_localhost: boolean = false
+): string {
+  // Force flags take precedence (use_server_info wins over use_localhost)
+  if (use_server_info) {
+    return getServerInfoUrl(coreStart) ?? LOCALHOST_FALLBACK;
   }
 
-  if (cloudSetup?.kibanaUrl) {
-    return cloudSetup.kibanaUrl;
+  if (use_localhost) {
+    return LOCALHOST_FALLBACK;
   }
 
-  const http = coreStart?.http;
-  if (http) {
-    const { protocol, hostname, port } = http.getServerInfo();
-    return `${protocol}://${hostname}:${port}${http.basePath.prepend('/').slice(0, -1)}`;
-  }
-
-  return 'http://localhost:5601';
+  // Default resolution order: publicBaseUrl → cloud URL → server info → localhost
+  return (
+    coreStart?.http?.basePath?.publicBaseUrl ??
+    cloudSetup?.kibanaUrl ??
+    getServerInfoUrl(coreStart) ??
+    LOCALHOST_FALLBACK
+  );
 }
 
-export function buildWorkflowExecutionUrl(
-  kibanaUrl: string,
+function getServerInfoUrl(coreStart?: CoreStart): string | undefined {
+  const http = coreStart?.http;
+  if (!http) {
+    return undefined;
+  }
+  const { protocol, hostname, port } = http.getServerInfo();
+  return `${protocol}://${hostname}:${port}${http.basePath.prepend('/').slice(0, -1)}`;
+}
+
+/** App path for an execution, relative to publicBaseUrl, including the space prefix. */
+export function buildWorkflowExecutionAppPath(
   spaceId: string,
   workflowId: string,
   executionId: string,
   stepExecutionId?: string
 ): string {
   const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-  const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
   const params = new URLSearchParams({
     executionId,
     tab: 'executions',
@@ -46,5 +62,20 @@ export function buildWorkflowExecutionUrl(
     params.set('stepExecutionId', stepExecutionId);
   }
 
-  return `${baseUrl}?${params.toString()}`;
+  return `${spacePrefix}/app/workflows/${workflowId}?${params.toString()}`;
+}
+
+export function buildWorkflowExecutionUrl(
+  kibanaUrl: string,
+  spaceId: string,
+  workflowId: string,
+  executionId: string,
+  stepExecutionId?: string
+): string {
+  return `${kibanaUrl}${buildWorkflowExecutionAppPath(
+    spaceId,
+    workflowId,
+    executionId,
+    stepExecutionId
+  )}`;
 }

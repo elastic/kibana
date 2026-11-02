@@ -7,33 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators, PresentationContainer } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   initializeTitleManager,
   useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
+  apiIsPresentationContainer,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { BookState } from '../../../server';
 import { defaultBookState } from './default_book_state';
 import { loadBook, saveBook } from './library_utils';
@@ -49,35 +41,27 @@ const bookStateComparators: StateComparators<BookState> = {
 };
 
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
-  const savedBookEmbeddableFactory: EmbeddableFactory<BookEmbeddableState, BookApi> = {
+  const savedBookEmbeddableFactory: EmbeddablePublicDefinition<BookEmbeddableState, BookApi> = {
     type: BOOK_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const savedObjectId = (initialState.rawState as BookByReferenceState).savedObjectId;
-      const initialBookState = savedObjectId
-        ? await loadBook(savedObjectId)
-        : initialState.rawState;
+      const titleManager = initializeTitleManager(initialState);
+      const savedObjectId = (initialState as BookByReferenceState).savedObjectId;
+      const initialBookState = savedObjectId ? await loadBook(savedObjectId) : initialState;
       const bookStateManager = initializeStateManager<BookState>(
         initialBookState as BookState,
         defaultBookState
       );
       const isByReference = Boolean(savedObjectId);
 
-      const serializeBook = (id?: string) => {
-        return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
-          },
-        };
-      };
+      const serializeBook = (id?: string) => ({
+        ...titleManager.getLatestState(),
+        ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
+      });
 
-      const serializeState = () => serializeBook(savedObjectId);
-
-      const unsavedChangesApi = initializeUnsavedChanges<BookEmbeddableState>({
+      const stateApi = initializeStateApi<BookEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => serializeBook(savedObjectId),
         anyStateChange$: merge(titleManager.anyStateChange$, bookStateManager.anyStateChange$),
         getComparators: () => {
           return {
@@ -86,14 +70,14 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
           };
         },
-        onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (!savedObjectId) bookStateManager.reinitializeState(lastSaved?.rawState as BookState);
+        applySerializedState: async (nextState) => {
+          titleManager.reinitializeState(nextState);
+          if (!savedObjectId) bookStateManager.reinitializeState(nextState as BookState);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...titleManager.api,
         onEdit: async () => {
           openLazyFlyout({
@@ -129,7 +113,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
             defaultMessage: 'book',
           }),
-        serializeState,
 
         // library transforms
         getSavedObjectId: () => savedObjectId,
@@ -138,10 +121,9 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           const newId = await saveBook(undefined, bookStateManager.getLatestState());
           return newId;
         },
-        checkForDuplicateTitle: async (title) => {},
-        getSerializedStateByValue: () => serializeBook() as SerializedPanelState<BookState>,
-        getSerializedStateByReference: (newId) =>
-          serializeBook(newId) as SerializedPanelState<BookByReferenceState>,
+        hasLibraryItemWithTitle: async (title) => false, // duplicate titles not implemented
+        getSerializedStateByValue: () => serializeBook() as BookState,
+        getSerializedStateByReference: (newId) => serializeBook(newId) as BookByReferenceState,
         canLinkToLibrary: async () => !isByReference,
         canUnlinkFromLibrary: async () => isByReference,
       });
@@ -168,10 +150,9 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               `}
             >
               {showLibraryCallout && (
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount={false}
                   size="s"
-                  color={'warning'}
                   title={
                     isByReference
                       ? i18n.translate('embeddableExamples.savedBook.libraryCallout', {
@@ -181,7 +162,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                           defaultMessage: 'Not saved in library',
                         })
                   }
-                  iconType={isByReference ? 'folderCheck' : 'folderClosed'}
                 />
               )}
               <div
@@ -203,7 +183,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                   <EuiFlexItem>
                     <EuiFlexGroup wrap responsive={false} gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiBadge iconType="userAvatar" color="hollow">
+                        <EuiBadge iconType="user" color="hollow">
                           {authorName}
                         </EuiBadge>
                       </EuiFlexItem>

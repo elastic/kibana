@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { MAX_SHORT_STRING_LENGTH } from './schema_limits';
 
 const startDescription =
-  'The start time of the query window using Elasticsearch date math (e.g., "now-24h", "now-15m").';
+  'The start time of the query window using Elasticsearch date math. Examples: "now-24h", "now-15m".';
 const endDescription =
-  'The end time of the query window using Elasticsearch date math (e.g., "now").';
+  'The end time of the query window using Elasticsearch date math. Example: "now".';
 
-export const indexDescription =
-  'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).';
+export const indexDescription = 'Concrete index or index pattern to analyze. Example: "logs-*".';
 
 export const timeRangeSchemaRequired = {
-  start: z.string().describe(startDescription),
-  end: z.string().describe(endDescription),
+  start: z.string().max(MAX_SHORT_STRING_LENGTH).describe(startDescription),
+  end: z.string().max(MAX_SHORT_STRING_LENGTH).describe(endDescription),
 };
 
 export function timeRangeSchemaOptional(defaultTimeRange: { start: string; end: string }) {
   return {
     start: z
       .string()
+      .max(MAX_SHORT_STRING_LENGTH)
       .describe(`${startDescription} Defaults to ${defaultTimeRange.start}.`)
-      .optional(),
+      .default(defaultTimeRange.start),
 
-    end: z.string().describe(`${endDescription} Defaults to ${defaultTimeRange.end}.`).optional(),
+    end: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .describe(`${endDescription} Defaults to ${defaultTimeRange.end}.`)
+      .default(defaultTimeRange.end),
   };
 }

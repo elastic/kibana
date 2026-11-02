@@ -11,11 +11,9 @@ export const MOCK_TAG_NAME = 'test tag';
 export const DEFAULT_TAGS_RESPONSE = [
   {
     id: MOCK_TAG_ID,
-    attributes: {
-      name: MOCK_TAG_NAME,
-      description: 'test tag description',
-      color: '#2c7b82',
-    },
+    name: MOCK_TAG_NAME,
+    description: 'test tag description',
+    color: '#2c7b82',
   },
 ];
 

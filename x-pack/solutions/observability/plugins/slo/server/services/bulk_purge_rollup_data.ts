@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { assertNever } from '@elastic/eui';
+import { assertNever } from '@kbn/std';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
-import type {
-  BulkPurgeRollupParams,
-  BulkPurgeRollupResponse,
-} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
+import type { BulkPurgeRollupParams, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 
 export class BulkPurgeRollupData {
-  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
+  constructor(private esClient: ElasticsearchClient, private repository: SLODefinitionRepository) {}
 
   public async execute(params: BulkPurgeRollupParams): Promise<BulkPurgeRollupResponse> {
     const lookback = this.getTimestamp(params.purgePolicy);
@@ -67,7 +63,7 @@ export class BulkPurgeRollupData {
       case 'fixed_age':
         const duration = purgePolicy.age;
         inputIsInvalid = slos.some((slo) => {
-          if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
+          if (slo.timeWindow.type === 'calendarAligned') {
             return moment(Date.now())
               .subtract(duration.asSeconds(), 's')
               .isAfter(moment(Date.now()).startOf(slo.timeWindow.duration.unit));
@@ -79,7 +75,7 @@ export class BulkPurgeRollupData {
       case 'fixed_time':
         const timestampMoment = moment(purgePolicy.timestamp);
         inputIsInvalid = slos.some((slo) => {
-          if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
+          if (slo.timeWindow.type === 'calendarAligned') {
             return timestampMoment.isAfter(
               moment(Date.now()).startOf(slo.timeWindow.duration.unit)
             );

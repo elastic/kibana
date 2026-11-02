@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { dockerRegistryPort, type FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
@@ -19,9 +19,15 @@ export function createTestConfig<
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
+    const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
+    const dockerServers = svlSharedConfig.get('dockerServers');
+
     return {
       ...svlSharedConfig.getAll(),
-
+      dockerServers:
+        !enableFleetDockerRegistry && dockerServers?.registry
+          ? { ...dockerServers, registry: { ...dockerServers.registry, enabled: false } }
+          : dockerServers,
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
@@ -38,7 +44,12 @@ export function createTestConfig<
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          // Fail fast if CI can't reach Fleet's product versions API (default 60s, retried once).
+          '--xpack.fleet.productVersionsApiTimeoutMs=5000',
           ...(options.kbnServerArgs ?? []),
+          ...(enableFleetDockerRegistry && dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,
@@ -46,6 +57,10 @@ export function createTestConfig<
         defaults: {
           'accessibility:disableAnimations': true,
           'dateFormat:tz': 'UTC',
+        },
+        globalDefaults: {
+          // Disable tours globally for all tests
+          hideAnnouncements: true,
         },
       },
       // the apps section defines the urls that

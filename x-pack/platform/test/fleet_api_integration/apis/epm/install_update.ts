@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         res = err;
       }
-      expect(res.response.data.statusCode).equal(404);
+      expect(res.status).equal(404);
     });
     it('should return 400 if trying to install an out-of-date package', async function () {
       await supertest
@@ -64,7 +64,15 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         res = err;
       }
-      expect(res.response.data.statusCode).equal(404);
+      expect(res.status).equal(404);
+    });
+    it('should return 200 if trying to install an out-of-date package with allow_outdated_version', async function () {
+      await supertest
+        .post(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ allow_outdated_version: true })
+        .expect(200);
+      await deletePackage('multiple_versions', '0.1.0');
     });
     it('should return 200 if trying to force install an out-of-date package', async function () {
       await supertest

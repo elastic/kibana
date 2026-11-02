@@ -14,6 +14,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -34,29 +35,35 @@ import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { SLO_CREATED_EBT_EVENT_TYPE, toSloDefinitionEbtData } from '../lib/telemetry';
 import { SO_SLO_TYPE } from '../saved_objects';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
+import { getSloApmLabels } from './utils';
 
 export class CreateSLO {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private internalSOClient: SavedObjectsClientContract,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private username: string
+    private username: string,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
+    addTransactionLabels(getSloApmLabels(slo));
     validateSLO(slo);
 
     await Promise.all([
@@ -90,7 +97,7 @@ export class CreateSLO {
       const tempDocPromise = this.createTempSummaryDocument(slo);
       rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
-      await Promise.all([
+      await allSettledOrThrow([
         createPromise,
         sloPipelinePromise,
         rollupTransformPromise,
@@ -100,20 +107,34 @@ export class CreateSLO {
       ]);
 
       // transforms can only be started after the related pipelines are created
-      await Promise.all([
+      await allSettledOrThrow([
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.debug(
-        `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
-      );
+      this.logger.warn('Cannot create the SLO. Rolling back.', {
+        service: { name: 'create_slo' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'creation_failed',
+        },
+        error: err,
+      });
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.warn('Rollback operation failed.', {
+            service: { name: 'create_slo' },
+            labels: {
+              slo_id: slo.id,
+              indicator_type: slo.indicator.type,
+              error_type: 'rollback_failed',
+            },
+            error: rollbackErr,
+          });
         }
       });
 
@@ -123,6 +144,8 @@ export class CreateSLO {
 
       throw err;
     }
+
+    this.telemetry.report(SLO_CREATED_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(slo));
 
     return this.toResponse(slo);
   }
@@ -158,11 +181,14 @@ export class CreateSLO {
   private async deleteTempSummaryDocument(slo: SLODefinition) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
+        this.scopedClusterClient.asCurrentUser.delete(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            refresh: true,
+          },
+          { ignore: [404] }
+        ),
       { logger: this.logger }
     );
   }

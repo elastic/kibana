@@ -277,15 +277,9 @@ describe('When displaying Endpoint Response Actions', () => {
             expect(cancelCommand).toBeDefined();
             expect(cancelCommand?.args?.comment).toBeDefined();
             expect(cancelCommand?.args?.comment?.required).toBe(false);
-
-            if (hasAction) {
-              expect(cancelCommand?.args?.action).toBeDefined();
-              expect(cancelCommand?.args?.action?.required).toBe(true);
-              expect(cancelCommand?.args?.action?.SelectorComponent).toBeDefined();
-            } else {
-              expect(cancelCommand?.args?.action).toBeUndefined();
-            }
-
+            expect(cancelCommand?.args?.action).toBeDefined();
+            expect(cancelCommand?.args?.action?.required).toBe(true);
+            expect(cancelCommand?.args?.action?.SelectorComponent).toBeDefined();
             expect(cancelCommand?.helpDisabled).toBe(!helpVisible);
             expect(cancelCommand?.helpHidden).toBe(!helpVisible);
           }

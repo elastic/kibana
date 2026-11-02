@@ -23,7 +23,7 @@ export const querySavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
-    icon: 'search',
+    icon: 'magnify',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {

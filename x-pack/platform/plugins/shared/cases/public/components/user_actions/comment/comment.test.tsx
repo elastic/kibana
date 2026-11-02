@@ -6,37 +6,42 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import { EuiCommentList } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-
-import { UserActionActions } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import {
   alertComment,
   basicCase,
+  basicCommentUnified,
   eventComment,
   externalReferenceAttachment,
   getAlertUserAction,
   getEventUserAction,
-  getExternalReferenceAttachment,
   getExternalReferenceUserAction,
-  getHostIsolationUserAction,
   getMultipleAlertsUserAction,
-  getPersistableStateAttachment,
   getPersistableStateUserAction,
   getUserAction,
-  hostIsolationComment,
   persistableStateAttachment,
 } from '../../../containers/mock';
 import { TestProviders, renderWithTestingProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
-import { getMockBuilderArgs } from '../mock';
+import { getMockBuilderArgs, getMockCommentRenderingContext } from '../mock';
+import { CommentRenderingProvider } from './comment_rendering_context';
 import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
+import { getCommentAttachmentType } from '../../attachments/comment';
+import { getStackAlertAttachmentType } from '../../attachments/alert';
+import { toStringArray } from '../../../../common/utils/attachments';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -47,10 +52,32 @@ const navigateToCaseView = jest.fn();
 
 describe('createCommentUserActionBuilder', () => {
   const builderArgs = getMockBuilderArgs();
+  const utils = getMockCommentRenderingContext();
+  const createUnifiedAlertAttachment = ({
+    attachmentId = alertComment.alertId,
+    index = alertComment.index,
+  }: {
+    attachmentId?: string | string[];
+    index?: string | string[];
+  } = {}) => ({
+    id: alertComment.id,
+    type: STACK_ALERT_ATTACHMENT_TYPE,
+    attachmentId,
+    metadata: { index, rule: alertComment.rule },
+    owner: alertComment.owner,
+    createdAt: alertComment.createdAt,
+    createdBy: alertComment.createdBy,
+    pushedAt: alertComment.pushedAt,
+    pushedBy: alertComment.pushedBy,
+    updatedAt: alertComment.updatedAt,
+    updatedBy: alertComment.updatedBy,
+    version: alertComment.version,
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
+    useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
   });
 
   describe('edits', () => {
@@ -58,6 +85,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getUserAction('comment', UserActionActions.update);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -70,6 +98,152 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('edited comment')).toBeInTheDocument();
     });
+
+    it('renders correctly when editing a comment whose attachment saved object is missing', async () => {
+      const userAction = getUserAction('comment', UserActionActions.update);
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited comment')).toBeInTheDocument();
+    });
+
+    it('names the attachment type when editing an alert', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getAlertUserAction({ action: UserActionActions.update });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 1 alert')).toBeInTheDocument();
+    });
+
+    it('counts the referenced ids when editing multiple alerts', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getMultipleAlertsUserAction({ action: UserActionActions.update });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 2 alerts')).toBeInTheDocument();
+    });
+
+    it('counts a value attachment as 1 when editing it', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'lens',
+        getLabel: () => 'Visualizations',
+        getIcon: () => 'lensApp',
+        getCreationActivity: () => ({ event: 'added a visualization' }),
+        getCountLabel: ({ count }) => (count === 1 ? '1 visualization' : `${count} visualizations`),
+        schema: z.object({}),
+      });
+
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited 1 visualization')).toBeInTheDocument();
+    });
+
+    it('falls back to the common label for a registered type without a count label', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        schema: z.object({}),
+      });
+
+      const userAction = getEventUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
+    });
+
+    it('falls back to the common label for an unregistered type', async () => {
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.update,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited attachment')).toBeInTheDocument();
+    });
   });
 
   describe('deletions', () => {
@@ -77,32 +251,53 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getUserAction('comment', UserActionActions.delete);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
+      // The `user` comment type resolves to the registered unified `comment` type, whose
+      // removal object drives the (lowercase) row label.
       expect(screen.getByText('removed comment')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting a single alert', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
       const userAction = getAlertUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed one alert')).toBeInTheDocument();
+      expect(screen.getByText('removed alert')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting multiple alerts', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
       const userAction = getMultipleAlertsUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -116,6 +311,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -125,52 +321,72 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting an external reference attachment with getAttachmentRemovalObject defined', async () => {
-      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
-        event: 'removed my own attachment',
+    it('resolves an external reference through the unified registry', async () => {
+      // A legacy external-reference delete payload whose type maps to a unified type
+      // (endpoint -> security.endpoint) picks up the unified type's removal label.
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        getLabel: () => 'Endpoint',
+        getIcon: () => 'logoSecurity',
+        getCreationActivity: () => ({ event: 'added an endpoint' }),
+        getRemovalActivity: () => ({ event: 'removed endpoint attachment' }),
+        schema: z.object({}),
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      const attachment = getExternalReferenceAttachment();
-      externalReferenceAttachmentTypeRegistry.register({
-        ...attachment,
-        getAttachmentRemovalObject,
+      const userAction = getExternalReferenceUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'externalReference',
+            externalReferenceId: 'my-id',
+            externalReferenceStorage: { type: 'elasticSearchDoc' },
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceMetadata: null,
+            owner: 'securitySolution',
+          },
+        },
       });
-
-      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         userAction,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
-        },
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toBeCalledWith({
-        caseData: {
-          id: 'basic-case-id',
-          title: 'Another horrible breach!!',
-        },
-        externalReferenceId: 'my-id',
-        externalReferenceMetadata: null,
-      });
+      expect(screen.getByText('removed endpoint attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting an external reference attachment without getAttachmentRemovalObject defined', async () => {
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      const attachment = getExternalReferenceAttachment();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
+    it('falls back to the common label for a registered type without a removal object', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        getLabel: () => 'Endpoint',
+        getIcon: () => 'logoSecurity',
+        getCreationActivity: () => ({ event: 'added an endpoint' }),
+        schema: z.object({}),
+      });
 
-      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
+      const userAction = getExternalReferenceUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'externalReference',
+            externalReferenceId: 'my-id',
+            externalReferenceStorage: { type: 'elasticSearchDoc' },
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceMetadata: null,
+            owner: 'securitySolution',
+          },
+        },
+      });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         userAction,
       });
 
@@ -180,8 +396,17 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting a persistable state attachment', async () => {
-      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
+    it('renders correctly when deleting a unified value attachment', async () => {
+      const userAction = getPersistableStateUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'lens',
+            data: { state: { test_foo: 'foo' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         userAction,
@@ -193,61 +418,209 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting a persistable state attachment with getAttachmentRemovalObject defined', async () => {
-      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
-        event: 'removed my own attachment',
+    it('renders correctly when deleting a unified event attachment', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity: () => ({ event: 'removed event' }),
+        schema: z.object({}),
       });
 
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      const attachment = getPersistableStateAttachment();
-      persistableStateAttachmentTypeRegistry.register({
-        ...attachment,
-        getAttachmentRemovalObject,
+      const userAction = getEventUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
       });
 
-      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         userAction,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
-        },
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toBeCalledWith({
-        caseData: {
-          id: 'basic-case-id',
-          title: 'Another horrible breach!!',
-        },
-        persistableStateAttachmentTypeId: '.test',
-        persistableStateAttachmentState: {
-          test_foo: 'foo',
-        },
-      });
+      expect(screen.getByText('removed event')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting a persistable state attachment without getAttachmentRemovalObject defined', async () => {
-      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-      const attachment = getPersistableStateAttachment();
-      persistableStateAttachmentTypeRegistry.register(attachment);
+    it('passes the saved object id and metadata to getRemovalActivity', () => {
+      const getRemovalActivity = jest.fn().mockReturnValue({ event: 'removed event' });
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity,
+        schema: z.object({}),
+      });
 
-      const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
+      const userAction = getEventUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'security.event',
+            attachmentId: 'event-id-1',
+            metadata: { index: 'event-index-1' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      }).build();
+
+      expect(getRemovalActivity).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedObjectId: userAction.commentId,
+          attachmentId: 'event-id-1',
+          metadata: { index: 'event-index-1' },
+        })
+      );
+    });
+
+    it('renders correctly when deleting a legacy event attachment', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity: () => ({ event: 'removed event' }),
+        schema: z.object({}),
+      });
+
+      const userAction = getEventUserAction({ action: UserActionActions.delete });
+
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+      expect(screen.getByText('removed event')).toBeInTheDocument();
+    });
+  });
+
+  describe('un-hides the create row when the attachment saved object is missing', () => {
+    it('renders a deleted comment as an event-only row without its text', async () => {
+      const userAction = getUserAction('comment', UserActionActions.create, {
+        commentId: basicCase.comments[0].id,
+        payload: {
+          comment: {
+            type: 'comment',
+            data: { content: 'a comment' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={utils}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
+
+      expect(await screen.findByText('added a comment')).toBeInTheDocument();
+      expect(screen.queryByText('a comment')).not.toBeInTheDocument();
+      expect(screen.getByTestId('comment-comment-comment-deleted')).toBeInTheDocument();
+      expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+      expect(screen.getByTestId(`copy-link-${basicCase.comments[0].id}`)).toBeInTheDocument();
+    });
+
+    it('renders a single-alert create row from the payload', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getAlertUserAction({
+        payload: {
+          comment: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-id-1',
+            metadata: { index: 'index-id-1', rule: { id: 'rule-id-1', name: 'Awesome rule' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+        'added an alert from Awesome rule'
+      );
+    });
+
+    it('renders a multiple-alerts create row from the payload', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getMultipleAlertsUserAction({
+        payload: {
+          comment: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ['alert-id-1', 'alert-id-2'],
+            metadata: {
+              index: ['index-id-1', 'index-id-2'],
+              rule: { id: 'rule-id-1', name: 'Awesome rule' },
+            },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
     });
   });
 
@@ -259,54 +632,68 @@ describe('createCommentUserActionBuilder', () => {
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={utils}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
     });
 
     it('deletes a user comment correctly', async () => {
+      const handleDeleteComment = jest.fn();
       const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={{ ...utils, handleDeleteComment }}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
 
       await deleteAttachment('trash', 'Delete');
 
       await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'basic-comment-id',
-          'Deleted comment'
-        );
+        expect(handleDeleteComment).toHaveBeenCalledWith('basic-comment-id', 'Deleted comment');
       });
     });
 
     it('edits a user comment correctly', async () => {
+      const handleManageMarkdownEditId = jest.fn();
       const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={{ ...utils, handleManageMarkdownEditId }}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
@@ -316,24 +703,30 @@ describe('createCommentUserActionBuilder', () => {
       await userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
       await waitFor(() => {
-        expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
+        expect(handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
       });
     });
 
     it('quotes a user comment correctly', async () => {
+      const handleManageQuote = jest.fn();
       const userAction = getUserAction('comment', UserActionActions.create, {
         commentId: basicCase.comments[0].id,
       });
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={{ ...utils, handleManageQuote }}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
@@ -343,7 +736,7 @@ describe('createCommentUserActionBuilder', () => {
       await userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
 
       await waitFor(() => {
-        expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
+        expect(handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
       });
     });
   });
@@ -351,33 +744,35 @@ describe('createCommentUserActionBuilder', () => {
   describe('Single alert', () => {
     it('renders correctly a single alert', async () => {
       const userAction = getAlertUserAction();
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [alertComment],
+        unifiedAttachmentTypeRegistry,
+        attachments: [createUnifiedAlertAttachment()],
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
         'added an alert from Awesome rule'
       );
     });
 
     it('deletes a single alert correctly', async () => {
       const userAction = getAlertUserAction();
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [alertComment],
+        unifiedAttachmentTypeRegistry,
+        attachments: [createUnifiedAlertAttachment()],
         userAction,
       });
 
@@ -385,60 +780,56 @@ describe('createCommentUserActionBuilder', () => {
 
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
         'added an alert from Awesome rule'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('trash', 'Delete');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
           'alert-comment-id',
-          'Deleted one alert'
+          'Deleted one alert',
+          undefined
         );
       });
     });
 
     it('views an alert correctly', async () => {
       const userAction = getAlertUserAction();
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [alertComment],
+        unifiedAttachmentTypeRegistry,
+        attachments: [createUnifiedAlertAttachment()],
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-action-show-alert-alert-action-id')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'));
-
-      await waitFor(() => {
-        expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
-      });
+      expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
     });
   });
 
   describe('Multiple alerts', () => {
     it('renders correctly multiple alerts with a link to the alerts table', async () => {
-      useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
       const userAction = getAlertUserAction();
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
+        unifiedAttachmentTypeRegistry,
         attachments: [
-          {
-            ...alertComment,
-            alertId: ['alert-id-1', 'alert-id-2'],
+          createUnifiedAlertAttachment({
+            attachmentId: ['alert-id-1', 'alert-id-2'],
             index: ['alert-index-1', 'alert-index-2'],
-          },
+          }),
         ],
         userAction,
       });
@@ -446,26 +837,113 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(screen.getByTestId('comment-action-show-alerts-1234'));
+      expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
+    });
+
+    describe('after some alerts are removed', () => {
+      const addedIds = ['alert-id-1', 'alert-id-2', 'alert-id-3', 'alert-id-4'];
+      const getAddedAlertsUserAction = (
+        attachmentId: string | string[] = addedIds,
+        ruleName = alertComment.rule.name
+      ) =>
+        getMultipleAlertsUserAction({
+          payload: {
+            comment: {
+              type: STACK_ALERT_ATTACHMENT_TYPE,
+              attachmentId,
+              metadata: {
+                index: toStringArray(attachmentId).map((id) => `index-${id}`),
+                rule: { ...alertComment.rule, name: ruleName },
+              },
+              owner: alertComment.owner,
+            },
+          },
+        });
+
+      const renderUserAction = (
+        userAction: ReturnType<typeof getMultipleAlertsUserAction>,
+        attachments: Array<ReturnType<typeof createUnifiedAlertAttachment>>
+      ) => {
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
+
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          unifiedAttachmentTypeRegistry,
+          attachments,
+          userAction,
+        });
+
+        renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+      };
+
+      it('keeps the added alerts count', () => {
+        renderUserAction(getAddedAlertsUserAction(), [
+          createUnifiedAlertAttachment({ attachmentId: ['alert-id-4'], index: ['index-4'] }),
+        ]);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added 4 alerts from Awesome rule'
+        );
+        expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
+      });
+
+      it('counts the remaining alerts in the delete toast', async () => {
+        renderUserAction(getAddedAlertsUserAction(), [
+          createUnifiedAlertAttachment({
+            attachmentId: ['alert-id-3', 'alert-id-4'],
+            index: ['index-3', 'index-4'],
+          }),
+        ]);
+
+        await deleteAttachment('trash', 'Delete');
+
+        await waitFor(() => {
+          expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
+            'alert-comment-id',
+            'Deleted 2 alerts',
+            undefined
+          );
+        });
+      });
+
+      it('keeps the added alerts count once every alert is removed', () => {
+        renderUserAction(getAddedAlertsUserAction(), []);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added 4 alerts from Awesome rule'
+        );
+      });
+
+      it('uses the live attachment when no alert is removed', () => {
+        renderUserAction(getAddedAlertsUserAction('alert-id-1', 'Old rule name'), [
+          createUnifiedAlertAttachment({ attachmentId: ['alert-id-1'], index: ['index-1'] }),
+        ]);
+
+        expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+          'added an alert from Awesome rule'
+        );
+      });
     });
 
     it('deletes multiple alerts correctly', async () => {
       const userAction = getAlertUserAction();
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
+        unifiedAttachmentTypeRegistry,
         attachments: [
-          {
-            ...alertComment,
-            alertId: ['alert-id-1', 'alert-id-2'],
+          createUnifiedAlertAttachment({
+            attachmentId: ['alert-id-1', 'alert-id-2'],
             index: ['alert-index-1', 'alert-index-2'],
-          },
+          }),
         ],
         userAction,
       });
@@ -473,35 +951,35 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('trash', 'Delete');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
           'alert-comment-id',
-          'Deleted 2 alerts'
+          'Deleted 2 alerts',
+          undefined
         );
       });
     });
 
     it('views multiple alerts correctly', async () => {
-      useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
       const userAction = getAlertUserAction();
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register(getStackAlertAttachmentType());
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
+        unifiedAttachmentTypeRegistry,
         attachments: [
-          {
-            ...alertComment,
-            alertId: ['alert-id-1', 'alert-id-2'],
+          createUnifiedAlertAttachment({
+            attachmentId: ['alert-id-1', 'alert-id-2'],
             index: ['alert-index-1', 'alert-index-2'],
-          },
+          }),
         ],
         userAction,
       });
@@ -509,8 +987,8 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-action-show-alerts-1234'));
-      await userEvent.click(screen.getByTestId('comment-action-show-alerts-1234'));
+      expect(screen.getByTestId('comment-action-show-table-1234')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('comment-action-show-table-1234'));
 
       await waitFor(() => {
         expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: '1234', tabId: 'alerts' });
@@ -518,223 +996,120 @@ describe('createCommentUserActionBuilder', () => {
     });
   });
 
-  describe('Single event', () => {
-    it('renders correctly a single event', async () => {
-      const userAction = getEventUserAction();
-
+  describe('Unified user comments (type comment)', () => {
+    it('renders create user action through the unified comment registry', () => {
+      const userAction = getUserAction(UserActionTypes.comment, UserActionActions.create);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
+        attachments: [basicCommentUnified],
         userAction,
       });
 
       const createdUserAction = builder.build();
+      expect(createdUserAction.length).toBe(1);
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('added a comment')).toBeInTheDocument();
     });
 
-    it('deletes a single event correctly', async () => {
-      const userAction = getEventUserAction();
-
+    it('appends the action source to the create event', () => {
+      const userAction = getUserAction(UserActionTypes.comment, UserActionActions.create, {
+        source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+      });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [eventComment],
+        attachments: [basicCommentUnified],
         userAction,
       });
 
-      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
 
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByTestId('single-event-user-action-event-action-id')).toHaveTextContent(
-        'added an event'
+      expect(screen.getByText(/added a comment/)).toBeInTheDocument();
+      expect(screen.getByTestId('user-action-via-source')).toHaveTextContent(
+        'via Elastic AI Agent'
       );
-
-      await deleteAttachment('minusInCircle', 'Remove');
-
-      await waitFor(() => {
-        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-          'event-comment-id',
-          'Deleted one event'
-        );
-      });
-    });
-
-    it('views an event correctly', async () => {
-      const userAction = getEventUserAction();
-
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [eventComment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(screen.getByTestId('comment-action-show-event-event-action-id')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('comment-action-show-event-event-action-id'));
-
-      await waitFor(() => {
-        expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('event-id-1', 'event-index-1');
-      });
     });
   });
 
-  describe('Host isolation action', () => {
-    it('renders correctly an action', async () => {
-      const userAction = getHostIsolationUserAction();
+  describe('Unified event attachments', () => {
+    it('renders create user action through the unified attachment registry', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({
+          event: 'added an event',
+        }),
+        schema: z.object({}),
+      });
 
+      const userAction = getEventUserAction();
+      const unifiedEventAttachment = {
+        id: eventComment.id,
+        type: 'security.event',
+        attachmentId: 'event-id-1',
+        metadata: { index: 'event-index-1' },
+        owner: eventComment.owner,
+        createdAt: eventComment.createdAt,
+        createdBy: eventComment.createdBy,
+        pushedAt: eventComment.pushedAt,
+        pushedBy: eventComment.pushedBy,
+        updatedAt: eventComment.updatedAt,
+        updatedBy: eventComment.updatedBy,
+        version: eventComment.version,
+      };
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [hostIsolationComment()],
+        unifiedAttachmentTypeRegistry,
+        attachments: [unifiedEventAttachment],
         userAction,
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
-      expect(screen.getByText('submitted isolate request on host')).toBeInTheDocument();
-      expect(screen.getByText('host1')).toBeInTheDocument();
-      expect(screen.getByText('I just isolated the host!')).toBeInTheDocument();
-    });
-
-    it('shows the correct username', async () => {
-      const createdBy = { profileUid: userProfiles[0].uid };
-      const userAction = getHostIsolationUserAction({
-        createdBy,
-      });
-
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [hostIsolationComment({ createdBy })],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
-      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-      expect(
-        screen.getAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]
-      ).toBeInTheDocument();
-      expect(screen.getAllByText('DR')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Damaged Raccoon')[0]).toBeInTheDocument();
+      expect(screen.getByText('added an event')).toBeInTheDocument();
     });
   });
 
   describe('Attachment framework', () => {
-    describe('External references', () => {
-      it('renders correctly an external reference', async () => {
-        const externalReferenceAttachmentTypeRegistry =
-          new ExternalReferenceAttachmentTypeRegistry();
-        externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
-
-        const userAction = getExternalReferenceUserAction();
-        const damagedRaccoon = userProfiles[0];
-        const builder = createCommentUserActionBuilder({
-          ...builderArgs,
-          externalReferenceAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
-          attachments: [
-            {
-              ...externalReferenceAttachment,
-              createdBy: {
-                username: damagedRaccoon.user.username,
-                fullName: damagedRaccoon.user.full_name,
-                email: damagedRaccoon.user.email,
-              },
-            },
-          ],
-          userAction,
-        });
-
-        const createdUserAction = builder.build();
-        renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-        expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
-        expect(screen.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
-        expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-        expect(screen.getByText('added a chart')).toBeInTheDocument();
+    const buildUnifiedActionUserAction = (viewObject: Record<string, unknown>) => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: 'lens',
+        getLabel: () => 'Lens',
+        getIcon: () => 'lensApp',
+        getCreationActivity: () => ({
+          event: 'added an embeddable',
+          ...viewObject,
+        }),
+        schema: z.object({}),
       });
 
-      it('renders correctly if the reference is not registered', async () => {
-        const externalReferenceAttachmentTypeRegistry =
-          new ExternalReferenceAttachmentTypeRegistry();
-
-        const userAction = getExternalReferenceUserAction();
-        const builder = createCommentUserActionBuilder({
-          ...builderArgs,
-          externalReferenceAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [
+          {
+            ...basicCommentUnified,
+            id: persistableStateAttachment.id,
+            type: 'lens',
+            data: { state: {} },
           },
-          attachments: [externalReferenceAttachment],
-          userAction,
-        });
-
-        const createdUserAction = builder.build();
-        renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-        expect(screen.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
-        expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
-        expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+        ],
+        userAction: getPersistableStateUserAction(),
       });
 
-      it('deletes the attachment correctly', async () => {
-        const externalReferenceAttachmentTypeRegistry =
-          new ExternalReferenceAttachmentTypeRegistry();
-        externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
+      return builder.build();
+    };
 
-        const userAction = getExternalReferenceUserAction();
-        const builder = createCommentUserActionBuilder({
-          ...builderArgs,
-          externalReferenceAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
-          attachments: [externalReferenceAttachment],
-          userAction,
-        });
-
-        const createdUserAction = builder.build();
-        renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-        expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
-
-        await deleteAttachment('trash', 'Delete');
-
-        await waitFor(() => {
-          expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
-            'external-reference-comment-id',
-            'Deleted attachment'
-          );
-        });
-      });
-    });
-
-    describe('Persistable state', () => {
-      it('renders correctly a persistable state attachment', async () => {
+    describe('Unified value attachments', () => {
+      it('renders correctly a unified value attachment', async () => {
         const MockComponent = jest.fn((props) => {
-          return (
-            <div data-test-subj={`attachment_${props.persistableStateAttachmentState.test_foo}`} />
-          );
+          const state = props.data.state as { test_foo: string };
+          return <div data-test-subj={`attachment_${state.test_foo}`} />;
         });
 
         const SpyLazyFactory = jest.fn(() => {
@@ -745,17 +1120,25 @@ describe('createCommentUserActionBuilder', () => {
           });
         });
 
-        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-        persistableStateAttachmentTypeRegistry.register(
-          getPersistableStateAttachment({
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register({
+          id: 'lens',
+          getLabel: () => 'Lens',
+          getIcon: () => 'lensApp',
+          getCreationActivity: () => ({
+            event: 'added an embeddable',
             children: React.lazy(SpyLazyFactory),
-          })
-        );
+          }),
+          schema: z.object({}),
+        });
 
         const userAction = getPersistableStateUserAction();
         const attachment01 = {
-          ...persistableStateAttachment,
-          persistableStateAttachmentState: { test_foo: '01' },
+          ...basicCommentUnified,
+          id: persistableStateAttachment.id,
+          type: 'lens',
+          data: { state: { test_foo: '01' } },
           createdBy: {
             username: userProfiles[0].user.username,
             fullName: userProfiles[0].user.full_name,
@@ -763,12 +1146,10 @@ describe('createCommentUserActionBuilder', () => {
             profileUid: userProfiles[0].uid,
           },
         };
+
         const builder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
+          unifiedAttachmentTypeRegistry,
           attachments: [attachment01],
           userAction,
         });
@@ -784,7 +1165,7 @@ describe('createCommentUserActionBuilder', () => {
         expect(MockComponent).toHaveBeenCalledTimes(1);
         expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
 
-        expect(screen.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
         expect(screen.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
         expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
         expect(screen.getByText('added an embeddable')).toBeInTheDocument();
@@ -792,15 +1173,12 @@ describe('createCommentUserActionBuilder', () => {
         unmount();
 
         const attachment02 = {
-          ...persistableStateAttachment,
-          persistableStateAttachmentState: { test_foo: '02' },
+          ...attachment01,
+          data: { state: { test_foo: '02' } },
         };
         const updateBuilder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
+          unifiedAttachmentTypeRegistry,
           attachments: [attachment02],
           userAction,
         });
@@ -815,64 +1193,94 @@ describe('createCommentUserActionBuilder', () => {
         expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
       });
 
-      it('renders correctly if the reference is not registered', async () => {
-        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-
+      it('does not render if the attachment type is not registered', async () => {
         const userAction = getPersistableStateUserAction();
         const builder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
-          attachments: [persistableStateAttachment],
+          attachments: [
+            {
+              ...basicCommentUnified,
+              id: persistableStateAttachment.id,
+              type: 'lens',
+              data: { state: { test_foo: 'foo' } },
+            },
+          ],
           userAction,
         });
 
         const createdUserAction = builder.build();
-        renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-        expect(screen.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
-        expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
-        expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+        expect(createdUserAction).toEqual([]);
       });
 
       it('deletes the attachment correctly', async () => {
-        const attachment = getPersistableStateAttachment();
-        const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-        persistableStateAttachmentTypeRegistry.register(attachment);
+        const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+        unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+        unifiedAttachmentTypeRegistry.register({
+          id: 'lens',
+          getLabel: () => 'Lens',
+          getIcon: () => 'lensApp',
+          getCreationActivity: () => ({
+            event: 'added an embeddable',
+          }),
+          schema: z.object({}),
+        });
 
         const userAction = getPersistableStateUserAction();
         const builder = createCommentUserActionBuilder({
           ...builderArgs,
-          persistableStateAttachmentTypeRegistry,
-          caseData: {
-            ...builderArgs.caseData,
-          },
-          attachments: [persistableStateAttachment],
+          unifiedAttachmentTypeRegistry,
+          attachments: [
+            {
+              ...basicCommentUnified,
+              id: persistableStateAttachment.id,
+              type: 'lens',
+              data: { state: { test_foo: 'foo' } },
+            },
+          ],
           userAction,
         });
 
         const createdUserAction = builder.build();
         renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-        expect(screen.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+        expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
 
         await deleteAttachment('trash', 'Delete');
 
         await waitFor(() => {
           expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
             'persistable-state-comment-id',
-            'Deleted attachment'
+            'Deleted attachment',
+            undefined
           );
         });
+      });
+
+      it('does not render legacy persistable state attachments', async () => {
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          attachments: [persistableStateAttachment],
+          userAction: getPersistableStateUserAction(),
+        });
+
+        expect(builder.build()).toEqual([]);
+      });
+
+      it('does not render legacy external reference attachments', async () => {
+        const builder = createCommentUserActionBuilder({
+          ...builderArgs,
+          attachments: [externalReferenceAttachment],
+          userAction: getExternalReferenceUserAction(),
+        });
+
+        expect(builder.build()).toEqual([]);
       });
     });
 
     it('shows correctly the visible primary actions', async () => {
       const onClick = jest.fn();
 
-      const attachment = getExternalReferenceAttachment({
+      const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
           {
             type: AttachmentActionType.BUTTON as const,
@@ -898,24 +1306,9 @@ describe('createCommentUserActionBuilder', () => {
         ],
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [externalReferenceAttachment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
@@ -932,7 +1325,7 @@ describe('createCommentUserActionBuilder', () => {
     it('shows correctly a custom action', async () => {
       const onClick = jest.fn();
 
-      const attachment = getExternalReferenceAttachment({
+      const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
           {
             type: AttachmentActionType.CUSTOM as const,
@@ -944,22 +1337,6 @@ describe('createCommentUserActionBuilder', () => {
           },
         ],
       });
-
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [externalReferenceAttachment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
 
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
@@ -973,7 +1350,7 @@ describe('createCommentUserActionBuilder', () => {
     it('shows correctly the non visible primary actions', async () => {
       const onClick = jest.fn();
 
-      const attachment = getExternalReferenceAttachment({
+      const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
           {
             type: AttachmentActionType.BUTTON,
@@ -999,24 +1376,9 @@ describe('createCommentUserActionBuilder', () => {
         ],
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [externalReferenceAttachment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
@@ -1035,7 +1397,7 @@ describe('createCommentUserActionBuilder', () => {
     it('hides correctly the  default actions', async () => {
       const onClick = jest.fn();
 
-      const attachment = getExternalReferenceAttachment({
+      const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
           {
             type: AttachmentActionType.BUTTON as const,
@@ -1054,24 +1416,9 @@ describe('createCommentUserActionBuilder', () => {
         hideDefaultActions: true,
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [externalReferenceAttachment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
@@ -1092,7 +1439,7 @@ describe('createCommentUserActionBuilder', () => {
     it('shows correctly the registered primary actions and non-primary actions', async () => {
       const onClick = jest.fn();
 
-      const attachment = getExternalReferenceAttachment({
+      const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
           {
             type: AttachmentActionType.BUTTON as const,
@@ -1130,24 +1477,9 @@ describe('createCommentUserActionBuilder', () => {
         ],
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [externalReferenceAttachment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
@@ -1169,7 +1501,7 @@ describe('createCommentUserActionBuilder', () => {
     it('divides correctly less than two primary actions', async () => {
       const onClick = jest.fn();
 
-      const attachment = getExternalReferenceAttachment({
+      const createdUserAction = buildUnifiedActionUserAction({
         getActions: () => [
           {
             type: AttachmentActionType.BUTTON as const,
@@ -1181,24 +1513,9 @@ describe('createCommentUserActionBuilder', () => {
         ],
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
-
-      const userAction = getExternalReferenceUserAction();
-      const builder = createCommentUserActionBuilder({
-        ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
-        caseData: {
-          ...builderArgs.caseData,
-        },
-        attachments: [externalReferenceAttachment],
-        userAction,
-      });
-
-      const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByTestId('comment-lens-lens')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
 
       await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });

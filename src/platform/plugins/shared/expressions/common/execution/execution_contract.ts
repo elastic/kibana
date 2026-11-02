@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { Execution, ExecutionResult } from './execution';
 import type { ExpressionValueError } from '../expression_types/specs';
 import type { ExpressionAstExpression } from '../ast';
@@ -41,8 +42,8 @@ export class ExecutionContract<
    * (available in execution context) to aborted state, letting expression
    * functions to stop their execution.
    */
-  cancel = () => {
-    this.execution.cancel();
+  cancel = (reason?: AbortReason) => {
+    this.execution.cancel(reason);
   };
 
   /**

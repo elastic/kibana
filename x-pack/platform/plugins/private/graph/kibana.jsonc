@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/graph-plugin",
   "owner": [
-    "@elastic/kibana-visualizations"
+    "@elastic/kibana-dashboards"
   ],
   "group": "platform",
   "visibility": "private",
@@ -19,7 +19,7 @@
       "data",
       "dataViews",
       "navigation",
-      "unifiedSearch",
+      "kql",
       "inspector",
       "savedObjectsManagement",
       "savedObjectsFinder",

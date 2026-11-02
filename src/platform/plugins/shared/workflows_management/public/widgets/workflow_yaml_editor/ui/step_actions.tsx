@@ -14,14 +14,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
 import {
-  CopyElasticSearchDevToolsOption,
+  CopyDevToolsOption,
   CopyWorkflowStepJsonOption,
   CopyWorkflowStepOption,
 } from './step_action_options';
@@ -31,10 +32,10 @@ import {
 } from '../../../entities/workflows/store';
 
 export interface StepActionsProps {
-  onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
+  onStepRun?: (params: { stepId: string; actionType: string }) => void;
 }
 
-export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }) => {
+export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
@@ -49,15 +50,22 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }
 
   const menuButton = useMemo(() => {
     return (
-      <EuiButtonIcon
-        onClick={togglePopover}
-        data-test-subj="toggleConsoleMenu"
-        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('workflows.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
-        iconType="boxesVertical"
-        iconSize="s"
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          onClick={togglePopover}
+          data-test-subj="toggleConsoleMenu"
+          aria-label={i18n.translate('workflows.requestOptionsButtonAriaLabel', {
+            defaultMessage: 'Request options',
+          })}
+          iconType="ellipsis"
+          iconSize="s"
+        />
+      </EuiToolTip>
     );
   }, [togglePopover]);
 
@@ -66,14 +74,16 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }
       return [];
     }
 
+    const showDevToolsOption =
+      focusedStepInfo.stepType.startsWith('elasticsearch.') ||
+      focusedStepInfo.stepType.startsWith('kibana.');
+
     return [
-      ...[
-        ...(focusedStepInfo.stepType.startsWith('elasticsearch.')
-          ? [<CopyElasticSearchDevToolsOption key="copy-as-console" onClick={closePopover} />]
-          : []),
-        <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
-        <CopyWorkflowStepJsonOption key="copy-step-as-json" onClick={closePopover} />,
-      ],
+      ...(showDevToolsOption
+        ? [<CopyDevToolsOption key="copy-as-console" onClick={closePopover} />]
+        : []),
+      <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
+      <CopyWorkflowStepJsonOption key="copy-step-as-json" onClick={closePopover} />,
     ];
   }, [focusedStepInfo, closePopover]);
 
@@ -92,7 +102,7 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }
         <EuiFlexItem grow={false}>
           <RunStepButton
             onClick={() =>
-              onStepActionClicked?.({
+              onStepRun?.({
                 stepId: focusedStepInfo.stepId as string,
                 actionType: 'run',
               })
@@ -104,6 +114,9 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="contextMenu"
+            aria-label={i18n.translate('workflows.stepActions.contextMenuAriaLabel', {
+              defaultMessage: 'Step actions',
+            })}
             button={menuButton}
             isOpen={isPopoverOpen}
             closePopover={closePopover}

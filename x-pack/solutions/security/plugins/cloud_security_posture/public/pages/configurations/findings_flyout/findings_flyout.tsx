@@ -48,7 +48,19 @@ export const BenchmarkIcons = ({
   <EuiFlexGroup gutterSize="s" alignItems="center">
     {benchmarkId.startsWith('cis') && (
       <EuiFlexItem grow={false}>
-        <EuiIconTip content="Center for Internet Security" type={cisLogoIcon} size={size} />
+        <EuiIconTip
+          content="Center for Internet Security"
+          type={cisLogoIcon}
+          size={size}
+          aria-label={i18n.translate('xpack.csp.benchmarkIcons.cisLogoAriaLabel', {
+            defaultMessage: 'Center for Internet Security',
+          })}
+          iconProps={{
+            title: i18n.translate('xpack.csp.benchmarkIcons.cisLogoTitle', {
+              defaultMessage: 'Center for Internet Security',
+            }),
+          }}
+        />
       </EuiFlexItem>
     )}
     <EuiFlexItem grow={false}>

@@ -11,10 +11,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { setKibanaServices } from './services/kibana_services';
 import type { LinksParentApi } from './types';
@@ -40,8 +38,6 @@ export const setStubKibanaServices = () => {
     dashboard: dashboardPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     contentManagement: contentManagementMock.createStartContract(),
-    presentationUtil: presentationUtilPluginMock.createStartContract(),
-    uiActions: uiActionsPluginMock.createStartContract(),
   });
 };
 
@@ -59,5 +55,5 @@ export const getMockLinksParentApi = (state: LinksEmbeddableState): LinksParentA
   hideTitle$: new BehaviorSubject<boolean | undefined>(false),
   title$: new BehaviorSubject<string | undefined>('My Dashboard'),
   description$: new BehaviorSubject<string | undefined>(''),
-  getSerializedStateForChild: () => ({ rawState: state }),
+  getSerializedStateForChild: () => state,
 });

@@ -22,7 +22,7 @@ import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useLicense } from '../../../hooks/use_license';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user_profile');
@@ -73,7 +73,7 @@ describe('useBulkAlertAssigneesItems', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
@@ -95,6 +95,14 @@ describe('useBulkAlertAssigneesItems', () => {
     expect(result.current.alertAssigneesItems[1]['data-test-subj']).toEqual(
       'remove-alert-assignees-menu-item'
     );
+    expect(result.current.alertAssigneesItems[0]).toMatchObject({
+      icon: 'users',
+      groupId: 'assignees',
+    });
+    expect(result.current.alertAssigneesItems[1]).toMatchObject({
+      icon: 'users',
+      groupId: 'assignees',
+    });
     expect(result.current.alertAssigneesPanels[0]['data-test-subj']).toEqual(
       'alert-assignees-context-menu-panel'
     );
@@ -231,7 +239,7 @@ describe('useBulkAlertAssigneesItems', () => {
   });
 
   it('should return 0 items for the VIEWER role', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
 
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,

@@ -17,7 +17,7 @@ GET _search
 {"query":{"match_all":{}}}
 ```
 
-### Kibana API support ([#100253](https://github.com/elastic/kibana/pull/128562))
+### Kibana API support ([#128562](https://github.com/elastic/kibana/pull/128562))
 Console plugin now supports Kibana API endpoints. `kbn:` prefix must be used in the request URL to send a request to Kibana API. For example, the following request sends a request to the Kibana API to retrieve the list of available spaces:
 ```
 GET kbn:api/spaces/space
@@ -43,6 +43,28 @@ POST /_some_endpoint
 }
 ```
 
+## Elasticsearch host management
+
+### How the host is determined
+
+Console needs to know which Elasticsearch node to proxy requests to. The server exposes a `/api/console/es_config` endpoint that returns the configured host(s):
+
+```json
+{ "host": "https://localhost:9200/", "allHosts": ["https://localhost:9200/"] }
+```
+
+These values come from `elasticsearch.hosts` in `kibana.yml`. On Elastic Cloud the `host` field is the Cloud URL. URLs are normalised through the `URL` constructor (trailing slash added, credentials stripped) before being sent to the browser.
+
+The client stores the user's selection in `localStorage` via `Settings.setSelectedHost` / `getSelectedHost` (key `selected_host`). On load, `EsHostService.init()` fetches `es_config` and populates the available host list. The Settings panel then displays a dropdown limited to that list.
+
+### Proxy host allowlist (SSRF protection)
+
+When the browser sends a request through the Console proxy (`/api/console/proxy`), it passes the chosen host as a `host` query parameter. The proxy handler (`server/routes/api/console/proxy/create_handler.ts`) validates that parameter against the configured `elasticsearch.hosts` allowlist; comparing credential-stripped, normalised versions and returns `400` for any host not on the list. The actual upstream request always uses the **original** configured host (which may contain credentials) so that authentication still works even though the browser never sees those credentials.
+
+### Stale `localStorage` values
+
+Because the allowlist check is strict, a `host` value left in `localStorage` from a previous Kibana configuration (different port, protocol, or address) will be rejected. To avoid breaking existing sessions, `sendRequests` in `MonacoEditorActionsProvider` validates the stored host against `EsHostService.getAllHosts()` before forwarding it to the proxy; using the same URL normalisation the server uses. If the stored host is no longer valid it is cleared from `localStorage` and the request falls back to the server's default. The Settings panel applies the same check and resets its displayed selection when it detects a stale value.
+
 ## Architecture
 Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
 The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.
@@ -54,14 +76,23 @@ Autocomplete definitions are all created in the form of javascript objects loade
 ### Creating definitions
 The [`generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
 
-Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
-are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
+Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain refinements for request body parameters. The script derives coarse body rules from the Elasticsearch specification, and overrides merge with them according to the body compiler's structure: ordinary object field maps merge recursively in curated order and append generated-only siblings, while arrays, primitives, and objects containing `__scope_link`, `__one_of`, or `__any_of` are replaced by the curated value. Any other fixes such as documentation links, request methods and patterns and url parameters
 should be addressed at the source. That means this should be fixed in Elasticsearch specifications and then 
 autocomplete definitions can be re-generated with the script. 
 
 If there are any endpoints missing completely from the `generated` folder, this should also be addressed at the source, i.e. 
 Elasticsearch specifications. If for some reason, that is not possible, then additional definitions files 
-can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/manual)).
+can be placed in the folder [`manual`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/manual).
+
+### Kibana API doc links
+
+The [`generated_kibana_api_doc_links.json`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json) file maps Kibana API path templates to their OpenAPI `operationId`, and powers the "Open API reference" link for `kbn:` requests in Console. It's generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
+
+```
+node scripts/generate_kibana_api_doc_links.js
+```
+
+Run this whenever the Kibana OpenAPI bundle changes (e.g. after `node scripts/build_openapi_artifacts.js`). This is expected to be automated with a scheduled Buildkite job that regenerates and publishes the file on a regular cadence; until then, re-run it manually when the bundle changes.
 
 ### Top level keys
 Use following top level keys in the definitions objects.
@@ -108,7 +139,7 @@ A property that describes if an endpoint is available in stack and serverless en
 ```
 
 #### `data_autocomplete_rules`
-Request body parameters and their values. Only used in `overrides` files because REST API specs don't contain any information about body request parameters.
+Request body parameters and their values. Generated definitions derive these from the Elasticsearch specification; `overrides` files merge curated rules into ordinary object field maps and replace atomic rules such as arrays, primitives, `__scope_link`, `__one_of`, and `__any_of`.
 Refer to Elasticsearch REST API documentation when configuring this object. See the [Request body parameters](#request-body-parameters) section below for more info. An example:
 ```json
 {
@@ -287,7 +318,7 @@ To provide a different set of autocomplete suggestions based on the value config
 
 ### Dynamic parameters
 Some autocomplete definitions need to be configured with dynamic values that can't be hard coded into a json or js file, for example a list of indices in the cluster. 
-A list of dynamic parameters is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/kb/kb.js) file. The values of these parameters are assigned dynamically for every cluster. 
+A list of dynamic parameters is defined in the  `parametrizedComponentFactories` object in [`kb.ts`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/kb/kb.ts) file. The values of these parameters are assigned dynamically for every cluster.
 Use these dynamic parameters with curly braces, for example `{index}`, `{fields}`, `{template}` etc.
 
 Dynamic parameters can be used in url patterns, for example `{index}/_search`. Url patterns can also contain unknown parameters just to indicate that any value can be used in the url, for example in the url `/_ilm/policy/{policy}` the value for `{policy}` can be any accepted policy name and the dynamic parameter `{policy}` is not defined in the autocomplete engine. 

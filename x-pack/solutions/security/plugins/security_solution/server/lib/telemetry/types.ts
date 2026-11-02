@@ -503,9 +503,10 @@ export interface ValueListIndicatorMatchResponseAggregation {
 }
 
 export interface TelemetryQueryConfiguration {
-  pageSize: number;
-  maxResponseSize: number;
-  maxCompressedResponseSize: number;
+  pageSize?: number;
+  maxResponseSize?: number;
+  maxCompressedResponseSize?: number;
+  excludeColdAndFrozenTiers: () => Promise<boolean>;
 }
 
 export interface TelemetryConfiguration {
@@ -551,6 +552,7 @@ export interface HealthDiagnosticConfiguration {
   eventLoopUtilizationCircuitBreaker: EventLoopUtilizationCircuitBreakerConfig;
   eventLoopDelayCircuitBreaker: EventLoopDelayCircuitBreakerConfig;
   elasticsearchCircuitBreaker: ElasticsearchCircuitBreakerConfig;
+  apiQueryAllowlist: Array<{ path: string }>;
 }
 
 export interface PaginationConfiguration {
@@ -568,6 +570,7 @@ export interface TelemetryFilterListArtifact {
   endpoint_alerts: AllowlistFields;
   exception_lists: AllowlistFields;
   prebuilt_rules_alerts: AllowlistFields;
+  detection_alerts_influencer_allowlist?: AllowlistFields;
 }
 
 export interface ValueListResponse {

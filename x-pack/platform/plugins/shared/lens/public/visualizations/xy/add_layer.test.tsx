@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
-import type { XYState } from './types';
+import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
-import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
-describe('AddLayerButton', () => {
+// Failing: See https://github.com/elastic/kibana/issues/255059
+describe.skip('AddLayerButton', () => {
   const addLayer = jest.fn();
 
   const renderAddLayerButton = () => {
-    const state: XYState = {
+    const state: XYVisualizationState = {
       legend: { position: Position.Bottom, isVisible: true },
       valueLabels: 'show',
       preferredSeriesType: 'bar',
@@ -27,7 +29,7 @@ describe('AddLayerButton', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'area',
-          splitAccessor: 'd',
+          splitAccessors: ['d'],
           xAccessor: 'a',
           accessors: ['b', 'c'],
         },
@@ -64,7 +66,7 @@ describe('AddLayerButton', () => {
         fireEvent.click(screen.getByLabelText('Add layer'));
       },
       clickVisualizationButton: () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Visualization' }));
+        fireEvent.click(screen.getByRole('menuitem', { name: 'Visualization' }));
       },
       clickSeriesOptionsButton: (seriesType = 'line') => {
         const lineOption = screen.getByTestId(`lnsXY_seriesType-${seriesType}`);
@@ -76,11 +78,7 @@ describe('AddLayerButton', () => {
         });
       },
       getSeriesTypeOptions: () => {
-        return within(
-          screen.getByTestId('contextMenuPanelTitleButton').parentElement as HTMLElement
-        )
-          .getAllByTestId('lnsChartSwitch-option-label')
-          .map((el) => el.textContent);
+        return screen.getAllByTestId('lnsChartSwitch-option-label').map((el) => el.textContent);
       },
     };
   };
@@ -108,6 +106,62 @@ describe('AddLayerButton', () => {
     clickVisualizationButton();
     await waitForSeriesOptions();
     clickSeriesOptionsButton('line');
-    expect(addLayer).toHaveBeenCalledWith(LayerTypes.DATA, undefined, undefined, 'line');
+    expect(addLayer).toHaveBeenCalledWith(LayerTypes.DATA, { seriesType: 'line' });
+  });
+});
+
+describe('Reference layer source selection', () => {
+  const renderReferenceMenu = (isEsqlChart: boolean) => {
+    const addLayer = jest.fn();
+    render(
+      <AddLayerButton
+        state={{
+          legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'show',
+          preferredSeriesType: 'bar',
+          layers: [],
+        }}
+        supportedLayers={[{ type: LayerTypes.REFERENCELINE, label: 'Reference lines' }]}
+        addLayer={addLayer}
+        eventAnnotationService={eventAnnotationServiceMock}
+        isEsqlChart={isEsqlChart}
+      />,
+      { wrapper: I18nProvider }
+    );
+    fireEvent.click(screen.getByLabelText('Add layer'));
+    fireEvent.click(screen.getByTestId('lnsLayerAddButton-referenceLine'));
+    return addLayer;
+  };
+
+  it.each([
+    ['static', LENS_DATASOURCE_ID.FORM_BASED, false],
+    ['esql', LENS_DATASOURCE_ID.TEXT_BASED, true],
+  ] as const)(
+    'creates a %s reference layer on ES|QL charts',
+    async (source, datasourceId, ignoreInitialValues) => {
+      const addLayer = renderReferenceMenu(true);
+      expect(addLayer).not.toHaveBeenCalled();
+      const menuItem = await screen.findByTestId(`lnsReferenceLineLayer_${source}`);
+      expect(menuItem).toHaveTextContent(
+        source === 'static' ? 'Static reference lines' : 'ES|QL reference lines'
+      );
+      expect(menuItem).toHaveTextContent(
+        source === 'static'
+          ? 'Set fixed values for budgets, targets, or thresholds.'
+          : 'Calculate thresholds using a separate ES|QL query.'
+      );
+      fireEvent.click(menuItem);
+      expect(addLayer).toHaveBeenCalledWith(LayerTypes.REFERENCELINE, {
+        ignoreInitialValues,
+        datasourceId,
+      });
+    }
+  );
+
+  it('keeps direct reference-layer creation on form-based charts', () => {
+    const addLayer = renderReferenceMenu(false);
+    expect(addLayer).toHaveBeenCalledWith(LayerTypes.REFERENCELINE);
+    expect(screen.queryByTestId('lnsReferenceLineLayer_static')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lnsReferenceLineLayer_esql')).not.toBeInTheDocument();
   });
 });

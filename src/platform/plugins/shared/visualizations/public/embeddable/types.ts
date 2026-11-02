@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
+  PublishesEsql,
+  PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
+  PublishesWritableTitle,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { VisParams } from '@kbn/visualizations-common';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisSavedObject } from '../types';
@@ -43,7 +48,7 @@ export type ExtraSavedObjectProperties = Pick<
 
 export type VisualizeRuntimeState = SerializedTitles &
   SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> & {
+  SerializedDrilldowns & {
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;
@@ -56,9 +61,13 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 };
 
 export type VisualizeApi = Partial<HasEditCapabilities> &
-  PublishesDataViews &
+  CanCancelRequests &
+  PublishesWritableTitle &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   PublishesRendered &
+  PublishesProjectRoutingOverrides &
+  PublishesEsql &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

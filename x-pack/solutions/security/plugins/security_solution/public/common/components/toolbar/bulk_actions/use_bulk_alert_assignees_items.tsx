@@ -16,6 +16,7 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 
 import { isEmpty } from 'lodash/fp';
+import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../constants/action_ids';
 import { useLicense } from '../../../hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
@@ -43,7 +44,7 @@ export const useBulkAlertAssigneesItems = ({
 }: UseBulkAlertAssigneesItemsProps) => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
   const handleOnAlertAssigneesSubmit = useCallback<
@@ -86,29 +87,33 @@ export const useBulkAlertAssigneesItems = ({
 
   const alertAssigneesItems = useMemo(
     () =>
-      hasIndexWrite && isPlatinumPlus
+      hasAlertsUpdate && isPlatinumPlus
         ? [
             {
-              key: 'manage-alert-assignees',
+              key: ALERT_ASSIGNEE_ACTION_IDS.assign,
               'data-test-subj': 'alert-assignees-context-menu-item',
               name: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
               panel: 2,
               label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
               disableOnQuery: true,
               disable: false,
+              icon: 'users' as const,
+              groupId: 'assignees' as const,
             },
             {
-              key: 'remove-all-alert-assignees',
+              key: ALERT_ASSIGNEE_ACTION_IDS.unassignAll,
               'data-test-subj': 'remove-alert-assignees-menu-item',
               name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               disableOnQuery: true,
               onClick: onRemoveAllAssignees,
               disable: alertAssignments ? isEmpty(alertAssignments) : false,
+              icon: 'users' as const,
+              groupId: 'assignees' as const,
             },
           ]
         : [],
-    [alertAssignments, hasIndexWrite, isPlatinumPlus, onRemoveAllAssignees]
+    [alertAssignments, hasAlertsUpdate, isPlatinumPlus, onRemoveAllAssignees]
   );
 
   const TitleContent = useMemo(
@@ -145,7 +150,7 @@ export const useBulkAlertAssigneesItems = ({
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(
     () =>
-      hasIndexWrite && isPlatinumPlus
+      hasAlertsUpdate && isPlatinumPlus
         ? [
             {
               id: 2,
@@ -156,7 +161,7 @@ export const useBulkAlertAssigneesItems = ({
             },
           ]
         : [],
-    [TitleContent, hasIndexWrite, isPlatinumPlus, renderContent]
+    [TitleContent, hasAlertsUpdate, isPlatinumPlus, renderContent]
   );
 
   return useMemo(() => {

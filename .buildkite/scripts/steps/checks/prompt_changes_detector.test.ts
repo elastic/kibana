@@ -22,10 +22,24 @@ describe('Prompt Changes Detector', () => {
   });
 
   it('should post comment when called', async () => {
-    mockUpsertComment.mockResolvedValue({});
+    mockUpsertComment.mockResolvedValue({
+      data: {
+        id: 1,
+        node_id: '123',
+        url: 'https://api.github.com/repos/owner/repo/issues/comments/123',
+        body: 'Test comment',
+        html_url: 'https://github.com/owner/repo/issues/123',
+        user: {
+          name: 'Test User',
+          avatar_url: 'https://github.com/avatar.png',
+        },
+        created_at: '2021-01-01T00:00:00Z',
+        updated_at: '2021-01-01T00:00:00Z',
+      },
+    } as any);
 
     // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
+    const { main } = await import('./prompt_changes_detector.ts');
     await main();
 
     expect(mockUpsertComment).toHaveBeenCalledWith({
@@ -40,7 +54,7 @@ describe('Prompt Changes Detector', () => {
     mockUpsertComment.mockRejectedValue(new Error('Test error'));
 
     // Import and run the main function
-    const { main } = await import('./prompt_changes_detector');
+    const { main } = await import('./prompt_changes_detector.ts');
 
     // Should not throw, but should exit with code 1
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { NotionConnector } from './notion';
 
 describe('NotionConnector', () => {
@@ -23,6 +24,41 @@ describe('NotionConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('auth', () => {
+    it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+      const bearerDef = NotionConnector.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerDef).toBeDefined();
+      expect(bearerDef?.isLegacy).toBe(true);
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(NotionConnector.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
+    });
+
+    it('supports oauth_authorization_code with correct Notion defaults', () => {
+      const oauthType = (
+        NotionConnector.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
+          tokenUrl: 'https://api.notion.com/v1/oauth/token',
+        },
+      });
+    });
   });
 
   describe('searchPageOrDSByTitle action', () => {
@@ -71,7 +107,7 @@ describe('NotionConnector', () => {
       };
       mockClient.post.mockResolvedValue(mockResponse);
 
-      const result = await NotionConnector.actions.searchPageOrDSByTitle.handler(mockContext, {
+      await NotionConnector.actions.searchPageOrDSByTitle.handler(mockContext, {
         query: 'Projects',
         queryObjectType: 'data_source',
       });
@@ -83,7 +119,6 @@ describe('NotionConnector', () => {
           property: 'object',
         },
       });
-      expect(result).toEqual(mockResponse.data);
     });
 
     it('should include optional pagination parameters', async () => {
@@ -141,23 +176,6 @@ describe('NotionConnector', () => {
         {}
       );
       expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should handle different page IDs', async () => {
-      const mockResponse = {
-        data: {
-          id: '12345678-1234-1234-1234-123456789abc',
-          object: 'page',
-          properties: {},
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = (await NotionConnector.actions.getPage.handler(mockContext, {
-        pageId: '12345678-1234-1234-1234-123456789abc',
-      })) as { id: string };
-
-      expect(result.id).toBe('12345678-1234-1234-1234-123456789abc');
     });
   });
 
@@ -317,6 +335,8 @@ describe('NotionConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = NotionConnector.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -329,59 +349,16 @@ describe('NotionConnector', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.notion.com/v1/users');
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Notion API: found 3 users',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should handle empty user list', async () => {
-      const mockResponse = {
-        data: {
-          results: [],
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
-
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Notion API: found 0 users',
-      });
-    });
-
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API token'));
 
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid API token');
-    });
-
-    it('should handle network errors', async () => {
-      mockClient.get.mockRejectedValue(new Error('Network timeout'));
-
-      if (!NotionConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await NotionConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -29,6 +29,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
   };
 
   return {
+    reportSourceQueryKeywords: jest.fn(),
     startSiemMigrationTask: jest.fn().mockReturnValue(mockStartSiemMigrationTaskReturn),
   } as jest.Mocked<PublicMethodsOf<SiemMigrationTelemetryClient>>;
 };

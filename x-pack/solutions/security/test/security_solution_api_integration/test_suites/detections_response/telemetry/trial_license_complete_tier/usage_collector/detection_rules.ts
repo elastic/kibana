@@ -1559,6 +1559,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_type: 'query',
             enabled: true,
             is_customized: false,
+            has_base_version: true,
             elastic_rule: true,
             alert_count_daily: 0,
             cases_count_total: 0,
@@ -1573,6 +1574,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
         });
       });
@@ -1607,6 +1609,7 @@ export default ({ getService }: FtrProviderContext) => {
             enabled: false,
             elastic_rule: true,
             is_customized: true,
+            has_base_version: true,
             alert_count_daily: 0,
             cases_count_total: 0,
             has_notification: true,
@@ -1620,6 +1623,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
 
           checkRuleTypeUsageFields(
@@ -1695,6 +1699,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_type: 'query',
             enabled: true,
             is_customized: true,
+            has_base_version: true,
             elastic_rule: true,
             alert_count_daily: 0,
             cases_count_total: 0,
@@ -1709,6 +1714,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
           checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
           checkRuleTypeUsageFields(
@@ -1764,6 +1770,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_type: 'query',
             enabled: false,
             is_customized: true,
+            has_base_version: true,
             elastic_rule: true,
             alert_count_daily: 0,
             cases_count_total: 0,
@@ -1778,6 +1785,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
           checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
           checkRuleTypeUsageFields(
@@ -1827,6 +1835,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_type: 'query',
             enabled: true,
             is_customized: true,
+            has_base_version: true,
             elastic_rule: true,
             alert_count_daily: 0,
             cases_count_total: 0,
@@ -1841,6 +1850,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
           checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
           checkRuleTypeUsageFields(

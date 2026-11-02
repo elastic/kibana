@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getRuleTagsAggregation } from '../../../../../../common';
 import { defaultRuleAggregationFactory } from '..';
 
@@ -25,7 +26,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should allow for nested valid aggregations', () => {
@@ -51,7 +52,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should allow for nested valid aggregations with root level aggs', () => {
@@ -91,13 +92,13 @@ describe('validateAggregationTerms', () => {
             },
           },
         },
-      });
-    }).not.toThrowError();
+      } as unknown as Record<string, AggregationsAggregationContainer>);
+    }).not.toThrow();
   });
 
   it('should allow for default and tags aggregations', () => {
-    expect(() => validateRuleAggregationFields(defaultRuleAggregationFactory())).not.toThrowError();
-    expect(() => validateRuleAggregationFields(getRuleTagsAggregation())).not.toThrowError();
+    expect(() => validateRuleAggregationFields(defaultRuleAggregationFactory())).not.toThrow();
+    expect(() => validateRuleAggregationFields(getRuleTagsAggregation())).not.toThrow();
   });
 
   it('should throw for simple aggregation with invalid fields', () => {
@@ -263,7 +264,7 @@ describe('validateAggregationTerms', () => {
             field: 'alert.attributes.executionStatus.status',
           },
         },
-      });
+      } as unknown as Record<string, AggregationsAggregationContainer>);
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: max"`);
   });
 

@@ -1,0 +1,30 @@
+responses:
+  '200':
+    description: A successful delete response.
+    content:
+      application/json:
+        examples:
+          deleteSavedObjectResponse:
+            summary: Successful delete
+            value: {}
+  '404':
+    description: Not found.
+    content:
+      application/json:
+        examples:
+          notFoundResponse:
+            summary: A not found error
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Saved object [dashboard/does-not-exist] not found
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/saved_objects/dashboard/example-dashboard-1?force=false" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      DELETE kbn://api/saved_objects/dashboard/example-dashboard-1?force=false

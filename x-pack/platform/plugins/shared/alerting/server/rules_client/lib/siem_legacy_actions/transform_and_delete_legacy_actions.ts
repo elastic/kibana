@@ -125,11 +125,15 @@ export const transformAndDeleteLegacyActions: TransformAndDeleteLegacyActions = 
         savedObject.attributes.ruleThrottle === 'no_actions' ||
         savedObject.attributes.ruleThrottle === 'rule';
 
+      const ruleId = ruleReference.id;
+
       if (hasNoThrottledActions) {
+        // Still register the rule so that bulkMigrateLegacyActions resets
+        // notifyWhen/throttle and adds per-action frequency to existing actions,
+        // even though there are no new throttled actions to migrate from the sidecar.
+        transformedActionsByRuleId[ruleId] = { transformedActions: [], transformedReferences: [] };
         return;
       }
-
-      const ruleId = ruleReference.id;
       const transformedActions = transformFromLegacyActions(
         savedObject.attributes,
         savedObject.references

@@ -6,17 +6,20 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Agent, AgentPolicy, NewAgentPolicy } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentlessPolicy } from '@kbn/fleet-plugin/common';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  buildPolicyIdOrVariantsKuery,
+} from '@kbn/fleet-plugin/common';
 import type {
-  AgentPolicyServiceInterface,
-  AgentService,
+  AgentClient,
+  AgentlessPoliciesService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
+import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 export interface ConnectorMetadata {
   id: string;
@@ -48,30 +51,37 @@ export interface PackagePolicyAndAgentMetadata extends PackagePolicyMetadata {
 
 const connectorsInputName = 'connectors-py';
 const pkgName = 'elastic_connectors';
-const pkgTitle = 'Elastic Connectors';
+
+// A few native connector `service_type` values don't match their `policy_template`
+// name in the `elastic_connectors` package manifest (see issue #266539).
+const SERVICE_TYPE_TO_POLICY_TEMPLATE: Record<string, string> = {
+  microsoft_teams: 'teams',
+  mssql: 'microsoft_sql',
+  s3: 'amazon_s3',
+};
+
+const getPolicyTemplateName = (serviceType: string): string =>
+  SERVICE_TYPE_TO_POLICY_TEMPLATE[serviceType] ?? serviceType;
 
 export class AgentlessConnectorsInfraService {
   private logger: Logger;
   private soClient: SavedObjectsClientContract;
   private esClient: ElasticsearchClient;
   private packagePolicyService: PackagePolicyClient;
-  private agentPolicyService: AgentPolicyServiceInterface;
-  private agentService: AgentService;
+  private agentlessPolicyService: AgentlessPoliciesService;
 
   constructor(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyService: PackagePolicyClient,
-    agentPolicyService: AgentPolicyServiceInterface,
-    agentService: AgentService,
+    agentlessPolicyService: AgentlessPoliciesService,
     logger: Logger
   ) {
     this.logger = logger;
     this.soClient = soClient;
     this.esClient = esClient;
     this.packagePolicyService = packagePolicyService;
-    this.agentService = agentService;
-    this.agentPolicyService = agentPolicyService;
+    this.agentlessPolicyService = agentlessPolicyService;
   }
 
   public getNativeConnectors = async (): Promise<ConnectorMetadata[]> => {
@@ -160,7 +170,7 @@ export class AgentlessConnectorsInfraService {
     return policiesMetadata;
   };
 
-  public deployConnector = async (connector: ConnectorMetadata): Promise<AgentPolicy> => {
+  public deployConnector = async (connector: ConnectorMetadata): Promise<AgentlessPolicy> => {
     this.logger.info(
       `Connector ${connector.id} has no integration policy associated with it, creating`
     );
@@ -186,73 +196,35 @@ export class AgentlessConnectorsInfraService {
     const pkgVersion = await this.getPackageVersion();
     this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
-    const agentPolicyToCreate: NewAgentPolicy = {
-      name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
-      description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
-      global_data_tags: [
-        {
-          name: 'organization',
-          value: 'elastic',
-        },
-        {
-          name: 'division',
-          value: 'engineering',
-        },
-        {
-          name: 'team',
-          value: 'search-extract-and-transform',
-        },
-      ],
-      namespace: 'default',
-      monitoring_enabled: ['logs', 'metrics'],
-      inactivity_timeout: 3600,
-      is_protected: false,
-      supports_agentless: true,
-    };
+    const policyTemplate = getPolicyTemplateName(connector.service_type);
 
     const packagePolicyToCreate = {
       package: {
-        title: pkgTitle,
         name: pkgName,
         version: pkgVersion,
       },
       name: `${connector.service_type} connector ${connector.id}`,
-      description: '',
       namespace: '',
-      enabled: true,
-      inputs: [
-        {
-          type: connectorsInputName,
-          policy_template: connector.service_type,
+      policy_template: policyTemplate,
+      inputs: {
+        [`${policyTemplate}-${connectorsInputName}`]: {
           enabled: true,
           vars: {
-            connector_id: { type: 'string', value: connector.id },
-            connector_name: { type: 'string', value: connector.name },
-            service_type: { type: 'string', value: connector.service_type },
+            connector_id: connector.id,
+            connector_name: connector.name,
           },
-          streams: [],
+          streams: {},
         },
-      ],
-      supports_agentless: true,
+      },
     };
 
-    const agentPolicy = await this.agentPolicyService.createWithPackagePolicies({
-      soClient: this.soClient,
-      esClient: this.esClient,
-      agentPolicy: agentPolicyToCreate,
-      packagePolicies: [packagePolicyToCreate],
-      options: {
-        withSysMonitoring: true,
-        spaceId: this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
-        forcePackagePolicyCreation: true,
-      },
-    });
+    const policy = await this.agentlessPolicyService.createAgentlessPolicy(packagePolicyToCreate);
 
     this.logger.info(
-      `Successfully created agent policy ${agentPolicy.id} for agentless connector ${connector.id}`
+      `Successfully created agent policy ${policy.id} for agentless connector ${connector.id}`
     );
 
-    return agentPolicy;
+    return policy;
   };
 
   public removeDeployment = async (packagePolicyId: string): Promise<void> => {
@@ -272,14 +244,16 @@ export class AgentlessConnectorsInfraService {
     // Why not use deleteFleetServerPoliciesForPolicyId?
     for (const agentPolicyId of policy.policy_ids) {
       this.logger.info(`Deleting agent policy ${agentPolicyId}`);
-      await this.agentPolicyService.delete(this.soClient, this.esClient, agentPolicyId);
+      await this.agentlessPolicyService.deleteAgentlessPolicy(agentPolicyId);
     }
   };
 
   public getAgentPolicyForConnectorId = async ({
     connectorId,
+    agentClient,
   }: {
     connectorId: string;
+    agentClient: AgentClient;
   }): Promise<PackagePolicyAndAgentMetadata | null> => {
     const allPolicies = await this.getConnectorPackagePolicies();
 
@@ -294,10 +268,21 @@ export class AgentlessConnectorsInfraService {
     if (policy && policy.agent_policy_ids.length > 0) {
       const policyId = policy!.agent_policy_ids[0];
 
-      const listAgentsResponse = await this.agentService.asInternalUser.listAgents({
-        kuery: `fleet-agents.policy_id:${policyId}`,
-        showInactive: false,
-      });
+      let listAgentsResponse;
+      try {
+        listAgentsResponse = await agentClient.listAgents({
+          kuery: buildPolicyIdOrVariantsKuery(policyId, 'fleet-agents.policy_id'),
+          showInactive: false,
+        });
+      } catch (error) {
+        if (error instanceof FleetUnauthorizedError) {
+          this.logger.debug(
+            `Skipping agent metadata for connector ${connectorId}: user lacks Fleet agent privileges`
+          );
+          return policy;
+        }
+        throw error;
+      }
 
       if (!listAgentsResponse || listAgentsResponse.agents.length === 0) {
         // If no agents assigned to policy, just return the policy

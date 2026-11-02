@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/content-list-footer",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

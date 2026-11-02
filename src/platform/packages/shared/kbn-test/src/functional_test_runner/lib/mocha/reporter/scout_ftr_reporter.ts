@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TEST_RUN_SCOPE, targetAttributes } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import { computeTestID } from '@kbn/scout-reporting';
@@ -29,6 +29,7 @@ import {
 } from '@kbn/code-owners';
 import type { Runner, Test } from '../../../fake_mocha_types';
 import type { Config as FTRConfig } from '../../config';
+import { getScoutTestTarget } from './scout_test_target';
 
 /**
  * Configuration options for the Scout Mocha reporter
@@ -65,12 +66,11 @@ export class ScoutFTRReporter {
 
     this.report = new ScoutEventsReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
+
     this.baseTestRunInfo = {
       id: this.runId,
-      target: {
-        type: SCOUT_TARGET_TYPE,
-        mode: SCOUT_TARGET_MODE,
-      },
+      target: { ...getScoutTestTarget(config), attributes: targetAttributes.current() },
+      scope: SCOUT_TEST_RUN_SCOPE,
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
         category: config.get('testConfigCategory'),
@@ -89,22 +89,23 @@ export class ScoutFTRReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+    return getOwningTeamsForPath(path.resolve(REPO_ROOT, filePath), this.codeOwnersEntries);
   }
 
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
+    const areas = this.getOwnerAreas(fileOwners);
 
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 

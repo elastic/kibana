@@ -14,8 +14,8 @@ import {
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useAppContext } from '../../../app_context';
@@ -63,42 +63,41 @@ const UpgradeStep = () => {
   if (isCloudEnabled) {
     if (error) {
       callToAction = (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount={false}
           title={i18n.translate('xpack.upgradeAssistant.overview.errorLoadingUpgradeStatus', {
             defaultMessage: 'An error occurred while retrieving the upgrade status',
           })}
-          color="danger"
-          iconType="warning"
           data-test-subj="upgradeStatusErrorCallout"
-        >
-          <p>
-            {error.statusCode} - {error.message as string}
-          </p>
-          <EuiButton
-            color="danger"
-            onClick={resendRequest}
-            data-test-subj="upgradeStatusRetryButton"
-            isLoading={isLoading}
-          >
-            {i18n.translate('xpack.upgradeAssistant.overview.upgradeStatus.retryButton', {
-              defaultMessage: 'Try again',
-            })}
-          </EuiButton>
-        </EuiCallOut>
+          text={
+            <p>
+              {error.statusCode} - {error.message as string}
+            </p>
+          }
+          actionProps={{
+            primary: {
+              children: i18n.translate(
+                'xpack.upgradeAssistant.overview.upgradeStatus.retryButton',
+                { defaultMessage: 'Try again' }
+              ),
+              onClick: resendRequest,
+              'data-test-subj': 'upgradeStatusRetryButton',
+              isLoading,
+            },
+          }}
+        />
       );
     } else {
       const readyForUpgrade = upgradeStatus?.readyForUpgrade;
-      const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
       callToAction = (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={upgradeOnCloudUrl}
+              href={cloud!.deploymentUpgradeUrl}
               target="_blank"
               data-test-subj="upgradeSetupCloudLink"
               iconSide="right"
-              iconType="popout"
+              iconType="external"
               isLoading={isLoading}
               isDisabled={!readyForUpgrade}
             >
@@ -112,7 +111,7 @@ const UpgradeStep = () => {
               target="_blank"
               data-test-subj="upgradeSetupDocsLink"
               iconSide="right"
-              iconType="popout"
+              iconType="external"
             >
               {i18nTexts.upgradeGuideLink}
             </EuiButtonEmpty>
@@ -127,7 +126,7 @@ const UpgradeStep = () => {
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
         iconSide="right"
-        iconType="popout"
+        iconType="external"
       >
         {i18nTexts.upgradeGuideLink}
       </EuiButton>

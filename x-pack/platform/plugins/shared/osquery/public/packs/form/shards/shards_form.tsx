@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import type { ShardsArray } from '../../../../common/utils/converters';
 import { ShardsPolicyField } from './shards_policy_field';
@@ -23,6 +23,7 @@ interface ShardsFormProps {
   control: ShardsFormReturn['control'];
   onDelete?: UseFieldArrayRemove;
   options: Array<EuiComboBoxOptionOption<string>>;
+  isDisabled?: boolean;
 }
 
 const ShardsFormComponent = ({
@@ -31,6 +32,7 @@ const ShardsFormComponent = ({
   isLastItem,
   control,
   options,
+  isDisabled = false,
 }: ShardsFormProps) => {
   const handleDeleteClick = useCallback(() => {
     if (onDelete) {
@@ -42,6 +44,10 @@ const ShardsFormComponent = ({
     ({ euiTheme }: any) => (index === 0 ? { marginTop: euiTheme.size.base } : {}),
     [index]
   );
+
+  // EuiComboBox uses `isDisabled`; EuiRange uses `disabled`.
+  const comboBoxProps = useMemo(() => ({ isDisabled }), [isDisabled]);
+  const rangeProps = useMemo(() => ({ disabled: isDisabled }), [isDisabled]);
 
   return (
     <>
@@ -56,28 +62,44 @@ const ShardsFormComponent = ({
             control={control}
             hideLabel={index !== 0}
             options={options}
+            euiFieldProps={comboBoxProps}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={true}>
-              <ShardsPercentageField index={index} control={control} hideLabel={index !== 0} />
+              <ShardsPercentageField
+                index={index}
+                control={control}
+                hideLabel={index !== 0}
+                euiFieldProps={rangeProps}
+              />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <div css={buttonWrapperCss}>
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',
                     {
                       defaultMessage: 'Delete shards row',
                     }
                   )}
-                  iconType="trash"
-                  color="text"
-                  disabled={isLastItem}
-                  onClick={handleDeleteClick}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',
+                      {
+                        defaultMessage: 'Delete shards row',
+                      }
+                    )}
+                    iconType="trash"
+                    color="text"
+                    disabled={isLastItem || isDisabled}
+                    onClick={handleDeleteClick}
+                  />
+                </EuiToolTip>
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>

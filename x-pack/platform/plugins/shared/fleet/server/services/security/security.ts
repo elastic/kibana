@@ -60,6 +60,30 @@ export function checkSuperuser(req: KibanaRequest) {
   return true;
 }
 
+/**
+ * Returns true when the caller may access Fleet debug routes.
+ *
+ * Accepts `superuser` and `system_indices_superuser`.  The latter is a strict
+ * superset of `superuser` (cluster:all, indices:* with allow_restricted_indices,
+ * applications:* with privileges:*) and is how local serverless dev clusters
+ * authenticate — accepting it here grants nothing the caller cannot already do.
+ */
+export function isDebugAuthorized(req: KibanaRequest) {
+  if (!checkSecurityEnabled()) {
+    return false;
+  }
+
+  const security = appContextService.getSecurityCore();
+  const user = security.authc.getCurrentUser(req);
+
+  if (!user) {
+    return false;
+  }
+
+  const userRoles = user.roles || [];
+  return userRoles.includes('superuser') || userRoles.includes('system_indices_superuser');
+}
+
 const computeUiApiPrivileges = (
   security: SecurityPluginStart,
   privileges: Record<string, PrivilegeMapObject>
@@ -154,6 +178,10 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       kibanaPrivileges: privileges.kibana,
       prefix: `${PLUGIN_ID}-settings-read`,
     });
+    const fleetGenerateReportsAllAuth = getAuthorizationFromPrivileges({
+      kibanaPrivileges: privileges.kibana,
+      prefix: `${PLUGIN_ID}-generate-report`,
+    });
 
     return {
       ...calculateAuthz({
@@ -173,12 +201,14 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
             read: fleetSettingsReadAuth,
             all: fleetSettingsAllAuth,
           },
+          generateReports: {
+            all: fleetGenerateReportsAllAuth,
+          },
         },
         integrations: {
           all: intAllAuth,
           read: intReadAuth,
         },
-        subfeatureEnabled: true,
       }),
       packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
       endpointExceptionsPrivileges: calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
@@ -193,7 +223,6 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
       all: false,
       read: false,
     },
-    subfeatureEnabled: true,
   });
 }
 

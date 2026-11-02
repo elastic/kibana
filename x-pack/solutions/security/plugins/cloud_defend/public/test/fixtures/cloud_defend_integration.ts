@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import Chance from 'chance';
 import type { CloudDefendPolicy } from '../../../common';
 

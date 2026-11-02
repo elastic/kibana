@@ -27,9 +27,9 @@ import {
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LegendItem } from './models';
 import { CUSTOM_LEGEND_VIS_TYPES } from './models';
 import { VisLegendItem } from './legend_item';
@@ -43,6 +43,7 @@ export interface VisLegendProps {
   hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   addLegend: BasicVislibParams['addLegend'];
   position: 'top' | 'bottom' | 'left' | 'right';
+  isInteractive?: boolean;
 }
 
 export interface VisLegendState {
@@ -211,7 +212,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
     const filters = this.props.hasCompatibleActions
       ? await this.props.hasCompatibleActions({
-          name: VALUE_CLICK_TRIGGER,
+          name: ON_CLICK_VALUE,
           data: item.values,
         })
       : false;
@@ -358,6 +359,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           getColor={this.getColor}
           onHighlight={this.highlight}
           onUnhighlight={this.unhighlight}
+          isInteractive={this.props.isInteractive}
         />
       ))}
     </ul>
@@ -369,29 +371,31 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
     return (
       <div className="visLegend" css={visLegendStyles.base}>
-        <button
-          type="button"
-          onClick={this.toggleLegend}
-          className={classNames('visLegend__toggle kbn-resetFocusState', {
-            'visLegend__toggle--isOpen': open,
-          })}
-          aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
-            defaultMessage: 'Toggle legend',
-          })}
-          aria-expanded={Boolean(open)}
-          aria-controls={this.legendId}
-          data-test-subj="vislibToggleLegend"
-          title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
-            defaultMessage: 'Toggle legend',
-          })}
-          css={[
-            visLegendStyles.inEmbPanel,
-            visLegendStyles.toggle,
-            open && visLegendStyles.openToggle,
-          ]}
-        >
-          <EuiIcon color="text" type="list" />
-        </button>
+        {this.props.isInteractive && (
+          <button
+            type="button"
+            onClick={this.toggleLegend}
+            className={classNames('visLegend__toggle kbn-resetFocusState', {
+              'visLegend__toggle--isOpen': open,
+            })}
+            aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
+              defaultMessage: 'Toggle legend',
+            })}
+            aria-expanded={Boolean(open)}
+            aria-controls={this.legendId}
+            data-test-subj="vislibToggleLegend"
+            title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
+              defaultMessage: 'Toggle legend',
+            })}
+            css={[
+              visLegendStyles.inEmbPanel,
+              visLegendStyles.toggle,
+              open && visLegendStyles.openToggle,
+            ]}
+          >
+            <EuiIcon color="text" type="listBullet" aria-hidden={true} />
+          </button>
+        )}
         {open && this.renderLegend(anchorPosition)}
       </div>
     );

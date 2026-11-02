@@ -14,7 +14,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { MaintenanceWindowsConfig } from './config';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { registerSavedObject } from './saved_objects';
 import {
@@ -30,6 +29,7 @@ import type {
   MaintenanceWindowsServerStart,
 } from './types';
 import { defineRoutes } from './routes';
+import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
 export class MaintenanceWindowsPlugin
   implements
@@ -41,14 +41,14 @@ export class MaintenanceWindowsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: MaintenanceWindowsConfig;
   private licenseState: ILicenseState | null = null;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
+  private readonly syncTasks: MaintenanceWindowSyncTasks;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = this.config = initializerContext.config.get();
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
+    this.syncTasks = new MaintenanceWindowSyncTasks(this.logger);
   }
 
   public setup(
@@ -69,7 +69,7 @@ export class MaintenanceWindowsPlugin
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
-    registerSavedObject(core.savedObjects, this.logger);
+    registerSavedObject(core.savedObjects);
 
     initializeMaintenanceWindowEventsGenerator(
       this.logger,
@@ -86,7 +86,6 @@ export class MaintenanceWindowsPlugin
     defineRoutes({
       router,
       licenseState: this.licenseState,
-      maintenanceWindowsConfig: this.config,
     });
 
     return {};
@@ -98,11 +97,14 @@ export class MaintenanceWindowsPlugin
   ): MaintenanceWindowsServerStart {
     const { maintenanceWindowClientFactory } = this;
 
+    this.syncTasks.setTaskManager(plugins.taskManager);
+
     maintenanceWindowClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityService: core.security,
       uiSettings: core.uiSettings,
+      notifyChange: this.syncTasks.runSoon,
     });
 
     const getMaintenanceWindowClientWithAuth = (
@@ -111,18 +113,25 @@ export class MaintenanceWindowsPlugin
       return maintenanceWindowClientFactory.createWithAuthorization(request);
     };
 
-    const getMaintenanceWindowClientInternal = (
-      request: KibanaRequest,
-      excludedExtension?: ['spaces']
+    const getMaintenanceWindowClientWithoutAuth = (
+      request: KibanaRequest
     ): MaintenanceWindowClientApi => {
-      return maintenanceWindowClientFactory.create(request, excludedExtension);
+      return maintenanceWindowClientFactory.createWithoutAuthorization(request);
+    };
+
+    const getMaintenanceWindowClientInternal = (
+      request: KibanaRequest
+    ): MaintenanceWindowClientApi => {
+      return maintenanceWindowClientFactory.createInternal(request);
     };
 
     scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
 
     return {
       getMaintenanceWindowClientWithAuth,
+      getMaintenanceWindowClientWithoutAuth,
       getMaintenanceWindowClientInternal,
+      registerSyncTask: this.syncTasks.register,
     };
   }
 

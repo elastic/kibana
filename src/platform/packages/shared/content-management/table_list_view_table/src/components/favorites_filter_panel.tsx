@@ -22,7 +22,7 @@ export function FavoritesFilterButton({
 }: FavoritesFilterButtonProps) {
   return (
     <EuiFilterButton
-      iconType={isFavoritesOnly ? 'starFilled' : 'starEmpty'}
+      iconType={isFavoritesOnly ? 'starFill' : 'star'}
       iconSide="left"
       data-test-subj="favoritesFilterButton"
       onClick={onToggleFavorites}

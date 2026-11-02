@@ -80,9 +80,16 @@ export interface AuthenticationTypeAnalyticsEvent {
  */
 interface CommonReportFields {
   type: string;
-  age?: number;
+  age?: number | null;
   body: {};
 }
+
+/**
+ * Removes `null` from every property's type while preserving optionality. Reporting API schemas
+ * accept `null` for optional fields (browsers send it explicitly), but those `null` values are
+ * stripped before reporting since EBT cannot represent nullable fields.
+ */
+type NonNullableProps<T> = { [K in keyof T]: Exclude<T[K], null> };
 
 /**
  * Helper type that transforms any Reporting API schema into its corresponding EBT schema:
@@ -90,12 +97,12 @@ interface CommonReportFields {
  * - Removes `type` property since events are identified by their `eventType` in EBT.
  * - Replaces `age` property with `created` timestamp so that we capture a fully qualified date.
  * - Spreads `body` property to keep the resulting EBT schema flat.
+ * - Removes `null` from field types since `null` values are stripped before reporting.
  */
-type FlattenReport<T extends CommonReportFields> = { created: string } & Omit<
-  T,
-  keyof CommonReportFields
+type FlattenReport<T extends CommonReportFields> = { created: string } & NonNullableProps<
+  Omit<T, keyof CommonReportFields>
 > &
-  T['body'];
+  NonNullableProps<T['body']>;
 
 /**
  * Describes the shape of the CSP violation event type.
@@ -271,6 +278,20 @@ const permissionsPolicyViolation: EventTypeOpts<PermissionsPolicyViolationEvent>
       _meta: {
         description: '"disposition" field of Reporting API permissions policy violation report.',
         optional: false,
+      },
+    },
+    allowAttribute: {
+      type: 'text',
+      _meta: {
+        description: '"allowAttribute" field of Reporting API permissions policy violation report.',
+        optional: true,
+      },
+    },
+    srcAttribute: {
+      type: 'text',
+      _meta: {
+        description: '"srcAttribute" field of Reporting API permissions policy violation report.',
+        optional: true,
       },
     },
   },

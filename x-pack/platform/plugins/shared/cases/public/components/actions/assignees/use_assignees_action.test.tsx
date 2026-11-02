@@ -42,8 +42,9 @@ describe('useAssigneesAction', () => {
         "data-test-subj": "cases-bulk-action-assignees",
         "disabled": false,
         "icon": <EuiIcon
+          aria-hidden={true}
           size="m"
-          type="userAvatar"
+          type="user"
         />,
         "key": "cases-bulk-action-assignees",
         "name": "Edit assignees",

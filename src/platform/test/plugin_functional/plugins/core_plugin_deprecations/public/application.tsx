@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters } from '@kbn/core/public';
 
 const DeprecationsApp = () => <div>Deprcations App</div>;
 
 export const renderApp = ({ element }: AppMountParameters) => {
-  ReactDOM.render(<DeprecationsApp />, element);
+  const root = createRoot(element);
+  root.render(<DeprecationsApp />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

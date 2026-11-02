@@ -34,7 +34,7 @@ export function AgentConfigurations() {
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
+          <EuiTitle size="s" data-test-subj="apmAgentConfigurationPanelTitle">
             <h2>
               {i18n.translate('xpack.apm.agentConfig.configurationsPanelTitle', {
                 defaultMessage: 'Configurations',
@@ -90,7 +90,7 @@ function CreateConfigurationButton() {
               data-test-subj="apmAgentConfigurationButtonCreateConfigurationButton"
               color="primary"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               href={href}
               isDisabled={!canSave}
             >

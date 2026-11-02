@@ -7,57 +7,66 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentRequest } from '../../../common/types/api';
-import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
-import type { Case } from '../../../common/types/domain';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { BulkCreateUnifiedAttachmentsRequestSchema } from '../../../common/types/api/attachment/v2';
+import type { Case, UnifiedAttachment } from '../../../common/types/domain';
+import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
+import { flattenAttachmentSavedObject } from '../../common/utils';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
+import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 
-import { decodeCommentRequest } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { BulkCreateArgs } from './types';
-import { validateRegisteredAttachments } from './validators';
+import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
+import { emitAttachmentsAddedEvent } from './trigger_utils';
+import { extractAndAddObservables } from './extract_observables';
 
-export const bulkCreate = async (
+const createAttachments = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
-): Promise<Case> => {
+): Promise<{
+  model: CaseCommentModel;
+  createdAttachments: AttachmentSavedObjectTransformedV2[];
+}> => {
   const { attachments, caseId } = args;
 
   const {
     logger,
     authorization,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
 
   try {
-    decodeWithExcessOrThrow(BulkCreateAttachmentsRequestRt)(attachments);
+    const decodedAttachments = decodeWithExcessOrThrowZod(
+      BulkCreateUnifiedAttachmentsRequestSchema
+    )(attachments);
+
     await validateMaxUserActions({
       caseId,
       userActionService,
-      userActionsToAdd: attachments.length,
+      userActionsToAdd: decodedAttachments.length,
     });
 
-    attachments.forEach((attachment) => {
-      decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
-      validateRegisteredAttachments({
+    decodedAttachments.forEach((attachment) => {
+      validateUnifiedAttachments({
         query: attachment,
-        persistableStateAttachmentTypeRegistry,
-        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
       });
     });
 
     const [attachmentsWithIds, entities]: [
-      Array<{ id: string } & AttachmentRequest>,
+      Array<{ id: string } & UnifiedAttachmentPayload>,
       OwnerEntity[]
-    ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
+    ] = decodedAttachments.reduce<
+      [Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]
+    >(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();
         return [
@@ -68,17 +77,46 @@ export const bulkCreate = async (
       [[], []]
     );
 
-    await authorization.ensureAuthorized({
-      operation: Operations.bulkCreateAttachments,
-      entities,
-    });
+    if (entities.length > 0) {
+      await authorization.ensureAuthorized({
+        operation: Operations.bulkCreateAttachments,
+        entities,
+      });
+    }
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-    const updatedModel = await model.bulkCreate({
+
+    // An empty request has no attachment owners, so check the case owner instead.
+    if (entities.length === 0) {
+      await authorization.ensureAuthorized({
+        operation: Operations.bulkCreateAttachments,
+        entities: [{ owner: model.savedObject.attributes.owner, id: caseId }],
+      });
+    }
+
+    const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });
 
-    return await updatedModel.encodeWithComments();
+    const {
+      attributes: { owner, settings },
+    } = model.savedObject;
+    const caseInfo = { id: caseId, owner };
+
+    const idsByType = new Map<string, string[]>();
+    for (const attachment of attachmentsWithIds) {
+      const ids = idsByType.get(attachment.type) ?? [];
+      ids.push(attachment.id);
+      idsByType.set(attachment.type, ids);
+    }
+    for (const [type, ids] of idsByType) {
+      emitAttachmentsAddedEvent(clientArgs, caseInfo, ids, type);
+    }
+
+    // This call never throws — failures are logged and do not abort the attachment creation.
+    await extractAndAddObservables(caseId, decodedAttachments, { settings }, clientArgs);
+
+    return { model: updatedModel, createdAttachments };
   } catch (error) {
     throw createCaseError({
       message: `Failed while bulk creating attachment to case id: ${caseId} error: ${error}`,
@@ -86,4 +124,30 @@ export const bulkCreate = async (
       logger,
     });
   }
+};
+
+/**
+ * Create attachments to a case. Returns the created attachments.
+ */
+export const bulkCreate = async (
+  args: BulkCreateArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment[]> => {
+  const { createdAttachments } = await createAttachments(args, clientArgs);
+
+  return createdAttachments.map((attachment) =>
+    toUnifiedAttachment(flattenAttachmentSavedObject(attachment))
+  );
+};
+
+/**
+ * Create attachments to a case. Returns the case with all its attachments.
+ */
+export const bulkCreateAndGetCase = async (
+  args: BulkCreateArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const { model } = await createAttachments(args, clientArgs);
+
+  return model.encodeWithComments();
 };

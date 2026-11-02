@@ -7,16 +7,44 @@
 
 import memoizeOne from 'memoize-one';
 import type {
+  Datasource,
   DatasourceMap,
   DatasourceLayers,
   DatasourceStates,
   DataViewsState,
+  FramePublicAPI,
+  TableInspectorAdapter,
 } from '@kbn/lens-common';
+
+/**
+ * Creates an updated FramePublicAPI with the new datasource state for a specific layer.
+ */
+export function getUpdatedFrameWithDatasourceState(
+  framePublicAPI: FramePublicAPI,
+  datasource: Datasource,
+  newDatasourceState: unknown,
+  layerId: string
+): FramePublicAPI {
+  const updatedDatasourceLayer = datasource.getPublicAPI({
+    state: newDatasourceState,
+    layerId,
+    indexPatterns: framePublicAPI.dataViews.indexPatterns,
+    activeDataTable: framePublicAPI.activeData?.[layerId],
+  });
+  return {
+    ...framePublicAPI,
+    datasourceLayers: {
+      ...framePublicAPI.datasourceLayers,
+      [layerId]: updatedDatasourceLayer,
+    },
+  };
+}
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap,
-  indexPatterns: DataViewsState['indexPatterns']
+  indexPatterns: DataViewsState['indexPatterns'],
+  activeData?: TableInspectorAdapter
 ): DatasourceLayers {
   const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
@@ -31,6 +59,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
           state: datasourceState,
           layerId: layer,
           indexPatterns,
+          activeDataTable: activeData?.[layer],
         });
       });
     });

@@ -12,13 +12,6 @@ import { screen, within, fireEvent } from '@testing-library/react';
 export class EuiSelectTestHarness {
   #testId: string;
 
-  /**
-   * Returns select or throws
-   */
-  get #selectEl() {
-    return screen.getByTestId(this.#testId);
-  }
-
   constructor(testId: string) {
     this.#testId = testId;
   }
@@ -31,36 +24,58 @@ export class EuiSelectTestHarness {
   }
 
   /**
-   * Returns button select if found, otherwise `null`
+   * Returns select element if found, otherwise `null`.
    */
-  public get self() {
+  public getElement(): HTMLElement | null {
     return screen.queryByTestId(this.#testId);
   }
 
   /**
-   * Returns all options of select
+   * Returns all options of select.
+   * Returns empty array if select is not found.
    */
-  public get options(): HTMLOptionElement[] {
-    return within(this.#selectEl).getAllByRole('option');
+  public getOptions(): HTMLOptionElement[] {
+    const el = this.getElement();
+    if (!el) return [];
+    return within(el).getAllByRole('option');
   }
 
   /**
-   * Returns selected option
+   * Returns selected option value.
+   * Returns empty string if select is not found.
    */
-  public get selected() {
-    return (this.#selectEl as HTMLSelectElement).value;
+  public getSelected(): string {
+    const el = this.getElement();
+    if (!el) return '';
+    return (el as HTMLSelectElement).value;
   }
 
   /**
    * Select option by value
    */
   public select(optionName: string | RegExp) {
-    const option = this.options.find((o) => o.value === optionName)?.value;
+    const el = this.getElement();
+    if (!el) {
+      throw new Error(`Expected select "${this.#testId}" to exist`);
+    }
+
+    const matches = (re: RegExp, value: string) => {
+      // Avoid surprising behavior for global regexes (`/foo/g`) by resetting state.
+      re.lastIndex = 0;
+      return re.test(value);
+    };
+
+    const option = this.getOptions().find((o) => {
+      if (typeof optionName === 'string') return o.value === optionName;
+
+      const text = o.textContent ?? '';
+      return matches(optionName, o.value) || matches(optionName, text);
+    });
 
     if (!option) {
       throw new Error(`Option [${optionName}] not found`);
     }
 
-    fireEvent.change(this.#selectEl, { target: { value: option } });
+    fireEvent.change(el, { target: { value: option.value } });
   }
 }

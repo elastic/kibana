@@ -12,6 +12,7 @@ This document contains all usage examples for `@kbn/synthtrace`. See the [README
   - [Infrastructure Scenarios](#infrastructure-scenarios)
   - [Combined Scenarios](#combined-scenarios)
   - [Specialized Scenarios](#specialized-scenarios)
+  - [Digital Experience Scenarios](#digital-experience-scenarios)
   - [SRE Incident Scenarios](#sre-incident-scenarios)
 - [Advanced Usage Examples](#advanced-usage-examples)
 
@@ -93,13 +94,13 @@ const esEvents = toElasticsearchOutput([
 For live data ingestion:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --live
+node scripts/synthtrace simple_trace --target=http://admin:changeme@localhost:9200 --live
 ```
 
 For a fixed time window:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
+node scripts/synthtrace simple_trace --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
 ```
 
 ### Local Development
@@ -107,7 +108,7 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 When running the CLI locally, you can simply use the following command to ingest data to a locally running Elasticsearch and Kibana instance:
 
 ```sh
-node scripts/synthtrace simple_trace.ts
+node scripts/synthtrace simple_trace
 ```
 
 _Assuming both Elasticsearch and Kibana are running on the default localhost ports with default credentials._
@@ -119,7 +120,7 @@ If the Kibana URL differs from the Elasticsearch URL in protocol or hostname, yo
 For example when running ES (with ssl) and Kibana (without ssl) locally in Serverless mode:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
+node scripts/synthtrace simple_trace --target=https://elastic_serverless:changeme@localhost:9200 --kibana=http://elastic_serverless:changeme@localhost:5601
 ```
 
 ### Using CLI for Elastic Cloud URLs
@@ -127,7 +128,7 @@ node scripts/synthtrace simple_trace.ts --target=https://elastic_serverless:chan
 If you are ingesting data to Elastic Cloud, you can pass the `--target` option with the Elastic Cloud URL:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
+node scripts/synthtrace simple_trace --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
 ```
 
 ### Using CLI with an API key
@@ -135,7 +136,7 @@ node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@y
 You can use a Kibana API key for authentication by passing the `--apiKey` option:
 
 ```sh
-node scripts/synthtrace simple_trace.ts --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
+node scripts/synthtrace simple_trace --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
 ```
 
 ## Scenario Examples
@@ -376,6 +377,34 @@ Generates data designed to trigger ML anomaly detection.
 node scripts/synthtrace apm_ml_anomalies --live
 ```
 
+#### `apm_anomalies`
+
+Generates APM transactions engineered so that, once APM anomaly-detection ML jobs run, the UI surfaces anomaly badges that exercise multi-detector and multi-environment scoring. Every service exists in both `production` and `development`, and each environment is anomalous at a different time (the trailing anomaly span is split in half: production earlier, development later), so the "all environments" combined chart shows two distinct anomaly clusters each tagged with its environment. Production is the higher (critical) score, so the badge / open-anomalies link still surfaces production.
+
+Services generated:
+
+- `synth-anomaly-detectors` — critical failure-rate anomaly plus a minor latency bump in production (so the badge surfaces failure rate, not latency), and a major failure-rate anomaly in development.
+- `synth-anomaly-environments` — critical latency spike in production, major in development.
+- `synth-anomaly-side-by-side` — the SAME critical latency spike in both environments, optionally offset in time by `sideBySideOffsetMinutes`, so the combined view shows two identical anomalies side by side.
+- `synth-anomaly-throughput` — large throughput spike in production, smaller one in development.
+- `synth-anomaly-all-metrics` — trips all three detectors (latency, failure rate, throughput) on one service in both environments, each in its own sub-window at a different time but with intentional overlaps (failure rate ramps from major to critical). The two environments use shifted windows, so some anomalous times line up across environments and others do not, and some buckets are anomalous on two or three detectors at once (so the badge surfaces the highest-scoring detector).
+
+**Options:**
+
+- `anomalyWindowHours` (number, default: 2): Trailing hours that are anomalous (split in half across the two environments).
+- `baselineRate` (number, default: 10): Transactions per minute during the baseline.
+- `sideBySideOffsetMinutes` (number, default: 15): Time offset applied to the `synth-anomaly-side-by-side` service's development environment relative to production. Both environments get the same anomaly, so the combined view shows identical anomalies side by side; `15` makes them land on the exact same time bucket.
+
+**Do not run with `--live`** (no baseline would exist for ML to learn). Use a fixed past range wider than the anomaly window. After ingesting, create APM ML jobs (APM > Settings > Anomaly detection) for the `production` and `development` environments and run their datafeeds over the ingested range for the badges to appear.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_anomalies --from=now-7d --to=now --clean
+node scripts/synthtrace apm_anomalies --from=now-7d --to=now --clean --scenarioOpts.anomalyWindowHours=4
+node scripts/synthtrace apm_anomalies --from=now-7d --to=now --clean --scenarioOpts.sideBySideOffsetMinutes=30
+```
+
 ### Log Scenarios
 
 #### `simple_logs`
@@ -581,6 +610,21 @@ Generates infrastructure host metrics along with APM host data.
 node scripts/synthtrace infra_hosts_with_apm_hosts --live
 ```
 
+#### `infra_hosts_minimal_host`
+
+Generates a single ECS infrastructure host row without numeric system metric fields. Useful for verifying Hosts page `N/A` behavior when a host exists but utilization/throughput values are unavailable.
+
+**Options:**
+
+- `hostName` (string, default: `minimal-host`): Host name to generate.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_minimal_host --from=now-15m --to=now --clean
+node scripts/synthtrace infra_hosts_minimal_host --scenarioOpts.hostName=my-host --from=now-15m --to=now --clean
+```
+
 #### `infra_docker_containers`
 
 Generates Docker container metrics.
@@ -609,6 +653,23 @@ Generates AWS RDS infrastructure metrics.
 
 ```sh
 node scripts/synthtrace infra_aws_rds --live
+```
+
+#### `infra_hosts_missing_normalized_load`
+
+Generates three groups of hosts to reproduce missing metrics in the Hosts table and KPIs. Linux hosts emit all metrics; Windows "partial" hosts emit everything except `system.load` (the primary bug case — normalized load shows "0%" instead of "N/A"); Windows "minimal" hosts emit only CPU (maximizing N/A columns).
+
+**Options:**
+
+- `numLinuxHosts` (number, default: 2): Hosts with full metrics
+- `numWindowsPartialHosts` (number, default: 2): All metrics except load (primary bug case)
+- `numWindowsMinimalHosts` (number, default: 1): Only CPU metrics (maximum N/A)
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now
+node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now --scenarioOpts='{"numLinuxHosts":2,"numWindowsPartialHosts":3,"numWindowsMinimalHosts":1}'
 ```
 
 ### Combined Scenarios
@@ -644,6 +705,35 @@ node scripts/synthtrace logs_traces_hosts --type=log --live
 
 ```sh
 node scripts/synthtrace logs_traces_hosts --type=log --scenarioOpts='{"numServices":20,"numHosts":50}' --live
+```
+
+#### `kubernetes_logs_traces_pods`
+
+Generates a comprehensive set of correlated Kubernetes logs, APM traces, and Kubernetes pod/container metrics.
+
+**Options:**
+
+- `numServices` (number, default: 10): Number of Kubernetes services to generate
+- `numPods` (number, default: 20): Number of Kubernetes pods to generate
+- `numContainers` (number, default: 30): Number of Kubernetes containers to generate
+- `numAgents` (number, default: 5): Number of agents
+- `logsInterval` (string, default: '1m'): Log generation interval
+- `logsRate` (number, default: 1): Log generation rate
+- `ingestPods` (boolean, default: true): Whether to ingest pod metrics
+- `ingestContainers` (boolean, default: true): Whether to ingest container metrics
+- `ingestTraces` (boolean, default: true): Whether to ingest traces
+- `logsdb` (boolean, default: false): Use LogsDB format
+
+**Usage:**
+
+```sh
+node scripts/synthtrace kubernetes_logs_traces_pods --live
+```
+
+**Example with options:**
+
+```sh
+node scripts/synthtrace kubernetes_logs_traces_pods --scenarioOpts='{"numServices":20,"numPods":50,"numContainers":100}'
 ```
 
 ### Specialized Scenarios
@@ -688,6 +778,95 @@ Generates simple OpenTelemetry traces.
 node scripts/synthtrace otel_simple_trace --live
 ```
 
+#### `genai`
+
+Generates OpenTelemetry GenAI APM traces for testing the GenAI tab in the APM transaction/span flyout and in Discover's document viewer. Uses the OTel APM pipeline.
+
+Root SERVER spans that carry `gen_ai.*` attributes show the GenAI tab immediately in the **transaction** flyout (Services > Traces). Agent and RAG traces also wrap CLIENT GenAI exit spans under a SERVER transaction, so the tab appears in the **span** flyout when you expand the waterfall. `regular-http-service` is a plain HTTP service — the GenAI tab must not appear.
+
+OTel GenAI fields exercised:
+
+- `gen_ai.operation.name`: `chat` | `embeddings`
+- `gen_ai.system`: `openai` | `anthropic` | `aws.bedrock`
+- `gen_ai.request.{model, temperature, top_p, top_k, max_tokens, seed}`
+- `gen_ai.response.{model, id, finish_reasons}`
+- `gen_ai.usage.{input_tokens, output_tokens}`
+- EDOT extensions: `gen_ai.provider.name`, `gen_ai.input.messages` / `gen_ai.output.messages`, `gen_ai.system_instructions`, `gen_ai.conversation.id`
+
+The Elasticsearch flattened `attributes` mapping uses `ignore_above: 1024`. Messages at or under that length are indexed and render from the fields API. Longer values are dropped from the index (`_ignored`) and survive only in `_source`; APM and Discover recover them with a `_source` fallback.
+
+Services generated:
+
+- `genai-chat-service` — multi-turn OpenAI gpt-4o chat with input/output messages.
+- `genai-tool-service` — Anthropic Claude tool/function calling (`tool_calls` plus tool results).
+- `genai-embed-service` — OpenAI embeddings (`operation.name = embeddings`, no conversation).
+- `genai-minimal-service` — Amazon Bedrock Titan with only required `gen_ai.*` fields (optional sections stay hidden).
+- `genai-long-content-service` — longer messages to exercise the View more toggle.
+- `genai-agent-service` — SERVER transaction wrapping three CLIENT GenAI exit spans (plan → search → synthesize).
+- `genai-rag-service` — SERVER root plus embeddings and chat CLIENT spans in one trace.
+- `regular-http-service` — non-GenAI HTTP traffic; the GenAI tab must not appear.
+- `genai-realworld-service` — multi-turn developer assistant conversation with mixed markdown (headers, tables, code blocks) to test rendering fidelity.
+- `genai-maxlen-service` — every message's serialized JSON is exactly 1024 characters, the largest value Elasticsearch still indexes.
+- `genai-overlimit-service` — messages well over 1024 characters. Elasticsearch drops them from the index; only a `_source` fallback can surface the conversation.
+- `genai-partial-service` — mixed short and over-limit messages in the same array. `ignore_above` drops only the long elements, so the indexed value is a non-null **partial** array. Recovery must replace the whole field, not skip it because a value is present.
+- `genai-reasoning-service` — OpenRouter-style output with a `reasoning` part followed by a `text` part (single serialized `parts` array). The reasoning must render as plain text inside a collapsed accordion.
+- `genai-reasoning-markdown-service` — same `reasoning` + `text` parts, but the reasoning uses rich markdown (heading, lists, table, code block, blockquote) to check how formatting renders.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace genai --live --clean
+node scripts/synthtrace genai --from=now-15m --to=now --clean
+```
+
+After ingesting, open **Observability > APM > Services**, pick a `genai-*` service, and open a trace. For Discover, query APM traces covering these services and open the **GenAI** tab in the document viewer. Over-limit conversations in ES|QL Discover require `METADATA _id, _index` so the tab can fetch `_source`.
+
+#### `apm_service_legacy_to_otel_metrics`
+
+Simulates a service migrating from classic Elastic APM to OTel instrumentation. The first half of the time range produces classic APM Java data (metrics + transactions), the second half produces OTel data with stable semconv `jvm.*` metrics in a dedicated OTel index. Both halves share the same `service.name`, so the APM Metrics tab must select the correct dashboard based on the latest agent data.
+
+**Options:**
+
+- `serviceName` (string, default: `migration-svc`): The shared service name across both phases
+- `rpm` (number, default: 2): Transactions per minute per phase
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_service_legacy_to_otel_metrics --from now-1w --to now --clean
+```
+
+#### `apm_service_overlapping_otel_metrics`
+
+Simulates a service migrating from classic Elastic APM to OTel instrumentation with an overlap period where both instrumentations send data simultaneously. Classic APM runs from `from` to 75% of the range, OTel runs from 25% to `to`, so the middle 50% has both types sending data at the same time. Both phases share the same `service.name`, so the APM Metrics tab must handle the overlap and let the user switch between dashboard variants.
+
+**Options:**
+
+- `serviceName` (string, default: `overlap-svc`): The shared service name across both phases
+- `rpm` (number, default: 2): Transactions per minute per phase
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_service_overlapping_otel_metrics --from now-2d --to now --clean
+```
+
+#### `apm_jvm_metrics_type_conflict`
+
+Reproduces `verification_exception` errors on the APM Metrics tab when both classic (Elastic APM) and OTel Java agents ingest data for the same service. The OTel metrics index is configured as TSDB with gauge annotations, causing type conflicts with classic APM fields when queried via ES|QL.
+
+**Options:**
+
+- `serviceName` (string, default: `kms-gps-synth`): OTel service name
+- `classicServiceName` (string, default: `kms-gps-classic`): Classic APM service name
+- `rpm` (number, default: 2): OTel traces per minute
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_jvm_metrics_type_conflict --from now-1w --to now --clean
+```
+
 #### `degraded_synthetics_monitors`
 
 Generates degraded synthetic monitor data.
@@ -716,6 +895,59 @@ Generates data for testing agent configuration.
 
 ```sh
 node scripts/synthtrace agent_config --live
+```
+
+### Digital Experience Scenarios
+
+These scenarios generate browser Real User Monitoring data for Digital Experience. EDOT Browser data is OTel-native, as stored by the Elasticsearch exporter, with no APM enrichment:
+
+- `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
+- `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
+
+Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
+
+The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`. For exact values in a test, pass `random: createSeededRandom('my-test')` (from `@kbn/synthtrace-client`) and a fixed `start` or `end` to `edotBrowser.session()`, which makes the whole session, trace and span IDs included, reproducible. Unlike the scenarios' `seed` option, it doesn't fix the session and tab IDs: pass those to `app.client()` yourself.
+
+> **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the EDOT Browser data. On a shared cluster, that also removes other OTel data.
+
+**Options (both scenarios):**
+
+- `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them. The apps then report distro version `0.3.0`, and `0.4.0` otherwise.
+- `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
+- `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
+- `seed` (string or number, default random): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
+
+#### `digital_experience_browser`
+
+Generates EDOT Browser data for five apps in different states of health:
+
+| `service.name`       | Health   | Notes                                               |
+| -------------------- | -------- | --------------------------------------------------- |
+| `storefront-web`     | healthy  | high traffic, good vitals                           |
+| `checkout-web`       | erroring | failing `POST /api/payment`, frequent JS errors     |
+| `media-portal-web`   | slow     | poor LCP from large images and render-blocking CSS  |
+| `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
+| `docs-web`           | healthy  | low traffic, mostly desktop, no environment         |
+
+With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
+node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
+node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
+```
+
+#### `digital_experience_mixed`
+
+Generates the `digital_experience_browser` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
 ```
 
 ### SRE Incident Scenarios

@@ -7,6 +7,8 @@
 
 import { useCallback, useEffect } from 'react';
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
+import { useHistory } from 'react-router-dom';
+import type { History } from 'history';
 import { useStoredUrlDetails } from './use_stored_state';
 import { OnboardingTopicId, type OnboardingCardId } from '../../constants';
 import { useOnboardingContext } from '../onboarding_context';
@@ -16,8 +18,8 @@ import { useCloudTopicId } from './use_cloud_topic_id';
 export const getCardIdFromHash = (hash: string): OnboardingCardId | null =>
   (hash.split('?')[0].replace('#', '') as OnboardingCardId) || null;
 
-const setHash = (cardId: OnboardingCardId | null) => {
-  history.replaceState(null, '', cardId == null ? ' ' : `#${cardId}`);
+const setHash = (history: History, cardId: OnboardingCardId | null) => {
+  history.replace({ hash: cardId == null ? undefined : `#${cardId}` });
 };
 
 const getUrlDetail = (topicId: OnboardingTopicId, cardId: OnboardingCardId | null): string => {
@@ -34,6 +36,7 @@ export const useUrlDetail = () => {
   const [storedUrlDetail, setStoredUrlDetail] = useStoredUrlDetails(spaceId);
 
   const { navigateTo } = useNavigateTo();
+  const history = useHistory();
 
   const navigateToDetail = useCallback(
     (detail?: string | null) => {
@@ -53,13 +56,13 @@ export const useUrlDetail = () => {
 
   const setCard = useCallback(
     (newCardId: OnboardingCardId | null) => {
-      setHash(newCardId);
+      setHash(history, newCardId);
       setStoredUrlDetail(getUrlDetail(topicId, newCardId) || null);
       if (newCardId != null) {
         telemetry.reportCardOpen(newCardId);
       }
     },
-    [setStoredUrlDetail, topicId, telemetry]
+    [setStoredUrlDetail, topicId, telemetry, history]
   );
 
   return { topicId, setTopic, setCard, navigateToDetail, storedUrlDetail, setStoredUrlDetail };
@@ -78,7 +81,12 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
 
   const onComplete = useCallback((cloudTopicId: OnboardingTopicId | null) => {
     if (cloudTopicId && config.has(cloudTopicId)) {
-      setTopic(cloudTopicId);
+      if (cloudTopicId === OnboardingTopicId.siemMigrations) {
+        setStoredUrlDetail(null);
+        navigateToDetail(cloudTopicId);
+      } else {
+        setTopic(cloudTopicId);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -102,6 +110,11 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
     if (!urlDetail && storedUrlDetail) {
       // Check if the stored topic is not valid, if so clear it to prevent inconsistencies
       const [storedTopicId] = storedUrlDetail.split('#');
+      if (storedTopicId === OnboardingTopicId.siemMigrations) {
+        // The SIEM migrations topic now redirects away from Get started, so don't restore it from stale local storage.
+        setStoredUrlDetail(null);
+        return;
+      }
       if (storedTopicId && !config.has(storedTopicId as OnboardingTopicId)) {
         setStoredUrlDetail(null);
         return;

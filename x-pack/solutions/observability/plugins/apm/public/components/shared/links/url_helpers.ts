@@ -6,11 +6,11 @@
  */
 
 import type { History } from 'history';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? parse(search.slice(1), { sort: false }) : {};
+  return search ? queryString.parse(search.slice(1), { sort: false }) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {
@@ -18,7 +18,7 @@ export function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return stringify(encodedQuery, { sort: false, encode: false });
+  return queryString.stringify(encodedQuery, { sort: false, encode: false });
 }
 
 type LocationWithQuery = Partial<
@@ -39,19 +39,38 @@ function getNextLocation(history: History, locationWithQuery: LocationWithQuery)
   };
 }
 
+export function isInactiveHistoryError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('fell out of navigation scope');
+}
+
 export function replace(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
-  return history.replace(location);
+  try {
+    return history.replace(location);
+  } catch (error) {
+    if (isInactiveHistoryError(error)) return;
+    throw error;
+  }
 }
 
 export function push(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
-  return history.push(location);
+  try {
+    return history.push(location);
+  } catch (error) {
+    if (isInactiveHistoryError(error)) return;
+    throw error;
+  }
 }
 
 export function createHref(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
-  return history.createHref(location);
+  try {
+    return history.createHref(location);
+  } catch (error) {
+    if (isInactiveHistoryError(error)) return '';
+    throw error;
+  }
 }
 
 export interface APMQueryParams {

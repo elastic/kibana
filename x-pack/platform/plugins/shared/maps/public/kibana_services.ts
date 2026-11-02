@@ -62,7 +62,7 @@ export const setSpaceId = (_spaceId: string) => {
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.dataViews;
-export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocomplete;
+export const getAutocompleteService = () => pluginsStart.kql.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
@@ -102,7 +102,6 @@ export const isScreenshotMode = () => {
   return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
 };
 export const getServerless = () => pluginsStart.serverless;
-export const getEmbeddableEnhanced = () => pluginsStart.embeddableEnhanced;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -134,3 +133,4 @@ export const getEmsTileLayerId = () => {
 };
 
 export const getShareService = () => pluginsStart.share;
+export const getCps = () => pluginsStart.cps;

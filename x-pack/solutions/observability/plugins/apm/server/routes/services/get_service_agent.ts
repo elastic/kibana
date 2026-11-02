@@ -8,36 +8,34 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  PROCESS_RUNTIME_VERSION,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
-
-export interface ServiceAgentResponse {
-  agentName?: string;
-  runtimeName?: string;
-  telemetrySdkName?: string;
-  telemetrySdkLanguage?: string;
-  serverlessType?: ServerlessType;
-}
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 export async function getServiceAgent({
   serviceName,
+  environment,
   apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -47,26 +45,39 @@ export async function getServiceAgent({
     TELEMETRY_SDK_NAME,
     TELEMETRY_SDK_LANGUAGE,
     SERVICE_RUNTIME_NAME,
+    SERVICE_RUNTIME_VERSION,
+    PROCESS_RUNTIME_VERSION,
     CLOUD_PROVIDER,
     CLOUD_SERVICE_NAME,
   ] as const);
 
   const params = {
-    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
     track_total_hits: 1,
     size: 1,
-    _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+    _source: [
+      AGENT_NAME,
+      SERVICE_RUNTIME_NAME,
+      SERVICE_RUNTIME_VERSION,
+      CLOUD_PROVIDER,
+      CLOUD_SERVICE_NAME,
+    ],
     query: {
       bool: {
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
+          ...environmentQuery(environment),
           {
-            exists: {
-              field: AGENT_NAME,
+            bool: {
+              should: [
+                { exists: { field: AGENT_NAME } },
+                { exists: { field: TELEMETRY_SDK_NAME } },
+                { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
@@ -90,9 +101,7 @@ export async function getServiceAgent({
       },
     },
     fields,
-    sort: {
-      _score: { order: 'desc' as const },
-    },
+    sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);
@@ -108,11 +117,23 @@ export async function getServiceAgent({
     event[CLOUD_SERVICE_NAME]
   );
 
+  const runtimeVersion =
+    event[SERVICE_RUNTIME_VERSION] ??
+    (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
+
+  const agentName =
+    getAgentName(
+      event[AGENT_NAME] ?? null,
+      event[TELEMETRY_SDK_LANGUAGE] ?? null,
+      event[TELEMETRY_SDK_NAME] ?? null
+    ) ?? undefined;
+
   return {
-    agentName: event[AGENT_NAME],
+    agentName,
     telemetrySdkName: event[TELEMETRY_SDK_NAME],
     telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
     runtimeName: event[SERVICE_RUNTIME_NAME],
+    runtimeVersion,
     serverlessType,
   };
 }

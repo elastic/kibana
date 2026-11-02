@@ -6,17 +6,6 @@
  */
 
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-
-export type OriginalColumn = {
-  id: string;
-  label: string;
-  variable?: string;
-  format?: SerializedFieldFormat;
-} & (
-  | { operationType: 'date_histogram'; sourceField: string; interval: number }
-  | { operationType: string; sourceField?: string; interval: never }
-);
 
 export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<
   'lens_map_to_columns',

@@ -11,6 +11,37 @@ import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
 export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
+// ---------------------------------------------------------------------------
+// String length ceilings (`maxLength`) — DoS protection.
+// ---------------------------------------------------------------------------
+
+// Elasticsearch simple_query_string. Complex queries with many terms and field
+// qualifiers stay well under 1024 chars; 1024 blocks abusive payloads.
+export const RULE_SEARCH_MAX_LENGTH = 1024;
+
+// Saved-object field names retrieved from CspBenchmarkRule. All SO mapping
+// field names are well under 256 chars.
+export const RULE_FIELD_NAME_MAX_LENGTH = 256;
+
+// CIS benchmark section names (e.g. "Logging", "Identity and Access Management").
+// 256 covers the longest realistic values with ample headroom.
+export const RULE_SECTION_MAX_LENGTH = 256;
+
+// CIS benchmark rule numbers (e.g. "1.2.3", "4.1.10"): short structured strings.
+// 64 covers all realistic values.
+export const RULE_NUMBER_MAX_LENGTH = 64;
+
+// CIS benchmark/rule identifiers (e.g. "cis_aws", rule UUIDs). 256 is generous.
+export const RULE_ID_MAX_LENGTH = 256;
+
+// CIS benchmark version strings (e.g. "1.4.0"): short semver-like strings.
+// 64 is generous for all known versions.
+export const BENCHMARK_VERSION_MAX_LENGTH = 64;
+
+// Fleet supports custom package policy IDs up to 255 characters. Keep this in
+// sync with Fleet's PackagePolicy schema.
+export const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
+
 // Since version 8.7.0
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
@@ -42,7 +73,8 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
   rego_rule_id: schema.string(),
   remediation: schema.string(),
   section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
+  // maxSize is set to 100 as it's not expected to have more than 100 tags per rule
+  tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
   version: schema.string(),
 });
 
@@ -54,7 +86,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ maxLength: RULE_SEARCH_MAX_LENGTH })),
 
   /**
    * The page of objects to return
@@ -69,15 +101,19 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize is set to 50 to cover all available fields with room for future additions
+  fields: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: RULE_FIELD_NAME_MAX_LENGTH }), { maxSize: 50 })
+  ),
 
   /**
    *  The fields to perform the parsed query against.
    * Valid fields are fields which mapped to 'text' in cspBenchmarkRuleSavedObjectMapping
    */
+  // maxSize is set to 2 as there are only 2 valid search fields
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
-    { defaultValue: ['metadata.name.text'] }
+    { defaultValue: ['metadata.name.text'], maxSize: 2 }
   ),
 
   /**
@@ -122,12 +158,12 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * package_policy_id
    */
-  packagePolicyId: schema.maybe(schema.string()),
+  packagePolicyId: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_ID_MAX_LENGTH })),
 
   /**
    * rule section
    */
-  section: schema.maybe(schema.string()),
+  section: schema.maybe(schema.string({ maxLength: RULE_SECTION_MAX_LENGTH })),
 });
 
 export interface FindCspBenchmarkRuleResponse {

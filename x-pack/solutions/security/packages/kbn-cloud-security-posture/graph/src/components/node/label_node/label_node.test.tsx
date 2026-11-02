@@ -14,22 +14,15 @@ import type { NodeProps } from '../../types';
 import { getLabelColors } from '../styles';
 import { GRAPH_FLAGS_BADGE_ID, GRAPH_IPS_TEXT_ID, GRAPH_LABEL_NODE_ID } from '../../test_ids';
 import {
+  GraphDisplayOptionsContext,
+  DEFAULT_GRAPH_DISPLAY_OPTIONS,
+} from '../../graph/graph_display_options_context';
+import {
   LabelNode,
   TEST_SUBJ_EXPAND_BTN,
   TEST_SUBJ_HANDLE,
-  TEST_SUBJ_HOVER_OUTLINE,
-  TEST_SUBJ_LABEL_TEXT,
-  TEST_SUBJ_TOOLTIP,
+  TEST_SUBJ_ORIGIN_HIGHLIGHT,
 } from './label_node';
-
-jest.mock('./label_node_badges', () => {
-  // Use the actual exports, except override LIMIT
-  const actual = jest.requireActual('./label_node_badges');
-  return {
-    ...actual,
-    LIMIT: 2,
-  };
-});
 
 describe('LabelNode', () => {
   const baseProps: NodeProps = {
@@ -69,7 +62,46 @@ describe('LabelNode', () => {
     expect(screen.getAllByTestId(TEST_SUBJ_HANDLE)).toHaveLength(2);
   });
 
-  test('renders expand button and outline on hover if interactive', async () => {
+  describe('origin highlight', () => {
+    test.each([
+      ['isOrigin', { isOrigin: true }],
+      ['isOriginAlert', { isOriginAlert: true }],
+    ])('renders the highlight ring when the node is %s', (_, originFlags) => {
+      render(
+        <ReactFlow>
+          <LabelNode {...baseProps} data={{ ...baseProps.data, ...originFlags }} />
+        </ReactFlow>
+      );
+
+      expect(screen.getByTestId(TEST_SUBJ_ORIGIN_HIGHLIGHT)).toBeInTheDocument();
+    });
+
+    test('does not render the highlight ring for a non-origin node', () => {
+      render(
+        <ReactFlow>
+          <LabelNode {...baseProps} />
+        </ReactFlow>
+      );
+
+      expect(screen.queryByTestId(TEST_SUBJ_ORIGIN_HIGHLIGHT)).not.toBeInTheDocument();
+    });
+
+    test('does not render the highlight ring when highlightOrigin is disabled', () => {
+      render(
+        <GraphDisplayOptionsContext.Provider
+          value={{ ...DEFAULT_GRAPH_DISPLAY_OPTIONS, highlightOrigin: false }}
+        >
+          <ReactFlow>
+            <LabelNode {...baseProps} data={{ ...baseProps.data, isOrigin: true }} />
+          </ReactFlow>
+        </GraphDisplayOptionsContext.Provider>
+      );
+
+      expect(screen.queryByTestId(TEST_SUBJ_ORIGIN_HIGHLIGHT)).not.toBeInTheDocument();
+    });
+  });
+
+  test('renders expand button on hover if interactive', async () => {
     render(
       <ReactFlow>
         <LabelNode {...baseProps} />
@@ -80,11 +112,10 @@ describe('LabelNode', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).toBeInTheDocument();
     });
   });
 
-  test('does not render expand button and outline on hover if no interactive', async () => {
+  test('does not render expand button on hover if not interactive', async () => {
     const props = {
       ...baseProps,
       data: {
@@ -103,7 +134,6 @@ describe('LabelNode', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId(TEST_SUBJ_EXPAND_BTN)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).not.toBeInTheDocument();
     });
   });
 
@@ -121,7 +151,8 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    // Label is hidden for a single IP — only the value itself is shown
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).not.toBeInTheDocument();
   });
 
@@ -158,98 +189,34 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    // Label is hidden for a single IP — only the value itself is shown
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
-  });
-
-  describe('Tooltip', () => {
-    test('shows tooltip when text is truncated', async () => {
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: 'This label is too long so it will be truncated for sure oh yeah',
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <LabelNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
-      });
-    });
-
-    test('tooltip shows full text content', async () => {
-      const longText = 'This is a very long label that exceeds twenty-seven characters';
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: longText,
-        },
-      };
-      render(
-        <ReactFlow>
-          <LabelNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toHaveTextContent(longText);
-      });
-    });
-
-    test('does not show tooltip otherwise', async () => {
-      render(
-        <ReactFlow>
-          <LabelNode {...baseProps} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).not.toBeInTheDocument();
-      });
-    });
   });
 
   describe('Shape colors', () => {
     const mockEuiTheme = {
       colors: {
-        danger: '#FF0000',
-        backgroundBasePrimary: '#0000FF',
-        borderStrongPrimary: '#0000DD',
-        textInverse: '#FFFFFF',
-        textPrimary: '#000000',
+        backgroundLightPrimary: '#E6F1FA',
+        borderBasePlain: '#D3DAE6',
+        textHeading: '#1A1C21',
       },
     };
 
-    it('should return danger colors when color prop is "danger"', () => {
+    const expectedColors = {
+      backgroundColor: mockEuiTheme.colors.backgroundLightPrimary,
+      borderColor: mockEuiTheme.colors.borderBasePlain,
+      textColor: mockEuiTheme.colors.textHeading,
+    };
+
+    it('should return gray colors when color prop is "danger"', () => {
       const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.danger,
-        borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.textInverse,
-      });
+      expect(colors).toEqual(expectedColors);
     });
 
-    it('should return primary colors when color prop is "primary"', () => {
+    it('should return gray colors when color prop is "primary"', () => {
       const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
-        borderColor: mockEuiTheme.colors.borderStrongPrimary,
-        textColor: mockEuiTheme.colors.textPrimary,
-      });
+      expect(colors).toEqual(expectedColors);
     });
   });
 });

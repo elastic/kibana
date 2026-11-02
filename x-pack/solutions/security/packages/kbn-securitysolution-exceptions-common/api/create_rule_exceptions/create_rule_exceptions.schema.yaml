@@ -51,6 +51,26 @@ paths:
                     namespace_type: single
                     os_types: [linux]
                     tags: [malware]
+            examples:
+              addItems:
+                value:
+                  items:
+                    - item_id: simple_list_item
+                      list_id: simple_list
+                      type: simple
+                      name: Sample Exception List Item
+                      description: This is a sample detection type exception item.
+                      entries:
+                        - type: exists
+                          field: actingProcess.file.signer
+                          operator: excluded
+                        - type: match_any
+                          field: host.name
+                          value: [saturn, jupiter]
+                          operator: included
+                      namespace_type: single
+                      os_types: [linux]
+                      tags: [malware]
       responses:
         200:
           description: Successful response

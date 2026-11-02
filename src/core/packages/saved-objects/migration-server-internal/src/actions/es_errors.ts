@@ -28,6 +28,10 @@ export const isIndexNotFoundException = (errorCause?: ErrorCause): boolean => {
   return errorCause?.type === 'index_not_found_exception';
 };
 
+export const isUnavailableShardsException = (errorCause?: ErrorCause): boolean => {
+  return errorCause?.type === 'unavailable_shards_exception';
+};
+
 export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean => {
   // traditional ES: validation_exception. serverless ES: illegal_argument_exception
   return (

@@ -8,8 +8,8 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup, MountPoint } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { CaseUI } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
@@ -25,16 +25,15 @@ async function addToCase(
   timeRange?: { from: string; to: string },
   owner?: string
 ) {
-  const apiPath = `/api/cases/${theCase?.id}/comments`;
-
   const payload = {
-    persistableStateAttachmentState: { attributes, timeRange },
-    persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
-    type: AttachmentType.persistableState,
+    type: LENS_ATTACHMENT_TYPE,
+    data: { state: { attributes, timeRange } },
     owner: owner ?? observabilityFeatureId,
   };
 
-  return http.post(apiPath, { body: JSON.stringify(payload) });
+  return http.post(buildPath('/api/cases/{caseId}/attachments', { caseId: theCase.id }), {
+    body: JSON.stringify(payload),
+  });
 }
 
 export const useAddToCase = ({

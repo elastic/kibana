@@ -22,10 +22,10 @@ export function registerUpdateSettingsRoute({ router, current }: RouteDependenci
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1000 }),
         }),
         body: schema.object({
-          settings: schema.arrayOf(schema.string()),
+          settings: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
         }),
       },
     },

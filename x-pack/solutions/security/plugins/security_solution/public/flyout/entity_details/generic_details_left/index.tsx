@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-import {
-  LeftPanelHeader,
-  type CspInsightLeftPanelSubTab,
-  type EntityDetailsLeftPanelTab,
-  type LeftPanelTabsType,
+import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
+import type {
+  EntityDetailsPath,
+  EntityDetailsLeftPanelTab,
+  LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
 import type { UseGetGenericEntityParams } from '../generic_right/hooks/use_get_generic_entity';
 import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
@@ -21,18 +21,15 @@ import {
   getFieldsTableTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
+import type { IdentityFields } from '../../document_details/shared/utils';
 
 interface BaseGenericEntityDetailsPanelProps {
-  value: string;
-  field: string;
+  identityFields: IdentityFields;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
   hasNonClosedAlerts?: boolean;
-  path?: {
-    tab?: EntityDetailsLeftPanelTab;
-    subTab?: CspInsightLeftPanelSubTab;
-  };
+  path?: Partial<EntityDetailsPath>;
 }
 
 export type GenericEntityDetailsPanelProps = BaseGenericEntityDetailsPanelProps &
@@ -74,8 +71,7 @@ const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelT
 
 export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
   const {
-    field,
-    value,
+    identityFields,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
@@ -89,13 +85,27 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {
+    const fields = identityFields ?? {};
+    const field = Object.keys(fields)[0] ?? 'host.name';
+    const value = fields['host.name'] ?? fields['user.name'] ?? Object.values(fields)[0] ?? '';
+    const entityIdForInsights =
+      fields['host.entity.id'] ?? fields['user.entity.id'] ?? fields['service.entity.id'] ?? '';
+    const entityType: 'host' | 'user' | 'service' =
+      field === 'user.name' || fields['user.entity.id'] !== undefined
+        ? 'user'
+        : String(field).startsWith('service.')
+        ? 'service'
+        : 'host';
+
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
         ? [
             getInsightsInputTab({
-              name: value,
-              fieldName: field as 'related.entity',
+              field,
+              value,
+              entityId: entityIdForInsights,
               scopeId,
+              entityType,
             }),
           ]
         : [];
@@ -110,8 +120,7 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    value,
-    field,
+    identityFields,
     scopeId,
     source,
   ]);

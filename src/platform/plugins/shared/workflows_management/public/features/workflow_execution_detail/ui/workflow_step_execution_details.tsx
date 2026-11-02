@@ -15,28 +15,87 @@ import {
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { ForeachIterationsSection } from './foreach_iterations_section';
+import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
+import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
+import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
+import {
+  approvalLabelsForStepExecution,
+  resumeMessageForStepExecution,
+  resumeSchemaForStepExecution,
+} from '../model/use_waiting_step_resume';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
+  allStepExecutions?: WorkflowStepExecutionDto[];
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps, shown on the overview pseudo-step. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
+  isLoadingStepData?: boolean;
+  workflowExecutionStatus?: ExecutionStatus;
+  resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
+  approvalLabels?: ApprovalLabels;
+  shouldAutoResume?: boolean;
+  /** Shared with the tree-row Provide action so one submit disables both. */
+  submitState?: React.ComponentProps<typeof ResumeExecutionButton>['submitState'];
+  waitingStepExecutionId?: string;
+  /** Run that owns `stepExecution`. Differs from `workflowExecutionId` for an injected child step. */
+  resumeExecutionId?: string;
+  hasResumeError?: boolean;
+  onRetryResume?: () => void;
+  /** When the step is workflow.execute, the child workflow execution (to link to) */
+  childWorkflowExecution?: ChildWorkflowExecutionItem;
+  /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
+  parentWorkflowExecution?: WorkflowExecutionLinkInfo;
+  onSelectStepExecution?: (stepExecutionId: string) => void;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, workflowExecutionDuration }) => {
+  ({
+    workflowExecutionId,
+    stepExecution,
+    allStepExecutions,
+    workflowExecutionDuration,
+    workflowExecutionUsage,
+    isLoadingStepData,
+    workflowExecutionStatus,
+    resumeMessage,
+    resumeSchema,
+    approvalLabels,
+    shouldAutoResume = false,
+    submitState,
+    waitingStepExecutionId,
+    resumeExecutionId,
+    hasResumeError,
+    onRetryResume,
+    childWorkflowExecution,
+    parentWorkflowExecution,
+    onSelectStepExecution,
+  }) => {
+    const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+    const isOwnWaitingStep = stepExecution?.id === waitingStepExecutionId;
+
+    // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
-      () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
-      [stepExecution?.status]
+      () =>
+        Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)) ||
+        isWaitingForInput,
+      [stepExecution?.status, isWaitingForInput]
     );
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
@@ -47,40 +106,34 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ? stepExecution?.stepType?.replace('trigger_', '')
       : undefined;
 
-    const tabs = useMemo(() => {
-      if (isTriggerPseudoStep) {
-        const pseudoTabs: { id: string; name: string }[] = [];
-        if (stepExecution?.input) {
-          pseudoTabs.push({
-            id: 'input',
-            name: 'Input',
-          });
-        }
-        return pseudoTabs;
+    const hasInput = Boolean(stepExecution?.input);
+    const hasOutput = Boolean(stepExecution?.output);
+    const hasError = Boolean(stepExecution?.error);
+    const isForeachOrWhile =
+      stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'while';
+
+    // Detect foreach/while children even when stepType is absent from the lightweight poll.
+    const hasForeachIterations = useMemo(() => {
+      const stepId = stepExecution?.stepId;
+      if (!stepId || !allStepExecutions?.length || !onSelectStepExecution) {
+        return false;
       }
-      return [
-        {
-          id: 'output',
-          name: stepExecution?.error ? 'Error' : 'Output',
-        },
-        {
-          id: 'input',
-          name: 'Input',
-        },
-      ];
-    }, [stepExecution, isTriggerPseudoStep]);
+      return allStepExecutions.some((s) => {
+        const frame = s.scopeStack.find((f) => f.stepId === stepId);
+        return frame?.nestedScopes.some((sc) => sc.scopeId !== undefined) ?? false;
+      });
+    }, [stepExecution?.stepId, allStepExecutions, onSelectStepExecution]);
 
-    const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
-
-    useEffect(() => {
-      // reset the tab to the default one on step change
-      setSelectedTabId(tabs[0].id);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [stepExecution?.stepId, tabs[0].id]);
+    const showInput = hasInput;
+    const showIterations =
+      (isForeachOrWhile || hasForeachIterations) &&
+      Boolean(onSelectStepExecution) &&
+      Boolean(allStepExecutions?.length);
+    const showOutput = hasOutput || hasError;
 
     if (!stepExecution) {
       return (
-        <EuiPanel hasShadow={false} paddingSize="m">
+        <EuiPanel hasShadow={false} hasBorder={false} borderRadius="none" paddingSize="m">
           <EuiSkeletonText lines={1} />
           <EuiSpacer size="l" />
           <EuiSkeletonText lines={4} />
@@ -93,6 +146,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          workflowExecutionUsage={workflowExecutionUsage}
+          showResumeUI={false}
+          executionId={workflowExecutionId}
+          resumeMessage={resumeMessage}
+          resumeSchema={resumeSchema}
+          approvalLabels={approvalLabels}
+          shouldAutoResume={shouldAutoResume}
+          waitingStepExecutionId={waitingStepExecutionId}
+          hasResumeError={hasResumeError}
+          onRetryResume={onRetryResume}
         />
       );
     }
@@ -100,93 +163,123 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+        data-test-subj={
+          isTriggerPseudoStep ? 'workflowExecutionTrigger' : 'workflowStepExecutionDetails'
+        }
       >
         <EuiFlexGroup
           direction="column"
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          <EuiFlexItem grow={false}>
-            <EuiTabs expand>
-              {tabs.map((tab) => (
-                <EuiTab
-                  onClick={() => setSelectedTabId(tab.id)}
-                  isSelected={tab.id === selectedTabId}
-                  key={tab.id}
-                  css={{ lineHeight: 'normal' }}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </EuiFlexItem>
+          {(childWorkflowExecution || parentWorkflowExecution) && (
+            <EuiFlexItem grow={false}>
+              <NestedWorkflowExecutionLinks
+                stepExecution={stepExecution}
+                childWorkflowExecution={childWorkflowExecution}
+                parentWorkflowExecution={parentWorkflowExecution}
+              />
+            </EuiFlexItem>
+          )}
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
-              {selectedTabId === 'output' && (
-                <>
-                  {isTriggerPseudoStep && (
-                    <>
-                      <EuiCallOut
-                        size="s"
-                        title={i18n.translate(
-                          'workflowsManagement.stepExecutionDetails.contextAccessTitle',
-                          {
-                            defaultMessage: 'Access this data in your workflow',
-                          }
-                        )}
-                        iconType="info"
-                        announceOnMount={false}
-                      >
-                        <FormattedMessage
-                          id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
-                          defaultMessage="You can reference these values using {code}"
-                          values={{
-                            code: <strong>{`{{ <field> }}`}</strong>,
-                          }}
-                        />
-                      </EuiCallOut>
-                      <EuiSpacer size="m" />
-                    </>
+              {isLoadingStepData ? (
+                <EuiPanel hasShadow={false} hasBorder={false} borderRadius="none" paddingSize="m">
+                  <EuiSkeletonText lines={4} />
+                </EuiPanel>
+              ) : (
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  {showInput && (
+                    <EuiFlexItem grow={false}>
+                      {isWaitingForInput && (
+                        <>
+                          {/* Tree row owns auto-open. This button shares submit state so it cannot open a second modal or resume again. */}
+                          <ResumeExecutionButton
+                            executionId={resumeExecutionId ?? workflowExecutionId}
+                            workflowId={stepExecution?.workflowId}
+                            stepStartedAt={stepExecution?.startedAt}
+                            resumeMessage={
+                              isOwnWaitingStep
+                                ? resumeMessage
+                                : resumeMessageForStepExecution(stepExecution)
+                            }
+                            resumeSchema={
+                              isOwnWaitingStep
+                                ? resumeSchema
+                                : resumeSchemaForStepExecution(stepExecution)
+                            }
+                            approvalLabels={
+                              isOwnWaitingStep
+                                ? approvalLabels
+                                : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
+                            }
+                            waitingStepExecutionId={stepExecution?.id}
+                            submitState={submitState}
+                          />
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      {isTriggerPseudoStep && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflows.stepExecutionDetails.inputAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflows.stepExecutionDetails.inputAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: (
+                                  <strong>
+                                    {triggerType === 'manual'
+                                      ? `{{ inputs.<field> }}`
+                                      : `{{ event.<field> }}`}
+                                  </strong>
+                                ),
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+                    </EuiFlexItem>
                   )}
-                  <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-                </>
-              )}
-              {selectedTabId === 'input' && (
-                <>
-                  {isTriggerPseudoStep && (
-                    <>
-                      <EuiCallOut
-                        size="s"
-                        title={i18n.translate(
-                          'workflowsManagement.stepExecutionDetails.inputAccessTitle',
-                          {
-                            defaultMessage: 'Access this data in your workflow',
-                          }
-                        )}
-                        iconType="info"
-                        announceOnMount={false}
-                      >
-                        <FormattedMessage
-                          id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
-                          defaultMessage="You can reference these values using {code}"
-                          values={{
-                            code: (
-                              <strong>
-                                {triggerType === 'manual'
-                                  ? `{{ inputs.<field> }}`
-                                  : `{{ event.<field> }}`}
-                              </strong>
-                            ),
-                          }}
+                  {showIterations &&
+                    stepExecution &&
+                    allStepExecutions &&
+                    onSelectStepExecution && (
+                      <EuiFlexItem grow={false}>
+                        <ForeachIterationsSection
+                          foreachStep={stepExecution}
+                          allStepExecutions={allStepExecutions}
+                          selectedId={stepExecution.id}
+                          onSelectStep={onSelectStepExecution}
+                          executionStatus={workflowExecutionStatus}
                         />
-                      </EuiCallOut>
-                      <EuiSpacer size="m" />
-                    </>
+                      </EuiFlexItem>
+                    )}
+                  {showOutput && (
+                    <EuiFlexItem grow={false}>
+                      <StepExecutionDataView
+                        stepExecution={stepExecution}
+                        mode="output"
+                        allStepExecutions={allStepExecutions}
+                      />
+                    </EuiFlexItem>
                   )}
-                  <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-                </>
+                </EuiFlexGroup>
               )}
             </EuiFlexItem>
           ) : (

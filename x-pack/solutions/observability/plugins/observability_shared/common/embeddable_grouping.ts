@@ -15,7 +15,7 @@ export const COMMON_OBSERVABILITY_GROUPING = [
         defaultMessage: 'Observability',
       }),
     getIconType: () => {
-      return 'online';
+      return 'wifi';
     },
     order: -1,
   },

@@ -104,15 +104,37 @@ describe('#delete', () => {
 
     describe('client calls', () => {
       it(`should use the ES delete action when not using a multi-namespace type`, async () => {
-        await deleteSuccess(client, repository, registry, type, id);
-        expect(client.get).not.toHaveBeenCalled();
+        client.get.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            getMockGetResponse(registry, { type, id })
+          )
+        );
+        client.delete.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            result: 'deleted',
+          } as estypes.DeleteResponse)
+        );
+        await repository.delete(type, id);
+        expect(client.get).toHaveBeenCalledTimes(1);
         expect(client.delete).toHaveBeenCalledTimes(1);
+        client.get.mockClear();
       });
 
       it(`should use ES get action then delete action when using a multi-namespace type`, async () => {
-        await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).not.toHaveBeenCalled();
+        client.get.mockResolvedValue(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            getMockGetResponse(registry, { type: MULTI_NAMESPACE_ISOLATED_TYPE, id })
+          )
+        );
+        client.delete.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            result: 'deleted',
+          } as estypes.DeleteResponse)
+        );
+        await repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id);
+        expect(client.get).toHaveBeenCalledTimes(2);
         expect(client.delete).toHaveBeenCalledTimes(1);
+        client.get.mockClear();
       });
 
       it(`does not includes the version of the existing document when using a multi-namespace type`, async () => {
@@ -255,7 +277,7 @@ describe('#delete', () => {
         id: string,
         options?: SavedObjectsDeleteOptions
       ) => {
-        await expect(repository.delete(type, id, options)).rejects.toThrowError(
+        await expect(repository.delete(type, id, options)).rejects.toThrow(
           createGenericNotFoundErrorPayload(type, id)
         );
       };
@@ -263,7 +285,7 @@ describe('#delete', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.delete(type, id, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {
@@ -322,7 +344,7 @@ describe('#delete', () => {
 
         await expect(
           repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
         expect(client.get).toHaveBeenCalledTimes(2);
@@ -341,7 +363,7 @@ describe('#delete', () => {
 
         await expect(
           repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
         expect(client.get).toHaveBeenCalledTimes(2);
@@ -375,7 +397,7 @@ describe('#delete', () => {
             result: 'something unexpected' as estypes.Result,
           } as estypes.DeleteResponse)
         );
-        await expect(repository.delete(type, id)).rejects.toThrowError(
+        await expect(repository.delete(type, id)).rejects.toThrow(
           'Unexpected Elasticsearch DELETE response'
         );
         expect(client.delete).toHaveBeenCalledTimes(1);

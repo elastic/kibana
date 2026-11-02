@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// @ts-ignore
 export { StartTrial } from './start_trial.container';

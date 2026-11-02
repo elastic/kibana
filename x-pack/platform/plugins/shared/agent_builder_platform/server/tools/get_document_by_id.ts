@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import { getDocumentById } from '@kbn/onechat-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { z } from '@kbn/zod/v4';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { getDocumentById } from '@kbn/agent-builder-genai-utils';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),
@@ -23,6 +23,13 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
     type: ToolType.builtin,
     description:
       'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
+    annotations: {
+      title: 'Get Document by ID',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
       const result = await getDocumentById({ id, index, esClient: esClient.asCurrentUser });

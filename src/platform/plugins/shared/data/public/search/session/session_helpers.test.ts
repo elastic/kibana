@@ -25,13 +25,7 @@ let nowProvider: jest.Mocked<NowProviderInternalContract>;
 let currentAppId$: BehaviorSubject<string>;
 
 beforeEach(() => {
-  const initializerContext = coreMock.createPluginInitializerContext({
-    search: {
-      sessions: {
-        notTouchedTimeout: '5m',
-      },
-    },
-  });
+  const initializerContext = coreMock.createPluginInitializerContext();
   const startService = coreMock.createSetup().getStartServices;
   nowProvider = createNowProviderMock();
   currentAppId$ = new BehaviorSubject('app');
@@ -59,7 +53,6 @@ beforeEach(() => {
     getSearchSessionEBTManagerMock(),
     getSessionsClientMock(),
     nowProvider,
-    undefined,
     { freezeState: false } // needed to use mocks inside state container
   );
   state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
@@ -88,10 +81,10 @@ describe('waitUntilNextSessionCompletes$', () => {
       const next = jest.fn();
       const complete = jest.fn();
       waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
 
       sessionService.start();
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
 
       completeSearch = sessionService.trackSearch({
         abort: () => {},
@@ -100,12 +93,12 @@ describe('waitUntilNextSessionCompletes$', () => {
 
       completeSearch();
 
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
       advance(500);
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
       advance(1000);
-      expect(next).toBeCalledTimes(1);
-      expect(complete).toBeCalled();
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(complete).toHaveBeenCalled();
     })
   );
 });

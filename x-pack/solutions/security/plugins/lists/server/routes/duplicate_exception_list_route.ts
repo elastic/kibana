@@ -7,12 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   DuplicateExceptionListRequestQuery,
   DuplicateExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
-import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -25,7 +25,7 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_URL}/_duplicate`,
       security: {
         authz: {
-          requiredPrivileges: [LISTS_API_ALL],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })

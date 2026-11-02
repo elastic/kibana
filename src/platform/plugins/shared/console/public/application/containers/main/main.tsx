@@ -17,7 +17,6 @@ import {
   EuiToolTip,
   useEuiTour,
   EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiScreenReaderOnly,
   useEuiTheme,
   useEuiOverflowScroll,
@@ -57,6 +56,7 @@ import {
   INITIAL_TOUR_CONFIG,
   FILES_TOUR_STEP,
   EXPORT_FILE_NAME,
+  EXPORT_REQUESTS_METRIC_ID,
 } from './constants';
 
 interface MainProps {
@@ -101,13 +101,14 @@ const useStyles = (isEmbeddable: boolean) => {
     `,
 
     consoleTabs: css`
-      padding: 0 ${euiTheme.size.s};
+      padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
     `,
 
     // Scrollable panel with body background
     scrollablePanelWithBackground: css`
       ${useEuiOverflowScroll('y', false)}
       background-color: ${euiTheme.colors.body};
+      border-radius: ${euiTheme.border.radius.inline};
     `,
   };
 };
@@ -128,7 +129,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const {
     docLinks,
-    services: { notifications, routeHistory },
+    services: { notifications, routeHistory, trackUiMetric },
   } = useServicesContext();
 
   const [tourStepProps, actions, tourState] = useEuiTour(
@@ -251,8 +252,13 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
-      <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-        <EuiSplitPanel.Inner grow={false} css={styles.consoleTabs}>
+      <EuiSplitPanel.Outer
+        grow={true}
+        borderRadius={isEmbeddable ? 'none' : 'm'}
+        hasShadow={false}
+        hasBorder={true}
+      >
+        <EuiSplitPanel.Inner grow={false} paddingSize="s" css={styles.consoleTabs}>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <TopNavMenu
@@ -269,14 +275,15 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                 <>
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                     <EuiButtonEmpty
-                      iconType="exportAction"
+                      iconType="upload"
                       disabled={inputEditorValue === ''}
-                      onClick={() =>
+                      onClick={() => {
                         downloadFileAs(EXPORT_FILE_NAME, {
                           content: inputEditorValue,
                           type: 'text/plain',
-                        })
-                      }
+                        });
+                        trackUiMetric.count(EXPORT_REQUESTS_METRIC_ID);
+                      }}
                       size="xs"
                       data-test-subj="consoleExportButton"
                       aria-label={MAIN_PANEL_LABELS.exportButtonTooltip}
@@ -287,7 +294,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                   <>
                     <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
                       <EuiButtonEmpty
-                        iconType="importAction"
+                        iconType="download"
                         onClick={() => document.getElementById('importConsoleFile')?.click()}
                         size="xs"
                         data-test-subj="consoleImportButton"
@@ -350,7 +357,6 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
             )}
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="none"
           css={styles.scrollablePanelWithBackground}
@@ -361,13 +367,11 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
               loading={!done}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
-              enableSuggestWidgetRepositioning={!isEmbeddable}
             />
           )}
           {currentTab === HISTORY_TAB_ID && <History />}
           {currentTab === CONFIG_TAB_ID && <Config />}
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner
           paddingSize="xs"
           grow={false}
@@ -376,7 +380,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         >
           <EuiButtonEmpty
             onClick={() => updateTab(CONFIG_TAB_ID)}
-            iconType="editorCodeBlock"
+            iconType="code"
             size="xs"
             color="text"
             aria-label={MAIN_PANEL_LABELS.variablesButton}

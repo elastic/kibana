@@ -8,10 +8,11 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
-import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
+import { UNISOLATE_HOST_ROUTE_V2 } from '../../../../common/endpoint/constants';
 import { loadPage } from './common';
 import { waitForActionToSucceed } from './response_actions';
+import { goToAlertsTab } from './alerts';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
 export const interceptActionRequests = (
@@ -29,66 +30,21 @@ export const interceptActionRequests = (
   }).as(alias);
 };
 
-export const sendActionResponse = (action: ActionDetails): void => {
+export const sendActionResponse = (
+  action: ActionDetails,
+  options?: { responseCode?: string }
+): void => {
   cy.task('sendHostActionResponse', {
     action,
     state: { state: 'success' },
-  });
-};
-
-export const isolateHostWithComment = (comment: string, hostname: string): void => {
-  cy.getByTestSubj('isolate-host-action-item').click();
-  cy.contains(`Isolate host ${hostname} from network.`);
-  cy.getByTestSubj('endpointHostIsolationForm');
-  cy.getByTestSubj('host_isolation_comment').type(comment);
-};
-
-export const releaseHostWithComment = (comment: string, hostname: string): void => {
-  cy.contains(`${hostname} is currently isolated.`);
-  cy.getByTestSubj('endpointHostIsolationForm');
-  cy.getByTestSubj('host_isolation_comment').type(comment);
-};
-
-export const openCaseAlertDetails = (alertId: string): void => {
-  cy.getByTestSubj(`comment-action-show-alert-${alertId}`).click();
-  cy.getByTestSubj('securitySolutionFlyoutFooterDropdownButton').click();
-};
-
-export const waitForReleaseOption = (alertId: string): void => {
-  openCaseAlertDetails(alertId);
-  cy.getByTestSubj('event-field-agent.status').then(($status) => {
-    if ($status.find('[title="Isolated"]').length > 0) {
-      cy.contains('Release host').click();
-    } else {
-      cy.getByTestSubj('euiFlyoutCloseButton').click();
-      openCaseAlertDetails(alertId);
-      cy.getByTestSubj('event-field-agent.status').within(() => {
-        cy.contains('Isolated');
-      });
-      cy.contains('Release host').click();
-    }
+    responseCode: options?.responseCode,
   });
 };
 
 export const visitRuleAlerts = (ruleName: string) => {
   loadPage('/app/security/rules');
   cy.contains(ruleName).click();
-};
-
-export const checkFlyoutEndpointIsolation = (): void => {
-  cy.getByTestSubj('event-field-agent.status').then(($status) => {
-    if ($status.find('[title="Isolated"]').length > 0) {
-      cy.contains('Release host').click();
-    } else {
-      cy.getByTestSubj('euiFlyoutCloseButton').click();
-      cy.wait(5000);
-      openAlertDetailsView();
-      cy.getByTestSubj('event-field-agent.status').within(() => {
-        cy.contains('Isolated');
-      });
-      cy.contains('Release host').click();
-    }
-  });
+  goToAlertsTab();
 };
 
 export const toggleRuleOffAndOn = (ruleName: string): void => {
@@ -105,19 +61,6 @@ export const toggleRuleOffAndOn = (ruleName: string): void => {
     });
 };
 
-export const filterOutEndpoints = (endpointHostname: string): void => {
-  cy.getByTestSubj('filters-global-container').within(() => {
-    cy.getByTestSubj('queryInput').click();
-    cy.getByTestSubj('queryInput').type(`host.name: ${endpointHostname}`);
-    cy.getByTestSubj('querySubmitButton').click();
-  });
-};
-
-export const filterOutIsolatedHosts = (): void => {
-  cy.getByTestSubj('adminSearchBar').type('united.endpoint.Endpoint.state.isolation: true');
-  cy.getByTestSubj('querySubmitButton').click();
-};
-
 const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
   const chainer = expectIsolated ? 'contain' : 'not.contain';
   cy.getByTestSubj('endpointListTable').within(() => {
@@ -131,8 +74,6 @@ const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
 
 export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
   checkEndpointListForIsolationStatus(false);
-export const checkEndpointListForOnlyIsolatedHosts = (): void =>
-  checkEndpointListForIsolationStatus(true);
 
 export const isolateHostActionViaAPI = (agentId: string): void => {
   cy.request({
@@ -142,6 +83,25 @@ export const isolateHostActionViaAPI = (agentId: string): void => {
     },
     method: 'POST',
     url: 'api/endpoint/action/isolate',
+    body: {
+      endpoint_ids: [agentId],
+    },
+  })
+    // verify action was successful
+    .then((response) => waitForActionToSucceed(response.body.data.id))
+    .then((actionResponse) => {
+      expect(actionResponse.status).to.equal('successful');
+    });
+};
+
+export const releaseHostActionViaAPI = (agentId: string): void => {
+  cy.request({
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+    method: 'POST',
+    url: UNISOLATE_HOST_ROUTE_V2,
     body: {
       endpoint_ids: [agentId],
     },

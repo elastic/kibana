@@ -6,9 +6,9 @@
  */
 
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         usersSessions.set(`user_${userPrefix}`, {
-          cookie: parseCookie(response.headers['set-cookie'][0])!,
+          cookie: findSessionCookie(response.headers['set-cookie']),
         });
       }
     });
@@ -309,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', usersSessions.get('user_one')!.cookie.cookieString())
         .send({
-          avatar: { initials: 'some-initials', color: 'some-color' },
+          avatar: { initials: 'some-initials', color: '#f3f3f3' },
           userSettings: { darkMode: 'dark', contrastMode: 'high' },
         })
         .expect(200);
@@ -350,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials",
               },
@@ -382,7 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials",
               },

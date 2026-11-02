@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiFieldText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import {
   STEP_1_TITLE,
@@ -38,7 +38,7 @@ interface ConnectionWizardProps {
 }
 
 export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect }) => {
-  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService } =
+  const { docLinks, clusterConfig, cloudUrl, telemetryService, apiService, setJustConnected } =
     useCloudConnectedAppContext();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +71,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
 
     if (data?.success) {
       telemetryService.trackClusterConnected();
+      setJustConnected(true);
       onConnect();
     }
 
@@ -106,7 +107,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               fill
               href={`${cloudUrl}/registration?onboarding_service_type=ccm${signupParams}`}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               onClick={handleSignUpClick}
               data-test-subj="connectionWizardSignUpButton"
@@ -118,7 +119,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             <EuiButton
               href={`${cloudUrl}/login?redirectTo=${encodedRedirectUrl}`}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               onClick={handleLoginClick}
               data-test-subj="connectionWizardLoginButton"
@@ -165,6 +166,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               onClick={handleConnect}
               disabled={!apiKey.trim() || isLoading || !clusterConfig?.hasEncryptedSOEnabled}
               isLoading={isLoading}
@@ -177,14 +179,12 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
         {error && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title="Authentication failed"
-              color="danger"
-              iconType="error"
               data-test-subj="connectionWizardError"
-            >
-              <p>{error}</p>
-            </EuiCallOut>
+              text={error}
+            />
           </>
         )}
       </>

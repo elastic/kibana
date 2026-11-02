@@ -9,23 +9,48 @@
 
 import { omit } from 'lodash';
 import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
-import { actions } from './actions';
+import * as actions from './actions';
 
 export {
   type DiscoverInternalState,
   type TabState,
   type TabStateGlobalState,
+  type RecentlyClosedTabState,
   type DiscoverAppState,
+  type ExpandedDocCascadePath,
   type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
+  type ProfileAppStateDefaults,
+  type ProfileAppStateSnapshot,
+  type UpdateESQLQueryActionPayload,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabInitializationStatus,
+  TabsBarVisibility,
 } from './types';
 
-export { DEFAULT_TAB_STATE } from './constants';
+export { DEFAULT_EXPANDED_DOC_OWNER, DEFAULT_TAB_STATE } from './constants';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  type InternalStateDependencies,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...omit(
+    internalStateSlice.actions,
+    'setTabs',
+    'setPersistedDiscoverSession',
+    'disconnectTab',
+    'setDefaultProfileAdHocDataViewIds',
+    'setAppState',
+    'setProfileState',
+    'syncProfileAppStateSnapshot',
+    'setExpandedDoc'
+  ),
   ...actions,
   syncLocallyPersistedTabState,
 };
@@ -33,6 +58,8 @@ export const internalStateActions = {
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  useInternalStateSubscribe,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
@@ -45,24 +72,46 @@ export {
 export {
   selectAllTabs,
   selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
   selectTab,
+  selectTabAppState,
+  selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  searchSourceComparator,
+  selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
 } from './selectors';
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
   DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectDataSourceProfileId,
+  selectCurrentProfileStateDefinition,
+  selectCurrentProfileUrlState,
+  selectCurrentProfileLocatorState,
+  selectCurrentTabType,
+  selectTabTypeForPersistence,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
+  useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
+  getDataViewIdOfSource,
+  pinDataViewOfSource,
+  getDataViewOfSource,
+  getTabDataView,
   useCurrentDataView,
+  useCurrentDataSource,
   useAdHocDataViews,
 } from './runtime_state';
 
@@ -70,11 +119,14 @@ export {
   type TabActionInjector,
   createTabActionInjector,
   createTabItem,
+  getSerializedSearchSourceDataViewDetails,
   parseControlGroupJson,
   extractEsqlVariables,
 } from './utils';
 
 export {
+  fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,

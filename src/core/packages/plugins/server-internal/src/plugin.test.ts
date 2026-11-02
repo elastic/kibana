@@ -95,6 +95,7 @@ beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
   instanceInfo = {
     uuid: 'instance-uuid',
+    airgapped: false,
   };
   nodeInfo = nodeServiceMock.createInternalPrebootContract();
   runtimeResolver = createRuntimePluginContractResolverMock();
@@ -279,6 +280,84 @@ test('`init` fails if object returned from initializer does not define `setup` f
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Instance of plugin \\"some-plugin-id\\" does not define \\"setup\\" function."`
   );
+});
+
+test('`init` fails if object returned from initializer defines an `initialize` function', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
+  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
+  );
+});
+
+test('`init` fails if the plugin class defines an `initialize` method', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  class PluginWithInitializeMethod {
+    setup() {
+      return {};
+    }
+
+    initialize() {
+      return Promise.resolve();
+    }
+  }
+  mockPluginInitializer.mockResolvedValue(new PluginWithInitializeMethod());
+
+  await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" defines an \\"initialize\\" function. \\"initialize\\" is reserved by core for plugin lifecycle hooks, rename the method."`
+  );
+});
+
+test('`init` allows a preboot plugin to define an `initialize` function', async () => {
+  const manifest = createPluginManifest({ type: PluginType.preboot });
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  const mockPluginInstance = { setup: jest.fn(), initialize: jest.fn() };
+  mockPluginInitializer.mockResolvedValue(mockPluginInstance);
+
+  await expect(plugin.init()).resolves.toBeUndefined();
 });
 
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
@@ -633,7 +712,7 @@ test('`stop` cleans up the plugin container', async () => {
 });
 
 describe('#getConfigSchema()', () => {
-  it('reads config schema from plugin', () => {
+  it('reads config schema from plugin', async () => {
     const pluginSchema = schema.any();
     const configDescriptor = {
       schema: pluginSchema,
@@ -660,10 +739,10 @@ describe('#getConfigSchema()', () => {
       }),
     });
 
-    expect(plugin.getConfigDescriptor()).toBe(configDescriptor);
+    expect(await plugin.getConfigDescriptor()).toBe(configDescriptor);
   });
 
-  it('returns null if config definition not specified', () => {
+  it('returns null if config definition not specified', async () => {
     jest.doMock(join('plugin-with-no-definition', 'server'), () => ({}), { virtual: true });
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
@@ -679,10 +758,10 @@ describe('#getConfigSchema()', () => {
         nodeInfo,
       }),
     });
-    expect(plugin.getConfigDescriptor()).toBe(null);
+    expect(await plugin.getConfigDescriptor()).toBe(null);
   });
 
-  it('returns null for plugins without a server part', () => {
+  it('returns null for plugins without a server part', async () => {
     const manifest = createPluginManifest({ server: false });
     const opaqueId = Symbol();
     const plugin = new PluginWrapper({
@@ -697,10 +776,10 @@ describe('#getConfigSchema()', () => {
         nodeInfo,
       }),
     });
-    expect(plugin.getConfigDescriptor()).toBe(null);
+    expect(await plugin.getConfigDescriptor()).toBe(null);
   });
 
-  it('throws if plugin contains invalid schema', () => {
+  it('throws if plugin contains invalid schema', async () => {
     jest.doMock(
       join('plugin-invalid-schema', 'server'),
       () => ({
@@ -726,7 +805,7 @@ describe('#getConfigSchema()', () => {
         nodeInfo,
       }),
     });
-    expect(() => plugin.getConfigDescriptor()).toThrowErrorMatchingInlineSnapshot(
+    await expect(() => plugin.getConfigDescriptor()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`
     );
   });

@@ -20,18 +20,25 @@ import {
   EuiLoadingSpinner,
   euiFontSize,
   EuiTextColor,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import {
+  IndexMode,
+  type TemplateListItem as IndexTemplate,
+  type SimulateIndexTemplateResponse,
+} from '@kbn/index-management-shared-types';
+
 import {
   formatDataRetention,
   indexModeLabels,
   getPhaseDescriptions,
   type PhaseDescription,
   type IlmPolicyFetcher,
+  type SimulatedTemplateFetcher,
 } from '../../../../utils';
 
 interface PhasesInfoProps {
@@ -88,6 +95,30 @@ const PhasesInfo = ({
   return null;
 };
 
+const LookupRetentionNotApplied = () => (
+  <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="lookupRetentionNotApplied">
+    <EuiFlexItem grow={false}>
+      {i18n.translate(
+        'xpack.createClassicStreamFlyout.nameAndConfirmStep.lookupRetentionNotAppliedLabel',
+        {
+          defaultMessage: 'Not applied to lookup index mode',
+        }
+      )}
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiTextColor color="subdued">
+        {i18n.translate(
+          'xpack.createClassicStreamFlyout.nameAndConfirmStep.lookupRetentionNotAppliedDescription',
+          {
+            defaultMessage:
+              'Index lifecycle management and data stream lifecycle skip indices with the lookup index mode.',
+          }
+        )}
+      </EuiTextColor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 interface RetentionDetailsProps {
   ilmPolicyName: string;
 }
@@ -114,8 +145,9 @@ const RetentionDetails = ({
 );
 
 interface ConfirmTemplateDetailsSectionProps {
-  template: TemplateDeserialized;
+  template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
+  getSimulatedTemplate?: SimulatedTemplateFetcher;
 }
 
 const useStyles = () => {
@@ -146,6 +178,7 @@ const useStyles = () => {
 export const ConfirmTemplateDetailsSection = ({
   template,
   getIlmPolicy,
+  getSimulatedTemplate,
 }: ConfirmTemplateDetailsSectionProps) => {
   const styles = useStyles();
   const { euiTheme } = useEuiTheme();
@@ -154,7 +187,17 @@ export const ConfirmTemplateDetailsSection = ({
   const [isLoadingIlmPolicy, setIsLoadingIlmPolicy] = useState(false);
   const [hasErrorLoadingIlmPolicy, setHasErrorLoadingIlmPolicy] = useState(false);
 
-  const ilmPolicyName = template.ilmPolicy?.name;
+  const [simulatedTemplate, setSimulatedTemplate] = useState<SimulateIndexTemplateResponse | null>(
+    null
+  );
+  const [isLoadingSimulatedTemplate, setIsLoadingSimulatedTemplate] = useState(false);
+  const [hasErrorLoadingSimulatedTemplate, setHasErrorLoadingSimulatedTemplate] = useState(false);
+
+  // Derive ILM policy name from simulated template settings
+  const ilmPolicyName = simulatedTemplate?.template?.settings?.index?.lifecycle?.name;
+  // ILM and data stream lifecycle are both skipped for lookup indices, so the policy is never applied
+  const isLookupMode = simulatedTemplate?.template?.settings?.index?.mode === IndexMode.lookup;
+  const hasDataStreamLifecycle = simulatedTemplate?.template?.lifecycle?.enabled === true;
 
   const phaseColors = useMemo(
     () => ({
@@ -166,15 +209,50 @@ export const ConfirmTemplateDetailsSection = ({
     [euiTheme]
   );
 
-  // Fetch ILM policy details when policy name is available
+  // Fetch simulated template data when getSimulatedTemplate is available
   useEffect(() => {
-    if (!ilmPolicyName || !getIlmPolicy) {
+    if (!getSimulatedTemplate) {
+      setSimulatedTemplate(null);
+      return;
+    }
+
+    const abortController = new AbortController();
+    setIsLoadingSimulatedTemplate(true);
+    setHasErrorLoadingSimulatedTemplate(false);
+
+    getSimulatedTemplate(template.name, abortController.signal)
+      .then((data) => {
+        if (!abortController.signal.aborted && data) {
+          setSimulatedTemplate(data);
+        }
+      })
+      .catch((error) => {
+        if (!abortController.signal.aborted) {
+          setSimulatedTemplate(null);
+          setHasErrorLoadingSimulatedTemplate(true);
+        }
+      })
+      .finally(() => {
+        if (!abortController.signal.aborted) {
+          setIsLoadingSimulatedTemplate(false);
+        }
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [getSimulatedTemplate, template.name]);
+
+  // Fetch ILM policy details when policy name is available (skipped for lookup mode, where it is not applied)
+  useEffect(() => {
+    if (!ilmPolicyName || !getIlmPolicy || isLookupMode) {
       setIlmPolicy(null);
       return;
     }
 
     const abortController = new AbortController();
     setIsLoadingIlmPolicy(true);
+    setHasErrorLoadingIlmPolicy(false);
 
     getIlmPolicy(ilmPolicyName, abortController.signal)
       .then((policy) => {
@@ -197,7 +275,7 @@ export const ConfirmTemplateDetailsSection = ({
     return () => {
       abortController.abort();
     };
-  }, [ilmPolicyName, getIlmPolicy]);
+  }, [ilmPolicyName, getIlmPolicy, isLookupMode]);
 
   const ilmPhases = useMemo(() => {
     if (!ilmPolicy) {
@@ -207,11 +285,21 @@ export const ConfirmTemplateDetailsSection = ({
   }, [ilmPolicy, phaseColors]);
 
   const templateDetails = useMemo(() => {
-    const indexMode = template.indexMode ?? 'standard';
-    const dataRetention = formatDataRetention(template);
     const componentTemplates = template.composedOf ?? [];
 
     const items: Array<{ title: string; description: NonNullable<React.ReactNode> }> = [];
+
+    // Show loading state while fetching simulated template
+    if (isLoadingSimulatedTemplate) {
+      return [
+        {
+          title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.loadingLabel', {
+            defaultMessage: 'Loading…',
+          }),
+          description: <EuiLoadingSpinner size="s" />,
+        },
+      ];
+    }
 
     // Version
     if (template.version !== undefined) {
@@ -223,37 +311,67 @@ export const ConfirmTemplateDetailsSection = ({
       });
     }
 
-    // Index mode
-    items.push({
-      title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.indexModeLabel', {
-        defaultMessage: 'Index mode',
-      }),
-      description: indexModeLabels[indexMode],
-    });
+    // Index mode and retention are only shown when simulated template data is available
+    if (simulatedTemplate) {
+      const simulatedSettings = simulatedTemplate.template?.settings;
+      const indexMode = simulatedSettings?.index?.mode ?? 'standard';
 
-    // Retention - ILM policy or data retention
-    if (ilmPolicyName) {
+      // Index mode (from simulated template settings)
       items.push({
-        title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel', {
-          defaultMessage: 'Retention',
+        title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.indexModeLabel', {
+          defaultMessage: 'Index mode',
         }),
-        description: (
-          <RetentionDetails ilmPolicyName={ilmPolicyName}>
-            <PhasesInfo
-              ilmPhases={ilmPhases}
-              isLoadingIlmPolicy={isLoadingIlmPolicy}
-              hasErrorLoadingIlmPolicy={hasErrorLoadingIlmPolicy}
-            />
-          </RetentionDetails>
-        ),
+        description: indexModeLabels[indexMode as keyof typeof indexModeLabels],
       });
-    } else if (dataRetention) {
-      items.push({
-        title: i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel', {
-          defaultMessage: 'Retention',
-        }),
-        description: dataRetention,
-      });
+
+      // Retention - ILM policy or data stream lifecycle from original template
+      if (isLookupMode) {
+        // Lifecycle is configured but never applied to lookup indices
+        if (ilmPolicyName || hasDataStreamLifecycle || formatDataRetention(template)) {
+          items.push({
+            title: i18n.translate(
+              'xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel',
+              {
+                defaultMessage: 'Retention',
+              }
+            ),
+            description: <LookupRetentionNotApplied />,
+          });
+        }
+      } else if (ilmPolicyName) {
+        // Show ILM policy retention with phases
+        items.push({
+          title: i18n.translate(
+            'xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel',
+            {
+              defaultMessage: 'Retention',
+            }
+          ),
+          description: (
+            <RetentionDetails ilmPolicyName={ilmPolicyName}>
+              <PhasesInfo
+                ilmPhases={ilmPhases}
+                isLoadingIlmPolicy={isLoadingIlmPolicy}
+                hasErrorLoadingIlmPolicy={hasErrorLoadingIlmPolicy}
+              />
+            </RetentionDetails>
+          ),
+        });
+      } else {
+        // Fall back to data stream lifecycle from original template
+        const dataRetention = formatDataRetention(template);
+        if (dataRetention) {
+          items.push({
+            title: i18n.translate(
+              'xpack.createClassicStreamFlyout.nameAndConfirmStep.retentionLabel',
+              {
+                defaultMessage: 'Retention',
+              }
+            ),
+            description: dataRetention,
+          });
+        }
+      }
     }
 
     // Component templates
@@ -274,7 +392,17 @@ export const ConfirmTemplateDetailsSection = ({
     }
 
     return items;
-  }, [template, ilmPolicyName, ilmPhases, isLoadingIlmPolicy, hasErrorLoadingIlmPolicy]);
+  }, [
+    template,
+    simulatedTemplate,
+    isLoadingSimulatedTemplate,
+    ilmPolicyName,
+    isLookupMode,
+    hasDataStreamLifecycle,
+    ilmPhases,
+    isLoadingIlmPolicy,
+    hasErrorLoadingIlmPolicy,
+  ]);
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" css={styles.panel}>
@@ -287,6 +415,21 @@ export const ConfirmTemplateDetailsSection = ({
         </h4>
       </EuiTitle>
       <EuiSpacer size="m" />
+
+      {hasErrorLoadingSimulatedTemplate && (
+        <>
+          <EuiText color="warning" size="xs">
+            {i18n.translate(
+              'xpack.createClassicStreamFlyout.nameAndConfirmStep.simulatedTemplateErrorDescription',
+              {
+                defaultMessage:
+                  'There was an error while loading index mode and data retention info. Try again later.',
+              }
+            )}
+          </EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiDescriptionList
         listItems={templateDetails}

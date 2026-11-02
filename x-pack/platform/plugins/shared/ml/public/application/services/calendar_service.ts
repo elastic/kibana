@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MlCalendar, MlCalendarId } from '../../../common/types/calendars';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { MlCalendar, MlCalendarId } from '@kbn/ml-common-types/calendars';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from './ml_api_service';
 
 class CalendarService {

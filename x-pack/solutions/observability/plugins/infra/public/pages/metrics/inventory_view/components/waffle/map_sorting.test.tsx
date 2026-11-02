@@ -12,22 +12,20 @@ import type { SnapshotNode } from '../../../../../../common/http_api/snapshot_ap
 import type { InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { InfraFormatterType } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import type { AutoSizerProps } from '../../../../../components/auto_sizer';
+import { EuiProvider } from '@elastic/eui';
 
-// Mock GroupOfNodes to simplify rendering
-jest.mock('./group_of_nodes', () => ({
-  GroupOfNodes: ({ group }: any) => {
-    return (
-      <div data-test-subj="groupOfNodes">
-        {group.nodes.map((node: any) => (
-          <div key={node.id} data-test-subj="nodeContainer">
-            <span data-test-subj="nodeName">{node.name}</span>
-            <span data-test-subj="nodeValue">{node.metrics?.[0]?.value || 0}</span>
-          </div>
-        ))}
-      </div>
-    );
+jest.mock('../../../../../components/auto_sizer', () => ({
+  AutoSizer: ({ children }: AutoSizerProps) => {
+    return children({
+      bounds: { height: 800, width: 1200 },
+      content: { height: 800, width: 1200 },
+      measureRef: jest.fn(),
+    });
   },
 }));
+
+const wrapWithProviders = (children: React.ReactNode) => <EuiProvider>{children}</EuiProvider>;
 
 const createMockNode = (name: string, value: number): SnapshotNode => ({
   name,
@@ -105,7 +103,7 @@ describe('Map sorting', () => {
       sort: { by: 'value', direction: 'desc' },
     };
 
-    render(<Map {...defaultProps} options={options} />);
+    render(wrapWithProviders(<Map {...defaultProps} options={options} />));
 
     const nodeNames = getNodeNames();
     const nodeValues = getNodeValues();
@@ -120,7 +118,7 @@ describe('Map sorting', () => {
       sort: { by: 'value', direction: 'asc' },
     };
 
-    render(<Map {...defaultProps} options={options} />);
+    render(wrapWithProviders(<Map {...defaultProps} options={options} />));
 
     const nodeNames = getNodeNames();
     const nodeValues = getNodeValues();
@@ -130,7 +128,7 @@ describe('Map sorting', () => {
   });
 
   it('updates node order when sort option changes from desc to asc', () => {
-    const { rerender } = render(<Map {...defaultProps} />);
+    const { rerender } = render(wrapWithProviders(<Map {...defaultProps} />));
 
     let nodeNames = getNodeNames();
     let nodeValues = getNodeValues();
@@ -142,7 +140,7 @@ describe('Map sorting', () => {
       ...defaultOptions,
       sort: { by: 'value', direction: 'desc' },
     };
-    rerender(<Map {...defaultProps} options={descOptions} />);
+    rerender(wrapWithProviders(<Map {...defaultProps} options={descOptions} />));
 
     nodeNames = getNodeNames();
     nodeValues = getNodeValues();
@@ -154,7 +152,7 @@ describe('Map sorting', () => {
       ...defaultOptions,
       sort: { by: 'value', direction: 'asc' },
     };
-    rerender(<Map {...defaultProps} options={ascOptions} />);
+    rerender(wrapWithProviders(<Map {...defaultProps} options={ascOptions} />));
 
     nodeNames = getNodeNames();
     nodeValues = getNodeValues();

@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import path from 'node:path';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -19,6 +20,9 @@ import type {
 import { archiveMaintenanceWindowRequestParamsSchemaV1 } from '../../../../schemas/maintenance_window/external/request/archive';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../schemas/maintenance_window/external/response';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
+
+const archiveMaintenanceWindowExamples = () =>
+  path.join(__dirname, 'archive_maintenance_window_examples.yaml');
 
 export const archiveMaintenanceWindowRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,
@@ -56,6 +60,7 @@ export const archiveMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Archive a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        oasOperationObject: archiveMaintenanceWindowExamples,
         availability: {
           since: '9.1.0',
           stability: 'stable',

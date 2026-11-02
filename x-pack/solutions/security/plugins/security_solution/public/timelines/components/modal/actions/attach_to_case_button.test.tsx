@@ -8,7 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { openAddToExistingCaseModalMock } from '@kbn/cases-plugin/public/mocks';
+import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AttachToCaseButton } from './attach_to_case_button';
@@ -24,8 +25,8 @@ jest.mock('../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => jest.fn(),
@@ -47,72 +48,106 @@ describe('AttachToCaseButton', () => {
   const navigateToApp = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     useKibanaMock().services.application.navigateToApp = navigateToApp;
+    useKibanaMock().services.cases.config = {
+      ...useKibanaMock().services.cases.config,
+      attachmentsEnabled: false,
+    };
   });
 
-  it('should render the 2 options in the popover when clicking on the button', async () => {
-    const { getByTestId } = renderAttachToCaseButton();
+  it('should render a single button that is not a dropdown', () => {
+    const { getByTestId, queryByTestId } = renderAttachToCaseButton();
 
-    const button = getByTestId('timeline-modal-attach-to-case-dropdown-button');
+    const button = getByTestId('timeline-modal-attach-to-case-button');
 
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Attach to case');
-
-    await userEvent.click(button);
-
-    expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toHaveTextContent(
-      'Attach to new case'
-    );
-
-    expect(getByTestId('timeline-modal-attach-timeline-to-existing-case')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-attach-timeline-to-existing-case')).toHaveTextContent(
-      'Attach to existing case'
-    );
+    expect(queryByTestId('timeline-modal-attach-timeline-to-new-case')).toBeNull();
+    expect(queryByTestId('timeline-modal-attach-timeline-to-existing-case')).toBeNull();
   });
 
-  it('should navigate to the create case page when clicking on attach to new case', async () => {
-    const here = jest.fn();
-    useKibanaMock().services.cases.ui.getAllCasesSelectorModal = here.mockImplementation(
-      ({ onRowClick }) => {
-        onRowClick();
-        return <></>;
-      }
-    );
+  describe('legacy flow (attachments framework disabled)', () => {
+    it('navigates to the create case page when creating a case from the modal', async () => {
+      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
+        .fn()
+        .mockImplementation(({ onRowClick }) => {
+          onRowClick();
+          return <></>;
+        });
 
-    const { getByTestId } = renderAttachToCaseButton();
+      const { getByTestId } = renderAttachToCaseButton();
 
-    await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
-    await waitForEuiPopoverOpen();
+      expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
+        path: '/create',
+        deepLinkId: SecurityPageName.case,
+      });
+    });
 
-    await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
+    it('opens modal and navigates to the case page when selecting a case in the modal', async () => {
+      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
+        .fn()
+        .mockImplementation(({ onRowClick }) => {
+          onRowClick({ id: 'case-id' });
+          return <></>;
+        });
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
-      path: '/create',
-      deepLinkId: SecurityPageName.case,
+      const { getByTestId } = renderAttachToCaseButton();
+
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
+
+      expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
+        path: '/case-id',
+        deepLinkId: SecurityPageName.case,
+      });
+    });
+
+    it('does not invoke the unified attachments hook', async () => {
+      const { getByTestId } = renderAttachToCaseButton();
+
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
+
+      expect(openAddToExistingCaseModalMock).not.toHaveBeenCalled();
     });
   });
 
-  it('should open modal and navigate to the case page when clicking on attach to existing case', async () => {
-    useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
-      .fn()
-      .mockImplementation(({ onRowClick }) => {
-        onRowClick({ id: 'case-id' });
-        return <></>;
-      });
+  describe('unified flow (attachments framework enabled)', () => {
+    beforeEach(() => {
+      useKibanaMock().services.cases.config = {
+        ...useKibanaMock().services.cases.config,
+        attachmentsEnabled: true,
+      };
+    });
 
-    const { getByTestId } = renderAttachToCaseButton();
+    it('opens the cases add-to-existing modal with a getAttachments returning the timeline attachment', async () => {
+      const { getByTestId } = renderAttachToCaseButton();
 
-    await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
-    await waitForEuiPopoverOpen();
+      expect(openAddToExistingCaseModalMock).toHaveBeenCalledTimes(1);
+      const args = openAddToExistingCaseModalMock.mock.calls[0][0];
+      expect(args.getAttachments()).toEqual([
+        {
+          type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
+          attachmentId: mockTimelineModel.savedObjectId,
+          metadata: { title: mockTimelineModel.title },
+        },
+      ]);
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
 
-    await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
+    it('does not render the legacy cases selector modal', async () => {
+      const legacyModal = jest.fn().mockImplementation(() => <div data-test-subj="legacy-modal" />);
+      useKibanaMock().services.cases.ui.getAllCasesSelectorModal = legacyModal;
 
-    expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
-      path: '/case-id',
-      deepLinkId: SecurityPageName.case,
+      const { getByTestId, queryByTestId } = renderAttachToCaseButton();
+
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
+
+      expect(legacyModal).not.toHaveBeenCalled();
+      expect(queryByTestId('legacy-modal')).toBeNull();
     });
   });
 });

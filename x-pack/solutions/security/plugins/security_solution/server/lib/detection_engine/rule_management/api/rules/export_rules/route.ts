@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
@@ -20,7 +20,7 @@ import { getRulesCount } from '../../../logic/search/get_existing_prepackaged_ru
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { getExportAll } from '../../../logic/export/get_export_all';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const exportRulesRoute = (
   router: SecuritySolutionPluginRouter,

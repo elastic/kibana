@@ -1,0 +1,31 @@
+# SUFFIX OPERATORS
+
+The suffix operators `IS NULL` and `IS NOT NULL` test whether a value is `NULL`.
+
+## Syntax
+
+- `<expression> IS NULL`
+- `<expression> IS NOT NULL`
+
+### Parameters
+
+#### expression
+
+The column or expression to test for `NULL` values.
+
+## Examples
+
+Find employees whose birth date is `NULL`.
+
+```esql
+FROM employees
+| WHERE birth_date IS NULL
+```
+
+Count employees whose rehire status is not `NULL`.
+
+```esql
+FROM employees
+| WHERE is_rehired IS NOT NULL
+| STATS COUNT(emp_no)
+```

@@ -24,3 +24,6 @@ export type {
   NotificationsSetup,
   NotificationsStart,
 } from './src/contracts';
+export type { FeedbackStart } from './src/feedback_types';
+export type { ToursStart } from './src/tours_types';
+export type { ScreenReaderStart, ScreenReaderNotifyOptions } from './src/screen_reader_types';

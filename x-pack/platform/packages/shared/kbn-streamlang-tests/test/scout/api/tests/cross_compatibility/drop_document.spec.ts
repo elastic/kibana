@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { DropDocumentProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Cross-compatibility - Drop Document Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should drop documents matching where condition in both ingest pipeline and ES|QL',
@@ -29,8 +30,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           {
@@ -58,13 +59,11 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-drop-basic', query);
 
         expect(ingestResult).toHaveLength(2);
-        ingestResult.forEach((remainingDoc) =>
-          expect(remainingDoc).not.toHaveProperty('logType', 'info')
-        );
+        ingestResult.forEach((remainingDoc) => expect(remainingDoc?.logType).not.toBe('info'));
 
         expect(esqlResult.documents).toHaveLength(2);
         esqlResult.documents.forEach((remainingDoc) =>
-          expect(remainingDoc).not.toHaveProperty('logType', 'info')
+          expect(remainingDoc?.logType).not.toBe('info')
         );
       }
     );
@@ -79,10 +78,10 @@ apiTest.describe(
       };
 
       // Both transpilers should throw validation errors with no where clause
-      expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+      await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
         'where clause is required in drop_document.'
       );
-      expect(() => transpileEsql(streamlangDSL)).toThrow(
+      await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
         'where clause is required in drop_document.'
       );
     });

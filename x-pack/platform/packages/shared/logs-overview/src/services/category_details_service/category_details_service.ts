@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createActorContext } from '@xstate5/react';
-import type { MachineImplementationsFrom } from 'xstate5';
-import { assign, setup } from 'xstate5';
+import { createActorContext } from '@xstate/react';
+import type { MachineImplementationsFrom } from 'xstate';
+import { assign, setup } from 'xstate';
 import type { LogCategory } from '../../types';
 import type { CategoryDetailsServiceDependencies, LogCategoryDetailsParams } from './types';
 

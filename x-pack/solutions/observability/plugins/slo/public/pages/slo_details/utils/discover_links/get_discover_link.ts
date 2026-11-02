@@ -6,16 +6,21 @@
  */
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
+  ALL_VALUE,
+  is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlCustomIndicatorSchema,
   kqlWithFiltersSchema,
 } from '@kbn/slo-schema';
+import { esql } from '@elastic/esql';
 import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
 import { getApmAvailabilityQueries as getApmAvailabilityQueries } from './get_apm_availability_queries';
@@ -43,7 +48,7 @@ export function createDiscoverLocator({
   const indicatorType = slo.indicator.type;
   switch (indicatorType) {
     case 'sli.apm.transactionDuration':
-      if (apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
+      if (is(apmTransactionDurationIndicatorSchema, slo.indicator)) {
         const { totalQuery } = getApmLatencyQueries(slo.indicator, esQueryConfig);
         filters.push({
           $state: { store: FilterStateStore.APP_STATE },
@@ -58,7 +63,7 @@ export function createDiscoverLocator({
       }
       break;
     case 'sli.apm.transactionErrorRate':
-      if (apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
+      if (is(apmTransactionErrorRateIndicatorSchema, slo.indicator)) {
         const { goodQuery, badQuery, totalQuery } = getApmAvailabilityQueries(
           slo.indicator,
           esQueryConfig
@@ -99,7 +104,7 @@ export function createDiscoverLocator({
       }
       break;
     case 'sli.kql.custom':
-      if (kqlCustomIndicatorSchema.is(slo.indicator)) {
+      if (is(kqlCustomIndicatorSchema, slo.indicator)) {
         const { goodQuery, badQuery, totalQuery } = getCustomKqlQueries(
           slo.indicator,
           esQueryConfig
@@ -172,12 +177,12 @@ export function createDiscoverLocator({
     'timestampField' in slo.indicator.params ? slo.indicator.params.timestampField : '@timestamp';
 
   // Add the filters from the main query filter as discover filters
-  if (kqlWithFiltersSchema.is(slo.indicator.params.filter)) {
+  if (is(kqlWithFiltersSchema, slo.indicator.params.filter)) {
     slo.indicator.params.filter.filters.forEach((f: Filter) => filters.push(f));
   }
 
   // Add the kql filter from the main query filter as discover kql query
-  const filterKuery = kqlWithFiltersSchema.is(slo.indicator.params.filter)
+  const filterKuery = is(kqlWithFiltersSchema, slo.indicator.params.filter)
     ? slo.indicator.params.filter.kqlQuery
     : slo.indicator.params.filter;
 
@@ -236,4 +241,51 @@ export function openInDiscover({
 }) {
   const locatorConfig = createDiscoverLocator({ slo, showBad, showGood, timeRange, uiSettings });
   discover?.locator?.navigate(locatorConfig);
+}
+
+export interface ApmTracesDiscoverParams {
+  index: string;
+  serviceName: string;
+  environment: string;
+  transactionType: string;
+  transactionName: string;
+}
+
+export function getApmTracesDiscoverUrl({
+  params,
+  share,
+  timeRange,
+}: {
+  params: ApmTracesDiscoverParams;
+  share: SharePluginStart;
+  timeRange: { from: string; to: string };
+}): string | undefined {
+  const { index, serviceName, environment, transactionType, transactionName } = params;
+
+  let query = esql.from(index);
+
+  if (serviceName && serviceName !== ALL_VALUE) {
+    query = query.where`${esql.col('service.name')} == ${serviceName}`;
+  }
+
+  if (environment && environment !== ALL_VALUE) {
+    query = query.where`${esql.col('service.environment')} == ${environment}`;
+  }
+
+  if (transactionType && transactionType !== ALL_VALUE) {
+    query = query.where`${esql.col('transaction.type')} == ${transactionType}`;
+  }
+
+  if (transactionName && transactionName !== ALL_VALUE) {
+    query = query.where`${esql.col('transaction.name')} == ${transactionName}`;
+  }
+
+  query = query.sort(['@timestamp', 'DESC']);
+
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+  return discoverLocator?.getRedirectUrl({
+    timeRange,
+    query: { esql: query.print() },
+  });
 }

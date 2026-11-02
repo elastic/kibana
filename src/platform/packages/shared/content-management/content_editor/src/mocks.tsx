@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import type { TagSelectorProps, SavedObjectsReference } from './services';
+import type { TagSelectorProps } from './services';
 
 const tagsList = ['id-1', 'id-2', 'id-3', 'id-4', 'id-5'];
 
@@ -46,19 +46,13 @@ export const TagSelector = ({ initialSelection, onTagsSelected }: TagSelectorPro
 };
 
 export interface TagListProps {
-  references?: SavedObjectsReference[];
+  tagIds: string[];
 }
 
-export const TagList = ({ references }: TagListProps) => {
-  if (!references) {
-    return null;
-  }
-
-  return (
-    <ul data-test-subj="tagList">
-      {references.map((tag) => (
-        <li key={tag.name}>{tag.name}</li>
-      ))}
-    </ul>
-  );
-};
+export const TagList = ({ tagIds }: TagListProps) => (
+  <ul data-test-subj="tagList">
+    {tagIds.map((id) => (
+      <li key={id}>{id}</li>
+    ))}
+  </ul>
+);

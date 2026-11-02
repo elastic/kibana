@@ -25,6 +25,7 @@ describe('allCasesUrlStateDeserializer', () => {
         "filterOptions": Object {
           "assignees": Array [],
           "category": Array [],
+          "extendedFieldFilters": Array [],
           "from": "now-30d",
           "owner": Array [],
           "reporters": Array [],
@@ -38,6 +39,7 @@ describe('allCasesUrlStateDeserializer', () => {
             "cases-comments.comment",
             "cases-comments.alertId",
             "cases-comments.eventId",
+            "cases.ef_all_values",
           ],
           "severity": Array [],
           "status": Array [],

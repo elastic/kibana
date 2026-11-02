@@ -18,15 +18,32 @@ import { StepNumberNav } from './components/step_number_nav';
 import { StepScreenshotDetails } from './step_screenshot_details';
 import { StepTabs } from './step_tabs';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { useSelectedMonitor } from '../monitor_details/hooks/use_selected_monitor';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { TestRunSteps } from './test_run_steps';
+import { useGetUrlParams } from '../../hooks';
 import { useTestRunDetailsBreadcrumbs } from './hooks/use_test_run_details_breadcrumbs';
+import { MonitorTypeEnum } from '../../../../../common/runtime_types';
+import { MonitorBackPage, SyntheticsHeaderToolbar, TEST_RUN_TITLE } from '../common/app_header';
+import { TestRunDate } from './components/test_run_date';
+import { TestRunDetailsStatus } from './components/test_run_details_status';
+import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 
 export const TestRunDetails = () => {
   // Step index from starts at 1 in synthetics
   const [stepIndex, setStepIndex] = React.useState(1);
 
   const { data: stepsData, loading: stepsLoading, stepEnds } = useJourneySteps();
+  const { monitor } = useSelectedMonitor();
+
+  // API monitors share the synthexec step pipeline but have no browser
+  // context, so the "Step N of M" screenshot panel and the per-step
+  // screenshot column would always render empty placeholders. Detect the
+  // type from either the saved monitor (local) or the journey doc itself
+  // (covers remote / not-yet-loaded cases).
+  const isApiMonitor =
+    monitor?.type === MonitorTypeEnum.API ||
+    stepsData?.details?.journey.monitor.type === MonitorTypeEnum.API;
 
   useTestRunDetailsBreadcrumbs([
     { text: stepsData ? moment(stepsData.details?.timestamp).format('LLL') : '' },
@@ -38,13 +55,23 @@ export const TestRunDetails = () => {
 
   const { monitorId } = useParams<{ monitorId: string }>();
   const selectedLocation = useSelectedLocation();
+  const { remoteName } = useGetUrlParams();
 
   const stateId = stepsData?.details?.summary?.state?.id;
 
   const hasNoSteps = stepsData?.steps.length === 0 && !stepsLoading;
 
   return (
-    <>
+    <MonitorBackPage
+      title={TEST_RUN_TITLE}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <TestRunDate />
+          <TestRunDetailsStatus />
+          <MonitorDetailsLocation />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <TestRunErrorInfo journeyDetails={stepsData?.details} hasNoSteps={hasNoSteps} />
       {!hasNoSteps && (
         <EuiFlexGroup gutterSize="m" wrap={true}>
@@ -79,12 +106,20 @@ export const TestRunDetails = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              <StepScreenshotDetails stepIndex={stepIndex} step={step} stateId={stateId} />
-              <EuiSpacer size="m" />
+              {!isApiMonitor && (
+                <>
+                  <StepScreenshotDetails stepIndex={stepIndex} step={step} stateId={stateId} />
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <StepTabs stepsList={stepsData?.steps} step={step} loading={stepsLoading} />
             </EuiPanel>
             <EuiSpacer size="m" />
-            <TestRunSteps isLoading={stepsLoading} steps={stepsData?.steps ?? []} />
+            <TestRunSteps
+              isLoading={stepsLoading}
+              steps={stepsData?.steps ?? []}
+              showScreenshots={!isApiMonitor}
+            />
             <EuiSpacer size="m" />
             <EuiPanel hasShadow={false} hasBorder>
               <TestRunErrorInfo
@@ -106,7 +141,8 @@ export const TestRunDetails = () => {
         configId={monitorId}
         name={stepsData?.details?.journey.monitor.name ?? ''}
         locationId={selectedLocation?.id}
+        remoteName={remoteName}
       />
-    </>
+    </MonitorBackPage>
   );
 };

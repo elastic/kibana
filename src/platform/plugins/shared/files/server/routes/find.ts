@@ -21,8 +21,14 @@ const method = 'post' as const;
 const string64 = schema.string({ minLength: 1, maxLength: 64 });
 const string256 = schema.string({ minLength: 1, maxLength: 256 });
 
-export const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
-export const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
+export const stringOrArrayOfStrings = schema.oneOf([
+  string64,
+  schema.arrayOf(string64, { maxSize: 100 }),
+]);
+export const nameStringOrArrayOfNameStrings = schema.oneOf([
+  string256,
+  schema.arrayOf(string256, { maxSize: 100 }),
+]);
 
 export function toArrayOrUndefined(val?: string | string[]): undefined | string[] {
   if (val == null) return undefined;

@@ -11,7 +11,7 @@ import { AuthzDisabled } from '@kbn/core-security-server';
 import { roleGrantsSubFeaturePrivileges } from './lib';
 import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 import type { RouteDefinitionParams } from '../..';
-import { API_VERSIONS } from '../../../../common/constants';
+import { API_VERSIONS, MAX_NAME_LENGTH } from '../../../../common/constants';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -39,12 +39,34 @@ export function definePutRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    createOrUpdateRoleRequest: {
+                      value: {
+                        description: 'My custom Kibana role.',
+                        elasticsearch: {
+                          cluster: ['monitor'],
+                          indices: [{ names: ['logs-*'], privileges: ['read'] }],
+                        },
+                        kibana: [{ spaces: ['default'], base: ['read'], feature: {} }],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: {
             params: schema.object({
               name: schema.string({
                 minLength: 1,
-                maxLength: 1024,
+                maxLength: MAX_NAME_LENGTH,
                 meta: { description: 'The role name.' },
               }),
             }),

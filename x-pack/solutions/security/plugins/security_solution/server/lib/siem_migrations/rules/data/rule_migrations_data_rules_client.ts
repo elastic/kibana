@@ -13,6 +13,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import {
@@ -37,6 +38,11 @@ export type RuleMigrationGetRulesOptions = SiemMigrationGetItemsOptions<RuleMigr
 
 export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<RuleMigrationRule> {
   protected type = 'rule' as const;
+
+  public async getVendor(migrationId: string): Promise<SiemMigrationVendor | undefined> {
+    const { data: rules } = await this.get(migrationId, { size: 1 });
+    return rules.length > 0 ? rules[0].original_rule.vendor : undefined;
+  }
 
   /** Retrieves the translation stats for the rule migrations with the provided id */
   public async getTranslationStats(migrationId: string): Promise<RuleMigrationTranslationStats> {
@@ -163,10 +169,17 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
                 def originalQuery = ctx._source.elastic_rule.query;
                 def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
                 ctx._source.elastic_rule.query = newQuery;
+                if (!newQuery.contains(params.placeholder) && ctx._source.translation_result == 'partial') {
+                  def macroLookupPattern = /\\[(macro|lookup):.*?\\]/;
+                  if (!macroLookupPattern.matcher(newQuery).find()) {
+                    ctx._source.translation_result = 'full';
+                  }
+                }
               `,
           lang: 'painless',
           params: {
             indexPattern,
+            placeholder: MISSING_INDEX_PATTERN_PLACEHOLDER,
           },
         },
         query,

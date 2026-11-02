@@ -18,13 +18,9 @@ const globalCss = cssString`
   // Disables the overscroll behavior to prevent the page from bouncing when scrolling
   overscroll-behavior: none;
 
-  // Removes the shadow from the global header.
-  // We add our own shadow to the tabs bar to be able to set a solid color for the selected tab on top of the shadow.
-  .header__secondBar,
-  [data-test-subj='kibanaProjectHeaderActionMenu'] {
+  // Removes the shadow from the global header
+  .header__secondBar {
     box-shadow: none;
-    border-bottom: none;
-    border-block-end: none;
   }
 `;
 
@@ -54,7 +50,7 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
       {...otherProps}
       css={css`
         // tabs bar background
-        background: ${euiTheme.colors.lightestShade};
+        background: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
       {children}

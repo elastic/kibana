@@ -77,11 +77,25 @@ class TelemetryConfigurationDTO {
       expectedClusterHealth: ['green', 'yellow'],
       validationIntervalMs: 1000,
     } as ElasticsearchCircuitBreakerConfig,
+    apiQueryAllowlist: [
+      { path: '_transform/*/_stats' },
+      { path: '_nodes/stats' },
+      { path: '_nodes/*/stats' },
+      { path: '_cluster/stats' },
+      { path: '_ml/anomaly_detectors/_stats' },
+      { path: '_ml/anomaly_detectors/*/_stats' },
+      { path: '_ml/trained_models/_stats' },
+      { path: '_ilm/status' },
+      { path: '_watcher/stats' },
+    ],
   };
   private readonly DEFAULT_QUERY_CONFIG: TelemetryQueryConfiguration = {
     pageSize: 500,
     maxResponseSize: 10 * 1024 * 1024, // 10 MB
     maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
+    excludeColdAndFrozenTiers: async () => {
+      return false;
+    },
   };
   private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {};
 

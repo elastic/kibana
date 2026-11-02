@@ -7,7 +7,6 @@
 
 import type { ChangeEvent } from 'react';
 import React, { Fragment, PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { EuiSelect, EuiSpacer, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,18 +24,6 @@ interface Props {
 }
 
 export class FormatSelect extends PureComponent<Props> {
-  static propTypes = {
-    argId: PropTypes.string,
-    argValue: PropTypes.string,
-    formatOptions: PropTypes.arrayOf(
-      PropTypes.shape({
-        value: PropTypes.string,
-        text: PropTypes.string,
-      })
-    ).isRequired,
-    onValueChange: PropTypes.func,
-  };
-
   state = {
     isCustomFormat: !this.props.formatOptions
       .map(({ value }) => value)

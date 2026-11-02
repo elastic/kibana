@@ -1,0 +1,537 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { hasExternalHitlChannels } from './has_external_hitl_channels';
+import {
+  buildWaitForApprovalResumeLinks,
+  sendWaitForApprovalNotifications,
+} from './send_wait_for_approval_notifications';
+
+describe('send_wait_for_approval_notifications', () => {
+  describe('hasExternalHitlChannels', () => {
+    it('returns false when channels are omitted', () => {
+      expect(hasExternalHitlChannels(undefined)).toBe(false);
+    });
+
+    it('returns true when slack webhook connector config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack: { 'connector-id': 'slack-1' },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when slack_api channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when email channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          email: { 'connector-id': 'email-1', to: ['a@example.com'] },
+        })
+      ).toBe(true);
+    });
+
+    it('returns false when email lacks recipients', () => {
+      expect(
+        hasExternalHitlChannels({
+          email: { 'connector-id': 'email-1', to: [] },
+        })
+      ).toBe(false);
+    });
+
+    it('returns true when slack2 channel config is present', () => {
+      expect(
+        hasExternalHitlChannels({
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123'] },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when a Teams channel is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when a ServiceNow record is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc' },
+        })
+      ).toBe(true);
+    });
+
+    it('returns true when an HTTP destination is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          http: { url: 'https://hooks.example/hitl' },
+        })
+      ).toBe(true);
+    });
+  });
+
+  describe('buildWaitForApprovalResumeLinks', () => {
+    it('builds approve and reject URLs with the resume token', () => {
+      const links = buildWaitForApprovalResumeLinks({
+        kibanaUrl: 'https://kibana.example',
+        spaceId: 'default',
+        executionId: 'exec-1',
+        stepId: 'step-exec-1',
+        token: 'resume-token',
+      });
+
+      expect(links.approveUrl).toContain('approved=true');
+      expect(links.rejectUrl).toContain('approved=false');
+      expect(links.approveUrl).toContain('/steps/step-exec-1/resume/external');
+      expect(links.approveUrl).toContain('token=resume-token');
+      expect(links.rejectUrl).toContain('token=resume-token');
+    });
+  });
+
+  describe('sendWaitForApprovalNotifications', () => {
+    const resumeLinks = {
+      approveUrl: 'https://kibana.example/approve',
+      rejectUrl: 'https://kibana.example/reject',
+    };
+    const baseNotifyArgs = {
+      message: 'Approve change?',
+      approveLabel: 'Approve',
+      rejectLabel: 'Decline',
+      resumeLinks,
+      spaceId: 'default',
+      workflowId: 'workflow-1',
+      executionId: 'exec-1',
+      renderTemplate: (template: string) => template,
+      abortController: new AbortController(),
+    };
+
+    it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+      const resumeLinksWithQuery = {
+        approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+        rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+      };
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack: { 'connector-id': 'slack-webhook-1' },
+        },
+        resumeLinks: resumeLinksWithQuery,
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(execute.mock.calls[0][0].connectorType).toBe('slack');
+      expect(execute.mock.calls[0][0].input.message).toContain('&amp;approved=true');
+      expect(execute.mock.calls[0][0].input.message).toContain(
+        '<https://kibana.example/approve?token=abc&amp;approved=true|Approve>'
+      );
+    });
+
+    it('sends slack and slack_api notifications when both are configured', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack: { 'connector-id': 'slack-webhook-1' },
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0].connectorType).toBe('slack');
+      expect(execute.mock.calls[1][0].connectorType).toBe('slack_api');
+      expect(execute.mock.calls[1][0].input).toEqual({
+        subAction: 'postBlockkit',
+        subActionParams: {
+          channelIds: ['C0123'],
+          text: expect.stringContaining('"type":"actions"'),
+        },
+      });
+    });
+
+    it('sends slack_api notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123', 'C0456'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0].input.subActionParams.channelIds).toEqual(['C0123']);
+      expect(execute.mock.calls[1][0].input.subActionParams.channelIds).toEqual(['C0456']);
+    });
+
+    it('sends slack_api #channel values as channelNames', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['#alerts', 'C0123'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({ channelNames: ['#alerts'] })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams).toEqual(
+        expect.objectContaining({ channelIds: ['C0123'] })
+      );
+    });
+
+    it('sends a Kibana-style email notification with markdown links and footer path', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          email: {
+            'connector-id': 'email-1',
+            to: ['oncall@example.com'],
+          },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(execute.mock.calls[0][0]).toEqual({
+        connectorType: 'email',
+        connectorNameOrId: 'email-1',
+        input: {
+          to: ['oncall@example.com'],
+          subject: 'Approval required',
+          message:
+            'Approve change?\n\n[Approve](https://kibana.example/approve)  [Decline](https://kibana.example/reject)',
+          kibanaFooterLink: {
+            path: '/app/workflows/workflow-1?executionId=exec-1&tab=executions',
+            text: 'View in Kibana',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
+    });
+
+    it('renders the approval subject and recipients', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          email: {
+            'connector-id': 'email-1',
+            to: ['{{inputs.email}}'],
+            subject: 'Approval for {{inputs.hostname}}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replaceAll('{{inputs.email}}', 'oncall@example.com')
+            .replaceAll('{{inputs.hostname}}', 'web-01'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.to).toEqual(['oncall@example.com']);
+      expect(execute.mock.calls[0][0].input.subject).toBe('Approval for web-01');
+    });
+
+    it('throws when every email recipient renders blank', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            email: {
+              'connector-id': 'email-1',
+              to: ['{{inputs.email}}'],
+            },
+          },
+          renderTemplate: () => '',
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL email "to" rendered to an empty list');
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('sends slack2 sendMessage notifications to every configured channel', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 'ok' })
+        .mockResolvedValueOnce({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          slack2: { 'connector-id': 'slack2-1', channels: ['C0123', 'C0456'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          connectorType: 'slack2',
+          input: {
+            subAction: 'sendMessage',
+            subActionParams: {
+              channel: 'C0123',
+              text: 'Approve change?\n\n<https://kibana.example/approve|Approve>  <https://kibana.example/reject|Decline>',
+              unfurlLinks: false,
+              unfurlMedia: false,
+            },
+          },
+        })
+      );
+      expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('posts a Teams channel message with approve and decline links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message: 'Isolate host <MAMBA.HOST>?',
+        resumeLinks: {
+          approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+          rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+        },
+        channels: {
+          teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledWith({
+        connectorType: 'microsoft-teams',
+        connectorNameOrId: 'teams-1',
+        input: {
+          subAction: 'sendChannelMessage',
+          subActionParams: {
+            teamId: 'team-1',
+            channelId: 'channel-1',
+            contentType: 'html',
+            content:
+              'Isolate host &lt;MAMBA.HOST&gt;?\n\n<br><a href="https://kibana.example/approve?token=abc&amp;approved=true">Approve</a> <a href="https://kibana.example/reject?token=abc&amp;approved=false">Decline</a>',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
+    });
+
+    it('renders Teams team-id and channel-id before posting', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          teams: {
+            'connector-id': 'teams-1',
+            'team-id': '{{ inputs.teamId }}',
+            'channel-id': '{{ inputs.channelId }}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{ inputs.teamId }}', 'team-from-input')
+            .replace('{{ inputs.channelId }}', '19:channel-from-input@thread.tacv2'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({
+          teamId: 'team-from-input',
+          channelId: '19:channel-from-input@thread.tacv2',
+        })
+      );
+    });
+
+    it('throws when a Teams field renders empty', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            teams: {
+              'connector-id': 'teams-1',
+              'team-id': 'team-1',
+              'channel-id': '{{ inputs.channelId }}',
+            },
+          },
+          renderTemplate: (template) => (template === 'team-1' ? template : ' '),
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL Teams "channel-id" rendered empty');
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('adds a ServiceNow comment with approve and decline links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        resumeLinks: {
+          approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+          rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+        },
+        channels: {
+          servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledWith({
+        connectorType: 'servicenow_search',
+        connectorNameOrId: 'snow-1',
+        input: {
+          subAction: 'addComment',
+          subActionParams: {
+            table: 'incident',
+            sysId: 'abc123',
+            comment:
+              'Approve change?\n\n[code]<a href="https://kibana.example/approve?token=abc&amp;approved=true">Approve</a>[/code]\n[code]<a href="https://kibana.example/reject?token=abc&amp;approved=false">Decline</a>[/code]',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
+    });
+
+    it('posts rendered approve and reject links through the HTTP system connector', async () => {
+      const executeSystemConnector = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          http: {
+            url: 'https://hooks.example/hitl',
+            body: '{"approve":"{{context.hitl.externalApproveLink}}","reject":"{{context.hitl.externalRejectLink}}"}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{context.hitl.externalApproveLink}}', 'https://kibana.example/approve')
+            .replace('{{context.hitl.externalRejectLink}}', 'https://kibana.example/reject'),
+        connectorExecutor: { executeSystemConnector } as never,
+      });
+
+      expect(executeSystemConnector).toHaveBeenCalledWith({
+        connectorType: '.http-system',
+        input: {
+          url: 'https://hooks.example/hitl',
+          method: 'POST',
+          body: '{"approve":"https://kibana.example/approve","reject":"https://kibana.example/reject"}',
+        },
+        abortController: expect.any(AbortController),
+      });
+    });
+
+    it('escapes ServiceNow comment text outside the journal anchors', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message: 'Isolate <your_input>? [code]no[/code]',
+        channels: {
+          servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
+        'Isolate \uFF1Cyour_input\uFF1E? [\u200bcode]no[\u200b/code]\n\n[code]<a href="https://kibana.example/approve">Approve</a>[/code]\n[code]<a href="https://kibana.example/reject">Decline</a>[/code]'
+      );
+    });
+
+    it('renders ServiceNow table and sys-id before adding the comment', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          servicenow: {
+            'connector-id': 'snow-1',
+            table: '{{ inputs.table }}',
+            'sys-id': '{{ inputs.incident_sys_id }}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{ inputs.table }}', 'incident')
+            .replace('{{ inputs.incident_sys_id }}', '8728d657c377cb10f3f11a2ed40131b1'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({
+          table: 'incident',
+          sysId: '8728d657c377cb10f3f11a2ed40131b1',
+        })
+      );
+    });
+
+    it('throws when a ServiceNow field renders empty', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            servicenow: {
+              'connector-id': 'snow-1',
+              table: 'incident',
+              'sys-id': '{{ inputs.incident_sys_id }}',
+            },
+          },
+          renderTemplate: (template) => (template === 'incident' ? template : ' '),
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL ServiceNow "sys-id" rendered empty');
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('throws when a configured connector fails', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValue({ status: 'error', message: 'Slack unavailable' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            slack: { 'connector-id': 'slack-1' },
+          },
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('Slack unavailable');
+    });
+  });
+});

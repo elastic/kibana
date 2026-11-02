@@ -12,6 +12,7 @@ import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
+import type { DataSource } from '@kbn/data-source';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { FieldRow } from '../../../doc_viewer_table/field_row';
 import { TableCell } from '../../../doc_viewer_table/table_cell';
@@ -24,8 +25,9 @@ import type { AttributeField } from './attributes_overview';
 interface AttributesTableProps
   extends Pick<
     DocViewRenderProps,
-    'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
+  dataSource: DataSource | undefined;
   fields: AttributeField[];
   searchTerm: string;
   isEsqlMode: boolean;
@@ -34,7 +36,7 @@ interface AttributesTableProps
 export const AttributesTable = ({
   hit,
   dataView,
-  columnsMeta,
+  dataSource,
   fields,
   searchTerm,
   columns,
@@ -71,15 +73,15 @@ export const AttributesTable = ({
             dataView,
             fieldFormats,
             isPinned: false,
-            columnsMeta,
+            dataSource,
           })
       ),
-    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, hit, dataView, fieldFormats, dataSource]
   );
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
-    [rows, filter, onToggleColumn, isEsqlMode]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
+    [rows, filter, onToggleColumn, isEsqlMode, columns]
   );
   const fieldValueCellActions = useMemo(
     () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
@@ -121,6 +123,7 @@ export const AttributesTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={false}
+          isESQLMode={isEsqlMode}
         />
       )}
       columnVisibility={{
@@ -135,7 +138,7 @@ export const AttributesTable = ({
         cellPadding: 'm',
         fontSize: 's',
       }}
-      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
       inMemory={{ level: 'enhancements' }}
       toolbarVisibility={false}
     />

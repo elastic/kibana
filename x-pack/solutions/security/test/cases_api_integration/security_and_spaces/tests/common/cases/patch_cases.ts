@@ -24,6 +24,7 @@ import {
   postCaseReq,
   postCaseResp,
   postCommentUserReq,
+  userActionSourceUser,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -70,8 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/238980
-  describe.skip('patch_cases', () => {
+  describe('patch_cases', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -140,7 +140,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { duration, time_to_investigate, time_to_resolve, ...dataWithoutMetrics } = data;
         const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
@@ -158,6 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses.closed },
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
         });
       });
 
@@ -178,7 +178,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { time_to_investigate, time_to_resolve, ...dataWithoutMetrics } =
           removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
@@ -195,6 +194,7 @@ export default ({ getService }: FtrProviderContext): void => {
           payload: { status: CaseStatuses['in-progress'] },
           comment_id: null,
           owner: 'securitySolutionFixture',
+          source: userActionSourceUser,
         });
       });
 

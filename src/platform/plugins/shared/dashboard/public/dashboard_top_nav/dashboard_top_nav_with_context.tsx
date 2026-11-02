@@ -8,16 +8,34 @@
  */
 
 import React from 'react';
+
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClientProvider } from '@kbn/react-query';
+
 import type { InternalDashboardTopNavProps } from './internal_dashboard_top_nav';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import type { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
+import { uiActionsService } from '../services/kibana_services';
+import { dashboardQueryClient } from '../services/dashboard_query_client';
+import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
+import { DashboardChangeHistoryProvider } from '../dashboard_history/dashboard_change_history_provider';
+
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
   dashboardApi: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
 }
 
 export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
-  <DashboardContext.Provider value={props.dashboardApi}>
-    <InternalDashboardTopNav {...props} />
-  </DashboardContext.Provider>
+  <QueryClientProvider client={dashboardQueryClient}>
+    <KibanaContextProvider services={{ uiActions: uiActionsService }}>
+      <DashboardContext.Provider value={props.dashboardApi}>
+        <DashboardInternalContext.Provider value={props.dashboardInternalApi}>
+          <DashboardChangeHistoryProvider>
+            <InternalDashboardTopNav {...props} />
+          </DashboardChangeHistoryProvider>
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    </KibanaContextProvider>
+  </QueryClientProvider>
 );

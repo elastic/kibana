@@ -20,12 +20,16 @@ import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { DashboardMigrationTelemetryClient } from './dashboard_migrations_telemetry_client';
-import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
+import {
+  enrichLookupResourcesWithMappings,
+  type EnrichedMigrationResources,
+} from '../../common/task/util/enrich_lookup_resources';
 
 export interface DashboardMigrationTaskInput
   extends Pick<StoredDashboardMigrationDashboard, 'id' | 'original_dashboard'> {
-  resources: MigrationResources;
+  resources: EnrichedMigrationResources;
 }
 export type DashboardMigrationTaskOutput = MigrateDashboardState;
 
@@ -41,6 +45,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    protected readonly vendor: SiemMigrationVendor,
     protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
@@ -48,9 +53,10 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, vendor, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new DashboardMigrationsRetriever(this.migrationId, {
       data: this.data,
+      experimentalFeatures: this.dependencies.experimentalFeatures,
     });
   }
 
@@ -70,7 +76,8 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       this.dependencies.telemetry,
       this.logger,
       this.migrationId,
-      modelName
+      modelName,
+      this.vendor
     );
 
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
@@ -90,6 +97,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
       inference: inferenceService,
       request: this.request,
       connectorId,
+      experimentalFeatures: this.dependencies.experimentalFeatures,
     });
 
     this.telemetry = telemetryClient;
@@ -109,7 +117,11 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
     return {
       id: migrationDashboard.id,
       original_dashboard: migrationDashboard.original_dashboard,
-      resources,
+      resources: await enrichLookupResourcesWithMappings({
+        resources,
+        resourcesDataClient: this.data.resources,
+        logger: this.logger,
+      }),
     };
   }
 

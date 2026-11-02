@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { isAgentMigrationSupported, MINIMUM_MIGRATE_AGENT_VERSION } from '../../../common/services';
-import { FleetError } from '../../errors';
+import { AgentlessAgentRestrictionError, FleetError } from '../../errors';
 
 import type { Agent } from '../../types';
 
@@ -33,30 +33,36 @@ export class MigrateActionRunner extends ActionRunner {
   }
 }
 
-export async function bulkMigrateAgentsBatch(
-  esClient: ElasticsearchClient,
+/**
+ * Splits the given agents into those that can be migrated and those that cannot,
+ * mirroring the eligibility rules applied by `bulkMigrateAgentsBatch`. Agents in a
+ * protected policy, fleet-server agents, and migration-unsupported/containerized
+ * agents are collected as errors; the rest are returned in `agentsToAction`.
+ */
+export async function partitionAgentsForMigration(
   soClient: SavedObjectsClientContract,
-  agents: Agent[],
-  options: {
-    actionId?: string;
-    total?: number;
-    spaceId?: string;
-    enrollment_token?: string;
-    uri?: string;
-    settings?: Record<string, any>;
-  }
-) {
+  agents: Agent[]
+): Promise<{ agentsToAction: Agent[]; errors: Record<Agent['id'], Error> }> {
   const errors: Record<Agent['id'], Error> = {};
-  const now = new Date().toISOString();
 
   const agentPolicies = await getAgentPolicyForAgents(soClient, agents);
   const protectedAgentPolicies = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
+  const protectedPolicyIdSet = new Set(protectedAgentPolicies.map((policy) => policy.id));
+  const agentlessPolicyIdSet = new Set(
+    agentPolicies.filter((agentPolicy) => agentPolicy?.supports_agentless).map(({ id }) => id)
+  );
 
   const agentsToAction: Agent[] = [];
   agents.forEach((agent: Agent) => {
-    if (
-      agent.policy_id &&
-      protectedAgentPolicies.map((policy) => policy.id).includes(agent.policy_id)
+    if (agent.policy_base_id && agentlessPolicyIdSet.has(agent.policy_base_id)) {
+      errors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot migrate managed agent ${agent.id}`
+      );
+    } else if (
+      agent.policy_base_id &&
+      // policy_base_id is always the base policy id, so agents on a version-specific variant
+      // (`my-policy#9.2`) are correctly blocked when `my-policy` is protected.
+      protectedPolicyIdSet.has(agent.policy_base_id)
     ) {
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is protected.`
@@ -81,9 +87,31 @@ export async function bulkMigrateAgentsBatch(
       agentsToAction.push(agent);
     }
   });
+
+  return { agentsToAction, errors };
+}
+
+export async function bulkMigrateAgentsBatch(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agents: Agent[],
+  options: {
+    actionId?: string;
+    total?: number;
+    spaceId?: string;
+    enrollment_token?: string;
+    uri?: string;
+    settings?: Record<string, any>;
+  }
+) {
+  const now = new Date().toISOString();
+
+  const { agentsToAction, errors } = await partitionAgentsForMigration(soClient, agents);
   const actionId = options.actionId ?? uuidv4();
   const agentIds = agentsToAction.map((agent) => agent.id);
-  const total = options.total ?? agentIds.length;
+  // all given agents, also the ones that failed validation: they get an error result, which counts
+  // against the total in the action status
+  const total = options.total ?? agents.length;
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 

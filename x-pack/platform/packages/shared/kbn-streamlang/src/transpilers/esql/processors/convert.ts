@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand } from '@kbn/esql-ast';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { isAlwaysCondition } from '../../../..';
 import type { ConvertType } from '../../../../types/formats';
 import type { ConvertProcessor } from '../../../../types/processors';
@@ -60,7 +58,7 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
   const convertAssignment = Builder.expression.func.call(typeConversionFunction, [fromColumn]);
 
   // Add missing field filter if needed (ignore_missing = false)
-  const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }

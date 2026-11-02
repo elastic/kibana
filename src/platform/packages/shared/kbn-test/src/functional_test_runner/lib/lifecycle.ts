@@ -39,6 +39,12 @@ export class Lifecycle {
     singular: true,
   });
 
+  /** non-singular channel used to force an immediate abort of the current config run */
+  private readonly abort$$ = new Rx.Subject<string>();
+  public readonly abort$ = this.abort$$.asObservable();
+  /** true once `abort()` has been called */
+  public isAborting = false;
+
   constructor(log: ToolingLog) {
     for (const [name, phase] of Object.entries(this)) {
       if (phase instanceof LifecyclePhase) {
@@ -53,5 +59,19 @@ export class Lifecycle {
         this.sub.unsubscribe();
       }
     });
+
+    this.sub.add(() => {
+      this.abort$$.complete();
+    });
+  }
+
+  /** signal that the current config run should abort immediately; idempotent */
+  public abort(reason: string) {
+    if (this.isAborting) {
+      return;
+    }
+
+    this.isAborting = true;
+    this.abort$$.next(reason);
   }
 }

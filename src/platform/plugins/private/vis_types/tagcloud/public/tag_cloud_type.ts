@@ -21,7 +21,7 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
   return {
     name: 'tagcloud',
     title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
-    icon: 'visTagCloud',
+    icon: 'chartTagCloud',
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.filter];
     },

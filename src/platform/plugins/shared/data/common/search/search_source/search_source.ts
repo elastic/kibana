@@ -77,13 +77,7 @@ import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } f
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
-import {
-  buildEsQuery,
-  isOfQueryType,
-  isPhraseFilter,
-  isPhrasesFilter,
-  sanitizeProjectRoutingForES,
-} from '@kbn/es-query';
+import { buildEsQuery, isOfQueryType, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -106,7 +100,6 @@ import type {
 } from './types';
 import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
-import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import { getEsQueryConfig, isRunningResponse, UI_SETTINGS } from '../..';
 import type { AggsStart } from '../aggs';
@@ -116,6 +109,7 @@ import type {
   ExpressionFunctionKibanaContext,
 } from '../expressions';
 import { filtersToAst, queryToAst } from '../expressions';
+import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -150,7 +144,10 @@ interface ExpressionAstOptions {
 
 const omitByIsNil = <T>(object: Record<string, T>) => omitBy<T>(object, isNil);
 
-/** @public **/
+/**
+ * @public
+ * @deprecated Don't use in new code. Use the typed search methods (`data.search.dsl`, `esql`, `eql`, `sql`) instead.
+ */
 export class SearchSource {
   private id: string = uniqueId('data_source');
   private shouldOverwriteDataViewType: boolean = false;
@@ -688,18 +685,14 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'pit':
         return addToRoot(key, val);
-      case 'projectRouting':
-        const sanitizedProjectRouting = sanitizeProjectRoutingForES(val);
-        if (sanitizedProjectRouting) {
-          return addToBody('project_routing', sanitizedProjectRouting);
-        }
-        return;
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
         } else {
           return addToBody('aggs', val);
         }
+      case 'timezone':
+        return addToRoot(key, val);
       default:
         return addToBody(key, val);
     }
@@ -809,6 +802,7 @@ export class SearchSource {
       'highlightAll',
       'fieldsFromSource',
       'body',
+      'timezone',
     ]);
     const body = { ...bodyParams, ...searchRequest.body };
     const dataView = this.getDataView(searchRequest.index);
@@ -959,7 +953,13 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...omit(searchRequest, ['query', 'filters', 'nonHighlightingFilters', 'fieldsFromSource']),
+      ...omit(searchRequest, [
+        'query',
+        'filters',
+        'nonHighlightingFilters',
+        'fieldsFromSource',
+        'timezone',
+      ]),
       body: omitByIsNil(bodyToReturn),
       indexType: this.getIndexType(searchRequest.index),
       highlightAll:
@@ -1011,9 +1011,11 @@ export class SearchSource {
     const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
       Object.hasOwn(srt, '_score')
     );
+    const overwriteTimezone = this.getField('timezone');
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
+      ...(overwriteTimezone ? { dateFormatTZ: overwriteTimezone } : {}),
     };
     return buildEsQuery(
       this.getDataView(index),

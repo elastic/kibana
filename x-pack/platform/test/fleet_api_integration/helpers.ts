@@ -7,7 +7,10 @@
 
 import * as uuid from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
+import {
+  agentPolicyRouteService,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import type {
   AgentPolicy,
@@ -85,6 +88,9 @@ export async function generateAgent(
       const oneWeekAgoTimestamp = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
       data = { policy_revision_idx: 1, last_checkin: new Date(oneWeekAgoTimestamp).toISOString() };
       break;
+    case 'offline-disconnected':
+      data = { policy_revision_idx: 1, last_checkin_status: 'disconnected' };
+      break;
     case 'inactive':
       const threeWeeksAgoTimestamp = new Date().getTime() - 21 * 24 * 60 * 60 * 1000;
       data = {
@@ -121,6 +127,7 @@ export async function generateAgent(
       enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
+      policy_base_id: removeVersionSuffixFromPolicyId(policyId),
       policy_revision: 1,
       agent: {
         id,
@@ -282,3 +289,44 @@ export const addUninstallTokenToPolicy = async (
 
   return savedObject.id;
 };
+
+export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+export const POLICY_BASE_ID_BACKFILL_TASK_ID = 'task:fleet:setup:backfillPolicyBaseId';
+
+async function getPolicyBaseIdBackfillTask(providerContext: FtrProviderContext) {
+  const res = await providerContext
+    .getService('es')
+    .get<{ task: { status: string } }>(
+      { index: TASK_MANAGER_INDEX, id: POLICY_BASE_ID_BACKFILL_TASK_ID },
+      { ignore: [404] }
+    );
+  return res.found ? res._source : undefined;
+}
+
+const FLEET_STARTUP_SETUP_SETTLED_SUMMARIES = ['Fleet is available', 'Fleet setup failed'];
+
+// Waits for the Fleet setup Kibana runs on start to reach a terminal state and release the `fleet-setup` lock.
+export async function waitForFleetStartupSetup(
+  providerContext: FtrProviderContext,
+  timeout = 2 * 60 * 1000
+) {
+  const supertest = providerContext.getService('supertest');
+
+  await providerContext
+    .getService('retry')
+    .waitForWithTimeout("Kibana's startup Fleet setup to settle", timeout, async () => {
+      const { body } = await supertest.get('/api/status').expect(200);
+
+      return FLEET_STARTUP_SETUP_SETTLED_SUMMARIES.includes(body?.status?.plugins?.fleet?.summary);
+    });
+}
+
+// The policy_base_id backfill runs in a Fleet setup task, after the setup response.
+// The task is removed once it ran.
+export async function waitForPolicyBaseIdBackfill(providerContext: FtrProviderContext) {
+  await providerContext.getService('retry').tryForTime(60000, async () => {
+    if (await getPolicyBaseIdBackfillTask(providerContext)) {
+      throw new Error('The policy_base_id backfill task has not run yet');
+    }
+  });
+}

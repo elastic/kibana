@@ -8,6 +8,7 @@
  */
 
 import { FlagsReader } from '@kbn/dev-cli-runner';
+import { ScoutTestTarget } from '@kbn/scout-info';
 import * as testFilesUtils from '../../common/utils';
 import * as configValidator from './config_validator';
 import { parseTestFlags } from './flags';
@@ -26,16 +27,30 @@ const validateAndProcessTestFilesMock =
   >;
 
 describe('parseTestFlags', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+
   beforeEach(() => {
     jest.clearAllMocks();
     validatePlaywrightConfigMock.mockResolvedValue();
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
+  });
+
+  afterAll(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
   });
 
   it(`should throw an error without 'config' or 'testFiles' flag`, async () => {
     const flags = new FlagsReader({
-      stateful: true,
-      logToFile: false,
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
       headed: false,
+      logToFile: false,
+      preserveEsData: false,
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
@@ -45,10 +60,13 @@ describe('parseTestFlags', () => {
 
   it(`should throw an error when both 'config' and 'testFiles' are provided`, async () => {
     const flags = new FlagsReader({
+      location: 'local',
       config: '/path/to/config',
       testFiles: 'test.spec.ts',
-      stateful: true,
+      arch: 'stateful',
+      domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
     });
 
@@ -57,127 +75,164 @@ describe('parseTestFlags', () => {
     );
   });
 
-  it(`should throw an error with '--stateful' flag as string value`, async () => {
+  it(`should throw an error with '--arch' flag as boolean`, async () => {
     const flags = new FlagsReader({
-      stateful: 'true',
+      location: 'local',
+      arch: true,
+      domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
     });
 
-    await expect(parseTestFlags(flags)).rejects.toThrow('expected --stateful to be a boolean');
+    await expect(parseTestFlags(flags)).rejects.toThrow('expected --arch to be a string');
   });
 
-  it(`should throw an error with '--serverless' flag as boolean`, async () => {
+  it(`should throw an error with '--domain' flag as boolean`, async () => {
     const flags = new FlagsReader({
-      serverless: true,
+      location: 'local',
+      arch: 'stateful',
+      domain: true,
       logToFile: false,
+      preserveEsData: false,
       headed: false,
     });
 
-    await expect(parseTestFlags(flags)).rejects.toThrow('expected --serverless to be a string');
+    await expect(parseTestFlags(flags)).rejects.toThrow('expected --domain to be a string');
   });
 
-  it(`should throw an error with incorrect '--serverless' flag`, async () => {
+  it(`should throw an error with incorrect '--location' flag`, async () => {
     const flags = new FlagsReader({
-      serverless: 'a',
+      location: 'earth',
+      arch: 'stateful',
+      domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
-      'invalid --serverless, expected one of "es", "oblt", "oblt-logs-essentials", "security"'
+      /Scout test target validation discovered 1 issue\(s\):\n - location/
     );
   });
 
-  it(`should parse with serverless flag for local target`, async () => {
+  it(`should throw an error with incorrect '--arch' flag`, async () => {
     const flags = new FlagsReader({
-      config: '/path/to/config',
-      stateful: false,
-      serverless: 'oblt',
+      location: 'local',
+      arch: 'bad_arch',
+      domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
-    });
-    validatePlaywrightConfigMock.mockResolvedValueOnce();
-    const result = await parseTestFlags(flags);
-
-    expect(result).toEqual({
-      mode: 'serverless=oblt',
-      configPath: '/path/to/config',
-      testTarget: 'local',
-      headed: false,
-      esFrom: undefined,
-      installDir: undefined,
-      logsDir: undefined,
-    });
-  });
-
-  it(`should parse with stateful flag for local target`, async () => {
-    const flags = new FlagsReader({
-      config: '/path/to/config',
-      testTarget: 'local',
-      stateful: true,
-      logToFile: false,
-      headed: true,
-      esFrom: 'snapshot',
-    });
-    validatePlaywrightConfigMock.mockResolvedValueOnce();
-    const result = await parseTestFlags(flags);
-
-    expect(result).toEqual({
-      mode: 'stateful',
-      configPath: '/path/to/config',
-      testTarget: 'local',
-      headed: true,
-      esFrom: 'snapshot',
-      installDir: undefined,
-      logsDir: undefined,
-    });
-  });
-
-  it(`should throw an error with incorrect '--testTarget' flag`, async () => {
-    const flags = new FlagsReader({
-      config: '/path/to/config',
-      testTarget: 'a',
-      stateful: true,
-      logToFile: false,
-      headed: true,
-      esFrom: 'snapshot',
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
-      'invalid --testTarget, expected one of "local", "cloud"'
+      /Scout test target validation discovered 1 issue\(s\):\n - arch/
     );
   });
 
-  it(`should parse with serverless flag for cloud target`, async () => {
+  it(`should throw an error with incorrect '--domain' flag`, async () => {
     const flags = new FlagsReader({
-      config: '/path/to/config',
-      testTarget: 'cloud',
-      stateful: false,
-      serverless: 'oblt',
+      location: 'local',
+      arch: 'stateful',
+      domain: 'rainbow-barfing-unicorns',
       logToFile: false,
+      preserveEsData: false,
+      headed: false,
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      /Scout test target validation discovered 1 issue\(s\):\n - domain/
+    );
+  });
+
+  it(`should parse with serverless arch for local target`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'serverless',
+      domain: 'observability_complete',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
       headed: false,
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
 
     expect(result).toEqual({
-      mode: 'serverless=oblt',
       configPath: '/path/to/config',
-      testTarget: 'cloud',
-      headed: false,
       esFrom: undefined,
+      headed: false,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
+      targetAttributes: [],
+      testTarget: new ScoutTestTarget('local', 'serverless', 'observability_complete'),
+    });
+  });
+
+  it(`should parse with stateful arch for local target`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: true,
+      esFrom: 'snapshot',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: 'snapshot',
+      headed: true,
+      repeatEach: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      targetAttributes: [],
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should parse with serverless arch for cloud target`, async () => {
+    const flags = new FlagsReader({
+      location: 'cloud',
+      arch: 'serverless',
+      domain: 'security_ease',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      repeatEach: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      targetAttributes: [],
+      testTarget: new ScoutTestTarget('cloud', 'serverless', 'security_ease'),
     });
   });
 
   it(`should parse with stateful flag for cloud target`, async () => {
     const flags = new FlagsReader({
+      location: 'cloud',
+      arch: 'stateful',
+      domain: 'classic',
       config: '/path/to/config',
-      testTarget: 'cloud',
-      stateful: true,
       logToFile: false,
+      preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
     });
@@ -185,14 +240,94 @@ describe('parseTestFlags', () => {
     const result = await parseTestFlags(flags);
 
     expect(result).toEqual({
-      mode: 'stateful',
       configPath: '/path/to/config',
-      testTarget: 'cloud',
-      headed: true,
       esFrom: 'snapshot',
+      headed: true,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
+      targetAttributes: [],
+      testTarget: new ScoutTestTarget('cloud', 'stateful', 'classic'),
     });
+  });
+
+  it(`should parse with --repeatEach flag`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: '5',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      repeatEach: 5,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      targetAttributes: [],
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should throw an error when '--repeatEach' is not a number`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: 'abc',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `unable to parse --repeatEach value [abc] as a number`
+    );
+  });
+
+  it(`should throw an error when '--repeatEach' is zero`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: '0',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' must be a positive integer, got '0'`
+    );
+  });
+
+  it(`should throw an error when '--repeatEach' is a decimal`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: '2.5',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' must be a positive integer, got '2.5'`
+    );
   });
 
   describe('testFiles flag', () => {
@@ -213,9 +348,12 @@ describe('parseTestFlags', () => {
       });
 
       const flags = new FlagsReader({
+        location: 'local',
+        arch: 'stateful',
+        domain: 'classic',
         testFiles: testFile,
-        stateful: true,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
       });
 
@@ -223,14 +361,16 @@ describe('parseTestFlags', () => {
 
       expect(validateAndProcessTestFilesMock).toHaveBeenCalledWith(testFile);
       expect(result).toEqual({
-        mode: 'stateful',
         configPath: derivedConfig,
-        testTarget: 'local',
-        headed: false,
-        testFiles: [testFile],
         esFrom: undefined,
+        headed: false,
+        repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
+        preserveEsData: false,
+        testFiles: [testFile],
+        targetAttributes: [],
+        testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
 
@@ -249,9 +389,12 @@ describe('parseTestFlags', () => {
       });
 
       const flags = new FlagsReader({
+        location: 'local',
+        arch: 'stateful',
+        domain: 'classic',
         testFiles: testFilesString,
-        stateful: true,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
       });
 
@@ -259,14 +402,16 @@ describe('parseTestFlags', () => {
 
       expect(validateAndProcessTestFilesMock).toHaveBeenCalledWith(testFilesString);
       expect(result).toEqual({
-        mode: 'stateful',
         configPath: derivedConfig,
-        testTarget: 'local',
-        headed: false,
-        testFiles,
         esFrom: undefined,
+        headed: false,
+        repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
+        preserveEsData: false,
+        testFiles,
+        targetAttributes: [],
+        testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
 
@@ -282,9 +427,12 @@ describe('parseTestFlags', () => {
       });
 
       const flags = new FlagsReader({
+        location: 'local',
+        arch: 'stateful',
+        domain: 'classic',
         testFiles: testFile,
-        stateful: true,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
       });
 
@@ -306,9 +454,12 @@ describe('parseTestFlags', () => {
       });
 
       const flags = new FlagsReader({
+        location: 'local',
+        arch: 'stateful',
+        domain: 'classic',
         testFiles: testFile,
-        stateful: true,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
       });
 
@@ -327,9 +478,12 @@ describe('parseTestFlags', () => {
       });
 
       const flags = new FlagsReader({
+        location: 'local',
+        arch: 'stateful',
+        domain: 'classic',
         testFiles: testFile,
-        stateful: true,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
       });
 
@@ -338,9 +492,12 @@ describe('parseTestFlags', () => {
 
     it('should not include testFiles in result when empty', async () => {
       const flags = new FlagsReader({
+        location: 'local',
+        arch: 'stateful',
+        domain: 'classic',
         config: '/path/to/config',
-        stateful: true,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
       });
 

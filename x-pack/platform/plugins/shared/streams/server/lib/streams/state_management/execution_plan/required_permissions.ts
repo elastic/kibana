@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { ActionsByType } from './types';
 
@@ -72,10 +71,11 @@ export function getRequiredPermissionsForActions({
     // since they are done by the kibana system user
     upsert_dot_streams_document,
     delete_dot_streams_document,
-    delete_queries,
     unlink_assets,
-    unlink_features,
+    unlink_systems,
     update_failure_store,
+    upsert_esql_view,
+    delete_esql_view,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);

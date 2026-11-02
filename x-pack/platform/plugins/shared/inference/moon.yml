@@ -4,26 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+  defaultOwner: '@elastic/search-ml-ux'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-plugin'
+  title: '@kbn/inference-plugin'
   description: Moon project for @kbn/inference-plugin
   channel: ''
-  owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/inference
+  owner: '@elastic/search-ml-ux'
+  sourceRoot: x-pack/platform/plugins/shared/inference
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/esql-ast'
-  - '@kbn/esql-validation-autocomplete'
+  - '@kbn/esql-language'
   - '@kbn/core'
   - '@kbn/logging'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/dev-cli-runner'
   - '@kbn/expect'
   - '@kbn/tooling-log'
@@ -42,8 +40,14 @@ dependsOn:
   - '@kbn/sse-utils-client'
   - '@kbn/zod'
   - '@kbn/inference-tracing'
-  - '@kbn/core-ui-settings-common'
   - '@kbn/setup-node-env'
+  - '@kbn/ai-anonymization-common'
+  - '@kbn/ai-anonymization-server'
+  - '@kbn/ai-anonymization-settings-plugin'
+  - '@kbn/anonymization-plugin'
+  - '@kbn/anonymization-common'
+  - '@kbn/utility-types'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
@@ -60,16 +64,4 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

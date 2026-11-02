@@ -1,0 +1,271 @@
+{
+  "sha1": "357e007e76d62cb92d27afc4bc42f5b9c592ea67",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "20fd3ec90091101-d65a2ca4be0f9c3",
+      "title": "Advanced settings - edit and save searches, edits and saves settings without a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_edit.spec.ts",
+        "line": 29,
+        "column": 23
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-a15d1ea44076beb",
+      "title": "security feature controls global advanced_settings all privileges - shows management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 18,
+        "column": 14
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-70c55d39cde2292",
+      "title": "security feature controls global advanced_settings all privileges - allows settings to be changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-b1c5ef3921e581b",
+      "title": "security feature controls global advanced_settings all privileges - doesn't show read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 33,
+        "column": 8
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-c585365935086e4",
+      "title": "security feature controls global advanced_settings read-only privileges - shows Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 40,
+        "column": 21
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-24e9d48b87bab9b",
+      "title": "security feature controls global advanced_settings read-only privileges - does not allow settings to be changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 47,
+        "column": 5
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-bbea8154da45959",
+      "title": "security feature controls global advanced_settings read-only privileges - shows read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 56,
+        "column": 21
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-6a3472d15e66cfe",
+      "title": "security feature controls no advanced_settings privileges - does not show Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 65,
+        "column": 11
+      }
+    },
+    {
+      "id": "a3e4b1438a281ec-2e2c27193dc1ee1",
+      "title": "security feature controls no advanced_settings privileges - does not allow navigation to advanced settings; shows \"not found\" error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_security.spec.ts",
+        "line": 72,
+        "column": 21
+      }
+    },
+    {
+      "id": "1fc0f0abf7efc2c-731a1321bb41fe8",
+      "title": "spaces feature controls space with no features disabled - shows Management navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
+        "line": 32,
+        "column": 5
+      }
+    },
+    {
+      "id": "1fc0f0abf7efc2c-1e9fd06bfa8c668",
+      "title": "spaces feature controls space with no features disabled - allows settings to be changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
+        "line": 46,
+        "column": 24
+      }
+    },
+    {
+      "id": "1fc0f0abf7efc2c-7343cf3be887afc",
+      "title": "spaces feature controls space with Advanced Settings disabled - redirects to management home",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
+        "line": 57,
+        "column": 5
+      }
+    },
+    {
+      "id": "097c759d9a3a9ff-591f404b0802fbf",
+      "title": "Advanced settings - common settings renders every common space and global setting field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/common_settings_fields.spec.ts",
+        "line": 55,
+        "column": 24
+      }
+    },
+    {
+      "id": "4c6123f145685f5-2eae084fca89f8f",
+      "title": "Advanced settings - disable animations disables animations while preserving completion events and exemptions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/disable_animations.spec.ts",
+        "line": 23,
+        "column": 60
+      }
+    },
+    {
+      "id": "56be6e862ac9594-a9844b276c65446",
+      "title": "Advanced settings - serverless setting validation blocks saving an invalid value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/serverless_setting_validation.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "9f0eb31a4bbd8d0-079d7ba5b670fdd",
+      "title": "Advanced settings - settings form updates a setting and resets it to its default value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/settings_form.spec.ts",
+        "line": 30,
+        "column": 27
+      }
+    },
+    {
+      "id": "9f0eb31a4bbd8d0-85511ca838c8adf",
+      "title": "Advanced settings - settings form shows the page reload toast for a setting that requires a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/settings_form.spec.ts",
+        "line": 44,
+        "column": 13
+      }
+    },
+    {
+      "id": "d0bff8bcf31a6fc-cac56ebdcbd5306",
+      "title": "Advanced settings - state:storeInSessionStorage hashes global state in the URL once enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/state_store_in_session_storage.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    }
+  ]
+}

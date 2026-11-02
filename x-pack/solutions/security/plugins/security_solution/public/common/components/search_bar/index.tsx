@@ -8,17 +8,15 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
+import type { Dispatch } from 'redux-v4';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
-
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
@@ -42,44 +40,56 @@ import { hostsActions } from '../../../explore/hosts/store';
 import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 interface SiemSearchBarProps {
-  id: InputsModelId.global | InputsModelId.timeline;
-  pollForSignalIndex?: () => void;
-  sourcererDataViewSpec?: DataViewSpec | undefined; // TODO remove when we remove the newDataViewPickerEnabled feature flag
-  dataView: DataView;
-  timelineId?: string;
   dataTestSubj?: string;
+  dataView: DataView;
+  /**
+   * Sources from the current page, such as dashboard panels, used to resolve
+   * filters that target a data view other than `dataView`.
+   */
+  additionalSources?: FilterableSource[];
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
+  id: InputsModelId.global | InputsModelId.timeline;
+  timelineId?: string;
   /**
    * Allows to hide the query menu button displayed to the left of the query input.
    */
   hideQueryMenu?: boolean;
+  /**
+   * Hides the date picker (and the associated Refresh button) from the search bar.
+   * KQL input and pinned filter bar remain visible.
+   */
+  hideDatePicker?: boolean;
+  /**
+   * Controls the search bar's padding and border. Use 'inPage' to align it with the page content.
+   */
+  displayStyle?: 'inPage' | 'detached' | 'withBorders';
 }
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
+    dataTestSubj,
     dataView,
+    additionalSources,
+    displayStyle,
     end,
     filterQuery,
     fromStr,
     hideFilterBar = false,
     hideQueryInput = false,
     hideQueryMenu = false,
+    hideDatePicker = false,
     id,
     isLoading = false,
-    pollForSignalIndex,
     queries,
     savedQuery,
     setSavedQuery,
     setSearchBarFilter,
-    sourcererDataViewSpec,
     start,
     toStr,
     updateSearch,
-    dataTestSubj,
   }) => {
     const {
       data: {
@@ -91,7 +101,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       unifiedSearch: {
         ui: { SearchBar },
       },
-      fieldFormats,
     } = useKibana().services;
 
     const dispatch = useDispatch();
@@ -119,11 +128,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
-        // if the function is there, call it to check if the signals index exists yet
-        // in order to update the index fields
-        if (pollForSignalIndex != null) {
-          pollForSignalIndex();
-        }
         const isQuickSelection =
           payload.dateRange.from.includes('now') || payload.dateRange.to.includes('now');
         let updateSearchBar: UpdateReduxSearchBar = {
@@ -171,7 +175,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
       [
         id,
-        pollForSignalIndex,
         toStr,
         end,
         fromStr,
@@ -304,20 +307,18 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const dataViews: DataView[] | null = useMemo(() => {
-      if (newDataViewPickerEnabled) {
-        if (dataView != null) {
-          return [dataView];
-        }
+    const sources: FilterableSource[] | null = useMemo(() => {
+      if (dataView == null) {
         return null;
       }
-
-      if (sourcererDataViewSpec != null) {
-        return [new DataView({ spec: sourcererDataViewSpec, fieldFormats })];
+      const extras = new Map<string, FilterableSource>();
+      for (const view of additionalSources ?? []) {
+        if (view.id && view.id !== dataView.id && !extras.has(view.id)) {
+          extras.set(view.id, view);
+        }
       }
-      return null;
-    }, [newDataViewPickerEnabled, sourcererDataViewSpec, dataView, fieldFormats]);
+      return [dataView, ...extras.values()];
+    }, [additionalSources, dataView]);
 
     const onTimeRangeChange = useCallback(
       ({ dateRange }: { dateRange: TimeRange }) => {
@@ -335,12 +336,12 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
       [filterManager, id, setTablesActivePageToZero, updateSearch]
     );
-    return dataViews ? (
+    return sources ? (
       <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={dataViews}
+          indexPatterns={sources}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
@@ -350,11 +351,12 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}
-          showDatePicker={true}
+          showDatePicker={!hideDatePicker}
           showQueryInput={!hideQueryInput}
           showQueryMenu={!hideQueryMenu}
           allowSavingQueries
           dataTestSubj={dataTestSubj}
+          displayStyle={displayStyle}
         />
       </div>
     ) : null;
@@ -363,7 +365,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.end === nextProps.end &&
     prevProps.filterQuery === nextProps.filterQuery &&
     prevProps.fromStr === nextProps.fromStr &&
-    deepEqual(prevProps.sourcererDataViewSpec, nextProps.sourcererDataViewSpec) &&
     prevProps.id === nextProps.id &&
     prevProps.isLoading === nextProps.isLoading &&
     prevProps.savedQuery === nextProps.savedQuery &&
@@ -373,7 +374,10 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.toStr === nextProps.toStr &&
     prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
-    deepEqual(prevProps.queries, nextProps.queries)
+    prevProps.displayStyle === nextProps.displayStyle &&
+    deepEqual(prevProps.queries, nextProps.queries) &&
+    deepEqual(prevProps.dataView, nextProps.dataView) &&
+    deepEqual(prevProps.additionalSources, nextProps.additionalSources)
 );
 
 const makeMapStateToProps = () => {
@@ -502,7 +506,12 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type DispatchProps = ReturnType<typeof mapDispatchToProps>;
+export const connector = connect<StateProps, DispatchProps, SiemSearchBarProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

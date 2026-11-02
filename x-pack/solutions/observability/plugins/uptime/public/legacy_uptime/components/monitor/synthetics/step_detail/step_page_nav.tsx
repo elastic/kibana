@@ -57,7 +57,7 @@ export const StepPageNavigation = ({
           data-test-subj="syntheticsStepPageNavigationButton"
           onClick={handlePreviousRun}
           disabled={!previousCheckGroup}
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           aria-label={PREVIOUS_CHECK_BUTTON_TEXT}
         >
           {PREVIOUS_CHECK_BUTTON_TEXT}
@@ -73,7 +73,7 @@ export const StepPageNavigation = ({
           data-test-subj="syntheticsStepPageNavigationButton"
           onClick={handleNextRun}
           disabled={!nextCheckGroup}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           iconSide="right"
           aria-label={NEXT_CHECK_BUTTON_TEXT}
         >

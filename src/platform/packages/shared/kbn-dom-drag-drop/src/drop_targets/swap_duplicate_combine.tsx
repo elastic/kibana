@@ -72,7 +72,7 @@ const getExtraTarget = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type={icon} />
+            <EuiIcon size="m" type={icon} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false} data-test-subj={`${DEFAULT_DATA_TEST_SUBJ}-dropTarget-${type}`}>
             <EuiText size="s">{label}</EuiText>

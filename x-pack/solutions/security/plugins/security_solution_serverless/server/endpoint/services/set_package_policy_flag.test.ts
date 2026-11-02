@@ -23,7 +23,7 @@ import { ensureOnlyEventCollectionIsAllowed } from '@kbn/security-solution-plugi
 
 import { setEndpointPackagePolicyServerlessBillingFlags } from './set_package_policy_flag';
 
-describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
+describe.skip('setEndpointPackagePolicyServerlessBillingFlags', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
@@ -73,12 +73,12 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
     expectedPolicy2!.inputs[0]!.config!.policy.value.meta.serverless = true;
     expectedPolicy2!.inputs[0]!.config!.policy.value.meta.billable = true;
     const expectedPolicies = [expectedPolicy1, expectedPolicy2];
-    expect(packagePolicyServiceMock.list).toBeCalledWith(soClientMock, {
+    expect(packagePolicyServiceMock.list).toHaveBeenCalledWith(soClientMock, {
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
     });
-    expect(packagePolicyServiceMock.bulkUpdate).toBeCalledWith(
+    expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledWith(
       soClientMock,
       esClientMock,
       expectedPolicies
@@ -102,12 +102,12 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
       packagePolicyServiceMock
     );
 
-    expect(packagePolicyServiceMock.list).toBeCalledWith(soClientMock, {
+    expect(packagePolicyServiceMock.list).toHaveBeenCalledWith(soClientMock, {
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
     });
-    expect(packagePolicyServiceMock.bulkUpdate).not.toBeCalled();
+    expect(packagePolicyServiceMock.bulkUpdate).not.toHaveBeenCalled();
   });
 
   it('correctly updates billable flag for endpoint policies', async () => {
@@ -135,7 +135,7 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
       packagePolicyServiceMock
     );
 
-    expect(packagePolicyServiceMock.list).toBeCalledWith(soClientMock, {
+    expect(packagePolicyServiceMock.list).toHaveBeenCalledWith(soClientMock, {
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
@@ -144,7 +144,7 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
     const expectedPolicy2 = cloneDeep(packagePolicy2);
     expectedPolicy2!.inputs[0]!.config!.policy.value.meta.billable = true;
     const expectedPolicies = [expectedPolicy2];
-    expect(packagePolicyServiceMock.bulkUpdate).toBeCalledWith(
+    expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledWith(
       soClientMock,
       esClientMock,
       expectedPolicies

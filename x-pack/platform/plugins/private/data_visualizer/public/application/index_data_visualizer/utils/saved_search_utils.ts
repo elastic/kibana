@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, compareFilters } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -31,6 +31,66 @@ function getSavedSearchSource(savedSearch?: SavedSearch | null) {
 
 function isNonAggregateQuery(query?: Query | AggregateQuery): query is Query {
   return isPopulatedObject(query, ['query', 'language']);
+}
+
+export function toFilterArray(
+  filters: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined
+): Filter[] {
+  const resolved = typeof filters === 'function' ? filters() : filters;
+  if (!resolved) {
+    return [];
+  }
+  return Array.isArray(resolved) ? resolved : [resolved];
+}
+
+function hasFieldKey(filter: Filter): boolean {
+  return filter.meta?.key != null;
+}
+
+function sameKeyedIdentity(a: Filter, b: Filter): boolean {
+  return (
+    a.meta?.key === b.meta?.key && JSON.stringify(a.meta?.params) === JSON.stringify(b.meta?.params)
+  );
+}
+
+function sameToggleState(a: Filter, b: Filter): boolean {
+  return !!a.meta?.negate === !!b.meta?.negate && !!a.meta?.disabled === !!b.meta?.disabled;
+}
+
+function filtersShareIdentity(a: Filter, b: Filter): boolean {
+  if (hasFieldKey(a) || hasFieldKey(b)) {
+    return sameKeyedIdentity(a, b);
+  }
+  // Default compareFilters ignores negate/disabled, so this is identity for custom DSL.
+  return compareFilters(a, b);
+}
+
+function filtersAreDuplicates(a: Filter, b: Filter): boolean {
+  return filtersShareIdentity(a, b) && sameToggleState(a, b);
+}
+
+/**
+ * Filters from `candidates` that are not already represented in `existing`.
+ *
+ * Prefer meta.key/params when either side has a field key: FilterManager's
+ * mapAndFlattenFilters rewrites phrase query DSL (match+type → match_phrase), so
+ * raw query comparison via dedupFilters never matches after hydration and can
+ * re-add forever. Keyless "Edit as Query DSL" filters have no meta.key — fall
+ * back to structural query comparison for those.
+ *
+ * Identity is not enough: negate/disabled are compared so toggling a saved
+ * filter is not dropped as a duplicate of the original.
+ */
+export function filtersNotAlreadyPresent(existing: Filter[], candidates: Filter[]): Filter[] {
+  return candidates.filter((candidate) => {
+    return !existing.some((existingFilter) => filtersAreDuplicates(existingFilter, candidate));
+  });
+}
+
+function excludeOverriddenSavedFilters(savedFilters: Filter[], overrides: Filter[]): Filter[] {
+  return savedFilters.filter(
+    (saved) => !overrides.some((override) => filtersShareIdentity(saved, override))
+  );
 }
 
 /**
@@ -73,10 +133,10 @@ export function getEsQueryFromSavedSearch({
       cloneDeep(savedSearchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearchSource.getField('index')?.timeFieldName;
 
-    if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
+    if (savedQuery?.bool && Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
       savedQuery.bool.filter = savedQuery.bool.filter.filter(
         (c: QueryDslQueryContainer) =>
-          !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
+          c != null && !(Object.hasOwn(c, 'range') && Object.hasOwn(c.range ?? {}, timeField))
       );
     }
 
@@ -92,42 +152,64 @@ export function getEsQueryFromSavedSearch({
     !savedSearch &&
     (userQuery || userFilters || (filterManager && filterManager.getGlobalFilters()?.length > 0))
   ) {
-    const combinedQuery = buildEsQuery(
-      dataView,
-      userQuery ?? [],
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        userQuery ?? [],
+        [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: userQuery?.query ?? '',
-      queryLanguage: (userQuery?.language ?? 'kuery') as SearchQueryLanguage,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: userQuery?.query ?? '',
+        queryLanguage: (userQuery?.language ?? 'kuery') as SearchQueryLanguage,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 
   // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
-    if (savedSearchSource.getField('filter')) {
-      // Rehydrate filter from saved search object into filter manager's store
-      if (filterManager) {
-        filterManager.addFilters(savedSearchSource.getField('filter') as Filter[]);
-      }
-    }
-    const combinedQuery = buildEsQuery(
-      dataView,
-      currentQuery,
-      [...(filterManager?.getFilters() ?? []), ...(userFilters ?? [])],
-      uiSettings ? getEsQueryConfig(uiSettings) : undefined
-    );
+    const savedFilters = toFilterArray(savedSearchSource.getField('filter'));
+    // Do not call filterManager.addFilters here: this helper runs inside useMemo during
+    // render, and mutating FilterManager notifies UnifiedSearch which setStates mid-render.
+    // That race can clear/rebuild the search with an empty query while the UI still shows
+    // the saved search query/filters, leaving document count at 0.
+    // Include saved-search filters plus any interactive app-state filters currently in the
+    // filter manager. Deduplicate against savedFilters to avoid doubling filters that are
+    // stored in the saved search but were also hydrated into the filter manager after render.
+    const filterManagerFilters = filterManager?.getFilters?.() ?? [];
+    const extraFilters = filtersNotAlreadyPresent(savedFilters, filterManagerFilters);
+    // A filter-manager copy that differs only by negate/disabled is an override of the
+    // saved filter, not an extra clause. Drop the saved original so the toggle wins.
+    const savedFiltersForQuery = excludeOverriddenSavedFilters(savedFilters, extraFilters);
+    const filtersForQuery = [...savedFiltersForQuery, ...extraFilters, ...(userFilters ?? [])];
+    try {
+      // buildEsQuery throws an exception for a fallible operation (anti-pattern).
+      // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
+      // bubbling up to the error boundary.
+      const combinedQuery = buildEsQuery(
+        dataView,
+        currentQuery,
+        filtersForQuery,
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
 
-    return {
-      searchQuery: combinedQuery,
-      searchString: currentQuery?.query ?? '',
-      queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
-      queryOrAggregateQuery: currentQuery,
-    };
+      return {
+        searchQuery: combinedQuery,
+        searchString: currentQuery?.query ?? '',
+        queryLanguage: (currentQuery?.language as SearchQueryLanguage) ?? 'kuery',
+        queryOrAggregateQuery: currentQuery,
+      };
+    } catch (e) {
+      return undefined;
+    }
   }
 }

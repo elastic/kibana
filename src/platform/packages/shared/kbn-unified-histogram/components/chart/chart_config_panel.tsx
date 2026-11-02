@@ -9,12 +9,14 @@
 
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import type { DataSource } from '@kbn/data-source';
 import { deriveLensSuggestionFromLensAttributes } from '../../utils/external_vis_context';
 
 import type {
@@ -33,9 +35,10 @@ export function ChartConfigPanel({
   currentSuggestionContext,
   isFlyoutVisible,
   setIsFlyoutVisible,
-  isPlainRecord,
+  dataSource,
   query,
   onSuggestionContextEdit,
+  isApproximate,
 }: {
   services: UnifiedHistogramServices;
   visContext: UnifiedHistogramVisContext;
@@ -44,14 +47,20 @@ export function ChartConfigPanel({
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
-  isPlainRecord?: boolean;
+  dataSource: DataSource;
   query?: Query | AggregateQuery;
   onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
+  isApproximate?: boolean;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
+
+  const isApproximate$ = useRef(new BehaviorSubject<boolean | undefined>(undefined));
+  useEffect(() => {
+    isApproximate$.current.next(isApproximate);
+  }, [isApproximate]);
+  const editorParentApi = useRef({ isApproximate$: isApproximate$.current });
 
   const updatePanelState = useCallback<
     ComponentProps<EditLensConfigPanelComponent>['updatePanelState']
@@ -91,7 +100,6 @@ export function ChartConfigPanel({
     [onSuggestionContextEdit, visContext]
   );
 
-  const currentSuggestion = currentSuggestionContext.suggestion;
   const currentSuggestionType = currentSuggestionContext.type;
 
   useEffect(() => {
@@ -114,20 +122,21 @@ export function ChartConfigPanel({
             setIsFlyoutVisible(false);
           }}
           wrapInFlyout
-          datasourceId="textBased"
+          hideTextBasedEditor={true}
           hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
+          parentApi={editorParentApi.current}
         />
       );
       setEditLensConfigPanel(panel);
-      previousSuggestion.current = currentSuggestion;
       previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
     }
-    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
-    // rerender the component if the data has changed
-    if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
+    // rerender the component if the data has changed or flyout becomes visible
+    // Note: when suggestion/chart type changes while flyout is visible, it flows through
+    // visContext.attributes props instead of recreating the component (which would reset state)
+    if (dataSource.kind === 'esql' && (dataHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
@@ -135,8 +144,7 @@ export function ChartConfigPanel({
     services.lens,
     updatePanelState,
     updateSuggestion,
-    isPlainRecord,
-    currentSuggestion,
+    dataSource,
     query,
     isFlyoutVisible,
     setIsFlyoutVisible,
@@ -145,7 +153,7 @@ export function ChartConfigPanel({
     currentSuggestionType,
   ]);
 
-  const flyoutElement = isPlainRecord ? editLensConfigPanel : null;
+  const flyoutElement = dataSource.kind === 'esql' ? editLensConfigPanel : null;
 
   useEffect(() => {
     if (flyoutElement) {

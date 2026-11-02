@@ -25,10 +25,6 @@ export const ASSOCIATED_HOSTS_METRIC = i18n.translate(
   }
 );
 
-export const ISOLATED_HOSTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.isolatedHosts', {
-  defaultMessage: 'Isolated hosts',
-});
-
 export const TOTAL_CONNECTORS_METRIC = i18n.translate(
   'xpack.cases.caseView.metrics.totalConnectors',
   {

@@ -100,11 +100,12 @@ export const Conversations = memo(({ alertId }: ConversationsProps) => {
             {conversationCount > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={YOUR_CONVERSATIONS}
                   button={
                     <EuiButtonEmpty
                       data-test-subj={VIEW_CONVERSATIONS_BUTTON_TEST_ID}
                       iconSide="right"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={togglePopover}
                     >
                       {VIEW}

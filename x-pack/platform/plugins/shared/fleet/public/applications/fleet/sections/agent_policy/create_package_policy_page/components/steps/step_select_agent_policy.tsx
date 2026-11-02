@@ -23,8 +23,7 @@ import { Error } from '../../../../../components';
 
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
-import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
-
+import { sendBulkGetAgentPolicies } from '../../../../../hooks';
 import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
@@ -55,8 +54,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   setHasAgentPolicyError,
   initialSelectedAgentPolicyIds,
 }) => {
-  const { isReady: isFleetReady } = useFleetStatus();
-
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -168,6 +165,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     []
   );
 
+  const newlySelectedAgentPolicies = selectedAgentPolicies.filter(
+    (policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id)
+  );
+
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
     return (
@@ -185,11 +186,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const someNewAgentPoliciesHaveLimitedPackage =
     !packageInfo ||
-    selectedAgentPolicies
-      .filter((policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id))
-      .some((selectedAgentPolicy) =>
-        doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
-      );
+    newlySelectedAgentPolicies.some((selectedAgentPolicy) =>
+      doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
+    );
 
   return (
     <>
@@ -230,17 +229,19 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               helpText={
-                isFleetReady && selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicies ? (
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
-                    defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policies."
-                    values={{
-                      count: selectedAgentPolicies.reduce(
-                        (acc, curr) => acc + (curr.agents ?? 0),
-                        0
-                      ),
-                    }}
-                  />
+                selectedPolicyIds.length > 0 && !isLoadingSelectedAgentPolicies ? (
+                  <span data-test-subj="agentPolicyAgentsDescription">
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
+                      defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policies."
+                      values={{
+                        count: selectedAgentPolicies.reduce(
+                          (acc, curr) => acc + (curr.agents ?? 0),
+                          0
+                        ),
+                      }}
+                    />
+                  </span>
                 ) : null
               }
               isInvalid={Boolean(someNewAgentPoliciesHaveLimitedPackage)}

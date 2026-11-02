@@ -21,8 +21,7 @@ import type {
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { asyncForEach, asyncMap } from '@kbn/std';
 
 import type {
@@ -30,7 +29,7 @@ import type {
   AggregationsTermsExclude,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isResponseError } from '@kbn/es-errors';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { Logger } from '@kbn/logging';
@@ -46,7 +45,11 @@ import type {
   UninstallTokenMetadata,
 } from '../../../../common/types/models/uninstall_token';
 
-import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
+import {
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../constants';
 import { appContextService } from '../../app_context';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../../agent_policy';
 import { isSpaceAwarenessEnabled } from '../../spaces/helpers';
@@ -649,6 +652,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   private async getAllPolicyIds(): Promise<string[]> {
     const agentPolicyIdsFetcher = await agentPolicyService.fetchAllAgentPolicyIds(this.soClient, {
       spaceId: '*',
+      kuery: `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
     });
     const policyIds: string[] = [];
     for await (const agentPolicyId of agentPolicyIdsFetcher) {
@@ -715,17 +719,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       return this._soClient;
     }
 
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-
-    this._soClient = appContextService.getSavedObjects().getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+    this._soClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
       includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
     });
 

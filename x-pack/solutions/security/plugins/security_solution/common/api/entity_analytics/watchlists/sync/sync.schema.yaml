@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Sync Schema
+  description: Schema for triggering a sync of entity sources for a watchlist.
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/sync:
+    post:
+      operationId: SyncWatchlist
+      x-codegen-enabled: true
+      summary: Trigger a sync of entity sources for a watchlist
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Sync completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - acknowledged
+                properties:
+                  acknowledged:
+                    type: boolean

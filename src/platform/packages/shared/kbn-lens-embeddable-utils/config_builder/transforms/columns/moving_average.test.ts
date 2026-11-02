@@ -17,12 +17,6 @@ import { LENS_MOVING_AVERAGE_DEFAULT_WINDOW } from '../../schema/constants';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
 describe('Moving Average Transforms', () => {
-  const testRef = {
-    id: 'col1',
-    field: 'sales',
-    label: 'Sum of Total Sales',
-  };
-
   const apiColumnRef: LensApiFieldMetricOperations = {
     operation: 'sum',
     field: 'sales',
@@ -40,7 +34,7 @@ describe('Moving Average Transforms', () => {
 
       const expected: MovingAverageIndexPatternColumn = {
         operationType: 'moving_average',
-        references: ['col1'],
+        references: [],
         label: '',
         customLabel: false,
         isBucketed: false,
@@ -54,7 +48,7 @@ describe('Moving Average Transforms', () => {
         timeShift: undefined,
       };
 
-      expect(fromMovingAverageAPItoLensState(input, testRef)).toEqual(expected);
+      expect(fromMovingAverageAPItoLensState(input)).toEqual(expected);
     });
 
     it('should use default window when not provided', () => {
@@ -64,7 +58,7 @@ describe('Moving Average Transforms', () => {
         window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
       };
 
-      const result = fromMovingAverageAPItoLensState(input, testRef);
+      const result = fromMovingAverageAPItoLensState(input);
       expect(result.params.window).toBe(LENS_MOVING_AVERAGE_DEFAULT_WINDOW);
     });
 
@@ -80,7 +74,7 @@ describe('Moving Average Transforms', () => {
         },
       };
 
-      const result = fromMovingAverageAPItoLensState(input, testRef);
+      const result = fromMovingAverageAPItoLensState(input);
       expect(result.params.format).toEqual({
         id: 'number',
         params: {
@@ -98,7 +92,7 @@ describe('Moving Average Transforms', () => {
         window: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
       };
 
-      const result = fromMovingAverageAPItoLensState(input, testRef);
+      const result = fromMovingAverageAPItoLensState(input);
       expect(result.label).toBe('7-day Average');
       expect(result.customLabel).toBe(true);
     });

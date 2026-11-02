@@ -116,7 +116,6 @@ export const ConversationListItem: React.FC<Props> = ({
     <span key={conversation.id + conversation.title}>
       <EuiFlexGroup gutterSize="xs">
         <EuiListGroupItem
-          size="xs"
           onClick={handleConversationClick}
           className="eui-textTruncate"
           css={css`

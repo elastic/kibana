@@ -6,8 +6,8 @@
  */
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { isSchema } from '../../../shared/type_guards';
 
 export interface FailureStoreStatsResponse {
@@ -80,26 +80,27 @@ const effectiveWithLifecycleFailureStoreSchema: z.Schema<EffectiveFailureStoreEn
     }),
   });
 
-const effectiveEnabledFailureStoreSchema: z.Schema<EffectiveFailureStoreEnabled> = z.union([
-  effectiveWithLifecycleFailureStoreSchema,
-  enabledWithoutLifecycleFailureStoreSchema,
-]);
-
-export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.union([
-  effectiveEnabledFailureStoreSchema,
-  disabledFailureStoreSchema,
-]);
+export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z
+  .union([
+    effectiveWithLifecycleFailureStoreSchema,
+    enabledWithoutLifecycleFailureStoreSchema,
+    disabledFailureStoreSchema,
+  ])
+  .meta({ id: 'EffectiveFailureStore' });
 
 export const enabledFailureStoreSchema: z.Schema<FailureStoreEnabled> = z.union([
   enabledWithLifecycleFailureStoreSchema,
   enabledWithoutLifecycleFailureStoreSchema,
 ]);
 
-export const failureStoreSchema: z.Schema<FailureStore> = z.union([
-  inheritFailureStoreSchema,
-  disabledFailureStoreSchema,
-  enabledFailureStoreSchema,
-]);
+export const failureStoreSchema: z.Schema<FailureStore> = z
+  .union([
+    inheritFailureStoreSchema,
+    disabledFailureStoreSchema,
+    enabledWithLifecycleFailureStoreSchema,
+    enabledWithoutLifecycleFailureStoreSchema,
+  ])
+  .meta({ id: 'FailureStore' });
 
 export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
   size: z.number().min(0).optional(),
@@ -108,7 +109,11 @@ export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.ob
 });
 
 export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
-  effectiveFailureStoreSchema.and(z.object({ from: NonEmptyString }));
+  effectiveFailureStoreSchema.and(
+    z.object({
+      from: NonEmptyString,
+    })
+  );
 
 export const isEnabledLifecycleFailureStore = (
   input: EffectiveFailureStore | FailureStore
@@ -130,7 +135,8 @@ export const isEnabledFailureStore = (
 ): input is FailureStoreEnabled | EffectiveFailureStoreEnabled => {
   return (
     isSchema(enabledFailureStoreSchema, input) ||
-    isSchema(effectiveEnabledFailureStoreSchema, input)
+    isSchema(effectiveWithLifecycleFailureStoreSchema, input) ||
+    isSchema(enabledWithoutLifecycleFailureStoreSchema, input)
   );
 };
 
@@ -142,8 +148,12 @@ export const isDisabledFailureStore = (input: FailureStore): input is FailureSto
   return isSchema(disabledFailureStoreSchema, input);
 };
 
+// Elasticsearch responses include the failure store configuration on the data stream,
+// but the client's `IndicesDataStream` type either omits it or types it with a different
+// shape. This models the fields we rely on. The property is optional so a raw
+// `IndicesDataStream` is directly assignable, avoiding type assertions at call sites.
 export type DataStreamWithFailureStore = IndicesDataStream & {
-  failure_store: {
+  failure_store?: {
     enabled?: boolean;
     lifecycle?: {
       enabled?: boolean;

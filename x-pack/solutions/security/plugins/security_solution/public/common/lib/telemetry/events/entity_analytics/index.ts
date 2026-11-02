@@ -423,6 +423,21 @@ const anomaliesCountClickedEvent: EntityAnalyticsTelemetryEvent = {
   },
 };
 
+const leadGenerationGenerateClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.LeadGenerationGenerateClicked,
+  schema: {},
+};
+
+const leadGenerationLeadClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.LeadGenerationLeadClicked,
+  schema: {},
+};
+
+const leadGenerationHuntWithAiClickedEvent: EntityAnalyticsTelemetryEvent = {
+  eventType: EntityEventTypes.LeadGenerationHuntWithAiClicked,
+  schema: {},
+};
+
 export const entityTelemetryEvents = [
   entityClickedEvent,
   entityAlertsClickedEvent,
@@ -440,4 +455,7 @@ export const entityTelemetryEvents = [
   addRiskInputToTimelineClickedEvent,
   mlJobUpdateEvent,
   anomaliesCountClickedEvent,
+  leadGenerationGenerateClickedEvent,
+  leadGenerationLeadClickedEvent,
+  leadGenerationHuntWithAiClickedEvent,
 ];

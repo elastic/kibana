@@ -30,6 +30,9 @@ import type {
   HandleRowReset,
   OnListUpdated,
 } from '../../assistant/settings/use_settings_updater/use_anonymization_updater';
+
+import { ANONYMIZATION_FIELDS_TABLE_CAPTION } from './translations';
+
 import type { FindAnonymizationFieldsClientResponse } from './selection/types';
 
 const Wrapper = styled.div`
@@ -179,6 +182,7 @@ const ContextEditorComponent: React.FC<Props> = ({
       <EuiSearchBar box={search.box} filters={search.filters} onChange={handleSearch} />
       {hasUpdateAIAssistantAnonymization ? toolbar : undefined}
       <EuiBasicTable
+        tableCaption={ANONYMIZATION_FIELDS_TABLE_CAPTION}
         columns={columns}
         compressed={compressed}
         data-test-subj="contextEditor"

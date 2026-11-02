@@ -25,6 +25,7 @@ const clientArgs = {
     attachmentService,
   },
   authorization: { getAuthorizationFilter },
+  config: { attachments: { enabled: false } },
 } as unknown as CasesClientArgs;
 
 const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientArgs };
@@ -32,7 +33,10 @@ const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientA
 describe('AlertsCount', () => {
   beforeAll(() => {
     getAuthorizationFilter.mockResolvedValue({});
-    clientMock.cases.get.mockResolvedValue({ id: 'test-id' } as unknown as Case);
+    clientMock.cases.get.mockResolvedValue({
+      id: 'test-id',
+      owner: 'securitySolution',
+    } as unknown as Case);
   });
 
   beforeEach(() => {
@@ -50,5 +54,16 @@ describe('AlertsCount', () => {
     const handler = new AlertsCount(constructorOptions);
 
     expect(await handler.compute()).toEqual({ alerts: { count: 5 } });
+  });
+
+  it('passes the case owner to the attachment service', async () => {
+    attachmentService.countAlertsAttachedToCase.mockResolvedValue(0);
+    const handler = new AlertsCount(constructorOptions);
+
+    await handler.compute();
+
+    expect(attachmentService.countAlertsAttachedToCase).toHaveBeenCalledWith(
+      expect.objectContaining({ caseId: 'test-id', owner: 'securitySolution' })
+    );
   });
 });

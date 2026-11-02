@@ -24,10 +24,10 @@ exports[`ExplorerNoResultsFound snapshot 1`] = `
         No results found
       </h2>
       <div
-        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
-        class="euiText emotion-euiText-m-euiTextColor-subdued"
+        class="euiText emotion-euiText-s-euiTextColor-subdued"
       >
         <p>
           Try widening the time selection or moving further back in time

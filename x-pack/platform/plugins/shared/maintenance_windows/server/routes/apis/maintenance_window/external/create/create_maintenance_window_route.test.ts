@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { createMaintenanceWindowRoute } from './create_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../schemas/maintenance_window/external/request/create';
@@ -23,12 +23,21 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   id: 'test-id',
   duration: 864000000,
+  schedule: {
+    custom: {
+      ...getMockMaintenanceWindowDomain().schedule.custom,
+      duration: '10d',
+      recurring: {
+        ...getMockMaintenanceWindowDomain().schedule.custom.recurring,
+      },
+    },
+  },
 } as MaintenanceWindow;
 
 const createParams = {
@@ -38,7 +47,12 @@ const createParams = {
     custom: {
       duration: '10d',
       start: '2021-03-07T00:00:00.000Z',
-      recurring: { every: '1d', end: '2022-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
+      timezone: 'UTC',
+      recurring: {
+        every: '1d',
+        end: '2022-05-17T05:05:00.000Z',
+        onWeekDay: ['MO', 'FR'],
+      },
     },
   },
   scope: {
@@ -76,6 +90,7 @@ describe('createMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Create a maintenance window.",
         "tags": Array [
           "oas-tag:maintenance-window",
@@ -115,6 +130,25 @@ describe('createMaintenanceWindowRoute', () => {
           count: undefined,
           bymonthday: undefined,
         },
+        schedule: {
+          custom: {
+            duration: '10d',
+            recurring: {
+              every: '1d',
+              end: '2022-05-17T05:05:00.000Z',
+              onWeekDay: ['MO', 'FR'],
+            },
+            start: '2021-03-07T00:00:00.000Z',
+            timezone: 'UTC',
+          },
+        },
+        scope: {
+          alerting: {
+            enabled: true,
+            kql: "_id: '1234'",
+            filters: [],
+          },
+        },
       },
     });
     expect(res.ok).toHaveBeenLastCalledWith({
@@ -127,6 +161,7 @@ describe('createMaintenanceWindowRoute', () => {
           custom: {
             duration: '10d',
             recurring: {
+              every: '1w',
               occurrences: 2,
             },
             start: '2023-02-26T00:00:00.000Z',
@@ -150,6 +185,15 @@ describe('createMaintenanceWindowRoute', () => {
     maintenanceWindowClient.create.mockResolvedValueOnce({
       ...mockMaintenanceWindow, // it has 60m duration
       duration: 3600000,
+      schedule: {
+        custom: {
+          ...mockMaintenanceWindow.schedule.custom,
+          duration: '1h',
+          recurring: {
+            ...mockMaintenanceWindow.schedule.custom.recurring,
+          },
+        },
+      },
     } as MaintenanceWindow);
 
     const [, handler] = router.post.mock.calls[0];

@@ -66,6 +66,16 @@ export const useStyles = () => {
     }
     & .euiDataGrid__leftControls {
       flex-grow: 1;
+
+      > .euiFlexGroup {
+        flex-grow: 1;
+
+        > .euiFlexItem {
+          flex-grow: 1;
+          flex-direction: row;
+          align-items: center;
+        }
+      }
     }
   `;
 

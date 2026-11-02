@@ -4,59 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { Filter } from '@kbn/es-query';
+
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type {
   HasEditCapabilities,
   PublishesTitle,
   PublishesWritableTitle,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-export type OverviewMode = 'single' | 'groups';
-export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
-export interface GroupFilters {
-  groupBy: GroupBy;
-  groups?: string[];
-  filters?: Filter[];
-  kqlQuery?: string;
-}
+import type {
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+} from '../../../../common/embeddables/overview/types';
 
-export interface SloConfigurationProps {
-  overviewMode?: OverviewMode;
-}
-
-export type SingleSloCustomInput = SloConfigurationProps & {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
-  remoteName?: string;
-  showAllGroupByInstances?: boolean;
-};
-
-export type GroupSloCustomInput = SloConfigurationProps & {
-  groupFilters: GroupFilters | undefined;
-};
-
-export type SloOverviewState = Partial<GroupSloCustomInput> & Partial<SingleSloCustomInput>;
-
-export type SloOverviewEmbeddableState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> &
-  SloOverviewState;
-
-export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
+export type SloOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSloGroupOverviewConfig &
   HasEditCapabilities &
   HasSupportedTriggers;
 
 export interface HasSloGroupOverviewConfig {
-  getSloGroupOverviewConfig: () => GroupSloCustomInput;
-  updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
+  getSloGroupOverviewConfig: () => GroupOverviewCustomState;
+  updateSloGroupOverviewConfig: (next: GroupOverviewCustomState) => void;
 }
 
 export const apiHasSloGroupOverviewConfig = (

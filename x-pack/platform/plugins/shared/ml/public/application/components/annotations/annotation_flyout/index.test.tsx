@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
-import type { Annotation } from '../../../../../common/types/annotations';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
 import { AnnotationFlyout } from '.';

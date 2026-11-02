@@ -30,6 +30,7 @@ export const getCaseComments = async ({
 }: GetCasesOptions): Promise<Array<SavedObjectsFindResult<AttachmentAttributes>>> => {
   const query: SavedObjectsCreatePointInTimeFinderOptions = {
     type: CASE_COMMENT_SAVED_OBJECT,
+    fields: ['type', 'rule'],
     perPage: maxPerPage,
     namespaces: ['*'],
     filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,

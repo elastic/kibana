@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
+  const toasts = getService('toasts');
 
   const createTestRuleset = async (rulesetId: string) => {
     await es.transport.request({
@@ -83,8 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/227730
-  describe.skip('Serverless Query Rules Overview', function () {
+  describe('Serverless Query Rules Overview', function () {
     before(async () => {
       try {
         await deleteTestRuleset('my-test-ruleset');
@@ -96,9 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'searchQueryRules',
-      });
+      await pageObjects.common.navigateToApp('searchQueryRules');
     });
 
     describe('Creating a query ruleset from an empty deployment', () => {
@@ -128,13 +126,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           0,
           'my_query_field'
         );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectUpdateButtonIsEnabled();
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectRuleFlyoutNotToExist();
+        // expect flyout to be closed
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
 
-        // give time for the ruleset to be created
-        await pageObjects.common.sleep(400);
+        // The success toast only fires after the PUT resolves, so it proves the ruleset was committed before we navigate away and read the list.
+        await toasts.getTitleAndDismiss();
         await browser.navigateTo('about:blank');
         await pageObjects.common.navigateToApp('searchQueryRules');
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -143,9 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Adding a new ruleset in a non-empty deployment', () => {
       before(async () => {
-        await pageObjects.svlCommonNavigation.sidenav.clickLink({
-          deepLinkId: 'searchQueryRules',
-        });
+        await pageObjects.common.navigateToApp('searchQueryRules');
       });
       it('should be able to create a new ruleset on top of an existing one', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -176,8 +175,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
 
-        // give time for the ruleset to be created
-        await pageObjects.common.sleep(400);
+        // The success toast only fires after the PUT resolves, so it proves the ruleset was committed before we navigate away and read the list.
+        await toasts.getTitleAndDismiss();
         await pageObjects.svlCommonNavigation.sidenav.clickLink({
           deepLinkId: 'searchQueryRules',
         });

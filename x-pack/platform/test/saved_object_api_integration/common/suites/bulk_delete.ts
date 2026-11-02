@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -52,10 +53,9 @@ export const TEST_CASES: Record<string, BulkDeleteTestCase> = Object.freeze({
 const createRequest = ({ type, id, force }: BulkDeleteTestCase) => ({ type, id, force });
 
 export function bulkDeleteTestSuiteFactory(context: FtrProviderContext) {
-  const esArchiver = context.getService('esArchiver');
+  const testDataLoader = getTestDataLoader(context);
   const supertest = context.getService('supertestWithoutAuth');
   const es = context.getService('es');
-  // const log = context.getService('log');
 
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_delete');
   const expectResponseBody =
@@ -124,16 +124,53 @@ export function bulkDeleteTestSuiteFactory(context: FtrProviderContext) {
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
+          await testDataLoader.createLegacyUrlAliases([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases_all.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases_all.json',
+            },
+            {
+              spaceName: 'space_x',
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_y',
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+              disabled: true,
+            },
+          ]);
+        });
+        after(async () => {
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
+          await testDataLoader.deleteFtrSpaces();
+        });
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title} `, async () => {

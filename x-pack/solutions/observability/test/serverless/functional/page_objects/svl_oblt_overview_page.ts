@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlObltOverviewPageProvider({ getService }: FtrProviderContext) {
@@ -12,7 +13,7 @@ export function SvlObltOverviewPageProvider({ getService }: FtrProviderContext) 
 
   return {
     async assertPageHeaderExists() {
-      await testSubjects.existOrFail('obltOverviewPageHeader');
+      await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.title);
     },
 
     async assertAlertsSectionExists() {

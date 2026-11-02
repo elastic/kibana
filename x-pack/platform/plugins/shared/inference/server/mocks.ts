@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { InferenceServerStart } from './types';
+import type { InferenceServerSetup, InferenceServerStart } from './types';
+
+const createSetupContractMock = (): jest.Mocked<InferenceServerSetup> => {
+  return {
+    registerFeatureEndpointResolver: jest.fn(),
+  };
+};
 
 const createStartContractMock = (): jest.Mocked<InferenceServerStart> => {
   return {
@@ -14,9 +20,15 @@ const createStartContractMock = (): jest.Mocked<InferenceServerStart> => {
     getConnectorList: jest.fn(),
     getDefaultConnector: jest.fn(),
     getConnectorById: jest.fn(),
+    getClientWithoutRequest: jest.fn(),
+    getConnectorByIdWithoutClientRequest: jest.fn(),
+    getInferenceEndpoints: jest.fn(),
+    getInferenceEndpointById: jest.fn(),
+    installTokenUsageDashboard: jest.fn(),
   };
 };
 
 export const inferenceMock = {
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

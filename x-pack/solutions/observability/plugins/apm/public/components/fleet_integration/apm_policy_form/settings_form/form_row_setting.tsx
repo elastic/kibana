@@ -8,7 +8,7 @@
 import {
   EuiFieldNumber,
   EuiFieldText,
-  EuiIcon,
+  EuiFormPrepend,
   EuiSwitch,
   EuiTextArea,
   EuiComboBox,
@@ -62,7 +62,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
           data-test-subj={row.dataTestSubj}
           disabled={isDisabled}
           value={value}
-          prepend={isDisabled ? <EuiIcon type="lock" /> : undefined}
+          prepend={isDisabled ? <EuiFormPrepend iconLeft="lock" /> : undefined}
           onChange={(e) => {
             onChange(row.key, e.target.value);
           }}

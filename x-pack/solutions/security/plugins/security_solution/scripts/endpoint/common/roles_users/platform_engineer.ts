@@ -29,12 +29,13 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
             'host_isolation_exceptions_all',
             'blocklist_all',
             'endpoint_exceptions_all',
+            'custom_yara_signatures_read',
 
             'actions_log_management_read',
 
             'workflow_insights_all',
           ],
-          securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

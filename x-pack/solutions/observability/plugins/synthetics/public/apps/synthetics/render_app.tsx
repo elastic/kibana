@@ -16,8 +16,15 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../
 import { SyntheticsApp } from './synthetics_app';
 
 export const getSyntheticsAppProps = (): SyntheticsAppProps => {
-  const { isDev, isServerless, coreStart, startPlugins, setupPlugins, appMountParameters } =
-    kibanaService;
+  const {
+    isDev,
+    isServerless,
+    isCCSEnabled,
+    coreStart,
+    startPlugins,
+    setupPlugins,
+    appMountParameters,
+  } = kibanaService;
 
   const {
     application: { capabilities },
@@ -25,7 +32,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     docLinks,
     http: { basePath },
     i18n,
-    theme,
   } = kibanaService.coreStart;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
@@ -34,7 +40,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
   );
 
   const canSave = (capabilities.uptime.save ?? false) as boolean; // TODO: Determine for synthetics
-  const darkMode = theme.getTheme().darkMode;
 
   return {
     isDev,
@@ -44,7 +49,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     i18n,
     startPlugins,
     basePath: basePath.get(),
-    darkMode,
     commonlyUsedRanges: coreStart.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
@@ -57,15 +61,12 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
             linkType: 'documentation',
             href: `${docLinks.links.observability.monitorUptimeSynthetics}`,
           },
-          {
-            linkType: 'discuss',
-            href: 'https://discuss.elastic.co/c/uptime', // Redirects to https://discuss.elastic.co/c/observability/synthetics/75
-          },
         ],
       }),
     setBadge,
     appMountParameters,
     isServerless,
+    isCCSEnabled,
   };
 };
 

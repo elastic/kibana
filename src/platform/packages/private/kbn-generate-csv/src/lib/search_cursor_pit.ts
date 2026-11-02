@@ -11,20 +11,24 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
+import { INTERNAL_ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/server';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
 export class SearchCursorPit extends SearchCursor {
   private searchAfter: estypes.SortResults | undefined;
+  private useInternalUser: boolean;
 
   constructor(
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
     abortController: AbortController,
-    logger: Logger
+    logger: Logger,
+    useInternalUser: boolean = false
   ) {
     super(indexPatternTitle, settings, clients, abortController, logger);
+    this.useInternalUser = useInternalUser;
   }
 
   /**
@@ -42,7 +46,10 @@ export class SearchCursorPit extends SearchCursor {
     this.logger.debug(`Requesting PIT for: [${this.indexPatternTitle}]...`);
     try {
       // NOTE: if ES is overloaded, this request could time out
-      const response = await this.clients.es.asCurrentUser.openPointInTime(
+      const esClient = this.useInternalUser
+        ? this.clients.es.asInternalUser
+        : this.clients.es.asCurrentUser;
+      const response = await esClient.openPointInTime(
         {
           index: this.indexPatternTitle,
           keep_alive: scroll.duration(taskInstanceFields),
@@ -59,11 +66,15 @@ export class SearchCursorPit extends SearchCursor {
       );
       pitId = response.id;
     } catch (err) {
-      this.logger.error(err);
+      const message = `Error opening PIT for index pattern [${this.indexPatternTitle}]: ${err.message}`;
+      this.logger.error(message);
+      throw new Error(message, { cause: err });
     }
 
     if (!pitId) {
-      throw new Error(`Could not receive a PIT ID!`);
+      throw new Error(
+        `Unable to get PIT for index pattern: [${this.indexPatternTitle}], no errors were thrown`
+      );
     }
 
     this.logger.debug(`Opened PIT ID: ${this.formatCursorId(pitId)}`);
@@ -77,7 +88,6 @@ export class SearchCursorPit extends SearchCursor {
     // maxConcurrentShardRequests=0 is not supported
     const effectiveMaxConcurrentShardRequests =
       maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
-
     const searchParamsPit = {
       params: {
         ...searchBody,
@@ -85,9 +95,13 @@ export class SearchCursorPit extends SearchCursor {
       },
     };
 
+    const strategy = this.useInternalUser
+      ? INTERNAL_ENHANCED_ES_SEARCH_STRATEGY
+      : ES_SEARCH_STRATEGY;
+
     return await lastValueFrom(
       this.clients.data.search(searchParamsPit, {
-        strategy: ES_SEARCH_STRATEGY,
+        strategy,
         abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
@@ -165,8 +179,11 @@ export class SearchCursorPit extends SearchCursor {
 
   public async closeCursor() {
     if (this.cursorId) {
+      const esClient = this.useInternalUser
+        ? this.clients.es.asInternalUser
+        : this.clients.es.asCurrentUser;
       this.logger.debug(`Executing close PIT on ${this.formatCursorId(this.cursorId)}`);
-      await this.clients.es.asCurrentUser.closePointInTime({ id: this.cursorId });
+      await esClient.closePointInTime({ id: this.cursorId });
     } else {
       this.logger.warn(`No PIT Id to clear!`);
     }

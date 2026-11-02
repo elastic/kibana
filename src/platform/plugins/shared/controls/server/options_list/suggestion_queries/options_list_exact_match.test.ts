@@ -17,31 +17,16 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
-        allowExpensiveQueries: true,
+
         searchString: 'searchForMe',
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
-      expect(aggregation).toMatchObject({
-        suggestions: {
-          filter: {
-            term: {
-              testField: {
-                value: 'searchForMe',
-                case_insensitive: true,
-              },
-            },
-          },
-          aggs: {
-            filteredSuggestions: {
-              terms: {
-                field: 'testField',
-                shard_size: 10,
-              },
-            },
-          },
-        },
+      expect(aggregationBuilder.buildAggregation(optionsListRequestBodyMock)).toMatchObject({
+        suggestions: { terms: { field: 'testField', shard_size: 10 } },
+      });
+      expect(aggregationBuilder.buildSearchFilter!(optionsListRequestBodyMock)).toMatchObject({
+        term: { testField: { value: 'searchForMe', case_insensitive: true } },
       });
     });
 
@@ -49,7 +34,7 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'testField',
-        allowExpensiveQueries: true,
+
         searchString: 'searchForMe',
         fieldSpec: {
           type: 'string',
@@ -57,34 +42,14 @@ describe('options list exact match search query', () => {
         } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
-
-      expect(aggregation).toMatchObject({
+      expect(aggregationBuilder.buildAggregation(optionsListRequestBodyMock)).toMatchObject({
         nestedSuggestions: {
-          nested: {
-            path: 'path.to.nested',
-          },
-          aggs: {
-            suggestions: {
-              filter: {
-                term: {
-                  testField: {
-                    value: 'searchForMe',
-                    case_insensitive: true,
-                  },
-                },
-              },
-              aggs: {
-                filteredSuggestions: {
-                  terms: {
-                    field: 'testField',
-                    shard_size: 10,
-                  },
-                },
-              },
-            },
-          },
+          nested: { path: 'path.to.nested' },
+          aggs: { suggestions: { terms: { field: 'testField', shard_size: 10 } } },
         },
+      });
+      expect(aggregationBuilder.buildSearchFilter!(optionsListRequestBodyMock)).toMatchObject({
+        term: { testField: { value: 'searchForMe', case_insensitive: true } },
       });
     });
 
@@ -92,31 +57,16 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
-        allowExpensiveQueries: true,
+
         searchString: '123',
         fieldSpec: { type: 'number' } as unknown as FieldSpec,
       };
       const aggregationBuilder = getExactMatchAggregationBuilder();
-      const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
-      expect(aggregation).toMatchObject({
-        suggestions: {
-          filter: {
-            term: {
-              bytes: {
-                value: '123',
-                case_insensitive: false, // this is the only part that is dependent on field type
-              },
-            },
-          },
-          aggs: {
-            filteredSuggestions: {
-              terms: {
-                field: 'bytes',
-                shard_size: 10,
-              },
-            },
-          },
-        },
+      expect(aggregationBuilder.buildAggregation(optionsListRequestBodyMock)).toMatchObject({
+        suggestions: { terms: { field: 'bytes', shard_size: 10 } },
+      });
+      expect(aggregationBuilder.buildSearchFilter!(optionsListRequestBodyMock)).toMatchObject({
+        term: { bytes: { value: '123', case_insensitive: false } },
       });
     });
   });
@@ -126,7 +76,7 @@ describe('options list exact match search query', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: 'cool',
-        allowExpensiveQueries: true,
+
         fieldName: 'coolTestField.keyword',
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
@@ -148,9 +98,7 @@ describe('options list exact match search query', () => {
         },
         aggregations: {
           suggestions: {
-            filteredSuggestions: {
-              buckets: [{ doc_count: 5, key: 'cool1' }],
-            },
+            buckets: [{ doc_count: 5, key: 'cool1' }],
           },
         },
       };
@@ -167,7 +115,6 @@ describe('options list exact match search query', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
       fieldName: 'bytes',
-      allowExpensiveQueries: true,
       searchString: '12345',
       fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };
@@ -190,9 +137,7 @@ describe('options list exact match search query', () => {
       },
       aggregations: {
         suggestions: {
-          filteredSuggestions: {
-            buckets: [{ doc_count: 5, key: 12345 }],
-          },
+          buckets: [{ doc_count: 5, key: 12345 }],
         },
       },
     };

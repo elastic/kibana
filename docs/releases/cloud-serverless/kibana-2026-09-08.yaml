@@ -1,0 +1,25 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-08
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-08
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 286439.yaml
+    checksum: ff18e579778838e5f1f6190784bcfa275fc35dd7
+  type: feature
+  title: Add custom HTML and CSS panels to dashboards
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds custom dashboard panels that you can build with HTML, CSS, Liquid templates, and ES|QL.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/286439
+  issues:
+  - https://github.com/elastic/kibana/issues/284399

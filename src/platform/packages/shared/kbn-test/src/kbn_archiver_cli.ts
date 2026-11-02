@@ -13,7 +13,7 @@ import Url from 'url';
 import type { Flags } from '@kbn/dev-cli-runner';
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { KbnClient } from './kbn_client';
+import { KbnClient } from '@kbn/kbn-client';
 
 import { readConfigFile, EsVersion } from './functional_test_runner';
 

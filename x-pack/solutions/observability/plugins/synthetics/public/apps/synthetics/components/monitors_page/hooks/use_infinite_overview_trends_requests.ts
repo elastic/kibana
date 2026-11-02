@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { OverviewStatusMetaData } from '../overview/types';
 import { useOverviewTrendsRequests } from './use_overview_trends_requests';
 
@@ -17,16 +18,22 @@ export interface UseInfiniteOverviewTrendsRequestsParams {
   numOfColumns: number;
 }
 
+const EMPTY_MONITORS: OverviewStatusMetaData[] = [];
+
 export const useInfiniteOverviewTrendsRequests = ({
   monitorsSortedByStatus,
   sliceToFetch,
   numOfColumns,
 }: UseInfiniteOverviewTrendsRequestsParams) => {
-  const monitorsToFetchTrendsFor = sliceToFetch
-    ? monitorsSortedByStatus.slice(
-        sliceToFetch.startIndex * numOfColumns,
-        (sliceToFetch.endIndex + 1) * numOfColumns
-      )
-    : [];
+  const monitorsToFetchTrendsFor = useMemo(
+    () =>
+      sliceToFetch
+        ? monitorsSortedByStatus.slice(
+            sliceToFetch.startIndex * numOfColumns,
+            (sliceToFetch.endIndex + 1) * numOfColumns
+          )
+        : EMPTY_MONITORS,
+    [monitorsSortedByStatus, sliceToFetch, numOfColumns]
+  );
   useOverviewTrendsRequests(monitorsToFetchTrendsFor);
 };

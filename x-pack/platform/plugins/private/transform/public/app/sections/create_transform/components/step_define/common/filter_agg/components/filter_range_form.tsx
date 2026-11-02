@@ -7,17 +7,16 @@
 
 import React, { useCallback, type ComponentProps } from 'react';
 import {
+  EuiButtonIcon,
   EuiFieldNumber,
-  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
-  EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FilterAggConfigRange } from '../types';
-
-const BUTTON_SIZE = 40;
 
 // The config prop of the component, to be used for the `updateConfig` function.
 type FilterRangeFormConfig = ComponentProps<
@@ -70,16 +69,17 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               }}
               step="any"
               prepend={
-                <EuiButton
-                  minWidth={BUTTON_SIZE}
-                  style={{ maxWidth: BUTTON_SIZE }}
-                  onChange={(e: any) => {
-                    updateConfig({ includeFrom: e.target.checked });
-                  }}
-                  fill={includeFrom}
-                >
-                  {includeFrom ? '≥' : '>'}
-                </EuiButton>
+                <EuiToolTip content={includeFrom ? '≥' : '>'} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType={includeFrom ? 'chevronLimitRight' : 'chevronSingleRight'}
+                    onClick={(e: any) => {
+                      updateConfig({ includeFrom: e.target.checked });
+                    }}
+                    display={includeFrom ? 'fill' : 'base'}
+                    aria-pressed={includeFrom}
+                    aria-label={includeFrom ? '≥' : '>'}
+                  />
+                </EuiToolTip>
               }
             />
           </EuiFormRow>
@@ -101,16 +101,17 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               }}
               step="any"
               append={
-                <EuiButton
-                  minWidth={BUTTON_SIZE}
-                  style={{ maxWidth: BUTTON_SIZE }}
-                  onClick={() => {
-                    updateConfig({ includeTo: !includeTo });
-                  }}
-                  fill={includeTo}
-                >
-                  {includeTo ? '≤' : '<'}
-                </EuiButton>
+                <EuiToolTip content={includeTo ? '≤' : '<'} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType={includeTo ? 'chevronLimitLeft' : 'chevronSingleLeft'}
+                    onClick={() => {
+                      updateConfig({ includeTo: !includeTo });
+                    }}
+                    display={includeTo ? 'fill' : 'base'}
+                    aria-pressed={includeTo}
+                    aria-label={includeTo ? '≤' : '<'}
+                  />
+                </EuiToolTip>
               }
             />
           </EuiFormRow>

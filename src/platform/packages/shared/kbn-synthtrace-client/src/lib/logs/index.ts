@@ -61,6 +61,11 @@ export type LogDocument = Fields &
     'client.ip'?: string;
     'error.stack_trace'?: string;
     'error.exception'?: unknown;
+
+    // OTel log exception fields https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/
+    'error.exception.type'?: string;
+    'error.exception.message'?: string;
+
     'error.log'?: unknown;
     'log.custom': Record<string, unknown>;
     'host.geo.location': number[];
@@ -81,8 +86,10 @@ export type LogDocument = Fields &
     'event.outcome'?: string;
     'event.action'?: string;
     'event.sequence'?: number;
+    'event.name'?: string;
     'source.ip'?: string;
     'rule.name'?: string;
+
     labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;
@@ -140,6 +147,11 @@ export type LogDocument = Fields &
     'span.id'?: string;
     'error.type'?: string;
     'error.code'?: string;
+
+    // Unprocessed OTel exception log fields (stored at the document root, not nested in attributes)
+    event_name?: string;
+    'exception.type'?: string;
+    'exception.message'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

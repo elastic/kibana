@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../../common/services/version_specific_policies_utils';
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;
@@ -31,14 +32,18 @@ export const StatusColumn: React.FunctionComponent<{
         (value) => value.version === version
       );
       const kuery = failed
-        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"${
+        ? `${buildPolicyBaseIdWithFallbackKuery(
+            agentPolicyId
+          )} AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"${
             currentVersionAgentStatus && currentVersionAgentStatus.failedUpgradeActionIds?.length
               ? ` AND (${currentVersionAgentStatus.failedUpgradeActionIds
                   .map((id) => `upgrade_details.action_id:"${id}"`)
                   .join(' OR ')})`
               : ''
           }`
-        : `policy_id:"${agentPolicyId}" AND (agent.version:"${version}" OR upgrade_details.target_version:"${version}") `;
+        : `${buildPolicyBaseIdWithFallbackKuery(
+            agentPolicyId
+          )} AND (agent.version:"${version}" OR upgrade_details.target_version:"${version}") `;
       return getHref('agent_list', {
         kuery: encodeURIComponent(kuery),
       });
@@ -73,7 +78,7 @@ export const StatusColumn: React.FunctionComponent<{
   const currentStatus = useMemo(() => {
     const inProgressStatus = (
       <EuiButtonEmpty size="s" href={getAgentsHref(false)} color="text">
-        <EuiIcon type="clock" />{' '}
+        <EuiIcon type="clock" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.inProgressText"
           defaultMessage="In progress"
@@ -82,7 +87,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     const failedStatus = (
       <EuiButtonEmpty size="s" href={getAgentsHref(true)} color="text">
-        <EuiIcon type="errorFilled" color="danger" />{' '}
+        <EuiIcon type="errorFill" color="danger" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.failedText"
           defaultMessage="Upgrade failed"
@@ -91,7 +96,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     const completedStatus = (
       <EuiButtonEmpty size="s" href={getAgentsHref(false)} color="text">
-        <EuiIcon type="checkInCircleFilled" color="success" />{' '}
+        <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.completedText"
           defaultMessage="Completed"
@@ -100,7 +105,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     const notStartedStatus = (
       <EuiButtonEmpty size="s" color="text">
-        <EuiIcon type="minusInCircle" color="text" />{' '}
+        <EuiIcon type="minusCircle" color="text" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.notStartedText"
           defaultMessage="Not started"

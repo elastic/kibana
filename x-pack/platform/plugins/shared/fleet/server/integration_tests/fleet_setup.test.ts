@@ -9,7 +9,7 @@ import Path from 'path';
 
 import { range } from 'lodash';
 
-import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TestElasticsearchUtils, createRoot } from '@kbn/core-test-helpers-kbn-server';
 import { getSupertest, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 
@@ -124,7 +124,7 @@ describe.skip('Fleet setup preconfiguration with multiple instances Kibana', () 
     it('sets up Fleet correctly', async () => {
       await addRoots(1);
       const [root1Start] = await startRoots();
-      const soClient = root1Start.savedObjects.createInternalRepository();
+      const soClient = root1Start.savedObjects.getUnsafeInternalClient();
 
       const esClient = root1Start.elasticsearch.client.asInternalUser;
       await new Promise((res) => setTimeout(res, 1000));
@@ -214,7 +214,7 @@ describe.skip('Fleet setup preconfiguration with multiple instances Kibana', () 
     ],
   };
 
-  async function expectFleetSetupState(soClient: ISavedObjectsRepository) {
+  async function expectFleetSetupState(soClient: SavedObjectsClientContract) {
     // Assert setup state
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: 'ingest-agent-policies',

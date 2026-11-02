@@ -20,7 +20,8 @@
     "@kbn/test-subj-selector",
     "@kbn/core-http-common",
     "@kbn/synthtrace-client",
-    "@kbn/synthtrace"
+    "@kbn/synthtrace",
+    "@kbn/core-chrome-browser-components"
   ],
   "exclude": [
     "target/**/*",

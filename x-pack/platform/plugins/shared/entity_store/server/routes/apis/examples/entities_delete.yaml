@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        deleteEntityExample:
+          summary: "Delete an entity by identifier"
+          description: "Delete a single entity from the Entity Store using its entity identifier."
+          value:
+            entityId: "host:web-server-prod-01"
+responses:
+  200:
+    description: "Indicates the entity was successfully deleted."
+    content:
+      application/json:
+        examples:
+          deleteSuccessExample:
+            summary: "Entity deleted"
+            description: "The entity was found and successfully removed from the latest index."
+            value:
+              deleted: true
+  404:
+    description: "Entity not found."
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: "Entity not found"
+            description: "No entity with the specified identifier exists in the Entity Store."
+            value:
+              statusCode: 404
+              error: "Not Found"
+              message: "Entity ID 'host:web-server-prod-01' not found"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X DELETE -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entityId":"host:web-server-prod-01"}' \
+        "${KIBANA_URL}/api/security/entity_store/entities/"
+  - lang: Console
+    source: |
+      DELETE kbn://api/security/entity_store/entities/
+      {
+        "entityId": "host:web-server-prod-01"
+      }

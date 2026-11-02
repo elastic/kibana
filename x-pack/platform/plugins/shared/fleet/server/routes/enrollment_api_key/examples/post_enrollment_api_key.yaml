@@ -1,0 +1,39 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postEnrollmentApiKeyRequestExample:
+          description: 'Create an enrollment API key for an agent policy'
+          value:
+            policy_id: 'policy-id-1'
+            name: 'My enrollment key'
+            expiration: '2025-01-01T00:00:00.000Z'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postEnrollmentApiKeyExample:
+            description: 'The created enrollment API key'
+            value:
+              item:
+                id: 'key-id-1'
+                name: 'My enrollment key'
+                active: true
+                policy_id: 'policy-id-1'
+                api_key_id: 'api-key-id-1'
+                api_key: 'api-key-value-1'
+                created_at: '2024-01-01T00:00:00.000Z'
+              action: 'created'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

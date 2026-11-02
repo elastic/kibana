@@ -14,7 +14,7 @@ const STORAGE_KEY = 'kbn_developer_toolbar_minimized';
 export const useMinimized = () => {
   const [isMinimized, setIsMinimized] = useState<boolean>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === 'true';
+    return stored !== 'false';
   });
 
   const toggleMinimized = useCallback(() => {

@@ -15,9 +15,11 @@ import type {
   VisualizationContextHelper,
   LensInternalApi,
 } from '@kbn/lens-common';
+import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
+  getLoadErrorMessage,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
@@ -97,13 +99,14 @@ export function buildUserMessagesHelpers(
   internalApi: LensInternalApi,
   { coreStart, data, visualizationMap, datasourceMap, spaces }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  getConsumerMessages?: () => UserMessage[]
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: (messages: UserMessage[]) => void;
   updateWarnings: () => void;
   updateMessages: (messages: UserMessage[]) => void;
-  resetMessages: () => void;
+  discardRuntimeMessages: () => void;
   updateBlockingErrors: (blockingMessages: UserMessage[] | Error) => void;
   updateValidationErrors: (messages: UserMessage[]) => void;
 } {
@@ -117,9 +120,8 @@ export function buildUserMessagesHelpers(
     }
   };
 
-  const resetMessages = () => {
+  const discardRuntimeMessages = () => {
     runtimeUserMessages = {};
-    internalApi.resetAllMessages();
   };
 
   const getUserMessages: UserMessagesGetter = (locationId, filters) => {
@@ -136,6 +138,12 @@ export function buildUserMessagesHelpers(
       activeData,
     } = getUpdatedState(internalApi.getVisualizationContext, visualizationMap, datasourceMap);
     const userMessages: UserMessage[] = [];
+
+    // The document could not be loaded, so any other message would be about the empty fallback
+    const loadError = internalApi.loadError$.getValue();
+    if (loadError) {
+      return filterAndSortUserMessages([getLoadErrorMessage(loadError)], locationId, filters ?? {});
+    }
 
     userMessages.push(
       ...getApplicationUserMessages({
@@ -170,9 +178,10 @@ export function buildUserMessagesHelpers(
           },
         },
         datasourceMap,
-        dataViewObject.indexPatterns
+        dataViewObject.indexPatterns,
+        activeData
       ),
-      query: activeAttributes.state.query,
+      query: getRepresentativeQuery(activeAttributes) ?? EMPTY_KQL_QUERY,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',
@@ -201,8 +210,26 @@ export function buildUserMessagesHelpers(
       }) ?? []),
       ...(activeVisualization?.getUserMessages?.(activeVisualizationState, {
         frame: framePublicAPI,
+        setState: (newStateOrUpdater) => {
+          const newVisState =
+            typeof newStateOrUpdater === 'function'
+              ? newStateOrUpdater(activeVisualizationState)
+              : newStateOrUpdater;
+          internalApi.updateAttributes({
+            ...activeAttributes,
+            state: {
+              ...activeAttributes.state,
+              visualization: newVisState,
+            },
+          });
+        },
       }) ?? [])
     );
+
+    const consumerMessages = getConsumerMessages?.() ?? [];
+
+    // When an internal error occurs (block chart rendering), the consumer message is not displayed.
+    userMessages.push(...consumerMessages);
 
     return handleMessageOverwriteFromConsumer(
       filterAndSortUserMessages(
@@ -216,7 +243,7 @@ export function buildUserMessagesHelpers(
 
   return {
     addUserMessages,
-    resetMessages,
+    discardRuntimeMessages,
     getUserMessages,
     /**
      * Here pass all the messages that comes directly from the Lens validation/info system

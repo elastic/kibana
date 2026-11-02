@@ -110,8 +110,8 @@ export function getGapAutoFillRunOutcome(consolidated: AggregatedByRuleEntry[]):
   };
 }
 
-export function isCancelled(abortController: AbortController): boolean {
-  return abortController.signal.aborted;
+export function isCancelled(signal: AbortSignal): boolean {
+  return signal.aborted;
 }
 
 export async function filterGapsWithOverlappingBackfills(
@@ -221,6 +221,7 @@ export async function initRun({
     schedule: soAttrs.schedule,
     maxBackfills: soAttrs.maxBackfills,
     ruleTypes: soAttrs.ruleTypes,
+    excludedReasons: soAttrs.excludedReasons,
   };
   const logEvent = createGapAutoFillSchedulerEventLogger({
     eventLogger,

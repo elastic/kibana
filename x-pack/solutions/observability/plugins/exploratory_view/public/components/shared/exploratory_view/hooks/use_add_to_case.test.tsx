@@ -11,6 +11,7 @@ import { render } from '../rtl_helpers';
 import { EuiButton } from '@elastic/eui';
 import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react';
+import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 describe('useAddToCase', function () {
   function setupTestComponent() {
@@ -74,8 +75,17 @@ describe('useAddToCase', function () {
     });
 
     expect(core.http?.post).toHaveBeenCalledTimes(1);
-    expect(core.http?.post).toHaveBeenCalledWith('/api/cases/test/comments', {
-      body: '{"persistableStateAttachmentState":{"attributes":{"title":"Test lens attributes"},"timeRange":{"to":"now","from":"now-5m"}},"persistableStateAttachmentTypeId":".lens","type":"persistableState","owner":"observability"}',
+    expect(core.http?.post).toHaveBeenCalledWith('/api/cases/test/attachments', {
+      body: JSON.stringify({
+        type: LENS_ATTACHMENT_TYPE,
+        data: {
+          state: {
+            attributes: { title: 'Test lens attributes' },
+            timeRange: { to: 'now', from: 'now-5m' },
+          },
+        },
+        owner: 'observability',
+      }),
     });
   });
 });

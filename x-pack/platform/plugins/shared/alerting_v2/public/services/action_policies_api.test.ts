@@ -1,0 +1,146 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { ActionPoliciesApi } from './action_policies_api';
+
+describe('ActionPoliciesApi', () => {
+  const http = httpServiceMock.createStartContract();
+  const api = new (class extends ActionPoliciesApi {
+    constructor() {
+      super(http as any);
+    }
+  })();
+
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('upsertActionPolicy', () => {
+    it('sends a PUT request with the policy id in the path', async () => {
+      const payload = { name: 'Test', description: '', destinations: [] } as any;
+      http.put.mockResolvedValue({ id: 'policy-1' });
+
+      await api.upsertActionPolicy('policy-1', payload);
+
+      expect(http.put).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
+        body: JSON.stringify(payload),
+      });
+    });
+  });
+
+  describe('listActionPolicies', () => {
+    it('sends the filter and search query params to the list path', async () => {
+      await api.listActionPolicies({ page: 2, filter: 'enabled: true', search: 'cpu' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+        query: {
+          page: 2,
+          per_page: undefined,
+          filter: 'enabled: true',
+          search: 'cpu',
+          sort_field: undefined,
+          sort_order: undefined,
+        },
+      });
+    });
+
+    it('omits empty filter and search values', async () => {
+      await api.listActionPolicies({ filter: '', search: '' });
+
+      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+        query: expect.objectContaining({ filter: undefined, search: undefined }),
+      });
+    });
+  });
+
+  describe('createActionPolicy', () => {
+    it('sends a POST request', async () => {
+      const payload = { name: 'Test', description: '', destinations: [] } as any;
+      http.post.mockResolvedValue({ id: 'policy-1' });
+
+      await api.createActionPolicy(payload);
+
+      expect(http.post).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
+        body: JSON.stringify(payload),
+      });
+    });
+  });
+
+  describe('updateActionPolicy', () => {
+    it('sends a PATCH request with the policy id in the path', async () => {
+      const payload = { name: 'Updated' } as any;
+      http.patch.mockResolvedValue({ id: 'policy-1' });
+
+      await api.updateActionPolicy('policy-1', payload);
+
+      expect(http.patch).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
+        body: JSON.stringify(payload),
+      });
+    });
+  });
+
+  describe('getActionPolicy', () => {
+    it('sends a GET request', async () => {
+      http.get.mockResolvedValue({ id: 'policy-1' });
+
+      await api.getActionPolicy('policy-1');
+
+      expect(http.get).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
+    });
+  });
+
+  describe('deleteActionPolicy', () => {
+    it('sends a DELETE request', async () => {
+      http.delete.mockResolvedValue(undefined);
+
+      await api.deleteActionPolicy('policy-1');
+
+      expect(http.delete).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
+    });
+  });
+
+  describe('fetchRuleEventFields', () => {
+    it('omits the query param entirely when no matcher is provided', async () => {
+      http.get.mockResolvedValue([]);
+
+      await api.fetchRuleEventFields();
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/alerting/v2/suggestions/rule_event_fields',
+        {}
+      );
+    });
+
+    it('forwards the trimmed matcher as a query parameter', async () => {
+      http.get.mockResolvedValue([]);
+
+      await api.fetchRuleEventFields('  alert_id: "abc"  ');
+
+      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/suggestions/rule_event_fields', {
+        query: { matcher: 'alert_id: "abc"' },
+      });
+    });
+
+    it('omits the query param when matcher is empty or whitespace', async () => {
+      http.get.mockResolvedValue([]);
+
+      await api.fetchRuleEventFields('   ');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/alerting/v2/suggestions/rule_event_fields',
+        {}
+      );
+    });
+
+    it('returns the response payload from the HTTP layer', async () => {
+      http.get.mockResolvedValue(['data.host.name', 'data.count']);
+
+      const result = await api.fetchRuleEventFields();
+
+      expect(result).toEqual(['data.host.name', 'data.count']);
+    });
+  });
+});

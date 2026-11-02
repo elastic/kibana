@@ -4,25 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eslint-plugin-imports'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/eslint-plugin-imports'
+  title: '@kbn/eslint-plugin-imports'
   description: Moon project for @kbn/eslint-plugin-imports
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-eslint-plugin-imports
+  sourceRoot: packages/kbn-eslint-plugin-imports
 dependsOn:
   - '@kbn/import-resolver'
   - '@kbn/repo-source-classifier'
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
+  - '@kbn/swc-register'
 tags:
   - shared-common
   - package
@@ -33,17 +33,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - oxlint_plugin.js
+    - src/**/*.mjs
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

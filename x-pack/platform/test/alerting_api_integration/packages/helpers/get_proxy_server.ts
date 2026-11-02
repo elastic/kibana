@@ -22,6 +22,16 @@ export const getHttpProxyServer = async (
     onProxyResHandler(proxyRes, req, res);
   });
 
+  // http-proxy doesn't propagate client disconnects to the target server.
+  // Tear down the proxied request when the client disconnects early (e.g. when the request is aborted).
+  proxyServer.on('proxyReq', (proxyReq, req, res) => {
+    res.on('close', () => {
+      if (!res.writableFinished) {
+        proxyReq.destroy();
+      }
+    });
+  });
+
   const proxyPort = getProxyPort(kbnTestServerConfig);
   proxyServer.listen(proxyPort);
 

@@ -13,6 +13,25 @@ A data stream is an index template with the data stream flag set to true. Each d
 Other details to note about the index template:
 - we set priority to 200, this is to beat the generic `logs-*-*`, `metrics-*-*`, `synthetics-*-*` index templates. We advise users set their own index template priority below 100 [here](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html). 
 - Fleet index templates are set to managed to deter users from editing them. However it is not necessarily safe to assume that Fleet index templates (or any managed asset) haven't been modified by the user, but if they have been modified we do not have to preserve these changes.
+
+### OpenTelemetry integrations and the `.otel` suffix
+
+OpenTelemetry (`otelcol`) integration packages use two related but different notions of **dataset**:
+
+1. **Registry / package `dataset`** — The value declared on the integration data stream in the package manifest (often short, e.g. `generic`). The Fleet UI and saved package policy streams refer to this registry identity when matching streams to package definitions.
+
+2. **Elasticsearch index naming** — When experimental `enableOtelIntegrations` is on and a data stream either uses the `otelcol` input or sets `use_otel_suffix: true` in its manifest, Fleet appends a **`.otel` segment** only when computing Elasticsearch asset names (index template patterns, etc.). This happens in [`getRegistryDataStreamAssetBaseName`](../common/services/datastream_es_name.ts) via `isOtelInputType`, producing bases such as `traces-generic.otel` (not by requiring `.otel` inside the manifest `dataset` string). The Elastic Agent does not add this suffix to templates; **Kibana EPM** installs templates using that naming at package install time.
+
+   `use_otel_suffix` exists for packages that ship only field mappings and ingest pipelines: they have no streams, so there is no `otelcol` input to detect. It affects Elasticsearch asset naming and OTel component templates only — such a package produces no collector configuration, so points 3 and below do not apply to it. Package-spec rejects the flag on a data stream that defines an input (validation `SVR00011`), and Fleet mirrors that precedence by ignoring the flag when streams are present: a data stream with inputs is OTel only when those inputs are `otelcol`, so installed assets stay aligned with the index the agent actually writes to.
+
+3. **`data_stream.dataset` on the collector** — The merged agent policy carries `data_stream.dataset` for each OTel stream. Fleet generates OpenTelemetry Collector config (including OTTL `set(attributes["data_stream.dataset"], "...")` statements) from that value **as-is**; it does **not** append `.otel` there. Optional stream variable `data_stream.dataset` overrides replace the dataset string verbatim for policy output (see [`getFullInputStreams`](../server/services/agent_policies/package_policies_to_agent_inputs.ts)). Further routing defaults may still apply inside the collector or Elasticsearch exporter at runtime (outside Kibana).
+
+**Overrides:** If a user sets `data_stream.dataset` to a custom value (including values that already contain `.otel`), Fleet embeds that literal string in generated OTTL. Fleet does not strip or deduplicate a trailing `.otel`. Installed index templates remain tied to the **registry** dataset plus Fleet’s `.otel` suffix for EPM naming, **not** to the live policy variable—so a custom dataset can target backing indices that only resolve correctly when templates, `dataset_is_prefix`, or exporter routing align with that choice.
+
+**Agent output privileges:** [`storedPackagePoliciesToAgentPermissions`](../server/services/agent_policies/package_policies_to_agent_permissions.ts) builds index names from `compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset`. It does **not** apply the same `stream.vars['data_stream.dataset']` merge as `getFullInputStreams`. When debugging “permission denied” vs routing, compare full agent policy `data_stream.dataset` with the privilege index patterns.
+
+**Acceptance tests:** Routing transforms and dataset override behaviour for full agent policies are covered in [`agent_policy_otel_routing.ts`](../../../../test/fleet_api_integration/apis/agent_policy/agent_policy_otel_routing.ts) (Fleet API integration tests).
+
 ### Component Templates (as of 8.2)
 In order of priority from highest to lowest:
   - `.fleet_agent_id_verification-1` - added when agent id verification is enabled, sets the `.fleet_final_pipeline-1` and agent ID mappings. ([we plan to remove the ability to disable agent ID verification](https://github.com/elastic/kibana/issues/127041) )

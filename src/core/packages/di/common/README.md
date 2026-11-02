@@ -58,6 +58,9 @@ The internal module provided by the core services solves those problems by intro
 
 The services marked as globally available will be registered in the global scope so that every plugin scope will inherit them. They will be resolved dynamically through the bound context so that the services bound in the request scope can inject request-scope dependencies.
 
+For plugin developers, there is a dedicated service, `Scope`, that provides an isolated container where they can place interim services like HTTP requests or session data.
+Those interim services can then be accessed by other services from any plugin, but only within the request scope, to minimize the risk of memory leaks or exposing session data.
+
 ## Usage
 ### Get Started
 To get started, just create an empty plugin and declare a named export called `module` in your `index.ts`:
@@ -321,10 +324,11 @@ export function HelloWorldApp() {
 ### Lazy Loading
 Lazy loading can be achieved using the built-in InversifyJS features:
 ```ts
-import { ContainerModule, ServiceIdentifier } from 'inversify';
+import { ContainerModule } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { IHeavyService } from './heavy-service';
 
-export const HeavyServiceToken = Symbol.for('HeavyService') as ServiceIdentifier<IHeavyService>;
+export const HeavyServiceToken = createToken<IHeavyService>('HeavyService');
 
 export const module = new ContainerModule(({ bind }) => {
   bind(HeavyServiceToken)
@@ -362,14 +366,15 @@ export const module = new ContainerModule(({ bind }) => {
 The DI should help resolve problems with circular dependencies.
 Since plugins implemented using the container modules no longer depend on the actual implementation of their dependencies, the services can be injected using static tokens rather than classes:
 ```ts
-import { ContainerModule, type ServiceIdentifier } from 'inversify';
+import { ContainerModule } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import { SomeService } from './some-service';
 
 export interface ISomeService {
   run(): void;
 }
 
-export const SomeServiceToken = Symbol.for('SomeService') as ServiceIdentifier<ISomeService>;
+export const SomeServiceToken = createToken<ISomeService>('SomeService');
 
 export const module = new ContainerModule(({ bind }) => {
   bind(SomeServiceToken).to(SomeService);
@@ -379,11 +384,26 @@ export const module = new ContainerModule(({ bind }) => {
 In this case, if `SomeService` depends on another service from a different plugin, which also has dependencies on `SomeService`, an intermediate package should be created to expose static injection tokens with public interfaces.
 In other words, the solution would be to segregate injection tokens from the container module definition.
 
+When a consumer imports the token from such a shared package, the `ServiceTypeOf` helper can infer the service type from the token itself, so the interface does not need to be imported separately:
+```ts
+import { inject, injectable } from 'inversify';
+import { SomeServiceToken } from '@kbn/some-shared-tokens';
+import type { ServiceTypeOf } from '@kbn/core-di';
+
+@injectable()
+class MyService {
+  constructor(
+    @inject(SomeServiceToken) private someService: ServiceTypeOf<typeof SomeServiceToken>
+  ) {}
+}
+```
+
 Another problem is circular dependency between two services.
 It is an anti-pattern that highlights a more serious problem that should be resolved instead.
 But if there is no other option, then it can be resolved by using the `onActivation` hook:
 ```ts
-import { ContainerModule, inject, injectable, type ServiceIdentifier } from 'inversify';
+import { ContainerModule, inject, injectable } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 export interface IGreeting {
   greet(): string;
@@ -420,8 +440,8 @@ class TestUser implements IUser {
   }
 }
 
-export const GreetingToken = Symbol.for('Greeting') as ServiceIdentifier<IGreeting>;
-export const UserToken = Symbol.for('User') as ServiceIdentifier<IUser>;
+export const GreetingToken = createToken<IGreeting>('Greeting');
+export const UserToken = createToken<IUser>('User');
 
 export const module = new ContainerModule(({ bind }) => {
   bind(GreetingToken).to(Greeting);
@@ -434,6 +454,334 @@ export const module = new ContainerModule(({ bind }) => {
 In most cases, the underlying problem is either duplicating some functionality or insufficient decomposition.
 With the decoupled container module configuration, it should be easier to detect that.
 But if there is no other option to get away from the services composition, deferred dependency injection via the `onActivation` hook is an acceptable option since it does not break the Inversion of Control principle.
+
+### Registries and Extensions
+In some cases, like HTTP routing or task handling, there is a need to register a handler during the setup stage that can be invoked later.
+That could be achieved in two ways:
+1. By using the `OnSetup` hook that resolves all the handlers (e.g., `Route`) and calls a registration function.
+  ```ts
+  import { ContainerModule } from 'inversify';
+  import { createToken, OnSetup } from '@kbn/core-di';
+  import { Router } from '@kbn/core-di-server';
+  import type { RouteDefinition } from './definition';
+
+  export const Route = createToken<RouteDefinition>('Route');
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(OnSetup)
+      .toResolvedValue((router) => (container) => {
+        container.getAll(Route).forEach((route) => router.register(route));
+      }, [Router])
+      .inSingletonScope();
+  });
+  ```
+
+2. By using an extended `KibanaContainerModule` that provides an API layer encapsulating the complexity:
+  ```ts
+  import { createToken, KibanaContainerModule, OnSetup } from '@kbn/core-di';
+  import { Router } from '@kbn/core-di-server';
+  import type { RouteDefinition } from './definition';
+
+  export const Route = createToken<RouteDefinition>('Route');
+
+  export const module = new KibanaContainerModule(({ onSetup }) => {
+    onSetup(Route, Router, (_, route, router) => {
+      router.register(route);
+    });
+  });
+  ```
+
+`KibanaContainerModule` provides two additional hooks, `onSetup` and `onStart`, to register services of a specific type with a specific handler.
+Basically, they are similar to the [`onActivation`](https://inversify.io/docs/api/container-module/#onactivation) hook, but they are executed only once during the setup or start stage, respectively.
+Additionally, they support inline dependency injection, so the handler can receive any dependencies it needs:
+```ts
+onSetup(Task, TaskManager, Logger, (_, task, taskManager, logger) => {
+  logger.debug(`Registering task handler for ${task.name}.`);
+  taskManager.register(task);
+});
+```
+
+Beware, the services exposed during the start stage will not be available during the setup stage.
+So the `onSetup` hook may fail if it depends on services registered in the start stage.
+```ts
+// fails because `CoreStart('injection')` is not available yet
+onSetup(Task, TaskManager, CoreStart('injection'), (_, task, taskManager, injection) => {
+  // ...
+});
+```
+
+### Inline Injection
+InversifyJS does not provide a way to inject dependencies into a function directly, and hence, the dependencies should be resolved imperatively from a factory.
+`KibanaContainerModule` provides a way to inject dependencies into a function directly by wrapping it into an asynchronous function.
+That function holds the invocation until the owning plugin is started so that it can guarantee consistency of the injected dependencies.
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+
+export const module = new KibanaContainerModule(({ bind, inject }) => {
+  bind(Token).toDynamicValue(inject(Config, HttpClient, async (config, http) => {
+    const response = await http.get(config.url);
+
+    return response.data;
+  }));
+});
+```
+
+The returned function will always be asynchronous so that the example service should be resolved with the `getAsync` method.
+
+Apart from that, the `inject` function can be used from the extended resolution context provided by the `KibanaContainerModule`.
+It can be used in callbacks passed to `onSetup`, `onStart`, and `onActivation`.
+```ts
+onSetup(Task, TaskManager, Logger, ({ inject }, task, taskManager, logger) => {
+  taskManager.register(task.name, inject(CoreStart('http'), (http, ...args) => { // Start services can be injected here
+    logger.debug(`Handling task ${task.name}.`);
+
+    return task.run(http, ...args);
+  }));
+
+});
+```
+
+And it is also available from the `toDynamicValue` and `toFactory` bindings:
+```ts
+  bind(Token).toDynamicValue(({ inject }) => inject(Config, HttpClient, async (config, http) => {
+    const response = await http.get(config.url);
+
+    return response.data;
+  })());
+```
+
+### Interim Services
+The `Scope` service can be used to register interim services available only during a short-lived session, such as HTTP request handling.
+It provides two additional methods:
+- `expose` to bind a service that will be available to services from other plugins, but only in the request scope.
+- `dispose` to dispose of the request scope and unbind all the services bound in it.
+
+```ts
+import { createToken, KibanaContainerModule, OnSetup, Scope } from '@kbn/core-di';
+import { Request, Response, Router } from '@kbn/core-di-server';
+import type { RouteDefinition } from './definition';
+
+export const Route = createToken<RouteDefinition>('Route');
+
+export const module = new KibanaContainerModule(({ onSetup }) => {
+  onSetup(Route, Router, ({ inject }, route, router) => {
+    router.register({
+      ...route,
+      handler: inject(Scope, async (scope, request, response) => {
+        scope.expose(Request).toConstantValue(request);
+        scope.expose(Response).toConstantValue(response);
+
+        try {
+          return await scope.get(route, { autobind: true }).handle();
+        } finally {
+          scope.dispose();
+        }
+      }),
+    });
+  });
+});
+```
+
+### Tips
+- Avoid resolving other services from `toDynamicValue` bindings if they can be resolved using `toResolvedValue`.
+  The latter resolves services in a single step in the same transient scope.
+  ```ts
+  bind(Token).toDynamicValue(async ({ get }) => {
+    const config = get(Config);
+    const http = get(HttpClient);
+    const response = await http.get(config.url);
+
+    return response.data;
+  });
+  ```
+
+  ```ts
+  bind(Token).toResolvedValue(async (config, http) => {
+    const response = await http.get(config.url);
+
+    return response.data;
+  }, [Config, HttpClient]);
+  ```
+
+- Make sure not to access services that are supposed to be available only after the start stage from services used during the setup stage.
+  This will cause a runtime error.
+  ```ts
+  class AuthService {
+    // fails because `CoreStart('http')` is not available when injected in `Setup`
+    constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
+
+    registerProvider(provider: AuthProvider) {
+      // ...
+    }
+  }
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(AuthService).toSelf();
+    bind(Setup).toResolvedValue((authService) => ({
+      auth: {
+        registerProvider: (provider) => authService.registerProvider(provider),
+      },
+    }), [AuthService]);
+  });
+  ```
+
+  Here is another example where the runtime error is not obvious:
+  ```ts
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Setup).toDynamicValue(({ get }) => ({
+      auth: {
+        enable: () => {
+          get(HttpServer).registerMiddleware(() => {
+            // may fail because `PluginStart` services are not available if the registered callback called too early
+            const { someService } = get(PluginStart('somePlugin'));
+
+            // ...
+          });
+        },
+      }
+    }));
+  });
+  ```
+
+- Keep the container module configuration simple and don't construct objects inline.
+  ```ts
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Setup).toResolvedValue((authService, configService) => ({
+      auth: {
+        registerProvider: () => { /* ... */ },
+      },
+      config: {
+        get: () => { /* ... */ },
+      },
+    }), [AuthService, ConfigService]);
+  });
+  ```
+
+  It is better to extract all the factories and keep only the binding configuration in the container module.
+  ```ts
+  import { setupFactory } from './setup-factory';
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Setup).toResolvedValue(setupFactory, [AuthService, ConfigService]);
+  });
+  ```
+
+- Try to avoid imperative code in the container module configuration.
+  There is always a better way to achieve the same result declaratively, and it will be easier to maintain and test.
+  ```ts
+  async function getFeatures(request, authService, configService, httpService) {
+    const config = await configService.get();
+    const features = config.getEnabledFeatures();
+    const experiments = await httpService.get('/api/features', { user: authService.getUser(request) });
+
+    return [...features, ...experiments];
+  }
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(Start).toResolvedValue((authService, configService, httpService) => ({
+      improvedSearch: {
+        isEnabled: () => {
+          return getFeatures(request, authService, configService, httpService).includes('improvedSearch'),
+        },
+      }
+    }), [AuthService, ConfigService, HttpService]);
+  });
+  ```
+
+  Instead, we can extract some calls into separate services and declare a dedicated service responsible for the features resolution.
+  ```ts
+  const ConfigToken = createToken<Config>('ConfigToken');
+  const ExperimentsToken = createToken<Experiments>('ExperimentsToken');
+  const UserToken = createToken<User>('UserToken');
+
+  class Features {
+    constructor(
+      @inject(ConfigToken) private readonly config: Config,
+      @inject(ExperimentsToken) private readonly experiments: Experiments,
+    ) {}
+
+    public has(feature: string): boolean {
+      return [...this.config.getEnabledFeatures(), ...this.experiments].includes(feature);
+    }
+  }
+
+  class ImprovedSearch {
+    constructor(
+      @inject(Features) private readonly features: Features,
+    ) {}
+
+    public isEnabled(): boolean {
+      return this.features.has('improvedSearch');
+    }
+  }
+
+  export const module = new ContainerModule(({ bind }) => {
+    bind(ConfigToken).toResolvedValue((configService) => configService.get(), [ConfigService]);
+    bind(UserToken)
+      .toResolvedValue((authService, request) => authService.getUser(request), [AuthService, Request])
+      .inRequestScope();
+    bind(ExperimentsToken)
+      .toResolvedValue((httpService, user) => httpService.get('/api/features', { user }), [HttpService, UserToken])
+      .inRequestScope();
+
+    bind(Features).toSelf();
+    bind(Start).toResolvedValue((improvedSearch) => ({ improvedSearch }), [ImprovedSearch]);
+  });
+  ```
+
+  The refactored code is longer, but it is easier to extend and reuse some parts of it.
+  In practice, the services are usually more complex and have more dependencies, so extracting them will likely reduce the amount of code.
+  Another advantage is that InversifyJS handles asynchronous code automatically, and we have a flat structure.
+  If the implementation of one of the services changes, it will not affect the rest of the code.
+  All of this, combined with loose coupling, will make the code easier to test and hence more maintainable.
+
+- Avoid mocking DI functions to inject mocked services.
+  That may bring side effects and make the tests more brittle.
+  Instead, invest some time in binding mocked services in the test container.
+
+  ```ts
+  jest.mock('@kbn/core-di-browser', () => ({
+    useService: (token: unknown) => {
+      if (token === SomeServiceToken) {
+        return {
+          doSomething: jest.fn(),
+        };
+      }
+
+      return null;
+    }
+  });
+  ```
+
+  ```tsx
+  import type { ServiceTypeOf } from '@kbn/core-di';
+  import { Context } from '@kbn/core-di-browser';
+  import { injectionServiceMock } from '@kbn/core-di-mocks';
+
+  describe('MyComponent', () => {
+    let container: Container;
+    let someServiceMock: jest.Mocked<ServiceTypeOf<typeof SomeServiceToken>>;
+
+    beforeEach(() => {
+      someServiceMock = {
+        doSomething: jest.fn(),
+      };
+
+      container = injectionServiceMock.createStartContract().getContainer();
+      container.bind(SomeServiceToken).toConstantValue(someServiceMock);
+    });
+
+    it('should do something', () => {
+      const { getByText } = render(
+        <Context.Provider value={container}>
+          <MyComponent />
+        </Context.Provider>
+      );
+
+      expect(someServiceMock.doSomething).toHaveBeenCalled();
+    });
+  });
+  ```
 
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.

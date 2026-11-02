@@ -8,9 +8,10 @@
  */
 
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { Rule } from 'eslint';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
+import { getAppIdFromFilePath } from '../helpers/get_app_id_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { getStringValue, isTruthy } from '../helpers/utils';
@@ -18,17 +19,19 @@ import { getStringValue, isTruthy } from '../helpers/utils';
 export const RULE_WARNING_MESSAGE =
   'First parameter passed to i18n.translate should start with the correct i18n identifier for this file. Correct it or use the autofix suggestion.';
 
-export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
+export const NO_IDENTIFIER_MESSAGE =
+  'APP_ID does not have an i18n identifier added to i18nrc.json yet. Translations for this plugin or package will not work until one is added.';
+
+export const I18nTranslateShouldStartWithTheRightId: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
   },
-  create(context) {
-    const { cwd, filename, sourceCode, report } = context;
-
+  createOnce(context) {
     return {
       CallExpression(node) {
-        const { callee } = node as TSESTree.CallExpression;
+        const callExprNode = node as unknown as TSESTree.CallExpression;
+        const { callee } = callExprNode;
 
         // Check if callee is i18n.translate (MemberExpression with specific identifiers)
         if (
@@ -41,9 +44,21 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
           return;
         }
 
-        const callExprNode = node as TSESTree.CallExpression;
+        const { cwd, filename, sourceCode } = context;
         const args = callExprNode.arguments;
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
+
+        // If no i18n identifier is found for this file, report an error
+        if (!i18nAppId) {
+          // Find the package/plugin ID from kibana.jsonc to show in the error message
+          const appId = getAppIdFromFilePath(filename, cwd);
+
+          context.report({
+            node,
+            message: NO_IDENTIFIER_MESSAGE.replace('APP_ID', appId),
+          });
+          return;
+        }
 
         // Check if the first argument is a ternary expression (ConditionalExpression)
         // If so, validate both branches have correct i18n identifiers
@@ -65,8 +80,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
 
         const identifier = args.length > 0 ? getStringValue(args[0]) : false;
 
-        const functionDeclaration = sourceCode.getScope(node).block as TSESTree.FunctionDeclaration;
-        const functionName = getFunctionName(functionDeclaration);
+        const functionName = getFunctionName(sourceCode.getScope(node).block);
 
         // Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
@@ -77,7 +91,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
 
         // If the identifier is not a string literal, report an error
         if (!identifier) {
-          report({
+          context.report({
             node,
             message: RULE_WARNING_MESSAGE,
             fix(fixer) {
@@ -108,7 +122,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
 
           const hasExistingOpts = args.length > 1;
 
-          report({
+          context.report({
             node,
             message: RULE_WARNING_MESSAGE,
             fix(fixer) {

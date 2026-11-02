@@ -18,14 +18,15 @@ import type {
 import type { AxiosHeaderValue } from 'axios';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
+import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
+import type { SpaceId } from '@kbn/core-spaces-common';
+import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskInfo } from './lib/action_executor';
-import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { PluginSetupContract, PluginStartContract } from './plugin';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
@@ -66,6 +67,7 @@ export interface HookServices {
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  getSkippedPreconfiguredConnectorIds: () => Set<string>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -96,6 +98,10 @@ export interface ActionTypeExecutorOptions<
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
   connectorTokenClient?: ConnectorTokenClientContract;
+  signal?: AbortSignal;
+  authMode?: AuthMode;
+  profileUid?: string;
+  connectorVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -107,6 +113,11 @@ export interface InMemoryConnector<
   secrets: Secrets;
   config: Config;
   exposeConfig?: boolean;
+  isDynamic?: boolean;
+  /**
+   * Events are on for this in-memory connector. GET reports it for a dual type.
+   */
+  isInboundEventsEnabled?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;
@@ -121,7 +132,7 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-type Validator<T> = Pick<z3.ZodType, 'parse'> | Pick<z4.ZodType, 'parse'>;
+type Validator<T> = Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;
@@ -182,25 +193,56 @@ export interface PostDeleteConnectorHookParams<
   services: HookServices;
 }
 
-export interface ActionType<
+// Params passed to cross-plugin lifecycle listeners, extending the hook params with the connector type.
+// Secrets are intentionally omitted from the public listener contract to avoid exposing plaintext
+// secrets to external plugins.
+export type ConnectorLifecyclePostCreateParams = Omit<
+  PostSaveConnectorHookParams,
+  'secrets' | 'isUpdate'
+> & {
+  connectorType: string;
+  connectorName: string;
+};
+export type ConnectorLifecyclePostDeleteParams = PostDeleteConnectorHookParams & {
+  connectorType: string;
+};
+
+// Cross-plugin lifecycle listener for connector create/delete events.
+// Registered by external plugins (e.g., Agent Builder) via the actions setup contract.
+export interface ConnectorLifecycleListener {
+  // Which connector types this listener applies to, or '*' for all types
+  connectorTypes: string[] | '*';
+  // Called after a connector is successfully created
+  onPostCreate?: (params: ConnectorLifecyclePostCreateParams) => Promise<void>;
+  // Called after a connector is deleted
+  onPostDelete?: (params: ConnectorLifecyclePostDeleteParams) => Promise<void>;
+}
+
+export type ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
+> =
+  | ClassicActionType<Config, Secrets, Params, ExecutorResultData>
+  | WorkflowActionType<Config, Secrets, Params, ExecutorResultData>;
+
+export interface ActionTypeCoreFields<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
 > {
   id: string;
   name: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
-  validate: {
-    params: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
-  };
   isSystemActionType?: boolean;
   source?: ActionTypeSource;
+  /**
+   * Spec this type was generated from; only set for spec-backed types
+   */
+  spec?: ConnectorSpec;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -210,6 +252,44 @@ export interface ActionType<
    * Only applies to system actions (isSystemActionType: true).
    */
   allowMultipleSystemActions?: boolean;
+  /**
+   * Description of this connector type.
+   */
+  description?: string;
+  /**
+   * When true, the connector type supports testing.
+   */
+  isTestable?: boolean;
+  /**
+   * When true, the connector type is shown as technical preview in the UI.
+   */
+  isExperimental?: boolean;
+  /**
+   * Auth type ids from the connector spec that opted into sandbox credential injection.
+   * Populated for spec-backed connectors via createConnectorTypeFromSpec.
+   */
+  sandboxSupportedAuthTypes?: readonly string[];
+  /**
+   * Per-instance check for stack connectors that are not driven by sandboxSupportedAuthTypes.
+   * Also called when listing connectors, where secrets are not decrypted and are passed as an
+   * empty object, so implementations should decide from config alone when possible.
+   */
+  isSandboxCapable?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+  }) => boolean;
+  /**
+   * Builds auth headers for sandbox credential injection from the decrypted secrets of a
+   * stack connector. Headers from secretHeaders take precedence over these.
+   */
+  getSandboxAuthHeaders?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+    connectorId: string;
+    connectorTokenClient?: ConnectorTokenClientContract;
+    configurationUtilities: ActionsConfigurationUtilities;
+    logger: Logger;
+  }) => Record<string, string> | Promise<Record<string, string>>;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -228,12 +308,41 @@ export interface ActionType<
   // Headers that should be added to every Axios request made by this action type
   globalAuthHeaders?: Record<string, AxiosHeaderValue>;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
 }
+
+export type WorkflowActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionTypeCoreFields<Config, Secrets, Params> & {
+  executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  validate: {
+    params?: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
+  };
+};
+
+export type ClassicActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> = ActionTypeCoreFields<Config, Secrets, Params> & {
+  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  validate: {
+    params: ValidatorType<Params>;
+    config: ValidatorType<Config>;
+    secrets: ValidatorType<Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
+  };
+};
 
 export interface RawAction extends Record<string, unknown> {
   actionTypeId: string;
@@ -241,6 +350,11 @@ export interface RawAction extends Record<string, unknown> {
   isMissingSecrets: boolean;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
+  authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
+  hasInboundEventIdentity?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
@@ -250,13 +364,24 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  /**
+   * Id of the UIAM API key in `apiKey`. Unencrypted and mapped so the alerting API key
+   * invalidation task can see this pending execution still needs the key.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId?: string;
   consumer?: string;
   source?: string;
 }
 
 export interface ActionTaskExecutorParams {
-  spaceId: string;
+  spaceId: SpaceId;
   actionTaskParamsId: string;
 }
 
@@ -266,12 +391,37 @@ export interface ResponseSettings {
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {
+  id?: string;
   connectorId: string;
   tokenType: string;
   token: string;
-  expiresAt: string;
+  expiresAt?: string;
   createdAt: string;
   updatedAt?: string;
+  refreshToken?: string;
+  refreshTokenExpiresAt?: string;
+}
+
+export interface UserConnectorToken {
+  id?: string;
+  profileUid: string;
+  connectorId: string;
+  credentialType: string;
+  credentials: Record<string, unknown>;
+  expiresAt?: string;
+  refreshTokenExpiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type OAuthPersonalCredentials = SavedObjectAttributes & {
+  accessToken: string;
+  refreshToken?: string;
+};
+
+export interface UserConnectorOAuthToken extends UserConnectorToken {
+  credentialType: 'oauth';
+  credentials: OAuthPersonalCredentials;
 }
 
 // This unallowlist should only contain connector types that require a request or API key for

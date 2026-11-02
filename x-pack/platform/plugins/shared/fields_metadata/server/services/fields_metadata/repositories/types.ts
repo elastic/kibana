@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FieldMetadataPlain } from '../../../../common';
 
 export interface IntegrationFieldsSearchParams {
@@ -28,3 +29,14 @@ export interface ExtractedIntegration {
 }
 
 export type IntegrationListExtractor = () => Promise<ExtractedIntegration[]>;
+
+// Streams extractor types
+
+export interface StreamsFieldsSearchParams {
+  streamName: string;
+}
+export type ExtractedStreamFields = Record<string, FieldMetadataPlain>;
+
+export type StreamsFieldsExtractor = (
+  params: StreamsFieldsSearchParams & { esClient: ElasticsearchClient }
+) => Promise<ExtractedStreamFields>;

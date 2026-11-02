@@ -43,3 +43,8 @@ export const ruleExecutionStatusWarningReason = {
   MAX_QUEUED_ACTIONS: 'maxQueuedActions',
   EXECUTION: 'ruleExecution',
 } as const;
+
+export {
+  MISSING_UIAM_API_KEY_TAG,
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+} from '../../../common/constants';

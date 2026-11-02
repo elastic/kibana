@@ -33,6 +33,7 @@ export const TEST_TAG = new Set([
   'stub',
   'fixture',
   'story_decorators',
+  'storybook_decorator',
   'test_helpers',
 ]);
 
@@ -51,6 +52,7 @@ export const TEST_DIR = new Set([
   '__stories__',
   '__fixtures__',
   '__snapshots__',
+  '__storybook_mocks__',
   'stub',
   'e2e',
   'ftr_e2e',

@@ -34,7 +34,7 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
+import { navigateBackToRulesManagement } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -65,7 +65,7 @@ describe(
       fillScheduleRuleAndContinue(rule);
       fillRuleAction(actions);
       createAndEnableRule();
-      openRuleManagementPageViaBreadcrumbs();
+      navigateBackToRulesManagement();
 
       goToRuleDetailsOf(rule.name);
 
@@ -125,7 +125,7 @@ describe(
         cy.get('[data-test-subj=comboBoxToggleListButton]').click();
       });
       cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST).should('be.visible');
-      cy.get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} button[role=option]`).then(
+      cy.get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} .euiComboBoxOption`).then(
         ($items) => $items.length > 0
       );
     });

@@ -42,7 +42,7 @@ export interface CreateStoreProps<State, Reducers extends ReducersMap<State>> {
   reducers: Reducers;
 }
 
-export const useCreateStore = <S extends Record<string, unknown>, R extends ReducersMap<S>>({
+export const useCreateStore = <S extends object, R extends ReducersMap<S>>({
   reducers,
   initialState,
 }: CreateStoreProps<S, R>) => {
@@ -78,9 +78,7 @@ export const useCreateStore = <S extends Record<string, unknown>, R extends Redu
   const actionsRef = useRef(createActions());
 
   return {
-    get state() {
-      return state;
-    },
+    state,
     get actions() {
       return actionsRef.current;
     },

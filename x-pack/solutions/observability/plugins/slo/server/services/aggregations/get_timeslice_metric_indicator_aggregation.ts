@@ -6,16 +6,17 @@
  */
 
 import type { TimesliceMetricIndicator, timesliceMetricMetricDef } from '@kbn/slo-schema';
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import { assertNever } from '@kbn/std';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { getElasticsearchQueryOrThrow } from '../transform_generators';
 
 type TimesliceMetricDef = TimesliceMetricIndicator['params']['metric'];
-type TimesliceMetricMetricDef = t.TypeOf<typeof timesliceMetricMetricDef>;
+type TimesliceMetricMetricDef = z.output<typeof timesliceMetricMetricDef>;
 
 export class GetTimesliceMetricIndicatorAggregation {
-  constructor(private indicator: TimesliceMetricIndicator) {}
+  constructor(private indicator: TimesliceMetricIndicator, private dataView?: DataView) {}
 
   private buildAggregation(metric: TimesliceMetricMetricDef) {
     const { aggregation } = metric;
@@ -85,7 +86,7 @@ export class GetTimesliceMetricIndicatorAggregation {
   private buildMetricAggregations(metricDef: TimesliceMetricDef) {
     return metricDef.metrics.reduce((acc, metric) => {
       const filter = metric.filter
-        ? getElasticsearchQueryOrThrow(metric.filter)
+        ? getElasticsearchQueryOrThrow(metric.filter, this.dataView)
         : { match_all: {} };
       const aggs = { metric: this.buildAggregation(metric) };
       return {

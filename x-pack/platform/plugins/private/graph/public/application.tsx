@@ -19,24 +19,20 @@ import type {
   ScopedHistory,
 } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
-import React from 'react';
 import type { DataPlugin } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FormattedRelative } from '@kbn/i18n-react';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type {
   ContentClient,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -60,7 +56,7 @@ export interface GraphDependencies {
   toastNotifications: ToastsStart;
   dataViews: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   contentClient: ContentClient;
   addBasePath: (url: string) => string;
   getBasePath: () => string;
@@ -90,7 +86,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
       tooltip: i18n.translate('xpack.graph.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save Graph workspaces',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
 
@@ -118,19 +114,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  const app = (
-    <KibanaRenderContextProvider {...core}>
-      <TableListViewKibanaProvider
-        {...{
-          core,
-          FormattedRelative,
-        }}
-      >
-        {graphRouter(deps)}
-      </TableListViewKibanaProvider>
-    </KibanaRenderContextProvider>
-  );
-  ReactDOM.render(app, element);
+  ReactDOM.render(core.rendering.addContext(graphRouter(deps)), element);
 
   return () => {
     licenseSubscription.unsubscribe();

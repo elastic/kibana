@@ -40,6 +40,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     `${getFullPath(src)}:${dest}`,
   ]);
 
+  dockerArgs.push('-e', 'EPR_REQUIRE_PACKAGE_SIGNATURES=false');
+
   const dockerServers = !skipRunningDockerRegistry
     ? defineDockerServersConfig({
         registry: {
@@ -81,6 +83,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
         `--xpack.fleet.developer.disableBundledPackagesCache=true`,
+        `--xpack.fleet.productVersionsApiTimeoutMs=2000`,
         '--xpack.cloudSecurityPosture.enabled=true',
         `--xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout=10`,
         `--xpack.fleet.packageVerification.gpgKeyPath=${getFullPath(
@@ -90,7 +93,15 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enablePackageRollback: true,
           enableAgentPrivilegeLevelChange: true,
+          enableAgentRollback: true,
           enableFleetPolicyRevisionsCleanupTask: false,
+          enableSloTemplates: true,
+          enableVersionSpecificPolicies: true,
+          enableOpAMP: true,
+          installIntegrationsKnowledge: false,
+          // Keep the legacy agentless APIs enabled here so the base suite exercises legacy behavior;
+          // config.agentless_legacy_disabled.ts overrides this to true for the rejection tests.
+          disableAgentlessLegacyAPI: false,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
@@ -109,6 +120,12 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
             appenders: ['default'],
           },
         ])}`,
+        // Background tasks that mutate the .fleet-agents and .fleet-policies documents these suites
+        // seed; their own coverage lives in x-pack/platform/test/fleet_tasks
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
+          'fleet:agent-status-change-task',
+          'fleet:version-specific-policy-assignment-task',
+        ])} `,
       ],
     },
   };

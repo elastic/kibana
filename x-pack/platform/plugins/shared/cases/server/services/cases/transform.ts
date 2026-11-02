@@ -53,6 +53,7 @@ export function transformUpdateResponseToExternalModel(
     total_comments,
     customFields,
     settings,
+    extended_fields,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
@@ -95,7 +96,11 @@ export function transformUpdateResponseToExternalModel(
           extractObservables: settings.extractObservables ?? false,
         },
       }),
-    },
+      ...(extended_fields !== undefined &&
+        extended_fields !== null && {
+          extended_fields: extended_fields as Record<string, string>,
+        }),
+    } as Partial<CaseTransformedAttributes>,
   };
 }
 
@@ -179,7 +184,8 @@ export function transformESModelToCase(
 
   const externalService = transformESExternalService(caseData.external_service, references);
 
-  const { total_alerts, total_comments, total_events, ...caseAttributes } = caseData;
+  const { total_alerts, total_comments, total_events, extended_fields, ...caseAttributes } =
+    caseData;
 
   const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
@@ -215,7 +221,11 @@ export function transformESModelToCase(
     incremental_id,
     settings,
     comments: [],
-  };
+    ...(extended_fields !== undefined &&
+      extended_fields !== null && {
+        extended_fields: extended_fields as Record<string, string>,
+      }),
+  } as Case;
 }
 
 function buildReferenceHandler(
@@ -255,13 +265,17 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
-  const { total_alerts, total_comments, ...caseSavedObjectAttributes } =
-    caseSavedObject.attributes ??
-    ({
-      total_alerts: -1,
-      total_events: -1,
-      total_comments: -1,
-    } as CasePersistedAttributes);
+  const {
+    total_alerts,
+    total_comments,
+    extended_fields: persistedExtendedFields,
+    ...caseSavedObjectAttributes
+  } = caseSavedObject.attributes ??
+  ({
+    total_alerts: -1,
+    total_events: -1,
+    total_comments: -1,
+  } as CasePersistedAttributes);
 
   const severity =
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
@@ -278,6 +292,11 @@ export function transformSavedObjectToExternalModel(
     extractObservables: caseSavedObjectAttributes.settings?.extractObservables ?? false,
   };
 
+  const extended_fields =
+    persistedExtendedFields !== undefined && persistedExtendedFields !== null
+      ? (persistedExtendedFields as Record<string, string>)
+      : undefined;
+
   return {
     ...caseSavedObject,
     attributes: {
@@ -292,7 +311,8 @@ export function transformSavedObjectToExternalModel(
       total_observables,
       incremental_id,
       settings,
-    },
+      ...(extended_fields !== undefined && { extended_fields }),
+    } as CaseTransformedAttributes,
   };
 }
 

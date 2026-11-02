@@ -25,7 +25,7 @@ export const CreateButton: React.FC<CreateButtonProps> = React.memo(({ onClick }
           fill
           onClick={onClick}
           size="m"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           disabled={!enabled}
         >
           {i18n.CREATE_SCHEDULE}
@@ -35,6 +35,8 @@ export const CreateButton: React.FC<CreateButtonProps> = React.memo(({ onClick }
     [onClick]
   );
 
-  return <WithMissingPrivileges>{createNewScheduleButton}</WithMissingPrivileges>;
+  return (
+    <WithMissingPrivileges requireWorkflowsExecute>{createNewScheduleButton}</WithMissingPrivileges>
+  );
 });
 CreateButton.displayName = 'CreateButton';

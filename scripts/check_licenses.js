@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/license_checker/run_check_licenses_cli');
+require('@kbn/dev/license_checker/run_check_licenses_cli');

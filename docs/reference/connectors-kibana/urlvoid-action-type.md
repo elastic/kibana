@@ -1,15 +1,15 @@
 ---
 navigation_title: "URLVoid"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/urlvoid-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.3
   serverless: preview
 ---
 
 # URLVoid connector [urlvoid-action-type]
 
 The URLVoid connector communicates with the URLVoid API to check domain and URL reputation using multi-engine scanning.
+
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Create connectors in {{kib}} [define-urlvoid-ui]
 

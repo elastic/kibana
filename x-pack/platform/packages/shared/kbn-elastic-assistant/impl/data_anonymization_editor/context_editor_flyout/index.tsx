@@ -79,7 +79,7 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
-                iconType={showRealValues ? 'eye' : 'eyeClosed'}
+                iconType={showRealValues ? 'eye' : 'eyeSlash'}
                 onClick={handleToggleShowRealValues}
               >
                 {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.hideRealValues', {
@@ -89,7 +89,7 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" iconType="documentEdit" onClick={openEditModal}>
+              <EuiButtonEmpty size="xs" iconType="pencil" onClick={openEditModal}>
                 {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.editButton', {
                   defaultMessage: 'Edit',
                 })}

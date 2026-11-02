@@ -7,6 +7,7 @@
 
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import type {
+  ADD_ELASTIC_RULES_TABLE,
   RULES_MONITORING_TABLE,
   RULES_UPDATES_TABLE,
 } from '../screens/alerts_detection_rules';
@@ -16,11 +17,11 @@ import {
   COLLAPSED_ACTION_BTN,
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_BULK_MANUAL_RULE_RUN_BTN,
   CUSTOM_RULES_BTN,
   DELETE_RULE_ACTION_BTN,
   DISABLED_RULES_BTN,
   DUPLICATE_RULE_ACTION_BTN,
-  DUPLICATE_RULE_MENU_PANEL_BTN,
   EDIT_RULE_ACTION_BTN,
   ELASTIC_RULES_BTN,
   ENABLED_RULES_BTN,
@@ -58,30 +59,37 @@ import {
   RULES_TAGS_POPOVER_WRAPPER,
   SELECT_ALL_RULES_BTN,
   SELECTED_RULES_NUMBER_LABEL,
-  TOASTER_BODY,
   TOASTER_CLOSE_ICON,
   TOASTER_ERROR_BTN,
+  CONFIRM_BULK_GAP_FILL_BTN,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
   MODIFIED_PREBUILT_RULE_BADGE,
   MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
   POPOVER_ACTIONS_TRIGGER_BUTTON,
+  RULE_FILL_ALL_GAPS_BUTTON,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
-import { LOADING_INDICATOR } from '../screens/security_header';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
 import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
 import { REVERT_MODAL_CONFIRMATION_BTN } from '../screens/rule_updates';
+import { BULK_FILL_RULE_GAPS_BTN, BULK_MANUAL_RULE_RUN_BTN } from '../screens/rules_bulk_actions';
+import { assertSuccessToast, assertToast } from '../screens/common/toast';
+import { openAppMenuOverflow } from './app_menu';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
 export const enableRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click();
+};
+
+export const assertEnableRuleToggleDisabled = (rulePosition: number) => {
+  cy.get(RULE_SWITCH).eq(rulePosition).should('be.disabled');
 };
 
 export const editFirstRule = () => {
@@ -107,33 +115,6 @@ export const manuallyRunFirstRule = () => {
   cy.get(MODAL_CONFIRMATION_BTN).click();
 };
 
-/**
- * Duplicates the rule from the menu and does additional
- * pipes and checking that the elements are present on the
- * page as well as removed when doing the clicks to help reduce
- * flake.
- */
-export const duplicateRuleFromMenu = () => {
-  cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
-
-  // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).click({ force: true });
-  cy.get(CONFIRM_DUPLICATE_RULE).click();
-};
-
-/**
- * Check that the duplicated rule is on the table
- * and it is disabled (default)
- */
-export const checkDuplicatedRule = (ruleName: string): void => {
-  cy.contains(RULE_NAME, ruleName)
-    .parents(RULES_ROW)
-    .find(RULE_SWITCH)
-    .should('have.attr', 'aria-checked', 'false');
-};
-
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click();
   cy.get(DELETE_RULE_ACTION_BTN).click();
@@ -152,6 +133,30 @@ export const manualRuleRunFromDetailsPage = () => {
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+export const bulkGapFillFromDetailsPage = () => {
+  cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+  cy.get(MODAL_CONFIRMATION_BTN).should('not.exist');
+  assertToast('No gap fills were scheduled', 'No gaps were detected for the selected time range.');
+};
+
+export const bulkManualRuleRunFromRulesTablePage = (ruleCount: number) => {
+  cy.get(BULK_MANUAL_RULE_RUN_BTN).click();
+  cy.get(CONFIRM_BULK_MANUAL_RULE_RUN_BTN).click();
+  cy.get(CONFIRM_BULK_MANUAL_RULE_RUN_BTN).should('not.exist');
+  assertSuccessToast(
+    'Rules scheduled',
+    `Successfully scheduled manual rule run for ${ruleCount} rule`
+  );
+};
+
+export const bulkGapFillFromRulesTablePage = () => {
+  cy.get(BULK_FILL_RULE_GAPS_BTN).click();
+  cy.get(CONFIRM_BULK_GAP_FILL_BTN).click();
+  cy.get(CONFIRM_BULK_GAP_FILL_BTN).should('not.exist');
+  assertToast('No gap fills were scheduled', 'No gaps were detected for the selected time range.');
 };
 
 export const revertRuleFromDetailsPage = () => {
@@ -283,6 +288,7 @@ export const waitForRuleToUpdate = () => {
 };
 
 export const importRules = (rulesFile: Cypress.FileReference | Cypress.FileReference[]) => {
+  openAppMenuOverflow();
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -376,11 +382,24 @@ export const expectToContainRule = (
   tableSelector:
     | typeof RULES_MANAGEMENT_TABLE
     | typeof RULES_MONITORING_TABLE
-    | typeof RULES_UPDATES_TABLE,
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
   ruleName: string
 ) => {
   cy.log(`Expecting rules table to contain '${ruleName}'`);
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
+};
+
+export const expectVisibleRulesCount = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  expectedCount: number
+) => {
+  cy.log(`Expecting rules table page to contain ${expectedCount} rules`);
+  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedCount);
 };
 
 export const expectModifiedRuleBadgeToBeDisplayed = () => {
@@ -426,6 +445,28 @@ export const expectRulesInTable = (
   }
 };
 
+export const expectFirstRuleInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  ruleName: string
+): void => {
+  cy.get(tableSelector).find(RULES_ROW).first().should('contain.text', ruleName);
+};
+
+export const expectLastRuleInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE
+    | typeof ADD_ELASTIC_RULES_TABLE,
+  ruleName: string
+): void => {
+  cy.get(tableSelector).find(RULES_ROW).last().should('contain.text', ruleName);
+};
+
 export const expectToContainModifiedBadge = (ruleName: string) => {
   cy.get(RULES_MANAGEMENT_TABLE)
     .find(RULES_ROW)
@@ -454,6 +495,7 @@ const selectOverwriteConnectorsRulesImport = () => {
 export const importRulesWithOverwriteAll = (
   rulesFile: Cypress.FileReference | Cypress.FileReference[]
 ) => {
+  openAppMenuOverflow();
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -552,7 +594,9 @@ export const clickErrorToastBtn = () => {
 };
 
 export const clickErrorToastBtnByContent = (content: string) => {
-  cy.contains(TOASTER_BODY, content).find(TOASTER_ERROR_BTN).click();
+  cy.contains('[data-test-subj="globalToastList"] .euiToast', content)
+    .find(TOASTER_ERROR_BTN)
+    .click();
 };
 
 export const closeErrorToast = () => {

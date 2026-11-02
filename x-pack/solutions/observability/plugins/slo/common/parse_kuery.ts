@@ -7,23 +7,32 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QuerySchema } from '@kbn/slo-schema';
-import { kqlQuerySchema } from '@kbn/slo-schema';
-import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { is, kqlQuerySchema } from '@kbn/slo-schema';
+import { buildEsQuery } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
+import { isEmpty } from 'lodash';
 
-export function getElasticsearchQueryOrThrow(kuery: QuerySchema = ''): QueryDslQueryContainer {
+export function getElasticsearchQueryOrThrow(
+  kuery: QuerySchema = '',
+  dataView?: DataViewBase
+): QueryDslQueryContainer {
   try {
-    if (kqlQuerySchema.is(kuery)) {
-      return toElasticsearchQuery(fromKueryExpression(kuery));
-    } else {
-      return buildEsQuery(
-        undefined,
-        {
-          query: kuery?.kqlQuery,
-          language: 'kuery',
-        },
-        kuery?.filters
-      );
+    if (isEmpty(kuery)) {
+      return { match_all: {} };
     }
+    const kqlQuery = is(kqlQuerySchema, kuery) ? kuery : kuery.kqlQuery;
+    const filters = is(kqlQuerySchema, kuery) ? [] : kuery.filters;
+    return buildEsQuery(
+      dataView,
+      {
+        query: kqlQuery,
+        language: 'kuery',
+      },
+      filters,
+      {
+        allowLeadingWildcards: true,
+      }
+    );
   } catch (err) {
     // @ts-expect-error `getElasticsearchQueryOrThrow` but it doesn't throw :shrug:
     return [];

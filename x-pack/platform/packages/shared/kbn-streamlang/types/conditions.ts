@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { createIsNarrowSchema, DeepStrict, NonEmptyString } from '@kbn/zod-helpers/v4';
 
 export const stringOrNumberOrBoolean = z
   .union([z.string(), z.number(), z.boolean()])
@@ -31,9 +30,12 @@ export const BINARY_OPERATORS: BinaryOperatorKeys[] = [
   'startsWith',
   'endsWith',
   'range',
+  'includes',
 ];
 
 export const UNARY_OPERATORS: UnaryOperatorKeys[] = ['exists'];
+
+export const ARRAY_OPERATORS: BinaryOperatorKeys[] = ['includes'];
 
 export interface RangeCondition {
   gt?: StringOrNumberOrBoolean;
@@ -53,23 +55,28 @@ export interface ShorthandBinaryFilterCondition {
   startsWith?: StringOrNumberOrBoolean;
   endsWith?: StringOrNumberOrBoolean;
   range?: RangeCondition;
+  includes?: StringOrNumberOrBoolean;
 }
 
 export const operatorToHumanReadableNameMap = {
-  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
-  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
-  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
-  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
+  eq: i18n.translate('xpack.streamlang.filter.equals', { defaultMessage: 'equals' }),
+  neq: i18n.translate('xpack.streamlang.filter.notEquals', { defaultMessage: 'not equals' }),
+  lt: i18n.translate('xpack.streamlang.filter.lessThan', { defaultMessage: 'less than' }),
+  lte: i18n.translate('xpack.streamlang.filter.lessThanOrEquals', {
     defaultMessage: 'less than or equals',
   }),
-  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
-  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
+  gt: i18n.translate('xpack.streamlang.filter.greaterThan', { defaultMessage: 'greater than' }),
+  gte: i18n.translate('xpack.streamlang.filter.greaterThanOrEquals', {
     defaultMessage: 'greater than or equals',
   }),
-  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
-  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
-  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
-  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
+  contains: i18n.translate('xpack.streamlang.filter.contains', { defaultMessage: 'contains' }),
+  startsWith: i18n.translate('xpack.streamlang.filter.startsWith', {
+    defaultMessage: 'starts with',
+  }),
+  endsWith: i18n.translate('xpack.streamlang.filter.endsWith', { defaultMessage: 'ends with' }),
+  exists: i18n.translate('xpack.streamlang.filter.exists', { defaultMessage: 'exists' }),
+  range: i18n.translate('xpack.streamlang.filter.range', { defaultMessage: 'in range' }),
+  includes: i18n.translate('xpack.streamlang.filter.includes', { defaultMessage: 'includes' }),
 };
 
 export const rangeConditionSchema = z
@@ -94,6 +101,9 @@ export const shorthandBinaryFilterConditionSchema = z
     startsWith: stringOrNumberOrBoolean.optional().describe('Starts-with comparison value.'),
     endsWith: stringOrNumberOrBoolean.optional().describe('Ends-with comparison value.'),
     range: rangeConditionSchema.optional().describe('Range comparison values.'),
+    includes: stringOrNumberOrBoolean
+      .optional()
+      .describe('Checks if multivalue field includes the value.'),
   })
   .refine(
     (obj) =>
@@ -120,7 +130,8 @@ export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFil
 
 export const filterConditionSchema = z
   .union([shorthandBinaryFilterConditionSchema, shorthandUnaryFilterConditionSchema])
-  .describe('A basic filter condition, either unary or binary.');
+  .describe('A basic filter condition, either unary or binary.')
+  .meta({ id: 'FilterCondition' });
 
 export interface AndCondition {
   and: Condition[];
@@ -163,7 +174,8 @@ export const conditionSchema: z.Schema<Condition> = z
   )
   .describe(
     'The root condition object. It can be a simple filter or a combination of other conditions.'
-  );
+  )
+  .meta({ id: 'Condition' });
 
 export const andConditionSchema = z
   .object({
@@ -218,6 +230,13 @@ export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysCon
 export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
+
+/**
+ * Strict version of conditionSchema that rejects excess/unknown keys.
+ * Pre-constructed for performance as DeepStrict creates proxy wrappers.
+ */
+export const conditionSchemaStrict = DeepStrict(conditionSchema);
+export const isConditionStrict = createIsNarrowSchema(z.unknown(), conditionSchemaStrict);
 
 export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
 

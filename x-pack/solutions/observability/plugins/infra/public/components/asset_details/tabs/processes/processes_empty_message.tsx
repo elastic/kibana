@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiText, EuiLink, EuiButton } from '@elastic/eui';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 
 interface ProcessesEmptyMessageProps {
   schema: DataSchemaFormat | null;
@@ -19,11 +20,11 @@ export const ProcessesEmptyMessage: React.FC<ProcessesEmptyMessageProps> = ({
   schema,
   clearSearchBar,
 }) => {
-  const isEcsSchema = schema === 'ecs' || schema === null;
+  const effectiveSchema = schema ?? DEFAULT_SCHEMA;
 
   return (
     <EuiEmptyPrompt
-      iconType="search"
+      iconType="magnify"
       titleSize="s"
       title={
         <strong>
@@ -35,7 +36,7 @@ export const ProcessesEmptyMessage: React.FC<ProcessesEmptyMessageProps> = ({
       }
       body={
         <EuiText size="s">
-          {isEcsSchema ? (
+          {effectiveSchema === 'ecs' ? (
             <FormattedMessage
               id="xpack.infra.metrics.nodeDetails.noProcessesBody.ecs"
               defaultMessage="Try modifying your filter. Only processes that are within the configured {metricbeatDocsLink} will display here."

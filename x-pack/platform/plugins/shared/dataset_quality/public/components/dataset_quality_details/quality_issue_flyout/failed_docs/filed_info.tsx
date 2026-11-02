@@ -10,11 +10,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +21,7 @@ import React from 'react';
 import {
   failedDocsErrorsColumnName,
   failedDocsErrorsColumnNameTooltip,
+  failedDocsInfoTableCaption,
   overviewDegradedFieldsTableLoadingText,
 } from '../../../../../common/translations';
 import { useQualityIssues } from '../../../../hooks';
@@ -56,9 +56,11 @@ export const FailedFieldInfo = () => {
           <EuiTitle size="xxs">
             <span>{failedDocsErrorsColumnName}</span>
           </EuiTitle>
-          <EuiToolTip content={failedDocsErrorsColumnNameTooltip}>
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-          </EuiToolTip>
+          <EuiIconTip
+            content={failedDocsErrorsColumnNameTooltip}
+            type="question"
+            className="eui-alignTop"
+          />
         </EuiFlexGroup>
         <EuiFlexItem
           data-test-subj="datasetQualityDetailsFailedDocsFlyoutFieldsList-cause"
@@ -76,6 +78,7 @@ export const FailedFieldInfo = () => {
           </EuiText>
           <EuiHorizontalRule margin="xs" />
           <EuiBasicTable
+            tableCaption={failedDocsInfoTableCaption}
             tableLayout="fixed"
             responsiveBreakpoint={true}
             columns={failedDocsErrorsColumns}

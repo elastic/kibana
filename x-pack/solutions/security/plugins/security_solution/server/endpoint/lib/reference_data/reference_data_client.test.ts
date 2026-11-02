@@ -16,6 +16,7 @@ import {
 } from './constants';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { ReferenceDataItemKey } from './types';
+import { allowedExperimentalValues } from '../../../../common';
 
 describe('Reference Data Client', () => {
   let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
@@ -25,7 +26,7 @@ describe('Reference Data Client', () => {
     const logger = loggingSystemMock.createLogger();
 
     soClientMock = savedObjectsClientMock.create();
-    refDataClient = new ReferenceDataClient(soClientMock, logger);
+    refDataClient = new ReferenceDataClient(soClientMock, allowedExperimentalValues, logger);
 
     referenceDataMocks.applyMocksToSoClient(soClientMock);
   });
@@ -89,8 +90,9 @@ describe('Reference Data Client', () => {
 
   describe('#update() method', () => {
     it('should update reference data item', async () => {
-      const update =
-        REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.spaceAwarenessResponseActionsMigration]();
+      const update = await REF_DATA_KEY_INITIAL_VALUE[
+        REF_DATA_KEYS.spaceAwarenessResponseActionsMigration
+      ](soClientMock, allowedExperimentalValues);
 
       await expect(
         refDataClient.update(REF_DATA_KEYS.spaceAwarenessResponseActionsMigration, update)
@@ -98,8 +100,9 @@ describe('Reference Data Client', () => {
     });
 
     it('should throw an error is update has an `id` that differs from the ref. data key', async () => {
-      const update =
-        REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.spaceAwarenessResponseActionsMigration]();
+      const update = await REF_DATA_KEY_INITIAL_VALUE[
+        REF_DATA_KEYS.spaceAwarenessResponseActionsMigration
+      ](soClientMock, allowedExperimentalValues);
       update.id = 'some-other-id' as unknown as ReferenceDataItemKey;
 
       await expect(

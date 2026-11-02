@@ -7,21 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type {
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+} from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
+import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  /** Aggregated token usage across all `ai.*` steps in this execution. */
+  workflowExecutionUsage?: WorkflowTokenUsage;
+  showResumeUI?: boolean;
+  executionId?: string;
+  resumeMessage?: string;
+  resumeSchema?: JsonModelSchemaType;
+  approvalLabels?: ApprovalLabels;
+  shouldAutoResume?: boolean;
+  waitingStepExecutionId?: string;
+  hasResumeError?: boolean;
+  onRetryResume?: () => void;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -45,26 +73,73 @@ const formatExecutionDate = (date: string) => {
 };
 
 export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewProps>(
-  ({ stepExecution, workflowExecutionDuration }) => {
+  ({
+    stepExecution,
+    workflowExecutionDuration,
+    workflowExecutionUsage,
+    showResumeUI = false,
+    executionId,
+    resumeMessage,
+    resumeSchema,
+    approvalLabels,
+    shouldAutoResume = false,
+    waitingStepExecutionId,
+    hasResumeError = false,
+    onRetryResume,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
-    const executionData = context?.execution as { isTestRun?: boolean } | undefined;
+    const executionData = context?.execution as
+      | {
+          isTestRun?: boolean;
+          executedBy?: string;
+          effectiveIdentity?: WorkflowExecutionDto['effectiveIdentity'];
+        }
+      | undefined;
     const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
-    const executionEnded = context?.now as string | undefined;
+    const executionEnded = stepExecution.finishedAt || (context?.now as string | undefined);
 
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
+        data-test-subj="workflowExecutionOverview"
       >
         <EuiFlexGroup
           direction="column"
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {executionData?.effectiveIdentity?.type === 'service_account' && (
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList
+                data-test-subj="workflowExecutionIdentity"
+                listItems={[
+                  {
+                    title: i18n.translate('workflows.execution.triggeredByLabel', {
+                      defaultMessage: 'Triggered by',
+                    }),
+                    description: executionData.executedBy ?? '-',
+                  },
+                  {
+                    title: executionData.effectiveIdentity.inheritedFrom
+                      ? i18n.translate('workflows.execution.inheritedRunAsLabel', {
+                          defaultMessage: 'Run as (inherited from parent)',
+                        })
+                      : i18n.translate('workflows.execution.runAsLabel', {
+                          defaultMessage: 'Run as',
+                        }),
+                    description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -76,7 +151,9 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <h3>{getStatusLabel(stepExecution.status)}</h3>
+                          <h3 data-test-subj="workflowExecutionStatus">
+                            {getStatusLabel(stepExecution.status)}
+                          </h3>
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -92,14 +169,14 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   {isTestRun && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="beaker" size="s" color="subdued" />
+                      <EuiIcon type="flask" size="s" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                   )}
                   {workflowExecutionDuration && (
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="clock" size="s" color="subdued" />
+                          <EuiIcon type="clock" size="s" color="subdued" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiText size="xs" color="subdued">
@@ -107,6 +184,14 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
+                  {workflowExecutionUsage && (
+                    <EuiFlexItem grow={false}>
+                      <TokenUsageBadge
+                        usage={workflowExecutionUsage}
+                        data-test-subj="workflowExecutionTokenUsage"
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -127,7 +212,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                   <EuiFlexGroup direction="column" gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        {i18n.translate('workflowsManagement.executionOverview.executionStarted', {
+                        {i18n.translate('workflows.executionOverview.executionStarted', {
                           defaultMessage: 'Execution started',
                         })}
                       </EuiText>
@@ -156,7 +241,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                   <EuiFlexGroup direction="column" gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        {i18n.translate('workflowsManagement.executionOverview.executionEnded', {
+                        {i18n.translate('workflows.executionOverview.executionEnded', {
                           defaultMessage: 'Execution ended',
                         })}
                       </EuiText>
@@ -174,6 +259,26 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             </div>
           </EuiFlexItem>
 
+          {hasResumeError && onRetryResume && (
+            <EuiFlexItem grow={false}>
+              <ResumeUnavailableCallout onRetry={onRetryResume} />
+            </EuiFlexItem>
+          )}
+
+          {showResumeUI && executionId && (
+            <EuiFlexItem grow={false}>
+              <ResumeExecutionButton
+                executionId={executionId}
+                workflowId={stepExecution.workflowId}
+                stepStartedAt={stepExecution.startedAt}
+                resumeMessage={resumeMessage}
+                resumeSchema={resumeSchema}
+                approvalLabels={approvalLabels}
+                autoOpen={shouldAutoResume}
+                waitingStepExecutionId={waitingStepExecutionId}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem css={{ overflow: 'hidden', minHeight: 0 }}>
             <StepExecutionDataView stepExecution={stepExecution} mode="input" />
           </EuiFlexItem>

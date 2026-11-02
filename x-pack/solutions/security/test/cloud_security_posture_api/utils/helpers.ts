@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Agent } from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -48,3 +49,118 @@ export function result(status: number, logger?: ToolingLog): CallbackHandler {
     }
   };
 }
+
+/**
+ * Loads a security alerts esArchiver archive, handling the race condition where
+ * Kibana's alerting framework auto-recreates the internal alerts index after deletion.
+ *
+ * The archive defines `.internal.alerts-security.alerts-default-000001` with
+ * `is_write_index: true` on the `.alerts-security.alerts-default` alias. Kibana also
+ * creates such an index on startup. When esArchiver deletes the existing index and
+ * recreates it, Kibana may simultaneously create a new index (e.g. -000002) with the
+ * same alias and `is_write_index: true`, causing an `illegal_state_exception`.
+ *
+ * This function handles the conflict by:
+ * 1. Attempting a normal load
+ * 2. On failure: cleaning up any Kibana-recreated duplicate indices, fixing aliases
+ *    on the archive-created index, and loading data only
+ */
+export const loadAlertArchive = async ({
+  es,
+  esArchiver,
+  logger,
+  archivePath,
+}: {
+  es: Client;
+  esArchiver: { load: (path: string, options?: { docsOnly?: boolean }) => Promise<unknown> };
+  logger: ToolingLog;
+  archivePath: string;
+}): Promise<void> => {
+  const archiveIndex = '.internal.alerts-security.alerts-default-000001';
+
+  // Delete only the specific archive index if it exists from a previous test suite.
+  // We avoid a broad wildcard delete (e.g., -default-*) to prevent interfering
+  // with other test suites that may have created their own alert indices.
+  try {
+    await es.indices.delete({
+      index: archiveIndex,
+      expand_wildcards: ['open', 'closed', 'hidden'],
+    });
+  } catch (e) {
+    // Ignore if index doesn't exist
+  }
+
+  try {
+    await esArchiver.load(archivePath);
+    return;
+  } catch (firstError) {
+    logger.debug(
+      `Alert archive load failed (likely race condition with alerting framework): ${
+        (firstError as Error).message
+      }`
+    );
+  }
+
+  // After the failed load, esArchiver may have created the archive index (without aliases)
+  // while Kibana simultaneously created another index with the alias is_write_index: true.
+  // Fix: atomically transfer the alias to the archive index, delete duplicates, then load data.
+
+  // Find all alert indices that have the alias
+  const kibanaCreatedIndices: string[] = [];
+  try {
+    const aliasInfo = await es.indices.getAlias({
+      name: '.alerts-security.alerts-default',
+      expand_wildcards: ['open', 'closed', 'hidden'],
+    });
+
+    for (const idxName of Object.keys(aliasInfo)) {
+      if (idxName !== archiveIndex) {
+        kibanaCreatedIndices.push(idxName);
+      }
+    }
+  } catch (e) {
+    // Alias might not exist yet
+  }
+
+  // Atomically remove alias from Kibana-created indices and add to archive index
+  if (kibanaCreatedIndices.length > 0) {
+    const actions: Array<Record<string, unknown>> = kibanaCreatedIndices.map((idxName) => ({
+      remove: { index: idxName, alias: '.alerts-security.alerts-default' },
+    }));
+    actions.push({
+      add: {
+        index: archiveIndex,
+        alias: '.alerts-security.alerts-default',
+        is_write_index: true,
+      },
+    });
+    actions.push({
+      add: {
+        index: archiveIndex,
+        alias: '.siem-signals-default',
+        is_write_index: false,
+      },
+    });
+
+    try {
+      await es.indices.updateAliases({ actions });
+    } catch (e) {
+      logger.debug(`Alias update failed: ${(e as Error).message}`);
+    }
+
+    // Delete Kibana-created duplicate indices
+    for (const idxName of kibanaCreatedIndices) {
+      try {
+        await es.indices.delete({
+          index: idxName,
+          expand_wildcards: ['open', 'closed', 'hidden'],
+        });
+      } catch (e) {
+        // Ignore
+      }
+    }
+  }
+
+  // Load data only (the index was already created by the first attempt)
+  await esArchiver.load(archivePath, { docsOnly: true });
+};

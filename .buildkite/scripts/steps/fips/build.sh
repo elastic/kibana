@@ -8,7 +8,8 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
 mkdir -p target
-download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_tmp_artifact "kibana-default.tar.zst" ./target "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+mv ./target/kibana-default.tar.zst ./target/kibana-$FULL_VERSION-linux-x86_64.tar.zst
 
 echo "--- Build FIPS image"
 node scripts/build \
@@ -17,10 +18,10 @@ node scripts/build \
     --skip-platform-folders \
     --skip-cdn-assets \
     --skip-archives \
+    --tar-zstd \
     --docker-images \
     --docker-namespace="kibana-ci" \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \
-    --docker-push \
     --skip-docker-ubi \
     --skip-docker-wolfi \
     --skip-docker-cloud \
@@ -32,7 +33,9 @@ node scripts/build \
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "./*docker-image*.tar.gz"
 
-KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+KIBANA_FIPS_IMAGE="$(kibana_ci_image_repository kibana-wolfi-fips):$FULL_VERSION-$BUILDKITE_COMMIT"
+retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$KIBANA_FIPS_IMAGE"
 
 cat <<EOF | buildkite-agent annotate --style "info" --context kibana-wolfi-fips-image
 

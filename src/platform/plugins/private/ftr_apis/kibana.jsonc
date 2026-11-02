@@ -12,6 +12,9 @@
     "server": true,
     "configPath": [
       "ftr_apis"
+    ],
+    "requiredPlugins": [
+      "taskManager"
     ]
   }
 }

@@ -7,23 +7,24 @@
 
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
+  is,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
+import { SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type { MouseEvent } from 'react';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | SLODefinitionResponse;
+  slo: SLOWithSummaryResponse;
 }
 
 export function SloIndicatorTypeBadge({ slo }: Props) {
@@ -65,8 +66,8 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>
-      {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
-        apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) &&
+      {(is(apmTransactionDurationIndicatorSchema, slo.indicator) ||
+        is(apmTransactionErrorRateIndicatorSchema, slo.indicator)) &&
         slo.indicator.params.service !== '' &&
         slo.indicator.params.service !== ALL_VALUE && (
           <EuiFlexItem grow={false} css={{ maxWidth: 100 }}>

@@ -15,7 +15,7 @@ import { getSecurityLinkAction } from '../mocks/security_link_component.mock';
 describe('HeaderMenu', () => {
   it('should render button icon with default settings', () => {
     const wrapper = render(
-      <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
+      <HeaderMenu iconType="boxesVertical" disableActions={false} actions={null} />
     );
 
     expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('HeaderMenu', () => {
   it('should render button icon disabled', () => {
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         disableActions={false}
         actions={actionsWithDisabledDelete}
       />
@@ -52,13 +52,29 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={null}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
       />
     );
 
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     expect(wrapper.queryByTestId('ButtonIcon')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
+  });
+
+  it('should expose the visible text as the accessible name for the empty button, not the popover aria-label', () => {
+    const wrapper = render(
+      <HeaderMenu
+        disableActions={false}
+        emptyButton
+        actions={null}
+        text="Affects 3 rules"
+        ariaLabel="View affected rules"
+      />
+    );
+
+    expect(wrapper.getByRole('button', { name: 'Affects 3 rules' })).toBe(
+      wrapper.getByTestId('EmptyButton')
+    );
   });
 
   it('should render empty button icon with actions and open the popover when clicked', () => {
@@ -68,7 +84,7 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={actions}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
         anchorPosition="downLeft"
       />
     );
@@ -87,7 +103,7 @@ describe('HeaderMenu', () => {
         emptyButton
         actions={actions}
         iconSide="right"
-        iconType="cheer"
+        iconType="popper"
         anchorPosition="downLeft"
       />
     );
@@ -106,14 +122,14 @@ describe('HeaderMenu', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={actions} />);
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
     fireEvent.click(wrapper.getByTestId('ActionItemedit'));
-    expect(onEdit).toBeCalled();
+    expect(onEdit).toHaveBeenCalled();
   });
 
   it('should render custom Actions', () => {
     const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         disableActions={false}
         emptyButton
         actions={customActions}
@@ -134,7 +150,7 @@ describe('HeaderMenu', () => {
     customAction[0].onClick = onEdit;
     const wrapper = render(
       <HeaderMenu
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         dataTestSubj="headerMenu"
         disableActions={false}
         actions={actions}

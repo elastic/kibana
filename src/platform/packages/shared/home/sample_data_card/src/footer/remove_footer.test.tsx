@@ -17,7 +17,13 @@ import type { Services } from '../services';
 import { SampleDataCardProvider } from '../services';
 import { getMockServices } from '../mocks';
 
-describe('install footer', () => {
+// Mock the polling functions to resolve immediately in tests
+jest.mock('../hooks/poll_sample_data_status', () => ({
+  pollForInstallation: jest.fn(async () => Promise.resolve()),
+  pollForRemoval: jest.fn(async () => Promise.resolve()),
+}));
+
+describe('remove footer', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -66,10 +72,11 @@ describe('install footer', () => {
   });
 
   test('should not invoke onRemove when remove button is clicked and an error is thrown', async () => {
+    const removeSampleDataSet = jest.fn(async () => {
+      throw new Error('error');
+    });
     const component = mount(<RemoveFooter {...props} />, {
-      removeSampleDataSet: () => {
-        throw new Error('error');
-      },
+      removeSampleDataSet,
     });
 
     await act(async () => {

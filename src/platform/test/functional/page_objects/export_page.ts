@@ -14,6 +14,7 @@ export class ExportPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   async exportButtonExists() {
     return await this.testSubjects.exists('exportTopNavButton');
@@ -23,8 +24,45 @@ export class ExportPageObject extends FtrService {
     await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
   }
 
-  async clickExportTopNavButton() {
-    return this.testSubjects.click('exportTopNavButton');
+  async clickExportTopNavButton(): Promise<boolean> {
+    if (await this.isExportPopoverOpen()) {
+      return true;
+    }
+
+    // The export action renders either in the top nav or inside the app menu overflow. The
+    // overflow button can also render next to a visible export button, so list export first.
+    const entry = await this.testSubjects.waitForFirst(
+      ['exportTopNavButton', 'app-menu-overflow-button'],
+      { timeout: 5000 }
+    );
+    if (!entry) {
+      return false;
+    }
+
+    if (entry === 'app-menu-overflow-button') {
+      await this.testSubjects.click('app-menu-overflow-button');
+      const overflowEntry = await this.testSubjects.waitForFirst(
+        ['exportPopoverPanel', 'exportTopNavButton'],
+        { timeout: 5000 }
+      );
+      if (!overflowEntry) {
+        return false;
+      }
+      if (overflowEntry === 'exportPopoverPanel') {
+        return true;
+      }
+    }
+
+    try {
+      await this.testSubjects.click('exportTopNavButton');
+    } catch (error) {
+      // In responsive layouts, the action can move into the overflow menu between the readiness
+      // probe and click. Its open export panel is the successful state for this helper.
+      if (!(await this.isExportPopoverOpen())) {
+        throw error;
+      }
+    }
+    return true;
   }
 
   async isExportPopoverOpen() {
@@ -41,7 +79,7 @@ export class ExportPageObject extends FtrService {
 
   async clickPopoverItem(
     label: string,
-    exportPopoverOpener: () => Promise<void> = this.clickExportTopNavButton.bind(this)
+    exportPopoverOpener: () => Promise<boolean> = this.clickExportTopNavButton.bind(this)
   ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
@@ -59,20 +97,34 @@ export class ExportPageObject extends FtrService {
     await this.testSubjects.click(`exportMenuItem-${label}`);
   }
 
+  async closeExportPopover() {
+    await this.retry.waitFor('export popover to close', async () => {
+      if (!(await this.isExportPopoverOpen())) {
+        return true; // It was already closed
+      }
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      return !(await this.isExportPopoverOpen());
+    });
+  }
+
   async isExportFlyoutOpen() {
     return await this.testSubjects.exists('exportItemDetailsFlyout');
   }
 
   async closeExportFlyout() {
     const closeButtonSubj = 'exportFlyoutCloseButton';
-    const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
+    await this.retry.waitFor('flyout to close', async () => {
+      const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
 
-    if (!isExportFlyoutOpen) {
-      return; // It was already closed
-    }
+      if (!isExportFlyoutOpen) {
+        return true; // It was already closed
+      }
 
-    await this.testSubjects.click(closeButtonSubj);
-    await this.testSubjects.waitForDeleted(closeButtonSubj);
+      // Use clickWhenNotDisabledWithoutRetry to avoid the internal retry mechanism
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(closeButtonSubj);
+      await this.testSubjects.waitForDeleted(closeButtonSubj);
+      return true;
+    });
   }
 
   async getExportAssetTextButton() {

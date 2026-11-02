@@ -18,6 +18,8 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
@@ -113,6 +115,8 @@ export const Criterion: React.FC<Props> = ({
 }) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
+  const fieldPopoverTitleId = useGeneratedHtmlId();
+  const comparatorPopoverTitleId = useGeneratedHtmlId();
 
   const fieldOptions = useMemo(() => {
     return fields.map((field) => {
@@ -171,6 +175,7 @@ export const Criterion: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="criterion-field"
+              aria-labelledby={fieldPopoverTitleId}
               button={
                 <EuiExpression
                   description={
@@ -194,7 +199,7 @@ export const Criterion: React.FC<Props> = ({
               anchorPosition="downLeft"
             >
               <div>
-                <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
+                <EuiPopoverTitle id={fieldPopoverTitleId}>{criterionFieldTitle}</EuiPopoverTitle>
                 <EuiFormRow
                   style={{ minWidth: '300px' }}
                   // @ts-expect-error upgrade typescript v5.1.6
@@ -220,6 +225,7 @@ export const Criterion: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="criterion-comparator-value"
+              aria-labelledby={comparatorPopoverTitleId}
               button={
                 <EuiExpression
                   description={
@@ -252,7 +258,9 @@ export const Criterion: React.FC<Props> = ({
               anchorPosition="downLeft"
             >
               <div>
-                <EuiPopoverTitle>{criterionComparatorValueTitle}</EuiPopoverTitle>
+                <EuiPopoverTitle id={comparatorPopoverTitleId}>
+                  {criterionComparatorValueTitle}
+                </EuiPopoverTitle>
                 <EuiFlexGroup gutterSize="l">
                   <EuiFlexItem grow={false}>
                     <EuiFormRow
@@ -320,18 +328,25 @@ export const Criterion: React.FC<Props> = ({
       </EuiFlexItem>
       {canDelete && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraCriterionButton"
-            aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
               defaultMessage: 'Remove condition',
             })}
-            color={'danger'}
-            iconType={'trash'}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              removeCriterion(idx);
-            }}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraCriterionButton"
+              aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+                defaultMessage: 'Remove condition',
+              })}
+              color={'danger'}
+              iconType={'trash'}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                removeCriterion(idx);
+              }}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

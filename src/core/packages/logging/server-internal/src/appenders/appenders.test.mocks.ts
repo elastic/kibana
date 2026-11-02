@@ -18,3 +18,52 @@ jest.mock('../layouts/layouts', () => {
     },
   };
 });
+
+jest.mock('@opentelemetry/sdk-logs', () => ({
+  LoggerProvider: jest.fn(() => ({ getLogger: jest.fn(() => ({ emit: jest.fn() })) })),
+  BatchLogRecordProcessor: jest.fn(),
+}));
+jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
+  OTLPLogExporter: jest.fn(),
+}));
+jest.mock('@elastic/opentelemetry-node/sdk', () => {
+  interface MockResource {
+    merge: jest.Mock<MockResource>;
+  }
+  const makeMergeableResource = (): MockResource => ({ merge: jest.fn(makeMergeableResource) });
+  return {
+    resources: {
+      detectResources: jest.fn(makeMergeableResource),
+      resourceFromAttributes: jest.fn(makeMergeableResource),
+      envDetector: 'envDetector',
+      hostDetector: 'hostDetector',
+      osDetector: 'osDetector',
+      processDetector: 'processDetector',
+    },
+  };
+});
+jest.mock('@opentelemetry/api', () => {
+  const actual = jest.requireActual('@opentelemetry/api');
+  // Preserve the prototype chain so prototype methods like getTracer() remain accessible.
+  // A plain spread ({ ...actual.trace }) only copies own enumerable properties and silently
+  // drops all prototype methods, which causes failures when kbn-inference-tracing calls
+  // trace.getTracer() at module-load time.
+  const mockTrace = Object.create(Object.getPrototypeOf(actual.trace));
+  Object.assign(mockTrace, actual.trace, { setSpanContext: jest.fn() });
+  return { ...actual, ROOT_CONTEXT: 'root-context', trace: mockTrace };
+});
+jest.mock('@kbn/apm-config-loader', () => ({
+  getConfiguration: jest.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
+}));
+// @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
+// @kbn/metrics. Those packages load heavy OTel SDK modules at require-time that are
+// unrelated to what otel_appender.ts actually uses (buildOtelResources). Mocking them
+// here prevents those module graphs from loading.
+jest.mock('@kbn/tracing', () => ({
+  initTracing: jest.fn(),
+  LateBindingSpanProcessor: { get: jest.fn() },
+  OTLPSpanProcessor: jest.fn(),
+}));
+jest.mock('@kbn/metrics', () => ({
+  initMetrics: jest.fn(),
+}));

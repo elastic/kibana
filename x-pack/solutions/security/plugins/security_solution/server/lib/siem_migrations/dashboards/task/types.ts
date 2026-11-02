@@ -15,13 +15,13 @@ import type { ChatModel } from '../../common/task/util/actions_client_chat';
 import type { DashboardMigrationsRetriever } from './retrievers';
 import type { MigrateDashboardConfig } from './agent/types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
-import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../common/task/util/enrich_lookup_resources';
 
 export type MigrationAgent = ReturnType<typeof getDashboardMigrationAgent>;
 
 export interface DashboardMigrationInput
   extends Pick<StoredDashboardMigrationDashboard, 'id' | 'original_dashboard'> {
-  resources: MigrationResources;
+  resources: EnrichedMigrationResources;
 }
 
 export interface DashboardMigrationTaskCreateClientParams {

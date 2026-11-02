@@ -19,17 +19,13 @@ import {
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
-jest.mock('@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled');
-jest.mock('@kbn/ai-assistant-icon', () => ({
-  RobotIcon: ({ size }: { size: string }) => <div data-testid="robot-icon" data-size={size} />,
-}));
-jest.mock('../../icons/assistant_icon/assistant_icon', () => ({
-  AssistantIcon: 'assistant-icon',
-}));
-
-const { getIsAiAgentsEnabled } = jest.requireMock(
-  '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled'
-);
+// workaround because of JSDOM not supporting :focus-visible
+// https://github.com/jsdom/jsdom/issues/3426
+const matchesOriginal = HTMLElement.prototype.matches;
+HTMLElement.prototype.matches = function (this: HTMLElement, query: string) {
+  if (query === ':focus-visible') return false;
+  return matchesOriginal.call(this, query);
+} as typeof HTMLElement.prototype.matches;
 
 describe('AIAssistantHeaderButton', () => {
   const mockCoreStart = coreMock.createStart();
@@ -53,11 +49,10 @@ describe('AIAssistantHeaderButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    getIsAiAgentsEnabled.mockResolvedValue(true);
     mockCoreStart.settings.client.set.mockResolvedValue(true);
     mockCoreStart.application.capabilities = {
       ...mockCoreStart.application.capabilities,
-      agentBuilder: { show: true },
+      agentBuilder: { show: true, manageAgents: true },
     };
   });
 
@@ -90,7 +85,7 @@ describe('AIAssistantHeaderButton', () => {
     });
 
     it('should render modal title and description', () => {
-      expect(screen.getByText('Select an AI chat experience')).toBeInTheDocument();
+      expect(screen.getByText('Select a chat experience')).toBeInTheDocument();
       expect(screen.getByText(/Choose which chat experience/i)).toBeInTheDocument();
     });
 
@@ -104,12 +99,11 @@ describe('AIAssistantHeaderButton', () => {
       expect(screen.getByText('Security AI Assistant')).toBeInTheDocument();
     });
 
-    it('should render AI Agent card with BETA badge', async () => {
+    it('should render AI Agent card', async () => {
       await waitFor(() => {
         expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
       });
       expect(screen.getByText('AI Agent')).toBeInTheDocument();
-      expect(screen.getByText('BETA')).toBeInTheDocument();
     });
 
     it('should close modal when Cancel button is clicked', () => {
@@ -144,7 +138,11 @@ describe('AIAssistantHeaderButton', () => {
   });
 
   describe('AI Agent Card - Disabled State', () => {
-    it('should be enabled when at least Security assistant is enabled', async () => {
+    it('should be disabled when manageAgents is false', async () => {
+      mockCoreStart.application.capabilities = {
+        ...mockCoreStart.application.capabilities,
+        agentBuilder: { show: true, manageAgents: false },
+      };
       renderComponent({
         isSecurityAIAssistantEnabled: true,
         isObservabilityAIAssistantEnabled: false,
@@ -157,10 +155,14 @@ describe('AIAssistantHeaderButton', () => {
       });
 
       const agentCard = screen.getByTestId('aiAssistantAgentCard');
-      expect(agentCard.querySelector('[disabled]')).toBeFalsy();
+      expect(agentCard.querySelector('[disabled]')).toBeTruthy();
     });
 
-    it('should be enabled when at least Observability assistant is enabled', async () => {
+    it('should be disabled when security AI assistant is disabled', async () => {
+      mockCoreStart.application.capabilities = {
+        ...mockCoreStart.application.capabilities,
+        agentBuilder: { show: true, manageAgents: false },
+      };
       renderComponent({
         isSecurityAIAssistantEnabled: false,
         isObservabilityAIAssistantEnabled: true,
@@ -173,11 +175,28 @@ describe('AIAssistantHeaderButton', () => {
       });
 
       const agentCard = screen.getByTestId('aiAssistantAgentCard');
+      expect(agentCard.querySelector('[disabled]')).toBeTruthy();
+    });
+
+    it('should be enabled when manageAgents is true', async () => {
+      mockCoreStart.application.capabilities = {
+        ...mockCoreStart.application.capabilities,
+        agentBuilder: { show: true, manageAgents: true },
+      };
+      renderComponent();
+
+      fireEvent.click(screen.getByTestId('aiAssistantHeaderButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
+      });
+
+      const agentCard = screen.getByTestId('aiAssistantAgentCard');
       expect(agentCard.querySelector('[disabled]')).toBeFalsy();
     });
   });
 
-  describe('AI Agent Confirmation Modal Flow', () => {
+  describe('AI Agent Selection Flow', () => {
     beforeEach(async () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('aiAssistantHeaderButton'));
@@ -187,41 +206,13 @@ describe('AIAssistantHeaderButton', () => {
       });
     });
 
-    it('should open confirmation modal when AI Agent is selected and Continue is clicked', async () => {
+    it('should apply settings directly when AI Agent is selected and Continue is clicked', async () => {
       await waitFor(() => {
         expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('aiAssistantAgentCard'));
       fireEvent.click(screen.getByTestId('aiAssistantApplyButton'));
-
-      await waitFor(() => {
-        expect(screen.getByText('Switch to AI Agent')).toBeInTheDocument();
-      });
-    });
-
-    it('should not open confirmation modal for Classic AI Assistant selections', () => {
-      fireEvent.click(screen.getByTestId('aiAssistantObservabilityCard'));
-      fireEvent.click(screen.getByTestId('aiAssistantApplyButton'));
-
-      expect(screen.queryByText('Switch to AI Agent')).not.toBeInTheDocument();
-    });
-
-    it('should close both modals and apply selection when Confirm is clicked in confirmation modal', async () => {
-      await waitFor(() => {
-        expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('aiAssistantAgentCard'));
-      fireEvent.click(screen.getByTestId('aiAssistantApplyButton'));
-
-      await waitFor(() => {
-        expect(screen.getByText('Switch to AI Agent')).toBeInTheDocument();
-      });
-
-      // Find and click Confirm button in confirmation modal
-      const confirmButtons = screen.getAllByText('Confirm');
-      fireEvent.click(confirmButtons[0]);
 
       await waitFor(() => {
         expect(mockCoreStart.settings.client.set).toHaveBeenCalled();

@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, type ColorMapping } from '@kbn/coloring';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -19,10 +19,8 @@ import { emptyTitleText } from '@kbn/visualization-ui-components';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type {
   LensDocument,
-  DateRange,
   Datasource,
   DatasourceMap,
   Visualization,
@@ -34,7 +32,10 @@ import type {
   DatasourceStates,
   VisualizationState,
   TriggerEvent,
+  FramePublicAPI,
 } from '@kbn/lens-common';
+import type { LensDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import {
   isOperation,
   isLensBrushEvent,
@@ -65,21 +66,6 @@ export function getAbsoluteDateRange(timefilter: TimefilterContract) {
   return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
 }
 
-export function convertToAbsoluteDateRange(dateRange: DateRange, now: Date) {
-  const absRange = getAbsoluteTimeRange(
-    {
-      from: dateRange.fromDate as string,
-      to: dateRange.toDate as string,
-    },
-    { forceNow: now }
-  );
-
-  return {
-    fromDate: absRange.from,
-    toDate: absRange.to,
-  };
-}
-
 export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
 }
@@ -92,13 +78,84 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
-export function getActiveDatasourceIdFromDoc(doc?: LensDocument) {
+
+/**
+ * Returns true when the chart's data is powered by ES|QL (text-based datasource),
+ * i.e. at least one layer resolves to the text-based datasource.
+ *
+ * Complements the existing text-based checks, which don't cover this case:
+ * - `isTextBasedAttributes` / `hasTextBasedLayers` (`@kbn/lens-common`) inspect the
+ *   persisted document, which is not available in runtime call sites like
+ *   `getConfiguration`, `hasLayerSettings`, or layer headers — these only get a
+ *   `FramePublicAPI`.
+ * - `DatasourcePublicAPI.isTextBasedLanguage()` is per-layer and returns false for
+ *   form-based helper layers (e.g. reference lines) that coexist with ES|QL data
+ *   layers, even though the chart as a whole is ES|QL-powered.
+ * - `selectCanEditTextBasedQuery` gates editor visibility off the legacy
+ *   `state.query` shape, not the chart type.
+ *
+ * The "any layer is text-based" semantics are sound because mixing DSL and ES|QL
+ * data layers is not allowed; the only form-based layers on an ES|QL chart are
+ * helper layers (reference lines).
+ */
+export const isEsqlChart = (datasourceLayers: FramePublicAPI['datasourceLayers']): boolean =>
+  Object.values(datasourceLayers).some(
+    (layer) => layer?.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
+  );
+
+/**
+ * True when a serialized datasource state actually holds data. Persisted panels can
+ * carry empty states for datasources that were merely initialized in the editor
+ * (e.g. `textBased: { layers: {} }` on a purely form-based chart) — those must not
+ * count when resolving the chart's active datasource.
+ */
+function hasNonEmptyState(doc: LensDocument, datasourceId: string): boolean {
+  const state = doc.state.datasourceStates[datasourceId];
+  if (!state || typeof state !== 'object') {
+    return false;
+  }
+  const { layers } = state as { layers?: unknown };
+  if (layers === undefined) {
+    // unknown shape — assume it holds data
+    return true;
+  }
+  return layers !== null && typeof layers === 'object' && Object.keys(layers).length > 0;
+}
+
+export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasourceId | null {
   if (!doc) {
     return null;
   }
 
-  const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  return firstDatasourceFromDoc || null;
+  const datasourceIds = Object.keys(doc.state.datasourceStates).filter((id) =>
+    hasNonEmptyState(doc, id)
+  );
+  // Mixed panels can hold both datasources (e.g. ES|QL data layers plus a
+  // form-based reference line layer). The text-based datasource always owns the
+  // data layers in that case, so it wins regardless of key order.
+  if (datasourceIds.includes(LENS_DATASOURCE_ID.TEXT_BASED)) {
+    return LENS_DATASOURCE_ID.TEXT_BASED;
+  }
+  if (datasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
+    return LENS_DATASOURCE_ID.FORM_BASED;
+  }
+  // a non-empty state under an unknown datasource id means the panel's actual
+  // configuration is unreadable (corrupted doc or forward-incompatible export);
+  // resolving to an empty known datasource would silently drop that config, so
+  // surface it as "no datasource" instead
+  if (datasourceIds.length > 0) {
+    return null;
+  }
+  // all states are empty (e.g. a brand-new panel): fall back to the plain key
+  // check, preferring formBased since an empty text-based state carries no query
+  const allDatasourceIds = Object.keys(doc.state.datasourceStates);
+  if (allDatasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
+    return LENS_DATASOURCE_ID.FORM_BASED;
+  }
+  if (allDatasourceIds.includes(LENS_DATASOURCE_ID.TEXT_BASED)) {
+    return LENS_DATASOURCE_ID.TEXT_BASED;
+  }
+  return null;
 }
 
 export function getActiveVisualizationIdFromDoc(doc?: LensDocument) {
@@ -279,7 +336,7 @@ export function inferTimeField(datatableUtilities: DatatableUtilitiesService, ev
         .map(({ table, column }) => {
           const tableColumn = table.columns[column];
           const hasTimeRange = Boolean(
-            tableColumn && datatableUtilities.getDateHistogramMeta(tableColumn)?.timeRange
+            tableColumn && datatableUtilities.getColumnTimeRange(tableColumn)
           );
           if (hasTimeRange) {
             return tableColumn.meta.field;
@@ -460,11 +517,16 @@ export function shouldRemoveSource(
   );
 }
 
-export const getColorMappingDefaults = () => {
+export const getColorMappingDefaults = (
+  options: {
+    defaultPaletteId?: ColorMapping.Config['paletteId'];
+  } = {}
+) => {
   if (COLOR_MAPPING_OFF_BY_DEFAULT) {
     return undefined;
   }
-  return { ...DEFAULT_COLOR_MAPPING_CONFIG };
+  const defaultPaletteId = options.defaultPaletteId ?? DEFAULT_COLOR_MAPPING_CONFIG.paletteId;
+  return { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: defaultPaletteId };
 };
 
 export const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';

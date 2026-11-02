@@ -14,6 +14,7 @@ export const transformAttackDiscoveryAlertFromApi = (
   return {
     alertIds: api.alert_ids,
     alertRuleUuid: api.alert_rule_uuid,
+    alertWorkflowReason: api.alert_workflow_reason,
     alertWorkflowStatus: api.alert_workflow_status,
     connectorId: api.connector_id,
     connectorName: api.connector_name,
@@ -35,5 +36,8 @@ export const transformAttackDiscoveryAlertFromApi = (
     userId: api.user_id,
     userName: api.user_name,
     users: api.users,
+    assignees: api.assignees,
+    tags: api.tags,
+    index: api.index,
   };
 };

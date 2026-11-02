@@ -9,13 +9,18 @@
 
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  SavedObjectsExportByTypeOptions,
-  SavedObjectsExportByObjectOptions,
+import {
+  type SavedObjectsExportByTypeOptions,
+  type SavedObjectsExportByObjectOptions,
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+  MAX_SAVED_OBJECTS_PER_QUERY,
 } from '@kbn/core-saved-objects-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server-internal';
@@ -139,8 +144,8 @@ export const registerExportRoute = (
   const { maxImportExportSize } = config;
 
   const referenceSchema = schema.object({
-    type: schema.string(),
-    id: schema.string(),
+    type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+    id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
   });
 
   router.post(
@@ -153,6 +158,8 @@ export const registerExportRoute = (
         description: `Retrieve sets of saved objects that you want to import into Kibana. You must include \`type\` or \`objects\` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+NOTE: The exported saved objects include \`coreMigrationVersion\` and \`typeMigrationVersion\` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forward compatibility across Kibana versions.
 
 NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the number of saved objects which may be exported.`,
         oasOperationObject: () => path.resolve(__dirname, './export.examples.yaml'),
@@ -167,21 +174,32 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         request: {
           body: schema.object({
             hasReference: schema.maybe(
-              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+              schema.oneOf([
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ])
             ),
             type: schema.maybe(
-              schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-                meta: {
-                  description:
-                    'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
-                },
-              })
+              schema.oneOf(
+                [
+                  schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                  schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
+                    maxSize: MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+                  }),
+                ],
+                {
+                  meta: {
+                    description:
+                      'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
+                  },
+                }
+              )
             ),
             objects: schema.maybe(
               schema.arrayOf(
                 schema.object({
-                  type: schema.string(),
-                  id: schema.string(),
+                  type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                  id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
                 }),
                 {
                   maxSize: maxImportExportSize,
@@ -194,6 +212,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
             ),
             search: schema.maybe(
               schema.string({
+                maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH,
                 meta: {
                   description:
                     'Search for documents to export using the Elasticsearch Simple Query String syntax.',
@@ -264,7 +283,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,
           createMapStream((obj: unknown) => {
-            return stringify(obj);
+            return stableStringify(obj);
           }),
           createConcatStream([]),
         ]);

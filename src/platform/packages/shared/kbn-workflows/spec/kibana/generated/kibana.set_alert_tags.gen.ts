@@ -23,7 +23,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema } from '../../schema';
+import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 
 // export contract
 export const SET_ALERT_TAGS_CONTRACT: InternalConnectorContract = {
@@ -53,6 +53,7 @@ And tags to detection alerts, and remove them from alerts.
     ...getShapeAt(set_alert_tags_request, 'path'),
     ...getShapeAt(set_alert_tags_request, 'query'),
     fetcher: FetcherConfigSchema,
+    ...KibanaStepMetaSchema,
   }),
   outputSchema: set_alert_tags_response,
 };

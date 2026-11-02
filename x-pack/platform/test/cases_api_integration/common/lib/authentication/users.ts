@@ -20,12 +20,16 @@ import {
   observabilityOnlyReadAlerts,
   securitySolutionOnlyReadAlerts,
   securitySolutionOnlyReadNoIndexAlerts,
+  securitySolutionOnlyReadAttackAlias,
+  securitySolutionOnlyNoIndexAttacks,
   securitySolutionOnlyReadDelete,
   noCasesConnectors as noCasesConnectorRole,
   onlyActions as onlyActionsRole,
   securitySolutionOnlyCreateComment,
   securitySolutionOnlyNoCreateComment,
   securitySolutionOnlyReadCreateComment,
+  securitySolutionOnlyManageTemplates,
+  securitySolutionOnlyNoManageTemplates,
 } from './roles';
 import type { User } from './types';
 
@@ -101,6 +105,18 @@ export const secSolutionOnlyReadNoIndexAlerts: User = {
   roles: [securitySolutionOnlyReadNoIndexAlerts.name],
 };
 
+export const secOnlyReadAttackAlias: User = {
+  username: 'sec_only_read_attack_alias',
+  password: 'sec_only_read_attack_alias',
+  roles: [securitySolutionOnlyReadAttackAlias.name],
+};
+
+export const secOnlyNoIndexAttacks: User = {
+  username: 'sec_only_no_index_attacks',
+  password: 'sec_only_no_index_attacks',
+  roles: [securitySolutionOnlyNoIndexAttacks.name],
+};
+
 export const obsOnly: User = {
   username: 'obs_only',
   password: 'obs_only',
@@ -171,18 +187,35 @@ export const onlyActions: User = {
   roles: [onlyActionsRole.name],
 };
 
+export const secOnlyManageTemplates: User = {
+  username: 'sec_only_manage_templates',
+  password: 'sec_only_manage_templates',
+  roles: [securitySolutionOnlyManageTemplates.name],
+};
+
+export const secOnlyNoManageTemplates: User = {
+  username: 'sec_only_no_manage_templates',
+  password: 'sec_only_no_manage_templates',
+  roles: [securitySolutionOnlyNoManageTemplates.name],
+};
+
 export const users = [
   superUser,
   secOnly,
   secOnlyRead,
   secOnlyReadAlerts,
   secSolutionOnlyReadNoIndexAlerts,
+  secOnlyReadAttackAlias,
+  secOnlyNoIndexAttacks,
   secOnlyDelete,
   secOnlyReadDelete,
   secOnlyNoDelete,
   secOnlyCreateComment,
   secOnlyReadCreateComment,
   secOnlyNoCreateComment,
+  secOnlyManageTemplates,
+  secOnlyNoManageTemplates,
+  secOnlySpacesAll,
   obsOnly,
   obsOnlyRead,
   obsOnlyReadAlerts,

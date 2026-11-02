@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { FileServiceStart } from '@kbn/files-plugin/server';
-import type { AttachmentRequest } from '../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type { AttachmentService } from '../../services';
 import type { Limiter } from './types';
 import { AlertLimiter } from './limiters/alerts';
@@ -30,7 +30,7 @@ export class AttachmentLimitChecker {
     ];
   }
 
-  public async validate(requests: AttachmentRequest[]) {
+  public async validate(requests: AttachmentRequestV2[]) {
     for (const limiter of this.limiters) {
       const itemsWithinRequests = limiter.countOfItemsInRequest(requests);
       const hasItemsInRequests = itemsWithinRequests > 0;

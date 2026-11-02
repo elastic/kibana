@@ -10,15 +10,20 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { LogLevel } from './create_logger';
 
-function isPromise(val: any): val is Promise<any> {
-  return val && typeof val === 'object' && 'then' in val && typeof val.then === 'function';
+function isPromise(val: unknown): val is Promise<unknown> {
+  return (
+    val !== null &&
+    typeof val === 'object' &&
+    'then' in val &&
+    typeof (val as Promise<unknown>).then === 'function'
+  );
 }
 
 function logTo(logger: ToolingLog, name: string, start: bigint) {
   logger.debug(`${name}: ${Number(process.hrtime.bigint() - start) / 1000000}ms`);
 }
 
-export const logPerf = <T extends any>(
+export const logPerf = <T>(
   logger: ToolingLog,
   logLevel: LogLevel,
   name: string,

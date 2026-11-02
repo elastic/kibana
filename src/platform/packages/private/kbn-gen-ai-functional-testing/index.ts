@@ -14,3 +14,25 @@ export {
   type AvailableConnector,
   type AvailableConnectorWithId,
 } from './src/connectors';
+export {
+  DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE,
+  FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV,
+  parseFtrGenAiLlmSampleSize,
+  takeRandomLlmSample,
+  type FtrGenAiLlmSampleSize,
+} from './src/random_llm_sample';
+export {
+  buildEisPreconfiguredConnectors,
+  getPreDiscoveredEisModels,
+  enableCcm,
+  type DiscoveredModel,
+} from './src/eis_helpers';
+export {
+  MAX_LLM_SMOKE_JUDGES,
+  discoverEisJudgeInferenceIds,
+  judgeLlmSmokeFailure,
+  recordLlmSmokeJudgement,
+  type LlmSmokeFailureEvidence,
+  type LlmSmokeFailureJudgement,
+  type LlmSmokeFailureVerdict,
+} from './src/llm_failure_judge';

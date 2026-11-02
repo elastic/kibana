@@ -1,0 +1,38 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getRemoteSyncedIntegrationsStatusExample:
+            description: 'Synchronization status of remote integrations across connected remote clusters'
+            value:
+              integrations:
+                - id: 'nginx-remote'
+                  package_name: 'nginx'
+                  package_version: '1.20.0'
+                  sync_status: 'COMPLETED'
+                  updated_at: '2024-01-01T00:00:00.000Z'
+                  install_status:
+                    main: 'installed'
+                    remote: 'installed'
+                - id: 'system-remote'
+                  package_name: 'system'
+                  package_version: '1.38.0'
+                  sync_status: 'FAILED'
+                  error: 'Failed to sync package to remote cluster'
+                  updated_at: '2024-01-01T00:00:00.000Z'
+                  install_status:
+                    main: 'installed'
+                    remote: 'not_installed'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

@@ -7,37 +7,37 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useStartServices } from '../../../../hooks';
 
 export const EncryptionKeyRequiredCallout: React.FunctionComponent = () => {
   const { docLinks } = useStartServices();
   return (
-    <EuiCallOut
-      iconType="warning"
-      color="warning"
+    <KbnWarningCallout
       title={
         <FormattedMessage
           id="xpack.fleet.encryptionKeyRequired.calloutTitle"
           defaultMessage="Additional setup required"
         />
       }
-    >
-      <FormattedMessage
-        id="xpack.fleet.encryptionKeyRequired.calloutDescription"
-        defaultMessage="You must configure an encryption key before configuring this output. {link}"
-        values={{
-          link: (
-            <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank" external>
-              <FormattedMessage
-                id="xpack.fleet.encryptionKeyRequired.link"
-                defaultMessage="Learn more"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiCallOut>
+      text={
+        <FormattedMessage
+          id="xpack.fleet.encryptionKeyRequired.calloutDescription"
+          defaultMessage="You must configure an encryption key before configuring this output. {link}"
+          values={{
+            link: (
+              <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.fleet.encryptionKeyRequired.link"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+    />
   );
 };

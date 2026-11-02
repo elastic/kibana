@@ -9,8 +9,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import type { QueryStringInputProps } from '@kbn/unified-search-plugin/public';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { QueryStringInputProps } from '@kbn/kql/public';
+import { QueryStringInput } from '@kbn/kql/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IndexPatternValue } from '../../../common/types';
 
@@ -36,7 +36,7 @@ export function QueryBarWrapper({
   const kibana = useKibana<TimeseriesVisDependencies>();
   const {
     appName,
-    unifiedSearch,
+    kql,
     storage,
     data,
     notifications,
@@ -79,7 +79,7 @@ export function QueryBarWrapper({
     <QueryStringInput
       appName={appName}
       deps={{
-        unifiedSearch,
+        autocomplete: kql.autocomplete,
         notifications,
         http,
         docLinks,

@@ -31,6 +31,9 @@ export const ActionsPopoverComponent = ({
     !!popoverState && popoverState.open && popoverState.id === popoverId;
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.uptime.monitorList.actionsPopover.popoverAriaLabel', {
+        defaultMessage: 'Monitor actions',
+      })}
       button={
         <EuiButton
           aria-label={i18n.translate(
@@ -44,7 +47,7 @@ export const ActionsPopoverComponent = ({
           )}
           data-test-subj={`xpack.uptime.monitorList.actionsPopover.${summary.monitor_id}`}
           onClick={() => togglePopoverIsVisible({ id: popoverId, open: true })}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           {i18n.translate(

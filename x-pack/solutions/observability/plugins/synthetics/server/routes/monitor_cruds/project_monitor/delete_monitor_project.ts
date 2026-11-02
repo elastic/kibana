@@ -4,8 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
+import { z } from '@kbn/zod';
+import {
+  asRouteSchema,
+  maxArraySizeMessage,
+  MAX_MONITOR_BATCH_SIZE,
+  routeId,
+} from '../../zod_query';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -19,25 +24,22 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
-    body: schema.object({
-      monitors: schema.arrayOf(schema.string()),
-    }),
-    params: schema.object({
-      projectName: schema.string(),
+    body: asRouteSchema(
+      z.strictObject({
+        monitors: z
+          .array(routeId)
+          .max(MAX_MONITOR_BATCH_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_BATCH_SIZE) }),
+      })
+    ),
+    params: z.strictObject({
+      projectName: routeId,
     }),
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, monitorConfigRepository } = routeContext;
+    const { request, monitorConfigRepository } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
-    if (monitorsToDelete.length > 500) {
-      return response.badRequest({
-        body: {
-          message: REQUEST_TOO_LARGE_DELETE,
-        },
-      });
-    }
 
     await validateSpaceId(routeContext);
 
@@ -50,27 +52,23 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const { saved_objects: monitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: 500,
+        perPage: MAX_MONITOR_BATCH_SIZE,
         filter: deleteFilter,
         fields: [],
       });
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    await deleteMonitorAPI.deleteMonitorBulk({
-      monitors,
+    const { res } = await deleteMonitorAPI.execute({
+      monitorIds: monitors.map(({ id }) => id),
     });
+
+    if (res) {
+      return res;
+    }
 
     return {
       deleted_monitors: monitorsToDelete,
     };
   },
 });
-
-export const REQUEST_TOO_LARGE_DELETE = i18n.translate(
-  'xpack.synthetics.server.project.delete.tooLarge',
-  {
-    defaultMessage:
-      'Delete request payload is too large. Please send a max of 500 monitors to delete per request',
-  }
-);

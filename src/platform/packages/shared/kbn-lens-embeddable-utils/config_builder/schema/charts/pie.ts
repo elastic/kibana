@@ -7,127 +7,226 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { z, lazySchema } from '@kbn/zod';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
-  mergeAllBucketsWithChartDimensionSchema,
-  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  legendPositionSchema,
+  legendTruncateAfterLinesSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
+import {
+  legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
+  getBucketsWithChartDimensionSchema,
+  getMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import type { PartitionMetric } from './partition_shared';
 import {
   legendNestedSchema,
-  legendSizeSchema,
-  legendTruncateAfterLinesSchema,
-  legendVisibleSchema,
+  validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
+import { groupIsNotCollapsed } from '../../utils';
 
-const pieStateSharedSchema = {
-  legend: schema.maybe(
-    schema.object({
+const pieStateSharedShape = {
+  legend: z
+    .object({
       nested: legendNestedSchema,
       truncate_after_lines: legendTruncateAfterLinesSchema,
-      visible: legendVisibleSchema,
+      visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
+      position: legendPositionSchema,
     })
-  ),
-  value_display: valueDisplaySchema,
-  /**
-   * Position of the labels
-   */
-  label_position: schema.maybe(
-    schema.oneOf([schema.literal('hidden'), schema.literal('inside'), schema.literal('outside')])
-  ),
-  /**
-   * Size of the donut hole
-   */
-  donut_hole: schema.maybe(
-    schema.oneOf([
-      schema.literal('none'),
-      schema.literal('small'),
-      schema.literal('medium'),
-      schema.literal('large'),
-    ])
-  ),
+    .strict()
+    .optional()
+    .meta({
+      id: 'visPieLegend',
+      title: 'Legend',
+      description: 'Legend configuration for pie chart',
+    }),
 };
 
-const partitionStatePrimaryMetricOptionsSchema = schema.object({
-  /**
-   * Color configuration
-   */
-  color: schema.maybe(staticColorSchema),
-});
+/**
+ * Pie chart styling: value display, slice labels, and donut hole
+ */
+const pieStylingSchema = lazySchema(() =>
+  z
+    .object({
+      values: valueDisplaySchema,
+      labels: z
+        .object({
+          visible: z
+            .boolean()
+            .optional()
+            .meta({ description: 'When `true`, displays slice labels.' }),
+          position: z
+            .union([z.literal('inside'), z.literal('outside')])
+            .optional()
+            .meta({
+              description: 'Slice label position: `inside` or `outside`.',
+            }),
+        })
+        .strict()
+        .optional()
+        .meta({
+          description: 'Label configuration for pie chart slice labels inside or outside the pie',
+        }),
+      donut_hole: z
+        .union([z.literal('none'), z.literal('s'), z.literal('m'), z.literal('l')])
+        .optional()
+        .meta({
+          description: 'Donut hole size. Accepted values: `none` (full pie), `s`, `m`, `l`.',
+        }),
+    })
+    .strict()
+    .meta({
+      id: 'visPieStyling',
+      title: 'Pie chart styling',
+      description: 'Visual chart styling options',
+    })
+);
 
-const partitionStateBreakdownByOptionsSchema = schema.object({
-  /**
-   * Color configuration
-   */
-  color: schema.maybe(schema.oneOf([colorByValueSchema, colorMappingSchema])),
-  /**
-   * Collapse by function. This parameter is used to collapse the
-   * metric chart when the number of columns is bigger than the
-   * number of columns specified in the columns parameter.
-   * Possible values:
-   * - 'avg': Collapse by average
-   * - 'sum': Collapse by sum
-   * - 'max': Collapse by max
-   * - 'min': Collapse by min
-   * - 'none': Do not collapse
-   */
-  collapse_by: schema.maybe(collapseBySchema),
-});
+/**
+ * Color configuration for primary metric in pie chart
+ */
+const partitionConfigPrimaryMetricOptionsShape = {
+  color: z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+};
 
-const pieTypeSchema = schema.oneOf([schema.literal('pie'), schema.literal('donut')]);
+/**
+ * Breakdown configuration including color mapping and collapse behavior
+ */
+const partitionConfigBreakdownByOptionsShape = {
+  color: colorMappingSchema.optional(),
+  collapse_by: collapseBySchema.optional(),
+};
 
-export const pieStateSchemaNoESQL = schema.object({
-  type: pieTypeSchema,
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...pieStateSharedSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.arrayOf(
-    mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      partitionStatePrimaryMetricOptionsSchema
-    ),
-    { minSize: 1 }
-  ),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  group_by: schema.arrayOf(
-    schema.maybe(mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema)),
-    { minSize: 1 }
-  ),
-});
+const pieTypeSchema = lazySchema(() => z.literal('pie'));
 
-const pieStateSchemaESQL = schema.object({
-  type: pieTypeSchema,
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...pieStateSharedSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metrics: schema.allOf([
-    schema.object(genericOperationOptionsSchema),
-    partitionStatePrimaryMetricOptionsSchema,
-    esqlColumnSchema,
-  ]),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  group_by: schema.maybe(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema])),
-});
+function validateForMultipleMetrics({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<{ collapse_by?: string }>;
+}) {
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
+  if (metrics.length === 1) {
+    if (groupByDimensionNumber > 3) {
+      return 'The number of non-collapsed group_by dimensions must not exceed 3';
+    }
+  } else {
+    if (groupByDimensionNumber > 2) {
+      return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2';
+    }
+  }
+  return validateColoringAssignments({ metrics, group_by });
+}
 
-export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL]);
+/**
+ * Pie chart configuration for standard (non-ES|QL) queries
+ */
+export const pieConfigSchemaNoESQL = lazySchema(() =>
+  z
+    .object({
+      type: pieTypeSchema,
+      ...sharedPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceSchema.shape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...pieStateSharedShape,
+      styling: pieStylingSchema.optional(),
+      metrics: z
+        .array(
+          getMetricsWithChartDimensionSchemaWithRefBasedOps('pieMetric').and(
+            z.object(partitionConfigPrimaryMetricOptionsShape)
+          )
+        )
+        .min(1)
+        .max(100)
+        .meta({ description: 'Array of metric configurations (minimum 1)' }),
+      group_by: z
+        .array(
+          getBucketsWithChartDimensionSchema('pieGroupBy').and(
+            z.object(partitionConfigBreakdownByOptionsShape)
+          )
+        )
+        .min(1)
+        .max(100)
+        .optional()
+        .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
+    })
+    .superRefine((data, ctx) => {
+      const msg = validateForMultipleMetrics(data);
+      if (msg) {
+        ctx.addIssue({ code: 'custom', message: msg });
+      }
+    })
+    .meta({
+      id: 'visPieNoESQL',
+      title: 'Pie Chart (DSL)',
+      description: 'Pie chart configuration for standard queries',
+    })
+);
 
-export type PieState = TypeOf<typeof pieStateSchema>;
-export type PieStateNoESQL = TypeOf<typeof pieStateSchemaNoESQL>;
-export type PieStateESQL = TypeOf<typeof pieStateSchemaESQL>;
+/**
+ * Pie chart configuration for ES|QL queries
+ */
+export const pieConfigSchemaESQL = lazySchema(() =>
+  z
+    .object({
+      type: pieTypeSchema,
+      ...sharedPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceEsqlTableSchema.shape,
+      ...pieStateSharedShape,
+      styling: pieStylingSchema.optional(),
+      metrics: z
+        .array(
+          esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).meta({
+            description: 'ES|QL column reference for primary metric',
+          })
+        )
+        .min(1)
+        .max(100)
+        .meta({ description: 'Array of metric configurations (minimum 1)' }),
+      group_by: z
+        .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
+        .min(1)
+        .max(100)
+        .optional()
+        .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
+    })
+    .superRefine((data, ctx) => {
+      const msg = validateForMultipleMetrics(data);
+      if (msg) {
+        ctx.addIssue({ code: 'custom', message: msg });
+      }
+    })
+    .meta({
+      id: 'visPieESQL',
+      title: 'Pie Chart (ES|QL)',
+      description: 'Pie chart configuration for ES|QL queries',
+    })
+);
+
+/**
+ * Complete pie chart configuration supporting both standard and ES|QL queries
+ */
+export const pieConfigSchema = lazySchema(() =>
+  z.union([pieConfigSchemaNoESQL, pieConfigSchemaESQL]).meta({
+    id: 'visPieChart',
+    title: 'Pie Chart',
+    description: 'Pie chart state: standard query or ES|QL query',
+  })
+);
+
+export type PieConfig = z.output<typeof pieConfigSchema>;
+export type PieConfigInput = z.input<typeof pieConfigSchema>;
+export type PieConfigNoESQL = z.output<typeof pieConfigSchemaNoESQL>;
+export type PieConfigESQL = z.output<typeof pieConfigSchemaESQL>;

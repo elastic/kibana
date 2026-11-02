@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPage,
-  EuiPageHeader,
-  EuiPageBody,
-  useEuiTheme,
-  EuiText,
-  EuiLink,
-  EuiSpacer,
-  EuiButton,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPage, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import useObservable from 'react-use/lib/useObservable';
 import { useCloudConnectedAppContext } from '../../app_context';
 import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
@@ -42,19 +31,18 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications, hasConfigurePermission, docLinks, telemetryService, apiService } =
+  const { notifications, hasConfigurePermission, docLinks, apiService, licensing } =
     useCloudConnectedAppContext();
-  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isRotatingApiKey, setIsRotatingApiKey] = useState(false);
 
-  const closeActionsPopover = () => setIsActionsPopoverOpen(false);
-  const toggleActionsPopover = () => setIsActionsPopoverOpen(!isActionsPopoverOpen);
+  const localLicense = useObservable(licensing.license$);
+  const currentLicenseType = localLicense?.type;
 
-  const showDisconnectModal = () => {
-    closeActionsPopover();
+  const showDisconnectModal = useCallback(() => {
     setIsDisconnectModalVisible(true);
-  };
+  }, []);
 
   const closeDisconnectModal = () => {
     setIsDisconnectModalVisible(false);
@@ -91,16 +79,65 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
     onDisconnect();
   };
 
-  const actionsMenuItems = [
-    <EuiContextMenuItem key="disconnect" onClick={showDisconnectModal}>
-      <EuiText color="danger" size="s">
-        <FormattedMessage
-          id="xpack.cloudConnect.connectedServices.actions.disconnectCluster"
-          defaultMessage="Disconnect cluster"
-        />
-      </EuiText>
-    </EuiContextMenuItem>,
-  ];
+  const handleRotateApiKey = useCallback(async () => {
+    setIsRotatingApiKey(true);
+
+    const { error } = await apiService.rotateApiKey();
+
+    setIsRotatingApiKey(false);
+
+    if (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.cloudConnect.rotateApiKey.errorTitle', {
+          defaultMessage: 'Failed to rotate API key',
+        }),
+        text: error.message,
+      });
+      return;
+    }
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.cloudConnect.rotateApiKey.successTitle', {
+        defaultMessage: 'API key rotated successfully',
+      }),
+    });
+  }, [apiService, notifications.toasts]);
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!hasConfigurePermission) {
+      return undefined;
+    }
+
+    return {
+      items: [
+        {
+          id: 'rotateApiKey',
+          label: i18n.translate('xpack.cloudConnect.connectedServices.actions.rotateApiKey', {
+            defaultMessage: 'Rotate API key',
+          }),
+          iconType: 'key',
+          overflow: true,
+          isLoading: isRotatingApiKey,
+          disableButton: isRotatingApiKey,
+          run: () => {
+            void handleRotateApiKey();
+          },
+          testId: 'cloudConnectRotateApiKeyButton',
+        },
+        {
+          id: 'disconnectCluster',
+          label: i18n.translate('xpack.cloudConnect.connectedServices.actions.disconnectCluster', {
+            defaultMessage: 'Disconnect cluster',
+          }),
+          iconType: 'linkSlash',
+          overflow: true,
+          isDestructive: true,
+          run: showDisconnectModal,
+          testId: 'cloudConnectDisconnectClusterButton',
+        },
+      ],
+    };
+  }, [handleRotateApiKey, hasConfigurePermission, isRotatingApiKey, showDisconnectModal]);
 
   const disconnectModal = isDisconnectModalVisible ? (
     <DisconnectClusterModal
@@ -111,94 +148,39 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
     />
   ) : null;
 
-  const actionsButton = (
-    <EuiButton fill iconType="arrowDown" iconSide="right" onClick={toggleActionsPopover}>
-      <FormattedMessage
-        id="xpack.cloudConnect.connectedServices.actionsButton"
-        defaultMessage="Actions"
-      />
-    </EuiButton>
-  );
-
   return (
     <EuiPage
       direction="column"
-      restrictWidth={1200}
-      grow={false}
+      paddingSize="m"
       css={{ background: euiTheme.colors.backgroundBasePlain }}
-      paddingSize="l"
     >
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="xpack.cloudConnect.connectedServices.pageTitle"
-            defaultMessage="Cloud connected services"
-          />
-        }
-        bottomBorder
-        description={
-          <FormattedMessage
-            id="xpack.cloudConnect.connectedServices.pageDescription"
-            defaultMessage="This cluster is connected to an Elastic Cloud organization. {learnMore}"
-            values={{
-              learnMore: (
-                <EuiLink
-                  href={docLinks.links.cloud.cloudConnect}
-                  target="_blank"
-                  external
-                  onClick={() => {
-                    // Track telemetry for learn more documentation link
-                    telemetryService.trackLinkClicked({
-                      destination_type: 'cloud_connect_docs',
-                    });
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.cloudConnect.connectedServices.learnMore"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-        rightSideItems={
-          hasConfigurePermission
-            ? [
-                <EuiPopover
-                  key="actions"
-                  button={actionsButton}
-                  isOpen={isActionsPopoverOpen}
-                  closePopover={closeActionsPopover}
-                  panelPaddingSize="none"
-                  anchorPosition="downRight"
-                >
-                  <EuiContextMenuPanel items={actionsMenuItems} />
-                </EuiPopover>,
-              ]
-            : []
-        }
+      <AppHeader
+        title={i18n.translate('xpack.cloudConnect.connectedServices.pageTitle', {
+          defaultMessage: 'Cloud connected services',
+        })}
+        description={i18n.translate('xpack.cloudConnect.connectedServices.pageDescription', {
+          defaultMessage: 'This cluster is connected to an Elastic Cloud organization.',
+        })}
+        menu={menu}
+        docLink={docLinks.links.cloud.cloudConnect}
+        spacing="bleed"
       />
-      <EuiSpacer size="l" />
-
-      <EuiPageBody>
+      <EuiPage direction="column" grow={false} paddingSize="none" restrictWidth={true}>
+        <EuiSpacer size="l" />
         <OverviewSection
           organizationId={clusterDetails.metadata.organization_id}
           connectedAt={clusterDetails.metadata.created_at}
           subscription={clusterDetails.metadata.subscription}
         />
-
         <EuiSpacer size="xxl" />
-
         <ServicesSection
           services={clusterDetails.services}
           onServiceUpdate={onServiceUpdate}
           subscription={clusterDetails.metadata.subscription}
+          currentLicenseType={currentLicenseType}
         />
-
         <MigrationSection />
-      </EuiPageBody>
-
+      </EuiPage>
       {disconnectModal}
     </EuiPage>
   );

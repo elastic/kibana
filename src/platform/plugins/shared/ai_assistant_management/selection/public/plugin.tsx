@@ -183,10 +183,7 @@ export class AIAssistantManagementPlugin
     if (!this.isServerless && licensing) {
       this.managementAppVisibilitySubscription = combineLatest([
         licensing.license$,
-        coreStart.settings.client.get$<AIChatExperience>(
-          PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-          AIChatExperience.Classic
-        ),
+        coreStart.settings.client.get$<AIChatExperience>(PREFERRED_CHAT_EXPERIENCE_SETTING_KEY),
       ]).subscribe(([license, chatExperience]) => {
         const isEnterprise = license?.hasAtLeast('enterprise');
 
@@ -228,29 +225,29 @@ export class AIAssistantManagementPlugin
       isUntouchedUiSetting &&
       (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled || isAiAgentsEnabled)
     ) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            coreStart.rendering.addContext(
-              <NavControlInitiator
-                isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
-                isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-                coreStart={coreStart}
-                triggerOpenChat={(selection: AIExperienceSelection) =>
-                  openChatSubject.next(selection)
-                }
-                spaces={spaces}
-              />
-            ),
-            element
-          );
+      const mountAiPicker = (element: HTMLElement) => {
+        ReactDOM.render(
+          coreStart.rendering.addContext(
+            <NavControlInitiator
+              isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+              isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+              coreStart={coreStart}
+              triggerOpenChat={(selection: AIExperienceSelection) =>
+                openChatSubject.next(selection)
+              }
+              spaces={spaces}
+            />
+          ),
+          element
+        );
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // before the user profile
-        order: 1001,
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      };
+
+      coreStart.chrome.controls.aiButton.register({
+        content: mountAiPicker,
       });
     }
   }

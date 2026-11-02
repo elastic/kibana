@@ -11,6 +11,9 @@
           "id": "admin@example.com"
         }
       },
+      "user": {
+        "id": "admin@example.com"
+      },
       "client": {
         "user": {
           "email": "admin@example.com"
@@ -117,6 +120,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -140,6 +148,9 @@
         "entity": {
           "id": "admin2@example.com"
         }
+      },
+      "user": {
+        "id": "admin2@example.com"
       },
       "client": {
         "user": {
@@ -247,6 +258,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -270,6 +286,9 @@
         "entity": {
           "id": "admin3@example.com"
         }
+      },
+      "user": {
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -377,6 +396,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -400,6 +424,9 @@
         "entity": {
           "id": "admin3@example.com"
         }
+      },
+      "user": {
+        "id": "admin3@example.com"
       },
       "client": {
         "user": {
@@ -507,6 +534,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -530,6 +562,9 @@
         "entity": {
           "id": "admin4@example.com"
         }
+      },
+      "user": {
+        "id": "admin4@example.com"
       },
       "client": {
         "user": {
@@ -646,6 +681,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -669,6 +709,9 @@
         "entity": {
           "id": "admin6@example.com"
         }
+      },
+      "user": {
+        "id": "admin6@example.com"
       },
       "client": {
         "user": {
@@ -785,6 +828,11 @@
           "id": "projects/your-project-id/roles/customRole"
         }
       },
+      "entity": {
+        "target": {
+          "id": "projects/your-project-id/roles/customRole"
+        }
+      },
       "user_agent": {
         "device": {
           "name": "Other"
@@ -811,6 +859,12 @@
             "admin-user2@example.com"
           ]
         }
+      },
+      "user": {
+        "id": [
+          "admin-user1@example.com",
+          "admin-user2@example.com"
+        ]
       },
       "client": {
         "user": {
@@ -946,6 +1000,15 @@
       ],
       "target": {
         "entity": {
+          "id": [
+            "projects/your-project-id/roles/customRole1",
+            "projects/your-project-id/roles/customRole2",
+            "projects/your-project-id/roles/customRole3"
+          ]
+        }
+      },
+      "entity": {
+        "target": {
           "id": [
             "projects/your-project-id/roles/customRole1",
             "projects/your-project-id/roles/customRole2",

@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { getErrorDetailsUrl } from '../../monitor_details/monitor_errors/errors_list';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const ErrorDetailsLink = ({
   stateId,
@@ -61,18 +63,25 @@ export const useErrorDetailsLink = ({
   stateId,
   configId,
   locationId,
+  remoteName: remoteNameOverride,
 }: {
   configId: string;
   stateId: string;
   locationId?: string;
+  remoteName?: string;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
+  const spaceId = useUrlSpaceId();
+  const { remoteName: remoteNameFromUrl } = useGetUrlParams();
+  const remoteName = remoteNameOverride ?? remoteNameFromUrl;
 
   return getErrorDetailsUrl({
     basePath,
     configId,
     stateId,
     locationId,
+    spaceId,
+    remoteName,
   });
 };
 

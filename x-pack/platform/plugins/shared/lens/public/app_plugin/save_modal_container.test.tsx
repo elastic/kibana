@@ -5,11 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { renderWithProviders } from '../test_utils/test_utils';
 import type { SaveProps } from './app';
-import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
+import {
+  type SaveVisualizationProps,
+  runSaveLensVisualization,
+  SaveModalContainer,
+} from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
+import type { LensDocument } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
+
+jest.mock('../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
+}));
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -30,7 +47,7 @@ describe('runSaveLensVisualization', () => {
       ...makeDefaultServices(),
       // start with both the initial input and lastKnownDoc synced
       lastKnownDoc: defaultDoc,
-      initialInput: { attributes: defaultDoc, savedObjectId: defaultDoc.savedObjectId },
+      initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
       redirectToOrigin,
       redirectTo,
       onAppLeave,
@@ -41,11 +58,9 @@ describe('runSaveLensVisualization', () => {
       newTitle: faker.lorem.word(),
       newDescription: faker.lorem.sentence(),
       newTags: [faker.lorem.word(), faker.lorem.word()],
-      isTitleDuplicateConfirmed: false,
       returnToOrigin: false,
       dashboardId: undefined,
       newCopyOnSave: false,
-      onTitleDuplicate: jest.fn(),
       ...propsOverrides,
     };
     const options = {
@@ -108,7 +123,7 @@ describe('runSaveLensVisualization', () => {
               initialInput: {
                 attributes: defaultByValueDoc,
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               },
             },
             { returnToOrigin: true }
@@ -121,7 +136,7 @@ describe('runSaveLensVisualization', () => {
             expect.objectContaining({
               state: expect.objectContaining({
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               }),
             })
           );
@@ -259,13 +274,8 @@ describe('runSaveLensVisualization', () => {
           expect.objectContaining({
             state: expect.arrayContaining([
               expect.objectContaining({
-                type: 'lens',
-                serializedState: expect.objectContaining({
-                  rawState: expect.objectContaining({ savedObjectId: undefined }),
-                  references: expect.arrayContaining([
-                    expect.objectContaining({ type: 'index-pattern' }),
-                  ]),
-                }),
+                type: LENS_EMBEDDABLE_TYPE,
+                serializedState: expect.objectContaining({ ref_id: undefined }),
               }),
             ]),
           })
@@ -294,13 +304,8 @@ describe('runSaveLensVisualization', () => {
           expect.objectContaining({
             state: expect.arrayContaining([
               expect.objectContaining({
-                type: 'lens',
-                serializedState: expect.objectContaining({
-                  rawState: expect.objectContaining({ savedObjectId: '1234' }),
-                  references: expect.arrayContaining([
-                    expect.objectContaining({ type: 'index-pattern' }),
-                  ]),
-                }),
+                type: LENS_EMBEDDABLE_TYPE,
+                serializedState: expect.objectContaining({ ref_id: '1234' }),
               }),
             ]),
           })
@@ -347,12 +352,14 @@ describe('runSaveLensVisualization', () => {
         },
         { saveToLibrary: true }
       );
-      await runSaveLensVisualization(props, saveProps, options);
+      const result = await runSaveLensVisualization(props, saveProps, options);
 
       // callback called
       expect(saveToLibraryFn).toHaveBeenCalled();
       expect(toasts.addSuccess).toHaveBeenCalled();
       expect(props.redirectTo).toHaveBeenCalled();
+      expect(result?.persistedDoc?.savedObjectId).toBeTruthy();
+      expect(result?.isLinkedToOriginatingApp).toBeFalsy();
 
       // not called
       expect(props.application.navigateToApp).not.toHaveBeenCalledWith('lens', { path: '/' });
@@ -416,5 +423,96 @@ describe('runSaveLensVisualization', () => {
       expect(props.redirectTo).not.toHaveBeenCalled();
       expect(props.application.navigateToApp).toHaveBeenCalledWith('lens', { path: '/' });
     });
+  });
+});
+
+describe('SaveModalContainer', () => {
+  beforeAll(() => setMockedPresentationUtilServices());
+
+  beforeEach(() => {
+    jest.mocked(trackCreateUiCounterEvents).mockClear();
+  });
+
+  const byValueDoc: LensDocument = { ...defaultDoc, savedObjectId: undefined };
+  const esqlDoc: LensDocument = {
+    ...byValueDoc,
+    state: {
+      ...byValueDoc.state,
+      datasourceStates: {
+        textBased: { layers: { layer1: { query: { esql: 'FROM logs' }, columns: [] } } },
+      },
+    },
+  };
+
+  const renderAndSave = async (
+    props: Partial<React.ComponentProps<typeof SaveModalContainer>>,
+    waitForSave: jest.Mock,
+    { saveAsNewCopy = false }: { saveAsNewCopy?: boolean } = {}
+  ) => {
+    renderWithProviders(
+      <SaveModalContainer
+        lensServices={makeDefaultServices()}
+        lastKnownDoc={byValueDoc}
+        initialInput={undefined}
+        onClose={jest.fn()}
+        {...props}
+      />
+    );
+    await userEvent.type(await screen.findByTestId('savedObjectTitle'), 'my chart');
+    if (saveAsNewCopy) {
+      await userEvent.click(screen.getByTestId('saveAsNewCheckbox'));
+    }
+    await userEvent.click(screen.getByLabelText('None'));
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() => expect(waitForSave).toHaveBeenCalled());
+  };
+
+  it('should track an ES|QL creation with its source when a chart is saved from chat', async () => {
+    const onSave = jest.fn();
+    await renderAndSave({ onSave, lastKnownDoc: esqlDoc, telemetrySource: 'chat' }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql', 'chat');
+  });
+
+  it('should pass no source for a DSL chart saved by a caller that does not set one', async () => {
+    const onSave = jest.fn();
+    await renderAndSave({ onSave }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', undefined);
+  });
+
+  it('should not track a creation when an existing chart is saved', async () => {
+    const onSave = jest.fn();
+    await renderAndSave(
+      {
+        onSave,
+        lastKnownDoc: defaultDoc,
+        initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
+        telemetrySource: 'chat',
+      },
+      onSave
+    );
+    expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
+  });
+
+  it('should track a creation when an existing chart is saved as a new copy', async () => {
+    const onSave = jest.fn();
+    await renderAndSave(
+      {
+        onSave,
+        lastKnownDoc: defaultDoc,
+        initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
+        telemetrySource: 'chat',
+      },
+      onSave,
+      { saveAsNewCopy: true }
+    );
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'chat');
+  });
+
+  it('should not track a creation when the Lens app handles the save', async () => {
+    const runSave = jest.fn();
+    await renderAndSave({ runSave }, runSave);
+    expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
   });
 });

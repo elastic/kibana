@@ -109,7 +109,7 @@ export const getDatatableRenderer = (dependencies: {
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
       subType: 'lens_datatable_renderer',
     });
-
+    const renderMode = handlers.getRenderMode();
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
@@ -141,28 +141,23 @@ export const getDatatableRenderer = (dependencies: {
     handlers.event(chartSizeEvent);
 
     // An entry for each table row, whether it has any actions attached to
-    // ROW_CLICK_TRIGGER trigger.
+    // ON_CLICK_ROW trigger.
+    // Row click trigger compatibility is determined by dashboard-level drilldown
+    // configuration and does not vary per row, so a single probe is sufficient.
     let rowHasRowClickTriggerActions: boolean[] = [];
-    if (hasCompatibleActions) {
-      if (!!config.data) {
-        rowHasRowClickTriggerActions = await Promise.all(
-          config.data.rows.map(async (_row, rowIndex) => {
-            try {
-              const hasActions = await hasCompatibleActions({
-                name: 'tableRowContextMenuClick',
-                data: {
-                  rowIndex,
-                  table: config.data,
-                  columns: config.args.columns.map((column) => column.columnId),
-                },
-              });
-
-              return hasActions;
-            } catch {
-              return false;
-            }
-          })
-        );
+    if (hasCompatibleActions && config.data && config.data.rows.length > 0) {
+      try {
+        const hasActions = await hasCompatibleActions({
+          name: 'tableRowContextMenuClick',
+          data: {
+            rowIndex: 0,
+            table: config.data,
+            columns: config.args.columns.map((column) => column.columnId),
+          },
+        });
+        rowHasRowClickTriggerActions = new Array(config.data.rows.length).fill(hasActions);
+      } catch {
+        rowHasRowClickTriggerActions = new Array(config.data.rows.length).fill(false);
       }
     }
 
@@ -186,6 +181,7 @@ export const getDatatableRenderer = (dependencies: {
           columnCellValueActions={columnCellValueActions}
           columnFilterable={columnsFilterable}
           interactive={isInteractive()}
+          viewMode={renderMode === 'preview' ? 'non-interactive' : renderMode}
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
           syncColors={config.syncColors}

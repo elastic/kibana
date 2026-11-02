@@ -13,5 +13,6 @@ set -e
 # Example: ./signal_index_exists.sh
 curl -s -k -f \
  -H 'Content-Type: application/json' \
+ -H 'elastic-api-version: 2023-10-31' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index > /dev/null

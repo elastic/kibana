@@ -6,6 +6,3 @@
  */
 
 export * from './transforms';
-
-export { LENS_ITEM_VERSION_V1 } from './constants';
-export type { LensSavedObjectV0, LensAttributesV0 } from './transforms';

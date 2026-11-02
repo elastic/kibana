@@ -23,7 +23,7 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TEST_RUN_SCOPE } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
@@ -35,6 +35,7 @@ import {
   computeTestID,
   ScoutEventsReport,
   ScoutReportEventAction,
+  buildScoutTargetInfo,
   type ScoutTestRunInfo,
 } from '../../..';
 
@@ -66,10 +67,8 @@ export class ScoutJestReporter extends BaseReporter {
     this.report = new ScoutEventsReport(this.scoutLog);
     this.baseTestRunInfo = {
       id: this.runId,
-      target: {
-        type: SCOUT_TARGET_TYPE,
-        mode: SCOUT_TARGET_MODE,
-      },
+      target: buildScoutTargetInfo(),
+      scope: SCOUT_TEST_RUN_SCOPE,
       config: {
         category: reporterOptions.configCategory,
       },
@@ -79,22 +78,22 @@ export class ScoutJestReporter extends BaseReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+    return getOwningTeamsForPath(path.resolve(REPO_ROOT, filePath), this.codeOwnersEntries);
   }
 
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
-
+    const areas = this.getOwnerAreas(fileOwners);
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 

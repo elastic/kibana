@@ -23,11 +23,26 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CPSServerStart } from '@kbn/cps/server';
 import type { createActionService } from './handlers/action/create_action_service';
+
+export interface CheckResponseActionAuthzParams {
+  saved_query_id?: string;
+  pack_id?: string;
+  query?: string;
+  queries?: Array<{ query?: string }>;
+  ecs_mapping?: Record<string, unknown>;
+}
 
 export interface OsqueryPluginSetup {
   createActionService: ReturnType<typeof createActionService>;
+  /** Throws 403 if the request is not authorized for the given osquery response action. */
+  checkResponseActionAuthz: (
+    request: KibanaRequest,
+    actionParams: CheckResponseActionAuthzParams
+  ) => Promise<void>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -50,8 +65,10 @@ export interface StartPlugins {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   fleet?: FleetStartContract;
+  security: SecurityPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   spaces?: SpacesPluginStart;
+  cps?: CPSServerStart;
 }

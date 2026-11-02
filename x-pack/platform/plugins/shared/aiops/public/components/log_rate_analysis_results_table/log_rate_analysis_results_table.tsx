@@ -8,7 +8,10 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
+
 import type { estypes } from '@elastic/elasticsearch';
+
+import { i18n } from '@kbn/i18n';
 
 import type { Criteria, EuiTableSortingType } from '@elastic/eui';
 import { useEuiTheme, useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
@@ -20,8 +23,9 @@ import {
   useAppDispatch,
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
-
 import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
+
 import { useColumns, LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE } from './use_columns';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -38,6 +42,7 @@ interface LogRateAnalysisResultsTableProps {
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
   skippedColumns: string[];
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -46,6 +51,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   barColorOverride,
   barHighlightColorOverride,
   skippedColumns,
+  parentApi,
 }) => {
   const { euiTheme } = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -99,9 +105,11 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION
   );
 
+  const isInteractive = useIsInteractive(parentApi);
+
   const columns = useColumns(
     LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.SIGNIFICANT_ITEMS,
-    skippedColumns,
+    isInteractive ? skippedColumns : [...skippedColumns, 'Actions'],
     searchQuery,
     barColorOverride,
     barHighlightColorOverride,
@@ -154,15 +162,17 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         pageSize,
         totalItemCount: itemCount,
         pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+        showPerPageOptions: isInteractive,
       },
       sorting: {
         sort: {
           field: sortField,
           direction: sortDirection,
         },
+        ...(!isInteractive && { readOnly: true }),
       },
     };
-  }, [pageIndex, pageSize, sortField, sortDirection, significantItems]);
+  }, [pageIndex, pageSize, sortField, sortDirection, significantItems, isInteractive]);
 
   useEffect(() => {
     // If no row is hovered or pinned or the user switched to a new page,
@@ -246,6 +256,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     <EuiBasicTable
       data-test-subj="aiopsLogRateAnalysisResultsTable"
       compressed
+      tableCaption={i18n.translate('xpack.aiops.logRateAnalysisResultsTable.tableCaption', {
+        defaultMessage: 'Log rate analysis results',
+      })}
       items={pageOfItems}
       columns={columns}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}

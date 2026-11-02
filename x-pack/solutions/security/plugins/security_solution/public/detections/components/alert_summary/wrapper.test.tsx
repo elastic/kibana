@@ -26,13 +26,36 @@ import { useNavigateToIntegrationsPage } from '../../hooks/alert_summary/use_nav
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateEaseAlertsDataView } from '../../hooks/alert_summary/use_create_data_view';
 
-jest.mock('../../../common/components/search_bar', () => ({
-  // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-  SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
-}));
-jest.mock('../alerts_table/alerts_grouping', () => ({
-  GroupedAlertsTable: () => <div />,
-}));
+// The child sections render heavy chart/table trees whose async data hooks never settle within
+// the per-test timeout, so we stub them and exercise only the Wrapper's loading/error/content branching.
+jest.mock('./integrations/integration_section', () => {
+  const actual = jest.requireActual('./integrations/integration_section');
+  return {
+    ...actual,
+    IntegrationSection: () => <div data-test-subj={actual.ADD_INTEGRATIONS_BUTTON_TEST_ID} />,
+  };
+});
+jest.mock('./search_bar/search_bar_section', () => {
+  const actual = jest.requireActual('./search_bar/search_bar_section');
+  return {
+    ...actual,
+    SearchBarSection: () => <div data-test-subj={actual.SEARCH_BAR_TEST_ID} />,
+  };
+});
+jest.mock('./kpis/kpis_section', () => {
+  const actual = jest.requireActual('./kpis/kpis_section');
+  return {
+    ...actual,
+    KPIsSection: () => <div data-test-subj={actual.KPIS_SECTION} />,
+  };
+});
+jest.mock('./table/table_section', () => {
+  const actual = jest.requireActual('./table/table_section');
+  return {
+    ...actual,
+    TableSection: () => <div data-test-subj={actual.GROUPED_TABLE_TEST_ID} />,
+  };
+});
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../hooks/alert_summary/use_navigate_to_integrations_page');
 jest.mock('../../hooks/alert_summary/use_integration_last_alert_ingested');
@@ -69,11 +92,6 @@ describe('<Wrapper />', () => {
       loading: false,
     });
 
-    jest.mock('react', () => ({
-      ...jest.requireActual('react'),
-      useEffect: jest.fn((f) => f()),
-    }));
-
     render(<Wrapper packages={packages} />);
 
     expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
@@ -97,11 +115,6 @@ describe('<Wrapper />', () => {
       dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
       loading: false,
     });
-
-    jest.mock('react', () => ({
-      ...jest.requireActual('react'),
-      useEffect: jest.fn((f) => f()),
-    }));
 
     render(
       <TestProviders>

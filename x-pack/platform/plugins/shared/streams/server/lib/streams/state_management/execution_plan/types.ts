@@ -103,7 +103,8 @@ export interface UpdateDataStreamMappingsAction {
   type: 'update_data_stream_mappings';
   request: {
     name: string;
-    mappings: StreamsMappingProperties;
+    // undefined resets the data stream level mappings override; the key is required so a reset cannot happen by omission
+    mappings: StreamsMappingProperties | undefined;
   };
 }
 
@@ -135,13 +136,6 @@ export interface UpdateFailureStoreAction {
   };
 }
 
-export interface DeleteQueriesAction {
-  type: 'delete_queries';
-  request: {
-    name: string;
-  };
-}
-
 export interface UnlinkAssetsAction {
   type: 'unlink_assets';
   request: {
@@ -149,8 +143,8 @@ export interface UnlinkAssetsAction {
   };
 }
 
-export interface UnlinkFeaturesAction {
-  type: 'unlink_features';
+export interface UnlinkSystemsAction {
+  type: 'unlink_systems';
   request: {
     name: string;
   };
@@ -165,6 +159,21 @@ export interface UpdateIngestSettingsAction {
       'index.number_of_shards'?: number | null;
       'index.refresh_interval': string | -1 | null;
     };
+  };
+}
+
+export interface UpsertEsqlViewAction {
+  type: 'upsert_esql_view';
+  request: {
+    name: string;
+    query: string;
+  };
+}
+
+export interface DeleteEsqlViewAction {
+  type: 'delete_esql_view';
+  request: {
+    name: string;
   };
 }
 
@@ -185,11 +194,12 @@ export type ElasticsearchAction =
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
-  | DeleteQueriesAction
   | UnlinkAssetsAction
-  | UnlinkFeaturesAction
+  | UnlinkSystemsAction
   | UpdateFailureStoreAction
-  | UpdateIngestSettingsAction;
+  | UpdateIngestSettingsAction
+  | UpsertEsqlViewAction
+  | DeleteEsqlViewAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -208,9 +218,10 @@ export interface ActionsByType {
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
-  delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
-  unlink_features: UnlinkFeaturesAction[];
+  unlink_systems: UnlinkSystemsAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
+  upsert_esql_view: UpsertEsqlViewAction[];
+  delete_esql_view: DeleteEsqlViewAction[];
 }

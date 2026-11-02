@@ -13,6 +13,9 @@ export const findSavedQueryRequestQuerySchema = t.type({
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.union([t.literal('asc'), t.literal('desc')]), t.undefined]),
+  search: t.union([t.string, t.undefined]),
+  createdBy: t.union([t.string, t.undefined]),
+  id: t.union([t.string, t.undefined]),
 });
 
 export type FindSavedQueryRequestQuerySchema = t.OutputOf<typeof findSavedQueryRequestQuerySchema>;

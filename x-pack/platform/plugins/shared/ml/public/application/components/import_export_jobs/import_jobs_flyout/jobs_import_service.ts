@@ -7,17 +7,15 @@
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Filter } from '@kbn/ml-common-types/filters';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
+import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
-import type { JobType } from '../../../../../common/types/saved_objects';
-import type {
-  Job,
-  Datafeed,
-  CombinedJob,
-} from '../../../../../common/types/anomaly_detection_jobs';
-import type { Filter } from '../../../../../common/types/filters';
-import type { DatafeedValidationResponse } from '../../../../../common/types/job_validation';
 import type { MlApi } from '../../../services/ml_api_service';
 
 export interface ImportedAdJob {

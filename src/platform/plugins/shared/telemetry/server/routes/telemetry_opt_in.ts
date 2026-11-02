@@ -120,6 +120,7 @@ export function registerTelemetryOptInRoutes({
     response: {
       200: {
         body: () =>
+          // codeql[js/kibana/unbounded-array-in-schema] Response body populated server-side by getOptInStats, not user input
           schema.arrayOf(schema.object({ clusterUuid: schema.string(), stats: schema.string() })),
       },
     },

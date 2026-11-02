@@ -9,23 +9,27 @@
 
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   TRANSACTION_DETAILS_BY_NAME_LOCATOR,
   type TransactionDetailsByNameParams,
 } from '@kbn/deeplinks-observability';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS } from '../ebt_constants';
 
 interface TransactionNameLinkProps {
   serviceName?: string;
   transactionName: string;
   renderContent?: (name: string) => React.ReactNode;
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
 export function TransactionNameLink({
   transactionName,
   serviceName,
   renderContent,
+  ebt,
 }: TransactionNameLinkProps) {
   const {
     share: { url: urlService },
@@ -73,6 +77,7 @@ export function TransactionNameLink({
         <EuiLink
           {...routeLinkProps}
           data-test-subj="unifiedDocViewerObservabilityTracesTransactionNameLink"
+          {...getEbtProps({ action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_TRANSACTION, ...ebt })}
         >
           {content}
         </EuiLink>

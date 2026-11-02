@@ -112,5 +112,6 @@ const buildTypeTransforms = ({
     versionSchemas: {
       ...modelVersionSchemas,
     },
+    ...(type.typeVersionGuesser ? { typeVersionGuesser: type.typeVersionGuesser } : {}),
   };
 };

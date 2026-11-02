@@ -18,8 +18,11 @@ import {
 export class SloListLocatorDefinition implements LocatorDefinition<SloListLocatorParams> {
   public readonly id = sloListLocatorID;
 
-  public readonly getLocation = async ({ kqlQuery = '' }: SloListLocatorParams) => {
-    const state: SearchState = deepmerge<SearchState>(DEFAULT_STATE, { kqlQuery });
+  public readonly getLocation = async ({ kqlQuery = '', filters = [] }: SloListLocatorParams) => {
+    const state: SearchState = deepmerge<SearchState>(DEFAULT_STATE, {
+      kqlQuery,
+      filters: filters as SearchState['filters'],
+    });
 
     return {
       app: 'slo',

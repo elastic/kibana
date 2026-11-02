@@ -23,12 +23,13 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   getPostCaseRequest,
-  persistableStateAttachment,
   postCaseReq,
-  postCommentActionsReq,
-  postCommentAlertReq,
   postCommentUserReq,
-  postExternalReferenceESReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -39,6 +40,8 @@ import {
   updateCase,
   superUserSpace1Auth,
   getCaseUserActionStats,
+  updateComment,
+  deleteComment,
 } from '../../../../common/lib/api';
 
 const getCaseUpdateData = (id: string, version: string) => ({
@@ -79,12 +82,11 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: theCase.id,
         params: [
           // Only this one should show up in total_comments
-          postCommentUserReq,
-          // The ones below count as total_other_actions
-          postExternalReferenceESReq,
-          persistableStateAttachment,
-          postCommentActionsReq,
-          postCommentAlertReq,
+          postUnifiedCommentReq,
+          postUnifiedIndicatorReq,
+          postUnifiedLensReq,
+          postUnifiedActionsReq,
+          postUnifiedAlertReq,
         ],
       });
 
@@ -93,6 +95,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActionTotals.total).to.equal(6);
       expect(userActionTotals.total_comments).to.equal(1);
       expect(userActionTotals.total_other_actions).to.equal(5);
+      expect(userActionTotals.total_comment_creations).to.equal(1);
+      expect(userActionTotals.total_hidden_comment_updates).to.equal(0);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
@@ -115,12 +119,11 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: theCase.id,
         params: [
           // only this one should show up in total_comments
-          postCommentUserReq,
-          // the ones below count as total_other_actions
-          postExternalReferenceESReq,
-          persistableStateAttachment,
-          postCommentActionsReq,
-          postCommentAlertReq,
+          postUnifiedCommentReq,
+          postUnifiedIndicatorReq,
+          postUnifiedLensReq,
+          postUnifiedActionsReq,
+          postUnifiedAlertReq,
         ],
       });
 
@@ -129,6 +132,97 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(userActionTotals.total).to.equal(13);
       expect(userActionTotals.total_comments).to.equal(1);
       expect(userActionTotals.total_other_actions).to.equal(12);
+      expect(userActionTotals.total_comment_creations).to.equal(1);
+      expect(userActionTotals.total_hidden_comment_updates).to.equal(0);
+      expect(userActionTotals.total).to.equal(
+        userActionTotals.total_comments + userActionTotals.total_other_actions
+      );
+    });
+
+    it('returns the correct stats for hidden comment updates when a comment is updated then deleted', async () => {
+      // 1 creation action
+      const theCase = await createCase(supertest, postCaseReq);
+
+      // Create a user comment - 1 create action
+      const caseWithComment = await createComment({
+        supertest,
+        caseId: theCase.id,
+        params: postCommentUserReq,
+      });
+
+      const comment = caseWithComment.comments![0];
+
+      // Update the comment - 1 update action
+      await updateComment({
+        supertest,
+        caseId: theCase.id,
+        req: {
+          id: comment.id,
+          version: comment.version,
+          comment: 'updated comment',
+          type: postCommentUserReq.type,
+          owner: postCommentUserReq.owner,
+        },
+      });
+
+      // Delete the comment - 1 delete action
+      await deleteComment({
+        supertest,
+        caseId: theCase.id,
+        commentId: comment.id,
+      });
+
+      const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
+
+      // Total: 1 (case create) + 1 (comment create) + 1 (comment update) + 1 (comment delete) = 4
+      expect(userActionTotals.total).to.equal(4);
+      // total_comments counts user comment user actions (create + update + delete = 3)
+      expect(userActionTotals.total_comments).to.equal(3);
+      expect(userActionTotals.total_other_actions).to.equal(1);
+      expect(userActionTotals.total_comment_creations).to.equal(1);
+      expect(userActionTotals.total_comment_deletions).to.equal(1);
+      // The update action is hidden because the comment was deleted
+      expect(userActionTotals.total_hidden_comment_updates).to.equal(1);
+      expect(userActionTotals.total).to.equal(
+        userActionTotals.total_comments + userActionTotals.total_other_actions
+      );
+    });
+
+    it('returns zero hidden comment updates when a comment is updated but not deleted', async () => {
+      // 1 creation action
+      const theCase = await createCase(supertest, postCaseReq);
+
+      // Create a user comment - 1 create action
+      const caseWithComment = await createComment({
+        supertest,
+        caseId: theCase.id,
+        params: postCommentUserReq,
+      });
+
+      const comment = caseWithComment.comments![0];
+
+      // Update the comment - 1 update action
+      await updateComment({
+        supertest,
+        caseId: theCase.id,
+        req: {
+          id: comment.id,
+          version: comment.version,
+          comment: 'updated comment',
+          type: postCommentUserReq.type,
+          owner: postCommentUserReq.owner,
+        },
+      });
+
+      const userActionTotals = await getCaseUserActionStats({ supertest, caseID: theCase.id });
+
+      // Total: 1 (case create) + 1 (comment create) + 1 (comment update) = 3
+      expect(userActionTotals.total).to.equal(3);
+      expect(userActionTotals.total_comments).to.equal(2);
+      expect(userActionTotals.total_other_actions).to.equal(1);
+      expect(userActionTotals.total_comment_creations).to.equal(1);
+      // The update action is NOT hidden because the comment was not deleted
+      expect(userActionTotals.total_hidden_comment_updates).to.equal(0);
       expect(userActionTotals.total).to.equal(
         userActionTotals.total_comments + userActionTotals.total_other_actions
       );
@@ -175,6 +269,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(userActionTotals.total).to.equal(9);
           expect(userActionTotals.total_comments).to.equal(1);
           expect(userActionTotals.total_other_actions).to.equal(8);
+          expect(userActionTotals.total_comment_creations).to.equal(1);
+          expect(userActionTotals.total_hidden_comment_updates).to.equal(0);
           expect(userActionTotals.total).to.equal(
             userActionTotals.total_comments + userActionTotals.total_other_actions
           );

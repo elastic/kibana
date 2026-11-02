@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reporting-export-types-pdf-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reporting-export-types-pdf-common'
+  title: '@kbn/reporting-export-types-pdf-common'
   description: Moon project for @kbn/reporting-export-types-pdf-common
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-reporting/export_types/pdf_common
+  sourceRoot: src/platform/packages/private/kbn-reporting/export_types/pdf_common
 dependsOn:
   - '@kbn/screenshotting-plugin'
   - '@kbn/reporting-common'

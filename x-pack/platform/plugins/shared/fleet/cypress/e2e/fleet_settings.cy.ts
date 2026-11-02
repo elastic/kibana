@@ -16,7 +16,10 @@ import {
 } from '../screens/fleet';
 import { login } from '../tasks/login';
 
-describe('Edit settings', () => {
+// The Fleet AppHeader (title + tabs) is sticky at the top of the scroll container, so the default
+// 'top' scroll behavior can align action targets underneath it and report them as "covered". Scroll
+// targets to the center of the viewport instead so they stay clear of the sticky header.
+describe('Edit settings', { scrollBehavior: 'center' }, () => {
   beforeEach(() => {
     login();
 
@@ -136,8 +139,12 @@ describe('Edit settings', () => {
     cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('logstash');
     cy.get('[placeholder="Specify host"').clear().type('logstash:5044');
     cy.getBySel(SETTINGS_OUTPUTS.SSL_BUTTON).click();
-    cy.get('[placeholder="Specify SSL certificate"]').clear().type('SSL CERTIFICATE');
-    cy.get('[placeholder="Specify certificate key"]').clear().type('SSL KEY');
+    cy.get('[placeholder="Specify SSL certificate"]')
+      .clear()
+      .type('-----BEGIN CERTIFICATE-----', { parseSpecialCharSequences: false });
+    cy.get('[placeholder="Specify certificate key"]')
+      .clear()
+      .type('-----BEGIN PRIVATE KEY-----', { parseSpecialCharSequences: false });
 
     cy.intercept('/api/fleet/outputs', {
       items: [
@@ -157,8 +164,8 @@ describe('Edit settings', () => {
       is_default: false,
       is_default_monitoring: false,
       ssl: {
-        certificate: "SSL CERTIFICATE');",
-        key: 'SSL KEY',
+        certificate: '-----BEGIN CERTIFICATE-----',
+        key: '-----BEGIN PRIVATE KEY-----',
       },
     }).as('postLogstashOutput');
 

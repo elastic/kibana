@@ -28,7 +28,7 @@ export const TableActionButton: FC<TableActionButtonProps> = ({
 }) => {
   const buttonContent = (
     <>
-      <EuiIcon type={iconType} css={{ marginRight: '8px' }} />
+      <EuiIcon aria-hidden={true} type={iconType} css={{ marginRight: '8px' }} />
       {label}
     </>
   );

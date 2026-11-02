@@ -15,15 +15,26 @@ import {
   executor,
   getConnectorType,
   getWorkflowsConnectorAdapter,
+  getWorkflowsConnectorTypeArgs,
   type GetWorkflowsConnectorTypeArgs,
+  resolveAlertStates,
 } from '.';
+import { WorkflowRequiresDelegatedIdentityError } from '../../api/workflow_requires_delegated_identity_error';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+
+const mockWorkflowsManagementApi = {
+  getWorkflow: jest.fn(),
+  runWorkflow: jest.fn(),
+  scheduleWorkflow: jest.fn(),
+  assertRunnableStandalone: jest.fn(),
+} as unknown as WorkflowsManagementApi;
 
 describe('Workflows Connector', () => {
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
   describe('getConnectorType', () => {
     it('should return correct connector type configuration', () => {
-      const connectorType = getConnectorType();
+      const connectorType = getConnectorType(mockWorkflowsManagementApi);
 
       expect(connectorType.id).toBe('.workflows');
       expect(connectorType.minimumLicenseRequired).toBe('gold');
@@ -36,7 +47,7 @@ describe('Workflows Connector', () => {
     });
 
     it('should have correct validation schemas', () => {
-      const connectorType = getConnectorType();
+      const connectorType = getConnectorType(mockWorkflowsManagementApi);
 
       expect(connectorType.validate).toBeDefined();
       expect(connectorType.validate.config).toBeDefined();
@@ -48,11 +59,28 @@ describe('Workflows Connector', () => {
   describe('executor', () => {
     const mockRequest = {} as KibanaRequest;
 
-    it('should execute workflow successfully', async () => {
-      const mockWorkflowsService = jest.fn().mockResolvedValue('workflow-run-123');
-      const deps: GetWorkflowsConnectorTypeArgs = {
-        getWorkflowsService: jest.fn().mockResolvedValue(mockWorkflowsService),
-      };
+    it('should schedule workflow successfully', async () => {
+      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue({
+        id: 'test-workflow-id',
+        name: 'Private workflow',
+        yaml: 'name: Private workflow',
+        enabled: true,
+        valid: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        createdBy: 'owner',
+        lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+        lastUpdatedBy: 'owner',
+        definition: {
+          version: '1',
+          name: 'Private workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+      });
+      jest
+        .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+        .mockResolvedValue('workflow-run-123');
 
       const execOptions = {
         actionId: 'test-action-id',
@@ -88,19 +116,26 @@ describe('Workflows Connector', () => {
         request: mockRequest,
       };
 
-      const result = await executor(execOptions, deps);
+      const connector = getConnectorType(mockWorkflowsManagementApi);
+      if (!connector.executor) throw new Error('Workflows connector executor is missing');
+      const result = await connector.executor(execOptions);
 
       expect(result).toEqual({
         status: 'ok',
         data: {
           workflowRunId: 'workflow-run-123',
-          status: 'executed',
+          status: 'scheduled',
         },
         actionId: 'test-action-id',
       });
 
-      expect(mockWorkflowsService).toHaveBeenCalledWith(
+      expect(mockWorkflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
+        mockRequest
+      );
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'test-workflow-id' }),
         'default',
         {
           event: {
@@ -117,14 +152,15 @@ describe('Workflows Connector', () => {
             spaceId: 'default',
           },
         },
-        mockRequest
+        mockRequest,
+        'alert'
       );
     });
 
     it('should skip execution when no alerts are provided', async () => {
-      const mockWorkflowsService = jest.fn().mockResolvedValue('workflow-run-123');
+      const mockScheduleWorkflowService = jest.fn().mockResolvedValue('workflow-run-123');
       const deps: GetWorkflowsConnectorTypeArgs = {
-        getWorkflowsService: jest.fn().mockResolvedValue(mockWorkflowsService),
+        getScheduleWorkflowService: jest.fn().mockResolvedValue(mockScheduleWorkflowService),
       };
 
       const execOptions = {
@@ -172,7 +208,7 @@ describe('Workflows Connector', () => {
         actionId: 'test-action-id',
       });
 
-      expect(mockWorkflowsService).not.toHaveBeenCalled();
+      expect(mockScheduleWorkflowService).not.toHaveBeenCalled();
     });
 
     it('should throw error for unsupported subAction', async () => {
@@ -200,10 +236,10 @@ describe('Workflows Connector', () => {
       );
     });
 
-    it('should handle workflows service errors', async () => {
+    it('should handle schedule workflows service errors', async () => {
       const serviceError = new Error('Service unavailable');
       const deps: GetWorkflowsConnectorTypeArgs = {
-        getWorkflowsService: jest.fn().mockRejectedValue(serviceError),
+        getScheduleWorkflowService: jest.fn().mockRejectedValue(serviceError),
       };
 
       const execOptions = {
@@ -241,12 +277,132 @@ describe('Workflows Connector', () => {
       };
 
       await expect(executor(execOptions, deps)).rejects.toThrow(
-        'Unable to run workflow test-workflow-id'
+        'Unable to schedule workflow test-workflow-id'
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to get workflows service: Service unavailable'
+        'Failed to get schedule workflows service: Service unavailable'
       );
+    });
+  });
+
+  describe('getWorkflowsService (run)', () => {
+    const mockRequest = {} as KibanaRequest;
+    const getRunService = async () => {
+      const { getWorkflowsService } = getWorkflowsConnectorTypeArgs(mockWorkflowsManagementApi);
+      if (!getWorkflowsService) throw new Error('getWorkflowsService is missing');
+      return getWorkflowsService(mockRequest);
+    };
+
+    const storedWorkflow = {
+      id: 'managed-workflow-id',
+      name: 'Managed workflow',
+      yaml: 'name: Managed workflow',
+      enabled: true,
+      valid: true,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      createdBy: 'owner',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'owner',
+      definition: {
+        version: '1',
+        name: 'Managed workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue(storedWorkflow as any);
+    });
+
+    it('refuses a delegated-identity-only workflow through the runWorkflow gate', async () => {
+      // This service is not the rule-action path. api.run schedules. The gate still applies
+      // to callers of getWorkflowsService.
+      jest
+        .mocked(mockWorkflowsManagementApi.runWorkflow)
+        .mockRejectedValue(new WorkflowRequiresDelegatedIdentityError('cannot be run standalone'));
+
+      const run = await getRunService();
+
+      await expect(run('managed-workflow-id', 'default', {}, mockRequest)).rejects.toBeInstanceOf(
+        WorkflowRequiresDelegatedIdentityError
+      );
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('runs the workflow when the standalone check passes', async () => {
+      jest.mocked(mockWorkflowsManagementApi.runWorkflow).mockResolvedValue('run-123');
+
+      const run = await getRunService();
+
+      await expect(run('managed-workflow-id', 'default', { a: 1 }, mockRequest)).resolves.toBe(
+        'run-123'
+      );
+      expect(mockWorkflowsManagementApi.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'managed-workflow-id' }),
+        'default',
+        { a: 1 },
+        mockRequest
+      );
+    });
+  });
+
+  describe('getScheduleWorkflowService (rule actions)', () => {
+    const mockRequest = {} as KibanaRequest;
+    const getScheduleService = async () => {
+      const { getScheduleWorkflowService } = getWorkflowsConnectorTypeArgs(
+        mockWorkflowsManagementApi
+      );
+      if (!getScheduleWorkflowService) throw new Error('getScheduleWorkflowService is missing');
+      return getScheduleWorkflowService(mockRequest);
+    };
+
+    const storedWorkflow = {
+      id: 'system-security-attack-discovery-worker',
+      name: 'Attack Discovery Runner',
+      yaml: 'name: Attack Discovery Runner',
+      enabled: true,
+      valid: true,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      createdBy: 'owner',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'owner',
+      definition: {
+        version: '1',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.mocked(mockWorkflowsManagementApi.getWorkflow).mockResolvedValue(storedWorkflow as any);
+    });
+
+    it('schedules a rule action and surfaces the standalone refusal from scheduleWorkflow', async () => {
+      jest
+        .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
+        .mockRejectedValue(new WorkflowRequiresDelegatedIdentityError('cannot be run standalone'));
+
+      const schedule = await getScheduleService();
+
+      await expect(
+        schedule(
+          'system-security-attack-discovery-worker',
+          'default',
+          { event: {} },
+          'alert',
+          mockRequest
+        )
+      ).rejects.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsManagementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });
 
@@ -330,6 +486,180 @@ describe('Workflows Connector', () => {
 
       expect(result.subActionParams.workflowId).toBe('unknown');
       expect(result.subActionParams.inputs).toBeUndefined();
+    });
+
+    it('should default alertStates to new=true, ongoing=false, recovered=false when not provided', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [{ _id: 'a1', _index: 'idx' }], count: 1 },
+        new: { data: [{ _id: 'a1', _index: 'idx' }], count: 1 },
+        ongoing: { data: [{ _id: 'a2', _index: 'idx' }], count: 1 },
+        recovered: { data: [{ _id: 'a3', _index: 'idx' }], count: 1 },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: ['test-tag'],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const params = {
+        subAction: 'run' as const,
+        subActionParams: { workflowId: 'wf-1' },
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params,
+        spaceId: 'default',
+      });
+
+      expect(result.subActionParams.alertStates).toEqual({
+        new: true,
+        ongoing: false,
+        recovered: false,
+      });
+      expect(result.subActionParams.inputs?.event?.alerts).toHaveLength(1);
+      expect(result.subActionParams.inputs?.event?.alerts[0]._id).toBe('a1');
+    });
+
+    it('should include ongoing and recovered alerts when alertStates enables them', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [], count: 3 },
+        new: {
+          data: [{ _id: 'a1', _index: 'idx' }],
+          count: 1,
+          alert_count: { active: 1, recovered: 0, ignored: 0 },
+        },
+        ongoing: {
+          data: [{ _id: 'a2', _index: 'idx' }],
+          count: 1,
+          alert_count: { active: 1, recovered: 0, ignored: 0 },
+        },
+        recovered: {
+          data: [{ _id: 'a3', _index: 'idx' }],
+          count: 1,
+          alert_count: { active: 0, recovered: 1, ignored: 0 },
+        },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: ['test-tag'],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const params = {
+        subAction: 'run' as const,
+        subActionParams: {
+          workflowId: 'wf-1',
+          alertStates: { new: true, ongoing: true, recovered: true },
+        },
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params,
+        spaceId: 'default',
+      });
+
+      expect(result.subActionParams.alertStates).toEqual({
+        new: true,
+        ongoing: true,
+        recovered: true,
+      });
+      expect(result.subActionParams.inputs?.event?.alerts).toHaveLength(3);
+    });
+
+    it('should exclude new alerts when alertStates.new is false', () => {
+      const adapter = getWorkflowsConnectorAdapter();
+
+      const mockAlerts = {
+        all: { data: [], count: 2 },
+        new: {
+          data: [{ _id: 'a1', _index: 'idx' }],
+          count: 1,
+          alert_count: { active: 1, recovered: 0, ignored: 0 },
+        },
+        ongoing: {
+          data: [],
+          count: 0,
+          alert_count: { active: 0, recovered: 0, ignored: 0 },
+        },
+        recovered: {
+          data: [{ _id: 'a2', _index: 'idx' }],
+          count: 1,
+          alert_count: { active: 0, recovered: 1, ignored: 0 },
+        },
+      };
+
+      const mockRule = {
+        id: 'rule-id',
+        name: 'test rule',
+        tags: ['test-tag'],
+        consumer: 'test-consumer',
+        producer: 'test-producer',
+        ruleTypeId: 'test-rule-type',
+      };
+
+      const params = {
+        subAction: 'run' as const,
+        subActionParams: {
+          workflowId: 'wf-1',
+          alertStates: { new: false, ongoing: false, recovered: true },
+        },
+      };
+
+      const result = adapter.buildActionParams({
+        alerts: mockAlerts as any,
+        rule: mockRule,
+        params,
+        spaceId: 'default',
+      });
+
+      expect(result.subActionParams.inputs?.event?.alerts).toHaveLength(1);
+      expect(result.subActionParams.inputs?.event?.alerts[0]._id).toBe('a2');
+    });
+  });
+
+  describe('resolveAlertStates', () => {
+    it('should return defaults when no alertStates provided', () => {
+      expect(resolveAlertStates()).toEqual({ new: true, ongoing: false, recovered: false });
+    });
+
+    it('should return defaults when undefined is passed', () => {
+      expect(resolveAlertStates(undefined)).toEqual({
+        new: true,
+        ongoing: false,
+        recovered: false,
+      });
+    });
+
+    it('should respect explicit values', () => {
+      expect(resolveAlertStates({ new: false, ongoing: true, recovered: true })).toEqual({
+        new: false,
+        ongoing: true,
+        recovered: true,
+      });
+    });
+
+    it('should fill in missing fields with defaults', () => {
+      expect(resolveAlertStates({ recovered: true })).toEqual({
+        new: true,
+        ongoing: false,
+        recovered: true,
+      });
     });
   });
 });

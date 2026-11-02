@@ -67,7 +67,7 @@ const renderCreateOption = () => {
       )}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="tag" />
+        <EuiIcon type="tag" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <span>

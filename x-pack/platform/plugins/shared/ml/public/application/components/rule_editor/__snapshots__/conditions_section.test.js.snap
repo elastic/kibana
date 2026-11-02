@@ -17,7 +17,7 @@ exports[`ConditionsSectionExpression renders when enabled with empty conditions 
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
       >
         Add new condition
       </span>
@@ -39,7 +39,7 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
       >
         Add new condition
       </span>
@@ -104,18 +104,23 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <button
-        aria-label="Delete condition"
-        class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
-        type="button"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
       >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="trash"
-        />
-      </button>
+        <button
+          aria-label="Delete condition"
+          class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="trash"
+          />
+        </button>
+      </span>
     </div>
   </div>
   <div
@@ -129,7 +134,7 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
       >
         Add new condition
       </span>
@@ -194,18 +199,23 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <button
-        aria-label="Delete condition"
-        class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
-        type="button"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
       >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="trash"
-        />
-      </button>
+        <button
+          aria-label="Delete condition"
+          class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="trash"
+          />
+        </button>
+      </span>
     </div>
   </div>
   <div
@@ -262,18 +272,23 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <button
-        aria-label="Delete condition"
-        class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
-        type="button"
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
       >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="trash"
-        />
-      </button>
+        <button
+          aria-label="Delete condition"
+          class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="trash"
+          />
+        </button>
+      </span>
     </div>
   </div>
   <div
@@ -287,7 +302,7 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
       >
         Add new condition
       </span>

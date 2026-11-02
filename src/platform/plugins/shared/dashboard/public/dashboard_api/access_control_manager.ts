@@ -12,15 +12,22 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { getAccessControlClient } from '../services/access_control_service';
+import { dashboardClient } from '../dashboard_client';
 
 export function initializeAccessControlManager(
   savedObjectResult?: DashboardReadResponseBody,
   savedObjectId$?: BehaviorSubject<string | undefined>
 ) {
   const accessControl$ = new BehaviorSubject<Partial<SavedObjectAccessControl>>({
-    owner: savedObjectResult?.data?.access_control?.owner,
+    owner: savedObjectResult?.meta?.owner,
     accessMode: savedObjectResult?.data?.access_control?.access_mode,
   });
+
+  const getState = () => {
+    const { accessMode } = accessControl$.value;
+    if (!accessMode) return;
+    return { access_control: { access_mode: accessMode } };
+  };
 
   async function changeAccessMode(accessMode: SavedObjectAccessControl['accessMode']) {
     const dashboardId = savedObjectId$?.value;
@@ -41,6 +48,7 @@ export function initializeAccessControlManager(
         ...currentAccessControl,
         accessMode,
       });
+      dashboardClient.invalidateCache(dashboardId);
     } catch (error) {
       throw error;
     }
@@ -50,6 +58,9 @@ export function initializeAccessControlManager(
     api: {
       accessControl$,
       changeAccessMode,
+    },
+    internalApi: {
+      getState,
     },
   };
 }

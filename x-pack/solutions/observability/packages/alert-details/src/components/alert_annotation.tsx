@@ -44,7 +44,7 @@ export function AlertAnnotation({ alertStart, color, dateFormat, id }: Props) {
           opacity: 1,
         },
       }}
-      marker={<EuiIcon type="warning" color={color} />}
+      marker={<EuiIcon type="warning" color={color} aria-hidden={true} />}
       markerPosition={Position.Top}
     />
   );

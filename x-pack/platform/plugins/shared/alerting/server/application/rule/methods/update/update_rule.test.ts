@@ -7,33 +7,19 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { ApiKeyType } from '../../../../task_runner/types';
 import type { IntervalSchedule } from '../../../../types';
 import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { RuleDomain } from '../../types';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -59,44 +45,17 @@ jest.mock('../get_schedule_frequency', () => ({
 }));
 
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as jest.Mock;
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
-const kibanaVersion = 'v7.10.0';
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
+  actionsAuthorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-};
+} = getRulesClientMockParams();
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
@@ -131,8 +90,10 @@ describe('update()', () => {
       snoozeSchedule: [],
       mutedInstanceIds: [],
       createdBy: 'elastic',
+      createdByProfileUid: null,
       createdAt: '2019-02-12T21:01:22.479Z',
       updatedBy: 'elastic',
+      updatedByProfileUid: null,
       updatedAt: '2019-02-12T21:01:22.479Z',
       actions: [
         {
@@ -400,6 +361,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -409,6 +371,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -463,6 +426,7 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -472,6 +436,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -506,6 +471,7 @@ describe('update()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -686,6 +652,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -723,6 +690,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -741,6 +709,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -794,6 +763,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -803,6 +773,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -961,6 +932,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -969,6 +941,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -987,6 +960,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -1022,6 +996,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -1031,6 +1006,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [
           Object {
             "actionTypeId": "test",
@@ -1173,6 +1149,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1190,6 +1167,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1208,6 +1186,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -1253,6 +1232,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -1263,6 +1243,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1361,6 +1342,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -1370,6 +1352,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1400,8 +1383,9 @@ describe('update()', () => {
         ],
         "alertTypeId": "myType",
         "apiKey": "MTIzOmFiYw==",
-        "apiKeyCreatedByUser": undefined,
+        "apiKeyCreatedByUser": false,
         "apiKeyOwner": "elastic",
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1411,6 +1395,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -1439,6 +1424,7 @@ describe('update()', () => {
         "throttle": "5m",
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -1553,6 +1539,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -1562,6 +1549,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1586,6 +1574,7 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -1595,6 +1584,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": false,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -1623,6 +1613,7 @@ describe('update()', () => {
         "throttle": "5m",
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -1793,11 +1784,15 @@ describe('update()', () => {
       },
     });
 
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/my alert name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: myType/my alert name',
+      undefined
+    );
   });
 
   it('should update rule flapping', async () => {
     const flapping = {
+      enabled: true,
       lookBackWindow: 10,
       statusChangeThreshold: 10,
     };
@@ -1841,7 +1836,6 @@ describe('update()', () => {
         systemActions: [],
         flapping,
       },
-      isFlappingEnabled: true,
     });
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
@@ -1859,35 +1853,6 @@ describe('update()', () => {
     );
 
     expect(result.flapping).toEqual(flapping);
-  });
-
-  it('should throw error when updating a rule with flapping if global flapping is disabled', async () => {
-    const flapping = {
-      lookBackWindow: 10,
-      statusChangeThreshold: 10,
-    };
-
-    await expect(
-      rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-          },
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-          systemActions: [],
-          flapping,
-        },
-        isFlappingEnabled: false,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error updating rule: can not update rule flapping if global flapping is disabled"`
-    );
   });
 
   it('swallows error when invalidate API key throws', async () => {
@@ -2138,6 +2103,7 @@ describe('update()', () => {
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '234', api_key: 'abc' },
+      uiamResult: { id: 'uiam-234', name: 'uiam-234', api_key: 'def' },
     });
     unsecuredSavedObjectsClient.create.mockRejectedValue(new Error('Fail'));
     await expect(
@@ -2171,7 +2137,7 @@ describe('update()', () => {
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {
-        apiKeys: ['MjM0OmFiYw=='],
+        apiKeys: ['MjM0OmFiYw==', 'dWlhbS0yMzQ6ZGVm'],
       },
       expect.any(Object),
       expect.any(Object)
@@ -2738,6 +2704,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -2757,6 +2724,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -2775,6 +2743,7 @@ describe('update()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -2810,6 +2779,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -2819,6 +2789,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -3322,6 +3293,7 @@ describe('update()', () => {
         snoozeSchedule: [],
         mutedInstanceIds: [],
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -3348,6 +3320,7 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -3366,6 +3339,7 @@ describe('update()', () => {
         tags: ['foo'],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: '1',
@@ -3479,6 +3453,7 @@ describe('update()', () => {
           "status": "pending",
         },
         "id": "1",
+        "isSnoozedUntil": null,
         "notifyWhen": "onThrottleInterval",
         "params": Object {
           "bar": true,
@@ -3488,6 +3463,7 @@ describe('update()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
+        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -3514,6 +3490,7 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": true,
         "apiKeyOwner": "elastic",
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -3523,6 +3500,7 @@ describe('update()', () => {
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -3551,6 +3529,7 @@ describe('update()', () => {
         "throttle": "5m",
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -3760,12 +3739,14 @@ describe('update()', () => {
           legacyId: null,
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
+          createdByProfileUid: null,
           snoozeSchedule: [],
           muteAll: false,
           mutedInstanceIds: [],
           alertTypeId: 'myType',
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyOwnerProfileUid: null,
           artifacts: {
             dashboards: [],
             investigation_guide: { blob: '' },
@@ -3784,6 +3765,7 @@ describe('update()', () => {
           throttle: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
         },
         {
           id: '1',
@@ -3819,6 +3801,7 @@ describe('update()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": "onActiveAlert",
           "params": Object {
             "bar": true,
@@ -3828,6 +3811,7 @@ describe('update()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [
             Object {
               "actionTypeId": "test",
@@ -4009,7 +3993,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.group]: definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.group]: Additional properties are not allowed ('group' was unexpected)]`
       );
     });
 
@@ -4042,7 +4026,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.frequency]: definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.frequency]: Additional properties are not allowed ('frequency' was unexpected)]`
       );
     });
 
@@ -4073,7 +4057,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(
-        `[Error: Error validating update data - [systemActions.0.alertsFilter]: definition for this key is missing]`
+        `[Error: Error validating update data - [systemActions.0.alertsFilter]: Additional properties are not allowed ('alertsFilter' was unexpected)]`
       );
     });
 
@@ -4206,8 +4190,10 @@ describe('update()', () => {
           snoozeSchedule: [],
           mutedInstanceIds: [],
           createdBy: 'elastic',
+          createdByProfileUid: null,
           createdAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           actions: [],
           artifacts: {
@@ -4343,6 +4329,7 @@ describe('update()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": "onActiveAlert",
           "params": Object {
             "bar": true,
@@ -4352,6 +4339,7 @@ describe('update()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [],
           "updatedAt": 2019-02-12T21:01:22.479Z,
         }
@@ -4392,8 +4380,10 @@ describe('update()', () => {
           snoozeSchedule: [],
           mutedInstanceIds: [],
           createdBy: 'elastic',
+          createdByProfileUid: null,
           createdAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           actions: [],
           artifacts: {
@@ -4571,6 +4561,7 @@ describe('update()', () => {
             "status": "pending",
           },
           "id": "1",
+          "isSnoozedUntil": null,
           "notifyWhen": "onActiveAlert",
           "params": Object {
             "bar": true,
@@ -4580,6 +4571,7 @@ describe('update()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
+          "snoozeSchedule": Array [],
           "systemActions": Array [],
           "updatedAt": 2019-02-12T21:01:22.479Z,
         }
@@ -4737,5 +4729,475 @@ describe('update()', () => {
       ).toEqual('new blob');
       expect(result.artifacts).toBeDefined();
     });
+  });
+
+  describe('rule migration', () => {
+    test('migrates legacy lastRun.outcomeMsg string to string[]', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          lastRun: {
+            outcomeMsg: 'Some message',
+          },
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          actions: [],
+          alertDelay: {
+            active: 10,
+          },
+        },
+      });
+
+      expect(result).toMatchObject({
+        lastRun: {
+          outcomeMsg: ['Some message'],
+        },
+      });
+    });
+  });
+
+  it('creates and invalidates UIAM API key as well', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        uiamApiKey: Buffer.from('001:essu_222').toString('base64'),
+      },
+    });
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+      uiamResult: { id: '456', name: '456', api_key: 'essu_def' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        uiamApiKey: '456:essu_def',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw==', 'MDAxOmVzc3VfMjIy'],
+      },
+      expect.any(Object),
+      expect.any(Object)
+    );
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        apiKey: 'MTIzOmFiYw==',
+        uiamApiKey: 'NDU2OmVzc3VfZGVm',
+      })
+    );
+  });
+
+  it('does not leak stale uiamApiKey when new API key set has no UIAM key', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        uiamApiKey: Buffer.from('stale-uiam-id:stale-uiam-key').toString('base64'),
+      },
+    });
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: { bar: true },
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: 'onThrottleInterval',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: { foo: true },
+          },
+        ],
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        revision: 1,
+        scheduledTaskId: 'task-123',
+      },
+      updated_at: new Date().toISOString(),
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: { bar: true },
+        throttle: '5m',
+        notifyWhen: 'onThrottleInterval',
+        actions: [{ group: 'default', id: '1', params: { foo: true } }],
+      },
+    });
+
+    const writtenAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
+  });
+
+  describe('missing UIAM API key tagging', () => {
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
+      // Set up serverless environment
+      const serverlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+        isServerless: true,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+        // To signal that user does not create the API key
+        isAuthenticationTypeAPIKey: () => false,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: null, // Missing UIAM key
+          schedule: { interval: '10s' },
+          actions: [],
+          params: {},
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      // Mock API key creation where UIAM key is missing
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '456', name: '456', api_key: 'def' },
+        // uiamResult is undefined/null - UIAM key creation failed
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '10s' },
+          params: {},
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+      });
+
+      await serverlessRulesClient.update({
+        id: '1',
+        data: {
+          name: 'my rule',
+          tags: ['existing-tag'],
+          schedule: { interval: '10s' },
+          actions: [],
+          params: {},
+          throttle: null,
+          notifyWhen: null,
+        },
+        allowMissingConnectorSecrets: true,
+        shouldIncrementRevision: () => true,
+      });
+
+      // Rule execution owns the missing UIAM key tag.
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'alert',
+        expect.objectContaining({
+          tags: ['existing-tag'],
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should not add missing UIAM API key tag when UIAM key is present during update', async () => {
+      // Set up serverless environment
+      const serverlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+        isServerless: true,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: Buffer.from('456:def').toString('base64'), // UIAM key present
+          schedule: { interval: '10s' },
+          actions: [],
+          params: {},
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      // The rule is enabled, so the API key is rotated: the tag decision is made on the
+      // freshly created key set, which does contain a UIAM key here.
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '456', name: '456', api_key: 'abc' },
+        uiamResult: { id: '789', name: '789', api_key: 'def' },
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '10s' },
+          params: {},
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+      });
+
+      await serverlessRulesClient.update({
+        id: '1',
+        data: {
+          name: 'my rule',
+          tags: ['existing-tag'],
+          schedule: { interval: '10s' },
+          actions: [],
+          params: {},
+          throttle: null,
+          notifyWhen: null,
+        },
+        allowMissingConnectorSecrets: true,
+        shouldIncrementRevision: () => true,
+      });
+
+      // Verify the missing UIAM key tag was NOT added
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'alert',
+        expect.objectContaining({
+          tags: ['existing-tag'], // Only original tags
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should not add missing UIAM API key tag in non-serverless environment during update', async () => {
+      // Non-serverless environment (default rulesClientParams.isServerless = false)
+      const nonServerlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: null, // Missing UIAM key but not serverless
+          schedule: { interval: '10s' },
+          actions: [],
+          params: {},
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: true,
+          schedule: { interval: '10s' },
+          params: {},
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+      });
+
+      await nonServerlessRulesClient.update({
+        id: '1',
+        data: {
+          name: 'my rule',
+          tags: ['existing-tag'],
+          schedule: { interval: '10s' },
+          actions: [],
+          params: {},
+          throttle: null,
+          notifyWhen: null,
+        },
+        allowMissingConnectorSecrets: true,
+        shouldIncrementRevision: () => true,
+      });
+
+      // Verify the missing UIAM key tag was NOT added (non-serverless)
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'alert',
+        expect.objectContaining({
+          tags: ['existing-tag'], // Only original tags
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  test('stamps updatedByProfileUid when the actor has a profile uid', async () => {
+    rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {},
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+      },
+      references: [],
+    });
+
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {},
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [],
+      },
+    });
+
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        updatedBy: 'elastic',
+        updatedByProfileUid: 'u_profile_1',
+        createdByProfileUid: null,
+      }),
+      expect.anything()
+    );
   });
 });

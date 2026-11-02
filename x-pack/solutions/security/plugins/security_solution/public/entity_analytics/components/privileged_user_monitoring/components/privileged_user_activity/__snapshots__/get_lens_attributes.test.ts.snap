@@ -56,9 +56,6 @@ Object {
         "type": "index-pattern",
       },
     ],
-    "query": Object {
-      "esql": "",
-    },
     "visualization": Object {
       "axisTitlesVisibilitySettings": Object {
         "x": false,
@@ -85,7 +82,9 @@ Object {
           "layerType": "data",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "uuidv4()",
+          "splitAccessors": Array [
+            "uuidv4()",
+          ],
           "xAccessor": "uuidv4()",
         },
       ],

@@ -35,7 +35,7 @@ export const KeepPoliciesUpToDateSwitch: React.FunctionComponent<Props> = ({
     <EuiText color="subdued" size="xs">
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="info" />
+          <EuiIcon type="info" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {disabled ? (

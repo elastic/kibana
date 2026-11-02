@@ -80,12 +80,6 @@ describe('Streams Usage Collector (simplified)', () => {
         description: 'Test wired stream',
         ingest: { lifecycle: { inherit: {} }, processing: { steps: [] }, settings: {}, wired: {} },
       },
-      // Group stream should be ignored for current metrics
-      {
-        name: 'group.parent',
-        description: 'A grouped stream',
-        ingest: { lifecycle: { inherit: {} }, processing: { steps: [] }, settings: {}, group: {} },
-      },
     ] as unknown as Streams.all.Definition[];
 
     registerStreamsUsageCollector(usageCollectionMock, mockLogger, makeReader(defs));
@@ -111,8 +105,7 @@ describe('Streams Usage Collector (simplified)', () => {
     await expect(collector.fetch({ esClient: fakeEsClient })).rejects.toThrow('reader error');
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Failed to collect Streams telemetry data',
-      expect.any(Error)
+      'Failed to collect Streams telemetry data: reader error'
     );
   });
 });

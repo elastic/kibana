@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { PackageDataStreamTypes } from '../types';
+
 // Namespace string eventually becomes part of an index name. This method partially implements index name rules from
 // https://github.com/elastic/elasticsearch/blob/master/docs/reference/indices/create-index.asciidoc
 // and implements a limit based on https://github.com/elastic/kibana/issues/75846
@@ -15,7 +17,10 @@ export function isValidNamespace(
   allowBlankNamespace?: boolean,
   allowedNamespacePrefixes?: string[]
 ): { valid: boolean; error?: string } {
-  if (!namespace.trim() && allowBlankNamespace) {
+  // Only a truly empty string is treated as "blank" here. A whitespace-only value (e.g. " ")
+  // must continue on to isValidEntity below so it gets rejected by INVALID_NAMESPACE_CHARACTERS,
+  // instead of being short-circuited as if the namespace were intentionally left blank.
+  if (namespace === '' && allowBlankNamespace) {
     return { valid: true };
   }
 
@@ -24,28 +29,25 @@ export function isValidNamespace(
     return { valid, error };
   }
 
-  for (const prefix of allowedNamespacePrefixes || []) {
-    if (!namespace.trim().startsWith(prefix)) {
-      return allowedNamespacePrefixes?.length === 1
-        ? {
-            valid: false,
-            error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixError', {
-              defaultMessage: 'Namespace should start with {allowedNamespacePrefixes}',
-              values: {
-                allowedNamespacePrefixes: allowedNamespacePrefixes?.[0],
-              },
-            }),
-          }
-        : {
-            valid: false,
-            error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixesError', {
-              defaultMessage:
-                'Namespace should start with one of these prefixes {allowedNamespacePrefixes}',
-              values: {
-                allowedNamespacePrefixes: allowedNamespacePrefixes?.join(', ') ?? '',
-              },
-            }),
-          };
+  if (allowedNamespacePrefixes && allowedNamespacePrefixes.length > 0) {
+    const matchesAnyPrefix = allowedNamespacePrefixes.some((prefix) =>
+      namespace.trim().startsWith(prefix)
+    );
+    if (!matchesAnyPrefix) {
+      return {
+        valid: false,
+        error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixError', {
+          defaultMessage:
+            'Namespace should start with {count, plural, one {{allowedNamespacePrefixes}} other {one of these prefixes: {allowedNamespacePrefixes}}}',
+          values: {
+            count: allowedNamespacePrefixes.length,
+            allowedNamespacePrefixes:
+              allowedNamespacePrefixes.length === 1
+                ? allowedNamespacePrefixes[0]
+                : allowedNamespacePrefixes.join(', '),
+          },
+        }),
+      };
     }
   }
   return { valid: true };
@@ -121,3 +123,45 @@ function isValidEntity(
 }
 
 export const INVALID_NAMESPACE_CHARACTERS = /[\*\\/\?"<>|\s,#:-]+/;
+
+// Namespaces cannot contain `-`, so everything after the last one is the namespace.
+const DATA_STREAM_INDEX_PATTERN_REGEX = /^(logs|metrics)-[a-z0-9_.]+-([^-]+)$/;
+
+/**
+ * Whether `pattern` is a `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>` pattern
+ * accepted by `DATA_STREAM_API_ROUTES.HAS_DATA_PATTERN`, where `<namespace>` is `*` or a valid namespace.
+ */
+export function isValidDataStreamIndexPattern(pattern: string): boolean {
+  const namespace = DATA_STREAM_INDEX_PATTERN_REGEX.exec(pattern)?.[2];
+  if (namespace === undefined) {
+    return false;
+  }
+  return namespace === '*' || isValidNamespace(namespace).valid;
+}
+
+export const VALID_DATA_STREAM_TYPES: readonly PackageDataStreamTypes[] = [
+  'logs',
+  'metrics',
+  'traces',
+  'synthetics',
+  'profiles',
+];
+
+export function isValidDataStreamType(
+  type: string,
+  allowBlank?: boolean
+): { valid: boolean; error?: string } {
+  if (!type.trim() && allowBlank) {
+    return { valid: true };
+  }
+  if (!VALID_DATA_STREAM_TYPES.includes(type as PackageDataStreamTypes)) {
+    return {
+      valid: false,
+      error: i18n.translate('xpack.fleet.dataStreamTypeValidation.invalidValueErrorMessage', {
+        defaultMessage: 'Data stream type must be one of: {allowedTypes}',
+        values: { allowedTypes: VALID_DATA_STREAM_TYPES.join(', ') },
+      }),
+    };
+  }
+  return { valid: true };
+}

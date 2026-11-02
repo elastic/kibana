@@ -40,6 +40,10 @@ describe('deleteConnector lib function', () => {
     expect(mockClient.transport.request).toHaveBeenCalledWith({
       method: 'DELETE',
       path: '/_connector/connectorId',
+      querystring: {
+        hard: true,
+        delete_sync_jobs: true,
+      },
     });
     jest.useRealTimers();
   });

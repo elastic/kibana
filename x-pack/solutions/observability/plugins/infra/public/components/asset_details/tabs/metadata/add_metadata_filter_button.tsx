@@ -41,70 +41,63 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     [item.name, searchCriteria?.filters]
   );
 
-  const handleAddFilter = () => {
-    const newFilter = buildMetadataFilter({
-      field: item.name,
-      value: item.value ?? '',
-      dataView: metrics.dataView,
-      negate: false,
-    });
-    if (newFilter) {
-      telemetry.reportHostFlyoutFilterAdded({
-        field_name: item.name,
+  const handleClick = () => {
+    if (existingFilter) {
+      telemetry.reportHostFlyoutFilterRemoved({
+        field_name: existingFilter.meta.key!,
       });
-      filterManagerService.addFilters(newFilter);
-      toastsService.addSuccess({
-        title: filterAddedToastTitle,
-        toastLifeTimeMs: 10000,
+      filterManagerService.removeFilter(existingFilter);
+    } else {
+      const newFilter = buildMetadataFilter({
+        field: item.name,
+        value: item.value ?? '',
+        dataView: metrics.dataView,
+        negate: false,
       });
+      if (newFilter) {
+        telemetry.reportHostFlyoutFilterAdded({
+          field_name: item.name,
+        });
+        filterManagerService.addFilters(newFilter);
+        toastsService.addSuccess({
+          title: filterAddedToastTitle,
+          toastLifeTimeMs: 10000,
+        });
+      }
     }
   };
 
-  if (existingFilter) {
-    return (
-      <span>
-        <EuiToolTip
-          content={i18n.translate('xpack.infra.metadataEmbeddable.setRemoveFilterTooltip', {
-            defaultMessage: 'Remove filter',
-          })}
-        >
-          <EuiButtonIcon
-            size="s"
-            color="text"
-            iconType="filter"
-            display="base"
-            data-test-subj="infraAssetDetailsMetadataRemoveFilterButton"
-            aria-label={i18n.translate('xpack.infra.metadataEmbeddable.filterAriaLabel', {
-              defaultMessage: 'Filter',
-            })}
-            onClick={() => {
-              telemetry.reportHostFlyoutFilterRemoved({
-                field_name: existingFilter.meta.key!,
-              });
-              filterManagerService.removeFilter(existingFilter);
-            }}
-          />
-        </EuiToolTip>
-      </span>
-    );
-  }
+  const tooltipContent = existingFilter
+    ? i18n.translate('xpack.infra.metadataEmbeddable.setRemoveFilterTooltip', {
+        defaultMessage: 'Remove filter',
+      })
+    : i18n.translate('xpack.infra.metadataEmbeddable.setFilterByValueTooltip', {
+        defaultMessage: 'Filter by value',
+      });
+
+  const ariaLabel = existingFilter
+    ? i18n.translate('xpack.infra.metadataEmbeddable.filterAriaLabel', {
+        defaultMessage: 'Filter',
+      })
+    : i18n.translate('xpack.infra.metadataEmbeddable.AddFilterAriaLabel', {
+        defaultMessage: 'Add filter and reload page',
+      });
 
   return (
     <span data-test-subj={`infraAssetDetailsMetadataField.${item.name}`}>
-      <EuiToolTip
-        content={i18n.translate('xpack.infra.metadataEmbeddable.setFilterByValueTooltip', {
-          defaultMessage: 'Filter by value',
-        })}
-      >
+      <EuiToolTip content={tooltipContent}>
         <EuiButtonIcon
-          color="primary"
           size="s"
+          color={existingFilter ? 'text' : 'primary'}
+          display={existingFilter ? 'base' : 'empty'}
           iconType="filter"
-          data-test-subj="infraAssetDetailsMetadataAddFilterButton"
-          aria-label={i18n.translate('xpack.infra.metadataEmbeddable.AddFilterAriaLabel', {
-            defaultMessage: 'Add filter and reload page',
-          })}
-          onClick={handleAddFilter}
+          data-test-subj={
+            existingFilter
+              ? 'infraAssetDetailsMetadataRemoveFilterButton'
+              : 'infraAssetDetailsMetadataAddFilterButton'
+          }
+          aria-label={ariaLabel}
+          onClick={handleClick}
         />
       </EuiToolTip>
     </span>

@@ -11,15 +11,24 @@ import type { ListrTask } from 'listr2';
 import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
 import { checkDocuments } from './check_documents';
+import { getRollbackMigrationContext } from './rollback_context';
 
 export const testUpgrade: Task = async (ctx, task) => {
+  const { migrationTypes, migrationKibanaIndex, migrationAlgorithm } =
+    getRollbackMigrationContext(ctx);
+
   const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
-    types: ctx.updatedTypes,
+    types: migrationTypes,
+    kibanaIndex: migrationKibanaIndex,
+    settings: { migrations: { algorithm: migrationAlgorithm } },
+    encryptionExtensionFactory: ctx.encryptedSavedObjects
+      ? (typeRegistry) => ctx.encryptedSavedObjects!.__testCreateDangerousExtension(typeRegistry)
+      : undefined,
   });
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run migration on updated types: '${ctx.updatedTypes
+      title: `Run migration on updated types: '${migrationTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await runMigrations(),
@@ -28,7 +37,7 @@ export const testUpgrade: Task = async (ctx, task) => {
       title: `Ensure migrated objects match latest version fixtures`,
       task: checkDocuments({
         repository: savedObjectsRepository,
-        types: ctx.updatedTypes,
+        types: migrationTypes,
         fixtures: ctx.fixtures.current,
       }),
     },

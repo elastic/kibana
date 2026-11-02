@@ -49,8 +49,9 @@ Here are some context for you to reference for your task, read it carefully as y
 You have to replace the macros syntax in the SPL query and use their value inline, if provided.
 
 Always follow the below guidelines when replacing macros:
-- The macros are always identified by backticks (\`).
-- Macros names can be in any case: 
+- The macros are always identified by single backticks (\`), e.g. \`macroName\`.
+- IMPORTANT: Do NOT confuse macros with SPL comments. SPL comments use triple backticks (\`\`\` comment text \`\`\`). Triple-backtick comments must be preserved as-is and must NOT be treated as macros.
+- Macros names can be in any case:
   - camelCase eg. \`someMacroName\`
   - snake_case eg. \`some_macro_name\`
   - kebab-case eg. \`some-macro-name\`
@@ -156,7 +157,17 @@ The correct replacement would be:
   - Make sure the Markdown is formatted correctly and the values properly escaped.
 - Don't add any other information or explanation before or after these two outputs.
 </output_format>
+
+<example_output>
+
+Please find the modified SPL query below:
+
+\`\`\`spl
+sourcetype="somesource" [macro:some_filter]
+| search title="sometitle"
+\`\`\`
+
+</example_output>
 `,
   ],
-  ['ai', 'Please find the modified SPL query below:'],
 ]);

@@ -59,7 +59,7 @@ describe('fetchTrends', () => {
     const expectedOutput = {
       config1location1: {
         configId: 'config1',
-        locationId: 'location1',
+        locationIds: ['location1'],
         data: [
           { x: 0, y: 10 },
           { x: 1, y: 20 },

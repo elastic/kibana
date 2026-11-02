@@ -58,6 +58,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can filter prebuilt rules by rule name on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-rule-name-on-the-rule-installation-page)
     - [**Scenario: User can see a list of available tags on the Rule Installation page**](#scenario-user-can-see-a-list-of-available-tags-on-the-rule-installation-page)
     - [**Scenario: User can filter prebuilt rules by a single tag on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-a-single-tag-on-the-rule-installation-page)
+    - [**Scenario: User can filter prebuilt rules by tags with special characters on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-tags-with-special-characters-on-the-rule-installation-page)
     - [**Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Rule Installation page**](#scenario-user-can-filter-prebuilt-rules-by-multiple-tags-using-and-logic-on-the-rule-installation-page)
     - [**Scenario: User can filter prebuilt rules by name and tags at the same time**](#scenario-user-can-filter-prebuilt-rules-by-name-and-tags-at-the-same-time)
     - [**Scenario: Empty state is shown when filters match no rules**](#scenario-empty-state-is-shown-when-filters-match-no-rules)
@@ -77,6 +78,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: API does not install prebuilt rules if they are up to date**](#scenario-api-does-not-install-prebuilt-rules-if-they-are-up-to-date)
   - [Error handling](#error-handling)
     - [**Scenario: Error is handled when any installation operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-installation-operation-on-prebuilt-rules-fails)
+    - [**Scenario: Installation review API endpoint rejects invalid `page` and `per_page` parameters**](#scenario-installation-review-api-endpoint-rejects-invalid-page-and-per_page-parameters)
+    - [**Scenario: Installation review API endpoint returns an empty response when `page` and `per_page` parameters select rules out of bounds**](#scenario-installation-review-api-endpoint-returns-an-empty-response-when-page-and-per_page-parameters-select-rules-out-of-bounds)
   - [Authorization / RBAC](#authorization--rbac)
     - [**Scenario: User with read privileges on Security Solution cannot install prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-install-prebuilt-rules)
     - [**Scenario: ML rules are not shown in prebuilt rules installation table when user is not an ML admin**](#scenario-ml-rules-are-not-shown-in-prebuilt-rules-installation-table-when-user-is-not-an-ml-admin)
@@ -439,6 +442,23 @@ Then only the available prebuilt rules having this tag should be shown
 
 `<tag>` = any tag from the list of available tags
 
+#### **Scenario: User can filter prebuilt rules by tags with special characters on the Rule Installation page**
+
+**Automation**: 1 API integration test with mock rules.
+
+```Gherkin
+Given multiple prebuilt rules available for installation
+And at least one rule has a <tag_with_special_chars> tag
+When user opens the Rule Installation page
+And filters the available prebuilt rules by <tag_with_special_chars>
+Then only the available prebuilt rules having this tag should be shown
+```
+
+**Examples:**
+
+`<tag_with_special_chars>` = tag containing Elasticsearch Query DSL reserved characters (+ - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /)
+More info in query DSL reserved characters: https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-query-string-query#_reserved_characters
+
 #### **Scenario: User can filter prebuilt rules by multiple tags using AND logic on the Rule Installation page**
 
 **Automation**: 1 API integration test with mock rules.
@@ -756,6 +776,34 @@ Examples:
   | installing selected   |
   | installing individual |
 ```
+
+#### **Scenario: Installation review API endpoint rejects invalid `page` and `per_page` parameters**
+
+**Automation**: 2 integration tests with mock rules - one per each parameter.
+
+```Gherkin
+Given a prebuilt rule asset exists in Kibana
+When user calls the review installation endpoint with invalid value for <field>
+Then the endpoint should return a 400 error with the correct error message
+
+Examples:
+| field    | invalid value                                   |
+| page     | empty string, 0, -1                             |
+| per_page | empty string, 0, -1, 10001 (max value is 10000) |
+```
+
+
+#### **Scenario: Installation review API endpoint returns an empty response when `page` and `per_page` parameters select rules out of bounds**
+
+**Automation**: 1 integration test with mock rules.
+
+```Gherkin
+Given <num_prebuilt_rule_assets> non-installed prebuilt rule assets exist in Kibana  
+When user calls the review installation endpoint with <page> and <per_page> parameters  
+And <page> * <per_page> is greater than <num_prebuilt_rule_assets>  
+Then the endpoint should return an empty list
+```
+
 
 ### Authorization / RBAC
 

@@ -14,7 +14,6 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
-
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
 }

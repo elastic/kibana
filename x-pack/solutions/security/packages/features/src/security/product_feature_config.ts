@@ -14,7 +14,7 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     privileges: {
       all: {
         ui: ['entity-analytics'],
-        api: [`${APP_ID}-entity-analytics`],
+        api: [`${APP_ID}-entity-analytics`, `${APP_ID}-entity-analytics-manage`],
       },
       read: {
         ui: ['entity-analytics'],
@@ -96,8 +96,16 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     subFeatureIds: [SecuritySubFeatureId.trustedDevices],
   },
 
+  [ProductFeatureSecurityKey.endpointCustomYaraSignatures]: {
+    subFeatureIds: [SecuritySubFeatureId.customYaraSignatures],
+  },
+
   [ProductFeatureSecurityKey.endpointPolicyManagement]: {
     subFeatureIds: [SecuritySubFeatureId.policyManagement],
+  },
+
+  [ProductFeatureSecurityKey.endpointScriptsManagement]: {
+    subFeatureIds: [SecuritySubFeatureId.scriptsManagement],
   },
 
   // Adds no additional kibana feature controls

@@ -7,6 +7,7 @@
 
 jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
+import { ScheduleType } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
 import type {
@@ -25,7 +26,7 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import type { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import type { ReportingRequestHandlerContext, ReportingSetup, ReportingUser } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -64,7 +65,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 describe('Handle request to schedule', () => {
@@ -141,7 +141,7 @@ describe('Handle request to schedule', () => {
 
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
-      user: { username: 'testymcgee' },
+      user: { username: 'testymcgee' } as ReportingUser,
       context: mockContext,
       path: '/api/reporting/test/generate/pdf',
       // @ts-ignore
@@ -159,7 +159,7 @@ describe('Handle request to schedule', () => {
         schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -240,6 +240,143 @@ describe('Handle request to schedule', () => {
       });
     });
 
+    test('creates a scheduled_report saved object with a realm-qualified createdById for a realm-bearing user', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({ path: '/foo' }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        expect.objectContaining({
+          createdBy: 'testymcgee',
+          createdById: ['realm:["native","default_native","testymcgee"]'],
+        }),
+        { id: 'mock-report-id' }
+      );
+    });
+
+    test('creates a scheduled_report saved object with createdById resolved via an API key profile lookup', async () => {
+      const apiKeyId = 'skdjtq4u543yt3rhewrh';
+      const esClient = await reportingCore.getEsClient();
+      const scopedEsClient = esClient.asScoped(mockRequest);
+      (scopedEsClient.asCurrentUser.security.getApiKey as jest.Mock).mockResolvedValue({
+        api_keys: [{ id: apiKeyId, profile_uid: 'profile-from-api-key' }],
+      });
+
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          authentication_type: 'api_key',
+          authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
+          lookup_realm: { type: '_es_api_key', name: '_es_api_key' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({
+          path: '/foo',
+          headers: {
+            authorization: `ApiKey ${Buffer.from(`${apiKeyId}:secret`).toString('base64')}`,
+          },
+        }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        expect.objectContaining({
+          createdBy: 'testymcgee',
+          createdById: ['profile-from-api-key'],
+          createdByApiKeyId: apiKeyId,
+        }),
+        { id: 'mock-report-id' }
+      );
+      expect(scopedEsClient.asCurrentUser.security.getApiKey).toHaveBeenCalledWith({
+        with_profile_uid: true,
+        id: apiKeyId,
+      });
+    });
+
+    test('records only the api key id for a UIAM key, whose creator cannot be resolved', async () => {
+      const esClient = await reportingCore.getEsClient();
+      const scopedEsClient = esClient.asScoped(mockRequest);
+
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'uiam-key-id',
+          authentication_type: 'api_key',
+          api_key: { id: 'uiam-key-id', managed_by: 'cloud' },
+          authentication_realm: { type: '_cloud_api_key', name: '_cloud_api_key' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({
+          path: '/foo',
+          headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+        }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const attributes = (soClient.create as jest.Mock).mock.calls[0][1];
+      expect(attributes.createdByApiKeyId).toBe('uiam-key-id');
+      expect(attributes.createdById).toBeUndefined();
+      expect(scopedEsClient.asCurrentUser.security.getApiKey).not.toHaveBeenCalled();
+    });
+
+    test('records no api key id for a report created through a session', async () => {
+      requestHandler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: {
+          username: 'testymcgee',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: httpServerMock.createKibanaRequest({ path: '/foo' }),
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+
+      await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const attributes = (soClient.create as jest.Mock).mock.calls[0][1];
+      expect(attributes.createdByApiKeyId).toBeUndefined();
+    });
+
     test('creates a scheduled_report saved object with notification', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
@@ -248,7 +385,7 @@ describe('Handle request to schedule', () => {
         notification: { email: { to: ['a@b.com'] } },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -339,7 +476,7 @@ describe('Handle request to schedule', () => {
         },
       });
 
-      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      const { id, created_at, payload, ...snapObj } = report;
       expect(snapObj).toMatchInlineSnapshot(`
         Object {
           "created_by": "testymcgee",
@@ -794,26 +931,53 @@ describe('Handle request to schedule', () => {
           `);
     });
 
-    test('disallows invalid browser timezone', async () => {
+    test('disallows an export type that a serverless feature flag has disabled', async () => {
+      const isExportTypeEnabled = jest
+        .spyOn(reportingCore, 'isExportTypeEnabled')
+        .mockResolvedValue(false);
+
       expect(
         await requestHandler.handleRequest({
           exportTypeId: 'csv_searchsource',
-          jobParams: {
-            ...mockJobParams,
-            browserTimezone: 'America/Amsterdam',
-          },
+          jobParams: mockJobParams,
         })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "body": "Invalid timezone \\"America/Amsterdam\\".",
-        }
-      `);
+      ).toEqual({ body: 'Invalid export-type of csv_searchsource' });
+      expect(isExportTypeEnabled).toHaveBeenCalledWith('csv_searchsource', ScheduleType.SCHEDULED);
     });
 
-    test('disallows scheduling when user is "false"', async () => {
+    test('disallows invalid browser timezone', async () => {
+      const handler = new ScheduleRequestHandler({
+        reporting: reportingCore,
+        user: { username: 'testymcgee' } as ReportingUser,
+        context: mockContext,
+        path: '/api/reporting/test/generate/pdf',
+        req: {
+          ...mockRequest,
+          query: {},
+          params: { exportType: 'printablePdfV2' },
+          body: {
+            schedule: { rrule: { freq: 1, interval: 2, tzid: 'America/Amsterdam' } },
+            jobParams: rison.encode({
+              ...mockJobParams,
+              browserTimezone: 'America/Amsterdam',
+            }),
+          },
+        },
+        res: mockResponseFactory,
+        logger: mockLogger,
+      });
+      try {
+        await handler.getJobParams();
+      } catch (err) {
+        expect(err.statusCode).toBe(400);
+        expect(err.body).toEqual('invalid params: browserTimezone: Invalid timezone');
+      }
+    });
+
+    test('disallows scheduling when user is undefined', async () => {
       requestHandler = new ScheduleRequestHandler({
         reporting: reportingCore,
-        user: false,
+        user: undefined,
         context: mockContext,
         path: '/api/reporting/test/generate/pdf',
         // @ts-ignore

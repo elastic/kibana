@@ -8,7 +8,7 @@ import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -16,21 +16,21 @@ import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
-  TimelineEdges,
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
   TimelineEventsAllStrategyResponse,
-  TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import type { TimelineEdges, TimelineItem } from '@kbn/securitysolution-timeline-common';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   EntityType,
+  RunTimeMappings,
   TimelineFactoryQueryTypes,
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction } from '@kbn/securitysolution-data-table';
 import { DETECTIONS_TABLE_IDS } from '../../../detections/constants';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
@@ -49,6 +49,7 @@ export interface TimelineArgs {
   inspect: InspectResponse;
   loadPage: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
+  rawEvents: EsHitRecord[];
   refetch: Refetch;
   totalCount: number;
   updatedAt: number;
@@ -214,6 +215,7 @@ export const useTimelineEventsHandler = ({
       querySize: 0,
     },
     events: [],
+    rawEvents: [],
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
@@ -253,6 +255,7 @@ export const useTimelineEventsHandler = ({
                       ...prevResponse,
                       consumers: response.consumers,
                       events: getTimelineEvents(response.edges),
+                      rawEvents: (response.rawResponse?.hits?.hits ?? []) as EsHitRecord[],
                       inspect: getInspectResponse(response, prevResponse.inspect),
                       pageInfo: response.pageInfo,
                       totalCount: response.totalCount,
@@ -403,6 +406,7 @@ export const useTimelineEventsHandler = ({
           querySize: 0,
         },
         events: [],
+        rawEvents: [],
         loadPage: wrappedLoadPage,
         updatedAt: 0,
       });

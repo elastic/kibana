@@ -10,7 +10,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { updateMaintenanceWindowRoute } from './update_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import { transformUpdateBody } from './transforms';
 import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
@@ -24,7 +24,7 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
@@ -89,8 +89,9 @@ describe('updateMaintenanceWindowRoute', () => {
       data: transformUpdateBody(updateParams),
     });
 
+    const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
+      body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
     });
   });
 
@@ -197,8 +198,10 @@ describe('updateMaintenanceWindowRoute', () => {
       data: transformUpdateBody(updateParams2),
     });
 
+    const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow2; // internal api response doesn't have schedule
+
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow2),
+      body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
     });
   });
 });

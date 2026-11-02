@@ -8,32 +8,24 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionCursorApi } from '../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 
 /**
- * This function retrieves the current workflow execution and verifies if cancellation requested.
- * In case when cancelRequested is true, it aborts the monitoredContext.abortController and marks the workflow as cancelled.
- * When monitoredContext.abortController.abort() is called, it will send cancellation signal to currently running node/step,
- * and in case if the node/step supports cancellation (like HTTP step with AbortSignal), it will stop its execution immediately.
+ * Reads in-memory execution state and, when cancelRequested is true, aborts the running step
+ * and marks the current step and its scopes as cancelled.
+ * Aborting the step's AbortController stops a step that supports cancellation (for example an HTTP step).
  */
 export async function cancelWorkflowIfRequested(
-  workflowExecutionRepository: WorkflowExecutionRepository,
   workflowExecutionState: WorkflowExecutionState,
   monitoredStepExecutionRuntime: StepExecutionRuntime,
+  workflowExecutionCursor: WorkflowExecutionCursorApi,
   monitorAbortController?: AbortController
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
-    const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-      workflowExecutionState.getWorkflowExecution().id,
-      workflowExecutionState.getWorkflowExecution().spaceId
-    );
-
-    if (!currentExecution?.cancelRequested) {
-      return;
-    }
+    return;
   }
 
   monitorAbortController?.abort();
@@ -42,8 +34,7 @@ export async function cancelWorkflowIfRequested(
 
   // mark current step scopes as cancelled
   while (!nodeStack.isEmpty()) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const scopeData = nodeStack.getCurrentScope()!;
+    const scopeData = nodeStack.getCurrentScope();
     nodeStack = nodeStack.exitScope();
     const stepExecutionId = buildStepExecutionId(
       workflowExecutionState.getWorkflowExecution().id,
@@ -69,4 +60,5 @@ export async function cancelWorkflowIfRequested(
   workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.CANCELLED,
   });
+  workflowExecutionCursor.stop();
 }

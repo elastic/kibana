@@ -163,6 +163,22 @@ export function DatatableAppearanceSettings({
           />
         </EuiToolTip>
       </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.table.visualOptionsShowRowNumbers', {
+          defaultMessage: 'Show row numbers',
+        })}
+        display="columnCompressed"
+        fullWidth
+      >
+        <EuiSwitch
+          compressed
+          data-test-subj="lens-table-row-numbers-switch"
+          label=""
+          showLabel={false}
+          checked={!!state.showRowNumbers}
+          onChange={() => setState({ ...state, showRowNumbers: !state.showRowNumbers })}
+        />
+      </EuiFormRow>
     </>
   );
 }

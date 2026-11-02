@@ -8,12 +8,13 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getServerlessProject } from '@kbn/test-kibana-server';
 import type { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import Path from 'path';
 import * as Url from 'url';
 import { schema } from './schema';
-import { formatCurrentDate, getProjectType, getOrganizationId } from './utils/common';
+import { formatCurrentDate, getOrganizationId } from './utils/common';
 import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 
 const $values = Symbol('values');
@@ -105,15 +106,23 @@ export class Config {
   }
 
   public getScoutTestConfig(): ScoutTestConfig {
+    const isServerless = this.get('serverless');
+    const serverArgs: string[] = this.get('kbnTestServer.serverArgs');
+    const serverlessProject = isServerless ? getServerlessProject(serverArgs) : undefined;
+
     return {
-      serverless: this.get('serverless'),
-      uiam: this.get('esServerlessOptions.uiam', false),
-      projectType: this.get('serverless')
-        ? getProjectType(this.get('kbnTestServer.serverArgs'))
-        : undefined,
-      organizationId: this.get('serverless')
-        ? getOrganizationId(this.get('kbnTestServer.serverArgs'))
-        : undefined,
+      serverless: isServerless,
+      http2: this.get('http2'),
+      // `uiam` reflects what the local server was actually started with:
+      // - on serverless, it comes from `esServerlessOptions.uiam` (set by the
+      //   chosen TS config set, e.g. the default UIAM-on configs in
+      //   `default/serverless/...` or future UIAM-off variants);
+      // - on stateful, UIAM is never available, so we force `false` regardless
+      //   of any (mis)configured server option.
+      uiam: isServerless ? this.get('esServerlessOptions.uiam') : false,
+      projectType: serverlessProject?.projectType,
+      productTier: serverlessProject?.productTier,
+      organizationId: isServerless ? getOrganizationId(serverArgs) : undefined,
       isCloud: false,
       license: this.get('esTestCluster.license'),
       cloudUsersFilePath: Path.resolve(REPO_ROOT, '.ftr', 'role_users.json'),
@@ -133,6 +142,24 @@ export class Config {
         username: this.get('servers.kibana.username'),
         password: this.get('servers.kibana.password'),
       },
+
+      ...(this.get('esServerlessOptions.cps', false) && this.get('servers.linkedElasticsearch.port')
+        ? {
+            linkedProject: {
+              hosts: {
+                elasticsearch: Url.format({
+                  protocol: this.get('servers.linkedElasticsearch.protocol'),
+                  hostname: this.get('servers.linkedElasticsearch.hostname'),
+                  port: this.get('servers.linkedElasticsearch.port'),
+                }),
+              },
+              auth: {
+                username: this.get('servers.linkedElasticsearch.username'),
+                password: this.get('servers.linkedElasticsearch.password'),
+              },
+            },
+          }
+        : {}),
 
       metadata: {
         generatedOn: formatCurrentDate(),

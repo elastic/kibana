@@ -143,6 +143,8 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  isOverlayOpen: boolean;
+  setIsOverlayOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setTraceOptions: (traceOptions: {
     apmUrl: string;
     langSmithProject: string;
@@ -173,6 +175,14 @@ export const useAssistantContext = () => {
 
   return context;
 };
+
+/**
+ * Same context as {@link useAssistantContext}, but returns `undefined` when no provider is present.
+ * Prefer {@link useAssistantContext} for assistant UI; use this only when a hook must degrade
+ * gracefully outside `AssistantProvider` (e.g. embedded previews).
+ */
+export const useMaybeAssistantContext = (): UseAssistantContext | undefined =>
+  React.useContext(AssistantContext);
 
 export const useAssistantContextValue = (props: AssistantProviderProps): UseAssistantContext => {
   const {
@@ -285,6 +295,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
    * Global Assistant Overlay actions
    */
   const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
   /**
    * Current User Avatar
@@ -357,6 +368,8 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       >,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      isOverlayOpen,
+      setIsOverlayOpen,
       setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
@@ -400,6 +413,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       setShowAnonymizedValues,
       contentReferencesVisible,
       setContentReferencesVisible,
+      isOverlayOpen,
       setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,

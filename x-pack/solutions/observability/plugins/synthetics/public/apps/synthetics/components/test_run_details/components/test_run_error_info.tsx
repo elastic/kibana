@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import * as React from 'react';
 import type { SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
 import { StdErrorLogs } from '../../common/components/stderr_logs';
+import { useGetUrlParams } from '../../../hooks';
 import {
   ERROR_RUNNING_TEST,
   FAILED_TO_RUN,
@@ -29,18 +31,17 @@ export const TestRunErrorInfo = ({
 
   const errorMessage = journeyDetails?.journey?.error?.message;
 
+  const { remoteName } = useGetUrlParams();
+
   return (
     <>
       {(hasNoSteps || isDownMonitor) && showErrorTitle && (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           title={ERROR_RUNNING_TEST}
-          color="danger"
-          iconType="warning"
-        >
-          <EuiText color="danger">{errorMessage ?? FAILED_TO_RUN}</EuiText>
-        </EuiCallOut>
+          text={errorMessage ?? FAILED_TO_RUN}
+        />
       )}
       <EuiSpacer size="m" />
       {(showErrorLogs || hasNoSteps) && (
@@ -48,6 +49,7 @@ export const TestRunErrorInfo = ({
           checkGroup={journeyDetails?.journey?.monitor.check_group}
           hideTitle={false}
           pageSize={10}
+          remoteName={remoteName}
         />
       )}
     </>

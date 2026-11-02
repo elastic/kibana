@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useAllHost } from '../../containers/hosts';
+import { useAllEntityStoreHosts, useAllHost } from '../../containers/hosts';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HostsQueryTabBody } from './hosts_query_tab_body';
 import { HostsType } from '../../store/model';
@@ -19,6 +19,7 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('Hosts query tab body', () => {
   const mockUseAllHost = useAllHost as jest.Mock;
+  const mockUseAllEntityStoreHosts = useAllEntityStoreHosts as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     indexNames: [],
@@ -31,22 +32,21 @@ describe('Hosts query tab body', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-    mockUseAllHost.mockReturnValue([
-      false,
-      {
-        hosts: [],
-        id: '123',
-        inspect: {
-          dsl: [],
-          response: [],
-        },
-        isInspected: false,
-        totalCount: 0,
-        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-        loadPage: jest.fn(),
-        refetch: jest.fn(),
+    const emptyHostsArgs = {
+      hosts: [],
+      id: '123',
+      inspect: {
+        dsl: [],
+        response: [],
       },
-    ]);
+      isInspected: false,
+      totalCount: 0,
+      pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
+      loadPage: jest.fn(),
+      refetch: jest.fn(),
+    };
+    mockUseAllHost.mockReturnValue([false, emptyHostsArgs]);
+    mockUseAllEntityStoreHosts.mockReturnValue([false, emptyHostsArgs]);
   });
   it('toggleStatus=true, do not skip', () => {
     render(

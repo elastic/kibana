@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlyoutFooter } from '@elastic/eui';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { Footer } from '../../flyout_v2/attack/main/footer';
+import { useAttackDetailsContext } from './context';
+import { FLYOUT_FOOTER_TEST_ID } from './constants/test_ids';
 
-export const FLYOUT_FOOTER_TEST_ID = 'attack-details-flyout-footer';
+export { FLYOUT_FOOTER_TEST_ID };
 
 /**
- * Bottom section of the flyout that contains the take action button
+ * Bottom section of the legacy attack details flyout. Delegates to the v2 Footer,
+ * supplying props from context.
  */
-export const PanelFooter = () => (
-  <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
-    <EuiPanel color="transparent">
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false} />
-      </EuiFlexGroup>
-    </EuiPanel>
-  </EuiFlyoutFooter>
-);
+export const PanelFooter = () => {
+  const { attack, searchHit, refetch } = useAttackDetailsContext();
+
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
+  if (!attack) return null;
+
+  return (
+    <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
+      <Footer attack={attack} hit={hit} onAttackUpdated={refetch} />
+    </EuiFlyoutFooter>
+  );
+};
 
 PanelFooter.displayName = 'PanelFooter';

@@ -182,14 +182,6 @@ export const topNavStrings = {
       defaultMessage: 'Full Screen Mode',
     }),
   },
-  labs: {
-    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
-      defaultMessage: 'labs',
-    }),
-    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
-      defaultMessage: 'Labs',
-    }),
-  },
   edit: {
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
@@ -223,7 +215,7 @@ export const topNavStrings = {
   },
   resetChanges: {
     label: i18n.translate('dashboard.topNave.resetChangesButtonAriaLabel', {
-      defaultMessage: 'Reset',
+      defaultMessage: 'Reset changes',
     }),
     description: i18n.translate('dashboard.topNave.resetChangesConfigDescription', {
       defaultMessage: 'Reset changes to dashboard',
@@ -243,6 +235,18 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.exportConfigDescription', {
       defaultMessage: 'Export dashboard',
+    }),
+    jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
+      defaultMessage: 'Export JSON',
+    }),
+    pngLabel: i18n.translate('dashboard.topNave.exportPngButtonAriaLabel', {
+      defaultMessage: 'PNG reports',
+    }),
+    pdfLabel: i18n.translate('dashboard.topNave.exportPdfButtonAriaLabel', {
+      defaultMessage: 'PDF reports',
+    }),
+    scheduleExportLabel: i18n.translate('dashboard.topNave.scheduleExportButtonAriaLabel', {
+      defaultMessage: 'Schedule export',
     }),
   },
   share: {
@@ -286,7 +290,7 @@ export const topNavStrings = {
   },
   add: {
     label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'add',
+      defaultMessage: 'Add',
     }),
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add content to your dashboard',
@@ -308,37 +312,15 @@ export const topNavStrings = {
       defaultMessage: 'Additional save options',
     }),
   },
+  history: {
+    label: i18n.translate('dashboard.topNav.historyLabel', {
+      defaultMessage: 'History',
+    }),
+  },
+  unsavedChangesTooltip: i18n.translate('dashboard.topNav.unsavedChangesTooltip', {
+    defaultMessage: 'You have unsaved changes',
+  }),
 };
-
-export const getControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.controlsButtonTitle', {
-    defaultMessage: 'Controls',
-  });
-
-export const getAddControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Control',
-  });
-
-export const getAddESQLControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
-    defaultMessage: 'Variable control',
-  });
-
-export const getEditControlGroupButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
-    defaultMessage: 'Settings',
-  });
-
-export const getOnlyOneTimeSliderControlMsg = () =>
-  i18n.translate('dashboard.editingToolbar.onlyOneTimeSliderControlMsg', {
-    defaultMessage: 'Control group already contains time slider control.',
-  });
-
-export const getAddTimeSliderControlButtonTitle = () =>
-  i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
-    defaultMessage: 'Time slider control',
-  });
 
 export const contentEditorFlyoutStrings = {
   readonlyReason: {

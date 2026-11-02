@@ -10,9 +10,11 @@ import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { i18n } from '@kbn/i18n';
 import axios from 'axios';
+import { API_BASE_PATH } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -34,14 +36,8 @@ export const registerClustersRoute = ({
 }: ClustersRouteOptions) => {
   router.get(
     {
-      path: '/internal/cloud_connect/cluster_details',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      path: `${API_BASE_PATH}/cluster_details`,
+      security: CLOUD_CONNECT_READ_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -106,40 +102,25 @@ export const registerClustersRoute = ({
         logger.error('Failed to retrieve cluster details', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
           const errorData = error.response?.data;
+          const apiStatusCode = error.response?.status;
 
-          if (status === 401) {
-            return response.unauthorized({
-              body: {
-                message: 'Invalid or expired API key',
-              },
-            });
-          }
+          // Extract error message from backend response
+          const errorMessage =
+            errorData?.errors?.[0]?.message ||
+            errorData?.message ||
+            'Failed to retrieve cluster details';
 
-          if (status === 403) {
-            return response.forbidden({
-              body: {
-                message: 'Insufficient permissions to access cluster details',
-              },
-            });
-          }
+          // Use 500 for 401 errors to prevent Kibana logout
+          // For all other errors, use the status code from the API
+          const statusCode = apiStatusCode === 401 ? 500 : apiStatusCode || 500;
 
-          if (status === 404) {
-            return response.notFound({
-              body: {
-                message: 'Cluster not found',
-              },
-            });
-          }
-
-          if (status === 400) {
-            return response.badRequest({
-              body: {
-                message: errorData?.message || 'Invalid request',
-              },
-            });
-          }
+          return response.customError({
+            statusCode,
+            body: {
+              message: errorMessage,
+            },
+          });
         }
 
         return response.customError({
@@ -154,14 +135,8 @@ export const registerClustersRoute = ({
 
   router.delete(
     {
-      path: '/internal/cloud_connect/cluster',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      path: `${API_BASE_PATH}/cluster`,
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -206,12 +181,13 @@ export const registerClustersRoute = ({
         logger.error('Failed to disconnect cluster', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
           return response.customError({
-            statusCode: status,
-            body: errorData || { message: 'An error occurred while disconnecting the cluster' },
+            statusCode: 500,
+            body: errorData || {
+              message: 'An error occurred while disconnecting the cluster',
+            },
           });
         }
 
@@ -227,18 +203,12 @@ export const registerClustersRoute = ({
 
   router.put(
     {
-      path: '/internal/cloud_connect/cluster_details',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      path: `${API_BASE_PATH}/cluster_details`,
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: {
         body: schema.object({
           services: schema.recordOf(
-            schema.string(),
+            schema.string({ maxLength: 256 }),
             schema.object({
               enabled: schema.boolean(),
             })
@@ -269,10 +239,10 @@ export const registerClustersRoute = ({
 
         // Update cluster services via Cloud Connect API
         const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
-        const updatedCluster = await cloudConnectClient.updateClusterServices(
+        const updatedCluster = await cloudConnectClient.updateCluster(
           apiKeyData.apiKey,
           apiKeyData.clusterId,
-          request.body.services
+          { services: request.body.services }
         );
 
         logger.debug(`Successfully updated cluster services: ${updatedCluster.id}`);
@@ -293,13 +263,11 @@ export const registerClustersRoute = ({
             );
 
             try {
-              await cloudConnectClient.updateClusterServices(
-                apiKeyData.apiKey,
-                apiKeyData.clusterId,
-                {
+              await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+                services: {
                   eis: { enabled: false },
-                }
-              );
+                },
+              });
               logger.info('Successfully rolled back EIS enablement in Cloud API');
             } catch (rollbackError) {
               logger.error('Failed to rollback Cloud API changes', { error: rollbackError });
@@ -327,13 +295,11 @@ export const registerClustersRoute = ({
             // If enabling the inference CCM settings failed, we need to rollback the service state
             const rollbackEnabled = !eisRequest.enabled;
             try {
-              await cloudConnectClient.updateClusterServices(
-                apiKeyData.apiKey,
-                apiKeyData.clusterId,
-                {
+              await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+                services: {
                   eis: { enabled: rollbackEnabled },
-                }
-              );
+                },
+              });
               logger.info(
                 `Successfully rolled back EIS to enabled=${rollbackEnabled} in Cloud API`
               );
@@ -366,7 +332,6 @@ export const registerClustersRoute = ({
         logger.error('Failed to update cluster services', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
           // Extract error code from Cloud Connect API error format
@@ -387,7 +352,7 @@ export const registerClustersRoute = ({
           }
 
           return response.customError({
-            statusCode: status,
+            statusCode: 500,
             body: {
               message: errorMessage,
               ...(errorCode && { code: errorCode }),

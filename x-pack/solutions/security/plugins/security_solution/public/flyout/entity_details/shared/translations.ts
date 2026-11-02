@@ -11,6 +11,13 @@ export const USER = i18n.translate('xpack.securitySolution.flyout.entityDetails.
   defaultMessage: 'User',
 });
 
+export const NO_CORRESPONDING_ENTITY_EXISTS = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.noCorrespondingEntityExists',
+  {
+    defaultMessage: 'No corresponding entity exists.',
+  }
+);
+
 export const FAIL_MANAGED_USER = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.failManagedUserDescription',
   {

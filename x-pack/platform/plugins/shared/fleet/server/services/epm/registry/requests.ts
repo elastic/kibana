@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Agent as HttpsAgent } from 'https';
+import type { Agent as HttpAgent } from 'http';
+
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
 import pRetry from 'p-retry';
@@ -12,12 +15,11 @@ import pRetry from 'p-retry';
 import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import type { RegistryConnectionErrorType } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
-import type { Agent as HttpAgent } from 'http';
-import type { Agent as HttpsAgent } from 'https';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
@@ -74,7 +76,13 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
   } catch (error) {
     // isSystemError here means we didn't succeed after max retries
     if (isSystemError(error)) {
-      throw new RegistryConnectionError(`Error connecting to package registry: ${error.message}`);
+      const { type, reason } = categorizeRegistryConnectionError(error);
+      throw new RegistryConnectionError(
+        `Error connecting to package registry: ${error.message} (type: ${type}${
+          reason ? `, reason: ${reason}` : ''
+        })`,
+        { type, reason }
+      );
     }
     // don't wrap our own errors
     if (error instanceof RegistryError) {
@@ -144,6 +152,41 @@ function isFetchError(error: FailedAttemptErrors): error is FetchError {
 
 function isSystemError(error: FailedAttemptErrors): boolean {
   return isFetchError(error) && error.type === 'system';
+}
+
+// Node system error codes grouped into operator-facing categories. The Elasticsearch
+// client in Kibana applies similar categorization to its connection failures.
+const REGISTRY_ERROR_CODES_BY_TYPE: Record<
+  Exclude<RegistryConnectionErrorType, 'unknown'>,
+  readonly string[]
+> = {
+  timeout: ['ETIMEDOUT', 'ESOCKETTIMEDOUT', 'ECONNABORTED'],
+  dns: ['ENOTFOUND', 'EAI_AGAIN'],
+  connection: ['ECONNREFUSED', 'ECONNRESET', 'EHOSTUNREACH', 'ENETUNREACH', 'EPIPE', 'EPROTO'],
+};
+
+// Maps a system `FetchError` to a failure `type` (timeout/dns/connection/unknown) and a
+// `reason` (the raw Node error code) so operators can distinguish EPR failure modes.
+// NOTE: node-fetch only emits its own `request-timeout` error when a `timeout` fetch option
+// is set (we don't set one), so socket-level timeouts arrive here as the system code
+// `ETIMEDOUT`. If a fetch `timeout` is ever introduced, `request-timeout` typed errors would
+// bypass `isSystemError` and fall through to the generic `RegistryError`, and this
+// categorization would need to account for them.
+export function categorizeRegistryConnectionError(error: FailedAttemptErrors): {
+  type: RegistryConnectionErrorType;
+  reason?: string;
+} {
+  const code = isFetchError(error) ? error.code : undefined;
+
+  if (!code) {
+    return { type: 'unknown' };
+  }
+
+  const matchedType = (
+    Object.keys(REGISTRY_ERROR_CODES_BY_TYPE) as Array<keyof typeof REGISTRY_ERROR_CODES_BY_TYPE>
+  ).find((type) => REGISTRY_ERROR_CODES_BY_TYPE[type].includes(code));
+
+  return { type: matchedType ?? 'unknown', reason: code };
 }
 
 function isRegistry5xxError(error: FailedAttemptErrors): boolean {

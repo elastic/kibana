@@ -26,10 +26,11 @@ export const sslSchema = schema.object(
   {
     certificate: schema.maybe(schema.string()),
     certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+      schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()])
     ),
     cipherSuites: schema.arrayOf(schema.string(), {
       defaultValue: cryptoConstants.defaultCoreCipherList.split(':'),
+      maxSize: 100,
     }),
     enabled: schema.boolean({
       defaultValue: false,
@@ -52,7 +53,7 @@ export const sslSchema = schema.object(
         schema.literal(TLS_V1_2),
         schema.literal(TLS_V1_3),
       ]),
-      { defaultValue: [TLS_V1_2, TLS_V1_3], minSize: 1 }
+      { defaultValue: [TLS_V1_2, TLS_V1_3], minSize: 1, maxSize: 10 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],

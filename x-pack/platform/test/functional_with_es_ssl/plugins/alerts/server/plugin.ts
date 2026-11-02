@@ -109,6 +109,18 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   },
 };
 
+const alertingFeatures = [
+  {
+    ruleTypeId: 'test.always-firing',
+    consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+  },
+  { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
+  {
+    ruleTypeId: 'test.failing',
+    consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+  },
+];
+
 export class AlertingFixturePlugin
   implements Plugin<void, void, AlertingExampleDeps, AlertingExampleDeps>
 {
@@ -133,17 +145,10 @@ export class AlertingFixturePlugin
         all: {
           alerting: {
             rule: {
-              all: [
-                {
-                  ruleTypeId: 'test.always-firing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
-                {
-                  ruleTypeId: 'test.failing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-              ],
+              all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
           },
           savedObject: {
@@ -155,17 +160,10 @@ export class AlertingFixturePlugin
         read: {
           alerting: {
             rule: {
-              all: [
-                {
-                  ruleTypeId: 'test.always-firing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
-                {
-                  ruleTypeId: 'test.failing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-              ],
+              all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
           },
           savedObject: {

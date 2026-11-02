@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import {
+  ALERT_REASON,
+  ALERT_RULE_DESCRIPTION,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_UUID,
+  ALERT_URL,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import type { SearchHit } from '../../../../../common/search_strategy';
 
 /**
@@ -14,7 +23,16 @@ export const mockSearchHit: SearchHit = {
   _index: 'index',
   _id: 'id',
   fields: {
-    'kibana.alert.rule.parameters': [
+    [ALERT_RULE_UUID]: ['ruleId'],
+    [ALERT_RULE_NAME]: ['ruleName'],
+    [ALERT_RULE_DESCRIPTION]: ['ruleDescription'],
+    [TIMESTAMP]: ['2020-01-01T00:00:00.000Z'],
+    'host.name': ['hostName'],
+    'user.name': ['userName'],
+    'agent.id': ['agentId'],
+    [ALERT_URL]: ['alertUrl'],
+    [ALERT_REASON]: ['reason'],
+    [ALERT_RULE_PARAMETERS]: [
       {
         threat: [
           {

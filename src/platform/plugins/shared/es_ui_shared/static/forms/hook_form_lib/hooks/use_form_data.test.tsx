@@ -79,7 +79,7 @@ describe('useFormData() hook', () => {
     test('should return the form data', () => {
       render(<TestComp onHookValueChange={onChangeSpy} />);
 
-      expect(onChangeSpy).toBeCalledTimes(1);
+      expect(onChangeSpy).toHaveBeenCalledTimes(1);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleInitialValue' });
     });

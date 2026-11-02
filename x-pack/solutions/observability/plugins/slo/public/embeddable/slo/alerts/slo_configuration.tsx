@@ -14,36 +14,27 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
-  EuiSwitch,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { SloSelector } from './slo_selector';
-import type { EmbeddableSloProps, SloItem } from './types';
+import type { AlertsCustomState, SloItem } from './types';
 
 interface SloConfigurationProps {
-  initialInput?: EmbeddableSloProps;
-  onCreate: (props: EmbeddableSloProps) => void;
+  initialInput?: AlertsCustomState;
+  onCreate: (props: AlertsCustomState) => void;
   onCancel: () => void;
 }
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
-  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(
-    initialInput?.showAllGroupByInstances ?? false
-  );
-  const [selectedSlos, setSelectedSlos] = useState(initialInput?.slos ?? []);
-
+  const [selectedSlos, setSelectedSlos] = useState<SloItem[]>(initialInput?.slos ?? []);
   const [hasError, setHasError] = useState(false);
 
-  const onConfirmClick = () => onCreate({ slos: selectedSlos, showAllGroupByInstances });
-
-  const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== ALL_VALUE);
+  const onConfirmClick = () => onCreate({ slos: selectedSlos });
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'alertsConfigurationFlyout',
@@ -75,34 +66,13 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
               singleSelection={false}
               onSelected={(slos) => {
                 setHasError(slos === undefined);
-                if (Array.isArray(slos)) {
-                  setSelectedSlos(
-                    slos?.map((slo) => ({
-                      id: slo?.id,
-                      instanceId: slo?.instanceId,
-                      name: slo?.name,
-                      groupBy: slo?.groupBy,
-                    })) as SloItem[]
-                  );
+                if (slos) {
+                  setSelectedSlos(slos);
                 }
               }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {hasGroupBy && (
-          <>
-            <EuiSpacer />
-            <EuiSwitch
-              label={i18n.translate('xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel', {
-                defaultMessage: 'Show all related group-by instances',
-              })}
-              checked={showAllGroupByInstances}
-              onChange={(e) => {
-                setShowAllGroupByInstances(e.target.checked);
-              }}
-            />
-          </>
-        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

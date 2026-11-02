@@ -8,13 +8,14 @@
 import type d3 from 'd3';
 
 import React from 'react';
-import type { Annotation } from '../../../../../common/types/annotations';
-import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { ChartTooltipService } from '../../../components/chart_tooltip';
 import type {
   AnnotationState,
   AnnotationUpdatesService,
 } from '../../../services/annotations_service';
+import type { CustomRuleEditorSource } from '../../../../../common/constants/usage_collection';
 
 interface Props {
   selectedJob: CombinedJob;
@@ -50,6 +51,7 @@ interface TimeseriesChartProps {
   zoomFromFocusLoaded: object;
   zoomToFocusLoaded: object;
   tooltipService: object;
+  telemetrySource: CustomRuleEditorSource;
 }
 
 interface TimeseriesChartIntProps {

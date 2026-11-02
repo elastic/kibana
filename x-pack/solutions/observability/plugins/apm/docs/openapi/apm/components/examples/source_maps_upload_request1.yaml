@@ -1,0 +1,8 @@
+description: |
+  An example of a multipart/form-data request body for `POST /api/apm/sourcemaps`.
+  Each field is a separate form part; `sourcemap` is the source map file content (typically uploaded as a file).
+value:
+  service_name: opbeans-node
+  service_version: 1.0.0
+  bundle_filepath: /test/e2e/general-usecase/bundle.js.map
+  sourcemap: "{\"version\":3,\"sources\":[\"bundle.js\"],\"names\":[],\"mappings\":\"AAAA\",\"file\":\"bundle.js\",\"sourcesContent\":[\"console.log('hello');\"]}"

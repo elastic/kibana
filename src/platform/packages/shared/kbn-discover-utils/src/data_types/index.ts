@@ -10,5 +10,5 @@
 export * from './logs';
 export * from './traces';
 export * from './apm';
-export * from './metrics';
 export type * from './observability';
+export * from './metrics';

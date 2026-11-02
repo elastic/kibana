@@ -22,6 +22,7 @@ import { mockAuthenticationProviderOptions } from './base.mock';
 import { PKIAuthenticationProvider } from './pki';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -127,6 +128,24 @@ describe('PKIAuthenticationProvider', () => {
       expectDebugLogs(
         'Peer certificate chain: [{"subject":"mock subject(2A:7A:C2:DD)","issuer":"mock issuer","issuerCertType":"object","subjectaltname":"mock subjectaltname","validFrom":"mock valid_from","validTo":"mock valid_to"}]',
         'Authentication is not possible since peer certificate was not authorized: Error: mock authorization error.'
+      );
+    });
+
+    it('does not handle requests when socket authorization state is unknown due to HTTP/2 stream destruction.', async () => {
+      // Simulates the HTTP/2 degraded socket: when a stream is destroyed (RST_STREAM / AbortController
+      // cancel), Node's Http2ServerRequest.socket proxy's getPrototypeOf trap falls back to the
+      // Http2Stream prototype, causing instanceof TLSSocket to return false in KibanaSocket. This
+      // makes authorized === undefined and getPeerCertificate === null. A plain net.Socket (not a
+      // TLSSocket) produces the same KibanaSocket behaviour and is used here to simulate that state.
+      const request = httpServerMock.createKibanaRequest({ socket: new Socket() });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
+      expectDebugLogs(
+        'Peer certificate chain: []',
+        'Authentication is not possible since socket authorization state is unknown (the HTTP/2 stream may have been cancelled before authentication completed).'
       );
     });
 
@@ -409,12 +428,11 @@ describe('PKIAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'Bearer some-token' },
       });
-      const state = {
-        accessToken: 'some-valid-token',
-        peerCertificateFingerprint256: '2A:7A:C2:DD',
-      };
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'some-valid-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.notHandled()
       );
 
@@ -454,27 +472,61 @@ describe('PKIAuthenticationProvider', () => {
       const { socket } = getMockSocket({ authorized: true });
       const request = httpServerMock.createKibanaRequest({ socket });
 
-      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.failed(new Error('Peer certificate is not available'))
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 
+    it('does not invalidate token or destroy session when socket state is unknown due to HTTP/2 stream destruction.', async () => {
+      // Regression test for kibana#258232. When a stream is destroyed (RST_STREAM from an
+      // AbortController or browser navigation cancel), Node's Http2ServerRequest.socket proxy's
+      // getPrototypeOf trap falls back to Http2Stream prototype. instanceof TLSSocket returns false
+      // in KibanaSocket, making authorized === undefined and getPeerCertificate === null.
+      //
+      // The old guard `peerCertificate === null && request.socket.authorized` evaluated
+      // `true && undefined` as falsy and missed. The code then entered the token-invalidation
+      // block, revoked the ES access token, and returned notHandled() — which authenticate()
+      // converted to Boom.unauthorized(), causing updateSessionValue() to delete the session.
+      //
+      // The fix changes the guard to `authorized !== false`, treating undefined (unknown TLS state)
+      // the same as true (known-authorized state). Only false (definitively unauthorized) should
+      // trigger token invalidation. A plain net.Socket (not TLSSocket) produces the same
+      // KibanaSocket behaviour as the destroyed-stream proxy and is used here as a test double.
+      const request = httpServerMock.createKibanaRequest({ socket: new Socket() });
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
+
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
+        AuthenticationResult.failed(new Error('Peer certificate is not available'))
+      );
+
+      // Token MUST NOT be invalidated: socket state is unknown, not definitively unauthorized.
+      // Invalidating the token here revokes the ES access token shared by all concurrent requests
+      // on this Kibana session and triggers session destruction via updateSessionValue() on 401.
+      expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
+    });
+
     it('invalidates token and fails with 401 if state is present, but peer certificate is not.', async () => {
       const { socket } = getMockSocket();
       const request = httpServerMock.createKibanaRequest({ socket });
-      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
-        accessToken: state.accessToken,
+        accessToken: sessionValue.state.accessToken,
       });
     });
 
@@ -482,15 +534,17 @@ describe('PKIAuthenticationProvider', () => {
       const peerCertificate = getMockPeerCertificate('2A:7A:C2:DD');
       const { socket } = getMockSocket({ peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket });
-      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
-        accessToken: state.accessToken,
+        accessToken: sessionValue.state.accessToken,
       });
     });
 
@@ -499,14 +553,16 @@ describe('PKIAuthenticationProvider', () => {
       const peerCertificate = getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']);
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket });
-      const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '3A:9A:C5:DD' };
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'existing-token', peerCertificateFingerprint256: '3A:9A:C5:DD' },
+      });
 
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         authentication: user,
         access_token: 'access-token',
       });
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
@@ -519,7 +575,7 @@ describe('PKIAuthenticationProvider', () => {
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
-        accessToken: state.accessToken,
+        accessToken: sessionValue.state.accessToken,
       });
 
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
@@ -556,11 +612,10 @@ describe('PKIAuthenticationProvider', () => {
           peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
         }).socket,
       });
-      const nonAjaxState = {
-        accessToken: 'existing-token',
-        peerCertificateFingerprint256: '2A:7A:C2:DD',
-      };
-      await expect(provider.authenticate(nonAjaxRequest, nonAjaxState)).resolves.toEqual(
+      const nonAjaxSessionValue = sessionMock.createValue({
+        state: { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
+      await expect(provider.authenticate(nonAjaxRequest, nonAjaxSessionValue)).resolves.toEqual(
         AuthenticationResult.succeeded(user, {
           authHeaders: { authorization: 'Bearer access-token' },
           state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
@@ -574,11 +629,10 @@ describe('PKIAuthenticationProvider', () => {
           peerCertificate: getMockPeerCertificate(['3A:7A:C2:DD', '3B:8B:D3:EE']),
         }).socket,
       });
-      const ajaxState = {
-        accessToken: 'existing-token',
-        peerCertificateFingerprint256: '3A:7A:C2:DD',
-      };
-      await expect(provider.authenticate(ajaxRequest, ajaxState)).resolves.toEqual(
+      const ajaxSessionValue = sessionMock.createValue({
+        state: { accessToken: 'existing-token', peerCertificateFingerprint256: '3A:7A:C2:DD' },
+      });
+      await expect(provider.authenticate(ajaxRequest, ajaxSessionValue)).resolves.toEqual(
         AuthenticationResult.succeeded(user, {
           authHeaders: { authorization: 'Bearer access-token' },
           state: { accessToken: 'access-token', peerCertificateFingerprint256: '3A:7A:C2:DD' },
@@ -592,11 +646,12 @@ describe('PKIAuthenticationProvider', () => {
           peerCertificate: getMockPeerCertificate(['4A:7A:C2:DD', '3B:8B:D3:EE']),
         }).socket,
       });
-      const optionalAuthState = {
-        accessToken: 'existing-token',
-        peerCertificateFingerprint256: '4A:7A:C2:DD',
-      };
-      await expect(provider.authenticate(optionalAuthRequest, optionalAuthState)).resolves.toEqual(
+      const optionalAuthSessionValue = sessionMock.createValue({
+        state: { accessToken: 'existing-token', peerCertificateFingerprint256: '4A:7A:C2:DD' },
+      });
+      await expect(
+        provider.authenticate(optionalAuthRequest, optionalAuthSessionValue)
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(user, {
           authHeaders: { authorization: 'Bearer access-token' },
           state: { accessToken: 'access-token', peerCertificateFingerprint256: '4A:7A:C2:DD' },
@@ -643,7 +698,9 @@ describe('PKIAuthenticationProvider', () => {
     it('fails with 401 if existing token is expired, but certificate is not present.', async () => {
       const { socket } = getMockSocket();
       const request = httpServerMock.createKibanaRequest({ socket });
-      const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
@@ -651,7 +708,7 @@ describe('PKIAuthenticationProvider', () => {
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
@@ -662,8 +719,12 @@ describe('PKIAuthenticationProvider', () => {
 
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
-      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
-      const peerCertificate = getMockPeerCertificate(state.peerCertificateFingerprint256);
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
+      const peerCertificate = getMockPeerCertificate(
+        sessionValue.state.peerCertificateFingerprint256
+      );
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
@@ -671,10 +732,10 @@ describe('PKIAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
-          { authHeaders: { authorization: `Bearer ${state.accessToken}` } }
+          { authHeaders: { authorization: `Bearer ${sessionValue.state.accessToken}` } }
         )
       );
 
@@ -686,8 +747,12 @@ describe('PKIAuthenticationProvider', () => {
     });
 
     it('fails if token from the state is rejected because of unknown reason.', async () => {
-      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
-      const peerCertificate = getMockPeerCertificate(state.peerCertificateFingerprint256);
+      const sessionValue = sessionMock.createValue({
+        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+      });
+      const peerCertificate = getMockPeerCertificate(
+        sessionValue.state.peerCertificateFingerprint256
+      );
       const { socket } = getMockSocket({ authorized: true, peerCertificate });
       const request = httpServerMock.createKibanaRequest({ socket, headers: {} });
 
@@ -699,7 +764,7 @@ describe('PKIAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, state)).resolves.toEqual(
+      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
         AuthenticationResult.failed(failureReason)
       );
 
@@ -708,7 +773,7 @@ describe('PKIAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `notHandled` if state is not presented.', async () => {
+    it('returns `notHandled` if session is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
@@ -716,7 +781,7 @@ describe('PKIAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 
-    it('redirects to logged out view if state is `null`.', async () => {
+    it('redirects to logged out view if session is `null`.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, null)).resolves.toEqual(
@@ -733,7 +798,7 @@ describe('PKIAuthenticationProvider', () => {
       const failureReason = new Error('failed to delete token');
       mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
 
-      await expect(provider.logout(request, state)).resolves.toEqual(
+      await expect(provider.logout(request, sessionMock.createValue({ state }))).resolves.toEqual(
         DeauthenticationResult.failed(failureReason)
       );
 
@@ -747,7 +812,7 @@ describe('PKIAuthenticationProvider', () => {
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-      await expect(provider.logout(request, state)).resolves.toEqual(
+      await expect(provider.logout(request, sessionMock.createValue({ state }))).resolves.toEqual(
         DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
 

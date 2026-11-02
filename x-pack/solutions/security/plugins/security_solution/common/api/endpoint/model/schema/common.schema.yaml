@@ -7,6 +7,7 @@ components:
   schemas:
     Id:
       type: string
+      description: A unique identifier
     IdOrUndefined:
       $ref: '#/components/schemas/Id'
       nullable: true
@@ -25,23 +26,28 @@ components:
       example: 10
     StartDate:
       type: string
+      maxLength: 64
       description: A start date in ISO 8601 format or Date Math format.
       example: "2023-10-31T00:00:00.000Z"
     EndDate:
       type: string
+      maxLength: 64
       description: An end date in ISO format or Date Math format.
       example: "2023-10-31T23:59:59.999Z"
     AgentId:
       type: string
       description: Agent ID
+      maxLength: 256
     Kuery:
       type: string
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
+      maxLength: 30000
     HostStatuses:
       type: array
       description: A set of agent health statuses to filter by.
       example: [ "healthy", "updating" ]
+      maxItems: 20
       items:
         type: string
         enum:
@@ -78,11 +84,13 @@ components:
           items:
             type: string
             minLength: 1
+            maxLength: 256
           minItems: 1
-          maxItems: 50
+          maxItems: 250
         - type: string
           minLength: 1
-      description: A list of agent IDs. Max of 50.
+          maxLength: 256
+      description: A list of agent IDs. Max of 250.
       example: [ "agent-id-1", "agent-id-2" ]
       minLength: 1
 
@@ -100,6 +108,7 @@ components:
         - scan
         - runscript
         - cancel
+        - memory-dump
       minLength: 1
       description: The command for the response action
 
@@ -107,6 +116,7 @@ components:
       type: array
       description: A list of response action command names.
       example: [ "isolate", "unisolate" ]
+      maxItems: 50
       items:
         $ref: '#/components/schemas/Command'
 
@@ -117,17 +127,20 @@ components:
 
     Status:
       type: string
+      description: The status of a response action.
       enum:
         - failed
         - pending
         - successful
+        - canceled
 
     Statuses:
       type: array
+      description: A list of response action statuses to filter by.
       items:
         $ref: '#/components/schemas/Status'
       minLength: 1
-      maxLength: 3
+      maxLength: 4
 
     UserIds:
       oneOf:
@@ -135,10 +148,13 @@ components:
           items:
             type: string
             minLength: 1
+            maxLength: 256
           minItems: 1
+          maxItems: 50
         - type: string
           minLength: 1
-      description: A list of user IDs.
+          maxLength: 256
+      description: A list of user IDs. Max of 50.
       example: [ "user-id-1", "user-id-2" ]
 
     WithOutputs:
@@ -147,10 +163,13 @@ components:
           items:
             type: string
             minLength: 1
+            maxLength: 256
           minItems: 1
+          maxItems: 50
         - type: string
           minLength: 1
-      description: A list of action IDs that should include the complete output of the action.
+          maxLength: 256
+      description: A list of action IDs that should include the complete output of the action. Max of 50.
       example: [ "action-id-1", "action-id-2" ]
 
     Type:
@@ -171,21 +190,24 @@ components:
 
     EndpointIds:
       type: array
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example: [ "endpoint-id-1", "endpoint-id-2" ]
       items:
         type: string
         minLength: 1
+        maxLength: 256
       minItems: 1
+      maxItems: 250
 
     Comment:
       type: string
+      maxLength: 30000
       description: Optional comment
       example: "This is a comment"
 
     Parameters:
       type: object
-      description: Optional parameters object
+      description: Parameters object
 
     AgentTypes:
       type: string
@@ -205,20 +227,24 @@ components:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
           type: array
-          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts. Max of 50.
           example: [ "alert-id-1", "alert-id-2" ]
           minItems: 1
+          maxItems: 50
           items:
             type: string
             minLength: 1
+            maxLength: 256
         case_ids:
           type: array
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example: [ "case-id-1", "case-id-2" ]
           minItems: 1
+          maxItems: 50
           items:
             type: string
             minLength: 1
+            maxLength: 256
         comment:
           $ref: '#/components/schemas/Comment'
         parameters:
@@ -241,6 +267,7 @@ components:
       properties:
         note:
           type: string
+          description: A note associated with the protection updates for the given package policy.
 
     ResponseActionDetails:
        type: object
@@ -264,6 +291,9 @@ components:
          wasSuccessful:
            type: boolean
            description: Whether the response action was successful
+         wasCanceled:
+           type: boolean
+           description: Whether the response action was canceled
          status:
            type: string
            description: The response action status
@@ -310,6 +340,9 @@ components:
                wasSuccessful:
                  type: boolean
                  description: Whether the response action was successful for the agent ID
+               wasCanceled:
+                 type: boolean
+                 description: Whether the response action was canceled for the agent ID
                completedAt:
                  type: string
                  description: The date and time the response action was completed for the agent ID
@@ -366,5 +399,4 @@ components:
 
     SuccessResponse:
       type: object
-      properties: {}
-      # Define properties for the success response if needed
+      description: A generic successful response.

@@ -9,16 +9,17 @@ import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 
 import {
-  EuiButtonEmpty,
-  EuiModalFooter,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiInMemoryTable,
-  EuiFlexGroup,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiInMemoryTable,
+  EuiModalFooter,
   EuiPortal,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -88,18 +89,32 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
 
   const renderMakeDefaultAction = (item: SavedViewItem) => {
     return (
-      <EuiButtonIcon
-        aria-label={i18n.translate('xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel', {
           defaultMessage: 'Mark as default',
         })}
-        key={item.id}
-        data-test-subj="infraRenderMakeDefaultActionButton"
-        iconType={item.attributes.isDefault ? 'starFilled' : 'starEmpty'}
-        size="s"
-        onClick={() => {
-          onMakeDefaultView(item.id);
-        }}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel',
+            {
+              defaultMessage: 'Mark as default',
+            }
+          )}
+          key={item.id}
+          data-test-subj={
+            item.attributes.isDefault
+              ? 'infraRenderMakeDefaultActionButton-filled'
+              : 'infraRenderMakeDefaultActionButton-empty'
+          }
+          iconType={item.attributes.isDefault ? 'starFill' : 'star'}
+          size="s"
+          onClick={() => {
+            onMakeDefaultView(item.id);
+          }}
+        />
+      </EuiToolTip>
     );
   };
 
@@ -161,6 +176,10 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
             search={searchConfig}
             pagination={true}
             sorting={true}
+            tableCaption={i18n.translate('xpack.infra.openView.table.tableCaption', {
+              defaultMessage: 'Saved views',
+            })}
+            data-test-subj="savedViews-viewsTable"
           />
         </EuiFlyoutBody>
         <EuiModalFooter>
@@ -208,16 +227,23 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
       </EuiButton>
     </EuiFlexGroup>
   ) : (
-    <EuiButtonIcon
-      aria-label={i18n.translate('xpack.infra.deleteConfimation.deleteButton.ariaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.infra.deleteConfimation.deleteButton.ariaLabel', {
         defaultMessage: 'Delete',
       })}
-      data-test-subj="infraDeleteConfimationButton"
-      iconType="trash"
-      color="danger"
-      size="s"
-      onClick={toggleVisibility}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('xpack.infra.deleteConfimation.deleteButton.ariaLabel', {
+          defaultMessage: 'Delete',
+        })}
+        data-test-subj="infraDeleteConfirmationButton"
+        iconType="trash"
+        color="danger"
+        size="s"
+        onClick={toggleVisibility}
+      />
+    </EuiToolTip>
   );
 };
 

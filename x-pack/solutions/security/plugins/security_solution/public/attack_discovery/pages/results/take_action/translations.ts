@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToNewCaseButtonLabel',
-  {
-    defaultMessage: 'Add to new case',
-  }
-);
-
-export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToExistingCaseButtonLabel',
-  {
-    defaultMessage: 'Add to existing case',
-  }
-);
-
 export const MARK_AS_ACKNOWLEDGED = i18n.translate(
   'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.markAsAcknowledgedButtonLabel',
   {
@@ -60,5 +46,12 @@ export const ADD_TO_CHAT = i18n.translate(
   'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.viewInAgentBuilderButtonLabel',
   {
     defaultMessage: 'Add to chat',
+  }
+);
+
+export const ADD_TO_DATASET = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetButtonLabel',
+  {
+    defaultMessage: 'Add to dataset',
   }
 );

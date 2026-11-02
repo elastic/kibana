@@ -65,7 +65,7 @@ compare_with_baseline() {
   echo "Run name: $RUN_NAME"
 
   # Build comparison command
-  COMPARISON_CMD="yarn start compare-metrics \"$RUN_NAME\" \
+  COMPARISON_CMD="pnpm start compare-metrics \"$RUN_NAME\" \
     -e \"$PERF_ENTITY_COUNT\" \
     -l \"$PERF_LOGS_PER_ENTITY\" \
     --degradation-threshold \"$PERF_DEGRADATION_THRESHOLD\" \
@@ -78,6 +78,11 @@ compare_with_baseline() {
     echo "Using baseline: $PERF_BASELINE_FILE"
   else
     echo "Tool will find relevant baseline automatically"
+  fi
+
+  # Entity Store V2 / ESQL: omit transform-only metrics from comparison report
+  if [ "${PERF_NO_TRANSFORMS:-false}" = "true" ]; then
+    COMPARISON_CMD="$COMPARISON_CMD --noTransforms"
   fi
 
   # Run comparison

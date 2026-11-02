@@ -7,6 +7,8 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { SecurityPageName } from '../../../app/types';
 import { TestProviders } from '../../../common/mock';
 import { DashboardsLandingPage } from '.';
@@ -19,6 +21,7 @@ import { act } from 'react-dom/test-utils';
 import type { NavigationLink } from '../../../common/links/types';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
+import { CREATE_DASHBOARD_MENU_ITEM_TEST_ID } from './use_dashboards_header_menu';
 
 jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
@@ -78,9 +81,11 @@ jest.mock('../../hooks/use_create_security_dashboard_link', () => {
 
 const TestComponent = () => (
   <TestProviders>
-    <DashboardContextProvider>
-      <DashboardsLandingPage />
-    </DashboardContextProvider>
+    <MemoryRouter>
+      <DashboardContextProvider>
+        <DashboardsLandingPage />
+      </DashboardContextProvider>
+    </MemoryRouter>
   </TestProviders>
 );
 
@@ -94,6 +99,12 @@ describe('Dashboards landing', () => {
   beforeEach(() => {
     mockUseCapabilities.mockReturnValue(DEFAULT_DASHBOARD_CAPABILITIES);
     mockUseCreateSecurityDashboard.mockReturnValue(CREATE_DASHBOARD_LINK);
+  });
+
+  it('should render the app header with the page title', async () => {
+    await renderDashboardLanding();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Dashboards');
   });
 
   describe('Dashboards default links', () => {
@@ -116,10 +127,15 @@ describe('Dashboards landing', () => {
       });
       await renderDashboardLanding();
 
-      const renderedItems = screen.queryAllByTestId('LandingImageCard-item');
+      const overviewItem = screen.queryByTestId(
+        `LandingImageCard-item-${SecurityPageName.overview}`
+      );
+      const detectionItem = screen.queryByTestId(
+        `LandingImageCard-item-${SecurityPageName.detectionAndResponse}`
+      );
 
-      expect(renderedItems[0]).toHaveTextContent(OVERVIEW_ITEM_LABEL);
-      expect(renderedItems[1]).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
+      expect(overviewItem).toHaveTextContent(OVERVIEW_ITEM_LABEL);
+      expect(detectionItem).toHaveTextContent(DETECTION_RESPONSE_ITEM_LABEL);
     });
 
     it('should not render items if all items filtered', async () => {
@@ -173,7 +189,7 @@ describe('Dashboards landing', () => {
       it('should render', async () => {
         await renderDashboardLanding();
 
-        expect(screen.getByTestId('createDashboardButton')).toBeInTheDocument();
+        expect(screen.getByTestId(CREATE_DASHBOARD_MENU_ITEM_TEST_ID)).toBeInTheDocument();
       });
 
       it('should not render if no write capability', async () => {
@@ -183,31 +199,33 @@ describe('Dashboards landing', () => {
         });
         await renderDashboardLanding();
 
-        expect(screen.queryByTestId('createDashboardButton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId(CREATE_DASHBOARD_MENU_ITEM_TEST_ID)).not.toBeInTheDocument();
       });
 
       it('should be enabled when link loaded', async () => {
         await renderDashboardLanding();
 
-        expect(screen.getByTestId('createDashboardButton')).not.toHaveAttribute('disabled');
+        expect(screen.getByTestId(CREATE_DASHBOARD_MENU_ITEM_TEST_ID)).not.toHaveAttribute(
+          'disabled'
+        );
       });
 
       it('should be disabled when link is not loaded', async () => {
         mockUseCreateSecurityDashboard.mockReturnValue({ isLoading: true, url: '' });
         await renderDashboardLanding();
 
-        expect(screen.getByTestId('createDashboardButton')).toHaveAttribute('disabled');
+        expect(screen.getByTestId(CREATE_DASHBOARD_MENU_ITEM_TEST_ID)).toHaveAttribute('disabled');
       });
 
       it('should link to correct href', async () => {
         await renderDashboardLanding();
 
-        expect(screen.getByTestId('createDashboardButton')).toHaveAttribute('href', URL);
+        expect(screen.getByTestId(CREATE_DASHBOARD_MENU_ITEM_TEST_ID)).toHaveAttribute('href', URL);
       });
 
       it('should send telemetry', async () => {
         await renderDashboardLanding();
-        screen.getByTestId('createDashboardButton').click();
+        screen.getByTestId(CREATE_DASHBOARD_MENU_ITEM_TEST_ID).click();
         expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.CREATE_DASHBOARD);
       });
     });

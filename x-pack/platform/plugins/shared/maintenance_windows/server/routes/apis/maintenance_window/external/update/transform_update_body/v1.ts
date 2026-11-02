@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import {
+  transformCustomScheduleToRRule,
+  getDurationInMilliseconds,
+} from '@kbn/response-ops-schedule-schema';
 import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../schemas/maintenance_window/external/request/update';
 import type { UpdateMaintenanceWindowParams } from '../../../../../../application/methods/update/types';
-import { transformCustomScheduleToRRule } from '../../../../../schemas/schedule';
 
 /**
  *  This function converts from the external, human readable, Maintenance Window creation/POST
@@ -16,18 +19,47 @@ import { transformCustomScheduleToRRule } from '../../../../../schemas/schedule'
 export const transformUpdateBody = (
   updateBody: UpdateMaintenanceWindowRequestBodyV1
 ): UpdateMaintenanceWindowParams['data'] => {
-  const kql = updateBody?.scope?.alerting.query.kql;
+  const requestScope = updateBody.scope;
   let customSchedule;
 
   if (updateBody.schedule?.custom) {
     customSchedule = transformCustomScheduleToRRule(updateBody.schedule.custom);
   }
+  const durationInMilliseconds = updateBody.schedule?.custom?.duration
+    ? getDurationInMilliseconds(updateBody.schedule.custom.duration)
+    : undefined;
+
+  const alertingKql = requestScope?.alerting?.query?.kql;
+  const alertingV2Kql = requestScope?.alerting_v2?.query?.kql;
+  const scope =
+    requestScope !== undefined
+      ? {
+          ...(requestScope.alerting !== undefined
+            ? {
+                alerting: {
+                  enabled: requestScope.alerting.enabled ?? true,
+                  ...(alertingKql ? { kql: alertingKql, filters: [] } : {}),
+                },
+              }
+            : {}),
+          ...(requestScope.alerting_v2 !== undefined
+            ? {
+                alertingV2: {
+                  enabled: requestScope.alerting_v2.enabled ?? true,
+                  ...(alertingV2Kql ? { kql: alertingV2Kql } : {}),
+                },
+              }
+            : {}),
+        }
+      : undefined;
 
   return {
     ...(updateBody.title && { title: updateBody.title }),
     ...(updateBody.enabled !== undefined && { enabled: updateBody.enabled }),
-    ...(customSchedule?.duration && { duration: customSchedule.duration }),
+    ...(durationInMilliseconds && { duration: durationInMilliseconds }),
     ...(customSchedule?.rRule && { rRule: customSchedule.rRule }),
-    ...(kql && { scopedQuery: { kql, filters: [] } }),
+    ...(alertingKql ? { scopedQuery: { kql: alertingKql, filters: [] } } : {}),
+    ...(updateBody.schedule && { schedule: updateBody.schedule }),
+    ...(scope !== undefined ? { scope } : {}),
   };
 };

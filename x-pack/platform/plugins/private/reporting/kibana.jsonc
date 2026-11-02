@@ -37,10 +37,10 @@
       "security",
       "spaces",
       "usageCollection",
-      "screenshotting"
+      "screenshotting",
+      "pageRenderScreenshotting"
     ],
     "requiredBundles": [
-      "embeddable",
       "esUiShared",
       "kibanaReact"
     ]

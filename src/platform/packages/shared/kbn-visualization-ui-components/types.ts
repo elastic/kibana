@@ -13,9 +13,9 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 
-// This is a line of shared icon names used by Reference Lines, Annotations and Metric chart
+// Intersection of icon names shared by Reference Lines, Annotations and Metric chart.
+// Each consumer extends this base set with its own additional icons.
 export type SharedSetOfIcons =
-  | 'empty'
   | 'asterisk'
   | 'alert'
   | 'bell'
@@ -27,3 +27,10 @@ export type SharedSetOfIcons =
   | 'mapMarker'
   | 'starEmpty'
   | 'tag';
+
+export type AnnotationReferenceLineIcons =
+  | SharedSetOfIcons
+  | 'circle'
+  | 'pinFilled'
+  | 'starFilled'
+  | 'triangle';

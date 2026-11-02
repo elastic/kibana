@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiI18n, EuiCopy, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiI18n, EuiToolTip } from '@elastic/eui';
 
 export const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) => {
   const showCopyButton = isCopyable && value;
@@ -22,13 +22,15 @@ export const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: str
           {(copyButton: string) => (
             <EuiCopy textToCopy={value}>
               {(copy) => (
-                <EuiButtonIcon
-                  onClick={copy}
-                  iconType="copyClipboard"
-                  color="text"
-                  aria-label={copyButton}
-                  size="xs"
-                />
+                <EuiToolTip content={copyButton} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    onClick={copy}
+                    iconType="copy"
+                    color="text"
+                    aria-label={copyButton}
+                    size="xs"
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           )}

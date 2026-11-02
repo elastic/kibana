@@ -6,7 +6,11 @@
  */
 
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
-import { ADD_EXCEPTION_BTN, ATTACH_TO_NEW_CASE_BUTTON } from '../../../../screens/alerts';
+import {
+  ADD_EXCEPTION_BTN,
+  ATTACH_ALERT_TO_CASE_BUTTON,
+  CREATE_NEW_CASE_FROM_MODAL_BUTTON,
+} from '../../../../screens/alerts';
 import {
   addAlertTagToNAlerts,
   closeAlerts,
@@ -39,7 +43,7 @@ import {
 import { sortUsingDataGridBtn } from '../../../../tasks/table_pagination';
 import { NO_PRIVILEGES_BOX } from '../../../../screens/common/page';
 import { openKibanaNavigation } from '../../../../tasks/kibana_navigation';
-import { ALERTS_PAGE } from '../../../../screens/kibana_navigation';
+import { DETECTIONS_PAGE } from '../../../../screens/kibana_navigation';
 
 const usersToCreate = [rulesAllUser, rulesAllWithCasesUser, rulesReadUser, rulesNoneUser];
 const rolesToCreate = [rulesAll, rulesAllWithCases, rulesRead, rulesNone];
@@ -97,7 +101,8 @@ describe('Alerts page - privileges', { tags: ['@ess'] }, () => {
     it(`should be able to add to case`, () => {
       expandFirstAlertActions();
 
-      cy.get(ATTACH_TO_NEW_CASE_BUTTON).click();
+      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).click();
+      cy.get(CREATE_NEW_CASE_FROM_MODAL_BUTTON).click();
 
       cy.get('[data-test-subj="create-case-submit"]').should('be.enabled');
     });
@@ -137,9 +142,9 @@ describe('Alerts page - privileges', { tags: ['@ess'] }, () => {
       cy.get(NO_PRIVILEGES_BOX).should('exist');
     });
 
-    it('should not see the "alerts" link in the sidebar', () => {
+    it('should not see the "detections" link in the sidebar', () => {
       openKibanaNavigation();
-      cy.get(ALERTS_PAGE).should('not.exist');
+      cy.get(DETECTIONS_PAGE).should('not.exist');
     });
   });
 });

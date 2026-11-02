@@ -24,7 +24,6 @@ export const formatNetworkTlsEdges = (buckets: NetworkTlsBuckets[]): NetworkTlsE
         subjects: bucket.subjects.buckets.map(({ key }) => key),
         ja3: bucket.ja3.buckets.map(({ key }) => key),
         issuers: bucket.issuers.buckets.map(({ key }) => key),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         notAfter: bucket.not_after.buckets.map(({ key_as_string }) => key_as_string),
       },
       cursor: {

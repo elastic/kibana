@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Moment } from 'moment';
 import moment from 'moment';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -24,6 +23,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '@kbn/reporting-public';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -58,6 +58,7 @@ import * as i18n from '../translations';
 import { SCHEDULED_REPORT_FORM_ID } from '../constants';
 import { getStartDateValidator } from '../validators/start_date_validator';
 import { scheduledReportMessageVariables } from '../schemas/scheduled_report_message_variables';
+import { getParsedDateFormat } from '../utils';
 
 const { emptyField } = fieldValidators;
 
@@ -165,6 +166,8 @@ export const ScheduledReportForm = ({
     [http.basePath]
   );
   const { defaultTimezone } = useDefaultTimezone();
+  const rawDateFormat = useUiSetting<string>('dateFormat');
+  const dateFormat = useMemo(() => getParsedDateFormat(rawDateFormat), [rawDateFormat]);
   const hasCcBcc =
     Boolean(scheduledReport.emailCcRecipients?.length) ||
     Boolean(scheduledReport.emailBccRecipients?.length);
@@ -285,15 +288,7 @@ export const ScheduledReportForm = ({
     <>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="s">
-          <h2>
-            {i18n.SCHEDULED_REPORT_FLYOUT_TITLE}{' '}
-            <EuiBetaBadge
-              className="eui-alignMiddle"
-              iconType="flask"
-              label={i18n.TECH_PREVIEW_LABEL}
-              tooltipContent={i18n.TECH_PREVIEW_DESCRIPTION}
-            />
-          </h2>
+          <h2>{i18n.SCHEDULED_REPORT_FLYOUT_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -393,8 +388,8 @@ export const ScheduledReportForm = ({
                     compressed: true,
                     fullWidth: true,
                     showTimeSelect: true,
-                    minDate: now,
                     readOnly,
+                    dateFormat,
                     'data-test-subj': 'startDatePicker',
                   },
                 }}
@@ -424,6 +419,7 @@ export const ScheduledReportForm = ({
                         {i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL}
                       </EuiFormLabel>
                     ),
+                    'aria-label': `${i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL} ${timezone}`,
                   },
                 }}
               />

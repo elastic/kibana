@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { AiIndexActions } from './ai_index';
 import type { AlertingActions } from './alerting';
+import type { AlertsActions } from './alerts';
 import type { ApiActions } from './api';
 import type { AppActions } from './app';
 import type { CasesActions } from './cases';
@@ -18,6 +20,8 @@ import type { UIActions } from './ui';
  * by the various `checkPrivilegesWithRequest` derivatives.
  */
 export interface Actions {
+  readonly aiIndex: AiIndexActions;
+  readonly alerts: AlertsActions;
   readonly api: ApiActions;
   readonly app: AppActions;
   readonly cases: CasesActions;

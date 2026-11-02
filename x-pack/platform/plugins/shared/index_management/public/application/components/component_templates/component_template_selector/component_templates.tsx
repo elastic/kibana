@@ -16,6 +16,7 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   useEuiTheme,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
 
 import type { ComponentTemplateListItem } from '../../../../../common';
@@ -35,18 +36,16 @@ interface Filters {
 
 const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) => {
   const { euiTheme } = useEuiTheme();
-  const heightHeader = `calc(${euiTheme.size.l} * 2)`;
 
   return {
     container: css`
       border: ${euiTheme.border.thin};
       border-radius: ${euiTheme.border.radius.medium};
       border-top: none;
+      width: 100%;
       height: 100%;
     `,
     header: css`
-      height: ${heightHeader};
-
       .euiFormControlLayout {
         max-width: initial;
       }
@@ -75,7 +74,8 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
       }
     `,
     listWrapper: css`
-      height: calc(100% - ${heightHeader});
+      width: 100%;
+      ${useEuiOverflowScroll('y', true)}
 
       ${isSearchResultEmpty &&
       css`
@@ -113,6 +113,12 @@ const i18nTexts = {
   },
   searchBoxPlaceholder: i18n.translate(
     'xpack.idxMgmt.componentTemplatesSelector.searchBox.placeholder',
+    {
+      defaultMessage: 'Search',
+    }
+  ),
+  searchBoxAriaLabel: i18n.translate(
+    'xpack.idxMgmt.componentTemplatesSelector.searchBox.ariaLabel',
     {
       defaultMessage: 'Search component templates',
     }
@@ -188,7 +194,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
   const renderEmptyResult = () => {
     return (
       <EuiEmptyPrompt
-        iconType="search"
+        iconType="magnify"
         title={
           <h3>
             <FormattedMessage
@@ -211,7 +217,12 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
   };
 
   return (
-    <div css={styles.container} data-test-subj="componentTemplates">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={styles.container}
+      data-test-subj="componentTemplates"
+    >
       <div css={styles.header}>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
@@ -221,7 +232,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
               onChange={(e) => {
                 setSearchValue(e.target.value);
               }}
-              aria-label={i18nTexts.searchBoxPlaceholder}
+              aria-label={i18nTexts.searchBoxAriaLabel}
               css={styles.searchBox}
               data-test-subj="componentTemplateSearchBox"
             />
@@ -231,13 +242,13 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <div css={[styles.listWrapper]} className="eui-yScrollWithShadows">
+      <div css={styles.listWrapper}>
         {isSearchResultEmpty ? (
           renderEmptyResult()
         ) : (
           <ComponentTemplatesList components={filteredComponents} listItemProps={listItemProps} />
         )}
       </div>
-    </div>
+    </EuiFlexGroup>
   );
 };

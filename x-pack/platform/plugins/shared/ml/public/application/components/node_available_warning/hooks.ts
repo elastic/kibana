@@ -6,10 +6,11 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '../../services/http_service';
 import { mlApiProvider } from '../../services/ml_api_service';
-import { type CloudInfo, extractDeploymentId } from '../../services/ml_server_info';
+import { extractDeploymentId } from '../../services/ml_server_info';
 
 export function useMlNodeAvailableCheck() {
   const { mlNodesAvailable } = useMlNodeCheck();
@@ -72,6 +73,7 @@ const defaultCloudInfo: CloudInfo = {
   deploymentId: null,
   cloudUrl: null,
   isMlAutoscalingEnabled: false,
+  isMlCpsEnabled: false,
 };
 
 export function useCloudCheck() {
@@ -89,6 +91,7 @@ export function useCloudCheck() {
         deploymentId: !resp.cloudId ? null : extractDeploymentId(resp.cloudId),
         cloudUrl: resp.cloudUrl ?? null,
         isMlAutoscalingEnabled: resp.isMlAutoscalingEnabled,
+        isMlCpsEnabled: resp.isMlCpsEnabled,
       });
     } catch (error) {
       if (error.statusCode === 403) {

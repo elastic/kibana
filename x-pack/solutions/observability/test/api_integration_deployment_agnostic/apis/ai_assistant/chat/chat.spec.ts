@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { withTimeout } from '@kbn/std';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
 import { times } from 'lodash';
 import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import type { LlmProxy } from '../utils/create_llm_proxy';
 import { createLlmProxy } from '../utils/create_llm_proxy';
+import { decodeEvents } from '../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const SYSTEM_MESSAGE = `this is a system message`;
@@ -119,18 +121,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           withInternalHeaders: true,
         });
 
-      await Promise.race([
-        new Promise((resolve, reject) => {
-          setTimeout(() => {
-            reject(new Error('Test timed out'));
-          }, 5000);
-        }),
-        new Promise<void>((resolve, reject) => {
+      const outcome = await withTimeout({
+        promise: new Promise<void>((resolve, reject) => {
           async function runTest() {
             const chunks = times(NUM_RESPONSES).map((i) => `Part: ${i}\n`);
             void proxy.interceptWithResponse(chunks);
 
-            const receivedChunks: Array<Record<string, any>> = [];
+            const receivedChunks: string[] = [];
 
             const passThrough = new PassThrough();
             supertestEditorWithCookieCredentials
@@ -147,12 +144,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .pipe(passThrough);
 
             passThrough.on('data', (chunk) => {
-              receivedChunks.push(JSON.parse(chunk.toString()));
+              receivedChunks.push(chunk.toString());
             });
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
 
-            const chatCompletionChunks = receivedChunks.filter(
+            const parsedEvents = decodeEvents(receivedChunks.join(''));
+
+            const chatCompletionChunks = parsedEvents.filter(
               (chunk) => chunk.type === 'chatCompletionChunk'
             );
             expect(chatCompletionChunks).to.have.length(
@@ -167,7 +166,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           runTest().then(resolve, reject);
         }),
-      ]);
+        timeoutMs: 5000,
+      });
+      if (outcome.timedout) {
+        throw new Error('Test timed out');
+      }
     });
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {

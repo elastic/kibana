@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ServiceProviderKeys } from '../../constants';
-import type { FieldsConfiguration } from '../types';
+import type { ConfigProperties, ConfigValue, FieldsConfiguration } from '@kbn/inference-common';
+import { type ServiceProviderKeys } from '../../constants';
 
+export { FieldType, type ConfigProperties, type ConfigValue } from '@kbn/inference-common';
 export interface SelectOption {
   label: string;
   value: string;
@@ -17,13 +18,6 @@ export interface SelectOption {
 export interface Dependency {
   field: string;
   value: string | number | boolean | null;
-}
-
-export enum FieldType {
-  STRING = 'str',
-  INTEGER = 'int',
-  BOOLEAN = 'bool',
-  MAP = 'map',
 }
 
 export interface ConfigCategoryProperties {
@@ -37,17 +31,6 @@ export interface Validation {
   type: string;
 }
 
-export interface ConfigProperties {
-  default_value: string | number | boolean | null;
-  description: string | null;
-  label: string;
-  required: boolean;
-  sensitive: boolean;
-  updatable: boolean;
-  type: FieldType;
-  supported_task_types: string[];
-}
-
 interface ConfigEntry extends ConfigProperties {
   key: string;
 }
@@ -55,7 +38,7 @@ interface ConfigEntry extends ConfigProperties {
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
   validationErrors: string[];
-  value: string | number | boolean | null;
+  value: ConfigValue;
 }
 
 type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
@@ -63,6 +46,9 @@ export interface OverrideFieldsContentType {
   serverlessOnly?: boolean;
   hidden?: string[];
   additional?: FieldsConfiguration[];
+  supplementalData?: Record<string, Partial<ConfigProperties>>[];
+  /** Default values to apply to existing provider configuration fields (e.g., model_id default values) */
+  defaultValues?: Record<string, ConfigValue>;
 }
 export type InternalOverrideFieldsType = {
   [Key in ServiceProviderKeysType | string]?: OverrideFieldsContentType;

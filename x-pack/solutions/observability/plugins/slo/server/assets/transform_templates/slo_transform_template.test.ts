@@ -146,6 +146,7 @@ describe('slo transform template', () => {
         version: 3.6,
         managed: true,
         managed_by: 'observability',
+        deletion_protected: true,
       },
     });
   });
@@ -250,7 +251,43 @@ describe('slo transform template', () => {
         version: 3.6,
         managed: true,
         managed_by: 'observability',
+        deletion_protected: true,
       },
     });
+  });
+
+  it('passes project_routing through verbatim', () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
+
+    const result = getSLOTransformTemplate(
+      transformId,
+      description,
+      source,
+      destination,
+      groupBy,
+      aggregations,
+      settings,
+      slo,
+      '_id:p1 AND _id:p2'
+    );
+
+    expect(result.source.project_routing).toBe('_id:p1 AND _id:p2');
+  });
+
+  it('omits project_routing when projectRouting is undefined', () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
+
+    const result = getSLOTransformTemplate(
+      transformId,
+      description,
+      source,
+      destination,
+      groupBy,
+      aggregations,
+      settings,
+      slo
+    );
+
+    expect(result.source).not.toHaveProperty('project_routing');
   });
 });

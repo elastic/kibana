@@ -11,7 +11,7 @@ import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugi
 
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-export type CasesSupportedOperations = (typeof allOperations)[number];
+export type CasesSupportedOperations = (typeof supportedOperations)[number];
 
 /**
  * If you add a new operation type (all, push, update, etc) you should also
@@ -30,6 +30,16 @@ const readOperations = [
   'getReporters',
   'getUserActions',
   'findConfigurations',
+  'getFieldDefinitions',
+  'getTemplate',
+  'findTemplates',
+] as const;
+// Users with the manageTemplates sub-privilege need read access to templates and the field
+// library even when they lack the standard cases read/all privilege for the owner.
+const manageTemplatesReadOperations = [
+  'getFieldDefinitions',
+  'getTemplate',
+  'findTemplates',
 ] as const;
 // Update operations do not currently include the ability to re-open a case
 const updateOperations = ['updateCase', 'updateComment'] as const;
@@ -38,6 +48,7 @@ const settingsOperations = ['createConfiguration', 'updateConfiguration'] as con
 const createCommentOperations = ['createComment'] as const;
 const reopenOperations = ['reopenCase'] as const;
 const assignOperations = ['assignCase'] as const;
+const manageTemplatesOperations = ['manageTemplate'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
@@ -49,6 +60,7 @@ const allOperations = [
   ...reopenOperations,
   ...assignOperations,
 ] as const;
+const supportedOperations = [...allOperations, ...manageTemplatesOperations] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(
@@ -74,6 +86,11 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(createCommentOperations, privilegeDefinition.cases?.createComment),
       ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
       ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assign),
+      ...getCasesPrivilege(manageTemplatesOperations, privilegeDefinition.cases?.manageTemplates),
+      ...getCasesPrivilege(
+        manageTemplatesReadOperations,
+        privilegeDefinition.cases?.manageTemplates
+      ),
     ]);
   }
 }

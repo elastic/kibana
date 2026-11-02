@@ -10,29 +10,32 @@ import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { CategorizationAnalyzer, FieldValidationResults } from '@kbn/ml-category-validator';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
 
-import type { Dictionary } from '../../../../common/types/common';
+import type { Dictionary } from '@kbn/ml-common-types/common';
 import type {
   MlJobWithTimeRange,
   MlSummaryJobs,
-  CombinedJobWithStats,
-  Job,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type {
   Datafeed,
   IndicesOptions,
-} from '../../../../common/types/anomaly_detection_jobs';
-import type { JobMessage } from '../../../../common/types/audit_message';
-import type { JobAction } from '../../../../common/constants/job_actions';
-import type { Group } from '../../../../common/types/groups';
-import type { ExistingJobsAndGroups } from '../job_service';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import type { Group } from '@kbn/ml-common-types/groups';
 
-import type { Category } from '../../../../common/types/categories';
+import type { Category } from '@kbn/ml-common-types/categories';
 import type {
   JobsExistResponse,
   BulkCreateResults,
+  BulkUpdateProjectRoutingResponse,
   ResetJobsResponse,
-} from '../../../../common/types/job_service';
+} from '@kbn/ml-common-types/job_service';
+import type { ExistingJobsAndGroups } from '../job_service';
+import type { JobAction } from '../../../../common/constants/job_actions';
+import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
@@ -120,8 +123,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  stopDatafeeds(datafeedIds: string[]) {
-    const body = JSON.stringify({ datafeedIds });
+  stopDatafeeds(datafeedIds: string[], closeJobs?: boolean) {
+    const body = JSON.stringify({ datafeedIds, closeJobs });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/stop_datafeeds`,
       method: 'POST',
@@ -233,8 +236,11 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  newJobCaps(indexPatternTitle: string, isRollup: boolean = false) {
-    const query = isRollup === true ? { rollup: true } : {};
+  newJobCaps(indexPatternTitle: string, isRollup: boolean = false, projectRouting?: string) {
+    const query = {
+      ...(isRollup === true ? { rollup: true } : {}),
+      ...(projectRouting ? { projectRouting } : {}),
+    };
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_caps/${indexPatternTitle}`,
       method: 'GET',
@@ -254,7 +260,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     splitFieldName: string | null,
     splitFieldValue: string | null,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    projectRouting?: string
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -268,6 +275,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldValue,
       runtimeMappings,
       indicesOptions,
+      projectRouting,
     });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
@@ -287,7 +295,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    projectRouting?: string
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -300,6 +309,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldName,
       runtimeMappings,
       indicesOptions,
+      projectRouting,
     });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
@@ -342,6 +352,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     analyzer: CategorizationAnalyzer,
     runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions,
+    projectRouting?: string,
     includeExamples?: boolean
   ) {
     const body = JSON.stringify({
@@ -355,6 +366,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       analyzer,
       runtimeMappings,
       indicesOptions,
+      projectRouting,
       includeExamples,
     });
     return httpService.http<FieldValidationResults>({
@@ -410,6 +422,28 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     const body = JSON.stringify(jobs);
     return httpService.http<BulkCreateResults>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_create`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  bulkUpdateProjectRouting({
+    projectRouting,
+    jobIds,
+    auto,
+    simulate,
+    restartRunningJobs,
+  }: {
+    projectRouting: string;
+    jobIds?: string[];
+    auto?: boolean;
+    simulate?: boolean;
+    restartRunningJobs?: boolean;
+  }) {
+    const body = JSON.stringify({ projectRouting, jobIds, auto, simulate, restartRunningJobs });
+    return httpService.http<BulkUpdateProjectRoutingResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_update_project_routing`,
       method: 'POST',
       body,
       version: '1',

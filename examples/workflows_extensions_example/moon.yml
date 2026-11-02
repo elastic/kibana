@@ -4,29 +4,38 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-extensions-example'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-extensions-example'
+  title: '@kbn/workflows-extensions-example'
   description: Moon project for @kbn/workflows-extensions-example
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: examples/workflows_extensions_example
+  sourceRoot: examples/workflows_extensions_example
 dependsOn:
   - '@kbn/core'
+  - '@kbn/spaces-plugin'
   - '@kbn/workflows-extensions'
   - '@kbn/zod'
   - '@kbn/i18n'
+  - '@kbn/config-schema'
+  - '@kbn/workflows'
+  - '@kbn/scout'
+  - '@kbn/core-security-common'
+  - '@kbn/mock-idp-utils'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
+  - '@kbn/workflows-yaml'
 tags:
   - plugin
   - prod
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -34,5 +43,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_service_accounts/**/*
     - '!target/**/*'
 tasks: {}

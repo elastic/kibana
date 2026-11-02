@@ -10,33 +10,28 @@ import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { CaseConnector, ExternalService, User } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   NONE_CONNECTOR_ID,
 } from '../../../common/constants';
 import {
+  CASE_ATTACHMENT_REF_NAME,
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import type {
-  BuilderDeps,
   BuilderParameters,
   CommonBuilderArguments,
   SavedObjectParameters,
   UserActionParameters,
   UserActionEvent,
+  AttachmentSavedObjectType,
 } from './types';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export abstract class UserActionBuilder {
-  protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-
-  constructor(deps: BuilderDeps) {
-    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
-  }
-
   protected getCommonUserActionAttributes({ user, owner }: { user: User; owner: string }) {
     return {
       created_at: new Date().toISOString(),
@@ -66,12 +61,20 @@ export abstract class UserActionBuilder {
       : [];
   }
 
-  protected createCommentReferences(id: string | null): SavedObjectReference[] {
+  protected createCommentReferences(
+    id: string | null,
+    savedObjectType: AttachmentSavedObjectType = CASE_COMMENT_SAVED_OBJECT
+  ): SavedObjectReference[] {
+    const referenceName =
+      savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT
+        ? CASE_ATTACHMENT_REF_NAME
+        : COMMENT_REF_NAME;
+
     return id != null
       ? [
           {
-            type: CASE_COMMENT_SAVED_OBJECT,
-            name: COMMENT_REF_NAME,
+            type: savedObjectType,
+            name: referenceName,
             id,
           },
         ]
@@ -100,7 +103,8 @@ export abstract class UserActionBuilder {
     value,
     valueKey,
     caseId,
-    attachmentId,
+    savedObjectId,
+    savedObjectType,
     connectorId,
     type,
   }: CommonBuilderArguments): SavedObjectParameters => {
@@ -113,7 +117,10 @@ export abstract class UserActionBuilder {
       },
       references: [
         ...this.createCaseReferences(caseId),
-        ...this.createCommentReferences(attachmentId ?? null),
+        ...this.createCommentReferences(
+          savedObjectId ?? null,
+          savedObjectType ?? CASE_COMMENT_SAVED_OBJECT
+        ),
         ...(type === UserActionTypes.connector
           ? this.createConnectorReference(connectorId ?? null)
           : []),

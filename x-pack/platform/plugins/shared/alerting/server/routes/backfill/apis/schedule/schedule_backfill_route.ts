@@ -4,30 +4,63 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import type {
   ScheduleBackfillRequestBodyV1,
   ScheduleBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/schedule';
-import { scheduleBodySchemaV1 } from '../../../../../common/routes/backfill/apis/schedule';
+import {
+  scheduleBodySchemaV1,
+  scheduleResponseSchemaV1,
+  scheduleBackfillExamplesV1,
+} from '../../../../../common/routes/backfill/apis/schedule';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  INTERNAL_BASE_ALERTING_API_PATH,
+  ALERTING_BACKFILL_SCHEDULE_API_PATH,
+} from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
-export const scheduleBackfillRoute = (
-  router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
-) => {
+interface BuildScheduleBackfillRouteParams {
+  licenseState: ILicenseState;
+  path: string;
+  router: IRouter<AlertingRequestHandlerContext>;
+  options: RouteConfigOptions<RouteMethod>;
+}
+
+const buildScheduleBackfillRoute = ({
+  licenseState,
+  path,
+  router,
+  options,
+}: BuildScheduleBackfillRouteParams) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`,
+      path,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
-      options: { access: 'internal' },
+      options,
       validate: {
-        body: scheduleBodySchemaV1,
+        request: {
+          body: scheduleBodySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => scheduleResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -45,3 +78,30 @@ export const scheduleBackfillRoute = (
     )
   );
 };
+
+export const scheduleBackfillRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildScheduleBackfillRoute({
+    licenseState,
+    path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`,
+    router,
+    options: { access: 'internal' },
+  });
+
+export const scheduleBackfillPublicRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) =>
+  buildScheduleBackfillRoute({
+    licenseState,
+    path: ALERTING_BACKFILL_SCHEDULE_API_PATH,
+    router,
+    options: {
+      access: 'public',
+      summary: 'Schedule a backfill for rules',
+      tags: ['oas-tag:alerting'],
+      oasOperationObject: scheduleBackfillExamplesV1,
+    },
+  });

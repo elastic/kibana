@@ -34,6 +34,12 @@ export default function ({ getService, getPageObjects, getPageObject }: FtrProvi
         await svlCommonNavigation.sidenav.expectLinkActive({
           deepLinkId: 'management:trained_models',
         });
+
+        await ml.testExecution.logTestStep(
+          'should display the stats bar and the analytics table with two trained models'
+        );
+        await ml.trainedModels.assertStats(2);
+        await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });
 

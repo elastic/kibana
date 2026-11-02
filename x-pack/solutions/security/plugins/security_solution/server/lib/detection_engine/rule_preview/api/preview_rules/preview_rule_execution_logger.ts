@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type {
-  IRuleMonitoringService,
-  RuleExecutionContext,
-  StatusChangeArgs,
-} from '../../../rule_monitoring';
+import type { ExecutionResult, IRuleMonitoringService } from '../../../rule_monitoring';
 
 export interface IPreviewRuleExecutionLogger {
   factory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
+  getExecutionResult: () => ExecutionResult | undefined;
+  getErrors: () => string[];
+  getWarnings: () => string[];
 }
 
-export const createPreviewRuleExecutionLogger = (
-  loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
-): IPreviewRuleExecutionLogger => {
+export const createPreviewRuleExecutionLogger = (): IPreviewRuleExecutionLogger => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  let executionResult: ExecutionResult | undefined;
+
   return {
     factory: ({ context }) => {
       const spyLogger = {
@@ -26,16 +27,28 @@ export const createPreviewRuleExecutionLogger = (
         trace: () => {},
         debug: () => {},
         info: () => {},
-        warn: () => {},
-        error: () => {},
-
-        logStatusChange: (args: StatusChangeArgs): Promise<void> => {
-          loggedStatusChanges.push({ ...context, ...args });
-          return Promise.resolve();
+        warn: (message: string) => {
+          warnings.push(message);
         },
+        error: (message: string) => {
+          errors.push(message);
+        },
+        logMetric: () => {},
+        logMetrics: () => {},
+        logExecutionResult: (result: ExecutionResult): void => {
+          executionResult = result;
+        },
+
+        closed: () => false,
+        close: () => Promise.resolve(),
       };
 
       return Promise.resolve(spyLogger);
     },
+    getExecutionResult: () => {
+      return executionResult;
+    },
+    getErrors: () => errors,
+    getWarnings: () => warnings,
   };
 };

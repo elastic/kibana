@@ -1,0 +1,27 @@
+# V_L1_NORM
+
+Calculates the l1 norm (Manhattan distance) between two dense_vectors.
+
+## Syntax
+
+`V_L1_NORM(left, right)`
+
+### Parameters
+
+#### left
+
+First dense_vector to calculate l1 norm similarity.
+
+#### right
+
+Second dense_vector to calculate l1 norm similarity.
+
+## Examples
+
+Calculates the l1 norm similarity between the `rgb_vector` column and the vector `[0, 255, 255]`, then sorts the results by similarity in descending order and color in ascending order.
+
+```esql
+from colors
+| eval similarity = v_l1_norm(rgb_vector, [0, 255, 255])
+| sort similarity desc, color asc
+```

@@ -48,6 +48,7 @@ import {
   esqlQueryDiffAlgorithm,
   ruleTypeDiffAlgorithm,
   forceTargetVersionDiffAlgorithm,
+  requiredFieldsDiffAlgorithm,
 } from './three_way_diff_algorithms';
 import {
   ScalarArrayDiffMissingBaseVersionStrategy,
@@ -67,7 +68,6 @@ export const calculateThreeWayRuleFieldsDiff = (
   isRuleCustomized: boolean = false
 ): ThreeWayRuleFieldsDiff => {
   const commonFieldsDiff = calculateCommonFieldsDiff(ruleVersions, isRuleCustomized);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { base_version, current_version, target_version } = ruleVersions;
   const hasBaseVersion = base_version !== MissingVersion;
 
@@ -234,7 +234,7 @@ const commonFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableCommon
   note: multiLineStringDiffAlgorithm,
   setup: multiLineStringDiffAlgorithm,
   related_integrations: simpleDiffAlgorithm,
-  required_fields: simpleDiffAlgorithm,
+  required_fields: requiredFieldsDiffAlgorithm,
   rule_schedule: simpleDiffAlgorithm,
   max_signals: numberDiffAlgorithm,
   rule_name_override: simpleDiffAlgorithm,

@@ -8,20 +8,20 @@ For the observability project type:
 
 ```bash
 # Start Elasticsearch in serverless mode as an observability project
-yarn es serverless --projectType=oblt --kill
+pnpm es serverless --projectType=oblt --kill
 
 # Run Kibana as an observability project
-yarn serverless-oblt
+pnpm serverless-oblt
 ```
 
 and one of:
 
 ```bash
 # Start Elasticsearch in serverless mode as a security project
-yarn es serverless --projectType=security --kill
+pnpm es serverless --projectType=security --kill
 
 # Run Kibana as a security project
-yarn serverless-security
+pnpm serverless-security
 ```
 
 Once running, you can login at `http://localhost:5601` with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
@@ -84,7 +84,7 @@ xpack.fleet.outputs:
 
 In serverless mode, Fleet Server runs in standalone mode. Unless you are [simultaneously developing Kibana and Fleet Server](./developing_kibana_and_fleet_server.mddeveloping_), it is easier to run Fleet Server as a Docker container.
 
-The Kibana's dev utils package defines a hard-coded [Fleet Server service token](ttps://github.com/elastic/kibana/blob/92b6fd64cd58fd62f69898c222e86409d5f15b60/src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
+The Kibana's dev utils package defines a hard-coded [Fleet Server service token](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
 
 Running a standalone Fleet Server:
 
@@ -131,10 +131,10 @@ Start ES with the `host` parameter:
 
 ```bash
 # Start Elasticsearch in serverless mode as a security|oblt projectType
-yarn es serverless --projectType=security --kill --host=<local_ip>
+pnpm es serverless --projectType=security --kill --host=<local_ip>
 
 # Run Kibana as a security|oblt projectType
-yarn serverless-security
+pnpm serverless-security
 ```
 
 Add to `kibana.dev.yml` config:
@@ -154,7 +154,7 @@ xpack.fleet.outputs:
     is_internal: false
     hosts: ['https://<local_ip>:9200']
     ca_trusted_fingerprint: F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84
-    config: 
+    config:
       ssl:
         verification_mode: none
 ```

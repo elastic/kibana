@@ -136,6 +136,11 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
+  ACTION as SEARCH_SESSION_ACTION,
+  getInProgressSessionIds,
+  setInProgressSessionIds,
+  SearchSessionEBTManager,
+  SessionsClient,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -147,7 +152,13 @@ export type {
   SearchSessionInfoProvider,
   ISessionsClient,
   SearchUsageCollector,
+  ISearchSessionEBTManager,
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
 } from './search';
+
+export type { SearchSessionsConfigSchema } from '../server/config';
 
 export { isRunningResponse } from '../common';
 
@@ -233,8 +244,6 @@ export { getTime } from '../common';
 export type { SavedObject } from '../common';
 
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
-
-export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
  * Plugin setup

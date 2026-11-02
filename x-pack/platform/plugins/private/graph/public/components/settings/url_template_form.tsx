@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiLink,
   EuiAccordion,
   useEuiTheme,
 } from '@elastic/eui';
@@ -189,14 +188,14 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                     {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
                       defaultMessage: 'Possible Kibana URL pasted, ',
                     })}
-                    <EuiLink onClick={convertUrl}>
+                    <EuiButtonEmpty size="xs" flush="both" onClick={convertUrl}>
                       <strong>
                         {i18n.translate(
                           'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
                           { defaultMessage: 'convert it.' }
                         )}
                       </strong>
-                    </EuiLink>
+                    </EuiButtonEmpty>
                   </strong>
                 </p>
               )}
@@ -213,7 +212,8 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             urlPlaceholderMissing
               ? [
                   i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-                    defaultMessage: 'The URL must contain a {placeholder} string.',
+                    defaultMessage:
+                      'The URL is invalid and/or must contain a {placeholder} string.',
                     values: { placeholder: '{{gquery}}' },
                   }),
                 ]
@@ -251,6 +251,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         >
           <EuiComboBox
             fullWidth
+            data-test-subj="graphDrilldownEncoder"
             singleSelection={{ asPlainText: true }}
             isClearable={false}
             options={outlinkEncoders.map((encoder) => ({ label: encoder.title, value: encoder }))}

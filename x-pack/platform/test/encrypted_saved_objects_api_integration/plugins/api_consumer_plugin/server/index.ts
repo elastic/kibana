@@ -62,6 +62,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
       [HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE, 'single', true],
       [SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE, 'multiple', false],
     ] as Array<[string, SavedObjectsNamespaceType, boolean]>) {
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- test plugin: registration loop but always registering. No problem.
       core.savedObjects.registerType({
         name,
         hidden,

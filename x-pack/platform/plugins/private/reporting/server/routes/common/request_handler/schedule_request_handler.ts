@@ -32,6 +32,7 @@ import {
   ScheduledReportAuditAction,
   scheduledReportAuditEvent,
 } from '../../../services/audit_events/audit_events';
+import { getReportingUserIdentity } from '../../../lib';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
@@ -57,10 +58,7 @@ export class ScheduleRequestHandler extends RequestHandler<
   (typeof validation)['body'],
   ScheduledReportApiJSON
 > {
-  protected async checkLicenseAndTimezone(
-    exportTypeId: string,
-    browserTimezone: string
-  ): Promise<IKibanaResponse | null> {
+  protected async checkLicense(exportTypeId: string): Promise<IKibanaResponse | null> {
     const { reporting, res } = this.opts;
     const licenseInfo = await reporting.getLicenseInfo();
     const licenseResults = licenseInfo.scheduledReports;
@@ -68,7 +66,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
     }
-    return super.checkLicenseAndTimezone(exportTypeId, browserTimezone);
+    return super.checkLicense(exportTypeId);
   }
 
   public static getValidation() {
@@ -145,6 +143,12 @@ export class ScheduleRequestHandler extends RequestHandler<
     const auditLogger = await reporting.getAuditLogger(req);
     const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
+    const { ids: createdById, apiKeyId: createdByApiKeyId } = await getReportingUserIdentity({
+      user,
+      request: req,
+      esClient: await reporting.getEsClient(),
+    });
+
     const reportId = id || SavedObjectsUtils.generateId();
     auditLogger.log(
       scheduledReportAuditEvent({
@@ -170,6 +174,8 @@ export class ScheduleRequestHandler extends RequestHandler<
       // we've already checked that user exists in handleRequest
       // this fallback is just to satisfy the type
       createdBy: user ? user.username : 'unknown',
+      ...(createdById.length > 0 ? { createdById } : {}),
+      ...(createdByApiKeyId ? { createdByApiKeyId } : {}),
       enabled: true,
       jobType,
       meta: {
@@ -209,12 +215,17 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { exportTypeId, jobParams } = params;
     const { reporting, req, res } = this.opts;
 
-    const checkErrorResponse = await this.checkLicenseAndTimezone(
-      exportTypeId,
-      jobParams.browserTimezone
-    );
+    const checkErrorResponse = await this.checkLicense(exportTypeId);
     if (checkErrorResponse) {
       return checkErrorResponse;
+    }
+
+    const disabledErrorResponse = await this.checkExportTypeEnabled(
+      exportTypeId,
+      ScheduleType.SCHEDULED
+    );
+    if (disabledErrorResponse) {
+      return disabledErrorResponse;
     }
 
     // check that security requirements are met

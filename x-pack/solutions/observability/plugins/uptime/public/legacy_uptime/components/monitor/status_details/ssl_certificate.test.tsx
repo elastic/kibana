@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import React from 'react';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
@@ -14,7 +12,7 @@ import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import type { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from './status_bar';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../lib';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 

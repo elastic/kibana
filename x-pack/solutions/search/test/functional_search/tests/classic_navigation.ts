@@ -40,13 +40,11 @@ export default function searchSolutionNavigation({
         { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
-        { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search applications' },
         { id: 'Agents', label: 'Agents' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
         { id: 'QueryRules', label: 'Query rules' },
-        { id: 'InferenceEndpoints', label: 'Inference endpoints' },
       ]);
     });
     it('has expected navigation', async () => {
@@ -62,12 +60,7 @@ export default function searchSolutionNavigation({
         {
           navItem: 'Indices',
           breadcrumbs: ['Build', 'Index Management'],
-          pageTestSubject: 'indexManagementHeaderContent',
-        },
-        {
-          navItem: 'Playground',
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsListPage',
+          pageTestSubject: 'indicesList',
         },
         {
           navItem: 'SearchApplications',
@@ -83,11 +76,6 @@ export default function searchSolutionNavigation({
           navItem: 'QueryRules',
           breadcrumbs: ['Relevance', 'Query rules'],
           pageTestSubject: 'queryRulesBasePage',
-        },
-        {
-          navItem: 'InferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
         },
       ];
 

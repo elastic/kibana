@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { PLUGIN } from '../../../../../common/constants/plugin';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../common/runtime_types';
 import { useSelectedLocation } from './hooks/use_selected_location';
 import { MonitorLocationSelect } from '../common/components/monitor_location_select';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
@@ -25,7 +26,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
   const { monitor } = useSelectedMonitor();
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, remoteName } = useGetUrlParams();
 
   const selectedLocation = useSelectedLocation();
 
@@ -44,12 +45,21 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
     params += `&spaceId=${spaceId}`;
   }
 
+  // Preserve the remote cluster context across location switches; otherwise
+  // we navigate to /monitor/<configId>?locationId=... without remoteName and
+  // the detail page falls back to the local saved-object lookup, which 404s
+  // for monitors that only exist on the remote cluster.
+  if (remoteName) {
+    params += `&remoteName=${remoteName}`;
+  }
+
   return (
     <MonitorLocationSelect
       isDisabled={isDisabled}
       monitorLocations={monitor?.locations}
       configId={monitorId}
       selectedLocation={selectedLocation}
+      origin={isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined}
       onChange={useCallback(
         (id, label) => {
           if (isAlertsTab) {

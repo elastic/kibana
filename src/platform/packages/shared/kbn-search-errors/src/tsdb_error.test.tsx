@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createEsError } from './create_es_error';
 import { renderSearchError } from './render_search_error';
-import { shallow } from 'enzyme';
-import { coreMock } from '@kbn/core/public/mocks';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 const servicesMock = {
   application: coreMock.createStart().application,
@@ -68,21 +68,33 @@ describe('Tsdb error', () => {
     servicesMock
   );
 
-  test('should set error.message to tsdb reason', () => {
+  it('should set error.message to tsdb reason', () => {
     expect(tsdbError.message).toEqual(
       'The field [bytes_counter] of Time series type [counter] has been used with the unsupported operation [sum].'
     );
   });
 
-  test('should render error message', () => {
+  it('should render error message', () => {
     const searchErrorDisplay = renderSearchError(tsdbError);
     expect(searchErrorDisplay).not.toBeUndefined();
-    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
-    expect(wrapper).toMatchSnapshot();
+
+    renderWithKibanaRenderContext(searchErrorDisplay?.body);
+
+    expect(
+      screen.getByText(
+        'The field [bytes_counter] of Time series type [counter] has been used with the unsupported operation [sum].'
+      )
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        'See more about Time series field types and [counter] supported aggregations'
+      )
+    ).toBeVisible();
   });
 
-  test('should return 1 actions', () => {
+  it('should return 1 actions', () => {
     const searchErrorDisplay = renderSearchError(tsdbError);
+
     expect(searchErrorDisplay).not.toBeUndefined();
     expect(searchErrorDisplay?.actions?.length).toBe(1);
   });

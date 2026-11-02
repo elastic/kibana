@@ -7,41 +7,76 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DashboardStateInput } from '@kbn/as-code-dashboard-schema';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { DashboardState } from './api';
-import type { create, read, update, deleteDashboard } from './api';
+import type {
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
+  DashboardUpdateResponseBody,
+} from './api';
 
 /**
  * Client interface for dashboard CRUD operations
  */
 export interface DashboardServerClient {
-  create: typeof create;
-  read: typeof read;
-  update: typeof update;
-  delete: typeof deleteDashboard;
+  read(
+    savedObjectsClient: SavedObjectsClientContract,
+    id: string,
+    options?: {
+      /** Returns the dashboard the way the Dashboard app loads it, keeping panels that can't be converted to the as-code API format. */
+      isDashboardAppRequest?: boolean;
+    }
+  ): Promise<DashboardReadResponseBody>;
+  /**
+   * Validates the state and creates a dashboard on behalf of the request's user, like `POST /api/dashboards`.
+   * Throws a `DashboardValidationError` when the state is invalid; nothing is saved then.
+   */
+  create(
+    request: KibanaRequest,
+    state: DashboardStateInput,
+    options?: {
+      /** Accepts the dashboard in the format the Dashboard app saves, including Lens panels in the app's own config format. */
+      isDashboardAppRequest?: boolean;
+    }
+  ): Promise<DashboardCreateResponseBody>;
+  /**
+   * Validates the state and creates or replaces the dashboard with this ID on behalf of the request's user, like `PUT /api/dashboards/{id}`.
+   * Throws a `DashboardValidationError` when the state or the ID of a new dashboard is invalid; nothing is saved then.
+   */
+  update(
+    request: KibanaRequest,
+    id: string,
+    state: DashboardStateInput,
+    options?: {
+      /** Accepts the dashboard in the format the Dashboard app saves, including Lens panels in the app's own config format. */
+      isDashboardAppRequest?: boolean;
+    }
+  ): Promise<DashboardUpdateResponseBody>;
 }
 
+/** The setup contract for the Dashboard plugin on the server. */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
+
+/**
+ * The start contract for the Dashboard plugin on the server.
+ * Provides methods for interacting with dashboards.
+ */
 export interface DashboardPluginStart {
+  /** Client for dashboard CRUD operations. */
   client: DashboardServerClient;
   /**
-   * @deprecated This method is deprecated and should be replaced by client.read
-   */
-  getDashboard: (
-    ctx: RequestHandlerContext,
-    id: string
-  ) => Promise<
-    Pick<DashboardState, 'description' | 'tags' | 'title'> & {
-      id: string;
-    }
-  >;
-  /**
-   * @deprecated Contact #kibana-presentation about requirements for a proper panel search interface
+   * Scans dashboards with pagination.
+   *
+   * @deprecated Contact #kibana-dashboards about requirements for a proper panel search interface.
+   * @param ctx - The request handler context.
+   * @param page - The page number.
+   * @param perPage - The number of items per page.
+   * @returns A promise that resolves to the {@link ScanDashboardsResult}.
    */
   scanDashboards: (
-    ctx: RequestHandlerContext,
+    savedObjectsClient: SavedObjectsClientContract,
     page: number,
     perPage: number
   ) => Promise<ScanDashboardsResult>;

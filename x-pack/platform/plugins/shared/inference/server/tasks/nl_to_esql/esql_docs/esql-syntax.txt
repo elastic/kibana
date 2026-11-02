@@ -1,156 +1,237 @@
 ```markdown
 # ES|QL Syntax Reference
 
-## Overview
+The **Elasticsearch Query Language (ES|QL)** provides a powerful, piped syntax for filtering, transforming, and analyzing data stored in Elasticsearch. ES|QL is designed to be easy to learn and use, supporting a wide range of commands, functions, and operators for data operations such as filtering, aggregation, time-series analysis, and more.
 
-The Elasticsearch Query Language (ES|QL) provides a powerful and flexible way to query, filter, transform, and analyze data stored in Elasticsearch. ES|QL uses a piped syntax (`|`) to chain commands and functions, enabling users to compose complex queries in a step-by-step manner. Each query starts with a source command (e.g., `FROM`) and can be followed by one or more processing commands.
+---
 
-### Basic Syntax
+## Basic Syntax
 
-An ES|QL query is composed of:
-1. A **source command**: Retrieves data from indices, data streams, or aliases.
-2. A series of **processing commands**: Transform or filter the data.
+An ES|QL query is composed of a **source command** followed by an optional series of **processing commands**, separated by a pipe character (`|`). Each command transforms the data, and the result of a query is the table produced by the final processing command.
 
-Commands are separated by the pipe character (`|`), and the result of one command is passed as input to the next. For example:
+**Example:**
 
 ```esql
 FROM employees
 | WHERE height > 2
-| SORT height DESC
+| SORT last_name
 ```
 
-The result of the query is the table produced by the final processing command.
+You can write ES|QL queries as a single line or with each command on a new line for readability:
 
-### Identifiers
+```esql
+FROM employees
+| WHERE height > 2
+| SORT last_name
+```
 
-Identifiers must be quoted with backticks (`` ` ``) if:
-- They don’t start with a letter, `_`, or `@`.
-- They contain characters other than letters, numbers, or `_`.
+---
 
-For example:
+## Identifiers
+
+- Identifiers (field or column names) must be quoted with backticks (`` ` ``) if:
+  - They don’t start with a letter, `_`, or `@`
+  - Any character is not a letter, number, or `_`
+
+**Example:**
+
 ```esql
 FROM index
 | KEEP `1.field`
 ```
 
-### Literals
+When referencing a function alias that itself uses a quoted identifier, escape the backticks:
 
-#### String Literals
-String literals are enclosed in double quotes (`"`). If the string contains quotes, escape them with `\\` or use triple quotes (`"""`):
 ```esql
-ROW name = """Indiana "Indy" Jones"""
+FROM index
+| STATS COUNT(`1.field`)
+| EVAL my_count = `COUNT(``1.field``)`
 ```
 
-#### Numeric Literals
-Numeric literals can be expressed in decimal or scientific notation:
+---
+
+## Literals
+
+### String Literals
+
+- Delimited by double quotes (`"`).
+- If the string contains quotes, escape them (`\"`).
+- Triple quotes (`"""`) can be used for convenience.
+
+**Examples:**
+
 ```esql
-ROW value1 = 1969, value2 = 3.14, value3 = 4E5
+FROM index
+| WHERE first_name == "Georgi"
+
+ROW name == """Indiana "Indy" Jones"""
 ```
 
-### Comments
+Special characters:
+- `\r` (carriage return)
+- `\n` (line feed)
+- `\t` (tab)
 
-ES|QL supports C++-style comments:
-- Single-line comments: `//`
-- Multi-line comments: `/* */`
+### Numeric Literals
+
+- Decimal and scientific notation are supported.
+
+**Examples:**
+
+```esql
+ROW a = 1969, b = 3.14, c = .1234, d = 4E5, e = 1.2e-3, f = -.1e2
+```
+
+---
+
+## Comments
+
+- Single line: `//`
+- Block: `/* ... */`
+
+**Examples:**
 
 ```esql
 // Query the employees index
 FROM employees
 | WHERE height > 2
+
+FROM /* Query the employees index */ employees
+| WHERE height > 2
+
+FROM employees
+/* Query the
+ * employees
+ * index */
+| WHERE height > 2
 ```
-
-### Timespan Literals
-
-Timespan literals represent datetime intervals and are expressed as a combination of a number and a temporal unit (e.g., `1 day`, `24h`, `7 weeks`). They are not whitespace-sensitive:
-```esql
-1day
-1 day
-1       day
-```
-
-Timespan literals can be used in various commands and functions, such as `WHERE`, `DATE_TRUNC`, and `BUCKET`.
 
 ---
 
-## Example Queries Using Timespan Literals
+## Timespan Literals
 
-Below are five example queries showcasing the use of timespan literals in combination with different commands and functions.
+**Timespan literals** express datetime intervals and durations. They are a combination of a number and a temporal unit (e.g., `1 day`, `24h`, `7 weeks`). Whitespace is not significant:
 
-Filtering Logs from the Last 24 Hours
-This query retrieves logs from the last 24 hours and calculates the total number of logs per hour.
+- `1day`
+- `1 day`
+- `1       day`
+
+Timespan literals are used in many ES|QL functions and commands, such as `DATE_TRUNC`, `BUCKET`, and in date math expressions.
+
+---
+
+## Function Named Parameters
+
+Some functions (like `MATCH`) support named parameters using JSON-like syntax:
+
+```esql
+FROM library
+| WHERE match(author, "Frank Herbert", {"minimum_should_match": 2, "operator": "AND"})
+| LIMIT 5
+```
+
+---
+
+# Examples: Using Timespan Literals in ES|QL
+
+Below are several ES|QL queries demonstrating the use of timespan literals with different commands and functions. Each example uses a different interval or unit, and combines ISO timestamps, `NOW()`, and timespan literals.
+
+---
+
+### 1. Filter Events from the Last 24 Hours
 
 ```esql
 FROM logs-*
 | WHERE @timestamp >= NOW() - 24h
-| EVAL hour = DATE_TRUNC(1 hour, @timestamp)
-| STATS log_count = COUNT(*) BY hour
-| SORT hour
+| SORT @timestamp DESC
+| LIMIT 10
 ```
+*This query retrieves the 10 most recent log entries from the last 24 hours.*
 
-Grouping by Weekly Buckets
-This query groups employee hire dates into weekly buckets for the last 7 weeks and calculates the number of hires per week.
+---
 
-```esql
-FROM employees
-| WHERE hire_date >= NOW() - 7 weeks
-| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 1 week)
-| SORT week
-```
-
-Calculating Monthly Averages
-This query calculates the average salary of employees grouped by monthly buckets for the year 2023.
-
-```esql
-FROM employees
-| WHERE hire_date >= "2023-01-01T00:00:00Z" AND hire_date < "2024-01-01T00:00:00Z"
-| EVAL month = DATE_TRUNC(1 month, hire_date)
-| STATS avg_salary = AVG(salary) BY month
-| SORT month
-```
-
-Creating Hourly Buckets for the Last Day
-This query creates hourly buckets for the last 1 day and calculates the total number of events in each bucket.
-
-```esql
-FROM events
-| WHERE @timestamp >= NOW() - 1 day
-| STATS event_count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)
-| SORT hour
-```
-
-Filtering and Aggregating by Custom Time Range
-This query filters logs within a custom time range and calculates the maximum response time for each 6-hour interval.
+### 2. Aggregate Events into 1-Hour Buckets for the Last Day
 
 ```esql
 FROM logs-*
-| WHERE @timestamp >= "2023-10-01T00:00:00Z" AND @timestamp < "2023-10-02T00:00:00Z"
-| EVAL interval = DATE_TRUNC(6 hours, @timestamp)
-| STATS max_response_time = MAX(response_time) BY interval
+| WHERE @timestamp >= NOW() - 1 day AND @timestamp < NOW()
+| STATS event_count = COUNT(*) BY hour_bucket = BUCKET(@timestamp, 1 hour)
+| SORT hour_bucket
+```
+*This query counts events per hour for the last day, using `BUCKET` with a `1 hour` timespan.*
+
+---
+
+### 3. Calculate Average Value per Day for the Last Week
+
+```esql
+FROM metrics
+| WHERE timestamp >= NOW() - 7 days
+| STATS avg_value = AVG(value) BY day = DATE_TRUNC(1 day, timestamp)
+| SORT day
+```
+*This query calculates the daily average of the `value` field for the past 7 days, using `DATE_TRUNC` with a `1 day` interval.*
+
+---
+
+### 4. Group Data into Weekly Buckets Over a Custom Range
+
+```esql
+FROM sales
+| WHERE sale_date >= "2024-05-01T00:00:00Z" AND sale_date < "2024-06-01T00:00:00Z"
+| STATS total_sales = SUM(amount) BY week = BUCKET(sale_date, 1 week)
+| SORT week
+```
+*This query sums sales amounts per week for May 2024, using `BUCKET` with a `1 week` interval.*
+
+---
+
+### 5. Find Events in the Last 3 Hours and Truncate to 30-Minute Intervals
+
+```esql
+FROM events
+| WHERE event_time >= NOW() - 3h
+| EVAL interval = DATE_TRUNC(30 minutes, event_time)
+| STATS count = COUNT(*) BY interval
 | SORT interval
 ```
+*This query counts events in 30-minute intervals for the last 3 hours, using `DATE_TRUNC` with a `30 minutes` timespan.*
 
 ---
 
-## Key Features of ES|QL Syntax
+### 6. Calculate Median Value in 15-Minute Buckets for the Last 2 Hours
 
-### Named Parameters in Functions
-Some functions, like `MATCH`, support named parameters for additional options:
 ```esql
-FROM library
-| WHERE MATCH(author, "Frank Herbert", {"minimum_should_match": 2, "operator": "AND"})
-| LIMIT 5
+FROM sensor_data
+| WHERE reading_time >= NOW() - 2h
+| STATS median_reading = MEDIAN(reading) BY bucket = BUCKET(reading_time, 15 minutes)
+| SORT bucket
 ```
-
-### Supported Commands and Functions
-ES|QL supports a wide range of commands and functions for filtering, transforming, and analyzing data. For example:
-- **Commands**: `FROM`, `WHERE`, `SORT`, `STATS`, `EVAL`, `KEEP`, `DROP`, `LIMIT`, `BUCKET`, `DATE_TRUNC`
-- **Functions**: `COUNT`, `AVG`, `MAX`, `MIN`, `DATE_EXTRACT`, `DATE_DIFF`, `CASE`
-
-Refer to the [Commands](#commands) and [Functions](#functions) sections for detailed descriptions and examples.
+*This query calculates the median sensor reading in 15-minute buckets for the last 2 hours.*
 
 ---
 
-## Conclusion
+### 7. Filter and Aggregate Using Weeks and Days
 
-ES|QL provides a robust and intuitive syntax for querying and analyzing data in Elasticsearch. By leveraging its piped syntax, timespan literals, and rich set of commands and functions, users can perform complex data transformations and aggregations with ease. The examples above demonstrate the flexibility and power of ES|QL, making it a valuable tool for data exploration and analysis.
+```esql
+FROM activity_logs
+| WHERE activity_date >= NOW() - 2 weeks
+| STATS daily_count = COUNT(*) BY day = DATE_TRUNC(1 day, activity_date)
+| SORT day
+```
+*This query counts activities per day for the last two weeks.*
+
+---
+
+## Summary
+
+- **ES|QL** uses a piped syntax for composing queries.
+- **Timespan literals** (e.g., `1 day`, `24h`, `7 weeks`) are used for date math, bucketing, and truncation.
+- **Commands and functions** such as `BUCKET`, `DATE_TRUNC`, `NOW()`, and `WHERE` support timespan literals.
+- **Identifiers** and **literals** follow specific quoting and escaping rules.
+- **Comments** can be added using `//` or `/* ... */`.
+
+For a complete list of commands, functions, and operators, refer to the [ES|QL Reference](#).
+
+---
 ```

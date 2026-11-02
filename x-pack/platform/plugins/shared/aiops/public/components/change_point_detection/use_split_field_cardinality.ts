@@ -15,6 +15,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 /**
  * Gets the cardinality of the selected split field
@@ -25,6 +26,7 @@ export function useSplitFieldCardinality(
   splitField: string | undefined,
   query: QueryDslQueryContainer
 ) {
+  const { cps } = useAiopsAppContext();
   const prevSplitField = usePrevious(splitField);
   const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 
@@ -39,6 +41,7 @@ export function useSplitFieldCardinality(
         runtime_mappings: { [optionDefinition.name]: optionDefinition.runtimeField },
       };
     }
+    const projectRouting = cps?.cpsManager?.getDefaultProjectRouting();
     return {
       params: {
         index: dataView.getIndexPattern(),
@@ -52,9 +55,10 @@ export function useSplitFieldCardinality(
           },
         },
         ...runtimeMappings,
+        ...(projectRouting ? { project_routing: projectRouting } : {}),
       },
     };
-  }, [splitField, dataView, query, splitFieldsOptions]);
+  }, [splitFieldsOptions, cps?.cpsManager, dataView, query, splitField]);
 
   const { runRequest: getSplitFieldCardinality, cancelRequest } = useCancellableSearch();
 

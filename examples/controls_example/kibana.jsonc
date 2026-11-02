@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/controls-example-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": "@elastic/kibana-dashboards",
   "group": "platform",
   "visibility": "private",
   "plugin": {
@@ -9,14 +9,13 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "controls",
       "data",
       "developerExamples",
       "embeddable",
       "navigation",
-      "presentationUtil",
       "uiActions",
       "dataViews"
-    ]
+    ],
+    "requiredBundles": ["kibanaReact"]
   }
 }

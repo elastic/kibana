@@ -6,43 +6,47 @@
  */
 
 import React, { useState } from 'react';
-import type { IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
+  EuiText,
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
-  type UseEuiTheme,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import type { AddLayerFunction, VisualizationLayerDescription } from '@kbn/lens-common';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import type { SeriesType, XYState } from './types';
+import type { SeriesType, XYVisualizationState } from './types';
 import { visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
-import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
 export interface AddLayerButtonProps {
-  state: XYState;
+  state: XYVisualizationState;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   eventAnnotationService: EventAnnotationServiceType;
   isInlineEditing?: boolean;
+  /** Hides the annotation library option (ES|QL charts do not support data-view-based library groups) */
+  hideAnnotationLibrary?: boolean;
+  isEsqlChart?: boolean;
 }
 
 export enum AddLayerPanelType {
   main = 'main',
   selectAnnotationMethod = 'selectAnnotationMethod',
+  selectReferenceSource = 'selectReferenceSource',
   compatibleVisualizationTypes = 'compatibleVisualizationTypes',
 }
 
@@ -52,6 +56,8 @@ export function AddLayerButton({
   addLayer,
   eventAnnotationService,
   isInlineEditing,
+  hideAnnotationLibrary,
+  isEsqlChart,
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
@@ -65,7 +71,16 @@ export function AddLayerButton({
     toolTipContent,
   }: (typeof supportedLayers)[0]) => {
     return {
-      panel: AddLayerPanelType.selectAnnotationMethod,
+      // without the library option there is no annotation method to choose from,
+      // so add a new annotation layer directly
+      ...(hideAnnotationLibrary
+        ? {
+            onClick: () => {
+              addLayer(LayerTypes.ANNOTATIONS);
+              toggleLayersChoice(false);
+            },
+          }
+        : { panel: AddLayerPanelType.selectAnnotationMethod }),
       toolTipContent,
       disabled,
       name: (
@@ -76,7 +91,7 @@ export function AddLayerButton({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -93,7 +108,7 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: label,
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -122,6 +137,7 @@ export function AddLayerButton({
       key="lsnLayerAdd"
     >
       <EuiPopover
+        aria-label={buttonLabel}
         data-test-subj="lnsConfigPanel__addLayerPopover"
         button={
           <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
@@ -142,7 +158,6 @@ export function AddLayerButton({
       >
         <EuiContextMenu
           initialPanelId={AddLayerPanelType.main}
-          size="s"
           panels={[
             {
               id: AddLayerPanelType.main,
@@ -160,7 +175,7 @@ export function AddLayerButton({
                       toolTipContent,
                       disabled,
                       name: label,
-                      icon: icon && <EuiIcon size="m" type={icon} />,
+                      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                       ['data-test-subj']: `lnsLayerAddButton-${type}`,
                       onClick: () => {
                         addLayer(type);
@@ -170,11 +185,21 @@ export function AddLayerButton({
                   }
                   return dataPanel(props);
                 }
+                if (type === LayerTypes.REFERENCELINE && isEsqlChart) {
+                  return {
+                    panel: AddLayerPanelType.selectReferenceSource,
+                    toolTipContent,
+                    disabled,
+                    name: label,
+                    icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
+                    'data-test-subj': `lnsLayerAddButton-${type}`,
+                  };
+                }
                 return {
                   toolTipContent,
                   disabled,
                   name: label,
-                  icon: icon && <EuiIcon size="m" type={icon} />,
+                  icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                   ['data-test-subj']: `lnsLayerAddButton-${type}`,
                   onClick: () => {
                     addLayer(type);
@@ -182,6 +207,71 @@ export function AddLayerButton({
                   },
                 };
               }),
+            },
+            {
+              id: AddLayerPanelType.selectReferenceSource,
+              title: i18n.translate('xpack.lens.configPanel.selectReferenceSourceTitle', {
+                defaultMessage: 'Reference lines',
+              }),
+              width: 400,
+              items: [
+                {
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon="number"
+                      data-test-subj="lnsReferenceLineLayer_static"
+                      onClick={() => {
+                        addLayer(LayerTypes.REFERENCELINE, {
+                          ignoreInitialValues: false,
+                          datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.staticReferenceLinesButtonLabel"
+                          defaultMessage="Static reference lines"
+                        />
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.staticReferenceLinesDescription"
+                          defaultMessage="Set fixed values for budgets, targets, or thresholds."
+                        />
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
+                },
+                {
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon="code"
+                      data-test-subj="lnsReferenceLineLayer_esql"
+                      onClick={() => {
+                        addLayer(LayerTypes.REFERENCELINE, {
+                          ignoreInitialValues: true,
+                          datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.esqlReferenceLinesButtonLabel"
+                          defaultMessage="ES|QL reference lines"
+                        />
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.esqlReferenceLinesDescription"
+                          defaultMessage="Calculate thresholds using a separate ES|QL query."
+                        />
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
+                },
+              ],
             },
             {
               id: AddLayerPanelType.selectAnnotationMethod,
@@ -194,7 +284,7 @@ export function AddLayerButton({
                   name: i18n.translate('xpack.lens.configPanel.newAnnotation', {
                     defaultMessage: 'New annotation',
                   }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   onClick: () => {
                     addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
@@ -226,27 +316,27 @@ export function AddLayerButton({
                   t.subtypes?.includes(firstLayerSubtype) && !isPercentageSeries(firstLayerSubtype);
 
                 return {
-                  renderItem: () => {
-                    return (
-                      <ChartOptionWrapper
-                        type={t.id}
-                        label={t.label}
-                        description={t.description}
-                        icon={t.icon}
-                        onClick={() => {
-                          addLayer(
-                            LayerTypes.DATA,
-                            undefined,
-                            undefined,
-                            canInitializeWithSubtype
-                              ? firstLayerSubtype
-                              : (t.subtypes?.[0] as SeriesType)
-                          );
-                          toggleLayersChoice(false);
-                        }}
-                      />
-                    );
-                  },
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon={<EuiIcon type={t.icon} aria-hidden={true} />}
+                      data-test-subj={`lnsXY_seriesType-${t.id}`}
+                      onClick={() => {
+                        addLayer(LayerTypes.DATA, {
+                          seriesType: canInitializeWithSubtype
+                            ? firstLayerSubtype
+                            : (t.subtypes?.[0] as SeriesType),
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s" data-test-subj="lnsChartSwitch-option-label">
+                        {t.label}
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        {t.description}
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
                 };
               }),
             },
@@ -260,53 +350,10 @@ export function AddLayerButton({
           eventAnnotationService={eventAnnotationService}
           isInlineEditing={isInlineEditing}
           addLayer={(extraArg) => {
-            addLayer(LayerTypes.ANNOTATIONS, extraArg);
+            addLayer(LayerTypes.ANNOTATIONS, { extraArg });
           }}
         />
       )}
     </div>
   );
 }
-
-const ChartOptionWrapper = ({
-  label,
-  description,
-  icon,
-  onClick,
-  type,
-}: {
-  label: string;
-  description: string;
-  icon: IconType;
-  onClick: () => void;
-  type: string;
-}) => {
-  const euiThemeContext = useEuiTheme();
-  return (
-    <button
-      data-test-subj={`lnsXY_seriesType-${type}`}
-      onClick={onClick}
-      className="euiContextMenuItem"
-      css={chartOptionWrapperStyles(euiThemeContext)}
-    >
-      <ChartOption option={{ icon, label, description }} />
-    </button>
-  );
-};
-
-const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s};
-  border-bottom: ${euiTheme.border.thin};
-  border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
-  width: 100%;
-  &:hover,
-  &:focus {
-    color: ${euiTheme.colors.primary};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
-    span,
-    .euiText {
-      text-decoration: underline;
-      color: ${euiTheme.colors.primary};
-    }
-  }
-`;

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import {
   SUB_ACTION,

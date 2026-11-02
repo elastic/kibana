@@ -35,7 +35,7 @@ export const ChartOption = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type={option.icon || 'empty'} />
+        <EuiIcon type={option.icon || 'empty'} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="lnsChartSwitch-option-label">
@@ -73,7 +73,7 @@ export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything'
 
 const CheckIcon = () => {
   const { euiTheme } = useEuiTheme();
-  return <EuiIcon type="check" color={euiTheme.colors.darkestShade} />;
+  return <EuiIcon type="check" color={euiTheme.colors.darkestShade} aria-hidden={true} />;
 };
 
 const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
@@ -107,7 +107,7 @@ export const ChartSwitchOptionPrepend = ({
     <EuiFlexItem grow={false}>
       {isChecked && <CheckIcon />}
       {dataLossWarning && <DataLossWarning content={dataLossWarning} id={subtypeId} />}
-      {!dataLossWarning && !isChecked && <EuiIcon type="empty" />}
+      {!dataLossWarning && !isChecked && <EuiIcon type="empty" aria-hidden={true} />}
     </EuiFlexItem>
   );
 };

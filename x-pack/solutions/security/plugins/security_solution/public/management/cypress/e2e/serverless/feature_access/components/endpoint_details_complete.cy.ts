@@ -10,10 +10,9 @@ import type { CyIndexEndpointHosts } from '../../../../tasks/index_endpoint_host
 import { indexEndpointHosts } from '../../../../tasks/index_endpoint_hosts';
 import { login, ROLE } from '../../../../tasks/login';
 
-const { insightsComponentExists, addConnectorButtonExists } = workflowInsightsSelectors;
+const { insightsComponentExists, connectorSelectorExists } = workflowInsightsSelectors;
 
-// FLAKY: https://github.com/elastic/kibana/issues/239216
-describe.skip(
+describe(
   'Endpoint details',
   {
     tags: [
@@ -55,7 +54,7 @@ describe.skip(
     it('should render Insights section on endpoint flyout with option to define connectors', () => {
       loadEndpointDetailsFlyout(endpointId);
       insightsComponentExists();
-      addConnectorButtonExists();
+      connectorSelectorExists();
     });
   }
 );

@@ -16,7 +16,7 @@ import {
   DatasetQualityLocatorDefinition,
 } from '../common/locators';
 
-export class DataQualityPlugin implements Plugin<void, void, any, any> {
+export class DataQualityPlugin implements Plugin<void, void, Dependencies> {
   public setup(_coreSetup: CoreSetup, { features, share }: Dependencies) {
     features.registerKibanaFeature(KIBANA_FEATURE);
     features.registerElasticsearchFeature(ELASTICSEARCH_FEATURE);

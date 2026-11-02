@@ -15,48 +15,20 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import type {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { getTopNavConfig, isFallbackDataView } from '../utils';
+import { getReadOnlyBadge, getTopNavConfig, isFallbackDataView } from '../utils';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
-
-const topNavStyles = {
-  goToLens: (euiThemeContext: UseEuiTheme) =>
-    css({
-      // Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.
-      '.visNavItem__goToLens': {
-        [euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])]: {
-          marginRight: euiThemeContext.euiTheme.size.m,
-          position: 'relative',
-        },
-
-        '&::after': {
-          [euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])]: {
-            borderRight: euiThemeContext.euiTheme.border.thin,
-            bottom: 0,
-            content: '""',
-            display: 'block',
-            pointerEvents: 'none',
-            position: 'absolute',
-            right: `-${euiThemeContext.euiTheme.size.s}`,
-            top: 0,
-          },
-        },
-      },
-    }),
-};
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -67,6 +39,7 @@ interface VisualizeTopNavProps {
   hasUnappliedChanges: boolean;
   originatingApp?: string;
   originatingPath?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   visInstance: VisualizeEditorVisInstance;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
@@ -79,24 +52,24 @@ interface VisualizeTopNavProps {
 const TopNav = ({
   currentAppState,
   isChromeVisible,
-  isEmbeddableRendered,
   hasUnsavedChanges,
   setHasUnsavedChanges,
   hasUnappliedChanges,
   originatingApp,
   setOriginatingApp,
   originatingPath,
+  incomingBreadcrumbs,
   visInstance,
   stateContainer,
   visualizationIdFromUrl,
   embeddableId,
+  isEmbeddableRendered,
   onAppLeave,
   eventEmitter,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
-  const styles = useMemoCss(topNavStyles);
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { setHeaderActionMenu, visualizeCapabilities } = services;
+  const { visualizeCapabilities } = services;
   const {
     embeddableHandler,
     vis,
@@ -114,6 +87,19 @@ const TopNav = ({
   const hideLensBadge = useCallback(() => {
     setHideTryInLensBadge(true);
   }, [setHideTryInLensBadge]);
+
+  // AppMenu is React.memo'd and lazy. A disableButton() snapshot from first
+  // paint stays disabled after adapters exist unless the menu identity changes.
+  const [inspectorAvailable, setInspectorAvailable] = useState(false);
+  useEffect(() => {
+    const update = () => {
+      const next = Boolean(embeddableHandler.hasInspector?.());
+      setInspectorAvailable((current) => (current === next ? current : next));
+    };
+    update();
+    const subscription = embeddableHandler.getOutput$().subscribe(update);
+    return () => subscription.unsubscribe();
+  }, [embeddableHandler, isEmbeddableRendered]);
 
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
@@ -149,33 +135,32 @@ const TopNav = ({
     };
   }, [embeddableHandler, vis]);
 
-  const config = useMemo(() => {
-    if (isEmbeddableRendered) {
-      return getTopNavConfig(
-        {
-          hasUnsavedChanges,
-          setHasUnsavedChanges,
-          hasUnappliedChanges,
-          openInspector,
-          originatingApp,
-          setOriginatingApp,
-          originatingPath,
-          visInstance,
-          stateContainer,
-          visualizationIdFromUrl,
-          stateTransfer: services.stateTransferService,
-          embeddableId,
-          displayEditInLensItem,
-          hideLensBadge,
-          setNavigateToLens,
-          showBadge: !hideTryInLensBadge && displayEditInLensItem,
-          eventEmitter,
-        },
-        services
-      );
-    }
+  const headerActions = useMemo(() => {
+    return getTopNavConfig(
+      {
+        hasUnsavedChanges,
+        setHasUnsavedChanges,
+        hasUnappliedChanges,
+        openInspector,
+        originatingApp,
+        setOriginatingApp,
+        originatingPath,
+        incomingBreadcrumbs,
+        visInstance,
+        stateContainer,
+        visualizationIdFromUrl,
+        stateTransfer: services.stateTransferService,
+        embeddableId,
+        displayEditInLensItem,
+        hideLensBadge,
+        setNavigateToLens,
+        showBadge: !hideTryInLensBadge && displayEditInLensItem,
+        eventEmitter,
+        inspectorAvailable,
+      },
+      services
+    );
   }, [
-    isEmbeddableRendered,
     hasUnsavedChanges,
     setHasUnsavedChanges,
     hasUnappliedChanges,
@@ -183,6 +168,7 @@ const TopNav = ({
     originatingApp,
     setOriginatingApp,
     originatingPath,
+    incomingBreadcrumbs,
     visInstance,
     stateContainer,
     visualizationIdFromUrl,
@@ -192,6 +178,7 @@ const TopNav = ({
     hideLensBadge,
     hideTryInLensBadge,
     eventEmitter,
+    inspectorAvailable,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
@@ -331,19 +318,36 @@ const TopNav = ({
 
   const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
 
-  return isChromeVisible ? (
-    /**
-     * Most visualizations have all search bar components enabled.
-     * Some visualizations have fewer options, but all visualizations have the search bar.
-     * That's is why the showSearchBar prop is set.
-     * All visualizations also have the timepicker\autorefresh component,
-     * it is enabled by default in the TopNavMenu component.
-     */
+  const badges = useMemo<AppHeaderBadge[] | undefined>(() => {
+    const nextBadges: AppHeaderBadge[] = [];
+    if (managed) {
+      nextBadges.push({
+        label: i18n.translate('visualizations.managedBadgeText', {
+          defaultMessage: 'Managed',
+        }),
+        color: 'primary',
+        tooltip: i18n.translate('visualizations.managedBadgeTooltip', {
+          defaultMessage:
+            'This visualization is managed by Elastic. Changes made here must be saved to a new visualization.',
+        }),
+        'data-test-subj': 'managedContentBadge',
+      });
+    }
+    if (!visualizeCapabilities.save) {
+      nextBadges.push(getReadOnlyBadge());
+    }
+    return nextBadges.length ? nextBadges : undefined;
+  }, [managed, visualizeCapabilities.save]);
 
+  const editorTitle =
+    vis.title ||
+    i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
+      defaultMessage: 'Edit visualization',
+    });
+
+  const searchBar = (
     <TopNavMenu
       appName={VISUALIZE_APP_NAME}
-      config={config}
-      setMenuMountPoint={setHeaderActionMenu}
       onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
@@ -353,18 +357,6 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
-      badges={
-        managed
-          ? [
-              getManagedContentBadge(
-                i18n.translate('visualizations.managedBadgeTooltip', {
-                  defaultMessage:
-                    'This visualization is managed by Elastic. Changes made here must be saved to a new visualization.',
-                })
-              ),
-            ]
-          : undefined
-      }
       allowSavingQueries
       dataViewPickerComponentProps={
         shouldShowDataViewPicker && vis.data.indexPattern
@@ -393,22 +385,34 @@ const TopNav = ({
       }
       showSearchBar
       useDefaultBehaviors
-      css={styles.goToLens}
     />
-  ) : showFilterBar ? (
-    /**
-     * The top nav is hidden in embed mode, but the filter bar must still be present so
-     * we show the filter bar on its own here if the chrome is not visible.
-     */
-    <TopNavMenu
-      appName={VISUALIZE_APP_NAME}
-      setMenuMountPoint={setHeaderActionMenu}
-      indexPatterns={indexPatterns}
-      showSearchBar
-      showDatePicker={false}
-      showQueryInput={false}
-    />
-  ) : null;
+  );
+
+  if (!isChromeVisible) {
+    return showFilterBar ? (
+      <TopNavMenu
+        appName={VISUALIZE_APP_NAME}
+        indexPatterns={indexPatterns}
+        showSearchBar
+        showDatePicker={false}
+        showQueryInput={false}
+      />
+    ) : null;
+  }
+
+  return (
+    <>
+      <AppHeader
+        title={editorTitle}
+        back={headerActions.back}
+        menu={headerActions.menu}
+        share={headerActions.share}
+        badges={badges}
+        sticky={false}
+      />
+      {searchBar}
+    </>
+  );
 };
 
 export const VisualizeTopNav = injectI18n(memo(TopNav));

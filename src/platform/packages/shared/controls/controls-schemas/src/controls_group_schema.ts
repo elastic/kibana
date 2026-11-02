@@ -7,88 +7,100 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
-  CONTROLS_CHAINING_HIERARCHICAL,
-  CONTROLS_CHAINING_NONE,
-  CONTROLS_LABEL_POSITION_ONE_LINE,
-  CONTROLS_LABEL_POSITION_TWO_LINE,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_CHAINING,
-  DEFAULT_CONTROLS_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
+  CONTROL_WIDTH_LARGE,
+  CONTROL_WIDTH_MEDIUM,
+  CONTROL_WIDTH_SMALL,
+  DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { controlSchema } from './control_schema';
+import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './options_list_schema';
+import { rangeSliderControlSchema } from './range_slider_schema';
+import { timeSliderControlSchema } from './time_slider_schema';
 
-export const labelPositionSchema = schema.oneOf(
-  [
-    schema.literal(CONTROLS_LABEL_POSITION_ONE_LINE),
-    schema.literal(CONTROLS_LABEL_POSITION_TWO_LINE),
-  ],
-  {
-    defaultValue: DEFAULT_CONTROLS_LABEL_POSITION,
-    meta: {
-      description: 'Position of the labels for controls. For example, "oneLine", "twoLine".',
-    },
-  }
-);
+export const controlWidthSchema = z
+  .union([
+    z.literal(CONTROL_WIDTH_SMALL),
+    z.literal(CONTROL_WIDTH_MEDIUM),
+    z.literal(CONTROL_WIDTH_LARGE),
+  ])
+  .default(DEFAULT_PINNED_CONTROL_STATE.width)
+  .meta({
+    description: 'Minimum width of the control panel.',
+  });
 
-export const chainingSchema = schema.oneOf(
-  [schema.literal(CONTROLS_CHAINING_HIERARCHICAL), schema.literal(CONTROLS_CHAINING_NONE)],
-  {
-    defaultValue: DEFAULT_CONTROLS_CHAINING,
-    meta: {
+export const pinnedControlSchema = z
+  .object({
+    id: z.string().optional().meta({ description: 'The unique ID of the control' }),
+    width: controlWidthSchema,
+    grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
       description:
-        'The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".',
-    },
-  }
-);
-
-export const ignoreParentSettingsSchema = schema.object({
-  ignoreFilters: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore global filters in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreFilters,
-    })
-  ),
-  ignoreQuery: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore the global query bar in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreQuery,
-    })
-  ),
-  ignoreTimerange: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore the global time range in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreTimerange,
-    })
-  ),
-  ignoreValidations: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Ignore validations in controls.' },
-      defaultValue: DEFAULT_IGNORE_PARENT_SETTINGS.ignoreValidations,
-    })
-  ),
-});
-
-export const controlsGroupSchema = schema.object(
-  {
-    controls: schema.arrayOf(controlSchema, {
-      defaultValue: [],
-      meta: { description: 'An array of control panels and their state in the control group.' },
+        'When `true`, the control expands to fill any available horizontal space. Defaults to `false`.',
     }),
-    labelPosition: labelPositionSchema,
-    chainingSystem: chainingSchema,
-    enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
-    autoApplySelections: schema.boolean({
-      meta: { description: 'Show apply selections button in controls.' },
-      defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
-    }),
-  },
-  {
-    meta: {
-      deprecated: true,
-    },
-  }
-);
+  })
+  .strict();
+
+export const getControlsSchema = () => {
+  /**
+   * - keep types in alphabetical order for the sake of documentation
+   * - control order will be determined by the array
+   */
+  return z.discriminatedUnion('type', [
+    pinnedControlSchema
+      .extend({
+        type: z.literal(ESQL_CONTROL),
+        config: optionsListESQLControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-esql-control',
+        title: ESQL_CONTROL,
+        description:
+          'An ES|QL variable control whose selected value is injected into ES|QL visualizations using the `?variable_name` syntax. Options can come from a fixed list or an ES|QL query. Define the options source in `config`.',
+      }),
+    pinnedControlSchema
+      .extend({
+        type: z.literal(OPTIONS_LIST_CONTROL),
+        config: optionsListDSLControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-options-list-control',
+        title: OPTIONS_LIST_CONTROL,
+        description:
+          'A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.',
+      }),
+    pinnedControlSchema
+      .extend({
+        type: z.literal(RANGE_SLIDER_CONTROL),
+        config: rangeSliderControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-range-slider-control',
+        title: RANGE_SLIDER_CONTROL,
+        description:
+          'A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.',
+      }),
+    pinnedControlSchema
+      .extend({
+        type: z.literal(TIME_SLIDER_CONTROL),
+        config: timeSliderControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-time-slider-control',
+        title: TIME_SLIDER_CONTROL,
+        description:
+          'A control panel that filters a time field to a selected sub-range of the global time range. Define the start and end positions in `config` as fractions of the global range (0 to 1).',
+      }),
+  ]);
+};
+
+export const getControlsGroupSchema = () => {
+  return z
+    .array(getControlsSchema())
+    .max(100)
+    .default([])
+    .meta({ description: 'An array of control panels and their state in the control group.' });
+};

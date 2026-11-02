@@ -6,102 +6,218 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EuiThemeComputed } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiCanAnimate, euiFontSizeFromScale } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const visorWidthPercentage = 0.5;
-export const dropdownWidthPercentage = 0.35;
-const visorPadding = '1px';
+// Cap the expanded NL textarea height to roughly a third of the viewport,
+// offset by 100px to leave room for the editor chrome above and below.
+// Matches the max-height used by the KQL QueryStringInput textarea.
+export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 
 export const visorStyles = (
-  euiTheme: EuiThemeComputed,
-  comboBoxWidth: number,
-  isSpaceReduced: boolean,
-  isVisible: boolean,
-  isDarkMode: boolean
+  euiThemeContext: UseEuiTheme,
+  isInline: boolean,
+  isVisible: boolean = true,
+  hasOutline: boolean = false
 ) => {
-  const visorBoxShadow = isDarkMode
-    ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
-    : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
-
-  const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorPadding})`;
+  const { euiTheme } = euiThemeContext;
+  const fontSize = euiFontSizeFromScale('xs', euiTheme);
+  // Outlined AiButton hover fill. Selected keeps it; idle applies it only while hovering.
+  const aiButtonHoverBackground = `linear-gradient(
+    180deg,
+    ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+    ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+  )`;
 
   return {
-    visorContainer: {
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-    },
-    visorWrapper: {
-      background:
-        'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);',
-      padding: visorPadding,
-      width: isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}% )`,
-      height: isVisible ? `${totalHeight}` : '0',
-      margin: isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0',
-      borderRadius: `calc(${euiTheme.size.s} + 1px)`,
-      opacity: isVisible ? 1 : 0,
-      pointerEvents: isVisible ? ('auto' as const) : ('none' as const),
-      overflow: 'hidden',
-      transition: 'all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
-      boxShadow: visorBoxShadow,
-    },
-    comboBoxWrapper: {
-      background: euiTheme.colors.backgroundBasePlain,
-      justifyContent: 'center',
-      borderBottomLeftRadius: euiTheme.size.s,
-      borderTopLeftRadius: euiTheme.size.s,
-      paddingLeft: '2px',
-      flexGrow: 1,
-      maxWidth: `${
-        isSpaceReduced ? `calc(${visorWidthPercentage * 100}% )` : `${comboBoxWidth}px`
-      }`,
-      overflow: 'hidden',
-    },
-    separator: {
-      width: '1px',
-      height: euiTheme.size.xl,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      flexShrink: 0,
-      alignSelf: 'stretch',
-      position: 'relative' as const,
-      '&::after': {
-        content: '""',
-        position: 'absolute' as const,
-        top: '50%',
-        left: '0',
-        transform: 'translateY(-50%)',
-        width: '1px',
-        height: '16px',
-        backgroundColor: euiTheme.colors.borderBasePlain,
-      },
-    },
+    visorContainer: css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      width: 100%;
+      position: relative;
+      z-index: ${euiTheme.levels.menu};
+      ${isInline
+        ? `
+          min-height: ${isVisible ? euiTheme.size.xl : '0'};
+          height: ${isVisible ? euiTheme.size.xl : '0'};
+          max-height: ${isVisible ? euiTheme.size.xl : '0'};
+          opacity: ${isVisible ? 1 : 0};
+          pointer-events: ${isVisible ? 'auto' : 'none'};
+          overflow: ${isVisible ? 'visible' : 'hidden'};
+          transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)${
+            hasOutline ? ', margin-top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)' : ''
+          };
+        `
+        : `min-height: ${euiTheme.size.xl};`}
+      ${hasOutline ? `margin-top: ${isVisible ? euiTheme.size.s : '0'};` : ''}
+    `,
+    inputSlot: css`
+      flex: 1;
+      min-width: 0;
+      position: relative;
+    `,
     searchWrapper: css`
-      background: ${euiTheme.colors.backgroundBasePlain};
-      justify-content: center;
-      border-bottom-right-radius: ${euiTheme.size.s};
-      border-top-right-radius: ${euiTheme.size.s};
-      padding-right: 2px;
-
       .euiFormControlLayout--group {
-        border-radius: ${euiTheme.size.s};
-      }
-      .euiFormControlLayout--group::after {
-        border: none;
+        border-radius: ${euiTheme.border.radius.control};
       }
 
       .euiFormControlLayout__append {
-        background-color: ${euiTheme.colors.backgroundBasePlain};
         &::before {
           border: none;
         }
       }
+
+      .kbnQueryBar__textarea {
+        border-radius: ${euiTheme.border.radius.control} !important;
+        font-size: ${fontSize} !important;
+        padding-left: ${euiTheme.size.s} !important;
+        padding-top: ${euiTheme.size.s} !important;
+      }
     `,
-    searchFieldStyles: css`
-      box-shadow: none;
-      border-radius: 0;
-      &:focus,
-      &:hover {
-        box-shadow: none !important;
-        outline: none !important;
+    generating: css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      flex-shrink: 0;
+      padding-inline-start: ${euiTheme.size.xs};
+    `,
+    modeToggle: css`
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      gap: ${euiTheme.size.xs};
+      margin-inline-start: ${hasOutline ? '0' : euiTheme.size.xs};
+      block-size: ${euiTheme.size.xl};
+      max-block-size: ${euiTheme.size.xl};
+      padding: ${euiTheme.size.xs};
+      border-radius: ${euiTheme.border.radius.control};
+
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border};
+        border-radius: inherit;
+        pointer-events: none;
+      }
+
+      .euiButton,
+      .euiButtonEmpty,
+      .euiButtonIcon {
+        border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
+      }
+    `,
+    modeIconButton: css`
+      &.euiButtonIcon {
+        inline-size: ${euiTheme.size.l};
+        block-size: ${euiTheme.size.l};
+        border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
+        background-color: transparent;
+
+        &:hover,
+        &:focus,
+        &:focus-visible {
+          background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+        }
+      }
+    `,
+    modeIconButtonActive: css`
+      &.euiButtonIcon,
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus,
+      &.euiButtonIcon:focus-visible {
+        background-color: ${euiTheme.colors.backgroundLightText};
+      }
+    `,
+    aiButtonSparkleHover: css`
+      overflow: visible;
+      box-sizing: border-box;
+      block-size: ${euiTheme.size.l};
+      max-block-size: ${euiTheme.size.l};
+
+      @keyframes esqlVisorSparkleTwinkle {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.45;
+          transform: scale(0.85);
+        }
+      }
+
+      ${euiCanAnimate} {
+        &:hover svg path,
+        &:focus-visible svg path {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation-name: esqlVisorSparkleTwinkle;
+          animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+
+        &:hover svg path:nth-of-type(2),
+        &:focus-visible svg path:nth-of-type(2) {
+          animation-delay: ${euiTheme.animation.slow};
+        }
+
+        &:hover svg path:nth-of-type(3),
+        &:focus-visible svg path:nth-of-type(3) {
+          animation-delay: ${euiTheme.animation.extraSlow};
+        }
+      }
+    `,
+    aiButtonIdleHover: css`
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus-visible {
+        background: ${aiButtonHoverBackground} !important;
+
+        /* EUI paints hover with an opaque ::before overlay. Drop it so the AI gradient shows. */
+        &::before {
+          background-color: transparent !important;
+        }
+      }
+    `,
+    aiButtonSelected: css`
+      /* Same gradient AiButton outlined uses on hover, held while this mode is active. */
+      background: ${aiButtonHoverBackground} !important;
+
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus,
+      &.euiButtonIcon:focus-visible,
+      &.euiButtonIcon:active {
+        background: ${aiButtonHoverBackground} !important;
+
+        &::before {
+          background-color: transparent !important;
+        }
+      }
+    `,
+    nlInput: css`
+      position: relative;
+      width: 100%;
+      height: ${euiTheme.size.xl};
+
+      .euiTextArea {
+        height: ${euiTheme.size.xl};
+        min-height: ${euiTheme.size.xl};
+        font-size: ${fontSize};
+        overflow: hidden;
+      }
+
+      .euiTextArea:focus {
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        overflow: auto;
+        max-height: ${NL_TEXTAREA_MAX_HEIGHT};
       }
     `,
   };

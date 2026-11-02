@@ -5,23 +5,8 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { nodeTypes, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { RegistryRuleType } from '../../../../rule_type_registry';
@@ -33,9 +18,8 @@ import {
   siemRule2,
 } from '../../../../rules_client/tests/test_helpers';
 import { formatLegacyActions } from '../../../../rules_client/lib';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { getRulesClientMockParams } from '../../../../test_utils';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
@@ -43,43 +27,16 @@ jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_action
   };
 });
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
-const kibanaVersion = 'v7.10.0';
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+  authorization,
+  auditLogger,
+} = getRulesClientMockParams({
   isSystemAction: jest.fn().mockImplementation((id) => id === 'system_action-id'),
-};
+});
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
@@ -199,6 +156,7 @@ describe('find()', () => {
                 "uuid": 100,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -212,6 +170,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "name": "fakeRuleName",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -320,6 +279,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -333,6 +293,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -431,6 +392,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -444,6 +406,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -505,7 +468,6 @@ describe('find()', () => {
         searchFields: ['params.risk_score', 'params.severity'],
         filter: 'alert.attributes.params.risk_score > 50',
       },
-      excludeFromPublicApi: true,
     });
 
     const findCallParams = unsecuredSavedObjectsClient.find.mock.calls[0][0];
@@ -725,6 +687,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -738,6 +701,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -761,6 +725,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "123",
             "artifacts": Object {
               "dashboards": Array [],
@@ -774,6 +739,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "2",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -794,7 +760,52 @@ describe('find()', () => {
     `);
   });
 
-  test('throws an error if useSavedObjectReferences.injectReferences throws an error', async () => {
+  test.each([{}, { allowPartialResults: false }])(
+    'propagates the original transformation error with find parameters %j',
+    async (params) => {
+      const error = new Error('Unable to transform rule');
+      ruleTypeRegistry.get.mockImplementation(() => {
+        throw error;
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await expect(rulesClient.find(params)).rejects.toBe(error);
+      expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+        'Error transforming rule with id 1: Unable to transform rule'
+      );
+    }
+  );
+
+  test('returns an error array when allowPartialResults is true', async () => {
+    const error = new Error('Unable to transform rule');
+    ruleTypeRegistry.get.mockImplementation(() => {
+      throw error;
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+
+    await expect(rulesClient.find({ allowPartialResults: true })).resolves.toEqual({
+      data: [],
+      errors: [
+        {
+          message: 'Unable to transform rule',
+          rule: {
+            id: '1',
+            name: 'fakeRuleName',
+          },
+        },
+      ],
+      page: 1,
+      perPage: 10,
+      total: 1,
+    });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      'Error transforming rule with id 1: Unable to transform rule'
+    );
+  });
+
+  test('omits the rule from the results and reports an error if useSavedObjectReferences.injectReferences throws an error', async () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
@@ -933,6 +944,7 @@ describe('find()', () => {
           id: '2',
           type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
+            name: 'rule-with-broken-references',
             alertTypeId: '123',
             schedule: { interval: '20s' },
             params: {
@@ -973,9 +985,112 @@ describe('find()', () => {
       ],
     });
     const rulesClient = new RulesClient(rulesClientParams);
-    await expect(rulesClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error injecting reference into rule params for rule id 2 - something went wrong!"`
+    const result = await rulesClient.find({ options: {}, allowPartialResults: true });
+
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      'Error transforming rule with id 2: Error injecting reference into rule params for rule id 2 - something went wrong!'
     );
+    expect(result.data.map((rule) => rule.id)).toEqual(['1']);
+    expect(result.errors).toEqual([
+      {
+        message: 'Error injecting reference into rule params for rule id 2 - something went wrong!',
+        rule: {
+          id: '2',
+          name: 'rule-with-broken-references',
+        },
+      },
+    ]);
+  });
+
+  test('omits the rule from the results and reports an error if references array is missing', async () => {
+    jest.resetAllMocks();
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      ensureRuleTypeIsAuthorized() {},
+    });
+    ruleTypeRegistry.list.mockReturnValue(listedTypes);
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: 'myType',
+      name: 'myType',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      category: 'test',
+      producer: 'myApp',
+      solution: 'stack',
+      validate: {
+        params: schema.any(),
+      },
+      validLegacyConsumers: [],
+    }));
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      total: 2,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: 'valid-rule',
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: { bar: true },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+          },
+          score: 1,
+          references: [{ name: 'action_0', type: 'action', id: '1' }],
+        },
+        {
+          id: '2',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: {
+            name: 'rule-with-missing-action-reference',
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: { bar: true },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [{ group: 'default', actionRef: 'action_0', params: { foo: true } }],
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {}, allowPartialResults: true });
+
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      'Error transforming rule with id 2: Action reference "action_0" not found in alert id: 2'
+    );
+    expect(result.data.map((rule) => rule.id)).toEqual(['1']);
+    expect(result.errors).toEqual([
+      {
+        message: 'Action reference "action_0" not found in alert id: 2',
+        rule: {
+          id: '2',
+          name: 'rule-with-missing-action-reference',
+        },
+      },
+    ]);
   });
 
   describe('authorization', () => {
@@ -1004,6 +1119,26 @@ describe('find()', () => {
       await expect(rulesClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"not authorized"`
       );
+    });
+
+    test('propagates authorization filter errors when partial results are allowed', async () => {
+      const error = new Error('not authorized');
+      authorization.getFindAuthorizationFilter.mockRejectedValue(error);
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await expect(rulesClient.find({ allowPartialResults: true })).rejects.toBe(error);
+    });
+
+    test('propagates rule type authorization errors when partial results are allowed', async () => {
+      const error = new Error('not authorized');
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        ensureRuleTypeIsAuthorized: () => {
+          throw error;
+        },
+      });
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await expect(rulesClient.find({ allowPartialResults: true })).rejects.toBe(error);
     });
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
@@ -1043,6 +1178,7 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "activeSnoozes": undefined,
               "artifacts": Object {
                 "dashboards": Array [],
                 "investigation_guide": Object {
@@ -1050,6 +1186,7 @@ describe('find()', () => {
                 },
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
@@ -1181,6 +1318,167 @@ describe('find()', () => {
     });
   });
 
+  describe('searchAfter and aggregations', () => {
+    const sampleSavedObjectHit = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'fakeRuleName',
+        alertTypeId: 'myType',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        executionStatus: {
+          status: 'pending',
+          lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+        },
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            actionTypeId: 'test-action-id',
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+            uuid: 100,
+          },
+        ],
+      },
+      score: 1,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    };
+
+    test('forwards searchAfter and aggs to the saved objects client', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const searchAfter = [123, 'rule-cursor'];
+      const aggs = {
+        facet_tags: { terms: { field: 'alert.attributes.tags', size: 10 } },
+      };
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      await rulesClient.find({
+        options: {
+          searchAfter,
+          aggs,
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          searchAfter,
+          aggs,
+        })
+      );
+    });
+
+    test('sets searchAfter from the last saved object sort values', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          { ...sampleSavedObjectHit, sort: ['first-page-cursor'] },
+          {
+            ...sampleSavedObjectHit,
+            id: '2',
+            sort: [1672531200000, 'id-2'],
+          },
+        ],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.searchAfter).toEqual([1672531200000, 'id-2']);
+    });
+
+    test('omits searchAfter when saved_objects is empty', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.data).toEqual([]);
+      expect(result).not.toHaveProperty('searchAfter');
+    });
+
+    test('omits searchAfter when the last hit has no sort property', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result).not.toHaveProperty('searchAfter');
+    });
+
+    test('passes aggregations through when returned by the saved objects client', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      const aggregations = {
+        facet_tags: {
+          buckets: [{ key: 'env', doc_count: 3 }],
+        },
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        aggregations,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result.aggregations).toEqual(aggregations);
+    });
+
+    test('omits aggregations when the saved objects client returns none', async () => {
+      unsecuredSavedObjectsClient.find.mockReset();
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [sampleSavedObjectHit],
+      });
+
+      const rulesClient = new RulesClient(rulesClientParams);
+      const result = await rulesClient.find({ options: {} });
+
+      expect(result).not.toHaveProperty('aggregations');
+    });
+  });
+
   describe('legacy actions migration for SIEM', () => {
     test('should call formatLegacyActions', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
@@ -1295,6 +1593,7 @@ describe('find()', () => {
                   "uuid": 100,
                 },
               ],
+              "activeSnoozes": undefined,
               "alertTypeId": "myType",
               "artifacts": Object {
                 "dashboards": Array [
@@ -1312,6 +1611,7 @@ describe('find()', () => {
                 "status": "pending",
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "name": "fakeRuleName",
               "notifyWhen": "onActiveAlert",
               "params": Object {

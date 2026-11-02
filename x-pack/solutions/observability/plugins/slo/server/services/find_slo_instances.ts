@@ -6,23 +6,39 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { FindSLOInstancesParams, FindSLOInstancesResponse } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  type FindSLOInstancesParams,
+  type FindSLOInstancesResponse,
+} from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
+import type { SLODefinitionClient } from './slo_definition_client';
+import { decodeSearchAfter, encodeSearchAfter } from './utils/search_after';
 
 const DEFAULT_SIZE = 100;
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
+  definitionClient: SLODefinitionClient;
 }
 
 export async function findSLOInstances(
   params: FindSLOInstancesParams,
-  { scopedClusterClient }: Dependencies
+  { scopedClusterClient, definitionClient }: Dependencies
 ): Promise<FindSLOInstancesResponse> {
-  const { search, size = DEFAULT_SIZE, searchAfter, sloId, spaceId } = params;
+  const { search, size = DEFAULT_SIZE, searchAfter, sloId, spaceId, remoteName } = params;
   if (size <= 0 || size > 1000) {
     throw new IllegalArgumentError('Size must be between 1 and 1000');
+  }
+
+  const afterObj = searchAfter ? decodeSearchAfter(searchAfter) : undefined;
+
+  const { slo } = await definitionClient.execute(sloId, spaceId, remoteName);
+  const groupBy = [slo.groupBy].flat();
+  const isDefinedWithGroupBy = !groupBy.includes(ALL_VALUE);
+  if (!isDefinedWithGroupBy) {
+    return { results: [] };
   }
 
   const response = await scopedClusterClient.asCurrentUser.search<
@@ -34,19 +50,22 @@ export async function findSLOInstances(
       };
     }
   >({
-    index: SUMMARY_DESTINATION_INDEX_PATTERN,
+    index: remoteName
+      ? `${remoteName}:${SUMMARY_DESTINATION_INDEX_PATTERN}`
+      : SUMMARY_DESTINATION_INDEX_PATTERN,
     size: 0,
     query: {
       bool: {
         filter: [
           { term: { spaceId } },
-          { term: { 'slo.id': sloId } },
+          { term: { 'slo.id': slo.id } },
+          { term: { 'slo.revision': slo.revision } },
           ...(search
             ? [
                 {
                   wildcard: {
                     'slo.instanceId': {
-                      value: `*${search}*`,
+                      value: `*${search.replace(/^\*/, '').replace(/\*$/, '')}*`,
                       case_insensitive: true,
                     },
                   },
@@ -59,7 +78,7 @@ export async function findSLOInstances(
     aggs: {
       instances: {
         composite: {
-          ...(searchAfter ? { after: { instanceId: searchAfter } } : {}),
+          ...(afterObj ? { after: afterObj } : {}),
           size,
           sources: [{ instanceId: { terms: { field: 'slo.instanceId' } } }],
         },
@@ -71,7 +90,22 @@ export async function findSLOInstances(
   const afterKey = response.aggregations?.instances.after_key;
 
   return {
-    results: buckets.map((bucket) => ({ instanceId: bucket.key.instanceId })),
-    searchAfter: buckets.length === size ? afterKey?.instanceId : undefined,
+    results: buckets.map((bucket) => ({
+      instanceId: bucket.key.instanceId,
+      groupings: toGroupings(bucket.key.instanceId, groupBy),
+    })),
+    searchAfter: buckets.length === size && afterKey ? encodeSearchAfter(afterKey) : undefined,
   };
+}
+
+function toGroupings(instanceId: string, groupBy: string[]): Record<string, string> {
+  const groupingValues = instanceId.split(',') ?? [];
+  if (groupingValues.length !== groupBy.length) {
+    return {};
+  }
+
+  return groupBy.reduce((acc, groupKey, index) => {
+    acc[groupKey] = groupingValues[index];
+    return acc;
+  }, {} as Record<string, string>);
 }

@@ -9,8 +9,10 @@ import { v4 as uuidV4 } from 'uuid';
 import type { AADAlert } from '@kbn/alerts-as-data-utils';
 import { get, isEmpty } from 'lodash';
 import type { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_DELAYED, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertHit, CombinedSummarizedAlerts } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import type {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -60,6 +62,8 @@ export class Alert<
   private context: Context;
   private readonly id: string;
   private alertAsData: AlertAsData | undefined;
+  private status: AlertStatus | undefined;
+  private _snoozeConfig?: RawRuleSnoozedInstance;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
@@ -354,6 +358,14 @@ export class Alert<
     return this.meta.maintenanceWindowNames ?? [];
   }
 
+  setSnoozeConfig(config: RawRuleSnoozedInstance) {
+    this._snoozeConfig = config;
+  }
+
+  getSnoozeConfig(): RawRuleSnoozedInstance | undefined {
+    return this._snoozeConfig;
+  }
+
   incrementActiveCount() {
     if (!this.meta.activeCount) {
       this.meta.activeCount = 0;
@@ -367,5 +379,13 @@ export class Alert<
 
   resetActiveCount() {
     this.meta.activeCount = 0;
+  }
+
+  setStatus(status: AlertStatus) {
+    this.status = status;
+  }
+
+  isDelayed() {
+    return this.status === ALERT_STATUS_DELAYED;
   }
 }

@@ -62,6 +62,7 @@ const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesServic
 
 const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
 const GCP_SINGLE_ACCOUNT = 'single-account';
+const AGENTLESS_OPTION_LABEL = /elastic managed integration/i;
 
 const getAssetInput = (
   input: NewPackagePolicyInput,
@@ -252,7 +253,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  it.skip('selects default CSP input selector', async () => {
+  it('selects default CSP input selector', async () => {
     const policy = getMockPolicyAWS();
     // enable all inputs of a policy template, same as fleet does
     policy.inputs = policy.inputs.map((input) => ({
@@ -285,15 +286,15 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: undefined,
+        isValid: false,
         updatedPolicy,
       });
     });
 
-    // 2nd call happens on mount and increments cspm template enabled input
+    // 2nd call happens on mount and selects the default enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: undefined,
+      isValid: false,
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => {
@@ -301,7 +302,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
             return {
               ...input,
               enabled: true,
-              config: { cloud_formation_template_url: { value: 's3_url' } },
             };
           }
           return input;
@@ -321,13 +321,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: undefined,
+      isValid: false,
       updatedPolicy: updatedPolicy2,
     });
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: undefined,
+      isValid: false,
       updatedPolicy: updatedPolicy2,
     });
   });
@@ -809,7 +809,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -866,7 +866,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       });
     });
-    it.skip('should render setup technology selector for GCP for single-account', async () => {
+    it('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
       });
@@ -891,8 +891,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(orgIdField).not.toBeInTheDocument();
 
       const projectIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      const credentialsJsonField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON);
-      await waitFor(() => expect(credentialsJsonField).toBeInTheDocument());
       const credentialsTypeSelector = queryByTestId(
         GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
@@ -926,7 +924,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
       // select agent-based and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
       const tenantIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
       const clientIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
@@ -934,7 +932,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const armTemplateSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
       const manualSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
       expect(tenantIdField).toBeInTheDocument();
       expect(clientIdField).toBeInTheDocument();
       expect(clientSecretField).toBeInTheDocument();
@@ -959,7 +957,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       // select agentless and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
       const tenantIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
       const clientIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
@@ -968,7 +966,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const manualSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
       // default state for Azure with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
-      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+      expect(setupTechnologySelector).toHaveTextContent(AGENTLESS_OPTION_LABEL);
       expect(tenantIdField).toBeInTheDocument();
       expect(clientIdField).toBeInTheDocument();
       expect(clientSecretField).toBeInTheDocument();
@@ -1108,7 +1106,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
@@ -1165,7 +1163,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
@@ -1225,7 +1223,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
@@ -1286,7 +1284,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
@@ -1347,7 +1345,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
+      const agentlessOption = getByLabelText(AGENTLESS_OPTION_LABEL);
       await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);

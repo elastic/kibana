@@ -72,7 +72,9 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({ data_view_id: undefined });
         const result = await server.validate(request);
 
-        expect(result.badRequest).toHaveBeenCalledWith('data_view_id: Required');
+        expect(result.badRequest).toHaveBeenCalledWith(
+          'data_view_id: Invalid input: expected string, received undefined'
+        );
       });
 
       it('respects the provided dataview', async () => {
@@ -130,7 +132,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('range.start: Required')
+          expect.stringContaining('range.start: Invalid input: expected string, received undefined')
         );
       });
     });
@@ -211,7 +213,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('weights.0.host: Number must be less than or equal to 1')
+          expect.stringContaining('host: Too big: expected number to be <=1')
         );
       });
 
@@ -228,7 +230,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('weights.0.type: Invalid literal value')
+          expect.stringContaining('type: Invalid input: expected "global_identifier"')
         );
       });
     });

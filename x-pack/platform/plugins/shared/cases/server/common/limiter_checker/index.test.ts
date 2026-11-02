@@ -18,13 +18,7 @@ describe('AttachmentLimitChecker', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockAttachmentService.executeCaseAggregations.mockImplementation(async () => {
-      return {
-        limiter: {
-          value: 5,
-        },
-      };
-    });
+    mockAttachmentService.countAlertsWithinCase.mockResolvedValue(5);
 
     mockFileService.find.mockImplementation(async () => {
       return {

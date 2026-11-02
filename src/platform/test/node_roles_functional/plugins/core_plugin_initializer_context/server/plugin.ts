@@ -22,15 +22,16 @@ export class CorePluginInitializerContextPlugin implements Plugin {
       {
         path: '/core_plugin_initializer_context/node/roles',
         security: {
+          authc: {
+            enabled: false,
+            reason: 'This route is part of a test plugin and does not require authentication.',
+          },
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
           },
         },
         validate: false,
-        options: {
-          authRequired: false,
-        },
       },
       async (context, req, res) => {
         return res.ok({ body: this.initializerContext.node.roles });

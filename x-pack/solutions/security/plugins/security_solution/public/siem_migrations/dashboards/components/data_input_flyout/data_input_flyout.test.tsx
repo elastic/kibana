@@ -145,6 +145,22 @@ describe('DashboardMigrationDataInputFlyout', () => {
     expect(getByTestId('dashboardMigrationDataInputFlyout')).toBeInTheDocument();
   });
 
+  it('exposes the visible title as the accessible name of the flyout title element', () => {
+    const { getByRole } = render(
+      <TestProviders>
+        <DashboardMigrationDataInputFlyout
+          onClose={() => {}}
+          migrationStats={undefined}
+          setFlyoutMigrationStats={() => {}}
+        />
+      </TestProviders>
+    );
+
+    // the flyout references this heading via `aria-labelledby`, so its accessible
+    // name must be the visible title and not an internal identifier
+    expect(getByRole('heading', { name: 'Upload Splunk dashboards' })).toBeInTheDocument();
+  });
+
   it('calls onClose when the close button is clicked', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -281,7 +297,7 @@ describe('DashboardMigrationDataInputFlyout', () => {
     // Start migration
     fireEvent.click(getByTestId('testModalStartMigrationButton'));
 
-    expect(mockStartMigration).toHaveBeenCalledWith('test-id-retry', undefined, {
+    expect(mockStartMigration).toHaveBeenCalledWith(migrationStats, undefined, {
       connectorId: 'Test Connector 1',
     });
   });
@@ -306,7 +322,7 @@ describe('DashboardMigrationDataInputFlyout', () => {
     // Start migration
     fireEvent.click(getByTestId('testModalStartMigrationButton'));
 
-    expect(mockStartMigration).toHaveBeenCalledWith('test-id-retry', 'not_fully_translated', {
+    expect(mockStartMigration).toHaveBeenCalledWith(migrationStats, 'not_fully_translated', {
       connectorId: 'Test Connector 1',
     });
   });

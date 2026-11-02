@@ -1,0 +1,2 @@
+# Keep trace exporter credentials out of Kibana process arguments.
+telemetry.tracing.exporters: ${NIGHTSHIFT_TRACING_EXPORTERS}

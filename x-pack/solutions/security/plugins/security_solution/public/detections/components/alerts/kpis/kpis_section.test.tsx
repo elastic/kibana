@@ -7,17 +7,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { KPIsSection } from './kpis_section';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../../../common/hooks/use_data_table_filters');
 
-const runtimeMappings: RunTimeMappings = createStubDataView({
-  spec: {},
-}).getRuntimeMappings() as RunTimeMappings;
+const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('<KPIsSection />', () => {
   it('should render correctly', () => {
@@ -28,7 +26,7 @@ describe('<KPIsSection />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <KPIsSection assignees={[]} pageFilters={undefined} runtimeMappings={runtimeMappings} />
+        <KPIsSection assignees={[]} dataView={dataView} pageFilters={undefined} />
       </TestProviders>
     );
 

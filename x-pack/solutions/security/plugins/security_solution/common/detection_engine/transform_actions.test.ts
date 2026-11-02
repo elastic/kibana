@@ -138,4 +138,28 @@ describe('transform_actions', () => {
       },
     });
   });
+
+  test('it should transform RuleResponseAction with missing params to ResponseAction (osquery)', () => {
+    const alertAction = {
+      actionTypeId: ResponseActionTypesEnum['.osquery'],
+      params: undefined,
+    } as unknown as RuleResponseAction;
+    const ruleAction = transformAlertToRuleResponseAction(alertAction);
+    expect(ruleAction).toEqual({
+      action_type_id: ResponseActionTypesEnum['.osquery'],
+      params: {},
+    });
+  });
+
+  test('it should transform ResponseAction with missing params to RuleResponseAction (osquery)', () => {
+    const responseAction = {
+      action_type_id: ResponseActionTypesEnum['.osquery'],
+      params: undefined,
+    } as unknown as ResponseAction;
+    const ruleAction = transformRuleToAlertResponseAction(responseAction);
+    expect(ruleAction).toEqual({
+      actionTypeId: ResponseActionTypesEnum['.osquery'],
+      params: {},
+    });
+  });
 });

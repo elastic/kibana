@@ -38,7 +38,9 @@ export function getDataViewFieldSubtypeMulti(field: HasSubtype) {
 }
 
 /**
- * Check whether the index expression represents a remote index (CCS) or not.
+ * Check whether the index expression represents a non-local index or not. This can happen in:
+ * - CCS for a remote cluster
+ * - CPS for a linked project
  * The index name is assumed to be individual index (no commas) but can contain `-`, wildcards,
  * datemath, remote cluster name and any other syntax permissible in index expression component.
  *
@@ -46,7 +48,7 @@ export function getDataViewFieldSubtypeMulti(field: HasSubtype) {
  *
  * @param indexExpression
  */
-export function isCCSRemoteIndexName(indexExpression: string): boolean {
+export function isNonLocalIndexName(indexExpression: string): boolean {
   if (indexExpression === '' || indexExpression[0] === '<' || indexExpression.startsWith('-<')) {
     // This is date math, but even if it is not, the remote can't start with '<'.
     // Thus, whatever it is, this is definitely not a remote index.

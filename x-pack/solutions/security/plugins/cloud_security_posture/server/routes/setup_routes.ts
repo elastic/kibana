@@ -28,6 +28,8 @@ import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_a
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
 import { setupCdrDataViews } from '../saved_objects/data_views';
 import { defineGraphRoute } from './graph/route';
+import { defineGraphEntitiesRoute } from './graph_entities/route';
+import { defineGraphEventsRoute } from './graph_events/route';
 
 /**
  * 1. Registers routes
@@ -52,8 +54,10 @@ export function setupRoutes({
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
   defineGraphRoute(router);
+  defineGraphEntitiesRoute(router);
+  defineGraphEventsRoute(router);
 
-  core.http.registerOnPreRouting(async (request, response, toolkit) => {
+  core.http.registerOnPostAuth(async (request, response, toolkit) => {
     if (request.url.pathname.includes(CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH)) {
       try {
         const [coreStart, startDeps] = await core.getStartServices();

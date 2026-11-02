@@ -19,12 +19,15 @@ export const cpuV2: SchemaBasedAggregations = {
     cpu_idle: {
       terms: {
         field: 'state',
-        include: ['idle', 'wait'],
+        // `wait` is optional in OTel datasets and can null the computed value.
+        include: ['idle'],
       },
       aggs: {
         avg: {
           avg: {
-            field: 'system.cpu.utilization',
+            // OTel lands this gauge under the `metrics.*` prefix; the unprefixed
+            // field returned null and coerced to `1 - 0 = 100%`.
+            field: 'metrics.system.cpu.utilization',
           },
         },
       },
@@ -34,12 +37,18 @@ export const cpuV2: SchemaBasedAggregations = {
         buckets_path: 'cpu_idle.avg',
       },
     },
+    cpu_idle_stats: {
+      stats_bucket: {
+        buckets_path: 'cpu_idle.avg',
+      },
+    },
     cpuV2: {
       bucket_script: {
         buckets_path: {
+          cpuIdleCount: 'cpu_idle_stats.count',
           cpuIdleTotal: 'cpu_idle_total',
         },
-        script: '1 - params.cpuIdleTotal',
+        script: 'params.cpuIdleCount > 0 ? 1 - params.cpuIdleTotal : null',
         gap_policy: 'skip',
       },
     },

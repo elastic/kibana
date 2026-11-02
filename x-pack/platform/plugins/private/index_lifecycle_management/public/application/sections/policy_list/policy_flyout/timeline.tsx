@@ -10,6 +10,7 @@ import type { PolicyFromES } from '../../../../../common/types';
 import { Timeline as ViewComponent } from '../../edit_policy/components/timeline/timeline';
 
 export const Timeline = ({ policy }: { policy: PolicyFromES }) => {
+  const showHotPhase = Boolean(policy.policy.phases.hot);
   const hasDeletePhase = Boolean(policy.policy.phases.delete);
   const isUsingRollover = Boolean(policy.policy.phases.hot?.actions.rollover);
   const warmPhaseMinAge = policy.policy.phases.warm?.min_age;
@@ -26,6 +27,7 @@ export const Timeline = ({ policy }: { policy: PolicyFromES }) => {
       coldPhaseMinAge={coldPhaseMinAge}
       frozenPhaseMinAge={frozenPhaseMinAge}
       deletePhaseMinAge={deletePhaseMinAge}
+      showHotPhase={showHotPhase}
     />
   );
 };

@@ -10,13 +10,12 @@
 import type { SyntheticEvent } from 'react';
 import React from 'react';
 
-import type { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor, EuiButtonPropsForButton } from '@elastic/eui';
 import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
@@ -34,7 +33,7 @@ export interface TryInConsoleButtonProps {
   color?: EuiButtonColor;
   showIcon?: boolean;
   iconType?: string;
-  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
+  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem' | 'tableActionItem';
   telemetryId?: string;
   onClick?: (e: SyntheticEvent<Element>) => void;
   disabled?: boolean;
@@ -49,7 +48,7 @@ export const TryInConsoleButton = ({
   content = RUN_IN_CONSOLE,
   color,
   showIcon = true,
-  iconType = 'console',
+  iconType = 'commandLine',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
@@ -128,9 +127,15 @@ export const TryInConsoleButton = ({
           {content}
         </EuiButton>
       );
-    case 'contextMenuItem':
+    case 'tableActionItem':
       return (
         <EuiContextMenuItem icon={iconType} hasPanel={false} css={noPadding} {...commonProps}>
+          {content}
+        </EuiContextMenuItem>
+      );
+    case 'contextMenuItem':
+      return (
+        <EuiContextMenuItem icon={iconType} hasPanel={false} {...commonProps}>
           {content}
         </EuiContextMenuItem>
       );

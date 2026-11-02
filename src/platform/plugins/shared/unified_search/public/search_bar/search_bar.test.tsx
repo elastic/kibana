@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: jest.fn().mockResolvedValue(null),
+}));
+
+jest.mock('@kbn/esql/public/kibana_services', () => ({
+  useKibanaServices: jest.fn(() => ({})),
+  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
+}));
+
 import React from 'react';
 import type { SearchBarProps, SearchBarState } from './search_bar';
 import SearchBar, { SearchBarUI } from './search_bar';
@@ -16,15 +26,21 @@ import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/d
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen, waitFor } from '@testing-library/react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { render, screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
 import { createMockStorage, createMockTimeHistory } from './mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
+import { createSearchBar } from './create_search_bar';
+import { QuerySource } from '@kbn/esql-types';
 
 const startMock = coreMock.createStart();
+startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const noop = jest.fn();
 
@@ -44,6 +60,7 @@ function wrapSearchBarInContext(
       enabled?: boolean;
       initialState?: SearchSessionState;
     };
+    servicesOverride?: Record<string, unknown>;
   }
 ) {
   const defaultOptions = {
@@ -59,7 +76,10 @@ function wrapSearchBarInContext(
   const initialSessionState = options?.backgroundSearch?.initialState ?? SearchSessionState.None;
   const sessionState$ = new BehaviorSubject<SearchSessionState>(initialSessionState);
 
+  const dataStart = dataPluginMock.createStartContract();
+
   const services = {
+    core: startMock,
     application: {
       ...startMock.application,
       capabilities: {
@@ -74,6 +94,7 @@ function wrapSearchBarInContext(
       ...startMock.chrome,
       getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject('oblt')),
     },
+    kql: kqlPluginMock.createStartContract(),
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
     notifications: startMock.notifications,
@@ -82,11 +103,13 @@ function wrapSearchBarInContext(
     docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
+      ...dataStart,
       search: searchServiceMock.createStartContract({
         isBackgroundSearchEnabled: backgroundSearchEnabled,
         session: getSessionServiceMock({ state$: sessionState$ }),
       }),
       query: {
+        ...dataStart.query,
         savedQueries: {
           findSavedQueries: () =>
             Promise.resolve({
@@ -114,6 +137,7 @@ function wrapSearchBarInContext(
         getIdsWithTitle: jest.fn(() => []),
       },
     },
+    ...options?.servicesOverride,
   };
 
   return (
@@ -146,6 +170,73 @@ describe('SearchBar', () => {
     });
   });
 
+  it('forwards showTimeWindowButtons to the query bar', async () => {
+    render(
+      wrapSearchBarInContext({
+        showFilterBar: false,
+        showQueryInput: false,
+        showTimeWindowButtons: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
+  });
+
+  it('forwards showTimeWindowButtons through the stateful SearchBar', async () => {
+    const data = dataPluginMock.createStartContract();
+    data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => ({
+      value: 0,
+      pause: true,
+    }));
+    data.query.timefilter.timefilter.getRefreshIntervalDefaults = jest.fn(() => ({
+      value: 0,
+      pause: true,
+    }));
+    data.query.timefilter.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
+    data.query.timefilter.timefilter.getTimeDefaults = jest.fn(() => ({
+      from: 'now-15m',
+      to: 'now',
+    }));
+    data.query.timefilter.timefilter.getMinRefreshInterval = jest.fn(() => 1000);
+    data.query.timefilter.history = createMockTimeHistory();
+
+    const StatefulSearchBar = createSearchBar({
+      core: startMock,
+      data,
+      storage: createMockStorage(),
+      kql: kqlPluginMock.createStartContract(),
+      cps: cpsPluginMock.createStartContract(),
+    });
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <StatefulSearchBar
+            appName="test"
+            useDefaultBehaviors={false}
+            disableSubscribingToGlobalDataServices
+            showFilterBar={false}
+            showQueryInput={false}
+            showTimeWindowButtons={false}
+            dateRangeFrom="now-15m"
+            dateRangeTo="now"
+            query={kqlQuery}
+            filters={[]}
+            indexPatterns={[]}
+          />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dataSharedTimefilterDuration')).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
+  });
+
   it('Should render filter bar, when required fields are provided', async () => {
     render(
       wrapSearchBarInContext({
@@ -163,6 +254,40 @@ describe('SearchBar', () => {
       // Check for filter-related elements that are actually rendered
       expect(screen.getByTestId('addFilter')).toBeInTheDocument();
       expect(screen.getByTestId('kbnQueryBar')).toBeInTheDocument();
+    });
+  });
+
+  it('Should render filter bar when filters exist but no index patterns are provided', async () => {
+    const dslFilter = {
+      meta: {
+        key: 'query',
+        value: '{"wildcard":{"kibana.alert.rule.name":"example*"}}',
+        type: 'custom',
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+      query: {
+        wildcard: {
+          'kibana.alert.rule.name': 'example*',
+        },
+      },
+    };
+
+    render(
+      wrapSearchBarInContext({
+        indexPatterns: [],
+        showDatePicker: false,
+        showQueryInput: true,
+        showFilterBar: true,
+        onFiltersUpdated: noop,
+        filters: [dslFilter],
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(screen.getByTestId('filter-items-group')).toBeInTheDocument();
     });
   });
 
@@ -268,9 +393,8 @@ describe('SearchBar', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
-      // Check for ES|QL menu button instead of editor since that's what's rendered
-      expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedQueryInput')).not.toBeInTheDocument();
+      expect(within(screen.getByTestId('querySubmitButton')).getByText('Search')).toBeVisible();
     });
   });
 
@@ -325,7 +449,7 @@ describe('SearchBar', () => {
     const submitButton = screen.getByTestId('querySubmitButton');
     await user.click(submitButton);
 
-    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
       1,
       {
@@ -352,7 +476,7 @@ describe('SearchBar', () => {
     const submitButton = screen.getByTestId('querySubmitButton');
     await user.click(submitButton);
 
-    expect(mockedOnQuerySubmit).toBeCalledTimes(1);
+    expect(mockedOnQuerySubmit).toHaveBeenCalledTimes(1);
     expect(mockedOnQuerySubmit).toHaveBeenNthCalledWith(
       1,
       {
@@ -442,7 +566,7 @@ describe('SearchBar', () => {
       });
 
       jest.advanceTimersByTime(500);
-      expect(onDraftChange).toHaveBeenCalledWith(draft);
+      expect(onDraftChange).not.toHaveBeenCalled(); // no change to draft
     });
 
     it('should check for query type mismatch', async () => {
@@ -505,5 +629,44 @@ describe('SearchBar', () => {
     expect(screen.getByTestId('globalQueryBar')).toBeInTheDocument();
     // Then verify the callout is not rendered
     expect(screen.queryByTestId('backgroundSearchRestoredCallout')).not.toBeInTheDocument();
+  });
+
+  it('records ES|QL query submitted telemetry for visor KQL searches', async () => {
+    const trackQuerySubmitted = jest.fn();
+    const kql = kqlPluginMock.createStartContract();
+    (kql.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
+    render(
+      wrapSearchBarInContext(
+        {
+          indexPatterns: [stubIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: esqlQuery,
+          dateRangeFrom: 'now-15m',
+          dateRangeTo: 'now',
+        },
+        {
+          servicesOverride: {
+            kql,
+            esql: {
+              getTelemetryService: jest.fn().mockResolvedValue({ trackQuerySubmitted }),
+            },
+          },
+        }
+      )
+    );
+
+    await waitFor(() => expect(kql.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit: visorKqlSubmit } = (kql.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => visorKqlSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    await waitFor(() => {
+      expect(trackQuerySubmitted).toHaveBeenCalledWith({
+        source: QuerySource.QUICK_SEARCH_KQL,
+        query: 'FROM test | WHERE KQL("""hostname:web-01""")',
+      });
+    });
   });
 });

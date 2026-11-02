@@ -8,9 +8,8 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
-      "@testing-library/react"
+      "@testing-library/react",
     ]
   },
   "include": [
@@ -31,5 +30,7 @@
     "@kbn/charts-theme",
     "@kbn/logging",
     "@kbn/react-query",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-logging-server-mocks",
   ]
 }

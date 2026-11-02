@@ -8,10 +8,20 @@
 import moment from 'moment';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdownFields,
+  resolveConnectorId,
+} from '@kbn/elastic-assistant-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
+import type {
+  AttackDiscoveryExecutorOptions,
+  AttackDiscoveryScheduleContext,
+} from '@kbn/attack-discovery-schedules-common';
+import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -22,7 +32,8 @@ import { getResourceName } from '../../../../ai_assistant_service';
 import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
-import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
+import { filterHallucinatedAlerts } from '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts';
+import type { AttackDiscoveryWorkflowExecutorFactory } from '../../../../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
   generateAttackDiscoveryAlertHash,
@@ -30,9 +41,11 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
-import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
+import { updateAlertsWithAttackIds } from './update_alerts_with_attack_ids';
 
 export interface AttackDiscoveryScheduleExecutorParams {
+  getInference: () => InferenceServerStart | undefined;
+  getWorkflowExecutorFactory: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
   publicBaseUrl: string | undefined;
@@ -40,12 +53,14 @@ export interface AttackDiscoveryScheduleExecutorParams {
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
+  getInference,
+  getWorkflowExecutorFactory,
   options,
   logger,
   publicBaseUrl,
   telemetry,
 }: AttackDiscoveryScheduleExecutorParams) => {
-  const { params, rule, services, spaceId } = options;
+  const { params, rule, services, spaceId, startedAt } = options;
   const { alertsClient, actionsClient, savedObjectsClient, scopedClusterClient } = services;
   if (!alertsClient) {
     throw new AlertsClientError();
@@ -54,7 +69,44 @@ export const attackDiscoveryScheduleExecutor = async ({
     throw new Error('Expected actionsClient not to be null!');
   }
 
+  const workflowConfig = (params as Record<string, unknown>).workflowConfig as
+    | Record<string, unknown>
+    | undefined;
+
+  if (workflowConfig != null) {
+    const workflowExecutorFactory = getWorkflowExecutorFactory();
+
+    if (workflowExecutorFactory == null) {
+      const error = new Error(
+        `Schedule "${rule.id}" has workflowConfig but no workflow executor is registered. ` +
+          'Ensure the discoveries plugin is enabled and has called registerAttackDiscoveryWorkflowExecutor during setup.'
+      );
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
+
+    return workflowExecutorFactory(options);
+  }
+
+  if (params.apiConfig?.connectorId) {
+    // Resolve potentially outdated Elastic managed connector ID to the new one.
+    // This provides backward compatibility for existing schedules that reference
+    // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
+    params.apiConfig.connectorId = resolveConnectorId(params.apiConfig.connectorId);
+  }
+
   const esClient = scopedClusterClient.asCurrentUser;
+
+  const inference = getInference();
+  const resolvedConnector = inference
+    ? await inference.getConnectorByIdWithoutClientRequest(
+        params.apiConfig.connectorId,
+        actionsClient,
+        esClient
+      )
+    : undefined;
+  const inferenceClient = inference
+    ? inference.getClientWithoutRequest(actionsClient, esClient)
+    : undefined;
 
   const resourceName = getResourceName(ANONYMIZATION_FIELDS_RESOURCE);
   const index = getIndexTemplateAndPattern(resourceName, spaceId).alias;
@@ -67,7 +119,7 @@ export const attackDiscoveryScheduleExecutor = async ({
   });
   const anonymizationFields = transformESSearchToAnonymizationFields(result.data);
 
-  const { query, filters, combinedFilter, ...restParams } = params;
+  const { alertsIndexPattern, query, filters, combinedFilter, ...restParams } = params;
 
   const startTime = moment(); // start timing the generation
   const scheduleInfo = {
@@ -81,11 +133,17 @@ export const attackDiscoveryScheduleExecutor = async ({
       actionsClient,
       config: {
         ...restParams,
-        filter: combinedFilter,
+        alertsIndexPattern,
         anonymizationFields,
+        apiConfig: {
+          ...restParams.apiConfig,
+          ...(resolvedConnector != null ? { actionTypeId: resolvedConnector.type } : {}),
+        },
+        filter: combinedFilter,
         subAction: 'invokeAI',
       },
       esClient,
+      inferenceClient,
       logger,
       savedObjectsClient,
     });
@@ -96,25 +154,13 @@ export const attackDiscoveryScheduleExecutor = async ({
       throw new Error('Rule execution cancelled due to timeout');
     }
 
-    const endTime = moment();
-    const durationMs = endTime.diff(startTime);
-
-    reportAttackDiscoveryGenerationSuccess({
-      alertsContextCount: anonymizedAlerts.length,
-      apiConfig: params.apiConfig,
-      attackDiscoveries,
-      durationMs,
-      end: restParams.end,
-      hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
-      scheduleInfo,
-      size: restParams.size,
-      start: restParams.start,
-      telemetry,
-    });
-
     const alertsParams = {
       alertsContextCount: anonymizedAlerts.length,
-      anonymizedAlerts,
+      anonymizedAlerts: anonymizedAlerts as Array<{
+        id?: string;
+        metadata: Record<string, never>;
+        pageContent: string;
+      }>, // TODO: remove this when the generator returns metadata: z.record(z.string(), z.unknown()) instead of metadata: z.object({}),
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
       enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
@@ -122,11 +168,21 @@ export const attackDiscoveryScheduleExecutor = async ({
       withReplacements: false, // Never apply replacements to the results. It's still possible for clients who read the generated discoveries to specify true when retrieving them.
     };
 
+    // Filter out attack discoveries with hallucinated alert IDs.
+    // Some LLMs will hallucinate alert IDs that don't exist in the alerts index.
+    // We query Elasticsearch to verify all alert IDs exist before persisting discoveries.
+    const validDiscoveries = await filterHallucinatedAlerts({
+      attackDiscoveries: attackDiscoveries ?? [],
+      alertsIndexPattern,
+      esClient,
+      logger,
+    });
+
     // Deduplicate attackDiscoveries before creating alerts
     const indexPattern = getScheduledIndexPattern(spaceId);
     const dedupedDiscoveries = await deduplicateAttackDiscoveries({
       esClient,
-      attackDiscoveries: attackDiscoveries ?? [],
+      attackDiscoveries: validDiscoveries,
       connectorId: params.apiConfig.connectorId,
       indexPattern,
       logger,
@@ -136,6 +192,26 @@ export const attackDiscoveryScheduleExecutor = async ({
       },
       replacements,
       spaceId,
+    });
+
+    const endTime = moment();
+    const durationMs = endTime.diff(startTime);
+    const duplicatesDroppedCount = validDiscoveries.length - dedupedDiscoveries.length;
+
+    reportAttackDiscoveryGenerationSuccess({
+      alertsContextCount: anonymizedAlerts.length,
+      apiConfig: params.apiConfig,
+      attackDiscoveries,
+      duplicatesDroppedCount,
+      durationMs,
+      end: restParams.end,
+      execution_mode: 'legacy',
+      hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
+      scheduleInfo,
+      size: restParams.size,
+      start: restParams.start,
+      telemetry,
+      trigger: 'schedule',
     });
 
     /**
@@ -171,6 +247,7 @@ export const attackDiscoveryScheduleExecutor = async ({
           alertsParams,
           publicBaseUrl,
           spaceId,
+          timestamp: startedAt.toISOString(),
         });
 
         const { alertIds, timestamp, mitreAttackTactics } = attackDiscovery;
@@ -211,9 +288,15 @@ export const attackDiscoveryScheduleExecutor = async ({
     reportAttackDiscoveryGenerationFailure({
       apiConfig: params.apiConfig,
       errorMessage: transformedError.message,
+      execution_mode: 'legacy',
       scheduleInfo,
       telemetry,
+      trigger: 'schedule',
     });
+
+    if (isInvalidAnonymizationError(error)) {
+      throw createTaskRunError(error, TaskErrorSource.USER);
+    }
     throw error;
   }
 

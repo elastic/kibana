@@ -135,7 +135,13 @@ export function SubChart({
             padding: theme.euiTheme.size.m,
           }}
         >
-          <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexGroup
+            direction="column"
+            role="list"
+            aria-label={i18n.translate('xpack.profiling.subChart.frameListLabel', {
+              defaultMessage: 'Stack frames',
+            })}
+          >
             {displayedFrames.map((frame, frameIndex) => {
               const parentIndex = parentsMetadata.indexOf(frame) + 1;
               const children = childrenMetadata[frame.AddressOrLine].concat().reverse();
@@ -143,74 +149,87 @@ export function SubChart({
               const currentAccordionState = accordionState[key];
               return (
                 <Fragment key={key}>
-                  {children.length > 0 ? (
-                    <EuiAccordion
-                      // taking over the control of the EuiAccordion state
-                      // to avoid rendering the children items when the accordion is closed.
-                      // This renders the page way faster as it avoids unnecessary render of items that might never be visible
-                      forceState={currentAccordionState || 'closed'}
-                      onToggle={(isOpen) => {
-                        setAccordionState((state) => ({
-                          ...state,
-                          [key]: isOpen ? 'open' : 'closed',
-                        }));
-                      }}
-                      css={css`
-                        display: flex;
-                        flex-direction: column-reverse;
-
-                        .css-bknxw4-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isOpen {
-                          transform: rotate(-90deg) !important;
+                  <div role="listitem" tabIndex={children.length > 0 ? undefined : 0}>
+                    {children.length > 0 ? (
+                      <EuiAccordion
+                        // taking over the control of the EuiAccordion state
+                        // to avoid rendering the children items when the accordion is closed.
+                        // This renders the page way faster as it avoids unnecessary render of items that might never be visible
+                        forceState={currentAccordionState || 'closed'}
+                        onToggle={(isOpen) => {
+                          setAccordionState((state) => ({
+                            ...state,
+                            [key]: isOpen ? 'open' : 'closed',
+                          }));
+                        }}
+                        css={css`
+                          display: flex;
+                          flex-direction: column-reverse;
+                        `}
+                        arrowProps={{
+                          css: css`
+                            transform: ${currentAccordionState === 'open'
+                              ? 'rotate(-90deg)'
+                              : 'rotate(0deg)'} !important;
+                          `,
+                        }}
+                        id={`accordion_${frame.AddressOrLine}`}
+                        buttonContent={renderFrameItem(frame, parentIndex)}
+                        paddingSize="s"
+                        extraAction={
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'xpack.profiling.traces.subChart.inlineDescription',
+                              {
+                                defaultMessage:
+                                  'This frame has {numberOfChildren} inline {numberOfChildren, plural, one {frame} other {frames}} inside, this allows for optimised processes.',
+                                values: { numberOfChildren: children.length },
+                              }
+                            )}
+                          >
+                            <EuiBadge
+                              color="primary"
+                              tabIndex={0}
+                              aria-label={i18n.translate(
+                                'xpack.profiling.subChart.inlineFrameCount',
+                                {
+                                  defaultMessage:
+                                    '{count} inline {count, plural, one {frame} other {frames}}',
+                                  values: { count: children.length },
+                                }
+                              )}
+                            >{`-> ${children.length}`}</EuiBadge>
+                          </EuiToolTip>
                         }
-                      `}
-                      id={`accordion_${frame.AddressOrLine}`}
-                      buttonContent={renderFrameItem(frame, parentIndex)}
-                      paddingSize="s"
-                      extraAction={
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.profiling.traces.subChart.inlineDescription',
-                            {
-                              defaultMessage:
-                                'This frame has {numberOfChildren} inline {numberOfChildren, plural, one {frame} other {frames}} inside, this allows for optimised processes.',
-                              values: { numberOfChildren: children.length },
-                            }
-                          )}
-                        >
-                          <EuiBadge
-                            color="primary"
-                            tabIndex={0}
-                          >{`-> ${children.length}`}</EuiBadge>
-                        </EuiToolTip>
-                      }
-                    >
-                      {currentAccordionState === 'open' ? (
-                        <EuiFlexGroup
-                          direction="column"
-                          gutterSize="s"
-                          style={{ marginLeft: '12px' }}
-                        >
-                          {children.map((child, childIndex) => {
-                            return (
-                              <Fragment key={[key, childIndex].join('|')}>
-                                {renderFrameItem(
-                                  child,
-                                  `${parentIndex}.${children.length - childIndex} ->`
-                                )}
-                              </Fragment>
-                            );
-                          })}
-                        </EuiFlexGroup>
-                      ) : null}
-                    </EuiAccordion>
-                  ) : (
-                    renderFrameItem(frame, parentIndex)
-                  )}
-                  {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
-                    <EuiFlexItem grow={false}>
+                      >
+                        {currentAccordionState === 'open' ? (
+                          <EuiFlexGroup
+                            direction="column"
+                            gutterSize="s"
+                            css={css`
+                              margin-left: 12px;
+                            `}
+                          >
+                            {children.map((child, childIndex) => {
+                              return (
+                                <Fragment key={[key, childIndex].join('|')}>
+                                  {renderFrameItem(
+                                    child,
+                                    `${parentIndex}.${children.length - childIndex} ->`
+                                  )}
+                                </Fragment>
+                              );
+                            })}
+                          </EuiFlexGroup>
+                        ) : null}
+                      </EuiAccordion>
+                    ) : (
+                      renderFrameItem(frame, parentIndex)
+                    )}
+                    {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
                       <EuiHorizontalRule size="full" margin="s" />
-                    </EuiFlexItem>
-                  ) : null}
+                    ) : null}
+                  </div>
                 </Fragment>
               );
             })}
@@ -259,7 +278,14 @@ export function SubChart({
           style={{ overflowWrap: 'anywhere' }}
         >
           <EuiFlexItem grow={false}>
-            <EuiBadge color={color}>
+            <EuiBadge
+              color={color}
+              tabIndex={0}
+              aria-label={i18n.translate('xpack.profiling.subChart.rankLabel', {
+                defaultMessage: 'Rank {index}',
+                values: { index },
+              })}
+            >
               <EuiText color={theme.euiTheme.colors.lightestShade} size="xs">
                 {index}
               </EuiText>
@@ -267,7 +293,16 @@ export function SubChart({
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
             {category === OTHER_BUCKET_LABEL || onClick === undefined ? (
-              <EuiText size="s">{label}</EuiText>
+              <EuiText
+                size="s"
+                tabIndex={0}
+                aria-label={i18n.translate('xpack.profiling.subChart.traceLabel', {
+                  defaultMessage: 'Trace: {label}',
+                  values: { label },
+                })}
+              >
+                {label}
+              </EuiText>
             ) : (
               <EuiLink data-test-subj="profilingSubChartLink" onClick={onClick}>
                 <EuiText size="s">{label}</EuiText>
@@ -275,7 +310,16 @@ export function SubChart({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="xs"
+              alignItems="flexEnd"
+              tabIndex={0}
+              aria-label={i18n.translate('xpack.profiling.subChart.percentageLabel', {
+                defaultMessage: '{percentage} of total samples',
+                values: { percentage: asPercentage(percentage / 100) },
+              })}
+            >
               {sample ? (
                 <EuiFlexItem>
                   <EuiText size="m">{asPercentage(sample.Percentage / 100)}</EuiText>
@@ -295,7 +339,16 @@ export function SubChart({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+      <EuiFlexItem
+        grow={false}
+        style={{ position: 'relative' }}
+        role="img"
+        tabIndex={0}
+        aria-label={i18n.translate('xpack.profiling.subChart.chartAriaLabel', {
+          defaultMessage: 'Time series chart for {label}',
+          values: { label },
+        })}
+      >
         <Chart size={{ height, width }}>
           <Tooltip showNullValues={false} />
           <Settings
@@ -328,7 +381,7 @@ export function SubChart({
                   opacity: 0.5,
                 },
               }}
-              marker={<EuiIcon type="dot" />}
+              marker={<EuiIcon type="dot" aria-hidden={true} />}
               markerPosition={Position.Top}
               hideTooltips
             />
@@ -358,6 +411,7 @@ export function SubChart({
         </Chart>
         {!showAxes ? (
           <div
+            aria-hidden="true"
             style={{
               position: 'absolute',
               top: 0,

@@ -15,6 +15,7 @@ import type { SiemMigrationResourceBase } from '../../../../../common/siem_migra
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { MigrationDataInputContextProvider } from '../../../common/components';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -33,6 +34,7 @@ const mockMigrationStateWithError: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+  vendor: MigrationSource.SPLUNK,
 };
 
 const mockMigrationStatsStopped: RuleMigrationStats = {
@@ -42,6 +44,8 @@ const mockMigrationStatsStopped: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+
+  vendor: MigrationSource.SPLUNK,
 };
 
 const mockMigrationStatsReady: RuleMigrationStats = {
@@ -51,6 +55,7 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+  vendor: MigrationSource.SPLUNK,
 };
 
 const missingMacro: SiemMigrationResourceBase = {
@@ -69,7 +74,11 @@ const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
   return render(<MigrationReadyPanel migrationStats={migrationStats} />, {
     wrapper: ({ children }) => (
       <TestProviders>
-        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+        <MigrationDataInputContextProvider
+          openFlyout={jest.fn()}
+          closeFlyout={jest.fn()}
+          isFlyoutOpen={false}
+        >
           {children}
         </MigrationDataInputContextProvider>
       </TestProviders>
@@ -109,11 +118,16 @@ describe('MigrationReadyPanel', () => {
       useStartMigrationMock.mockReturnValue({
         startMigration: mockStartMigration,
         isLoading: true,
+        isFlyoutOpen: false,
       });
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />, {
         wrapper: ({ children }) => (
           <TestProviders>
-            <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+            <MigrationDataInputContextProvider
+              openFlyout={jest.fn()}
+              closeFlyout={jest.fn()}
+              isFlyoutOpen={false}
+            >
               {children}
             </MigrationDataInputContextProvider>
           </TestProviders>
@@ -157,30 +171,57 @@ describe('MigrationReadyPanel', () => {
 
   describe('Missing Resources', () => {
     const missingResources = [missingMacro, missingLookup];
+    const mockGetMissingResources = jest.fn();
 
     beforeEach(() => {
+      mockGetMissingResources.mockReset();
       useGetMissingResourcesMock.mockImplementation((type, setterFn: Function) => {
+        mockGetMissingResources.mockImplementation(() => {
+          setterFn(missingResources);
+        });
         return {
-          getMissingResources: jest.fn().mockImplementation(() => {
-            setterFn(missingResources);
-          }),
+          getMissingResources: mockGetMissingResources,
           isLoading: false,
         };
       });
     });
 
-    it('should render missing resources warning when there are missing resources', async () => {
-      renderReadyPanel(mockMigrationStatsReady);
+    it.each([
+      [
+        MigrationSource.SPLUNK,
+        'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.',
+      ],
+      [
+        MigrationSource.QRADAR,
+        'Migration of 6 rules is created and ready to start. You can also upload the missing reference sets for more accurate results.',
+      ],
+      [
+        MigrationSource.SENTINEL,
+        'Migration of 6 rules is created and ready to start. You can also upload the missing watchlists for more accurate results.',
+      ],
+    ])('should render missing resources warning for %s', async (vendor, expectedDescription) => {
+      renderReadyPanel({ ...mockMigrationStatsReady, vendor });
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-          'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.'
+          expectedDescription
         );
       });
     });
 
-    it('should render missing resources button', async () => {
-      renderReadyPanel(mockMigrationStatsReady);
-      expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toBeVisible();
+    it.each([
+      [MigrationSource.SPLUNK, 'Upload missing macros and lookup lists.'],
+      [MigrationSource.QRADAR, 'Upload missing reference sets'],
+      [MigrationSource.SENTINEL, 'Upload missing watchlists'],
+    ])('should render missing resources button aria label for %s', async (vendor, ariaLabel) => {
+      renderReadyPanel({ ...mockMigrationStatsReady, vendor });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toBeVisible();
+      });
+      expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toHaveAttribute(
+        'aria-label',
+        ariaLabel
+      );
     });
   });
 });

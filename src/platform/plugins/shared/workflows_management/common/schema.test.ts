@@ -11,31 +11,103 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
-import { parseWorkflowYamlToJSON } from './lib/yaml';
+import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import { getWorkflowZodSchema } from './schema';
 
-const examples = [
-  {
-    name: 'national_parks.yaml',
-    yaml: readFileSync(Path.join(__dirname, 'examples', 'national_parks.yaml'), 'utf8'),
-  },
-  {
-    name: 'automated_triaging.yaml',
-    yaml: readFileSync(Path.join(__dirname, 'examples', 'automated_triaging.yaml'), 'utf8'),
-  },
-];
-
-describe('getWorkflowZodSchema: elasticsearch steps', () => {
-  it('should return the correct schema', () => {
-    const schema = getWorkflowZodSchema({});
-    expect(schema).toBeDefined();
-  });
-  examples.forEach((example) => {
-    it(`should parse ${example.name} with zod schema`, () => {
+describe('schema', () => {
+  describe('getWorkflowZodSchema: elasticsearch steps', () => {
+    const examples = [
+      {
+        name: 'national_parks.yaml',
+        yaml: readFileSync(Path.join(__dirname, 'examples', 'national_parks.yaml'), 'utf8'),
+      },
+      {
+        name: 'automated_triaging.yaml',
+        yaml: readFileSync(Path.join(__dirname, 'examples', 'automated_triaging.yaml'), 'utf8'),
+      },
+    ];
+    it('should return the correct schema', () => {
       const schema = getWorkflowZodSchema({});
-      const result = parseWorkflowYamlToJSON(example.yaml, schema);
+      expect(schema).toBeDefined();
+    });
+    it('should allow unknown steps and settings in lightweight mode', () => {
+      const schema = getWorkflowZodSchema({}, [], { lightweight: true });
+      const result = parseWorkflowYamlToJSON(
+        [
+          'name: Lightweight workflow',
+          'enabled: true',
+          'triggers:',
+          '  - type: manual',
+          'settings:',
+          '  unknown_setting:',
+          '    nested: true',
+          'steps:',
+          '  - name: custom-step',
+          '    type: custom.step',
+          '    with:',
+          '      arbitrary: true',
+        ].join('\n'),
+        schema
+      );
+
       expect(result.error).toBeUndefined();
       expect(result.success).toBe(true);
     });
+    examples.forEach((example) => {
+      it(`should parse ${example.name} with zod schema`, () => {
+        const schema = getWorkflowZodSchema({});
+        const result = parseWorkflowYamlToJSON(example.yaml, schema);
+        expect(result.error).toBeUndefined();
+        expect(result.success).toBe(true);
+      });
+    });
+  });
+
+  it('accepts a templated waitForApproval timeout nested under if', () => {
+    const schema = getWorkflowZodSchema({});
+    const result = parseWorkflowYamlToJSON(
+      [
+        'name: Nested HITL timeout',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: decision_gate',
+        '    type: if',
+        '    condition: "true"',
+        '    steps:',
+        '      - name: await_decision',
+        '        type: waitForApproval',
+        '        timeout: "{{ inputs.expiresIn | default: \'72h\' }}"',
+      ].join('\n'),
+      schema
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts compound durations on wait and step timeout', () => {
+    const schema = getWorkflowZodSchema({});
+    const result = parseWorkflowYamlToJSON(
+      [
+        'name: Compound duration',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: pause',
+        '    type: wait',
+        '    with:',
+        '      duration: 1h30m',
+        '  - name: await_decision',
+        '    type: waitForApproval',
+        '    timeout: 1h30m',
+      ].join('\n'),
+      schema
+    );
+
+    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
   });
 });

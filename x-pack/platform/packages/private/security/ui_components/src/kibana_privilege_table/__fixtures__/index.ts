@@ -5,62 +5,62 @@
  * 2.0.
  */
 
-import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
-import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent } from '@testing-library/react';
 
-import { findTestSubject } from '@kbn/test-jest-helpers';
+export function getDisplayedFeaturePrivileges(container: HTMLElement) {
+  const categoryExpander = container.querySelector('[data-test-subj~="featureCategoryButton_foo"]');
+  if (categoryExpander) fireEvent.click(categoryExpander);
 
-import { SubFeatureForm } from '../sub_feature_form';
+  const allExpanderButtons = container.querySelectorAll('[data-test-subj~="featureTableCell"]');
+  allExpanderButtons.forEach((button) => fireEvent.click(button));
 
-export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
-  const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-  categoryExpander.simulate('click');
+  const featurePrivilegeControls = container.querySelectorAll(
+    '[data-test-subj~="featurePrivilegeControls"]'
+  );
 
-  const allExpanderButtons = findTestSubject(wrapper, 'featureTableCell');
-  allExpanderButtons.forEach((button) => button.simulate('click'));
+  return Array.from(featurePrivilegeControls).reduce((acc, featureControls) => {
+    const idElement = featureControls.querySelector('[id^="featurePrivilegeControls_"]');
+    const featureId = idElement
+      ? idElement.id.replace('featurePrivilegeControls_', '').replace(/--.*/, '')
+      : '';
 
-  const featurePrivilegeControls = wrapper
-    .find(EuiAccordion)
-    .filter('[data-test-subj="featurePrivilegeControls"]');
+    if (!featureId) return acc;
 
-  return featurePrivilegeControls.reduce((acc, featureControls) => {
-    const buttonGroup = featureControls
-      .find(EuiButtonGroup)
-      .filter('[data-test-subj="primaryFeaturePrivilegeControl"]');
-    const { name, idSelected } = buttonGroup.props();
-    expect(name).toBeDefined();
+    const primaryGroup = featureControls.querySelector(
+      '[data-test-subj~="primaryFeaturePrivilegeControl"]'
+    );
+    // EUI EuiButtonGroupButton stores option id as data-test-subj, not as HTML id
+    const selectedPrimaryBtn = primaryGroup?.querySelector('[aria-pressed="true"]');
+    const idSelected = selectedPrimaryBtn?.getAttribute('data-test-subj');
     expect(idSelected).toBeDefined();
 
-    const featureId = name!.substr(`featurePrivilege_`.length);
-    const primaryFeaturePrivilege = idSelected!.substr(`${featureId}_`.length);
-    const subFeaturePrivileges = [];
+    const primaryFeaturePrivilege = idSelected
+      ? idSelected.substring(`${featureId}_`.length)
+      : 'none';
+    const subFeaturePrivileges: string[] = [];
 
-    const subFeatureForm = featureControls.find(SubFeatureForm);
-    if (subFeatureForm.length > 0) {
-      const independentPrivileges = (
-        subFeatureForm.find(EuiCheckbox) as ReactWrapper<EuiCheckboxProps>
-      ).reduce((acc2, checkbox) => {
-        const { id: privilegeId, checked } = checkbox.props();
-        return checked ? [...acc2, privilegeId] : acc2;
-      }, [] as string[]);
+    // EUI EuiCheckbox puts data-test-subj on the <input> element itself via ...rest
+    const checkedCheckboxes = featureControls.querySelectorAll(
+      'input[type="checkbox"][data-test-subj~="independentSubFeaturePrivilegeControl"]:checked'
+    );
+    checkedCheckboxes.forEach((checkbox) => {
+      subFeaturePrivileges.push(checkbox.id);
+    });
 
-      const mutuallyExclusivePrivileges = (
-        subFeatureForm.find(EuiButtonGroup) as ReactWrapper<EuiButtonGroupProps>
-      ).reduce((acc2, subPrivButtonGroup) => {
-        const { idSelected: selectedSubPrivilege } = subPrivButtonGroup.props();
-        return selectedSubPrivilege && selectedSubPrivilege !== 'none'
-          ? [...acc2, selectedSubPrivilege]
-          : acc2;
-      }, [] as string[]);
-
-      subFeaturePrivileges.push(...independentPrivileges, ...mutuallyExclusivePrivileges);
-    }
+    const subGroups = featureControls.querySelectorAll(
+      '[data-test-subj~="mutexSubFeaturePrivilegeControl"]'
+    );
+    subGroups.forEach((group) => {
+      const selectedBtn = group.querySelector('[aria-pressed="true"]');
+      const selectedId = selectedBtn?.getAttribute('data-test-subj') ?? '';
+      if (selectedId && selectedId !== 'none') {
+        subFeaturePrivileges.push(selectedId);
+      }
+    });
 
     return {
       ...acc,
       [featureId]: {
-        ...acc[featureId],
         primaryFeaturePrivilege,
         subFeaturePrivileges,
       },

@@ -14,7 +14,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
+import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 
 const codeEditorAriaLabel = i18n.translate('workflows.jsonDataView.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view',
@@ -31,6 +31,7 @@ interface JsonCodeEditorCommonProps {
   hasLineNumbers?: boolean;
   hideCopyButton?: boolean;
   enableFindAction?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const JsonCodeEditorCommon = ({
@@ -41,8 +42,12 @@ export const JsonCodeEditorCommon = ({
   onEditorDidMount,
   hideCopyButton,
   enableFindAction,
+  'data-test-subj': dataTestSubj,
 }: JsonCodeEditorCommonProps) => {
   const styles = useMemoCss(componentStyles);
+  // Keep Monaco token colors in sync with EUI color mode (transparent editor bg uses the container).
+  useWorkflowsMonacoTheme();
+
   if (jsonValue === '') {
     return null;
   }
@@ -56,7 +61,6 @@ export const JsonCodeEditorCommon = ({
       editorDidMount={onEditorDidMount}
       aria-label={codeEditorAriaLabel}
       options={{
-        // Limitation: it's not possible to use different themes for different code editors in the same page, so the same theme as the workflow yaml editor is used.
         theme: WORKFLOWS_MONACO_EDITOR_THEME,
         automaticLayout: true,
         fontSize: 12,
@@ -82,11 +86,16 @@ export const JsonCodeEditorCommon = ({
     return codeEditor;
   }
   return (
-    <EuiFlexGroup css={styles.codeEditor} direction="column" gutterSize="s">
+    <EuiFlexGroup
+      css={styles.codeEditor}
+      direction="column"
+      gutterSize="s"
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={false} css={styles.copyButtonContainer}>
         <EuiCopy textToCopy={jsonValue}>
           {(copy) => (
-            <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+            <EuiButtonEmpty size="xs" flush="right" iconType="copy" onClick={copy}>
               {copyToClipboardLabel}
             </EuiButtonEmpty>
           )}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MaintenanceWindow } from '../server/application/types';
+
 export type {
   MaintenanceWindowModificationMetadata,
   DateRange,
@@ -33,12 +35,21 @@ export {
   MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE,
 } from './constants';
 
+export type MaintenanceWindowUI = Omit<MaintenanceWindow, 'schedule'>;
+
 export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
+  getScopedQueryErrorAttributes,
+  isScopedQueryErrorAttributes,
+} from './maintenance_window_scoped_query_error_message';
+export type {
+  MaintenanceWindowScopeName,
+  ScopedQueryErrorAttributes,
 } from './maintenance_window_scoped_query_error_message';
 
 export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';
+export type { AlertingV2ScopeAttributes } from '../server/data/types/alerts_filter_query_attributes';
 
 // export only necessary server types
 export type { MaintenanceWindowCategoryIds } from '../server/routes/schemas/maintenance_window/shared';
@@ -46,6 +57,13 @@ export type { MaintenanceWindowResponse } from '../server/routes/schemas/mainten
 export type { FindMaintenanceWindowsResponse } from '../server/routes/schemas/maintenance_window/internal/request/find';
 export type { CreateMaintenanceWindowRequestBody } from '../server/routes/schemas/maintenance_window/internal/request/create';
 export type { UpdateMaintenanceWindowRequestBody } from '../server/routes/schemas/maintenance_window/internal/request/update';
+
+export type {
+  CreateMaintenanceWindowRequestBody as ExternalCreateMaintenanceWindowRequestBody,
+  CreateMaintenanceWindowResponse as ExternalCreateMaintenanceWindowResponse,
+} from '../server/routes/schemas/maintenance_window/external/request/create';
+export type { MaintenanceWindowResponse as ExternalMaintenanceWindowResponse } from '../server/routes/schemas/maintenance_window/external/response';
+export type { FindMaintenanceWindowsResponse as ExternalFindMaintenanceWindowsResponse } from '../server/routes/schemas/maintenance_window/external/request/find';
 
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
@@ -55,6 +73,7 @@ export const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH =
   `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_active` as const;
 
 // External
+export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
 export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
 export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;

@@ -11,6 +11,7 @@ import type * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
+import type { SharingData } from '@kbn/share-plugin/public';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
 import type { ClientConfigType } from '../../types';
@@ -34,6 +35,14 @@ export interface ExportModalShareOpts {
   isServerless?: boolean;
 }
 
+export interface ScreenCaptureExportShareOpts
+  extends Pick<ExportModalShareOpts, 'apiClient' | 'startServices$'> {
+  /**
+   * marks the PDF/PNG export as experimental in the export flyout
+   */
+  isExperimental?: boolean;
+}
+
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
   license: ILicense;
@@ -41,13 +50,8 @@ export interface ExportPanelShareOpts {
   startServices$: Rx.Observable<StartServices>;
 }
 
-export interface ReportingSharingData {
-  title: string;
+export interface ReportingSharingData extends SharingData {
   reportingDisabled?: boolean;
-  locatorParams: {
-    id: string;
-    params: unknown;
-  };
 }
 
 export interface JobParamsProviderOptions {

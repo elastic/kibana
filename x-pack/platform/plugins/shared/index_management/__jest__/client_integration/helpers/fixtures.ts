@@ -59,22 +59,38 @@ export const createTestEnrichPolicy = (name: string, type: EnrichPolicyType) => 
   },
 });
 
-export const getMatchingIndices = () => ({
-  indices: ['test-1', 'test-2', 'test-3', 'test-4', 'test-5'],
-});
-export const getMatchingDataStreams = () => ({
-  dataStreams: ['test-6', 'test-7', 'test-8', 'test-9', 'test-10'],
-});
+// Template create test data
+export const TEXT_MAPPING_FIELD = {
+  name: 'text_datatype',
+  type: 'text',
+};
 
-export const getFieldsFromIndices = () => ({
-  commonFields: [],
-  indices: [
-    {
-      index: 'test-1',
-      fields: [
-        { name: 'first_name', type: 'keyword', normalizedType: 'keyword' },
-        { name: 'age', type: 'long', normalizedType: 'number' },
-      ],
-    },
-  ],
-});
+export const BOOLEAN_MAPPING_FIELD = {
+  name: 'boolean_datatype',
+  type: 'boolean',
+};
+
+export const KEYWORD_MAPPING_FIELD = {
+  name: 'keyword_datatype',
+  type: 'keyword',
+};
+
+export const componentTemplate1 = {
+  name: 'test_component_template_1',
+  hasMappings: true,
+  hasAliases: false,
+  hasSettings: false,
+  usedBy: [],
+  isManaged: false,
+};
+
+export const componentTemplate2 = {
+  name: 'test_component_template_2',
+  hasMappings: false,
+  hasAliases: false,
+  hasSettings: true,
+  usedBy: ['test_index_template_1'],
+  isManaged: false,
+};
+
+export const componentTemplates = [componentTemplate1, componentTemplate2];

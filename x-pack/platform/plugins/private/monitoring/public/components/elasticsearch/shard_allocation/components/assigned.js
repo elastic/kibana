@@ -9,6 +9,7 @@ import React from 'react';
 import { get, sortBy } from 'lodash';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, euiFontSize, logicalCSS } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { Shard } from './shard';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
@@ -21,7 +22,7 @@ const childTitleStyle = (theme) => css`
   ${logicalCSS('padding', `${theme.euiTheme.size.l} ${theme.euiTheme.size.s}`)}
   text-align: center;
   font-size: ${euiFontSize(theme, 'xs').fontSize};
-  color: ${theme.euiTheme.colors.ghost};
+  color: ${theme.euiTheme.colors.textGhost};
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -105,7 +106,16 @@ export class Assigned extends React.Component {
     // TODO: redesign for shard allocation
     const name = <EuiLink href={generateQueryAndLink(data)}>{data.name}</EuiLink>;
     const master =
-      data.node_type === 'master' ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
+      data.node_type === 'master' ? (
+        <EuiIcon
+          type="starFillSpace"
+          color="primary"
+          aria-label={i18n.translate(
+            'xpack.monitoring.elasticsearch.shardAllocation.masterNodeAriaLabel',
+            { defaultMessage: 'Master node' }
+          )}
+        />
+      ) : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
 
     return (

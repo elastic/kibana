@@ -44,7 +44,9 @@ export const registerImportRoute = (
         access: 'public',
         description: `Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Tampering with exported data risks introducing unspecified errors and data loss.
 
-Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.`,
+Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
+
+NOTE: The exported saved objects include \`coreMigrationVersion\` and \`typeMigrationVersion\` metadata. If you store exported saved objects outside of Kibana (for example in NDJSON files) or generate them yourself, you must preserve or include these fields to retain forwards compatibility across Kibana versions.`,
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
@@ -188,6 +190,7 @@ const okResponseSchema = () =>
     successCount: schema.number({
       meta: { description: 'Indicates the number of successfully imported records.' },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response body populated server-side by importer, not user input
     errors: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
       meta: {
         description: `Indicates the import was unsuccessful and specifies the objects that failed to import.
@@ -195,6 +198,7 @@ const okResponseSchema = () =>
 NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a \`missing_references\` error and conflict error.`,
       },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response body populated server-side by importer, not user input
     successResults: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
       meta: {
         description: `Indicates the objects that are successfully imported, with any metadata if applicable.

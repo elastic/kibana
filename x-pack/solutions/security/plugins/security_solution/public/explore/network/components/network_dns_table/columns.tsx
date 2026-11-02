@@ -8,11 +8,8 @@
 import numeral from '@elastic/numeral';
 import React from 'react';
 
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import type { NetworkDnsItem } from '../../../../../common/search_strategy';
 import { NetworkDnsFields } from '../../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -45,7 +42,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
             mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
             data={{
               value: dnsName,
               field: 'dns.question.registered_domain',

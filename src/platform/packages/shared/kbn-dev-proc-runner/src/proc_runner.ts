@@ -10,7 +10,7 @@
 import * as Rx from 'rxjs';
 import exitHook from 'exit-hook';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createFailError } from '@kbn/dev-cli-errors';
+import { createFailError, isFailError } from '@kbn/dev-cli-errors';
 
 import type { Proc, ProcOptions } from './proc';
 import { startProc } from './proc';
@@ -21,7 +21,11 @@ const MINUTE = 60 * SECOND;
 const noop = () => {};
 
 interface RunOptions extends ProcOptions {
-  wait: true | RegExp;
+  /**
+   * When omitted or `false`, start the process and return without waiting for a log line or exit.
+   * `true` waits for the process to exit; a `RegExp` waits for a matching log line.
+   */
+  wait?: true | RegExp | false;
   waitTimeout?: number | false;
   onEarlyExit?: (msg: string) => void;
 }
@@ -52,17 +56,8 @@ export class ProcRunner {
    *  Start a process, tracking it by `name`
    */
   async run(name: string, options: RunOptions) {
-    const {
-      args = [],
-      cwd = process.cwd(),
-      stdin = undefined,
-      wait = false,
-      waitTimeout = 15 * MINUTE,
-      env = process.env,
-      onEarlyExit,
-      writeLogsToPath,
-    } = options;
-    const cmd = options.cmd === 'node' ? process.execPath : options.cmd;
+    const { wait = false, waitTimeout = 15 * MINUTE, onEarlyExit, ...procOptions } = options;
+    const cmd = procOptions.cmd === 'node' ? process.execPath : procOptions.cmd;
 
     if (this.closing) {
       throw new Error('ProcRunner is closing');
@@ -77,12 +72,8 @@ export class ProcRunner {
     }
 
     const proc = this.startProc(name, {
+      ...procOptions,
       cmd,
-      args,
-      cwd,
-      env,
-      stdin,
-      writeLogsToPath,
     });
 
     if (onEarlyExit) {
@@ -138,7 +129,7 @@ export class ProcRunner {
         await proc.outcomePromise;
       }
     } catch (e) {
-      this.log.error(e);
+      this.log.error(isFailError(e) ? e.message : e);
       throw e;
     } finally {
       // while the procRunner closes promises will resolve/reject because

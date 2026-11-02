@@ -6,7 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { EcsSecurityExtension as Ecs, ThreatIndicatorEcs } from '@kbn/securitysolution-ecs';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
@@ -31,5 +31,5 @@ export const hasThreatMatchValue = (data: Ecs): boolean =>
   );
 
 export const HorizontalSpacer = styled.div`
-  margin: 0 ${({ theme }) => theme.eui.euiSizeXS};
+  margin: 0 ${({ theme }) => theme.euiTheme.size.xs};
 `;

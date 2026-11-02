@@ -136,6 +136,7 @@ describe('AssetCriticalityDataClient', () => {
             },
           },
           settings: {
+            auto_expand_replicas: '0-1',
             default_pipeline: 'entity_analytics_create_eventIngest_from_timestamp-pipeline-default',
           },
         },

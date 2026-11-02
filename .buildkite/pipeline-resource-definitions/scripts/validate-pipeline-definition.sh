@@ -15,9 +15,12 @@ ABSOLUTE_PATH=$(realpath "$TARGET_FILE")
 FILE_NAME=$(basename "$ABSOLUTE_PATH")
 FOLDER_NAME=$(dirname "$ABSOLUTE_PATH")
 
+# for an up-to-date SHA, run
+# docker pull -q docker.elastic.co/ci-agent-images/pipelib:latest >/dev/null
+# docker inspect docker.elastic.co/ci-agent-images/pipelib:latest --format '{{index .RepoDigests 0}}'
 docker run \
  --mount type=bind,source="$FOLDER_NAME",target=/home/app/ \
-  docker.elastic.co/ci-agent-images/pipelib:0.8.0@sha256:641d7fc6cfe473900a1fbe49876762916d804b09fdf2945f74e9f803f3073779 \
+  docker.elastic.co/ci-agent-images/pipelib@sha256:d79a2f81e8679788e314bdb69c074388dbc9b5d6d30f9e2e90cd40b867911bf7 \
   rre validate --backstage-entity-aware "/home/app/$FILE_NAME"
 
 if [ $? -ne 0 ]; then

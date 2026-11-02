@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
@@ -31,7 +30,6 @@ import type {
 
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { IPM_APP_ID } from '../../../plugin';
 import {
   typeFieldName,
   typeFieldDescription,
@@ -39,6 +37,7 @@ import {
   titleFieldDescription,
   filterTitle,
   managedBadge,
+  relationshipsTableCaption,
 } from './i18n';
 
 const canGoInApp = (
@@ -54,8 +53,6 @@ const canGoInApp = (
 export const RelationshipsTable = ({
   basePath,
   capabilities,
-  id,
-  navigateToUrl,
   getDefaultTitle,
   getSavedObjectLabel,
   relationships,
@@ -64,8 +61,6 @@ export const RelationshipsTable = ({
 }: {
   basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
-  navigateToUrl: CoreStart['application']['navigateToUrl'];
-  id: string;
   getDefaultTitle: SavedObjectsManagementPluginStart['getDefaultTitle'];
   getSavedObjectLabel: SavedObjectsManagementPluginStart['getSavedObjectLabel'];
   relationships: SavedObjectRelation[];
@@ -179,19 +174,18 @@ export const RelationshipsTable = ({
   });
 
   return (
-    <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
-      <EuiInMemoryTable<SavedObjectRelation>
-        items={relationships}
-        columns={columns}
-        pagination={{
-          pageSize,
-        }}
-        onTableChange={onTableChange}
-        search={search}
-        rowProps={() => ({
-          'data-test-subj': `relationshipsTableRow`,
-        })}
-      />
-    </RedirectAppLinks>
+    <EuiInMemoryTable<SavedObjectRelation>
+      items={relationships}
+      columns={columns}
+      tableCaption={relationshipsTableCaption}
+      pagination={{
+        pageSize,
+      }}
+      onTableChange={onTableChange}
+      search={search}
+      rowProps={() => ({
+        'data-test-subj': `relationshipsTableRow`,
+      })}
+    />
   );
 };

@@ -14,6 +14,12 @@ import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { PreviewLink } from './preview_link';
 import { getRightPanelParams } from '../utils/link_utils';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
+import type { IdentityFields } from '../../document_details/shared/utils';
+import { useEntityFromStore } from '../../entity_details/shared/hooks/use_entity_from_store';
+import {
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 
 interface FlyoutLinkProps {
   /**
@@ -24,6 +30,10 @@ interface FlyoutLinkProps {
    * Value to display in EuiLink
    */
   value: string;
+  /**
+   * Entity identifiers - key-value pairs of field names and their values
+   */
+  identityFields?: IdentityFields;
   /**
    * Scope id to use for the preview panel
    */
@@ -58,6 +68,7 @@ interface FlyoutLinkProps {
 export const FlyoutLink: FC<FlyoutLinkProps> = ({
   field,
   value,
+  identityFields,
   scopeId,
   isFlyoutOpen = false,
   ruleId,
@@ -68,16 +79,39 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const { telemetry } = useKibana().services;
   const whichFlyout = useWhichFlyout();
   const renderPreview = isFlyoutOpen || whichFlyout !== null;
+  const resolutionIdentifiers: IdentityFields = useMemo(
+    () => identityFields ?? { [field]: value },
+    [identityFields, field, value]
+  );
+
+  const isHostOrUser = field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME;
+  const entityType = field === HOST_NAME_FIELD_NAME ? 'host' : 'user';
+
+  const docEntityId =
+    entityType === 'host'
+      ? resolutionIdentifiers['host.entity.id']
+      : resolutionIdentifiers['user.entity.id'];
+
+  const { entityRecord } = useEntityFromStore({
+    entityId: docEntityId,
+    identityFields: resolutionIdentifiers,
+    entityType,
+    skip: !isHostOrUser || Object.keys(resolutionIdentifiers).length === 0,
+  });
+
+  const resolvedEntityId = entityRecord?.entity?.id;
 
   const rightPanelParams = useMemo(
     () =>
       getRightPanelParams({
-        value,
+        identityFields,
+        entityId: resolvedEntityId,
         field,
+        value,
         scopeId,
         ruleId,
       }),
-    [value, field, scopeId, ruleId]
+    [identityFields, resolvedEntityId, field, value, scopeId, ruleId]
   );
 
   const onClick = useCallback(() => {
@@ -98,7 +132,13 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   // If the flyout is open, render the preview link
   if (renderPreview) {
     return (
-      <PreviewLink field={field} value={value} scopeId={scopeId} data-test-subj={dataTestSubj}>
+      <PreviewLink
+        field={field}
+        value={value}
+        entityId={resolvedEntityId}
+        scopeId={scopeId}
+        data-test-subj={dataTestSubj}
+      >
         {children}
       </PreviewLink>
     );

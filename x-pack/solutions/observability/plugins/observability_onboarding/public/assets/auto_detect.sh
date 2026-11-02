@@ -76,7 +76,7 @@ for i in "$@"; do
     elastic_agent_version="${i#*=}"
     ;;
   --metrics-enabled=*)
-    val="${1#*=}"
+    val="${i#*=}"
     case "$val" in
       true) metrics_enabled=true ;;
       *) metrics_enabled=false ;;
@@ -296,7 +296,11 @@ install_integrations() {
 
     case "$item" in
     "system")
-      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      local host_name=$(hostname 2>/dev/null | tr '[:upper:]' '[:lower:]')
+      if [ -z "$host_name" ]; then
+        host_name="unknown-host"
+      fi
+      metadata="\t$host_name"
       ;;
     esac
 

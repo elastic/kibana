@@ -12,7 +12,7 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -34,7 +34,7 @@ import {
   createDashboardEditUrl,
   createDashboardListingFilterUrl,
 } from '../utils/urls';
-import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
+import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/telemetry/dashboard_duration_start_mark';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -86,6 +86,7 @@ export async function mountApp({
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
     return {
+      isEmbeddedViaUrl: true,
       forceShowTopNavMenu: routeParams[dashboardUrlParams.showTopMenu] === 'true',
       forceShowQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
       forceShowDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',
@@ -103,7 +104,7 @@ export async function mountApp({
       performance.mark(DASHBOARD_DURATION_START_MARK);
     }
 
-    const routeParams = parse(routeProps.history.location.search);
+    const routeParams = queryString.parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
@@ -119,13 +120,14 @@ export async function mountApp({
     );
   };
 
-  const renderListingPage = (routeProps: RouteComponentProps) => {
+  const renderListingPage = (routeProps: RouteComponentProps<{ activeTab?: string }>) => {
     // clear the dashboard duration start mark set during mounting because we
     // went to the listing page instead of a dashboard view
     performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+    embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true);
 
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
-    const routeParams = parse(routeProps.history.location.search);
+    const routeParams = queryString.parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
     return (
@@ -168,7 +170,11 @@ export async function mountApp({
               ]}
               render={renderDashboard}
             />
-            <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route
+              exact
+              path={[LANDING_PAGE_PATH, `${LANDING_PAGE_PATH}/:activeTab`]}
+              render={renderListingPage}
+            />
             <Route exact path="/">
               <Redirect to={LANDING_PAGE_PATH} />
             </Route>
@@ -193,7 +199,7 @@ export async function mountApp({
     coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   render(app, element);

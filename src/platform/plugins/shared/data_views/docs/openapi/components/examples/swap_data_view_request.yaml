@@ -1,4 +1,5 @@
 summary: Swap references from data view ID "abcd-efg" to "xyz-123" and remove the data view that is no longer referenced.
+description: Swap all saved object references from one data view to another and delete the source data view afterward.
 value:
   {
     "fromId" : "abcd-efg",

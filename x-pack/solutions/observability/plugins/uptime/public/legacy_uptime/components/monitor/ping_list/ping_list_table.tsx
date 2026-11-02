@@ -11,7 +11,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import * as I18LABELS from './translations';
 import type { FailedStepsApiResponse, Ping } from '../../../../../common/runtime_types';
 import { PingStatusColumn } from './columns/ping_status';
@@ -231,6 +231,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
       itemId="docId"
       itemIdToExpandedRowMap={expandedRows}
       pagination={pagination}
+      data-test-subj="uptimePingListTable"
       noItemsMessage={
         loading
           ? i18n.translate('xpack.uptime.pingList.pingsLoadingMesssage', {
@@ -240,6 +241,9 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
               defaultMessage: 'No history found',
             })
       }
+      tableCaption={i18n.translate('xpack.uptime.pingList.pingHistoryCaption', {
+        defaultMessage: 'Ping history',
+      })}
       tableLayout="auto"
       rowProps={getRowProps}
       onChange={onChange}

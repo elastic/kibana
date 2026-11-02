@@ -32,7 +32,7 @@ describe('LandingLinksImageCards', () => {
   });
 
   it('should render LandingLinksImageCard item', () => {
-    const landingLinksCardTestId = 'LandingImageCard-item';
+    const landingLinksCardTestId = `LandingImageCard-item-${DEFAULT_NAV_ITEM.id}`;
 
     const { queryByTestId } = render(<LandingLinksImageCards items={[{ ...DEFAULT_NAV_ITEM }]} />);
 

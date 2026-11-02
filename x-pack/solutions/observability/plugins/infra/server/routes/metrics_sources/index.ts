@@ -7,28 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core/server';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import {
-  existsQuery,
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
-import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import {
-  DATASTREAM_DATASET,
-  EVENT_MODULE,
-  findInventoryFields,
-  findInventoryModel,
-  METRICSET_MODULE,
-} from '@kbn/metrics-data-access-plugin/common';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
   getTimeRangeMetadataQueryParamsRT,
   getTimeRangeMetadataResponseRT,
 } from '../../../common/metrics_sources/get_has_data';
+import { getHasData } from './has_data';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
@@ -41,6 +28,7 @@ import {
 import type { InfraSource } from '../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { getPreferredSchema } from '../../lib/helpers/get_preferred_schema';
 
 const defaultStatus = {
   metricIndicesExist: false,
@@ -52,10 +40,15 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
   const composeSourceStatus = async (
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
+    metricAlias: string,
+    request: KibanaRequest
   ): Promise<MetricsSourceStatus> => {
     try {
-      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(requestContext, sourceId);
+      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(
+        requestContext,
+        metricAlias,
+        request
+      );
       return {
         metricIndicesExist: hasMetricIndices,
         remoteClustersExist: true,
@@ -80,31 +73,41 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
+        }),
+        query: schema.object({
+          includeStatus: schema.boolean({ defaultValue: true }),
         }),
       },
     },
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
+      const { includeStatus } = request.query;
       const soClient = (await requestContext.core).savedObjects.client;
 
       try {
-        const [sourceSettled, statusSettled] = await Promise.allSettled([
+        // Resolve the source configuration first so we can pass metricAlias
+        // directly to the status probe — avoiding the second source-config
+        // read the previous implementation performed inside composeSourceStatus.
+        const [sourceSettled] = await Promise.allSettled([
           libs.sources.getSourceConfiguration(soClient, sourceId),
-          composeSourceStatus(requestContext, sourceId),
         ]);
 
         const source = isFulfilled<InfraSource>(sourceSettled) ? sourceSettled.value : null;
-        const status = isFulfilled<MetricsSourceStatus>(statusSettled)
-          ? statusSettled.value
-          : defaultStatus;
 
         if (!source) {
           return response.notFound();
         }
 
+        const status = includeStatus
+          ? await composeSourceStatus(requestContext, source.configuration.metricAlias, request)
+          : defaultStatus;
+
         const sourceResponse = {
-          source: { ...source, status },
+          source: {
+            ...source,
+            ...(includeStatus ? { status } : {}),
+          },
         };
 
         return response.ok({
@@ -127,7 +130,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
         body: createRouteValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
@@ -152,7 +155,11 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(soClient, sourceId, sourceConfigurationPayload)
           : sources.createSourceConfiguration(soClient, sourceId, sourceConfigurationPayload));
 
-        const status = await composeSourceStatus(requestContext, sourceId);
+        const status = await composeSourceStatus(
+          requestContext,
+          patchedSourceConfiguration.configuration.metricAlias,
+          request
+        );
 
         const sourceResponse = {
           source: { ...patchedSourceConfiguration, status },
@@ -191,22 +198,40 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}/hasData',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
       },
     },
     async (requestContext, request, response) => {
-      const { sourceId } = request.params;
+      try {
+        const { sourceId } = request.params;
 
-      const client = createSearchClient(requestContext, framework);
-      const soClient = (await requestContext.core).savedObjects.client;
-      const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
+        // `request` is threaded through so `subscribeToAborted$` cancels the ES
+        // call when the client disconnects.
+        const client = createSearchClient(requestContext, framework, request);
+        const soClient = (await requestContext.core).savedObjects.client;
+        const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
-      const results = await hasData(source.configuration.metricAlias, client);
+        const results = await hasData(source.configuration.metricAlias, client, logger);
 
-      return response.ok({
-        body: { hasData: results, configuration: source.configuration },
-      });
+        return response.ok({
+          body: { hasData: results, configuration: source.configuration },
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 
@@ -228,46 +253,14 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const hostInventoryModel = findInventoryModel('host');
-        const hostIntegration =
-          typeof hostInventoryModel?.requiredIntegration !== 'object' ||
-          !('otel' in hostInventoryModel?.requiredIntegration)
-            ? undefined
-            : hostInventoryModel.requiredIntegration;
-
-        const hasDataResponse = await infraMetricsClient.search({
-          track_total_hits: true,
-          terminate_after: 1,
-          size: 0,
-          query: {
-            bool: {
-              should:
-                source === 'all'
-                  ? [
-                      ...existsQuery(hostInventoryModel.fields.id),
-                      ...existsQuery(findInventoryFields('container').id),
-                      ...existsQuery(findInventoryFields('pod').id),
-                      ...existsQuery(findInventoryFields('awsEC2').id),
-                      ...existsQuery(findInventoryFields('awsS3').id),
-                      ...existsQuery(findInventoryFields('awsRDS').id),
-                      ...existsQuery(findInventoryFields('awsSQS').id),
-                    ]
-                  : source === 'host' && hostIntegration
-                  ? [
-                      ...termQuery(EVENT_MODULE, hostIntegration.beats),
-                      ...termQuery(METRICSET_MODULE, hostIntegration.beats),
-                      ...termQuery(DATASTREAM_DATASET, hostIntegration.otel),
-                    ]
-                  : [],
-              minimum_should_match: 1,
-            },
-          },
+        const { hasData: hasMetricsData } = await getHasData({
+          infraMetricsClient,
+          source,
+          logger,
         });
 
         return response.ok({
-          body: getHasDataResponseRT.encode({
-            hasData: hasDataResponse.hits.total.value > 0,
-          }),
+          body: getHasDataResponseRT.encode({ hasData: hasMetricsData }),
         });
       } catch (err) {
         if (Boom.isBoom(err)) {
@@ -304,75 +297,19 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const inventoryModel = findInventoryModel(dataSource);
-        if (
-          typeof inventoryModel.requiredIntegration !== 'object' ||
-          !('otel' in inventoryModel.requiredIntegration)
-        ) {
-          return response.ok({
-            body: getTimeRangeMetadataResponseRT.encode({
-              schemas: ['ecs'],
-              preferredSchema: 'ecs',
-            }),
-          });
-        }
-
-        const [ecsResponse, otelResponse] = (
-          await infraMetricsClient.msearch([
-            {
-              track_total_hits: true,
-              terminate_after: 1,
-              size: 0,
-              query: {
-                bool: {
-                  should: [
-                    ...termsQuery(EVENT_MODULE, inventoryModel.requiredIntegration.beats),
-                    ...termsQuery(METRICSET_MODULE, inventoryModel.requiredIntegration.beats),
-                    ...(!isInventoryView ? termsQuery(DATASTREAM_DATASET, 'apm*') : []),
-                  ],
-                  minimum_should_match: 1,
-                  filter: [
-                    ...rangeQuery(from, to),
-                    ...kqlQuery(kuery),
-                    ...(filters ? [filters] : []),
-                  ],
-                },
-              },
-            },
-            {
-              track_total_hits: true,
-              terminate_after: 1,
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    ...termQuery(DATASTREAM_DATASET, inventoryModel.requiredIntegration.otel),
-                    ...rangeQuery(from, to),
-                    ...kqlQuery(kuery),
-                    ...(filters ? [filters] : []),
-                  ],
-                },
-              },
-            },
-          ])
-        ).responses;
-        const hasEcsData = ecsResponse.hits.total.value !== 0;
-        const hasOtelData = otelResponse.hits.total.value !== 0;
-
-        const allSchemas: DataSchemaFormat[] = ['ecs', 'semconv'];
-        const availableSchemas = allSchemas.filter(
-          (key) => (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData)
-        );
-        const preferredSchema =
-          availableSchemas.length > 0
-            ? availableSchemas.includes('semconv')
-              ? 'semconv'
-              : availableSchemas[0]
-            : null;
+        const { schemas, preferredSchema } = await getPreferredSchema({
+          infraMetricsClient,
+          dataSource,
+          from,
+          to,
+          kuery,
+          filters,
+          isInventoryView,
+        });
 
         return response.ok({
           body: getTimeRangeMetadataResponseRT.encode({
-            schemas: availableSchemas,
+            schemas,
             preferredSchema,
           }),
         });

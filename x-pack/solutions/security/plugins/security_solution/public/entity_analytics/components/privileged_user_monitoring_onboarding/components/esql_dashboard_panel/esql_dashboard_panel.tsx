@@ -140,8 +140,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           timerange={timerange}
           withActions={[
             VisualizationContextMenuActions.inspect,
-            VisualizationContextMenuActions.addToNewCase,
-            VisualizationContextMenuActions.addToExistingCase,
+            VisualizationContextMenuActions.addToCase,
             VisualizationContextMenuActions.saveToLibrary,
             // Excluding VisualizationContextMenuActions.openInLens
           ]}
@@ -196,6 +195,12 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
                     },
                   }}
                   columns={columns}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.genericDashboard.tableCaption',
+                    {
+                      defaultMessage: 'Generic dashboard results table',
+                    }
+                  )}
                 />
               </div>
             </InspectButtonContainer>

@@ -8,8 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../..',
   roots: ['<rootDir>/src/dev'],
-  testPathIgnorePatterns: ['src/dev/packages', 'integration_tests'],
 };

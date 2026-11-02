@@ -96,9 +96,14 @@ export const ColorPalette = ({
         <EuiFlexItem grow={false} style={{ width: 40 }}>
           <EuiToolTip content={getToolTipContent()}>
             {hasDelta ? (
-              <EuiIcon type={delta > 0 ? 'sortUp' : 'sortDown'} size="m" color={getColor()} />
+              <EuiIcon
+                type={delta > 0 ? 'sortUp' : 'sortDown'}
+                size="m"
+                color={getColor()}
+                aria-hidden={true}
+              />
             ) : (
-              <EuiIcon type="minus" size="m" color="subdued" />
+              <EuiIcon type="minus" size="m" color="subdued" aria-hidden={true} />
             )}
           </EuiToolTip>
         </EuiFlexItem>

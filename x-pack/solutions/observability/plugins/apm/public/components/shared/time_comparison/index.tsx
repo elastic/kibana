@@ -5,82 +5,73 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiSelect } from '@elastic/eui';
+import { EuiCheckbox, EuiFormPrepend, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import styled from '@emotion/styled';
+import { useHistory } from 'react-router-dom';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useShouldShowAnomalyUi } from '../../../hooks/use_should_show_anomaly_ui';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { isPending } from '../../../hooks/use_fetcher';
+import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import * as urlHelpers from '../links/url_helpers';
 import { getComparisonOptions, TimeRangeComparisonEnum } from './get_comparison_options';
 
-const PrependContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBaseFormsPrepend};
-  padding: 0 ${({ theme }) => theme.euiTheme.size.m};
-`;
-
-export function TimeComparison() {
+export function TimeComparison({
+  compressed,
+  fullWidth,
+}: {
+  compressed?: boolean;
+  fullWidth?: boolean;
+}) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isSmall, isMedium } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset, kuery },
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
 
-  const location = useLocation();
-  const apmRouter = useApmRouter();
-
-  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } = useAnomalyDetectionJobsContext();
-  const { core } = useApmPluginContext();
+  const { anomalyDetectionSetupState, anomalyDetectionJobsStatus } =
+    useAnomalyDetectionJobsContext();
   const { preferredEnvironment } = useEnvironmentsContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
 
   const comparisonOptions = useMemo(() => {
-    const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
-    // Only show the "Expected bounds" option in Overview and Transactions tabs
-    const showExpectedBoundsForThisTab =
-      !matchingRoutes.some((d) => d.path === '/services/{serviceName}/transactions/view') &&
-      matchingRoutes.some(
-        (d) =>
-          d.path === '/services/{serviceName}/overview' ||
-          d.path === '/services/{serviceName}/transactions'
-      );
-
     const timeComparisonOptions = getComparisonOptions({
       start,
       end,
-      showSelectedBoundsOption: showExpectedBoundsForThisTab && canGetJobs,
-      anomalyDetectionJobsStatus,
-      anomalyDetectionJobsData,
+      showSelectedBoundsOption: shouldShowAnomalyUi,
+      anomalyDetectionSetupState,
+      kuery,
       preferredEnvironment,
     });
 
     return timeComparisonOptions;
-  }, [
-    canGetJobs,
-    anomalyDetectionJobsStatus,
-    anomalyDetectionJobsData,
-    start,
-    end,
-    preferredEnvironment,
-    apmRouter,
-    location.pathname,
-  ]);
+  }, [shouldShowAnomalyUi, anomalyDetectionSetupState, start, end, preferredEnvironment, kuery]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(({ value }) => value === offset);
+
+  const isExpectedBoundsDeepLink = offset === TimeRangeComparisonEnum.ExpectedBounds;
+  // Unauthorized users (and rare fetch failures before success) get a permanent `Unknown`
+  // setup state and a fetch that never initiates, so must not be treated as pending —
+  // otherwise the selector would be hidden forever (see below).
+  const isAnomalyDetectionSetupPending =
+    anomalyDetectionSetupState !== AnomalyDetectionSetupState.Unknown &&
+    isPending(anomalyDetectionJobsStatus);
+
+  // Preserve expected_bounds deeplinks (e.g. from anomaly alerts) until ML job setup
+  // has loaded. While pending, expected bounds is treated as unavailable and would
+  // otherwise be replaced with the first time-comparison option (typically day before).
+  if (isExpectedBoundsDeepLink && isAnomalyDetectionSetupPending) {
+    return null;
+  }
 
   // Replaces type when current one is no longer available in the select options
   if (
@@ -99,17 +90,17 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
+      compressed={compressed}
       aria-label={i18n.translate('xpack.apm.timeComparison.euiSelect.seletTimeComparisonLabel', {
         defaultMessage: 'Select time comparison options',
       })}
-      fullWidth={isSmall || isMedium}
+      fullWidth={fullWidth ?? (isSmall || isMedium)}
       data-test-subj="comparisonSelect"
       disabled={comparisonEnabled === false}
       options={comparisonOptions}
       value={offset}
-      compressed
       prepend={
-        <PrependContainer>
+        <EuiFormPrepend>
           <EuiCheckbox
             id="comparison"
             label={i18n.translate('xpack.apm.timeComparison.label', {
@@ -130,7 +121,7 @@ export function TimeComparison() {
               });
             }}
           />
-        </PrependContainer>
+        </EuiFormPrepend>
       }
       onChange={(e) => {
         trackApmEvent({

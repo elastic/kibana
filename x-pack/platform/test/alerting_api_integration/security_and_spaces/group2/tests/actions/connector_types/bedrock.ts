@@ -94,7 +94,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
-          is_connector_type_deprecated: false,
+          is_connector_type_deprecated: true,
         });
       });
 
@@ -118,7 +118,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
-          is_connector_type_deprecated: false,
+          is_connector_type_deprecated: true,
           is_missing_secrets: false,
           config,
         });
@@ -140,7 +140,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -183,7 +183,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"accessKey\": Required;\n [2]: Field \"secret\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at accessKey\n✖ Invalid input: expected string, received undefined\n  → at secret`,
             });
           });
       });
@@ -204,7 +204,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"accessKey\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at accessKey`,
             });
           });
       });
@@ -225,7 +225,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"secret\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at secret`,
             });
           });
       });
@@ -261,7 +261,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -313,8 +313,9 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           });
 
           it('should send a stringified JSON object with latest body', async () => {
+            const connectorId = await createConnector(apiUrl);
             const { body } = await supertest
-              .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+              .post(`/api/actions/connector/${connectorId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -332,7 +333,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             );
             expect(body).to.eql({
               status: 'ok',
-              connector_id: bedrockActionId,
+              connector_id: connectorId,
               data: {
                 ...bedrockClaude2SuccessResponse,
                 usage: {
@@ -347,7 +348,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 getService,
                 spaceId: 'default',
                 type: 'action',
-                id: bedrockActionId,
+                id: connectorId,
                 provider: 'actions',
                 actions: new Map([
                   ['execute-start', { equal: 1 }],
@@ -356,13 +357,14 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               });
             });
 
-            const executeEvent = events[1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should overwrite the model when a model argument is provided', async () => {
+            const connectorId = await createConnector(apiUrl);
             const { body } = await supertest
-              .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+              .post(`/api/actions/connector/${connectorId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -379,7 +381,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(simulator.requestUrl).to.eql(`${apiUrl}/model/some-other-model/invoke`);
             expect(body).to.eql({
               status: 'ok',
-              connector_id: bedrockActionId,
+              connector_id: connectorId,
               data: {
                 ...bedrockClaude2SuccessResponse,
                 usage: {
@@ -394,22 +396,23 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 getService,
                 spaceId: 'default',
                 type: 'action',
-                id: bedrockActionId,
+                id: connectorId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { gte: 2 }],
-                  ['execute', { gte: 2 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[3];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(145);
           });
 
           it('should invoke AI with assistant AI body argument formatted to bedrock expectations', async () => {
+            const connectorId = await createConnector(apiUrl);
             const { body } = await supertest
-              .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+              .post(`/api/actions/connector/${connectorId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -451,7 +454,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
             expect(body).to.eql({
               status: 'ok',
-              connector_id: bedrockActionId,
+              connector_id: connectorId,
               data: {
                 message: bedrockClaude2SuccessResponse.completion,
                 usage: {
@@ -466,16 +469,16 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 getService,
                 spaceId: 'default',
                 type: 'action',
-                id: bedrockActionId,
+                id: connectorId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { gte: 3 }],
-                  ['execute', { gte: 3 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[5];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(256);
           });
 
@@ -623,7 +626,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             connector_id: bedrockActionId,
             errorSource: TaskErrorSource.USER,
-            message: `error validating action params: Field \"subAction\": Required`,
+            message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subAction`,
             retry: false,
           });
         });

@@ -23,21 +23,20 @@ export type {
   CustomizationCallback,
   DiscoverCustomization,
   DiscoverCustomizationService,
-  FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
-  TopNavCustomization,
 } from './customizations';
 export {
   SEARCH_EMBEDDABLE_TYPE,
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   apiPublishesSavedSearch,
   type PublishesSavedSearch,
   type PublishesWritableSavedSearch,
   type HasTimeRange,
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
+  type SearchEmbeddablePanelApiState,
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
+export type { ExpandedDocRef } from './application/main/utils/expanded_doc';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

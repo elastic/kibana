@@ -6,9 +6,10 @@
  */
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -90,6 +91,10 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
 };
 
 describe('[Lens formula] math completion', () => {
+  afterEach(() => {
+    i18n.init({ locale: 'en', messages: {} });
+  });
+
   describe('signature help', () => {
     function unwrapSignatures(signatureResult: monaco.languages.SignatureHelpResult) {
       return signatureResult.value.signatures[0];
@@ -208,6 +213,25 @@ The total number of documents. When you provide a field, the total number of fie
         contents: [{ value: expect.stringContaining('clamp([value]: number') }],
       });
     });
+
+    // This is related to the hover text
+    it('should localize tinymath argument type labels in signatures', () => {
+      i18n.init({
+        locale: 'de-DE',
+        messages: {
+          'lensFormulaDocs.boolean': 'Boolesch',
+          'lensFormulaDocs.number': 'Zahl',
+          'lensFormulaDocs.string': 'Zeichenfolge',
+        },
+      });
+
+      const hover = getHover('ifelse(count() > 1, average(bytes), 5)', 2, operationDefinitionMap);
+
+      expect(hover.contents[0].value).toContain(': Boolesch');
+      expect(hover.contents[0].value).toContain(': Zahl');
+      expect(hover.contents[0].value).not.toContain(': boolean');
+      expect(hover.contents[0].value).not.toContain(': number');
+    });
   });
 
   describe('autocomplete', () => {
@@ -229,7 +253,7 @@ The total number of documents. When you provide a field, the total number of fie
         },
         indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+        kql: kqlPluginMock.createStartContract(),
         dataViews: dataViewPluginMocks.createStartContract(),
         timefilter: {
           getTime: () => ({ from: '2022-11-01T00:00:00.000Z', to: '2022-11-03T00:00:00.000Z' }),

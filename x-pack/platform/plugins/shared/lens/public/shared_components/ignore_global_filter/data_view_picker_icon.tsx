@@ -27,6 +27,7 @@ export const getIgnoreGlobalFilterIcon = ({
       <EuiIcon
         type={'filterIgnore'}
         color={color}
+        aria-hidden={true}
         css={css`
           margin-top: 5px;
         `}

@@ -7,11 +7,18 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import {
+  CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+  ENABLE_DISABLE_RULES_API_PRIVILEGE,
+  EXCEPTIONS_API_ALL,
+  INVESTIGATION_GUIDE_API_EDIT,
+  RULES_API_ALL,
+} from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  PatchRuleRequestBody,
+  UnresolvedRulePatchProps,
   validatePatchRuleRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
@@ -29,7 +36,17 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: [RULES_API_ALL],
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                RULES_API_ALL,
+                EXCEPTIONS_API_ALL,
+                CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
+                INVESTIGATION_GUIDE_API_EDIT,
+                ENABLE_DISABLE_RULES_API_PRIVILEGE,
+              ],
+            },
+          ],
         },
       },
     })
@@ -38,10 +55,11 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: {
           request: {
-            // Use non-exact validation because everything is optional in patch - since everything is optional,
-            // io-ts can't find the right schema from the type specific union and the exact check breaks.
-            // We do type specific validation after fetching the existing rule so we know the rule type.
-            body: buildRouteValidationWithZod(PatchRuleRequestBody),
+            // Only the type-independent props are validated here: `type` is optional in patch
+            // bodies, so the type-specific union cannot be resolved until the existing rule is
+            // fetched. Type-specific fields are preserved and validated further down the stack,
+            // once the rule type is known.
+            body: buildRouteValidationWithZod(UnresolvedRulePatchProps),
           },
         },
       },
@@ -53,8 +71,10 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
+          const securitySolutionCtx = await context.securitySolution;
+
           const rulesClient = await (await context.alerting).getRulesClient();
-          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
+          const detectionRulesClient = securitySolutionCtx.getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
@@ -69,6 +89,16 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
               statusCode: error.statusCode,
             });
           }
+
+          await validateRuleResponseActions({
+            endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
+            endpointService: securitySolutionCtx.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: securitySolutionCtx.getSpaceId(),
+            existingRule,
+            checkOsqueryResponseActionAuthz:
+              securitySolutionCtx.getCheckOsqueryResponseActionAuthz(),
+          });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({

@@ -1,0 +1,32 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          deleteEnrollmentApiKeyExample:
+            description: 'The enrollment API key was successfully revoked'
+            value:
+              action: 'deleted'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'No enrollment API key was found with the given ID'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'EnrollmentAPIKey key-id-1 not found'

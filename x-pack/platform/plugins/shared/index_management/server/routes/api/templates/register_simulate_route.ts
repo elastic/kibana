@@ -25,7 +25,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       },
       validate: {
         body: schema.nullable(bodySchema),
-        params: schema.object({ templateName: schema.maybe(schema.string()) }),
+        params: schema.object({ templateName: schema.maybe(schema.string({ maxLength: 1000 })) }),
       },
     },
     async (context, request, response) => {
@@ -48,7 +48,33 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
           };
 
       try {
-        const templatePreview = await client.asCurrentUser.indices.simulateTemplate(params);
+        const templatePromise = client.asCurrentUser.indices.getIndexTemplate({
+          name: templateName!,
+        });
+        const templatePreviewPromise = client.asCurrentUser.indices.simulateTemplate(params);
+        const settingsPromise = client.asInternalUser.cluster.getSettings({
+          include_defaults: true,
+        });
+
+        const [templateContent, templatePreview, { persistent, defaults }] = await Promise.all([
+          templatePromise,
+          templatePreviewPromise,
+          settingsPromise,
+        ]);
+
+        const isLogsPattern = !!templateContent.index_templates.find((t) =>
+          // @ts-expect-error I think there are some incorrect types from the es client package
+          t.index_template.index_patterns?.some((pattern) => pattern === 'logs-*-*')
+        );
+
+        const isLogsdbEnabled =
+          (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
+
+        templatePreview.template.settings.index = templatePreview.template.settings.index || {};
+
+        templatePreview.template.settings.index.mode =
+          templatePreview.template.settings.index.mode ||
+          (isLogsdbEnabled && isLogsPattern ? 'logsdb' : 'standard');
 
         return response.ok({ body: templatePreview });
       } catch (error) {

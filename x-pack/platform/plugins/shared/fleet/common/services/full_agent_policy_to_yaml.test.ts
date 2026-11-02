@@ -5,9 +5,26 @@
  * 2.0.
  */
 
+import * as yaml from 'yaml';
+
 import type { FullAgentPolicy } from '../types';
 
 import { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
+
+// Mock yaml module for testing (matches YamlModule shape)
+const mockYaml = {
+  Document: class {
+    private data: unknown;
+    constructor(data: unknown) {
+      this.data = data;
+    }
+    toString() {
+      return JSON.stringify(this.data);
+    }
+  },
+  isScalar: () => true,
+  visit: () => {},
+};
 
 describe('fullAgentPolicyToYaml', () => {
   it('should replace secrets', () => {
@@ -45,10 +62,111 @@ describe('fullAgentPolicyToYaml', () => {
       fleet: {},
     } as unknown as FullAgentPolicy;
 
-    const yaml = fullAgentPolicyToYaml(agentPolicyWithSecrets, (policy) => JSON.stringify(policy));
+    const result = fullAgentPolicyToYaml(agentPolicyWithSecrets, mockYaml);
 
-    expect(yaml).toMatchInlineSnapshot(
+    expect(result).toMatchInlineSnapshot(
       `"{\\"id\\":\\"1234\\",\\"outputs\\":{\\"default\\":{\\"type\\":\\"elasticsearch\\",\\"hosts\\":[\\"http://localhost:9200\\"]}},\\"inputs\\":[{\\"id\\":\\"test_input-secrets-abcd1234\\",\\"revision\\":1,\\"name\\":\\"secrets-1\\",\\"type\\":\\"test_input\\",\\"data_stream\\":{\\"namespace\\":\\"default\\"},\\"use_output\\":\\"default\\",\\"package_policy_id\\":\\"abcd1234\\",\\"package_var_secret\\":\\"\${SECRET_0}\\",\\"input_var_secret\\":\\"\${SECRET_1}\\",\\"streams\\":[{\\"id\\":\\"test_input-secrets.log-abcd1234\\",\\"data_stream\\":{\\"type\\":\\"logs\\",\\"dataset\\":\\"secrets.log\\"},\\"package_var_secret\\":\\"\${SECRET_0}\\",\\"input_var_secret\\":\\"\${SECRET_1}\\",\\"stream_var_secret\\":\\"\${SECRET_2}\\"}],\\"meta\\":{\\"package\\":{\\"name\\":\\"secrets\\",\\"version\\":\\"1.0.0\\"}}}],\\"secret_references\\":[{\\"id\\":\\"secret-id-1\\"},{\\"id\\":\\"secret-id-2\\"},{\\"id\\":\\"secret-id-3\\"}],\\"revision\\":2,\\"agent\\":{},\\"signed\\":{},\\"output_permissions\\":{},\\"fleet\\":{}}"`
     );
+  });
+
+  it('preserves multi-line strings as YAML literal block scalars (program: |)', () => {
+    const program =
+      '//   It also says that "The data pipeline ingests data at least every 2\n' +
+      '//   minutes." If a package is created every minute on average\n';
+    const policy = {
+      id: 'test-policy',
+      outputs: {},
+      inputs: [
+        {
+          id: 'test-input',
+          type: 'cel',
+          streams: [{ id: 'test-stream', program }],
+        },
+      ],
+      revision: 1,
+      agent: {},
+    } as unknown as FullAgentPolicy;
+
+    const result = fullAgentPolicyToYaml(policy, yaml);
+
+    // Must use literal block style, not folded (>) or double-quoted
+    expect(result).toContain('program: |');
+    // Lines must be preserved verbatim — no newline-to-space collapse
+    expect(result).toContain('every 2\n');
+    expect(result).toContain('minutes."');
+    expect(result).not.toContain('every 2  //');
+  });
+
+  it('serializes policies that reuse an object by reference without throwing on YAML aliases', () => {
+    // The same object is reused by reference in two places (here an ES privileges
+    // object shared between a stream and output_permissions), as happens when Fleet
+    // assembles a full policy server-side. With anchors enabled, the custom key
+    // sorter can emit the alias before its anchor and make serialization throw
+    // "Unresolved alias (the anchor must be set before the alias)". `inputs` is
+    // inserted before `output_permissions` so the anchor would attach here, while
+    // POLICY_KEYS_ORDER sorts `output_permissions` first, triggering the bug.
+    const sharedPrivileges = { cluster: ['monitor'] };
+    const policy = {
+      id: 'test-policy',
+      outputs: {},
+      inputs: [
+        {
+          id: 'test-input',
+          type: 'synthetics/http',
+          streams: [
+            {
+              id: 'test-stream',
+              data_stream: { elasticsearch: { privileges: sharedPrivileges } },
+            },
+          ],
+        },
+      ],
+      output_permissions: { default: { _elastic_agent_checks: sharedPrivileges } },
+      revision: 1,
+      agent: {},
+    } as unknown as FullAgentPolicy;
+
+    let result = '';
+    expect(() => {
+      result = fullAgentPolicyToYaml(policy, yaml);
+    }).not.toThrow();
+
+    // No anchors/aliases are emitted; the shared content is inlined in both places.
+    expect(result).not.toMatch(/&a\d/);
+    expect(result).not.toMatch(/\*a\d/);
+    expect(result.match(/cluster:/g) ?? []).toHaveLength(2);
+  });
+
+  it('should quote date-only strings to prevent YAML 1.1 timestamp interpretation by the agent', () => {
+    // Integrations like microsoft_defender_cloud use date-only API versions (e.g. 2021-06-01).
+    // The Elastic Agent parses policy YAML with a YAML 1.1 parser, which treats unquoted
+    // YYYY-MM-DD values as timestamps and converts them to RFC3339 (2021-06-01T00:00:00Z).
+    // The yaml-1.1 schema in Document options forces these values to be quoted.
+    const policy = {
+      id: 'test-policy',
+      outputs: {},
+      inputs: [
+        {
+          id: 'test-input',
+          type: 'cel',
+          streams: [
+            {
+              id: 'test-stream',
+              state: {
+                assessment_api_version: '2021-06-01',
+                sub_assessment_api_version: '2019-01-01-preview',
+              },
+            },
+          ],
+        },
+      ],
+      revision: 1,
+      agent: {},
+    } as unknown as FullAgentPolicy;
+
+    const result = fullAgentPolicyToYaml(policy, yaml);
+
+    expect(result).toContain('assessment_api_version: "2021-06-01"');
+    expect(result).toContain('sub_assessment_api_version: 2019-01-01-preview');
   });
 });

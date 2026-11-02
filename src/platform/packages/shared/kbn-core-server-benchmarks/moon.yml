@@ -4,22 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-server-benchmarks'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-server-benchmarks'
+  title: '@kbn/core-server-benchmarks'
   description: Moon project for @kbn/core-server-benchmarks
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-core-server-benchmarks
+  sourceRoot: src/platform/packages/shared/kbn-core-server-benchmarks
 dependsOn:
   - '@kbn/bench'
   - '@kbn/tooling-log'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
@@ -31,16 +31,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

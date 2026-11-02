@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { updateMaintenanceWindowRoute } from './update_maintenance_window_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/types';
 import type {
@@ -26,11 +26,20 @@ jest.mock('../../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindow = {
-  ...getMockMaintenanceWindow(),
+  ...getMockMaintenanceWindowDomain(),
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
   duration: 864000000,
+  schedule: {
+    custom: {
+      ...getMockMaintenanceWindowDomain().schedule.custom,
+      duration: '10d',
+      recurring: {
+        ...getMockMaintenanceWindowDomain().schedule.custom.recurring,
+      },
+    },
+  },
   id: 'test-id',
 } as MaintenanceWindow;
 
@@ -83,6 +92,7 @@ describe('updateMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Update a maintenance window.",
         "tags": Array [
           "oas-tag:maintenance-window",
@@ -123,6 +133,20 @@ describe('updateMaintenanceWindowRoute', () => {
           filters: [],
           kql: "_id: '1234'",
         },
+        schedule: {
+          custom: {
+            duration: '10d',
+            start: '2021-03-07T00:00:00.000Z',
+            recurring: { every: '1d', end: '2022-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
+          },
+        },
+        scope: {
+          alerting: {
+            enabled: true,
+            kql: "_id: '1234'",
+            filters: [],
+          },
+        },
       },
     });
     expect(res.ok).toHaveBeenLastCalledWith({
@@ -135,6 +159,7 @@ describe('updateMaintenanceWindowRoute', () => {
           custom: {
             duration: '10d',
             recurring: {
+              every: '1w',
               occurrences: 2,
             },
             start: '2023-02-26T00:00:00.000Z',
@@ -156,7 +181,7 @@ describe('updateMaintenanceWindowRoute', () => {
     updateMaintenanceWindowRoute(router, licenseState);
 
     maintenanceWindowClient.update.mockResolvedValueOnce({
-      ...getMockMaintenanceWindow(), // it has 60m duration
+      ...getMockMaintenanceWindowDomain(), // it has 60m duration
       eventStartTime: new Date().toISOString(),
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,

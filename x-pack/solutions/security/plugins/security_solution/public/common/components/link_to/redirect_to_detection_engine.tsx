@@ -12,10 +12,13 @@ export const getDetectionEngineUrl = (search?: string) => `${appendSearch(search
 export const getRulesUrl = (search?: string) => `${appendSearch(search)}`;
 
 export const getRuleDetailsUrl = (detailName: string, search?: string) =>
-  `/id/${detailName}${appendSearch(search)}`;
+  `/id/${encodeURIComponent(detailName)}${appendSearch(search)}`;
 
 export const getRuleDetailsTabUrl = (detailName: string, tabName: string, search?: string) =>
-  `/id/${detailName}/${tabName}${appendSearch(search)}`;
+  `/id/${encodeURIComponent(detailName)}/${tabName}${appendSearch(search)}`;
 
 export const getEditRuleUrl = (detailName: string, search?: string) =>
-  `/id/${detailName}/edit${appendSearch(search)}`;
+  `/id/${encodeURIComponent(detailName)}/edit${appendSearch(search)}`;
+
+export const getRuleChangesHistoryUrl = (ruleId: string, search?: string) =>
+  `/id/${encodeURIComponent(ruleId)}/changes-history${appendSearch(search)}`;

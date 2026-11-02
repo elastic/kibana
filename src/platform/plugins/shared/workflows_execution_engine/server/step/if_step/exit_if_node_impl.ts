@@ -18,7 +18,10 @@ export class ExitIfNodeImpl implements NodeImplementation {
   ) {}
 
   public run(): void {
-    this.stepExecutionRuntime.finishStep();
+    const stepState = this.stepExecutionRuntime.getCurrentStepState();
+    const conditionResult = stepState?.conditionResult;
+    this.stepExecutionRuntime.setCurrentStepState(undefined);
+    this.stepExecutionRuntime.finishStep(conditionResult ? { conditionResult } : {});
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

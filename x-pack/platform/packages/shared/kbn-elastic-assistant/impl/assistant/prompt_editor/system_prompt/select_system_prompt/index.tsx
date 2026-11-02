@@ -123,6 +123,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           css={css`
             min-width: 100%;
           `}
+          aria-label={i18n.SELECT_A_SYSTEM_PROMPT}
         >
           <EuiSuperSelect
             // Limits popover z-index to prevent it from getting too high and covering tooltips.
@@ -131,8 +132,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             compressed={compressed}
             data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
             fullWidth
-            hasDividers
-            itemLayoutAlign="top"
             disabled={isDisabled}
             isOpen={isOpenLocal && !isSettingsModalVisible}
             onChange={onChange}

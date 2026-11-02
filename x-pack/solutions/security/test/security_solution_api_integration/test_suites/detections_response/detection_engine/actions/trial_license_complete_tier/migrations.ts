@@ -23,6 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
@@ -128,18 +129,6 @@ export default ({ getService }: FtrProviderContext) => {
             uuid: ruleSO?.alert.actions[0].uuid,
             frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
           },
-          {
-            actionRef: 'action_1',
-            actionTypeId: '.email',
-            group: 'default',
-            params: {
-              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-              subject: 'Test Actions',
-              to: ['test@test.com'],
-            },
-            uuid: ruleSO?.alert.actions[1].uuid,
-            frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
-          },
         ]);
         expect(ruleSO?.alert.throttle).to.eql(null);
         expect(ruleSO?.alert.notifyWhen).to.eql(null);
@@ -147,11 +136,6 @@ export default ({ getService }: FtrProviderContext) => {
           {
             id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
             name: 'action_0',
-            type: 'action',
-          },
-          {
-            id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
-            name: 'action_1',
             type: 'action',
           },
         ]);
@@ -364,16 +348,42 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('7.16.0', () => {
+      // The `siem-detection-engine-rule-actions` type is not importable via the standard SO API.
+      // We seed it with pre-7.16.0 migrationVersion so DocumentMigrator runs the 7.16.0 migration
+      // (moving ruleAlertId/action ids to references) on creation.
+      const RULE_ACTIONS_SO_ID = 'fce024a0-0452-11ec-9b15-d13d79d162f3';
+
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
-        );
+        await kibanaServer.savedObjects.create({
+          type: 'siem-detection-engine-rule-actions',
+          id: RULE_ACTIONS_SO_ID,
+          overwrite: true,
+          attributes: {
+            ruleAlertId: 'fb1046a0-0452-11ec-9b15-d13d79d162f3',
+            actions: [
+              {
+                action_type_id: '.slack',
+                id: 'f6e64c00-0452-11ec-9b15-d13d79d162f3',
+                params: {
+                  message:
+                    'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+                group: 'default',
+              },
+            ],
+            ruleThrottle: '7d',
+            alertThrottle: '7d',
+          },
+          migrationVersion: { 'siem-detection-engine-rule-actions': '7.11.2' },
+          references: [],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
-        );
+        await kibanaServer.savedObjects.delete({
+          type: 'siem-detection-engine-rule-actions',
+          id: RULE_ACTIONS_SO_ID,
+        });
       });
 
       it('migrates legacy siem-detection-engine-rule-actions to use saved object references', async () => {

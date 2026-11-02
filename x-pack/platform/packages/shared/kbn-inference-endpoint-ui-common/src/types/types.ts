@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ConfigProperties } from './dynamic_config/types';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConfigProperties, ConfigValue } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
   key: string;
@@ -18,10 +20,11 @@ export type Map = Record<string, string>;
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
   validationErrors: string[];
-  value: string | number | boolean | null | Map;
+  value: ConfigValue;
 }
 
-export type FieldsConfiguration = Record<string, ConfigProperties>;
+export type { InferenceProvider } from '@kbn/inference-common';
+export { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '@kbn/inference-common';
 
 interface AdaptiveAllocations {
   max_number_of_allocations?: number;
@@ -40,7 +43,7 @@ export interface Config {
   taskTypeConfig?: Record<string, unknown>;
   inferenceId: string;
   provider: string;
-  providerConfig?: ProviderConfig; // Record<string, unknown>;
+  providerConfig?: ProviderConfig;
   contextWindowLength?: number;
   temperature?: number;
   headers?: Map;
@@ -49,20 +52,6 @@ export interface Config {
 export interface Secrets {
   providerSecrets?: Record<string, unknown>;
 }
-
-export interface InferenceProvider {
-  service: string;
-  name: string;
-  task_types: string[];
-  logo?: string;
-  configurations: FieldsConfiguration;
-}
-
-export interface Secrets {
-  providerSecrets?: Record<string, unknown>;
-}
-
-export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
 
 export interface InferenceEndpoint {
   config: Config;
@@ -74,6 +63,16 @@ export function isMapWithStringValues(value: unknown): value is Map {
   return (
     typeof value === 'object' &&
     value !== null &&
+    Array.isArray(value) === false &&
     Object.values(value).every((v) => typeof v === 'string')
   );
+}
+
+export function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((v) => typeof v === 'string');
+}
+
+export interface InferenceEndpointUiCommonPluginStartDependencies {
+  application: ApplicationStart;
+  cloud?: CloudStart;
 }

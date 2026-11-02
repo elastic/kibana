@@ -67,7 +67,9 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: async () => {
+        return !!start.core.application?.capabilities.api_keys?.save;
+      },
       ...options?.apiKeys,
     },
     onTelemetryEvent: (event) => {
@@ -115,6 +117,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         }
       }
     },
+    defaultTabId: options?.defaultTabId ?? undefined,
   };
 
   return result;

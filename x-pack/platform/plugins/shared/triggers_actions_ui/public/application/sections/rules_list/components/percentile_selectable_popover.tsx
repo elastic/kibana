@@ -8,7 +8,7 @@
 import React, { memo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiPopover, EuiButtonIcon, EuiSelectable } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiSelectable, EuiToolTip } from '@elastic/eui';
 
 const iconButtonTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton',
@@ -56,15 +56,17 @@ export const PercentileSelectablePopover = memo((props: Props) => {
 
   return (
     <EuiPopover
+      aria-label={iconButtonTitle}
       button={
-        <EuiButtonIcon
-          iconType="gear"
-          size="s"
-          data-test-subj={`percentileSelectablePopover-iconButton`}
-          title={iconButtonTitle}
-          aria-label={iconButtonTitle}
-          onClick={onButtonClick}
-        />
+        <EuiToolTip content={iconButtonTitle} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="gear"
+            size="s"
+            data-test-subj={`percentileSelectablePopover-iconButton`}
+            aria-label={iconButtonTitle}
+            onClick={onButtonClick}
+          />
+        </EuiToolTip>
       }
       panelPaddingSize="s"
       isOpen={isOpen}

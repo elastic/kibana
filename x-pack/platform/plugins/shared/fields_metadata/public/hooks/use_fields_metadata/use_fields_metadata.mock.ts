@@ -10,6 +10,7 @@ import type { UseFieldsMetadataHook } from './use_fields_metadata';
 export const createUseFieldsMetadataHookMock = (): jest.Mocked<UseFieldsMetadataHook> =>
   jest.fn(() => ({
     fieldsMetadata: undefined,
+    streamFieldsMetadata: undefined,
     loading: false,
     error: undefined,
     reload: jest.fn(),

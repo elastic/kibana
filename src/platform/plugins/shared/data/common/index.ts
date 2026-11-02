@@ -9,6 +9,7 @@
 
 export type { RefreshInterval } from '@kbn/data-service-server';
 export {
+  DEFAULT_HISTOGRAM_BAR_TARGET,
   DEFAULT_QUERY_LANGUAGE,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -234,6 +235,7 @@ export type {
   SearchSessionRequestInfo,
   SearchSessionRequestStatus,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
   SearchSessionsFindResponse,
   EqlRequestParams,
   EqlSearchStrategyRequest,
@@ -509,6 +511,7 @@ export {
   isAbortResponse,
   isRunningResponse,
   getUserTimeZone,
+  strategyToString,
   SearchSessionStatus,
   SearchStatus,
   SEARCH_SESSION_TYPE,
@@ -523,7 +526,12 @@ export {
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   ESQL_TABLE_TYPE,
+  getQueryLanguage,
+  getQueryString,
+  getQueryStringCharCount,
+  getQueryStringLineCount,
 } from './search';
+export { convertIntervalToEsInterval } from './search/aggs/buckets/lib/time_buckets/calc_es_interval';
 export type {
   TimeRangeBounds,
   TimeRange,
@@ -565,7 +573,6 @@ export type {
 } from '@kbn/data-views-plugin/common';
 export type { DataViewsContract, DataViewListItem } from '@kbn/data-views-plugin/common';
 export {
-  RUNTIME_FIELD_TYPES,
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,

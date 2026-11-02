@@ -13,9 +13,13 @@ const configSchema = schema.object({
   artifactRepositoryUrl: schema.string({
     defaultValue: 'https://kibana-knowledge-base-artifacts.elastic.co',
   }),
+  artifactRepositoryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
   elserInferenceId: schema.string({
     defaultValue: internalElserInferenceId,
   }),
+  // Functional tests install explicitly and cannot share the cluster-wide install lock
+  // with the startup task. Production keeps auto-install on.
+  autoInstallEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor<ProductDocBaseConfig> = {

@@ -8,20 +8,21 @@
 import React, { useState } from 'react';
 import {
   type CommonProps,
+  EuiBeacon,
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiToolTip,
-  useEuiTheme,
   EuiNotificationBadge,
-  EuiButton,
+  EuiToolTip,
   EuiTourStep,
-  EuiBeacon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
@@ -53,7 +54,7 @@ const toggleSearchBarTooltip = i18n.translate(
 const investigateInTimelineTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.investigateInTimeline.tooltip',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -83,6 +84,9 @@ export interface ActionsProps extends CommonProps {
    */
   onInvestigateInTimeline?: () => void;
 
+  /** Whether the origin event filters are unavailable. */
+  investigateInTimelineDisabled?: boolean;
+
   /**
    * Whether search is toggled or not. Defaults value is false.
    */
@@ -99,6 +103,7 @@ export const Actions = ({
   showToggleSearch = true,
   showInvestigateInTimeline = true,
   onInvestigateInTimeline,
+  investigateInTimelineDisabled = false,
   onSearchToggle,
   searchFilterCounter = 0,
   searchToggled,
@@ -112,8 +117,10 @@ export const Actions = ({
     SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
     true
   );
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (shouldShowSearchBarButtonTour) {
+  if (shouldShowSearchBarButtonTour && isTourEnabled) {
     if (searchFilterCounter > 0) {
       setIsSearchBarTourOpen(true);
       setShouldShowSearchBarButtonTour(false);
@@ -148,7 +155,7 @@ export const Actions = ({
           >
             <EuiToolTip title={tooltipTitle} content={tooltipContent} position="left">
               <EuiButton
-                iconType="search"
+                iconType="magnify"
                 color={searchToggled ? 'primary' : 'text'}
                 fill={searchToggled}
                 css={[
@@ -229,6 +236,7 @@ export const Actions = ({
           >
             <EuiButtonIcon
               iconType="timeline"
+              isDisabled={investigateInTimelineDisabled}
               display="base"
               size="m"
               aria-label={investigateInTimelineTooltip}

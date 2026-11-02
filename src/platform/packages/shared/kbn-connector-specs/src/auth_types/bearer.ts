@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-const authSchema = z
-  .object({
-    token: z
-      .string()
-      .min(1, { message: i18n.BEARER_AUTH_REQUIRED_MESSAGE })
-      .meta({ sensitive: true, label: i18n.BEARER_TOKEN_LABEL }),
-  })
-  .meta({ label: i18n.BEARER_AUTH_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      token: z
+        .string()
+        .min(1, { message: i18n.BEARER_AUTH_REQUIRED_MESSAGE })
+        .meta({ sensitive: true, label: i18n.BEARER_TOKEN_LABEL }),
+    })
+    .meta({ label: i18n.BEARER_AUTH_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
@@ -39,5 +41,11 @@ export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
 
     return axiosInstance;
+  },
+  getAuthHeaders: async (
+    _: AuthContext,
+    secret: AuthSchemaType
+  ): Promise<Record<string, string>> => {
+    return { Authorization: `Bearer ${secret.token}` };
   },
 };

@@ -12,11 +12,15 @@ import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import type { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+
+export interface SpanLinksCount {
+  linkedChildren: number;
+  linkedParents: number;
+}
 
 interface Props {
   spanLinksCount: SpanLinksCount;
@@ -33,7 +37,6 @@ export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: P
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

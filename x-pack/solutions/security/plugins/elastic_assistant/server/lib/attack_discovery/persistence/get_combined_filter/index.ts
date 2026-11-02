@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { isEmpty } from 'lodash/fp';
 
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields/field_names';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 /** A KQL "users field is empty" query */
 export const EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL = `${ALERT_ATTACK_DISCOVERY_USERS}: ""`;
@@ -20,6 +20,7 @@ interface GetFilterParams {
   authenticatedUser: AuthenticatedUser;
   filter?: string;
   shared?: boolean;
+  includeAllAuthors?: boolean;
 }
 
 export const getSharedFilter = (shared?: boolean): string => {
@@ -63,7 +64,14 @@ export const getCombinedFilter = ({
   authenticatedUser,
   filter,
   shared,
+  includeAllAuthors,
 }: GetFilterParams): string => {
+  // If includeAllAuthors is true, we bypass the user and shared filters
+  // to include all attack discoveries regardless of who created them or their shared status.
+  if (includeAllAuthors) {
+    return filter ?? '';
+  }
+
   const sharedFilter = getSharedFilter(shared);
   const userFilter = getUserFilter({ authenticatedUser, shared });
   const additionalFilter = getAdditionalFilter(filter);

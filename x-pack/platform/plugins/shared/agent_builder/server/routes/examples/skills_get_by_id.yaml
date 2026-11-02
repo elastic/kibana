@@ -1,0 +1,26 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          getSkillResponseExample:
+            description: "Example response returning a skill by ID"
+            value:
+              id: my-custom-skill
+              name: Custom Analysis Skill
+              description: A skill for performing custom data analysis.
+              content: "You are an expert data analyst. Use the available tools to query and analyze data."
+              tool_ids:
+                - platform.core.search
+              readonly: false
+              experimental: false
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X GET "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}" \
+      -H "Authorization: ApiKey ${API_KEY}"
+- lang: Console
+  source: |
+    GET kbn:/api/agent_builder/skills/{skillId}

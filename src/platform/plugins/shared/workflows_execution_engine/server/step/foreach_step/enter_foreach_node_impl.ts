@@ -8,7 +8,11 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
+import type { ForeachStepState } from './types';
+import { ITERATION_STEP_TYPE, iterationStepIdFromIndex } from './utils';
+import { isTemplateExpression } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
@@ -18,7 +22,8 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private stepExecutionRuntime: StepExecutionRuntime,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    private stepIoService: StepIoService
   ) {}
 
   public async run(): Promise<void> {
@@ -31,13 +36,38 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private async enterForeach(): Promise<void> {
     this.stepExecutionRuntime.startStep();
-    let foreachState = this.stepExecutionRuntime.getCurrentStepState();
-    this.stepExecutionRuntime.setInput({
-      foreach: this.node.configuration.foreach,
-    });
-    const evaluatedItems = this.getItems();
+    const foreachConfig = this.node.configuration.foreach;
+    // Pin the loop's source outputs for the lifetime of the loop. Enter still
+    // evaluates the source expression once; older executions without
+    // `input.items` re-evaluate it in WorkflowContextManager.buildForeachContext.
+    // Without pinning, a concurrent flush can evict the source between an inner
+    // step's prepareForRead and that read, blanking the loop item. Unpinned in
+    // ExitForeachNodeImpl.
+    this.stepIoService.pinForeachSource(this.node.stepId, foreachConfig);
+
+    const foreachInput = Array.isArray(foreachConfig)
+      ? JSON.stringify(foreachConfig)
+      : foreachConfig;
+
+    let evaluatedItems: unknown[];
+
+    try {
+      evaluatedItems = this.getItems();
+      this.stepExecutionRuntime.setInput({
+        foreach: foreachInput,
+        items: evaluatedItems,
+      });
+    } catch (error) {
+      this.stepExecutionRuntime.setInput({
+        foreach: foreachInput,
+      });
+
+      throw error;
+    }
 
     if (evaluatedItems.length === 0) {
+      // No iterations will run — release the pin we just took.
+      this.stepIoService.unpinForeachScope(this.node.stepId);
       this.workflowLogger.logDebug(
         `Foreach step "${this.node.stepId}" has no items to iterate over. Skipping execution.`,
         {
@@ -45,7 +75,6 @@ export class EnterForeachNodeImpl implements NodeImplementation {
         }
       );
       this.stepExecutionRuntime.setCurrentStepState({
-        items: [],
         total: 0,
       });
       this.stepExecutionRuntime.finishStep();
@@ -60,39 +89,46 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       }
     );
 
-    // Initialize foreach state
-    foreachState = {
-      items: evaluatedItems,
-      item: evaluatedItems[0],
+    // Initialize foreach state — only store index and total to avoid
+    // persisting the entire items array on every iteration.
+    const foreachState = {
       index: 0,
       total: evaluatedItems.length,
     };
 
     this.stepExecutionRuntime.setCurrentStepState(foreachState);
-    // Enter a new scope for the first iteration
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.navigateToSynthetic({
+      stepId: iterationStepIdFromIndex(foreachState.index),
+      stepType: ITERATION_STEP_TYPE,
+    });
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
   private advanceIteration(): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    let foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
-    // Update items and index if they have changed
-    const items = foreachState.items;
-    const index = foreachState.index + 1;
-    const item = items[index];
-    const total = foreachState.total;
-    foreachState = {
-      items,
-      index,
-      item,
-      total,
-    };
-    // Enter a new scope for the new iteration
-    this.stepExecutionRuntime.setCurrentStepState(foreachState);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    const currentForeachState = this.stepExecutionRuntime.getCurrentStepState() as
+      | ForeachStepState
+      | undefined;
+
+    if (!currentForeachState) {
+      throw new Error(`Foreach state for step ${this.node.stepId} not found`);
+    }
+
+    const currentIndex = currentForeachState.index as number;
+
+    const index = currentIndex + 1;
+
+    if (index >= currentForeachState.total) {
+      this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
+      return;
+    }
+
+    const newForeachState: ForeachStepState = { index, total: currentForeachState.total };
+    // Only persist index and total — no need to store the full items array.
+    this.stepExecutionRuntime.setCurrentStepState(newForeachState);
+    this.wfExecutionRuntimeManager.navigateToSynthetic({
+      stepId: iterationStepIdFromIndex(index),
+      stepType: ITERATION_STEP_TYPE,
+    });
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
@@ -135,7 +171,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       );
     }
 
-    if (expression.startsWith('{{') && expression.endsWith('}}')) {
+    if (Array.isArray(expression)) {
+      return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
+    }
+
+    if (isTemplateExpression(expression)) {
       return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
     }
 

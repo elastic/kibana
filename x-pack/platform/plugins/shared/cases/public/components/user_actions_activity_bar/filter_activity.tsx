@@ -39,11 +39,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
-          numFilters={
-            userActionsStats && userActionsStats.total > 0
-              ? userActionsStats.total - userActionsStats.totalDeletions
-              : 0
-          }
+          numFilters={userActionsStats?.total ?? 0}
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
@@ -57,11 +53,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
-          numFilters={
-            userActionsStats && userActionsStats.totalComments > 0
-              ? userActionsStats.totalComments - userActionsStats.totalCommentDeletions
-              : 0
-          }
+          numFilters={userActionsStats?.totalCommentCreations ?? 0}
           isLoading={isLoading}
           isDisabled={isLoading}
           onClick={() => handleFilterChange('user')}
@@ -73,11 +65,10 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'action'}
           hasActiveFilters={type === 'action'}
-          numFilters={
-            userActionsStats && userActionsStats.totalOtherActions > 0
-              ? userActionsStats.totalOtherActions - userActionsStats.totalOtherActionDeletions
-              : 0
-          }
+          numFilters={Math.max(
+            (userActionsStats?.total ?? 0) - (userActionsStats?.totalCommentCreations ?? 0),
+            0
+          )}
           onClick={() => handleFilterChange('action')}
           isLoading={isLoading}
           isDisabled={isLoading}

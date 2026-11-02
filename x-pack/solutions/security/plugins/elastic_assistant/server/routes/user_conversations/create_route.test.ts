@@ -131,7 +131,7 @@ describe('Create conversation route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'test_thing'`
+        'messages.0.role: Invalid option: expected one of "system"|"user"|"assistant"'
       );
     });
   });

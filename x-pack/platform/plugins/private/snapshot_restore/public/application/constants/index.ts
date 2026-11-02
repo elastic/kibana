@@ -98,6 +98,8 @@ export const UIM_REPOSITORY_DELETE_MANY = 'repository_delete_many';
 export const UIM_REPOSITORY_SHOW_DETAILS_CLICK = 'repository_show_details_click';
 export const UIM_REPOSITORY_DETAIL_PANEL_VERIFY = 'repository_detail_panel_verify';
 export const UIM_REPOSITORY_DETAIL_PANEL_CLEANUP = 'repository_detail_panel_cleanup';
+export const UIM_REPOSITORY_SET_DEFAULT_PRIVILEGE_MISSING =
+  'repository_set_default_privilege_missing';
 export const UIM_SNAPSHOT_LIST_LOAD = 'snapshot_list_load';
 export const UIM_SNAPSHOT_SHOW_DETAILS_CLICK = 'snapshot_show_details_click';
 export const UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB = 'snapshot_detail_panel_summary_tab';

@@ -51,7 +51,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
     <EuiButtonEmpty
       data-test-subj="syntheticsSortMenuButton"
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -89,8 +89,11 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.sortMenu.popoverAriaLabel', {
+        defaultMessage: 'Sort options',
+      })}
     >
-      <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
+      <EuiContextMenuPanel items={items} style={{ minWidth: 160 }} />
     </EuiPopover>
   );
 };
@@ -108,7 +111,6 @@ const ContextMenuItem = ({
 
   return (
     <EuiContextMenuItem
-      size="s"
       key={option.value}
       icon={getIconType(option.checked)}
       onClick={() => {

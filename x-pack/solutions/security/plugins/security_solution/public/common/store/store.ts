@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import thunk from 'redux-thunk';
+import thunk from 'redux-thunk-v2';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
-} from 'redux';
-import { applyMiddleware, createStore as createReduxStore } from 'redux';
+  Store,
+} from 'redux-v4';
+import { applyMiddleware, createStore as createReduxStore } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -34,17 +34,14 @@ import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
-import type { SourcererDataView } from '../../sourcerer/store/model';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
-import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
-import { createDefaultDataView } from '../../data_view_manager/utils/create_default_data_view';
 
 let store: Store<State, Action> | null = null;
 
@@ -55,16 +52,6 @@ export const createStoreFactory = async (
   storage: Storage,
   enableExperimental: ExperimentalFeatures
 ): Promise<Store<State, Action>> => {
-  const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
-    application: coreStart.application,
-    http: coreStart.http,
-    dataViewService: startPlugins.data.dataViews,
-    uiSettings: coreStart.uiSettings,
-    spaces: startPlugins.spaces,
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    skip: enableExperimental.newDataViewPickerEnabled,
-  });
-
   const timelineInitialState = {
     timeline: {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -120,10 +107,6 @@ export const createStoreFactory = async (
       ...subPlugins.management.store.initialState,
     },
     {
-      defaultDataView,
-      kibanaDataViews,
-      signalIndexName: signal.name,
-      signalIndexMappingOutdated: signal.index_mapping_outdated,
       enableExperimental,
     },
     dataTableInitialState,
@@ -152,18 +135,7 @@ const timelineActionsWithNonserializablePayloads = [
 ];
 
 const actionSanitizer = (action: AnyAction) => {
-  if (action.type === sourcererActions.setDataView.type) {
-    return {
-      ...action,
-      payload: {
-        ...action.payload,
-        dataView: 'dataView',
-        browserFields: 'browserFields',
-        indexFields: 'indexFields',
-        fields: 'fields',
-      },
-    };
-  } else if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
+  if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
     const { type, payload } = action;
     if (type === timelineActions.addTimeline.type || type === timelineActions.updateTimeline.type) {
       return {
@@ -186,37 +158,12 @@ const actionSanitizer = (action: AnyAction) => {
   return action;
 };
 
-const sanitizeDataView = (dataView: SourcererDataView) => {
-  return {
-    ...dataView,
-    browserFields: 'browserFields',
-    indexFields: 'indexFields',
-    fields: 'fields',
-    dataView: 'dataView',
-  };
-};
-
 const sanitizeTimelineModel = (timeline: TimelineModel) => {
   return {
     ...timeline,
     footerText: 'footerText',
     loadingText: 'loadingText',
   };
-};
-
-const stateSanitizer = (state: State) => {
-  if (state.sourcerer) {
-    return {
-      ...state,
-      sourcerer: {
-        ...state.sourcerer,
-        defaultDataView: sanitizeDataView(state.sourcerer.defaultDataView),
-        kibanaDataViews: state.sourcerer.kibanaDataViews.map(sanitizeDataView),
-      },
-    };
-  } else {
-    return state;
-  }
 };
 
 /**
@@ -233,7 +180,6 @@ export const createStore = (
     name: 'Kibana Security Solution',
     actionsBlacklist: ['USER_MOVED_POINTER', 'USER_SET_RASTER_SIZE'],
     actionSanitizer: actionSanitizer as EnhancerOptions['actionSanitizer'],
-    stateSanitizer: stateSanitizer as EnhancerOptions['stateSanitizer'],
     // uncomment the following to enable redux action tracing
     // https://github.com/zalmoxisus/redux-devtools-extension/commit/64717bb9b3534ff616d9db56c2be680627c7b09d#diff-182cb140f8a0fd8bc37bbdcdad07bbadb9aebeb2d1b8ed026acd6132f2c88ce8R10
     // trace: true,

@@ -10,12 +10,22 @@ export type {
   ChatCompleteAPI,
   ChatCompleteAPIResponse,
   ChatCompleteOptions,
+  ChatCompleteTemplate,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
+  FeatureChatCompleteAPI,
+  FeatureChatCompleteOptions,
 } from './api';
+export {
+  chatCompletionReasoningEfforts,
+  type ChatCompletionReasoning,
+  type ChatCompletionReasoningEffort,
+} from './reasoning';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
+export { parseTemplateJson } from './parse_template_json';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
@@ -62,7 +72,11 @@ export type {
   ToolCallsOfToolOptions,
 } from './tools_of';
 
-export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
+export type {
+  ChatCompleteMetadata,
+  ConnectorTelemetryMetadata,
+  ChatCompleteAnonymizationMetadata,
+} from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,
@@ -76,22 +90,21 @@ export {
   type ChatCompletionToolNotFoundError,
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
+  isContextLengthExceededError,
   isToolValidationError,
   isOutputTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
 
 export type {
-  AnonymizationRule,
   AnonymizationEntity,
   Anonymization,
   Deanonymization,
   AnonymizationOutput,
   DeanonymizationOutput,
   DeanonymizedMessage,
-  RegexAnonymizationRule,
-  NamedEntityRecognitionRule,
-  AnonymizationSettings,
+  AnonymizationResponseMetadata,
+  DeanonymizedMessageData,
 } from './anonymization';
 
 export type {

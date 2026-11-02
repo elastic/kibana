@@ -60,7 +60,7 @@ const ContextPillsComponent: React.FC<Props> = ({
             data-test-subj={`pillButton-${id}`}
             disabled={selectedPromptContexts[id] != null}
             iconSide="left"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="s"
             onClick={() => selectPromptContext(id)}
           >

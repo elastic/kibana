@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import { take } from 'lodash';
+import React from 'react';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
+import { render, screen } from '@testing-library/react';
+
+import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
-import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
-import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from '../constants';
+import { OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 
 const allOptions = [
   { value: 'moo', docCount: 1 },
@@ -39,7 +40,7 @@ const renderComponent = ({
   disableMultiValueEmptySelection = false,
 }: {
   componentApi: OptionsListComponentApi;
-  displaySettings: OptionsListDisplaySettings;
+  displaySettings: OptionsListDisplaySettings & { isInteractive?: boolean };
   showOnlySelected?: boolean;
   disableMultiValueEmptySelection?: boolean;
 }) => {
@@ -156,6 +157,22 @@ describe('Options list popover', () => {
     renderComponent({
       ...contextMock,
       disableMultiValueEmptySelection: true,
+    });
+
+    expect(getSelectAllCheckbox()).toBeDisabled();
+  });
+
+  test('should disable bulk select checkbox when isInteractive is false', () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(3);
+    contextMock.componentApi.setAvailableOptions([
+      { value: 'moo', docCount: 1 },
+      { value: 'tweet', docCount: 2 },
+      { value: 'oink', docCount: 3 },
+    ]);
+    renderComponent({
+      ...contextMock,
+      displaySettings: { ...contextMock.displaySettings, isInteractive: false },
     });
 
     expect(getSelectAllCheckbox()).toBeDisabled();

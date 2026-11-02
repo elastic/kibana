@@ -227,7 +227,7 @@ export const loadLiveQuery = (
     },
   }).then((response) => response.body.data);
 
-export const loadRule = (includeResponseActions = false) => {
+export const loadRule = (includeResponseActions = false, query = '_id:*') => {
   cy.login(ServerlessRoleName.SOC_MANAGER, false);
 
   return request<RuleResponse>({
@@ -270,7 +270,7 @@ export const loadRule = (includeResponseActions = false) => {
         },
       ],
       language: 'kuery',
-      query: '_id:*',
+      query,
       author: [],
       false_positives: [],
       references: [],
@@ -433,8 +433,12 @@ export const addOsqueryToAgentPolicy = (
     },
   });
 
-export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({
+export const cleanupAgentPolicy = (agentPolicyId: string | undefined) => {
+  if (!agentPolicyId) {
+    return;
+  }
+
+  return request({
     method: 'POST',
     body: { agentPolicyId },
     headers: {
@@ -442,3 +446,4 @@ export const cleanupAgentPolicy = (agentPolicyId: string) =>
     },
     url: '/api/fleet/agent_policies/delete',
   });
+};

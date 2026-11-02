@@ -161,6 +161,9 @@ const timepickerRanges = [
   },
 ];
 
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+}));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');

@@ -253,7 +253,7 @@ describe('healthRoute', () => {
     await sleep(600);
     stats$.next(nextMockStat);
 
-    expect(logHealthMetrics).toBeCalledTimes(2);
+    expect(logHealthMetrics).toHaveBeenCalledTimes(2);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -337,7 +337,7 @@ describe('healthRoute', () => {
       summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
-    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics).toHaveBeenCalledTimes(3);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -429,7 +429,7 @@ describe('healthRoute', () => {
       summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
-    expect(logHealthMetrics).toBeCalledTimes(3);
+    expect(logHealthMetrics).toHaveBeenCalledTimes(3);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -851,7 +851,7 @@ function mockHealthStats(overrides = {}) {
         timestamp: new Date().toISOString(),
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
-          claim_strategy: 'update_by_query',
+          claim_strategy: 'mget',
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
@@ -862,6 +862,10 @@ function mockHealthStats(overrides = {}) {
               warn_threshold: 80,
             },
             custom: {},
+          },
+          execution_control: {
+            paused: false,
+            paused_task_types: [],
           },
         },
       },

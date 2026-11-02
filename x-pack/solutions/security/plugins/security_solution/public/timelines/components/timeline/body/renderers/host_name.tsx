@@ -15,6 +15,8 @@ import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
   contextId: string;
@@ -23,6 +25,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityId?: string;
 }
 
 const HostNameComponent: React.FC<Props> = ({
@@ -32,15 +35,17 @@ const HostNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  entityId,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openHostFlyout } = useFlyoutApi();
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const isInSecurityApp = useIsInSecurityApp();
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
-  const isInTimelineContext =
-    hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+  const isInTimelineContext = hostName && eventContext?.timelineID;
 
   const openHostDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent<Element, Event>) => {
@@ -50,27 +55,38 @@ const HostNameComponent: React.FC<Props> = ({
         onClick();
       }
 
-      /*
-       * if and only if renderer is running inside security solution app
-       * we check for event and timeline context
-       * */
-      if (!eventContext || !isInTimelineContext) {
+      if (!eventContext || !isInTimelineContext || !eventContext.enableHostDetailsFlyout) {
         return;
       }
 
-      const { timelineID } = eventContext;
-      openFlyout({
-        right: {
-          id: HostPanelKey,
-          params: {
-            hostName,
-            contextID: contextId,
-            scopeId: timelineID,
+      if (newFlyoutSystemEnabled) {
+        openHostFlyout({ hostName, entityId });
+      } else {
+        const { timelineID } = eventContext;
+        openFlyout({
+          right: {
+            id: HostPanelKey,
+            params: {
+              hostName,
+              entityId,
+              contextID: contextId,
+              scopeId: timelineID,
+            },
           },
-        },
-      });
+        });
+      }
     },
-    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout]
+    [
+      onClick,
+      eventContext,
+      isInTimelineContext,
+      hostName,
+      entityId,
+      openFlyout,
+      contextId,
+      newFlyoutSystemEnabled,
+      openHostFlyout,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -92,9 +108,9 @@ const HostNameComponent: React.FC<Props> = ({
       hostName,
       isButton,
       isInTimelineContext,
+      isInSecurityApp,
       openHostDetailsSidePanel,
       title,
-      isInSecurityApp,
     ]
   );
 

@@ -6,7 +6,7 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -17,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core-execution-context-common",
     "@kbn/embeddable-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",
@@ -24,7 +25,6 @@
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
     "@kbn/i18n",
-    "@kbn/presentation-publishing",
     "@kbn/saved-search-plugin",
     "@kbn/data-views-plugin",
     "@kbn/unified-data-table",

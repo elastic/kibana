@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { escapeQuotes } from '@kbn/es-query';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -215,22 +216,26 @@ function convertComparatorToFill(comparator: Comparator) {
   }
 }
 
-function convertCriteriaToKQL(criteria: PartialCriterion) {
+// Exported for unit testing.
+export function convertCriteriaToKQL(criteria: PartialCriterion) {
   if (!criteria.value || !criteria.comparator || !criteria.field) {
     return '';
   }
 
+  // Phrase / equality / match values are interpolated into a quoted KQL string,
+  // so any embedded backslashes or double quotes need to be escaped to keep the
+  // resulting expression parseable. See https://github.com/elastic/kibana/issues/203071.
+  const quotedValue = `"${escapeQuotes(String(criteria.value))}"`;
+
   switch (criteria.comparator) {
     case Comparator.MATCH:
     case Comparator.EQ:
-      return `${criteria.field} : "${criteria.value}"`;
+    case Comparator.MATCH_PHRASE:
+      return `${criteria.field} : ${quotedValue}`;
     case Comparator.NOT_MATCH:
     case Comparator.NOT_EQ:
-      return `NOT ${criteria.field} : "${criteria.value}"`;
-    case Comparator.MATCH_PHRASE:
-      return `${criteria.field} : ${criteria.value}`;
     case Comparator.NOT_MATCH_PHRASE:
-      return `NOT ${criteria.field} : ${criteria.value}`;
+      return `NOT ${criteria.field} : ${quotedValue}`;
     case Comparator.GT:
       return `${criteria.field} > ${criteria.value}`;
     case Comparator.GT_OR_EQ:

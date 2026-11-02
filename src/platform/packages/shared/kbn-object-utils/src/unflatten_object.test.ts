@@ -51,4 +51,40 @@ describe('unflattenObject', () => {
       },
     });
   });
+
+  it('handles nested arrays', () => {
+    expect(
+      unflattenObject({
+        nested: [[{ 'first.second': 'foo' }, { 'first.second': 'bar' }]],
+        mixed: [[1, 2, { 'first.second': 'foo' }]],
+      })
+    ).toEqual({
+      nested: [[{ first: { second: 'foo' } }, { first: { second: 'bar' } }]],
+      mixed: [[1, 2, { first: { second: 'foo' } }]],
+    });
+  });
+
+  it('unflattens nested flattened objects', () => {
+    expect(
+      unflattenObject({
+        'my.flattened.parent.key': {
+          'an.internal.key': 1,
+        },
+      })
+    ).toEqual({
+      my: {
+        flattened: {
+          parent: {
+            key: {
+              an: {
+                internal: {
+                  key: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
 });

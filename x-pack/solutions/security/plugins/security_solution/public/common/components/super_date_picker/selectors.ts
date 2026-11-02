@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import type {
@@ -32,7 +32,7 @@ export const getGlobalQueries = (
   const inputsRange = state.inputs[id];
   return !isEmpty(inputsRange.linkTo)
     ? inputsRange.linkTo.reduce<GlobalQuery[]>((acc, linkToId: InputsModelId) => {
-        if (linkToId === InputsModelId.socTrends || linkToId === InputsModelId.valueReport) {
+        if (linkToId === InputsModelId.valueReport) {
           return acc;
         }
         const linkToIdInputsRange: InputsRange = state.inputs[linkToId];

@@ -1,0 +1,38 @@
+{
+  "10.1.0": [
+    {
+      "product_name": "kibana",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_kibana",
+      "inference_id": ".elser-2-elasticsearch"
+    },
+    {
+      "product_name": "security",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_security",
+      "inference_id": ".elser-2-elasticsearch"
+    }
+  ],
+  "10.2.0": [
+    {
+      "product_name": "kibana",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_kibana",
+      "inference_id": ".elser-2-elasticsearch"
+    },
+    {
+      "product_name": "security",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_security",
+      "inference_id": ".elser-2-elasticsearch"
+    }
+  ]
+}

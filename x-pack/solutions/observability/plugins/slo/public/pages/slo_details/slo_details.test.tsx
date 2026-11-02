@@ -7,14 +7,15 @@
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
@@ -28,13 +29,12 @@ import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
-import { SloDetailsPage } from './slo_details';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
+import { SloDetailsPage } from './slo_details';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -67,11 +67,10 @@ const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 TagsListMock.mockReturnValue(<div>Tags list</div>);
-const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
-HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
+const mockGetMonitor = jest.fn();
 const mockDelete = jest.fn();
 const mockDeleteInstance = jest.fn();
 const mockCapabilities = {
@@ -88,6 +87,7 @@ const mockKibana = () => {
       application: { navigateToUrl: mockNavigate, capabilities: mockCapabilities },
       charts: chartPluginMock.createStartContract(),
       http: {
+        get: mockGetMonitor,
         basePath: {
           prepend: (url: string) => url,
           get: () => 'http://localhost:5601',
@@ -114,6 +114,7 @@ const mockKibana = () => {
         },
       },
       observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
+      inspector: { open: jest.fn() },
       share: {
         url: {
           locators: {
@@ -144,6 +145,7 @@ const mockKibana = () => {
 describe('SLO Details Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetMonitor.mockReset();
     mockKibana();
     usePermissionsMock.mockReturnValue({
       isLoading: false,
@@ -173,7 +175,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -190,7 +192,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -250,6 +252,124 @@ describe('SLO Details Page', () => {
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 
+  it('warns when a Synthetics monitor interval exceeds the timeslice window', async () => {
+    const slo = buildSlo({
+      indicator: {
+        type: 'sli.synthetics.availability',
+        params: {
+          index: 'synthetics-*',
+          monitorIds: [],
+          projects: [],
+          tags: [],
+        },
+      },
+      budgetingMethod: 'timeslices',
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0.95,
+        timesliceWindow: '1m',
+      },
+      meta: {
+        synthetics: {
+          monitorId: 'monitor-with-a-slow-schedule',
+          locationId: 'us-east-1',
+          configId: 'monitor-with-a-slow-schedule',
+        },
+      },
+    });
+    mockGetMonitor.mockResolvedValue({ schedule: { number: '20', unit: 'm' } });
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    expect(await screen.findByTestId('sloSyntheticsTimesliceWindowCallout')).toHaveTextContent(
+      'This monitor runs every 20 minutes, but this SLO uses a 1 minute timeslice window. Set the timeslice window to at least the monitor interval to avoid an inflated SLI and reduced burn rates.'
+    );
+    expect(mockGetMonitor).toHaveBeenCalledWith(
+      '/api/synthetics/monitors/monitor-with-a-slow-schedule',
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+  });
+
+  it('does not warn when a Synthetics monitor interval is no longer than the timeslice window', async () => {
+    const slo = buildSlo({
+      indicator: {
+        type: 'sli.synthetics.availability',
+        params: {
+          index: 'synthetics-*',
+          monitorIds: [],
+          projects: [],
+          tags: [],
+        },
+      },
+      budgetingMethod: 'timeslices',
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0.95,
+        timesliceWindow: '5m',
+      },
+      meta: {
+        synthetics: {
+          monitorId: 'monitor-with-a-matching-schedule',
+          locationId: 'us-east-1',
+          configId: 'monitor-with-a-matching-schedule',
+        },
+      },
+    });
+    mockGetMonitor.mockResolvedValue({ schedule: { number: '5', unit: 'm' } });
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    await waitFor(() => {
+      expect(mockGetMonitor).toHaveBeenCalled();
+    });
+    expect(screen.queryByTestId('sloSyntheticsTimesliceWindowCallout')).not.toBeInTheDocument();
+  });
+
+  it('does not look up a Synthetics monitor schedule for a remote SLO', async () => {
+    const slo = buildSlo({
+      indicator: {
+        type: 'sli.synthetics.availability',
+        params: {
+          index: 'synthetics-*',
+          monitorIds: [],
+          projects: [],
+          tags: [],
+        },
+      },
+      budgetingMethod: 'timeslices',
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0.95,
+        timesliceWindow: '1m',
+      },
+      meta: {
+        synthetics: {
+          monitorId: 'remote-monitor',
+          locationId: 'remote-location',
+          configId: 'remote-monitor',
+        },
+      },
+      remote: { remoteName: 'remote-cluster', kibanaUrl: 'https://remote.kibana' },
+    });
+    jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
+    useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+    render(<SloDetailsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sloDetailsPage')).toBeInTheDocument();
+    });
+    expect(mockGetMonitor).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('sloSyntheticsTimesliceWindowCallout')).not.toBeInTheDocument();
+  });
+
   it("renders a 'Edit' button under actions menu", async () => {
     const slo = buildSlo();
     jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
@@ -303,7 +423,7 @@ describe('SLO Details Page', () => {
     fireEvent.click(button!);
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(
+      expect(mockNavigate).toHaveBeenCalledWith(
         paths.sloCreateWithEncodedForm(encodeURIComponent(encode(transformSloToCloneState(slo))))
       );
     });
@@ -331,13 +451,13 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(deleteModalConfirmButton!);
 
-    expect(mockDelete).toBeCalledWith({
+    expect(mockDelete).toHaveBeenCalledWith({
       id: slo.id,
       name: slo.name,
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slos);
     });
   });
 
@@ -348,7 +468,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchActiveAlertsMock.mockReturnValue({
       isLoading: false,
-      data: new ActiveAlerts({ [`${slo.id}|${ALL_VALUE}`]: 2 }),
+      data: new ActiveAlerts([[{ id: slo.id, instanceId: ALL_VALUE }, 2]]),
     });
 
     render(<SloDetailsPage />);

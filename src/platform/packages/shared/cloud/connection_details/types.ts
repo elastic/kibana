@@ -15,6 +15,7 @@ export interface ConnectionDetailsOpts {
   apiKeys?: ConnectionDetailsOptsApiKeys;
   navigateToUrl?: (url: string) => void;
   onTelemetryEvent?: (event: ConnectionDetailsTelemetryEvents) => void;
+  defaultTabId?: TabID;
 }
 
 export interface ConnectionDetailsOptsLinks {

@@ -17,8 +17,8 @@ jest.mock('../../../hooks/use_create_timeline', () => ({
 }));
 
 const mockGetState = jest.fn();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: jest.fn(),
@@ -172,7 +172,7 @@ describe('SaveTimelineModal', () => {
 
       expect(getByTestId('save-timeline-modal-callout')).toBeInTheDocument();
       expect(getByTestId('save-timeline-modal-callout')).toHaveTextContent(
-        'You have an unsaved timeline. Do you wish to save it?'
+        'You have an unsaved Timeline. Do you wish to save it?'
       );
     });
 

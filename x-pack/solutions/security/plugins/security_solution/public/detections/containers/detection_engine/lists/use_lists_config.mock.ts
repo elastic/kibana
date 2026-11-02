@@ -14,5 +14,4 @@ export const getUseListsConfigMock: () => jest.Mocked<UseListsConfigReturn> = ()
   loading: false,
   needsConfiguration: false,
   needsIndex: false,
-  canCreateIndex: false,
 });

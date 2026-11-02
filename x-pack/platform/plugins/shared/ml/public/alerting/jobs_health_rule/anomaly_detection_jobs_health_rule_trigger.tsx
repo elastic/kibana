@@ -15,7 +15,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
 import { JobSelectorControl, type JobSelection } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';

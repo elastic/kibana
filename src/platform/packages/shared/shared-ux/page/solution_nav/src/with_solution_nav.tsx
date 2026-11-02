@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import type { EuiPageSidebarProps } from '@elastic/eui';
@@ -25,6 +25,7 @@ export interface TemplateProps {
   children?: ReactNode;
   pageSideBar?: ReactNode;
   pageSideBarProps?: EuiPageSidebarProps;
+  style?: CSSProperties;
 }
 
 type Props<P> = P &
@@ -36,6 +37,7 @@ const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
 export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
   const WithSolutionNav = (props: Props<P>) => {
+    const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
     const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
@@ -53,7 +55,9 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
     const isSidebarShrunk =
-      isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
+      isSmallerBreakpoint ||
+      isMediumBreakpoint ||
+      (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
       'kbnSolutionNav__sidebar',
@@ -73,10 +77,23 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
+      /**
+       * Disable EuiPageSidebar's default responsive behavior (min-width: 100% at xs/s)
+       * so the sidenav can be collapsed at small breakpoints.
+       */
+      responsive: [],
       minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
       hasEmbellish: !isSidebarShrunk,
     };
+
+    /**
+     * At small breakpoints, EuiPageTemplate switches to 'flex-direction: column'
+     * which stacks the sidenav on top. Force row layout so the sidenav stays on the left.
+     */
+    const templateStyle: CSSProperties | undefined = isSmallerBreakpoint
+      ? { ...propagatedProps.style, flexDirection: 'row' }
+      : propagatedProps.style;
 
     return (
       <WrappedComponent
@@ -84,6 +101,7 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
           ...(propagatedProps as P),
           pageSideBar,
           pageSideBarProps,
+          style: templateStyle,
         }}
       >
         {children}

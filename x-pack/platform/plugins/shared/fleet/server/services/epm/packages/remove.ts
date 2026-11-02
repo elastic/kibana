@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
 import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '@kbn/core/server';
-
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  SavedObjectsUtils,
+  SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
 import pMap from 'p-map';
@@ -39,6 +46,7 @@ import type {
 import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
+
 import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
@@ -53,11 +61,86 @@ import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies
 import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
+import { isTrustedInstallSource } from './install_source';
+import { assertUninstallAuthorizedForAffectedSpaces } from './uninstall_authz';
+
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
 
 const MAX_ASSETS_TO_DELETE = 1000;
+
+/**
+ * Removes package dependencies that were installed for the given package (listed in is_dependency_of)
+ * and that have no other dependants after removing this package.
+ */
+export async function cleanupDependenciesStep(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  installation: Installation;
+  esClient: ElasticsearchClient;
+  force?: boolean;
+  installSource?: InstallSource;
+}): Promise<void> {
+  const { savedObjectsClient, pkgName, installation, esClient, force, installSource } = options;
+  const parentRef = { name: pkgName, version: installation.version };
+
+  if (appContextService.getExperimentalFeatures().enableResolveDependencies !== true) {
+    return;
+  }
+
+  const dependencies = installation.dependencies ?? [];
+  if (!dependencies.length) {
+    return;
+  }
+
+  for (const dep of dependencies) {
+    const depInstallation = await getInstallation({ savedObjectsClient, pkgName: dep.name });
+    if (!depInstallation) {
+      continue;
+    }
+
+    const isDependencyOf = depInstallation.is_dependency_of ?? [];
+
+    if (isDependencyOf.length > 0) {
+      const updated = isDependencyOf.filter(
+        (p) => !(p.name === parentRef.name && p.version === parentRef.version)
+      );
+      // If there are still dependencies, update the package's is_dependency_of
+      if (updated.length > 0) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'update',
+          id: pkgName,
+          name: pkgName,
+          savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+        });
+        await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, dep.name, {
+          is_dependency_of: updated,
+        });
+        continue;
+      }
+      if (!depInstallation.installed_as_dependency) {
+        appContextService
+          .getLogger()
+          .info(
+            `Skipping removal of dependency ${dep.name}@${dep.version} because it was manually installed`
+          );
+        continue;
+      }
+      appContextService.getLogger().info(`Removing dependency ${dep.name}@${dep.version}`);
+      // If this was the last dependency, remove the package. No request is passed here —
+      // authz over the full dependency closure was already verified at the top-level call.
+      await removeInstallation({
+        savedObjectsClient,
+        pkgName: dep.name,
+        pkgVersion: dep.version,
+        esClient,
+        force,
+        installSource,
+      });
+    }
+  }
+}
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -66,12 +149,15 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
+  request?: KibanaRequest;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
   }
+
+  // Fetch package policies before cleanupDependenciesStep so we can run authz check
   const { total, items } = await packagePolicyService.list(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     {
@@ -81,6 +167,37 @@ export async function removeInstallation(options: {
       spaceId: '*',
     }
   );
+
+  // Check that the caller has privileges in all spaces affected by this uninstall,
+  // including the full dependency closure. collectSpacesForUninstallClosure walks
+  // the dependency tree before any removal starts, so a later authz failure cannot
+  // leave earlier dependencies already deleted.
+  if (options.request) {
+    // Fail closed if SO_SEARCH_LIMIT was reached for the root package — there may be
+    // policies in spaces we haven't enumerated yet. Dep truncation is handled inside
+    // collectSpacesForUninstallClosure.
+    if (items.length < total) {
+      throw new PackageRemovalError(
+        `Unable to verify uninstall authorization for package ${pkgName}: too many package policies to enumerate`
+      );
+    }
+    await assertUninstallAuthorizedForAffectedSpaces({
+      request: options.request,
+      pkgName,
+      installation,
+      packagePolicies: items,
+      savedObjectsClient,
+    });
+  }
+
+  await cleanupDependenciesStep({
+    savedObjectsClient,
+    pkgName,
+    installation,
+    esClient,
+    force: options.force,
+    installSource: options.installSource,
+  });
 
   if (!options.force) {
     await populatePackagePolicyAssignedAgentsCount(esClient, items);
@@ -154,11 +271,13 @@ export async function deleteKibanaAssets({
   packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
 }) {
-  const savedObjectsClient = new SavedObjectsClient(
-    appContextService
-      .getSavedObjects()
-      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
-  );
+  const savedObjectsClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.sloTemplate,
+    ],
+    excludedExtensions: [SPACES_EXTENSION_ID],
+  });
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   if (namespace) {
@@ -190,7 +309,8 @@ export async function deleteKibanaAssets({
     }
 
     const foundObjects = resolvedObjects.filter(
-      ({ saved_object: savedObject }) => savedObject?.error?.statusCode !== 404
+      ({ saved_object: savedObject }) =>
+        !isSavedObjectErrorResult(savedObject) || savedObject.error.statusCode !== 404
     );
 
     // in the case of a partial install, it is expected that some assets will be not found
@@ -301,10 +421,16 @@ export async function deletePrerequisiteAssets(
     indexAssets,
     transformAssets,
     indexTemplatesAndPipelines,
+    installSource,
   }: {
     indexAssets: EsAssetReference[];
     transformAssets: EsAssetReference[];
     indexTemplatesAndPipelines: EsAssetReference[];
+    /**
+     * Where the package came from. Decides whether the transform destination indices are
+     * deleted along with the transforms; omitted means untrusted, which is the safe default.
+     */
+    installSource?: InstallSource;
   },
   esClient: ElasticsearchClient
 ) {
@@ -326,10 +452,20 @@ export async function deletePrerequisiteAssets(
     );
 
     // in case transform's destination index contains any pipeline,
-    // we should delete the transforms first
-    await pMap(transformAssets, (transformAsset) => deleteESAsset(transformAsset, esClient), {
-      concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
-    });
+    // we should delete the transforms first.
+    //
+    // `delete_dest_index` is authorized by Elasticsearch against the identity stored on the
+    // transform, not against this client. For a caller-authored package that identity is the
+    // uploader's API key, which typically holds no `delete_index` privilege — asking for it
+    // would fail the whole delete and strand the transform. Deleting the destination index
+    // with Kibana's own privileges instead is not an option: `dest.index` is attacker-chosen,
+    // so that would let an upload name any index and have uninstall drop it. Leaving the index
+    // behind is the safe failure; the transform itself is always removed.
+    await deleteTransforms(
+      esClient,
+      transformAssets.map((asset) => asset.id),
+      isTrustedInstallSource(installSource)
+    );
 
     // then delete index templates and pipelines
     await pMap(indexTemplatesAndPipelines, (asset) => deleteESAsset(asset, esClient), {
@@ -366,6 +502,7 @@ async function deleteAssets(
       indexAssets,
       transformAssets,
       indexTemplatesAndPipelines,
+      installSource,
     },
     esClient
   );

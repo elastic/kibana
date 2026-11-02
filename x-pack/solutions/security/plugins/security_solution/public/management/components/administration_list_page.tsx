@@ -75,7 +75,7 @@ export const AdministrationListPage = memo<
               restrictWidth={restrictWidth}
               data-test-subj={getTestId('header')}
             />
-            <EuiSpacer size="l" />
+            <EuiSpacer size="m" />
           </>
         )}
         <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>

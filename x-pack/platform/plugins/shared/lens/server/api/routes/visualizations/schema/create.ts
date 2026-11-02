@@ -5,36 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
+import { lensResponseItemSchema, lensApiConfigLibItemSchemaNoESQL } from './common';
 
-import {
-  lensCMCreateOptionsSchema,
-  lensItemDataSchema,
-  lensItemSchema,
-} from '../../../../content_management';
-import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
-import { pickFromObjectSchema } from '../../../../utils';
-import { lensResponseItemSchema } from './common';
-
-export const lensCreateRequestParamsSchema = schema.object(
-  {
-    id: schema.maybe(lensItemSchema.getPropSchemas().id),
-  },
-  { unknowns: 'forbid' }
-);
-
-export const lensCreateRequestQuerySchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
-  },
-  { unknowns: 'forbid' }
-);
-
-export const lensCreateRequestBodySchema = schema.oneOf([
-  lensApiStateSchema,
-  lensItemDataSchema,
-  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
-]);
+export const lensCreateRequestBodySchema = lensApiConfigLibItemSchemaNoESQL;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

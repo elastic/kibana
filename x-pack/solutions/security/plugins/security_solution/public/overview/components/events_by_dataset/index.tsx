@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
-import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
@@ -47,7 +47,6 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
-  dataViewSpec?: DataViewSpec;
   dataView: DataView;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
@@ -58,6 +57,13 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   hideQueryToggle?: boolean;
   sourcererScopeId?: PageScope;
   applyGlobalQueriesAndFilters?: boolean;
+  /**
+   * Additional drop-list of index patterns layered on top of the histogram's
+   * allowlist as a negated `_index` filter (e.g. alert-backing indices).
+   * Forwarded to the Lens embeddable as `excludedPatterns` and CPS-expanded
+   * downstream so it covers both local and remote-prefixed `_index` values.
+   */
+  excludedPatterns?: string[];
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -78,7 +84,6 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   filters,
   from,
   headerChildren,
-  dataViewSpec,
   dataView,
   onlyField,
   paddingSize,
@@ -89,6 +94,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
+  excludedPatterns,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -132,14 +138,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     if (filterQueryFromProps == null) {
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
-        dataViewSpec,
         dataView,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, dataView, query, filters]);
+  }, [filterQueryFromProps, kibana.services.uiSettings, dataView, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,
@@ -190,12 +195,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       paddingSize={paddingSize}
       showSpacer={showSpacer}
       startDate={from}
-      sourcererScopeId={sourcererScopeId}
+      pageScope={sourcererScopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
       chartHeight={CHART_HEIGHT}
       hideQueryToggle={hideQueryToggle}
       applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
+      excludedPatterns={excludedPatterns}
     />
   );
 };

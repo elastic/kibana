@@ -11,7 +11,7 @@ import type {
 } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 import { ElasticsearchAssetType } from '../../../../../types';
@@ -330,7 +330,7 @@ describe('cleanupArchiveEntriesStep', () => {
       initialState: 'save_archive_entries_from_assets_map' as any,
     });
 
-    expect(mockedRemoveArchiveEntries).toBeCalledWith({
+    expect(mockedRemoveArchiveEntries).toHaveBeenCalledWith({
       savedObjectsClient: expect.anything(),
       refs: packageAssets,
     });
@@ -359,7 +359,7 @@ describe('cleanupArchiveEntriesStep', () => {
       initialState: 'save_archive_entries_from_assets_map' as any,
     });
 
-    expect(mockedRemoveArchiveEntries).not.toBeCalled();
+    expect(mockedRemoveArchiveEntries).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if retryFromLastState is not passed', async () => {
@@ -383,7 +383,7 @@ describe('cleanupArchiveEntriesStep', () => {
       initialState: 'save_archive_entries_from_assets_map' as any,
     });
 
-    expect(mockedRemoveArchiveEntries).not.toBeCalled();
+    expect(mockedRemoveArchiveEntries).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if initialState != save_archive_entries_from_assets_map', async () => {
@@ -408,7 +408,7 @@ describe('cleanupArchiveEntriesStep', () => {
       initialState: 'create_restart_install' as any,
     });
 
-    expect(mockedRemoveArchiveEntries).not.toBeCalled();
+    expect(mockedRemoveArchiveEntries).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if attributes are not present', async () => {
@@ -429,6 +429,6 @@ describe('cleanupArchiveEntriesStep', () => {
       initialState: 'save_archive_entries_from_assets_map' as any,
     });
 
-    expect(mockedRemoveArchiveEntries).not.toBeCalled();
+    expect(mockedRemoveArchiveEntries).not.toHaveBeenCalled();
   });
 });

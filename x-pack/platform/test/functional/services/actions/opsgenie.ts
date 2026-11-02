@@ -20,7 +20,8 @@ export function ActionsOpsgenieServiceProvider(
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -34,7 +35,9 @@ export function ActionsOpsgenieServiceProvider(
 
     async setConnectorFields({ name, apiUrl, apiKey }: ConnectorFormFields) {
       await testSubjects.setValue('nameInput', name);
-      await testSubjects.setValue('config.apiUrl-input', apiUrl);
+      await retry.try(async () => {
+        await testSubjects.setValue('config.apiUrl-input', apiUrl);
+      });
       await testSubjects.setValue('secrets.apiKey-input', apiKey);
     },
 
@@ -47,18 +50,39 @@ export function ActionsOpsgenieServiceProvider(
     },
 
     async getObjFromJsonEditor() {
-      const jsonEditor = await find.byCssSelector('.monaco-editor .view-lines');
-
-      return JSON.parse(await jsonEditor.getVisibleText());
+      // The JSON editor is lazy-loaded inside a Suspense boundary. Wait for Monaco
+      // to mount inside the container before reading the value.
+      let value = '';
+      await retry.waitFor('json editor to be ready', async () => {
+        value = await browser.execute(() => {
+          const container = document.querySelector('[data-test-subj="actionJsonEditor"]');
+          const editor = window.MonacoEnvironment?.monaco.editor
+            .getEditors()
+            .find((e: any) => container?.contains(e.getDomNode()));
+          return editor?.getModel()?.getValue() ?? '';
+        });
+        return value.length > 0;
+      });
+      return JSON.parse(value);
     },
 
     async setJsonEditor(value: object) {
       const stringified = JSON.stringify(value);
 
-      await find.clickByCssSelector('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(stringified);
+      await retry.waitFor('json editor to be ready for writing', async () => {
+        return browser.execute((text: string) => {
+          const container = document.querySelector('[data-test-subj="actionJsonEditor"]');
+          const editor = window.MonacoEnvironment?.monaco.editor
+            .getEditors()
+            .find((e: any) => container?.contains(e.getDomNode()));
+          if (!editor) {
+            return false;
+          }
+          editor.getModel()?.setValue(text);
+          editor.focus();
+          return true;
+        }, stringified);
+      });
     },
   };
 }

@@ -12,12 +12,9 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { lastValueFrom } from 'rxjs';
-import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { KibanaContext, EqlSearchStrategyResponse, EqlSearchStrategyRequest } from '..';
-import { EQL_SEARCH_STRATEGY } from '..';
+import type { ISearchMethods } from '@kbn/search-types';
+import type { KibanaContext } from '..';
 import { getEsQueryConfig } from '../../es_query';
 import type { DataViewsContract, UiSettingsCommon } from '../..';
 import type { EqlRawResponse } from './eql_raw_response';
@@ -42,7 +39,7 @@ export type EqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 interface EqlStartDependencies {
-  search: ISearchGeneric;
+  searchService: ISearchMethods;
   uiSettingsClient: UiSettingsCommon;
   dataViews: DataViewsContract;
 }
@@ -93,7 +90,9 @@ export const getEqlFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { search, uiSettingsClient, dataViews } = await getStartDependencies(getKibanaRequest);
+      const { searchService, uiSettingsClient, dataViews } = await getStartDependencies(
+        getKibanaRequest
+      );
 
       const dsl = {
         query: args.query,
@@ -114,58 +113,46 @@ export const getEqlFn = ({
         dsl.filter = query;
       }
 
-      if (!inspectorAdapters.requests) {
-        inspectorAdapters.requests = new RequestAdapter();
-      }
-
-      const request = inspectorAdapters.requests.start(
-        i18n.translate('data.search.dataRequest.title', {
-          defaultMessage: 'Data',
-        }),
-        {
-          description: i18n.translate('data.search.es_search.dataRequest.description', {
-            defaultMessage:
-              'This request queries Elasticsearch to fetch the data for the visualization.',
-          }),
-        }
-      );
-
-      request.stats({
-        indexPattern: {
-          label: i18n.translate('data.search.es_search.dataViewLabel', {
-            defaultMessage: 'Data view',
-          }),
-          value: args.index,
-          description: i18n.translate('data.search.es_search.indexPatternDescription', {
-            defaultMessage: 'The data view that connected to the Elasticsearch indices.',
-          }),
-        },
-      });
-
       try {
-        const response = await lastValueFrom(
-          search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
-            {
-              params: {
-                ...dsl,
-                index: args.index,
-              },
+        const { rawResponse } = await searchService.eql(
+          {
+            index: args.index,
+            query: args.query,
+            size: args.size,
+            fields: args.field,
+            filter: dsl.filter,
+          },
+          {
+            abortSignal,
+            inspector: {
+              adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+              title: i18n.translate('data.search.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+              description: i18n.translate('data.search.es_search.dataRequest.description', {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the visualization.',
+              }),
+              getRequestStats: () => ({
+                indexPattern: {
+                  label: i18n.translate('data.search.es_search.dataViewLabel', {
+                    defaultMessage: 'Data view',
+                  }),
+                  value: args.index,
+                  description: i18n.translate('data.search.es_search.indexPatternDescription', {
+                    defaultMessage: 'The data view that connected to the Elasticsearch indices.',
+                  }),
+                },
+              }),
             },
-            { abortSignal, strategy: EQL_SEARCH_STRATEGY }
-          )
+          }
         );
-
-        const stats: RequestStatistics = {};
-
-        request.stats(stats).ok({ json: response });
-        request.json(dsl!);
 
         return {
           type: 'eql_raw_response',
-          body: response.rawResponse,
+          body: rawResponse,
         };
       } catch (e) {
-        request.error({ json: 'attributes' in e ? e.attributes : { message: e.message } });
         throw e;
       }
     },

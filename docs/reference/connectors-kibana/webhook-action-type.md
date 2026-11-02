@@ -9,7 +9,7 @@ applies_to:
 
 # Webhook connector and action [webhook-action-type]
 
-The Webhook connector uses [axios](https://github.com/axios/axios) to send a POST or PUT request to a web service.
+The Webhook connector uses [axios](https://github.com/axios/axios) to send a request to a web service.
 
 ## Create connectors in {{kib}} [define-webhook-ui]
 
@@ -28,10 +28,15 @@ Name
 :   The name of the connector.
 
 Method
-:   The HTTP request method, either `post`(default) or `put`.
+:   The HTTP method to send a request to a web service: 
+    - `POST` (default)
+    - `PUT`
+    - {applies_to}`stack: ga 9.3` `PATCH`
+    - {applies_to}`stack: ga 9.3` `GET`
+    - {applies_to}`stack: ga 9.3` `DELETE` 
 
 URL
-:   The request URL. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
+:   The request URL must start with `http://` or `https://`. Internal hostnames such as `http://dev-logstash:10200` are supported. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
 
 Authentication
 :   The authentication type: none, basic, SSL, or {applies_to}`stack: ga 9.2` OAuth 2.0 authentication. 
@@ -78,7 +83,7 @@ You can test connectors as you’re creating or editing the connector in {{kib}}
 Webhook actions have the following properties.
 
 Body
-:   A JSON payload sent to the request URL. For example:
+:   A JSON payload sent to the request URL using the `POST`, `PUT`, or `PATCH` HTTP methods. For example:
 
     ```text
     {

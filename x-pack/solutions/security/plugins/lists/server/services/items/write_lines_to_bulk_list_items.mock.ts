@@ -24,13 +24,11 @@ import type { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
   config: getConfigMockDecoded(),
-  deserializer: undefined,
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listIndex: LIST_INDEX,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
-  serializer: undefined,
   stream: new TestReadable(),
   type: TYPE,
   user: USER,
@@ -39,12 +37,10 @@ export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStream
 
 export const getWriteBufferToItemsOptionsMock = (): WriteBufferToItemsOptions => ({
   buffer: [],
-  deserializer: undefined,
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
-  serializer: undefined,
   type: TYPE,
   user: USER,
 });

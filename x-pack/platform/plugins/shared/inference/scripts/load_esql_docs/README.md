@@ -5,18 +5,50 @@ The generated documentation is validated and will emit warnings when invalid que
 
 ## Requirements
 
-- checked out `built-docs` repo in the same folder as the `kibana` repository
 - a running Kibana instance
-- an installed Generative AI connector
+- an Elasticsearch `chat_completion` inference endpoint (CI uses EIS `.openai-gpt-5.5-chat_completion`)
+
+### Run
+pnpm es snapshot --license trial
+node scripts/kibana --dev --no-base-path
+
+## Incremental Updates
+
+The script uses a hash-based caching mechanism to optimize performance. This means:
+- Unchanged source files are skipped completely
+- Only changed sections within a file are reprocessed
+- The cache significantly reduces processing time when only a few files have changed
+
+### Force Update All Files
+
+To force the script to regenerate all files regardless of hash matches, use the `--force` flag:
+
+```
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --force
+```
+
+This is useful for:
+- Testing the full generation pipeline
+- Regenerating all files after changes to the processing logic
+- Ensuring all files are up-to-date after cache corruption
 
 ### Run script to generate ES|QL docs and verify syntax
 
+To deterministically get the ES|QL docs from the Elastic's documentation markdown files, without modification from LLMs, you can run:
 ```
 node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js
 ```
 
-The script will also generate a report of syntax errors found during the generation process, located at
-`x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/esql_docs/__tmp__/syntax-errors.json`. This file will not be checked into git.
+To call an LLM and enrich the extracted docs, pass an Elasticsearch `chat_completion` inference endpoint id. The product-docs CI job enables EIS and uses `.openai-gpt-5.5-chat_completion`. Enrichment explains in natural language what the ES|QL examples are doing. Without `--inferenceId` the script only extracts documentation and does not prompt for a connection.
+
+```
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-5.5-chat_completion
+```
+
+You can also combine flags:
+```
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-5.5-chat_completion --force
+```
 
 ### Checking syntax errors for generated files
 

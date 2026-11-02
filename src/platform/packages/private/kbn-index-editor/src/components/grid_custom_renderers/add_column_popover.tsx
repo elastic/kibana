@@ -114,6 +114,9 @@ export const AddColumnPopover = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('indexEditor.columnHeaderEdit.addColumnPopoverLabel', {
+        defaultMessage: 'Add column',
+      })}
       button={triggerButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

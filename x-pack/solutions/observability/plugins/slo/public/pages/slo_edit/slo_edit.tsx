@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { paths } from '../../../common/locators/paths';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { SloAppHeader } from '../../components/slo_app_header/slo_app_header';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloEditForm } from './components/slo_edit_form';
+import { useSloFormValues } from './hooks/use_slo_form_values';
+
+const slosBackLabel = i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
+  defaultMessage: 'SLOs',
+});
 
 export function SloEditPage() {
   const {
@@ -26,8 +30,7 @@ export function SloEditPage() {
     serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
-  const { data: slo, isLoading: isLoadingSlo } = useFetchSloDetails({ sloId });
-  const isEditMode = Boolean(sloId);
+  const { initialValues, isLoading, isEditMode, slo } = useSloFormValues(sloId);
 
   const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -38,9 +41,7 @@ export function SloEditPage() {
     [
       {
         href: basePath.prepend(paths.slos),
-        text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
-          defaultMessage: 'SLOs',
-        }),
+        text: slosBackLabel,
         deepLinkId: 'slo',
       },
       ...(!!slo
@@ -52,7 +53,7 @@ export function SloEditPage() {
           ]
         : []),
       {
-        text: sloId
+        text: isEditMode
           ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
               defaultMessage: 'Edit',
             })
@@ -74,26 +75,38 @@ export function SloEditPage() {
     }
   }, [hasRightLicense, permissions, navigateToUrl, basePath]);
 
+  const pageTitle = isEditMode
+    ? i18n.translate('xpack.slo.sloEditPageTitle', {
+        defaultMessage: 'Edit SLO',
+      })
+    : i18n.translate('xpack.slo.sloCreatePageTitle', {
+        defaultMessage: 'Create new SLO',
+      });
+
+  const back =
+    isEditMode && slo
+      ? {
+          href: basePath.prepend(paths.sloDetails(slo.id, slo.instanceId)),
+          label: slo.name,
+        }
+      : {
+          href: basePath.prepend(paths.slos),
+          label: slosBackLabel,
+        };
+
   return (
     <ObservabilityPageTemplate
-      pageHeader={{
-        pageTitle: isEditMode
-          ? i18n.translate('xpack.slo.sloEditPageTitle', {
-              defaultMessage: 'Edit SLO',
-            })
-          : i18n.translate('xpack.slo.sloCreatePageTitle', {
-              defaultMessage: 'Create new SLO',
-            }),
-        bottomBorder: false,
-      }}
-      data-test-subj="slosEditPage"
+      data-test-subj="sloEditPage"
+      pageSectionProps={{ paddingSize: 'none' }}
     >
-      <HeaderMenu />
-      {isEditMode && isLoadingSlo ? (
-        <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
-      ) : (
-        <SloEditForm slo={slo} />
-      )}
+      <SloAppHeader title={pageTitle} back={back} />
+      <EuiPageSection paddingSize="l" restrictWidth={false}>
+        {isLoading ? (
+          <EuiLoadingSpinner size="xl" data-test-subj="sloEditLoadingSpinner" />
+        ) : (
+          <SloEditForm slo={slo} formSettings={{ isEditMode }} initialValues={initialValues} />
+        )}
+      </EuiPageSection>
     </ObservabilityPageTemplate>
   );
 }

@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: Watchlist Entities Unassign Schema
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/entities/unassign:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview; added in 9.4.0
+      operationId: UnassignWatchlistEntities
+      summary: Manually unassign entities from a watchlist
+      description: |
+        Unassigns the provided entities from the specified watchlist.
+        This only removes the "manual" assignment. If the entity is also
+        assigned via other sources (for example, index or integration), it will
+        remain on the watchlist.
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the watchlist to remove entities from
+          example: 'high-risk-vendors'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                euids:
+                  type: array
+                  items:
+                    type: string
+                  description: The EUIDs of the entities to unassign
+                  example: ["user:john.doe", "host:web-01"]
+              required:
+                - euids
+            examples:
+              unassignEntities:
+                summary: Unassign two entities from a watchlist
+                value:
+                  euids: ["user:john.doe", "host:web-01"]
+      responses:
+        "200":
+          description: Unassignment successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successful:
+                    type: integer
+                    description: Number of entities successfully unassigned
+                    example: 1
+                  failed:
+                    type: integer
+                    description: Number of entities that failed to process
+                    example: 0
+                  not_found:
+                    type: integer
+                    description: Number of entities not found in the manual watchlist assignment
+                    example: 1
+                  total:
+                    type: integer
+                    description: Total number of entities processed
+                    example: 2
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WatchlistEntityUnassignResponseItem"
+                required:
+                  - successful
+                  - failed
+                  - not_found
+                  - total
+                  - items
+              examples:
+                unassignEntitiesResponse:
+                  summary: Successful unassignment of two entities
+                  value:
+                    successful: 1
+                    failed: 0
+                    not_found: 1
+                    total: 2
+                    items:
+                      - euid: "user:john.doe"
+                        status: "success"
+                      - euid: "host:web-01"
+                        status: "not_found"
+
+components:
+  schemas:
+    WatchlistEntityUnassignResponseItem:
+      type: object
+      example:
+        euid: "user:john.doe"
+        status: "success"
+      properties:
+        euid:
+          type: string
+          description: The EUID of the entity
+          example: "user:john.doe"
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - not_found
+          example: "success"
+        error:
+          type: string
+          description: Error message if the entity failed to process
+          example: "Invalid entity type"
+      required:
+        - euid
+        - status

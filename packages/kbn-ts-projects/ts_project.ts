@@ -67,17 +67,40 @@ export class TsProject {
   }): TsProject[] {
     const mapPath = Path.resolve(__dirname, 'config-paths.json');
     if (!Fs.existsSync(mapPath)) {
-      throw new Error('missing config-paths.json file, make sure you run `yarn kbn bootstrap`');
+      throw new Error('missing config-paths.json file, make sure you run `pnpm kbn bootstrap`');
     }
+
+    const refreshTsConfigPaths = () => {
+      const tsConfigPaths = [...getRepoRelsSync(REPO_ROOT, ['tsconfig.json', '**/tsconfig.json'])];
+      Fs.writeFileSync(mapPath, JSON.stringify(tsConfigPaths, null, 2));
+    };
 
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
 
     if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
-      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+      throw new Error('TS Project map missing, make sure you run `pnpm kbn bootstrap`');
     }
 
-    const ignores = expand('ignore', options.ignore, tsConfigRepoRels);
-    const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
+    let ignores: Set<string>;
+    let disableTypeCheck: Set<string>;
+    try {
+      ignores = expand('ignore', options.ignore, tsConfigRepoRels);
+      disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
+    } catch (error) {
+      const shouldRefresh =
+        error instanceof Error &&
+        error.message.includes('patterns do not match any tsconfig.json files');
+
+      if (shouldRefresh && !options.noTsconfigPathsRefresh) {
+        refreshTsConfigPaths();
+        return TsProject.loadAll({
+          ...options,
+          noTsconfigPathsRefresh: true,
+        });
+      }
+
+      throw error;
+    }
 
     const cache = new Map();
     const projects: TsProject[] = [];
@@ -97,13 +120,12 @@ export class TsProject {
 
       if (options.noTsconfigPathsRefresh) {
         throw createFailError(
-          `Run "yarn kbn bootstrap" to update the tsconfig.json path cache. ${repoRel} no longer exists.`
+          `Run "pnpm kbn bootstrap" to update the tsconfig.json path cache. ${repoRel} no longer exists.`
         );
       }
 
       // rebuild the tsconfig.json path cache
-      const tsConfigPaths = getRepoRelsSync(REPO_ROOT, ['tsconfig.json', '**/tsconfig.json']);
-      Fs.writeFileSync(mapPath, JSON.stringify(tsConfigPaths, null, 2));
+      refreshTsConfigPaths();
       return TsProject.loadAll({
         ...options,
         noTsconfigPathsRefresh: true,

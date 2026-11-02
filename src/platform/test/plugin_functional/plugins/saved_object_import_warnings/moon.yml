@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/saved-object-import-warnings-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/saved-object-import-warnings-plugin'
+  title: '@kbn/saved-object-import-warnings-plugin'
   description: Moon project for @kbn/saved-object-import-warnings-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/saved_object_import_warnings
+  sourceRoot: src/platform/test/plugin_functional/plugins/saved_object_import_warnings
 dependsOn:
   - '@kbn/core'
 tags:

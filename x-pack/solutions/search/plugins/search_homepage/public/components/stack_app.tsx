@@ -9,8 +9,8 @@ import React from 'react';
 
 import { UsageTrackerContextProvider } from '../contexts/usage_tracker_context';
 import { useKibana } from '../hooks/use_kibana';
-import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './header';
+import { SearchHomepageBody } from './search_homepage/search_homepage_body';
 
 export const App: React.FC = () => {
   const {

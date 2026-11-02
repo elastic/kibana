@@ -37,6 +37,7 @@ describe('Create Layout', () => {
         },
         "useReportingBranding": true,
         "width": 16,
+        "zoom": 2,
       }
     `);
   });
@@ -98,6 +99,7 @@ describe('Create Layout', () => {
         },
         "useReportingBranding": false,
         "width": 18,
+        "zoom": 2,
       }
     `);
   });

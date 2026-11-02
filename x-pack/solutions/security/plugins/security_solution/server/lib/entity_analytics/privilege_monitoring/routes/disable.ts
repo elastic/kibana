@@ -12,16 +12,17 @@ import type { DisableMonitoringEngineResponse } from '../../../../../common/api/
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENGINE_DISABLE_URL,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../engine/status_service';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .post({
@@ -29,7 +30,7 @@ export const disablePrivilegeMonitoringEngineRoute = (
       path: MONITORING_ENGINE_DISABLE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics-manage`],
         },
       },
       options: {
@@ -43,35 +44,43 @@ export const disablePrivilegeMonitoringEngineRoute = (
       {
         version: API_VERSIONS.public.v1,
         validate: {},
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<DisableMonitoringEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<DisableMonitoringEngineResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
-        try {
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const soClient = dataClient.getScopedSoClient(request);
-          const statusService = createEngineStatusService(dataClient, soClient);
-          const body = await statusService.disable();
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error disabling privilege monitoring engine: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const dataClient = secSol.getPrivilegeMonitoringDataClient();
+            const soClient = dataClient.getScopedSoClient(request);
+            const statusService = createEngineStatusService(dataClient, soClient);
+            const body = await statusService.disable();
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error disabling privilege monitoring engine: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

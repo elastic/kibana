@@ -18,7 +18,15 @@ export const ScreenReaderAnnouncementsProvider: FC<PropsWithChildren<unknown>> =
   const [screenReaderMessage, setScreenReaderMessage] = useState('');
 
   const announce = useCallback<ScreenReaderAnnouncementsContextValue['announce']>((message) => {
-    setScreenReaderMessage(message);
+    setScreenReaderMessage((current) => {
+      if (current === message) {
+        requestAnimationFrame(() => {
+          setScreenReaderMessage(message);
+        });
+        return '';
+      }
+      return message;
+    });
   }, []);
 
   const contextValue = useMemo(() => ({ announce }), [announce]);

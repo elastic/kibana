@@ -13,20 +13,20 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ILicense } from '@kbn/licensing-types';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-
-export interface ControlsContext {
-  /** The editor supports the creation of controls,
-   * This flag should be set to true to display the "Create control" suggestion
-   **/
-  supportsControls: boolean;
-  /** Function to be called after the control creation **/
-  onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  /** Function to be called after cancelling the control creation **/
-  onCancelControl: () => void;
-}
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type {
+  ESQLControlVariable,
+  ESQLQueryStats,
+  ESQLControlsContext,
+  ESQLCallbacks,
+  ESQLTelemetryCallbacks,
+  ESQLSourceResult,
+  EsqlView,
+} from '@kbn/esql-types';
+import type { ESQLDependencies } from '@kbn/code-editor';
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -43,11 +43,6 @@ export interface ESQLEditorProps {
     query?: AggregateQuery,
     abortController?: AbortController
   ) => Promise<void>;
-  /** If it is true, the editor displays the message @timestamp found
-   * The text based queries are relying on adhoc dataviews which
-   * can have an @timestamp timefield or nothing
-   */
-  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -58,9 +53,8 @@ export interface ESQLEditorProps {
   isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
+  /** Test subject selector for targeting the editor in automated tests */
   dataTestSubj?: string;
-  /** Hide the Run query information which appears on the footer*/
-  hideRunQueryText?: boolean;
   /** Hide the Run query button which appears when editor is inlined*/
   hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)
@@ -72,12 +66,12 @@ export interface ESQLEditorProps {
   disableSubmitAction?: boolean;
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
-  /** hide @timestamp info **/
-  hideTimeFilterInfo?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
+  /** set when the quick search visor is rendered next to the editor, so the empty editor doesn't advertise its own AI entry point **/
+  hasExternalVisor?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
@@ -85,7 +79,7 @@ export interface ESQLEditorProps {
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
-  controlsContext?: ControlsContext;
+  controlsContext?: ESQLControlsContext;
   /** Opens the given query in a new Discover tab **/
   onOpenQueryInNewTab?: (tabName: string, esqlQuery: string) => Promise<void>;
   /** The available ESQL variables from the page context this editor was opened in */
@@ -94,11 +88,31 @@ export interface ESQLEditorProps {
   expandToFitQueryOnMount?: boolean;
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
-  /** Optional form field label to show above the query editor */
-  formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** Enable data source browser suggestion & command integration */
+  enableResourceBrowser?: boolean;
+  /**
+   * Shows the action to create an ES|QL view from the current query.
+   */
+  enableCreateView?: boolean;
+  /** Stats about the last request made */
+  queryStats?: ESQLQueryStats;
+  /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /**
+   * Called once the editor has set up its NL-to-ES|QL review handler.
+   * The parent receives `handler` and can pass it as `onNlResult` to a sibling
+   * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
+   */
+  onVisorNlResultReady?: (handler: VisorNlResultHandler) => void;
 }
+
+/** Receives the generated ES|QL for review and the callbacks for the user's decision */
+export type VisorNlResultHandler = (
+  generatedQuery: string,
+  review: { onAccept: () => void; onReject?: () => void }
+) => void;
 
 interface ESQLVariableService {
   isCreateControlSuggestionEnabled: boolean;
@@ -113,6 +127,8 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
 }
 
 export interface ESQLEditorDeps {
@@ -120,8 +136,10 @@ export interface ESQLEditorDeps {
   data: DataPublicPluginStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  kql: KqlPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   esql?: EsqlPluginStartBase;
 }
 
@@ -129,3 +147,10 @@ export enum HistoryTabId {
   recentQueries = 'history-queries-tab',
   standardQueries = 'starred-queries-tab',
 }
+
+export type EsqlLanguageDeps = ESQLCallbacks &
+  Partial<{
+    telemetry: ESQLTelemetryCallbacks;
+    isSuggestFixEnabled: ESQLDependencies['isSuggestFixEnabled'];
+    getEditorMessages: ESQLDependencies['getEditorMessages'];
+  }>;

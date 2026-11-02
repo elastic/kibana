@@ -8,14 +8,32 @@
  */
 
 import type { JSDocTag } from 'ts-morph';
-import { Node, TypeFormatFlags } from 'ts-morph';
+import { Node, SyntaxKind, TypeFormatFlags } from 'ts-morph';
 import type { ApiDeclaration } from '../types';
 import { maybeCollectReferences } from './get_references';
 import { getSignature } from './get_signature';
 import { getTypeKind } from './get_type_kind';
-import { getCommentsFromNode, getJSDocTags } from './js_doc_utils';
+import { getCommentsFromNode, getJSDocTags, getPluginContextForNode } from './js_doc_utils';
 import type { BuildApiDecOpts } from './types';
-import { getSourceForNode } from './utils';
+import { getSourceLocationForNode } from './utils';
+
+const getReferencedTypeName = (node: Node): string | undefined => {
+  if (!Node.isParameterDeclaration(node)) {
+    return undefined;
+  }
+
+  const typeNode = node.getTypeNode();
+  if (!typeNode || typeNode.getKind() !== SyntaxKind.TypeReference) {
+    return undefined;
+  }
+
+  const typeText = typeNode.getText().split('<')[0].trim();
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(typeText)) {
+    return undefined;
+  }
+
+  return typeText;
+};
 
 /**
  * @returns an ApiDeclaration with common functionality that every node shares. Type specific attributes, like
@@ -41,16 +59,22 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
       .getText(undefined, TypeFormatFlags.OmitParameterModifiers)}`;
   }
 
+  const { path, lineNumber, columnNumber } = getSourceLocationForNode(node);
+  const pluginContext = getPluginContextForNode(node, opts);
+
   const apiDec = {
     parentPluginId: opts.currentPluginId,
     id: opts.id,
     type: getTypeKind(node),
     tags: getTagNames(tags),
     label,
-    description: getCommentsFromNode(node),
+    description: getCommentsFromNode(node, pluginContext),
     signature: getSignature(node, opts.plugins, opts.log),
-    path: getSourceForNode(node),
+    path,
+    lineNumber,
+    columnNumber,
     deprecated,
+    docsReferencedTypeName: getReferencedTypeName(node),
     removeBy: removeByTag ? removeByTag.getCommentText() : undefined,
     trackAdoption,
   };

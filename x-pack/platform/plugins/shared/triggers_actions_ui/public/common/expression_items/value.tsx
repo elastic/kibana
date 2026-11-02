@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
@@ -52,6 +53,10 @@ export const ValueExpression = ({
   const [valuePopoverOpen, setValuePopoverOpen] = useState(false);
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.value.popoverAriaLabel',
+        { defaultMessage: 'Value' }
+      )}
       button={
         <EuiExpression
           data-test-subj="valueExpression"

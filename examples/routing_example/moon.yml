@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/routing-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/routing-example-plugin'
+  title: '@kbn/routing-example-plugin'
   description: Moon project for @kbn/routing-example-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: examples/routing_example
+  sourceRoot: examples/routing_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'

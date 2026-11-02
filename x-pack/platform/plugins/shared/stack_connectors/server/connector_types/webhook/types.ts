@@ -6,7 +6,7 @@
  */
 
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
 } from '@kbn/actions-plugin/server/types';
 import type {
@@ -21,6 +21,7 @@ export type WebhookConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type WebhookConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,

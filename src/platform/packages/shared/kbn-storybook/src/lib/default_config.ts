@@ -49,6 +49,7 @@ export const defaultConfig: StorybookConfig = {
     // https://storybook.js.org/docs/essentials
     '@storybook/addon-essentials',
     '@storybook/addon-jest',
+    '@storybook/addon-docs',
     {
       /**
        * This addon replaces rules in the default SB webpack config
@@ -68,14 +69,7 @@ export const defaultConfig: StorybookConfig = {
             use: [
               { loader: 'style-loader' },
               { loader: 'css-loader', options: { importLoaders: 2 } },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  postcssOptions: {
-                    config: require.resolve('@kbn/optimizer/postcss.config'),
-                  },
-                },
-              },
+              { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
               {
                 loader: 'sass-loader',
                 options: {
@@ -85,7 +79,7 @@ export const defaultConfig: StorybookConfig = {
                         loaderContext.context || loaderContext.rootContext,
                         resolve(
                           REPO_ROOT,
-                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                          'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                         )
                       )
                     );

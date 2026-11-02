@@ -144,8 +144,38 @@ describe('extractSchemaPropertyPaths', () => {
     });
   });
 
+  describe('includeMetadata', () => {
+    it('adds description and displayType (e.g. string[] for z.array(z.string()))', () => {
+      const schema = z.object({
+        labels: z.array(z.string()).optional().describe('Multi labels'),
+        count: z.number(),
+      });
+
+      const result = extractSchemaPropertyPaths(schema, { includeMetadata: true });
+
+      const labels = result.find((r) => r.path === 'labels');
+      expect(labels?.description).toBe('Multi labels');
+      expect(labels?.displayType).toBe('string[]');
+      const count = result.find((r) => r.path === 'count');
+      expect(count?.displayType).toBe('number');
+    });
+
+    it('uses object displayType for array-of-object container paths', () => {
+      const schema = z.object({
+        items: z.array(z.object({ id: z.string() })),
+      });
+
+      const result = extractSchemaPropertyPaths(schema, { includeMetadata: true });
+
+      const items = result.find((r) => r.path === 'items');
+      expect(items?.displayType).toBe('object');
+      const id = result.find((r) => r.path === 'items.id');
+      expect(id?.displayType).toBe('string');
+    });
+  });
+
   describe('array types', () => {
-    it('should handle array types without extracting paths', () => {
+    it('should extract array field and nested object paths for array-of-object', () => {
       const schema = z.object({
         tags: z.array(z.string()),
         items: z.array(
@@ -161,7 +191,26 @@ describe('extractSchemaPropertyPaths', () => {
       expect(result).toEqual([
         { path: 'tags', type: 'array' },
         { path: 'items', type: 'array' },
+        { path: 'items.id', type: 'string' },
+        { path: 'items.value', type: 'number' },
       ]);
+    });
+
+    it('should unwrap optional array-of-object for nested paths', () => {
+      const schema = z.object({
+        rows: z
+          .array(
+            z.object({
+              key: z.string(),
+            })
+          )
+          .optional(),
+      });
+
+      const result = extractSchemaPropertyPaths(schema);
+
+      expect(result).toContainEqual({ path: 'rows', type: 'optional' });
+      expect(result).toContainEqual({ path: 'rows.key', type: 'string' });
     });
   });
 
@@ -231,6 +280,7 @@ describe('extractSchemaPropertyPaths', () => {
         path: 'foreach.items',
         type: 'array',
       });
+      // foreach.items is z.array(z.any()) — no nested object paths under items
       expect(result).toContainEqual({
         path: 'foreach.index',
         type: 'number',

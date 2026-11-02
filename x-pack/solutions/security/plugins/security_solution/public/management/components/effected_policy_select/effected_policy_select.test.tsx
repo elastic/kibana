@@ -110,6 +110,22 @@ describe('when using EffectedPolicySelect component', () => {
     expect(getByTestId('test-perPolicy').textContent).toEqual('Per Policy');
   });
 
+  it('should not show the assignment info tooltip by default', async () => {
+    const { queryByTestId } = await render();
+
+    expect(queryByTestId('test-assignmentInfoTooltip')).toBeNull();
+  });
+
+  it('should show the assignment info tooltip when `assignmentInfoTooltip` is set', async () => {
+    const { getByTestId, findByText } = await render({
+      assignmentInfoTooltip: 'Some assignment info',
+    });
+
+    fireEvent.mouseOver(getByTestId('test-assignmentInfoTooltip'));
+
+    expect(await findByText('Some assignment info')).toBeInTheDocument();
+  });
+
   it('should show Global as current selection when artifact is global', async () => {
     const { getByTestId } = await render();
 
@@ -232,13 +248,10 @@ describe('when using EffectedPolicySelect component', () => {
 
       expect(getByTestId('test-unaccessibleGroupLabel')).toBeTruthy();
       expect(getByTestId(`test-unAccessiblePolicy-${unAccessiblePolicyId}`)).toBeTruthy();
-      expect(
-        (
-          getByTestId(
-            `${policySelectorTestUtils.testIds.root}-test-unAccessiblePolicy-${unAccessiblePolicyId}-checkbox`
-          ) as HTMLInputElement
-        ).disabled
-      ).toBe(true);
+      expect(getByTestId(`test-unAccessiblePolicy-${unAccessiblePolicyId}`)).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
 
     it('should display count of policies assigned to artifact that are not accessible in active space', async () => {

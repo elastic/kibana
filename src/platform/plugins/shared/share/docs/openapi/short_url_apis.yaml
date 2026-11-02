@@ -55,6 +55,18 @@ paths:
                     The slug is the part of the short URL that identifies it.
                     You can provide a custom slug which consists of latin alphabet letters, numbers, and `-._` characters.
                     The slug must be at least 3 characters long, but no longer than 255 characters.
+            examples:
+              createShortUrlRequest:
+                summary: Create a short URL for a dashboard locator
+                description: Request a short URL that resolves to a dashboard with a preset time range.
+                value:
+                  locatorId: DASHBOARD_APP_LOCATOR
+                  slug: my-dashboard
+                  params:
+                    dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                    timeRange:
+                      from: now-7d
+                      to: now
       responses:
         '200':
           description: Indicates a successful call.
@@ -62,6 +74,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/urlResponse'
+              examples:
+                createShortUrlResponse:
+                  summary: Short URL created
+                  description: The created short URL record.
+                  value:
+                    id: c54b04f5d4b3aa3c
+                    slug: my-dashboard
+                    accessCount: 0
+                    accessDate: 1767225600000
+                    createDate: 1767225600000
+                    locator:
+                      id: DASHBOARD_APP_LOCATOR
+                      version: 9.4.0
+                      state:
+                        dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                        timeRange:
+                          from: now-7d
+                          to: now
   /api/short_url/{id}:
     delete:
       summary: Delete a short URL
@@ -93,6 +123,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/urlResponse'
+              examples:
+                getShortUrlResponse:
+                  summary: Short URL retrieved by ID
+                  description: The short URL record matching the given identifier.
+                  value:
+                    id: c54b04f5d4b3aa3c
+                    slug: my-dashboard
+                    accessCount: 12
+                    accessDate: 1767744000000
+                    createDate: 1767225600000
+                    locator:
+                      id: DASHBOARD_APP_LOCATOR
+                      version: 9.4.0
+                      state:
+                        dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                        timeRange:
+                          from: now-7d
+                          to: now
   /api/short_url/_slug/{slug}:
     get:
       summary: Resolve a short URL
@@ -116,6 +164,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/urlResponse'
+              examples:
+                resolveShortUrlResponse:
+                  summary: Short URL resolved by slug
+                  description: The short URL record matching the given slug.
+                  value:
+                    id: c54b04f5d4b3aa3c
+                    slug: my-dashboard
+                    accessCount: 12
+                    accessDate: 1767744000000
+                    createDate: 1767225600000
+                    locator:
+                      id: DASHBOARD_APP_LOCATOR
+                      version: 9.4.0
+                      state:
+                        dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                        timeRange:
+                          from: now-7d
+                          to: now
 components:
   parameters:
     idParam:
@@ -131,10 +197,15 @@ components:
       properties:
         accessCount:
           type: integer
+          description: Number of times the short URL has been resolved.
         accessDate:
-          type: string
+          type: integer
+          format: int64
+          description: Unix epoch (milliseconds) of the last time the short URL was resolved. Set to the creation time when the URL has never been accessed.
         createDate:
-          type: string
+          type: integer
+          format: int64
+          description: Unix epoch (milliseconds) when the short URL was created.
         id:
           type: string
           description: The identifier for the short URL.

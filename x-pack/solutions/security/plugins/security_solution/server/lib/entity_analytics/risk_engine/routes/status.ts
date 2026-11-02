@@ -11,10 +11,12 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { RiskEngineStatusResponse } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { withEntityStoreV2Disabled } from './utils';
 
 export const riskEngineStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  isEntityAnalyticsEntityStoreV2Enabled: boolean
 ) => {
   router.versioned
     .get({
@@ -28,35 +30,38 @@ export const riskEngineStatusRoute = (
     })
     .addVersion(
       { version: '1', validate: {} },
-      async (context, request, response): Promise<IKibanaResponse<RiskEngineStatusResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withEntityStoreV2Disabled(
+        isEntityAnalyticsEntityStoreV2Enabled,
+        async (context, request, response): Promise<IKibanaResponse<RiskEngineStatusResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        const securitySolution = await context.securitySolution;
-        const riskEngineClient = securitySolution.getRiskEngineDataClient();
-        const spaceId = securitySolution.getSpaceId();
-        const [_, { taskManager }] = await getStartServices();
+          const securitySolution = await context.securitySolution;
+          const riskEngineClient = securitySolution.getRiskEngineDataClient();
+          const spaceId = securitySolution.getSpaceId();
+          const [_, { taskManager }] = await getStartServices();
 
-        try {
-          const { riskEngineStatus, taskStatus } = await riskEngineClient.getStatus({
-            namespace: spaceId,
-            taskManager,
-          });
+          try {
+            const { riskEngineStatus, taskStatus } = await riskEngineClient.getStatus({
+              namespace: spaceId,
+              taskManager,
+            });
 
-          const body: RiskEngineStatusResponse = {
-            risk_engine_status: riskEngineStatus,
-            risk_engine_task_status: taskStatus,
-          };
+            const body: RiskEngineStatusResponse = {
+              risk_engine_status: riskEngineStatus,
+              risk_engine_task_status: taskStatus,
+            };
 
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
 
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: { message: error.message, full_error: JSON.stringify(e) },
-            bypassErrorFormat: true,
-          });
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: { message: error.message, full_error: JSON.stringify(e) },
+              bypassErrorFormat: true,
+            });
+          }
         }
-      }
+      )
     );
 };

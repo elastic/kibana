@@ -77,6 +77,10 @@ export const DELETE_LABEL = i18n.translate('xpack.synthetics.management.deleteLa
   defaultMessage: 'Delete',
 });
 
+export const RESET_LABEL = i18n.translate('xpack.synthetics.management.resetLabel', {
+  defaultMessage: 'Reset',
+});
+
 export const DELETE_DESCRIPTION_LABEL = i18n.translate(
   'xpack.synthetics.management.confirmDescriptionLabel',
   {
@@ -215,10 +219,4 @@ export const getMonitorEnabledUpdateFailureMessage = (name: string) =>
   i18n.translate('xpack.synthetics.management.monitorEnabledUpdateFailureMessage', {
     defaultMessage: 'Unable to update monitor {name}.',
     values: { name },
-  });
-
-export const getFilterForTypeMessage = (typeName: string) =>
-  i18n.translate('xpack.synthetics.management.filter.clickTypeMessage', {
-    defaultMessage: 'Click to filter records for type {typeName}.',
-    values: { typeName },
   });

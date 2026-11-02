@@ -154,7 +154,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
-            search: MOCK_FIRST_DASHBOARD_TITLE,
+            query: MOCK_FIRST_DASHBOARD_TITLE,
             per_page: 100,
           },
           trigger: { id: 'searchDashboards' },
@@ -181,7 +181,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenCalledWith(
         expect.objectContaining({
           search: {
-            search: '',
+            query: '',
             per_page: 100,
           },
         })
@@ -220,7 +220,7 @@ describe('DashboardsSelector', () => {
       expect(mockSearchExecute).toHaveBeenLastCalledWith(
         expect.objectContaining({
           search: {
-            search: '',
+            query: '',
             per_page: 100,
           },
         })
@@ -242,5 +242,22 @@ describe('DashboardsSelector', () => {
 
     expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
     expect(screen.getByText(MOCK_SECOND_DASHBOARD_TITLE)).toBeInTheDocument();
+  });
+
+  it('removes invalid dashboard ids from form data', async () => {
+    render(
+      <DashboardsSelector
+        uiActions={mockUiActions}
+        dashboardsFormData={[{ id: 'invalid-id' }, { id: MOCK_SECOND_DASHBOARD_ID }]}
+        onChange={mockOnChange}
+        placeholder={MOCK_PLACEHOLDER}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith([
+        { label: MOCK_SECOND_DASHBOARD_TITLE, value: MOCK_SECOND_DASHBOARD_ID },
+      ]);
+    });
   });
 });

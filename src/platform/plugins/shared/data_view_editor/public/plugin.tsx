@@ -29,7 +29,20 @@ export class DataViewEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { application, uiSettings, docLinks, http, notifications, overlays } = core;
-    const { data, dataViews } = plugins;
+    const { data, dataViews, cps } = plugins;
+
+    // Must keep a stable identity: the editor remounts its whole form when `services` changes.
+    const services = {
+      uiSettings,
+      docLinks,
+      http,
+      notifications,
+      application,
+      overlays,
+      dataViews,
+      searchClient: data.search.search,
+      cps,
+    };
 
     return {
       /**
@@ -41,6 +54,7 @@ export class DataViewEditorPlugin
         core,
         dataViews,
         searchClient: data.search.search,
+        cps,
       }),
       /**
        * Data view editor flyout via react component
@@ -48,19 +62,7 @@ export class DataViewEditorPlugin
        * @returns JSX.Element
        */
       IndexPatternEditorComponent: (props: DataViewEditorProps) => (
-        <DataViewEditor
-          services={{
-            uiSettings,
-            docLinks,
-            http,
-            notifications,
-            application,
-            overlays,
-            dataViews,
-            searchClient: data.search.search,
-          }}
-          {...props}
-        />
+        <DataViewEditor services={services} {...props} />
       ),
       /**
        * Convenience method to determine whether the user can create or edit edit data views.

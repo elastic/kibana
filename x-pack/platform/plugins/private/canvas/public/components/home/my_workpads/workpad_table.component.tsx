@@ -63,7 +63,7 @@ export const WorkpadTable = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={strings.getExportToolTip()} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="exportAction"
+                iconType="upload"
                 onClick={() => onExport(workpad.id)}
                 aria-label={strings.getExportToolTip()}
               />

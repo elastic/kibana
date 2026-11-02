@@ -8,12 +8,13 @@
 import React, { useState, useRef } from 'react';
 import {
   EuiBadge,
-  EuiText,
   EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
+  EuiToolTip,
   useEuiTheme,
-  EuiCopy,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createPortal } from 'react-dom';
@@ -101,28 +102,30 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
     >
       {actions.map((action, actionIndex) => (
         <EuiFlexItem grow={false} key={`${action.iconType}-${actionIndex}`}>
-          <EuiButtonIcon
-            css={buttonIconCss}
-            onClick={action.onClick}
-            iconType={action.iconType}
-            aria-label={action.ariaLabel}
-            title={action.title}
-          />
+          <EuiToolTip content={action.title} disableScreenReaderOutput>
+            <EuiButtonIcon
+              css={buttonIconCss}
+              onClick={action.onClick}
+              iconType={action.iconType}
+              aria-label={action.ariaLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       ))}
       <EuiFlexItem grow={false}>
         <EuiCopy textToCopy={item}>
           {(copy) => (
-            <EuiButtonIcon
-              onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
-                event.stopPropagation();
-                copy();
-              }}
-              iconType="copy"
-              css={buttonIconCss}
-              aria-label={copyItem}
-              title={copyItem}
-            />
+            <EuiToolTip content={copyItem} disableScreenReaderOutput>
+              <EuiButtonIcon
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                  event.stopPropagation();
+                  copy();
+                }}
+                iconType="copy"
+                css={buttonIconCss}
+                aria-label={copyItem}
+              />
+            </EuiToolTip>
           )}
         </EuiCopy>
       </EuiFlexItem>

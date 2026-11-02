@@ -1,0 +1,339 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { inject, injectable } from 'inversify';
+import { noDataStrategy } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, alertEventStatus } from '../../../resources/datastreams/alert_events';
+import type { RuleResponse } from '../../rules_client/types';
+import { parseDurationToMs } from '../../duration';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
+import { BasicTransitionStrategy } from './basic_strategy';
+import type { StateTransitionContext, StateTransitionResult } from './types';
+import type { LatestAlertEventState } from '../queries';
+
+const DEFAULT_STATUS_COUNT = 1;
+
+type StateTransition = NonNullable<RuleResponse['state_transition']>;
+type StateTransitionPhase = NonNullable<StateTransition['pending']>;
+type Operator = NonNullable<StateTransitionPhase['operator']>;
+const DEFAULT_OPERATOR: Operator = 'or';
+
+interface ThresholdConfig {
+  operator: Operator;
+  count?: number;
+  timeframeMs?: number;
+}
+
+/**
+ * Evaluates whether a count-based threshold is met.
+ *
+ * - If no count is configured, the threshold is always considered met.
+ * - Otherwise, the current count must be >= the configured count.
+ */
+const isCountThresholdMet = (currentCount: number, threshold?: number): boolean => {
+  if (threshold == null) {
+    return true;
+  }
+
+  return currentCount >= threshold;
+};
+
+/**
+ * Evaluates whether a timeframe-based threshold is met.
+ *
+ * - If no timeframe is configured, the threshold is always considered met.
+ * - Otherwise, the elapsed time must be >= the configured timeframe.
+ */
+const isTimeframeThresholdMet = (elapsedMs: number, thresholdMs?: number): boolean => {
+  if (thresholdMs == null) {
+    return true;
+  }
+
+  return elapsedMs >= thresholdMs;
+};
+
+/**
+ * Evaluates whether a combined (count + timeframe) threshold is met,
+ * taking the operator into account.
+ *
+ * - and: both count and timeframe must be met.
+ * - or:  either count or timeframe is sufficient.
+ *
+ * When only one dimension is configured, the operator is irrelevant;
+ * the single dimension decides.
+ */
+const isThresholdMet = (
+  currentCount: number,
+  elapsedMs: number,
+  config: ThresholdConfig
+): boolean => {
+  const countMet = isCountThresholdMet(currentCount, config.count);
+  const timeframeMet = isTimeframeThresholdMet(elapsedMs, config.timeframeMs);
+
+  const hasCount = config.count != null;
+  const hasTimeframe = config.timeframeMs != null;
+
+  if (hasCount && hasTimeframe) {
+    return config.operator === 'and' ? countMet && timeframeMet : countMet || timeframeMet;
+  }
+
+  if (hasCount) {
+    return countMet;
+  }
+
+  if (hasTimeframe) {
+    return timeframeMet;
+  }
+
+  // No thresholds configured — always met (behave like basic).
+  return true;
+};
+
+/**
+ * A count of 0 skips the phase, unless a timeframe is ANDed with it: then the
+ * timeframe must still elapse, so the phase is entered and held until the
+ * timeframe is met.
+ *
+ * Elapsed time is measured against when the phase was entered (the timestamp of
+ * the latest `status_count == 1` event, derived by the query, see `getElapsedMs`),
+ * so an ANDed timeframe accumulates across evaluations and resolves correctly
+ * regardless of how the schedule interval compares to the timeframe.
+ */
+const isPhaseSkipped = (phase?: StateTransitionPhase): boolean =>
+  phase?.count === 0 && !(phase.timeframe != null && phase.operator === 'and');
+
+/**
+ * A transition strategy that extends the basic state machine with
+ * configurable count (and future timeframe) thresholds for the
+ * `pending → active` and `recovering → inactive` transitions.
+ *
+ * - A count of N holds the phase for N evaluations and resolves it on evaluation N+1.
+ * - A count of 0 skips the phase entirely, unless a timeframe is ANDed with it
+ *   (see `isPhaseSkipped`).
+ * - When no threshold is configured for a phase, the strategy behaves
+ *   identically to the basic strategy for that phase.
+ */
+@injectable()
+export class CountTimeframeStrategy extends BasicTransitionStrategy {
+  override readonly name = 'count_timeframe';
+
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    super();
+    this.logger = loggerService.forSubsystem('director');
+  }
+
+  override canHandle(rule: RuleResponse): boolean {
+    return rule.state_transition != null && Object.keys(rule.state_transition).length > 0;
+  }
+
+  override getNextState(ctx: StateTransitionContext): StateTransitionResult {
+    const { rule, previousEpisode, alertEvent, evaluatedAt } = ctx;
+    const stateTransition = rule.state_transition;
+    const currentEpisodeStatus = previousEpisode?.last_episode_status;
+    const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
+    const phaseStartedAt =
+      previousEpisode?.last_episode_phase_started_at ?? previousEpisode?.last_episode_timestamp;
+    const elapsedMs = this.getElapsedMs(evaluatedAt, phaseStartedAt);
+
+    // Delegate to the inherited basic state machine to get the "natural" next state.
+    const basicResult = super.getNextState(ctx);
+
+    if (!stateTransition) {
+      return basicResult;
+    }
+
+    if (
+      alertEvent.status === alertEventStatus.no_data &&
+      rule.no_data?.strategy === noDataStrategy.resolve
+    ) {
+      return basicResult;
+    }
+
+    // --- Handle pending count of 0: skip pending, go directly to active ---
+    if (this.shouldSkipPending(stateTransition, basicResult.status)) {
+      return { status: alertEpisodeStatus.active };
+    }
+
+    // --- Handle recovering count of 0: skip recovering, go directly to inactive ---
+    if (this.shouldSkipRecovering(stateTransition, basicResult.status)) {
+      return { status: alertEpisodeStatus.inactive };
+    }
+
+    // --- Pending → Active threshold ---
+    if (this.isPendingToActiveTransition(currentEpisodeStatus, basicResult.status)) {
+      return this.getNextStateTransition({
+        currentStatusCount,
+        elapsedMs,
+        operator: stateTransition.pending?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.pending?.count,
+        timeframeMs: this.safeParseDurationToMs(
+          stateTransition.pending?.timeframe,
+          rule.id,
+          'pending_timeframe'
+        ),
+        successStatus: alertEpisodeStatus.active,
+        stayStatus: alertEpisodeStatus.pending,
+      });
+    }
+
+    // --- Recovering → Inactive threshold ---
+    if (this.isRecoveringToInactiveTransition(currentEpisodeStatus, basicResult.status)) {
+      return this.getNextStateTransition({
+        currentStatusCount,
+        elapsedMs,
+        operator: stateTransition.recovering?.operator ?? DEFAULT_OPERATOR,
+        count: stateTransition.recovering?.count,
+        timeframeMs: this.safeParseDurationToMs(
+          stateTransition.recovering?.timeframe,
+          rule.id,
+          'recovering_timeframe'
+        ),
+        successStatus: alertEpisodeStatus.inactive,
+        stayStatus: alertEpisodeStatus.recovering,
+      });
+    }
+
+    // --- Changing to pending for the first time ---
+    if (
+      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
+    ) {
+      return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
+    }
+
+    // --- Changing to recovering for the first time ---
+    if (
+      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.recovering)
+    ) {
+      return { status: alertEpisodeStatus.recovering, statusCount: DEFAULT_STATUS_COUNT };
+    }
+
+    return basicResult;
+  }
+
+  private getCurrentStatusCount(previousEpisode?: LatestAlertEventState): number {
+    if (!previousEpisode) {
+      return 0;
+    }
+
+    return previousEpisode.last_episode_status_count ?? DEFAULT_STATUS_COUNT;
+  }
+
+  private shouldSkipPending(
+    stateTransition: StateTransition,
+    nextStatus: AlertEpisodeStatus
+  ): boolean {
+    return isPhaseSkipped(stateTransition.pending) && nextStatus === alertEpisodeStatus.pending;
+  }
+
+  private shouldSkipRecovering(
+    stateTransition: StateTransition,
+    nextStatus: AlertEpisodeStatus
+  ): boolean {
+    return (
+      isPhaseSkipped(stateTransition.recovering) && nextStatus === alertEpisodeStatus.recovering
+    );
+  }
+
+  private isPendingToActiveTransition(
+    currentStatus: AlertEpisodeStatus | undefined | null,
+    nextStatus: AlertEpisodeStatus
+  ): boolean {
+    return currentStatus === alertEpisodeStatus.pending && nextStatus === alertEpisodeStatus.active;
+  }
+
+  private isRecoveringToInactiveTransition(
+    currentStatus: AlertEpisodeStatus | undefined | null,
+    nextStatus: AlertEpisodeStatus
+  ): boolean {
+    return (
+      currentStatus === alertEpisodeStatus.recovering && nextStatus === alertEpisodeStatus.inactive
+    );
+  }
+
+  private isChangingStatus(
+    currentStatus: AlertEpisodeStatus | undefined | null,
+    nextStatus: AlertEpisodeStatus,
+    targetStatus: AlertEpisodeStatus
+  ): boolean {
+    return nextStatus === targetStatus && currentStatus !== targetStatus;
+  }
+
+  private getNextStateTransition({
+    currentStatusCount,
+    elapsedMs,
+    operator,
+    count,
+    timeframeMs,
+    successStatus,
+    stayStatus,
+  }: {
+    currentStatusCount: number;
+    elapsedMs: number;
+    operator: Operator;
+    count?: number;
+    timeframeMs?: number;
+    successStatus: AlertEpisodeStatus;
+    stayStatus: AlertEpisodeStatus;
+  }): StateTransitionResult {
+    const config: ThresholdConfig = { operator, count, timeframeMs };
+
+    if (isThresholdMet(currentStatusCount, elapsedMs, config)) {
+      return { status: successStatus };
+    }
+
+    return { status: stayStatus, statusCount: currentStatusCount + 1 };
+  }
+
+  /**
+   * Safely parses a duration string to milliseconds.
+   * Returns `undefined` when the value is malformed so that
+   * the timeframe dimension is simply ignored instead of
+   * blowing up the entire state transition evaluation.
+   */
+  private safeParseDurationToMs(
+    value: string | undefined,
+    ruleId: string,
+    resource: 'pending_timeframe' | 'recovering_timeframe'
+  ): number | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    try {
+      return parseDurationToMs(value);
+    } catch {
+      this.logger.warn({
+        message: 'Rule state transition timeframe is invalid',
+        code: ALERTING_LOG_CODES.DIRECTOR_TIMEFRAME_INVALID,
+        labels: { rule_id: ruleId, resource },
+      });
+      return undefined;
+    }
+  }
+
+  private getElapsedMs(evaluatedAt: string, phaseStartedAt?: string | null): number {
+    if (!phaseStartedAt) {
+      return 0;
+    }
+
+    const currentMs = Date.parse(evaluatedAt);
+    const phaseStartedMs = Date.parse(phaseStartedAt);
+
+    if (Number.isNaN(currentMs) || Number.isNaN(phaseStartedMs)) {
+      return 0;
+    }
+
+    return Math.max(0, currentMs - phaseStartedMs);
+  }
+}

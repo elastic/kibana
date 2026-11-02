@@ -6,6 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { withTimeout } from '@kbn/std';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
@@ -19,12 +20,12 @@ import {
   MessageRole,
   SELECT_RELEVANT_FIELDS_NAME,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { createOpenAiChunk } from './create_openai_chunk';
+import { createOpenAiChunk, createOpenAIResponse } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
-type LLMMessage = string[] | ToolMessage | string | undefined;
+export type LLMMessage = string[] | ToolMessage | string | undefined;
 
 type RequestHandler = (
   request: Request,
@@ -60,6 +61,7 @@ export interface LlmResponseSimulator {
   complete: () => Promise<void>;
   rawWrite: (chunk: string) => Promise<void>;
   rawEnd: () => Promise<void>;
+  stream: boolean;
 }
 
 export class LlmProxy {
@@ -311,12 +313,14 @@ export class LlmProxy {
     waitForIntercept: () => Promise<LlmResponseSimulator>;
     completeAfterIntercept: () => Promise<LlmResponseSimulator>;
   } {
-    const waitForInterceptPromise = Promise.race([
-      new Promise<LlmResponseSimulator>((outerResolve) => {
+    const waitForInterceptPromise = withTimeout({
+      promise: new Promise<LlmResponseSimulator>((outerResolve) => {
         this.interceptors.push({
           name,
           when,
           handle: (request, response, requestBody) => {
+            const stream = requestBody.stream ?? false;
+
             function write(chunk: string) {
               return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
             }
@@ -326,10 +330,11 @@ export class LlmProxy {
 
             const simulator: LlmResponseSimulator = {
               requestBody,
+              stream,
               status: once((status: number) => {
                 response.writeHead(status, {
                   'Elastic-Interceptor': name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
-                  'Content-Type': 'text/event-stream',
+                  'Content-Type': stream ? 'text/event-stream' : 'application/json',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
                 });
@@ -348,11 +353,15 @@ export class LlmProxy {
               },
               complete: async () => {
                 this.log.debug(`Completed intercept for "${name}"`);
-                await write('data: [DONE]\n\n');
+                if (stream) {
+                  await write('data: [DONE]\n\n');
+                }
                 await end();
               },
               error: async (error) => {
-                await write(`data: ${JSON.stringify({ error })}\n\n`);
+                await write(
+                  stream ? `data: ${JSON.stringify({ error })}\n\n` : JSON.stringify({ error })
+                );
                 await end();
               },
             };
@@ -361,21 +370,20 @@ export class LlmProxy {
           },
         });
       }),
-      new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 30000ms`)), 30000);
-      }),
-    ]);
+      timeoutMs: 30000,
+    }).then((outcome) => {
+      if (outcome.timedout) {
+        throw new Error(`Interceptor "${name}" timed out after 30000ms`);
+      }
+      return outcome.value;
+    });
 
     return {
       waitForIntercept: () => waitForInterceptPromise,
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
 
-        function getParsedChunks(): Array<string | ToolMessage> {
-          const llmMessage = isFunction(responseChunks)
-            ? responseChunks(simulator.requestBody)
-            : responseChunks;
-
+        function getParsedChunks(llmMessage: LLMMessage): Array<string | ToolMessage> {
           if (!llmMessage) {
             return [];
           }
@@ -391,9 +399,17 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        const parsedChunks = getParsedChunks();
-        for (const chunk of parsedChunks) {
-          await simulator.next(chunk);
+        const llmMessage = isFunction(responseChunks)
+          ? responseChunks(simulator.requestBody)
+          : responseChunks;
+
+        if (simulator.stream) {
+          const parsedChunks = getParsedChunks(llmMessage);
+          for (const chunk of parsedChunks) {
+            await simulator.next(chunk);
+          }
+        } else {
+          await simulator.rawWrite(JSON.stringify(createOpenAIResponse(llmMessage)));
         }
 
         await simulator.complete();

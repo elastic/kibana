@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodSchema } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
@@ -15,6 +15,7 @@ import {
   type LangSmithParams,
 } from '@langchain/core/language_models/chat_models';
 import type { InteropZodType } from '@langchain/core/utils/types';
+import { interopSafeParseAsync, isInteropZodSchema } from '@langchain/core/utils/types';
 import type {
   BaseLanguageModelInput,
   StructuredOutputMethodOptions,
@@ -22,7 +23,6 @@ import type {
 } from '@langchain/core/language_models/base';
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { isInteropZodSchema } from '@langchain/core/utils/types';
 import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
@@ -32,6 +32,8 @@ import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
+  ChatCompleteCacheControl,
+  ChatCompletionReasoning,
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
@@ -63,7 +65,12 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   temperature?: number;
   model?: string;
   signal?: AbortSignal;
+  timeout?: number;
+  maxContentLength?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
+  reasoning?: ChatCompletionReasoning;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -72,12 +79,18 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   tool_choice?: ToolChoice;
   temperature?: number;
   model?: string;
+  timeout?: number;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
+  reasoning?: ChatCompletionReasoning;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
 
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
+ *
+ * Reasoning text (`additional_kwargs.reasoning_content`) is only included when streaming.
  *
  * @example
  * ```ts
@@ -102,6 +115,11 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected maxRetries?: number;
   protected model?: string;
   protected signal?: AbortSignal;
+  protected timeout?: number;
+  protected maxContentLength?: number;
+  protected sessionId?: string;
+  protected cacheControl?: ChatCompleteCacheControl;
+  protected reasoning?: ChatCompletionReasoning;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -113,7 +131,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
+    this.timeout = args.timeout;
+    this.maxContentLength = args.maxContentLength;
     this.maxRetries = args.maxRetries;
+    this.sessionId = args.sessionId;
+    this.cacheControl = args.cacheControl;
+    this.reasoning = args.reasoning;
   }
 
   static lc_name() {
@@ -128,6 +151,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       'tool_choice',
       'temperature',
       'model',
+      'cacheControl',
+      'sessionId',
+      'reasoning',
     ];
   }
 
@@ -173,23 +199,37 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   override bindTools(tools: BindToolsInput[], kwargs?: Partial<InferenceChatModelCallOptions>) {
     // conversion will be done at call time for simplicity's sake
     // so we just need to implement this method with the default behavior to support tools
-    return this.bind({
+    return this.withConfig({
       tools,
       ...kwargs,
-    } as Partial<InferenceChatModelCallOptions>);
+    });
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
+    const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
+    const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+    const resolvedToolChoice = options.tool_choice ?? 'auto';
+
     return {
       connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
-      toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
+      // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
+      // Only forward tool params when we actually have tools.
+      tools: hasTools ? inferredTools : undefined,
+      // Default to `auto` when tools are present so OpenAI-compatible endpoints that require an
+      // explicit tool choice can still accept the request.
+      toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
+      timeout: options.timeout ?? this.timeout,
+      maxContentLength: this.maxContentLength,
+      cacheControl: options.cacheControl ?? this.cacheControl,
+      sessionId: options.sessionId ?? this.sessionId,
+      reasoning: options.reasoning ?? this.reasoning,
     };
   }
 
@@ -246,7 +286,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           ? {
               tokenUsage: {
                 promptTokens: response.tokens.prompt,
-                completionTokens: response.tokens.completion,
+                completionTokens: response.tokens.completion + (response.tokens.thinking ?? 0),
                 totalTokens: response.tokens.total,
               },
             }
@@ -335,7 +375,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema as unknown as ZodSchema),
+            parameters:
+              '_zod' in (schema as object)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
           },
         },
       ];
@@ -358,7 +401,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const llm = this.bindTools(tools, { tool_choice: functionName });
 
     const outputParser = RunnableLambda.from<AIMessageChunk, RunOutput>(
-      (input: AIMessageChunk): RunOutput => {
+      async (input: AIMessageChunk): Promise<RunOutput> => {
         if (!input.tool_calls || input.tool_calls.length === 0) {
           throw new Error('No tool calls found in the response.');
         }
@@ -366,7 +409,20 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         if (!toolCall) {
           throw new Error(`No tool call found with name ${functionName}.`);
         }
-        return toolCall.args as RunOutput;
+        if (!isInteropZodSchema(schema)) {
+          return toolCall.args as RunOutput;
+        }
+        const parsed = await interopSafeParseAsync(schema, toolCall.args);
+        if (parsed.success) {
+          return parsed.data;
+        }
+        const text = JSON.stringify(toolCall.args);
+        throw new OutputParserException(
+          `Failed to parse. Text: "${text}". Error: ${
+            parsed.error.issues ? JSON.stringify(parsed.error.issues) : String(parsed.error)
+          }`,
+          text
+        );
       }
     );
 

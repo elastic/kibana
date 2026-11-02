@@ -15,5 +15,7 @@ export * from './src/types';
 export * from './src/list_header';
 export * from './src/header_menu';
 export * from './src/generate_linked_rules_menu_item';
+export * from './src/unnecessary_escaping_callout';
 export * from './src/wildcard_with_wrong_operator_callout';
+export * from './src/malformed_matches_value_callout';
 export * from './src/partial_code_signature_callout';

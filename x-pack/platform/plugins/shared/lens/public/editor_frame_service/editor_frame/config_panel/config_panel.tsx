@@ -6,26 +6,27 @@
  */
 
 import React, { useEffect, useMemo, memo, useCallback } from 'react';
-import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
   removeDimension,
 } from '../../../state_management/lens_slice';
 import { LayerPanel } from './layer_panel';
+import { getVisibleLayerIds } from './get_visible_layer_ids';
 import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import {
   setLayerDefaultDimension,
+  setDimensionAndUpdateDatasource,
   useLensDispatch,
   removeOrClearLayer,
   cloneLayer,
@@ -37,6 +38,7 @@ import {
   selectVisualization,
   selectSelectedLayerId,
   registerLibraryAnnotationGroup,
+  selectCanEditTextBasedQuery,
 } from '../../../state_management';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
@@ -60,7 +62,8 @@ export function ConfigPanel(
   }
 ) {
   const { datasourceMap } = useEditorFrameService();
-  const { activeVisualization, canEditTextBasedQuery, indexPatternService } = props;
+  const { activeVisualization, indexPatternService } = props;
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
@@ -83,13 +86,11 @@ export function ConfigPanel(
       return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
     }
 
-    const visibleLayerIds = layerIds.filter((id) => {
-      const config = activeVisualization.getConfiguration({
-        layerId: id,
-        frame: props.framePublicAPI,
-        state: visualization.state,
-      });
-      return !config.hidden;
+    const visibleLayerIds = getVisibleLayerIds({
+      activeVisualization,
+      visualizationState: visualization.state,
+      framePublicAPI: props.framePublicAPI,
+      layerIds,
     });
 
     const isOnlyVisibleLayer = visibleLayerIds.length === 1;
@@ -162,16 +163,13 @@ export function ConfigPanel(
     [updateDatasource]
   );
 
-  const updateAll = useMemo(
+  const updateAll = useMemo<LayerPanelProps['updateAll']>(
     () =>
-      (
-        datasourceId: string | undefined,
-        newDatasourceState: unknown,
-        newVisualizationState: unknown
-      ) => {
-        if (!datasourceId) return;
-        // React will synchronously update if this is triggered from a third party component,
-        // which we don't want. The timeout lets user interaction have priority, then React updates.
+      ({ datasourceId, newDatasourceState, layerId, groupId, columnId }) => {
+        const visualizationId = visualization.activeId;
+        if (!datasourceId || !visualizationId) return;
+        // Keep async behavior from dimension editors, but delegate the
+        // datasource+visualization orchestration to a single reducer action.
 
         setTimeout(() => {
           const newDsState =
@@ -179,28 +177,19 @@ export function ConfigPanel(
               ? newDatasourceState(datasourceStates[datasourceId].state)
               : newDatasourceState;
 
-          const newVisState =
-            typeof newVisualizationState === 'function'
-              ? newVisualizationState(visualization.state)
-              : newVisualizationState;
-
           dispatchLens(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              newState: newVisState,
-              dontSyncLinkedDimensions: true, // TODO: to refactor: this is quite brittle, we avoid to sync linked dimensions because we do it with datasourceState update
-            })
-          );
-          dispatchLens(
-            updateDatasourceState({
-              newDatasourceState: newDsState,
+            setDimensionAndUpdateDatasource({
+              visualizationId,
+              layerId,
+              groupId,
+              columnId,
               datasourceId,
-              clearStagedPreview: false,
+              newDatasourceState: newDsState,
             })
           );
         }, 0);
       },
-    [dispatchLens, visualization.state, datasourceStates, activeVisualization.id]
+    [dispatchLens, datasourceStates, visualization.activeId]
   );
 
   const toggleFullscreen = useCallback(() => {
@@ -290,7 +279,7 @@ export function ConfigPanel(
   // This will be used only in dimension editors like metric charts which adds a hidden layer.
   // That's why we don't update the currently selected or focused layer.
   const addLayer: AddLayerFunction = useCallback(
-    (layerType, extraArg, ignoreInitialValues, seriesType) => {
+    (layerType, { extraArg, ignoreInitialValues, seriesType } = {}) => {
       const layerId = generateId();
       dispatchLens(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
@@ -317,21 +306,35 @@ export function ConfigPanel(
     };
   }, [activeVisualization, props.framePublicAPI, selectedLayerId, visualization.state]);
 
-  const euiOverflowScroll = useEuiOverflowScroll('y');
-
   if (layerConfig?.config.hidden || !selectedLayerId || !layerConfig) return null;
 
   return (
     <EuiForm
       css={css`
         .lnsApp & {
+          /* Add left padding and negative margin to create space for drag-drop extra targets
+             (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones. */
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
-          margin-left: -400px;
-          ${euiOverflowScroll}
+            calc(${DRAG_DROP_EXTRA_TARGETS_PADDING}px + ${euiTheme.size.base});
+          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          /* Background gradient: transparent in the extended left area (for tooltips),
+             solid color for the visible content area */
+          background: linear-gradient(
+            to right,
+            transparent 0,
+            transparent ${DRAG_DROP_EXTRA_TARGETS_PADDING}px,
+            ${euiTheme.colors.emptyShade} ${DRAG_DROP_EXTRA_TARGETS_PADDING}px
+          );
+          /* Override the default max-width of drag-drop extra targets to reduce
+             horizontal overflow space requirements */
+          .domDroppable__extraTargets {
+            width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
+          }
+          /* Note: overflow scrolling is handled by the parent lnsConfigPanelScrollContainer */
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
             margin-left: 0;
+            background: ${euiTheme.colors.emptyShade};
           }
         }
       `}
@@ -359,11 +362,13 @@ export function ConfigPanel(
         addLayer={addLayer}
         isOnlyLayer={isOnlyLayer}
         onEmptyDimensionAdd={(columnId, { groupId }) => {
+          // the layer's datasource can differ from the active one on mixed panels
+          // (e.g. a form-based reference line layer on an ES|QL chart)
+          const layerDatasourceId =
+            props.framePublicAPI.datasourceLayers?.[selectedLayerId]?.datasourceId ??
+            activeDatasourceId;
           // avoid state update if the datasource does not support initializeDimension
-          if (
-            activeDatasourceId != null &&
-            datasourceMap[activeDatasourceId]?.initializeDimension
-          ) {
+          if (layerDatasourceId != null && datasourceMap[layerDatasourceId]?.initializeDimension) {
             dispatchLens(
               setLayerDefaultDimension({
                 layerId: selectedLayerId,

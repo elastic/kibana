@@ -12,6 +12,7 @@ import type { ChatCompletionTokenCount } from './events';
  */
 export interface InferenceCallbackCompleteEvent {
   tokens?: ChatCompletionTokenCount;
+  model?: string;
 }
 
 /**

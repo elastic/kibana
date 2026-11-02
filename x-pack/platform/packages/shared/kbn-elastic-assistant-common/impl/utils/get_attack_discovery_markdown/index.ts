@@ -15,7 +15,9 @@ export const getMarkdownFields = (markdown: string): string => {
 };
 
 export const getAttackChainMarkdown = (attackDiscovery: AttackDiscovery): string => {
-  const tacticMetadata = getTacticMetadata(attackDiscovery).filter((tactic) => tactic.detected);
+  const tacticMetadata = getTacticMetadata(attackDiscovery.mitreAttackTactics).filter(
+    (tactic) => tactic.detected
+  );
 
   if (tacticMetadata.length === 0) {
     return '';

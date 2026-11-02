@@ -1,0 +1,26 @@
+# COPY_SIGN
+
+Returns a value with the magnitude of the first argument and the sign of the second argument. This function is similar to Java's Math.copySign(double magnitude, double sign) and IEEE 754's `copysign`.
+
+## Syntax
+
+`COPY_SIGN(magnitude, sign)`
+
+### Parameters
+
+#### magnitude
+
+The expression providing the magnitude of the result. Must be a numeric type.
+
+#### sign
+
+The expression providing the sign of the result. Must be a numeric type.
+
+## Examples
+
+Calculates a new field `cs1` that takes the absolute value of `salary` but applies the sign of the smallest value in `salary_change` for each employee.
+
+```esql
+FROM employees
+| EVAL cs1 = COPY_SIGN(salary, LEAST(salary_change))
+```

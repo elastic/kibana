@@ -17,6 +17,7 @@ import type {
   TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { NavigateToLensContext } from '@kbn/lens-common';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import type { VisGroups } from './vis_groups_enum';
@@ -126,6 +127,16 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    * Using this method we can rewrite the standard mechanism for getting used indexes
    */
   readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
+
+  /**
+   * Vega may provide project routing overrides.
+   * This method should return an array of project routing values extracted from the vega spec.
+   */
+  readonly getProjectRoutingOverrides?: (
+    visParams: VisParams
+  ) => Promise<Array<{ name?: string; value: string }> | undefined>;
+
+  readonly getEsqlQuery?: (visParams: VisParams) => AggregateQuery | undefined;
 
   readonly isAccessible?: boolean;
   /**

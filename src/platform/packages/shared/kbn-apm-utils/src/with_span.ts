@@ -9,7 +9,10 @@
 
 import type { Logger } from 'elastic-apm-node';
 import agent from 'elastic-apm-node';
+import { trace } from '@opentelemetry/api';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import asyncHooks from 'async_hooks';
+import { prefixKeys } from './add_labels';
 
 export interface SpanOptions {
   name: string;
@@ -70,7 +73,17 @@ export async function withSpan<T>(
   ];
 
   if (!agent.isStarted()) {
-    const promise = cb();
+    // If Elastic APM is not started, let's use OTel's withActiveSpan instead in case it's started.
+    const promise = withActiveSpan(
+      name,
+      {
+        attributes: {
+          'span.type': type,
+          ...(labels ? prefixKeys(labels, 'kibana.') : {}),
+        },
+      },
+      () => cb()
+    );
     // make sure tests that mock out the callback with a sync
     // function don't fail.
     if (typeof promise === 'object' && 'then' in promise) {
@@ -130,6 +143,7 @@ export async function withSpan<T>(
 
     if (labels) {
       targetedSpan.addLabels(labels);
+      trace.getActiveSpan()?.setAttributes(prefixKeys(labels, 'kibana.'));
     }
 
     return promise

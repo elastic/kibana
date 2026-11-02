@@ -12,14 +12,21 @@ import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
 import {
-  fromSavedObjectTabToSavedSearch,
+  fromSavedObjectTabToAppState,
+  fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
 } from '../tab_mapping_utils';
-import { createInternalStateAsyncThunk } from '../utils';
-import { setDataView } from './data_views';
+import {
+  createInternalStateAsyncThunk,
+  extractEsqlVariables,
+  parseControlGroupJson,
+} from '../utils';
+import { setDataSource, setDataView } from './tab_state_data_view';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
+import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import type { DiscoverAppState } from '../types';
+import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -51,35 +58,49 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
       discoverSession.tabs.map(async (tab) => {
         dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
+        const existingTab = selectTab(state, tab.id);
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+        const tabDataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
         let initialAppState: DiscoverAppState | undefined;
 
-        if (tabStateContainer) {
-          const savedSearch = await fromSavedObjectTabToSavedSearch({
-            tab,
-            discoverSession,
-            services,
-          });
-          const dataView = savedSearch.searchSource.getField('index');
+        if (tabDataStateContainer) {
+          const searchSource = await fromSavedObjectTabToSearchSource({ tab, services });
+          const query = searchSource.getField('query');
+          let dataView = searchSource.getField('index');
 
-          if (dataView) {
+          if (isNonEmptyEsqlQuery(query)) {
+            const previousSource = tabRuntimeState.currentDataSource$.getValue();
+            // Same variables and time range the tab is restored with, as in initializeSingleTab.
+            const esqlVariables = extractEsqlVariables(parseControlGroupJson(tab.controlGroupJson));
+            const { esqlSource, dataView: esqlDataView } = await resolveEsqlSource({
+              esql: query.esql,
+              services,
+              esqlVariables,
+              timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
+              previousSourceId: previousSource?.kind === 'esql' ? previousSource.id : undefined,
+            });
+            dataView = esqlDataView;
+            dispatch(setDataSource({ tabId: tab.id, dataSource: esqlSource }));
+          } else if (dataView) {
             dispatch(setDataView({ tabId: tab.id, dataView }));
           }
 
-          tabStateContainer.savedSearchState.set(savedSearch);
-
           initialAppState = getInitialAppState({
-            initialUrlState: undefined,
-            savedSearch,
+            initialUrlState: fromSavedObjectTabToAppState({ tab }),
+            persistedTab: tab,
+            dataView,
             services,
           });
+
+          // Sidebar visibility is not saved tab state, so keep the current value when resetting.
+          initialAppState.hideSidebar = existingTab?.appState.hideSidebar;
         }
 
         const tabState = fromSavedObjectTabToTabState({
           tab,
-          existingTab: selectTab(state, tab.id),
+          existingTab,
           initialAppState,
+          profileStateRegistry: services.profileStateRegistry,
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.

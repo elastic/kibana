@@ -31,7 +31,8 @@ export function nodesByIndices() {
       const node = get(shard, 'node.name', shard.node || 'unassigned');
       const index = get(shard, 'index.name', shard.index);
       if (!obj[node]) {
-        createNode(obj, nodes[node], node);
+        const nodeInfo = nodes[node] || { name: node, type: 'node' };
+        createNode(obj, nodeInfo, node);
       }
       let indexObj = find(obj[node].children, { id: index });
       if (!indexObj) {

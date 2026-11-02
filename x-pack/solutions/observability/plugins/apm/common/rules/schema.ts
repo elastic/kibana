@@ -25,7 +25,7 @@ export const errorCountParamsSchema = schema.object({
   threshold: schema.number(),
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  groupBy: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   errorGroupingKey: schema.maybe(schema.string()),
   useKqlFilter: schema.maybe(schema.boolean()),
   searchConfiguration: schema.maybe(searchConfigurationSchema),
@@ -44,7 +44,7 @@ export const transactionDurationParamsSchema = schema.object({
     schema.literal(AggregationType.P99),
   ]),
   environment: schema.string(),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  groupBy: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   useKqlFilter: schema.maybe(schema.boolean()),
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
@@ -53,6 +53,7 @@ const detectorsSchema = schema.oneOf([
   schema.literal(AnomalyDetectorType.txLatency),
   schema.literal(AnomalyDetectorType.txThroughput),
   schema.literal(AnomalyDetectorType.txFailureRate),
+  schema.literal(AnomalyDetectorType.txLowCount),
 ]);
 
 export const anomalyParamsSchema = schema.object({
@@ -67,7 +68,7 @@ export const anomalyParamsSchema = schema.object({
     schema.literal(ML_ANOMALY_SEVERITY.MINOR),
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
-  anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1 })),
+  anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1, maxSize: 4 })),
 });
 
 export const transactionErrorRateParamsSchema = schema.object({
@@ -78,7 +79,7 @@ export const transactionErrorRateParamsSchema = schema.object({
   transactionName: schema.maybe(schema.string()),
   serviceName: schema.maybe(schema.string()),
   environment: schema.string(),
-  groupBy: schema.maybe(schema.arrayOf(schema.string())),
+  groupBy: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   useKqlFilter: schema.maybe(schema.boolean()),
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });

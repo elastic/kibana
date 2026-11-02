@@ -9,6 +9,7 @@
 
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { ChromeSetup } from '@kbn/core-chrome-browser';
 import type { CoreDiServiceSetup } from '@kbn/core-di';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
@@ -21,6 +22,7 @@ import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-browser';
 import type { SecurityServiceSetup } from '@kbn/core-security-browser';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-browser';
+import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -42,6 +44,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
+  /** {@link ChromeSetup} */
+  chrome: ChromeSetup;
   /** {@link CustomBrandingSetup} */
   customBranding: CustomBrandingSetup;
   /** {@link FatalErrorsSetup} */
@@ -69,6 +73,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   security: SecurityServiceSetup;
   /** {@link UserProfileServiceSetup} */
   userProfile: UserProfileServiceSetup;
+  /** {@link IUserStorageClient} */
+  userStorage: IUserStorageClient;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }

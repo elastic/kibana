@@ -16,5 +16,3 @@ export enum FactoryQueryType {
   IndicatorGrid = 'threatIntelligenceIndicatorGrid',
   Barchart = 'threatIntelligenceBarchart',
 }
-
-export const CASE_ATTACHMENT_TYPE_ID = 'indicator';

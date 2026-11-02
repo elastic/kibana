@@ -6,12 +6,11 @@
  */
 
 import { partition } from 'lodash';
+import type { SavedObject } from '@kbn/core/server';
 import { getCaseReferenceId } from './references';
-import type { AttachmentSavedObject } from './types';
 
-export const partitionByCaseAssociation = (caseId: string, attachments: AttachmentSavedObject[]) =>
-  partition(attachments, (attachment) => {
-    const caseRefId = getCaseReferenceId(attachment.references);
+export const isAssociatedToCase = <T>(caseId: string, attachment: SavedObject<T>): boolean =>
+  caseId === getCaseReferenceId(attachment.references);
 
-    return caseId === caseRefId;
-  });
+export const partitionByCaseAssociation = <T>(caseId: string, attachments: Array<SavedObject<T>>) =>
+  partition(attachments, (attachment) => isAssociatedToCase(caseId, attachment));

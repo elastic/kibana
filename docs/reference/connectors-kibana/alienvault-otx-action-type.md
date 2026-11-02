@@ -1,15 +1,15 @@
 ---
 navigation_title: "AlienVault OTX"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/alienvault-otx-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.3
   serverless: preview
 ---
 
 # AlienVault OTX connector [alienvault-otx-action-type]
 
 The AlienVault OTX (Open Threat Exchange) connector communicates with the AlienVault OTX API to retrieve community-driven threat intelligence.
+
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Create connectors in {{kib}} [define-alienvault-otx-ui]
 

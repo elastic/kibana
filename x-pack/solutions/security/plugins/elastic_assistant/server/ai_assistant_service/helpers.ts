@@ -27,8 +27,12 @@ export const createGetElserId =
   (trainedModelsProvider: MlPluginSetup['trainedModelsProvider']): GetElser =>
   async () =>
     // Force check to happen as internal user
-    (await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER())
-      .model_id;
+    (
+      await trainedModelsProvider(
+        {} as KibanaRequest,
+        { getCurrentNamespace: () => undefined } as SavedObjectsClientContract
+      ).getELSER()
+    ).model_id;
 
 interface PipelineExistsParams {
   esClient: ElasticsearchClient;

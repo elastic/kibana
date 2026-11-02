@@ -19,61 +19,86 @@ import {
   UnifiedHistogramFetchStatus,
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
-import { isEqual, intersection } from 'lodash';
+import { intersection } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, pairwise, startWith } from 'rxjs';
 import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { Filter } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { isSameDataset, type EsqlSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { type DiscoverAppState, useAppStateSelector } from '../../state_management/redux';
+import {
+  type DiscoverAppState,
+  selectTabCombinedFilters,
+  useAppStateSelector,
+} from '../../state_management/redux';
 import type {
   DataDocumentsMsg,
   DiscoverLatestFetchDetails,
 } from '../../state_management/discover_data_state_container';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
   internalStateActions,
-  useCurrentDataView,
+  useCurrentDataSource,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
+import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
-const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
-const EMPTY_FILTERS: Filter[] = [];
+const LENS_ACTIONS_OPTIONS: UseUnifiedHistogramProps['lensActionsOptions'] = {
+  navigation: { originatingApp: 'discover' },
+  telemetrySource: 'discover',
+};
+
 const TAB_ATTRIBUTE_TO_TRIGGER_CHART_FETCH: Array<keyof UnifiedHistogramFetchParamsExternal> = [
   'externalVisContext',
   'breakdownField',
   'timeInterval',
 ];
 
+/**
+ * A new source for the same dataset (revert → setDataView) is not a source change.
+ * Classic compares `id`. ES|QL compares `datasetId`, because `id` is a query hash
+ * and changes when the query text changes even if FROM, time field, and project
+ * routing stay the same.
+ */
+function hasFetchParamChanged(
+  previous: UnifiedHistogramFetchParamsExternal,
+  next: UnifiedHistogramFetchParamsExternal,
+  key: keyof UnifiedHistogramFetchParamsExternal
+): boolean {
+  if (key === 'dataSource') {
+    if (!previous.dataSource && !next.dataSource) {
+      return false;
+    }
+    return !isSameDataset(previous.dataSource, next.dataSource);
+  }
+  return previous[key] !== next[key];
+}
+
 export interface UseUnifiedHistogramOptions {
   initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
 }
 
 export const useDiscoverHistogram = (
-  stateContainer: DiscoverStateContainer,
   options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const {
     data$: { main$, documents$, totalHits$ },
     inspectorAdapters,
     getAbortController,
-  } = stateContainer.dataState;
-  const savedSearchState = useSavedSearch();
+  } = dataStateContainer;
   const isEsqlMode = useIsEsqlMode();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -87,6 +112,7 @@ export const useDiscoverHistogram = (
    */
 
   const [unifiedHistogramApi, setUnifiedHistogramApi] = useState<UnifiedHistogramApi>();
+  const chartHidden = useAppStateSelector((state) => state.hideChart);
 
   /**
    * Sync Unified Histogram state with Discover state
@@ -96,42 +122,38 @@ export const useDiscoverHistogram = (
     const subscription = createUnifiedHistogramStateObservable(
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
-      const { lensRequestAdapter, ...stateChanges } = changes;
-      const appState = stateContainer.getCurrentTab().appState;
-      const oldState = {
-        hideChart: appState.hideChart,
-      };
-      const newState = { ...oldState, ...stateChanges };
+      const { lensRequestAdapter, hideChart } = changes;
 
       if ('lensRequestAdapter' in changes) {
         inspectorAdapters.lensRequests = lensRequestAdapter;
       }
 
-      if (!isEqual(oldState, newState)) {
-        dispatch(updateAppState({ appState: newState }));
+      if (typeof hideChart === 'boolean') {
+        // `updateAppState`checks internally for value changes before dispatching any action
+        dispatch(
+          updateAppState({
+            appState: {
+              hideChart,
+            },
+          })
+        );
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [dispatch, inspectorAdapters, stateContainer, unifiedHistogramApi?.state$, updateAppState]);
+  }, [dispatch, inspectorAdapters, unifiedHistogramApi?.state$, updateAppState]);
 
   /**
    * Sync URL query params with Unified Histogram
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState$).subscribe((changes) => {
-      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-        unifiedHistogramApi?.setChartHidden(changes.chartHidden);
-      }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [stateContainer.appState$, unifiedHistogramApi]);
+    if (unifiedHistogramApi && typeof chartHidden === 'boolean') {
+      unifiedHistogramApi.setChartHidden(chartHidden);
+    }
+  }, [chartHidden, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -193,30 +215,24 @@ export const useDiscoverHistogram = (
    * Request params
    */
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
-  const currentTabControlState = useCurrentTabSelector((tab) => tab.controlGroupState);
+  const currentTabControlState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const {
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
     searchSessionId,
   } = requestParams;
 
-  const dataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   const query = useAppStateSelector((state) => state.query);
-  const appFilters = useAppStateSelector((state) => state.filters);
-  const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
-
-  const filtersMemoized = useMemo(() => {
-    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
-    return allFilters.length ? allFilters : EMPTY_FILTERS;
-  }, [appFilters, globalFilters]);
-
-  const chartHidden = useAppStateSelector((state) => state.hideChart);
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation);
+  const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
   const getModifiedVisAttributes = useCallback<
@@ -230,36 +246,35 @@ export const useDiscoverHistogram = (
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
-      dataView,
+      dataSource: currentDataSource,
       query,
-      filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
+      filters,
       timeRange,
       relativeTimeRange,
       breakdownField,
       timeInterval,
       esqlVariables,
-      controlsState: currentTabControlState,
+      isApproximate: esqlApproximation,
+      controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
-      externalVisContext:
-        isEsqlMode && canImportVisContext(savedSearchState?.visContext)
-          ? savedSearchState?.visContext
-          : undefined,
+      externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
-    };
+    } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
     breakdownField,
     timeInterval,
     currentTabControlState,
-    dataView,
+    currentDataSource,
     esqlVariables,
-    filtersMemoized,
+    esqlApproximation,
+    filters,
     inspectorAdapters.requests,
     isEsqlMode,
     timeRange,
     relativeTimeRange,
     searchSessionId,
     query,
-    savedSearchState?.visContext,
+    visContext,
     getModifiedVisAttributes,
   ]);
 
@@ -267,18 +282,16 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
-      const visContext = collectedFetchParams?.externalVisContext ?? savedSearchState?.visContext;
-      const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
+      const esqlSource = currentDataSource?.kind === 'esql' ? currentDataSource : undefined;
+      const table = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
-        isEsqlMode,
+        currentDataSource: esqlSource,
       });
 
       const nextFetchParams = {
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        columns: isEsqlMode ? esqlQueryColumns : undefined,
-        table: isEsqlMode ? table : undefined,
-        externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
+        table: esqlSource && !latestFetchDetails ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
@@ -293,7 +306,7 @@ export const useDiscoverHistogram = (
       return;
     }
 
-    const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
+    const subscription = dataStateContainer.fetchChart$.subscribe((latestFetchDetails) => {
       if (latestFetchDetails) {
         triggerUnifiedHistogramFetch.current(latestFetchDetails);
       }
@@ -302,19 +315,20 @@ export const useDiscoverHistogram = (
     return () => {
       subscription.unsubscribe();
     };
-  }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+  }, [dataStateContainer.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
     const previousFetchParams = previousFetchParamsRef.current;
     if (!collectedFetchParams || !previousFetchParams) {
       return;
     }
-    const changedParams = Object.keys(collectedFetchParams).filter((key) => {
-      return (
-        collectedFetchParams[key as keyof UnifiedHistogramFetchParamsExternal] !==
-        previousFetchParams[key as keyof UnifiedHistogramFetchParamsExternal]
-      );
-    });
+    const changedParams = Object.keys(collectedFetchParams).filter((key) =>
+      hasFetchParamChanged(
+        previousFetchParams,
+        collectedFetchParams,
+        key as keyof UnifiedHistogramFetchParamsExternal
+      )
+    );
 
     if (
       changedParams.length > 0 &&
@@ -327,6 +341,7 @@ export const useDiscoverHistogram = (
     }
   }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 
+  const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
@@ -340,9 +355,11 @@ export const useDiscoverHistogram = (
         case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
           // if user customized the visualization manually
           // (only this action should trigger Unsaved changes badge)
-          stateContainer.savedSearchState.updateVisContext({
-            nextVisContext,
-          });
+          dispatch(
+            updateAttributes({
+              attributes: { visContext: nextVisContext },
+            })
+          );
           dispatch(
             setOverriddenVisContextAfterInvalidation({
               overriddenVisContextAfterInvalidation: undefined,
@@ -377,7 +394,7 @@ export const useDiscoverHistogram = (
           break;
       }
     },
-    [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
+    [dispatch, setOverriddenVisContextAfterInvalidation, updateAttributes]
   );
 
   const onBreakdownFieldChange = useCallback<
@@ -408,6 +425,7 @@ export const useDiscoverHistogram = (
       enableLensVisService: true,
       services,
       localStorageKeyPrefix: 'discover',
+      lensActionsOptions: LENS_ACTIONS_OPTIONS,
       initialState: {
         chartHidden,
         topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
@@ -456,33 +474,12 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         return changes;
       }
 
-      if (prev?.lensRequestAdapter !== curr.lensRequestAdapter) {
+      if (!prev || prev.lensRequestAdapter !== curr.lensRequestAdapter) {
         changes.lensRequestAdapter = curr.lensRequestAdapter;
       }
 
-      if (prev?.chartHidden !== curr.chartHidden) {
+      if (!prev || prev.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
-      }
-
-      return changes;
-    }),
-    filter((changes) => Object.keys(changes).length > 0)
-  );
-};
-
-const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
-  return state$.pipe(
-    startWith(undefined),
-    pairwise(),
-    map(([prev, curr]) => {
-      const changes: Partial<UnifiedHistogramState> = {};
-
-      if (!curr) {
-        return changes;
-      }
-
-      if (prev?.hideChart !== curr.hideChart) {
-        changes.chartHidden = curr.hideChart;
       }
 
       return changes;
@@ -500,30 +497,29 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 function getUnifiedHistogramTableForEsql({
   documentsValue,
-  isEsqlMode,
+  currentDataSource,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
-  isEsqlMode: boolean;
+  currentDataSource: EsqlSource | undefined;
 }) {
-  if (
-    !isEsqlMode ||
-    !documentsValue?.result ||
-    ![FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus)
-  ) {
-    return {
-      table: undefined,
-      esqlQueryColumns: EMPTY_ESQL_COLUMNS,
-    };
+  if (!currentDataSource) {
+    return undefined;
   }
 
-  const esqlQueryColumns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
-  return {
-    table: {
-      type: 'datatable' as const,
-      rows: documentsValue.result.map((r) => r.raw),
-      columns: esqlQueryColumns,
-      meta: { type: ESQL_TABLE_TYPE },
-    },
-    esqlQueryColumns,
-  };
+  // Provide a pre-fetched data table only when documents are already available,
+  // so Lens can reuse the rows for suggestion enrichment without an extra request.
+  // The columns of the chart itself come from the EsqlSource (its eager LIMIT 0 query), so the
+  // chart doesn't wait for the documents.
+  const isDocumentsComplete =
+    documentsValue?.result &&
+    [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(documentsValue.fetchStatus);
+
+  return isDocumentsComplete
+    ? {
+        type: 'datatable' as const,
+        rows: documentsValue!.result!.map((r) => r.raw),
+        columns: [...currentDataSource.resultColumns],
+        meta: { type: ESQL_TABLE_TYPE },
+      }
+    : undefined;
 }

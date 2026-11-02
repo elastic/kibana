@@ -25,7 +25,7 @@ const SNStoreButtonComponent: React.FC<Props> = ({ color, appId = '' }) => {
       href={getStoreURL(appId)}
       color={color}
       iconSide="right"
-      iconType="popout"
+      iconType="external"
       target="_blank"
     >
       {i18n.VISIT_SN_STORE}

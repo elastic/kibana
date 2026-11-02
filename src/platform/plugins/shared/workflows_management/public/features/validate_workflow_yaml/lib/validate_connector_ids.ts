@@ -7,78 +7,197 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
+import { ALL_CONNECTOR_IDS, type ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem, YamlValidationResult } from '@kbn/workflows-yaml';
+import { isTemplateReference } from './is_template_reference';
+import { getCachedInferenceConnectorInstances } from '../../../../common/schema';
+import {
+  getActionTypeDisplayNameFromStepType,
+  getActionTypeIdFromStepType,
+} from '../../../shared/lib/action_type_utils';
+import {
+  getConnectorTypesFromStepType,
+  getCustomStepConnectorIdSelectionHandler,
+  isCreateConnectorEnabledForStepType,
+} from '../../../shared/lib/connectors_utils';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
-import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
+import {
+  getCreateConnectorHoverCommandLink,
+  getEditConnectorHoverCommandLink,
+} from '../../../widgets/workflow_yaml_editor/lib/use_register_hover_commands';
+
+const TRANSLATIONS = {
+  manageConnector: i18n.translate('workflows.validateConnectorIds.manageConnectorMessage', {
+    defaultMessage: 'Manage connectors',
+  }),
+  featureSettings: i18n.translate('workflows.validateConnectorIds.featureSettingsLinkText', {
+    defaultMessage: 'Feature Settings',
+  }),
+  createConnector: i18n.translate('workflows.validateConnectorIds.createConnectorMessage', {
+    defaultMessage: 'Create connector',
+  }),
+  editConnector: i18n.translate('workflows.validateConnectorIds.editConnectorMessage', {
+    defaultMessage: 'Edit connector',
+  }),
+  allConnectors: i18n.translate('workflows.validateConnectorIds.allConnectorsMessage', {
+    defaultMessage: 'All connectors of this type',
+  }),
+  allConnectorsWarning: i18n.translate(
+    'workflows.validateConnectorIds.allConnectorsWarningMessage',
+    {
+      defaultMessage:
+        'This trigger starts the workflow for events from every connector instance of this type.',
+    }
+  ),
+};
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
-  connectorsManagementUrl?: string
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  connectorsManagementUrl: string,
+  modelSettingsUrl?: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
-  if (!dynamicConnectorTypes) {
-    return [
-      {
-        id: 'connector-id-validation',
-        severity: 'error',
-        message: 'Dynamic connector types not found',
-        owner: 'connector-id-validation',
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 0,
-        afterMessage: null,
-        hoverMessage: null,
-      },
-    ];
-  }
-
   const notReferenceConnectorIds = connectorIdItems.filter(
-    (item) => !item.key?.startsWith('${{') || !item.key.endsWith('}}')
+    (item) => !isTemplateReference(item.key)
   );
 
   for (const connectorIdItem of notReferenceConnectorIds) {
-    const connectorType = dynamicConnectorTypes[connectorIdItem.connectorType];
-    const displayName = connectorType?.displayName ?? connectorIdItem.connectorType;
-    const instances = getConnectorInstancesForType(
-      connectorIdItem.connectorType,
-      dynamicConnectorTypes
-    );
-
-    const instance = instances.find(
-      (ins) => ins.id === connectorIdItem.key || ins.name === connectorIdItem.key
-    );
-
-    if (!instance) {
+    if (connectorIdItem.key === ALL_CONNECTOR_IDS && connectorIdItem.yamlPath[0] === 'triggers') {
       results.push({
         id: connectorIdItem.id,
-        severity: 'error',
-        message: `${displayName} connector "${connectorIdItem.key}" not found. Add a new connector or choose an existing one`,
-        owner: 'connector-id-validation',
-        startLineNumber: connectorIdItem.startLineNumber,
-        startColumn: connectorIdItem.startColumn,
-        endLineNumber: connectorIdItem.endLineNumber,
-        endColumn: connectorIdItem.endColumn,
-        afterMessage: null,
-        hoverMessage: connectorsManagementUrl
-          ? `[Open connectors management](${connectorsManagementUrl})`
-          : null,
-      });
-    } else {
-      results.push({
-        id: connectorIdItem.id,
-        severity: null,
+        severity: 'info',
         message: null,
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${connectorIdItem.connectorType} connector, ID: ${instance.id})`,
-        hoverMessage: null,
+        beforeMessage: TRANSLATIONS.allConnectors,
+        hoverMessage: TRANSLATIONS.allConnectorsWarning,
       });
+    } else {
+      const stepType = connectorIdItem.connectorType;
+
+      const connectorType = dynamicConnectorTypes[stepType];
+      const displayName =
+        connectorType?.displayName ?? getActionTypeDisplayNameFromStepType(stepType);
+      const instances = getConnectorInstancesForType(
+        stepType,
+        dynamicConnectorTypes,
+        getCachedInferenceConnectorInstances()
+      );
+      const isInferenceFeature = Boolean(
+        getCustomStepConnectorIdSelectionHandler(stepType)?.inferenceFeatureId
+      );
+
+      const instance = instances.find((ins) => ins.id === connectorIdItem.key);
+      // Create insert position at the start of the connector-id value
+      const insertPosition = {
+        lineNumber: connectorIdItem.startLineNumber,
+        column: connectorIdItem.startColumn,
+      };
+
+      const manageConnectorLink = `[${TRANSLATIONS.manageConnector}](${connectorsManagementUrl})`;
+      const featureSettingsLink = modelSettingsUrl
+        ? `[${TRANSLATIONS.featureSettings}](${modelSettingsUrl})`
+        : undefined;
+
+      if (!instance) {
+        const actions: string[] = [];
+        if (isInferenceFeature) {
+          if (featureSettingsLink) {
+            actions.push(featureSettingsLink);
+          }
+        } else if (isCreateConnectorEnabledForStepType(stepType)) {
+          const resolvedConnectorType = getConnectorTypesFromStepType(stepType)[0];
+          const createConnectorLink = getCreateConnectorHoverCommandLink({
+            text: TRANSLATIONS.createConnector,
+            connectorType: getActionTypeIdFromStepType(resolvedConnectorType),
+            insertPosition,
+          });
+          actions.push(createConnectorLink);
+        }
+        if (!isInferenceFeature) {
+          actions.push(manageConnectorLink);
+        }
+
+        const errorResult: YamlValidationResult = {
+          id: connectorIdItem.id,
+          severity: 'error',
+          message: isInferenceFeature
+            ? i18n.translate('workflows.validateConnectorIds.inferenceEndpointNotFoundMessage', {
+                defaultMessage:
+                  'Inference endpoint "{id}" not found.\nChoose an existing endpoint in Feature Settings\n',
+                values: { id: connectorIdItem.key },
+              })
+            : i18n.translate('workflows.validateConnectorIds.connectorNotFoundMessage', {
+                defaultMessage:
+                  '{displayName} connector UUID "{id}" not found.\nCreate a new connector or choose an existing one\n',
+                values: { displayName, id: connectorIdItem.key },
+              }),
+          owner: 'connector-id-validation',
+          ruleId: 'connectorNotFound',
+          startLineNumber: connectorIdItem.startLineNumber,
+          startColumn: connectorIdItem.startColumn,
+          endLineNumber: connectorIdItem.endLineNumber,
+          endColumn: connectorIdItem.endColumn,
+          beforeMessage: null,
+          hoverMessage: actions.join(' | '),
+        };
+        results.push(errorResult);
+      } else {
+        const actions: string[] = [];
+        if (instance.isInferenceEndpoint) {
+          if (featureSettingsLink) {
+            actions.push(featureSettingsLink);
+          }
+        } else {
+          actions.push(
+            getEditConnectorHoverCommandLink({
+              text: TRANSLATIONS.editConnector,
+              connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
+              connectorId: instance.id,
+            })
+          );
+          if (isCreateConnectorEnabledForStepType(stepType)) {
+            actions.push(
+              getCreateConnectorHoverCommandLink({
+                text: TRANSLATIONS.createConnector,
+                connectorType: instance.connectorType ?? getActionTypeIdFromStepType(stepType),
+                insertPosition,
+              })
+            );
+          }
+          actions.push(manageConnectorLink);
+        }
+
+        const connectedMessage = i18n.translate(
+          'workflows.validateConnectorIds.connectorFoundMessage',
+          {
+            defaultMessage: `Successfully connected to {displayName} connector "{name}"`,
+            values: { displayName, name: instance.name },
+          }
+        );
+        const uuidMessage = `Connector uuid: <code>${instance.id}</code>`;
+        const actionsMessage = actions.join(' | ');
+
+        const validResult: YamlValidationResult = {
+          id: connectorIdItem.id,
+          severity: 'info',
+          message: null,
+          owner: 'connector-id-validation',
+          startLineNumber: connectorIdItem.startLineNumber,
+          startColumn: connectorIdItem.startColumn,
+          endLineNumber: connectorIdItem.endLineNumber,
+          endColumn: connectorIdItem.endColumn,
+          beforeMessage: `✓ ${instance.name}`,
+          hoverMessage: `${connectedMessage}\n\n${uuidMessage}\n\n${actionsMessage}`,
+        };
+        results.push(validResult);
+      }
     }
   }
 

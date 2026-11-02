@@ -18,7 +18,13 @@ import type {
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import {
+  type Filter,
+  FilterStateStore,
+  type ProjectRouting,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import type {
@@ -32,6 +38,7 @@ import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getData,
@@ -43,10 +50,11 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
+import { initializeProjectRoutingManager } from '../../project_routing_manager';
 import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import { getTopNavConfig } from '../top_nav_config';
+import { getMapsAppHeaderBack, getMapsAppHeaderMenu } from '../top_nav_config';
 import {
   getEditPath,
   getFullPath,
@@ -54,6 +62,7 @@ import {
   MAP_EMBEDDABLE_NAME,
 } from '../../../../common/constants';
 import type { SavedMap } from '../saved_map';
+import { getMapClient } from '../../../content_management';
 import {
   getInitialQuery,
   getInitialRefreshConfig,
@@ -98,17 +107,18 @@ export interface Props {
     query,
     timeFilters,
     searchSessionId,
+    projectRouting,
   }: {
     filters?: Filter[];
     query?: Query;
     timeFilters?: TimeRange;
     forceRefresh?: boolean;
     searchSessionId?: string;
+    projectRouting?: ProjectRouting;
   }) => void;
   timeFilters: TimeRange;
   isSaveDisabled: boolean;
   query: Query | undefined;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: ScopedHistory;
   setExecutionContext: (executionContext: KibanaExecutionContext) => void;
 }
@@ -119,6 +129,7 @@ export interface State {
   savedQuery?: SavedQuery;
   isRefreshPaused: boolean;
   refreshInterval: number;
+  hasSavedMaps: boolean;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -126,6 +137,7 @@ export class MapApp extends React.Component<Props, State> {
   _globalSyncUnsubscribe: (() => void) | null = null;
   _globalSyncChangeMonitorSubscription: Subscription | null = null;
   _appSyncUnsubscribe: (() => void) | null = null;
+  _projectRoutingUnsubscribe: (() => void) | undefined = undefined;
   _appStateManager = new AppStateManager();
   _prevIndexPatternIds: string[] | null = null;
   _isMounted: boolean = false;
@@ -139,6 +151,7 @@ export class MapApp extends React.Component<Props, State> {
       initialized: false,
       isRefreshPaused: true,
       refreshInterval: 0,
+      hasSavedMaps: false,
     };
     this._kbnUrlStateStorage = createKbnUrlStateStorage({
       useHash: false,
@@ -186,6 +199,13 @@ export class MapApp extends React.Component<Props, State> {
       this._updateFromGlobalState
     );
 
+    // Initialize project routing manager for CPS support
+    this._projectRoutingUnsubscribe = initializeProjectRoutingManager({
+      onProjectRoutingChange: (projectRouting) => {
+        this.props.setQuery({ projectRouting });
+      },
+    });
+
     // savedQuery must be fetched from savedQueryId
     // const initialSavedQuery = this._appStateManager.getAppState().savedQuery;
     // if (initialSavedQuery) {
@@ -220,6 +240,9 @@ export class MapApp extends React.Component<Props, State> {
     }
     if (this._globalSyncChangeMonitorSubscription) {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
+    }
+    if (this._projectRoutingUnsubscribe) {
+      this._projectRoutingUnsubscribe();
     }
 
     this.props.onAppLeave((actions) => {
@@ -465,41 +488,81 @@ export class MapApp extends React.Component<Props, State> {
 
     this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
 
-    this.setState({ initialized: true });
+    const hasSavedObject = Boolean(this.props.savedMap.getSavedObjectId());
+    this.setState({ initialized: true, hasSavedMaps: hasSavedObject });
+
+    if (hasSavedObject || this.props.savedMap.hasSaveAndReturnConfig()) {
+      return;
+    }
+
+    try {
+      const results = await getMapClient().search({ limit: 1 });
+      if (this._isMounted) {
+        this.setState({ hasSavedMaps: results.hits.length > 0 });
+      }
+    } catch {
+      // Keep hasSavedMaps false so create-without-library does not render a looping back button.
+    }
   }
 
-  _renderTopNav() {
+  _getManagedBadge(): AppHeaderBadge[] | undefined {
+    if (!this.props.savedMap.isManaged()) {
+      return undefined;
+    }
+
+    const tooltip = i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
+      defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
+    });
+    const managedBadge = getManagedContentBadge(tooltip);
+
+    return [
+      {
+        label: managedBadge.badgeText,
+        color: 'primary',
+        tooltip,
+        'data-test-subj': managedBadge['data-test-subj'],
+      },
+    ];
+  }
+
+  _renderAppHeader() {
     if (this.props.isFullScreen) {
       return null;
     }
 
-    const topNavConfig = getTopNavConfig({
-      savedMap: this.props.savedMap,
-      isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
-      isSaveDisabled: this.props.isSaveDisabled,
-      enableFullScreen: this.props.enableFullScreen,
-      openMapSettings: this.props.openMapSettings,
-      inspectorAdapters: this.props.inspectorAdapters,
-      history: this.props.history,
-    });
+    return (
+      <AppHeader
+        title={this.props.savedMap.getPageTitle()}
+        back={getMapsAppHeaderBack({
+          savedMap: this.props.savedMap,
+          history: this.props.history,
+          hasSavedMaps: this.state.hasSavedMaps,
+        })}
+        badges={this._getManagedBadge()}
+        menu={getMapsAppHeaderMenu({
+          savedMap: this.props.savedMap,
+          isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
+          isSaveDisabled: this.props.isSaveDisabled,
+          enableFullScreen: this.props.enableFullScreen,
+          openMapSettings: this.props.openMapSettings,
+          inspectorAdapters: this.props.inspectorAdapters,
+          history: this.props.history,
+        })}
+        spacing="compact"
+      />
+    );
+  }
+
+  _renderSearchBar() {
+    if (this.props.isFullScreen) {
+      return null;
+    }
 
     const { TopNavMenu } = getNavigation().ui;
     return (
       <TopNavMenu
-        setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
-        badges={
-          this.props.savedMap.isManaged()
-            ? [
-                getManagedContentBadge(
-                  i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
-                    defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
-                  })
-                ),
-              ]
-            : undefined
-        }
-        config={topNavConfig}
+        config={[]}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}
         query={this.props.query}
@@ -581,16 +644,13 @@ export class MapApp extends React.Component<Props, State> {
 
     return (
       <div id="maps-plugin" css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}>
-        {this._renderTopNav()}
-        <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
+        {this._renderAppHeader()}
+        {this._renderSearchBar()}
         <div id="react-maps-root" css={styles.reactMapsRoot}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}
-            title={this.props.savedMap.getAttributes().title}
-            description={this.props.savedMap.getAttributes().description}
             waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
-            isSharable
           />
         </div>
       </div>

@@ -28,16 +28,27 @@ interface Options {
   client: Client;
   baseDir?: string;
   log: ToolingLog;
-  kbnClient: KbnClient;
+  kbnClient?: KbnClient;
+  /**
+   * When true, `kbnClient` is not required and loading archives that contain
+   * saved-object indices (.kibana*) will throw an error. Intended for Scout tests and
+   * linked CPS projects that should only ingest pure ES data.
+   */
+  dataOnly?: boolean;
 }
 
 export class EsArchiver {
   private readonly client: Client;
   private readonly baseDir: string;
   private readonly log: ToolingLog;
-  private readonly kbnClient: KbnClient;
+  private readonly kbnClient: KbnClient | undefined;
+  private readonly dataOnly: boolean;
 
   constructor(options: Options) {
+    this.dataOnly = options.dataOnly ?? false;
+    if (!this.dataOnly && !options.kbnClient) {
+      throw new Error('kbnClient is required when dataOnly is not enabled');
+    }
     this.client = options.client;
     this.baseDir = options.baseDir ?? REPO_ROOT;
     this.log = options.log;
@@ -108,6 +119,7 @@ export class EsArchiver {
         log: this.log,
         kbnClient: this.kbnClient,
         performance,
+        dataOnly: this.dataOnly,
       })
     );
   }
@@ -123,7 +135,6 @@ export class EsArchiver {
         inputDir: this.findArchive(path),
         client: this.client,
         log: this.log,
-        kbnClient: this.kbnClient,
       })
     );
   }
@@ -169,6 +180,13 @@ export class EsArchiver {
    * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
+    if (this.dataOnly) {
+      throw new Error(
+        'emptyKibanaIndex is not supported in dataOnly mode. ' +
+          'Use kbnArchiver to manage Kibana saved objects instead.'
+      );
+    }
+
     return await withSpan('es_archiver empty_kibana_index', () =>
       emptyKibanaIndexAction({
         client: this.client,

@@ -59,7 +59,7 @@ export const getCasesSynchronizationSourceQuery = (
   owner: Owner
 ): QueryDslQueryContainer => ({
   bool: {
-    filter: getCasesSourceQuery(spaceId, owner).bool?.filter,
+    filter: getCasesSourceQuery(spaceId, owner)?.bool?.filter ?? [],
     must: [
       {
         bool: {

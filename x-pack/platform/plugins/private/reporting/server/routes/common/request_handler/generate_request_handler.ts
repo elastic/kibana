@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ScheduleType } from '@kbn/reporting-server';
 import { getCounters } from '..';
 import type { SavedReport } from '../../../lib/store';
@@ -98,12 +98,17 @@ export class GenerateRequestHandler extends RequestHandler<
       reporting.getUsageCounter()
     );
 
-    const checkErrorResponse = await this.checkLicenseAndTimezone(
-      exportTypeId,
-      jobParams.browserTimezone
-    );
+    const checkErrorResponse = await this.checkLicense(exportTypeId);
     if (checkErrorResponse) {
       return checkErrorResponse;
+    }
+
+    const disabledErrorResponse = await this.checkExportTypeEnabled(
+      exportTypeId,
+      ScheduleType.SINGLE
+    );
+    if (disabledErrorResponse) {
+      return disabledErrorResponse;
     }
 
     let report: Report | undefined;

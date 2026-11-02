@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { screen, render } from '@testing-library/react';
+import { CENTER_ALIGNMENT } from '@elastic/eui';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { getEuiTableColumn } from './get_eui_table_column';
@@ -24,7 +25,9 @@ describe('getEuiTableColumn ', () => {
     expect(getEuiTableColumn({ label })).toEqual({
       name: label,
       render: expect.any(Function),
-      width: '100px',
+      maxWidth: '7em',
+      minWidth: '2.5em',
+      align: CENTER_ALIGNMENT,
       'data-test-subj': 'toggle-custom-field-column',
     });
   });
@@ -41,9 +44,13 @@ describe('getEuiTableColumn ', () => {
 
       render(<div>{column.render(customField)}</div>);
 
-      expect(
-        screen.getByTestId(`toggle-custom-field-column-view-${key}-${expectedResult}`)
-      ).toBeInTheDocument();
+      const element = screen.getByTestId(
+        `toggle-custom-field-column-view-${key}-${expectedResult}`
+      );
+
+      expect(element).toBeInTheDocument();
+      expect(element).toHaveTextContent(customField.value ? 'On' : 'Off');
+      expect(element).toHaveAttribute('data-euiicon-type', customField.value ? 'check' : 'cross');
     }
   );
 });

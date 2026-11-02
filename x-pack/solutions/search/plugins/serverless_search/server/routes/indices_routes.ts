@@ -22,7 +22,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
-          search_query: schema.maybe(schema.string()),
+          search_query: schema.maybe(schema.string({ maxLength: 1000 })),
           size: schema.number({ defaultValue: 20, min: 0 }),
         }),
       },
@@ -62,7 +62,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
       path: '/internal/serverless_search/index_names',
       validate: {
         query: schema.object({
-          query: schema.maybe(schema.string()),
+          query: schema.maybe(schema.string({ maxLength: 1000 })),
         }),
       },
       security: {
@@ -95,7 +95,7 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
       path: '/internal/serverless_search/index/{indexName}',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {
@@ -124,11 +124,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
         body: schema.object({
           searchQuery: schema.string({
             defaultValue: '',
+            maxLength: 10000,
           }),
           trackTotalHits: schema.boolean({ defaultValue: false }),
         }),
         params: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
         query: schema.object({
           page: schema.number({ defaultValue: 0, min: 0 }),

@@ -70,7 +70,21 @@ Hook managing an abort controller instance that aborts when it goes out of scope
   await fetch(url, { signal })
 ```
 
-### [useTruncateText](.src/use_truncate_text/use_truncate_text.ts)
+### [useDebouncedValue](./src/use_debounced_value/use_debounced_value.ts)
+
+Returns a debounced version of the provided value. The returned value only updates after the specified wait period has elapsed since the last change. Accepts an optional `compare` function to customise equality checks.
+
+```tsx
+// Basic usage
+const debouncedQuery = useDebouncedValue(query, 300);
+
+// With a custom comparator for object values
+const debouncedFilters = useDebouncedValue(filters, 500, {
+  compare: (a, b) => a.id === b.id,
+});
+```
+
+### [useTruncateText](./src/use_truncate_text/use_truncate_text.ts)
 
 Hook for managing text truncation with expand/collapse functionality. Provides controlled truncation of long text content with customizable length. 
 

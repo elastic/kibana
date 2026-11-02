@@ -27,7 +27,7 @@ export function getExpandAction<T extends object>({
     description,
     type: 'icon',
     'data-test-subj': props['data-test-subj'],
-    icon: (value: T) => (isExpanded(value) ? 'arrowDown' : 'arrowRight'),
+    icon: (value: T) => (isExpanded(value) ? 'chevronSingleDown' : 'chevronSingleRight'),
     onClick: (value: T) => onClick(isExpanded(value) ? undefined : value),
   };
 }

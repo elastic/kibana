@@ -66,6 +66,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+      rules: {
+        pathname: '/app/rules',
+      },
     },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
@@ -89,6 +92,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'ruleStatusFilter',
         ])}`,
         `--uiSettings.overrides.workflows:ui:enabled=true`,
+        // Keeps the classic Rules and Logs heading tabs, which hide when Alerting V2 is on.
+        `--uiSettings.globalOverrides.alerting:v2:enabled=false`,
         `--workflowsManagement.enabled=true`,
         `--workflowsExecutionEngine.enabled=true`,
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify(['connectorsFromSpecs'])}`,

@@ -138,8 +138,7 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsF
           >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setTagsWarningCallout"
-              defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
-              apply changes."
+              defaultMessage="You’re about to overwrite tags for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to apply changes."
               values={{ rulesCount }}
             />
           </EuiCallOut>

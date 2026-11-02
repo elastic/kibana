@@ -23,7 +23,7 @@ describe('Cards Navigation', () => {
     test('is rendered', () => {
       expect(() =>
         render(<CardsNavigation appBasePath={APP_BASE_PATH} sections={sectionsMock} />)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -81,7 +81,7 @@ describe('Cards Navigation', () => {
         appBasePath: APP_BASE_PATH,
         extendedCardNavigationDefinitions: {
           [invalidAppId]: {
-            icon: 'launch',
+            icon: 'rocket',
             description: 'Invalid app not part of any registered management section',
             category: 'other',
           },
@@ -101,7 +101,7 @@ describe('Cards Navigation', () => {
         appBasePath: APP_BASE_PATH,
         extendedCardNavigationDefinitions: {
           [notManagementAppId]: {
-            icon: 'launch',
+            icon: 'rocket',
             description: 'Invalid app not part of any registered management section',
             category: 'other',
             skipValidation: true,

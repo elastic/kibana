@@ -65,7 +65,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       name: '',
       actions: [
         ...(canSave
-          ? [
+          ? ([
               {
                 name: i18n.translate('xpack.apm.settings.customLink.table.editButtonLabel', {
                   defaultMessage: 'Edit',
@@ -82,7 +82,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
                   onCustomLinkSelected(customLink);
                 },
               },
-            ]
+            ] satisfies ITableColumn<CustomLink>['actions'])
           : []),
       ],
     },
@@ -105,6 +105,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       />
       <EuiSpacer size="s" />
       <ManagedTable
+        data-test-subj="customLinksTable"
         noItemsMessage={
           isEmpty(items) ? <LoadingStatePrompt /> : <NoResultFound value={searchTerm} />
         }
@@ -113,6 +114,9 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         initialSortField="@timestamp"
         initialSortDirection="desc"
         initialPageSize={25}
+        rowProps={(item) => ({
+          'data-test-subj': `customLinkRow-${item.label}`,
+        })}
       />
     </>
   );

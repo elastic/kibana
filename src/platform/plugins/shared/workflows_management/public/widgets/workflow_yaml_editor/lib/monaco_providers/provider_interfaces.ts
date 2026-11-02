@@ -12,13 +12,13 @@
 import type YAML from 'yaml';
 import type { Scalar, YAMLMap } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import type {
+  ExecutionContext,
+  StepExecutionData,
+} from '../execution_context/build_execution_context';
 
-/**
- * Context information for hover providers
- */
-export interface HoverContext {
-  /** The connector type (e.g., "elasticsearch.search", "kibana.createSpace") */
-  connectorType: string;
+interface BaseHoverContext {
+  kind: 'connector' | 'trigger';
   /** YAML path segments to the current position */
   yamlPath: string[];
   /** Current value at the cursor position */
@@ -29,11 +29,31 @@ export interface HoverContext {
   model: monaco.editor.ITextModel;
   /** YAML document */
   yamlDocument: YAML.Document;
+}
+
+/**
+ * Context for connector/step hovers (extends base with connector type and step/parameter context).
+ */
+export interface HoverContext extends BaseHoverContext {
+  kind: 'connector';
+  /** The connector type (e.g., "elasticsearch.search", "kibana.createSpace") */
+  connectorType: string;
   /** Step context if we're inside a workflow step */
   stepContext?: StepContext;
   /** Parameter context if we're inside a parameter */
   parameterContext?: ParameterContext | null;
 }
+
+/**
+ * Context for triggers.
+ */
+export interface TriggerHoverContext extends BaseHoverContext {
+  kind: 'trigger';
+  /** Trigger type (e.g. "example.custom_trigger") */
+  triggerType: string;
+}
+
+export type BuiltHoverContext = HoverContext | TriggerHoverContext;
 
 /**
  * Context information for action providers
@@ -140,6 +160,10 @@ export interface MonacoConnectorHandler {
 export interface ProviderConfig {
   /** Function to get the current YAML document */
   getYamlDocument: () => YAML.Document | null;
+  /** Function to get the current execution context (for template expression hover) */
+  getExecutionContext?: () => ExecutionContext | null;
+  /** Lazily fetch a step's I/O data and merge into the execution context */
+  fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
   /** Additional configuration options */
   options?: Record<string, any>;
 }

@@ -14,6 +14,7 @@ paths:
         - name: list_id
           in: query
           required: true
+          description: Parent value list's `id` to page through items for.
           schema:
             $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
         - name: page
@@ -50,6 +51,8 @@ paths:
         - name: cursor
           in: query
           required: false
+          description: |
+            Opaque cursor returned in a previous response; pass it to continue listing from the next page. Omit on the first request.
           schema:
             $ref: '#/components/schemas/FindListItemsCursor'
         - name: filter

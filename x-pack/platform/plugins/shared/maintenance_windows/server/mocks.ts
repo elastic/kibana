@@ -17,6 +17,10 @@ const createStartMock = () => {
     getMaintenanceWindowClientWithAuth: jest
       .fn()
       .mockResolvedValue(maintenanceWindowClientMock.create()),
+    getMaintenanceWindowClientWithoutAuth: jest
+      .fn()
+      .mockResolvedValue(maintenanceWindowClientMock.create()),
+    registerSyncTask: jest.fn().mockReturnValue(jest.fn()),
   });
 
   return mock;

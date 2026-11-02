@@ -1,0 +1,210 @@
+# Analysis Deep Dive
+
+## Table of Contents
+- [Step 0: Common reasons tests become invalid](#step-0-common-reasons-tests-become-invalid)
+- [Step 2: Duplicate recommendation formats](#step-2-duplicate-recommendation-formats)
+- [Step 3: Layer recommendation format](#step-3-layer-recommendation-format)
+- [Step 4: When the test catches a real bug](#step-4-when-the-test-catches-a-real-application-bug)
+- [Step 4: Verify against documentation](#step-4-verify-against-documentation)
+- [Step 4: Diagnosing "Element Disabled" failures](#step-4-diagnosing-element-disabled-failures)
+- [Step 5: Pre-proposal checklist](#step-5-pre-proposal-checklist)
+
+Detailed guidance for Steps 0, 2, 3, 4, and 5 of the analysis framework.
+
+## Step 0: Common reasons tests become invalid
+
+- UI redesign changed component structure
+- API endpoints were renamed or deprecated
+- Feature was moved to a different page/flow
+- Test data format changed
+- Feature flag was removed or made permanent
+
+**Don't blindly unskip a test.** A skipped test that fails after unskipping may be catching a real regression OR may simply be outdated. Always verify first.
+
+Useful commands:
+```bash
+git log --oneline -15 -- path/to/test.cy.ts
+git log -p --all -S '.skip' -- path/to/test.cy.ts
+```
+
+## Step 2: Duplicate recommendation formats
+
+### Duplicate in another Cypress test
+
+Compare both tests and recommend keeping the better-written one.
+
+**Evaluate based on:**
+- Proper use of intercepts and waits (not hardcoded `cy.wait(ms)`)
+- Clear, descriptive test names and assertions
+- Proper setup/teardown (`beforeEach`/`afterEach`)
+- Use of `data-test-subj` selectors (not CSS classes or IDs)
+- Test isolation (doesn't depend on other tests)
+- Readability and maintainability
+
+**Format:**
+- Keep: `[path/to/better-test.cy.ts]` — Reason: [why it's better]
+- Delete: `[path/to/duplicate-test.cy.ts]` — Reason: [why it's worse]
+
+### Duplicate in API or Unit tests
+
+- Delete the Cypress test: `[path/to/cypress-test.cy.ts]`
+- Existing coverage: `[path/to/api-or-unit-test]`
+- Note: Confirm with the team before deletion if the Cypress test covers additional UI behavior
+
+### Duplicate in Scout tests
+
+Scout runs on stateful (ESS / classic Cloud) and on serverless, including MKI. Stateful is not MKI. Scout can replace Cypress `@ess` when it has `tags.stateful.*`, and Cypress `@serverless` when it has `tags.serverless.security.*` (MKI).
+
+**Read the `tag:` argument in the Scout spec** — do not grep for `@local-…` / `@cloud-…` strings. Those are runtime expansions of the `tags.*` helpers and almost never appear in source.
+
+| Cypress tag | Matching Scout coverage |
+|-------------|-------------------------|
+| `@ess` | `tags.stateful.classic` |
+| `@serverless` | `tags.serverless.security.complete` (or `.essentials` / `.ease` / `.all` if that was the intended tier) |
+| `@serverlessQA` | Do **not** delete Cypress for this tag alone — Kibana QA gate is still Cypress; Scout QA is not a replacement yet |
+
+`tags.stateful.classic` expands to `@local-stateful-classic` + `@cloud-stateful-classic`.
+`tags.serverless.security.complete` expands to `@local-serverless-security_complete` + `@cloud-serverless-security_complete`.
+
+Apply the **first matching row**. `@serverlessQA` wins over delete.
+
+| Cypress tags | Scout `tag:` | Recommendation |
+|--------------|--------------|----------------|
+| has `@serverlessQA` | any | Keep Cypress until Scout is in the Kibana QA gate |
+| `@ess` + `@serverless` (no `@serverlessQA`) | `tags.stateful.classic` **and** `tags.serverless.security.*` | Delete Cypress — Scout covers both sides |
+| `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.serverless.security.*` | Keep Cypress for ESS, or recommend a Scout **migration** that adds `tags.stateful.classic`. Do not edit an existing Scout spec's tags. |
+| `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.stateful.classic` | Keep Cypress for serverless, or recommend a Scout **migration** that adds serverless coverage. Do not edit an existing Scout spec's tags to turn on MKI. |
+| `@serverless` only (no `@ess`, no `@serverlessQA`) | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
+| `@ess` only | includes `tags.stateful.classic` | Delete Cypress — Scout covers ESS |
+
+**Format:**
+- Delete Cypress: `[path]` — Reason: Scout spec `[path]` uses `tags.…` covering the same env
+
+## Step 3: Layer recommendation format
+
+> **Layer Analysis**
+> - Current: E2E (Cypress)
+> - Tests: [what the test actually validates]
+> - Destination: [Scout UI / API / unit / delete]
+> - Cypress fix allowed?: [yes — `@serverlessQA` / no]
+> - Reason: [why this destination]
+
+**Real Example:** [#246754](https://github.com/elastic/kibana/pull/246754) — Flaky Cypress test using CSS class selector was deleted and coverage moved to a more appropriate layer. The test "opens alerts page when alerts count is clicked" was testing navigation logic that doesn't require E2E testing.
+
+## Step 4: When the test catches a real application bug
+
+Sometimes a "flaky" test is correctly identifying a bug in the application. Signs that the application needs fixing (not the test):
+
+1. **Race condition in React render cycle**
+   - State computed from async data but UI renders before data is ready
+   - `useEffect` sets state but child components already rendered with wrong values
+   - Feature flag change altered timing, exposing a latent bug
+
+2. **Incorrect conditional rendering**
+   - Component renders when it shouldn't (data not ready)
+   - Missing loading gates on async operations
+
+3. **Filter/state not applied on first render**
+   - Default values used instead of computed values
+   - State initialization happens too late
+
+**When to fix the application (not the test):**
+- The test accurately describes expected user behavior
+- Manual testing shows the same problem
+- The feature flag change didn't break the feature — it exposed a pre-existing bug
+- The test worked before because slower code paths hid the race condition
+
+**Real Example:** `building_block_alerts.cy.ts` was marked as failing after enabling `newDataViewPickerEnabled`. Investigation revealed:
+- The alerts table rendered before the building block filter was applied
+- The `useEffect` that set the filter ran AFTER the table's first render
+- The new data view picker loaded faster, exposing this race condition
+- **Fix was in the application:** Changed filter computation to use rule data directly instead of waiting for `useEffect`
+
+```typescript
+// Before (buggy — useEffect runs after render)
+useEffect(() => {
+  setShowBuildingBlockAlerts(isBuildingBlockRule);
+}, [isBuildingBlockRule]);
+// Table renders with showBuildingBlockAlerts = false
+
+// After (fixed — compute directly)
+const shouldShowBuildingBlockAlerts = isBuildingBlockRule || showBuildingBlockAlerts;
+// Table renders with correct filter immediately
+```
+
+## Step 4: Verify against documentation
+
+Check the [Elastic Security Documentation](https://www.elastic.co/docs/solutions/security) to verify expected behavior:
+
+**1. Find the relevant feature documentation:**
+- Detection rules, alerts, cases, timeline
+- Entity Analytics (risk scoring, anomaly detection, privileged user monitoring)
+- Cloud Security (CSPM, KSPM, CNVM)
+- Endpoint protection (Elastic Defend)
+- Investigation tools (Osquery, Session View)
+- AI-powered features (AI Assistant, Attack Discovery)
+
+**2. Compare documented vs actual behavior:**
+- Does the UI match what's documented?
+- Do the features work as described?
+- Are there documented limitations being violated?
+
+**3. If behavior differs from documentation:**
+
+> **Potential Bug Detected**
+>
+> Feature: [feature name]
+> Expected (per docs): [documented behavior]
+> Actual: [observed behavior]
+> Doc reference: [link to documentation]
+>
+> **Recommendation:** File a bug report, not a test fix
+
+**Note:** If documentation is outdated but feature works correctly, file a docs issue instead.
+
+## Step 4: Diagnosing "Element Disabled" failures
+
+When a test fails because an element is disabled (`pointer-events: none`, `disabled` attribute):
+
+**1. Ask "Why is it disabled?"**
+- Trace through the UI code to find the condition that disables it
+- Look for state dependencies (loading states, validation, feature flags)
+
+**2. Check for caching layers**
+- React Query caches (`staleTime`, `cacheTime`)
+- Redux/state caches
+- API response caching
+- Example: A 5-minute cache might serve stale "not ready" status
+
+**3. Check server logs (especially MKI)**
+- Look for "primary shards not active", "index not found", "timeout waiting for", "no node found to start"
+
+**4. Classify correctly:**
+
+| Finding | Classification | Action |
+|---------|---------------|--------|
+| Test setup didn't wait for readiness | Test issue | Fix the wait logic |
+| UI has race condition with cache | App bug | Needs code fix, file issue |
+| Infrastructure wasn't ready (shards, nodes) | Environment issue | May need infra fix |
+
+**Real Example:** ML rule suppression test failed because `forceStartDatafeeds()` returned before jobs actually started. Server logs showed: "index does not have all primary shards active yet" — this was an infrastructure issue, not a test bug.
+
+## Step 4: Classification format
+
+> **Classification**
+> - Type: [Bug / Flakiness / Environment Issue / Needs Investigation]
+> - Confidence: [High / Medium / Low]
+> - Evidence: [what led to this conclusion]
+
+## Step 5: Pre-proposal checklist
+
+Before proposing ANY fix, verify:
+
+| Check | Status | Action if Not Done |
+|-------|--------|-------------------|
+| **Step 0: Functionality Valid?** | [ ] | Go back and verify the feature still exists and works |
+| **Step 1: Environment Context?** | [ ] | Read tags and open CI in the browser (user can log in). Ask only if CI is unreachable |
+| **Step 2: Duplicate Coverage?** | [ ] | Search for API/unit tests covering same functionality |
+| **Step 3: Destination layer?** | [ ] | Scout UI / API / unit / delete — Cypress fix only if `@serverlessQA` |
+
+Do NOT skip these steps. Proposing a fix for an invalid or redundant test wastes time.

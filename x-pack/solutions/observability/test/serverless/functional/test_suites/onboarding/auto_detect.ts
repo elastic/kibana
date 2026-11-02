@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
   describe('Onboarding Auto-Detect', () => {
@@ -36,6 +36,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('guides user through data onboarding', async () => {
+      // The command (and its copy button) only render after POST /flow resolves, which on a
+      // cold stack creates two API keys and writes a saved object before the step leaves its skeleton.
+      await testSubjects.existOrFail('observabilityOnboardingAutoDetectPanelCodeSnippet', {
+        timeout: 60_000,
+      });
       await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
       const copiedCommand = await browser.getClipboardValue();
 
@@ -48,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         copiedCommand.match(commandRegex)!;
 
       // Simulate bash script installing detected integrations
-      await supertest
+      await supertestWithoutAuth
         .post(`/internal/observability_onboarding/flow/${onboardingId}/integrations/install`)
         .set('Authorization', `ApiKey ${installKey}`)
         .set('Content-Type', 'text/tab-separated-values')
@@ -59,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Simulate bash script installing Elastic Agent
       const agentId = generateLongId();
-      await supertest
+      await supertestWithoutAuth
         .post(`/internal/observability_onboarding/flow/${onboardingId}/step/ea-status`)
         .set('Authorization', `ApiKey ${installKey}`)
         .set('x-elastic-internal-origin', 'Kibana')

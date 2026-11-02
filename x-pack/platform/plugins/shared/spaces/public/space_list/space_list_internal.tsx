@@ -35,6 +35,15 @@ const DEFAULT_DISPLAY_LIMIT = 5;
 type SpaceTarget = Omit<SpacesDataEntry, 'isAuthorizedForPurpose'>;
 
 /**
+ * A space as displayed in this list. This includes both real spaces and synthetic
+ * entries — the "all spaces" (`*`) pseudo-entry and the raw-namespace fallback for
+ * spaces created after load. Its `id` is therefore a plain display `string` so those
+ * sentinels never live in a `Space['id']` (a prerequisite for branding `Space['id']`
+ * as a nominal `SpaceId`; see https://github.com/elastic/kibana-team/issues/3680).
+ */
+type DisplaySpace = Omit<SpaceTarget, 'id'> & { id: string };
+
+/**
  * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for any
  * number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras (along
  * with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka "All spaces") is present, it supersedes all
@@ -67,10 +76,12 @@ export const SpaceListInternal = ({
   const unauthorizedSpacesCount = namespaces.filter(
     (namespace) => namespace === UNKNOWN_SPACE
   ).length;
-  let displayedSpaces: SpaceTarget[];
+  let displayedSpaces: DisplaySpace[];
   let button: ReactNode = null;
 
   if (isSharedToAllSpaces) {
+    // Synthetic "all spaces" pseudo-entry: modeled as a display entry so the `*`
+    // sentinel is never stored in a `Space['id']`.
     displayedSpaces = [
       {
         id: ALL_SPACES_ID,
@@ -83,8 +94,8 @@ export const SpaceListInternal = ({
     ];
   } else {
     const authorized = namespaces.filter((namespace) => namespace !== UNKNOWN_SPACE);
-    const enabledSpaceTargets: SpaceTarget[] = [];
-    const disabledSpaceTargets: SpaceTarget[] = [];
+    const enabledSpaceTargets: DisplaySpace[] = [];
+    const disabledSpaceTargets: DisplaySpace[] = [];
     authorized.forEach((namespace) => {
       const spaceTarget = shareToSpacesData.spacesMap.get(namespace);
       if (spaceTarget === undefined) {

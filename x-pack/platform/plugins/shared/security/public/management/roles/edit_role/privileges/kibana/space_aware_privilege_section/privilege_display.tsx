@@ -11,6 +11,7 @@ import _ from 'lodash';
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { constants } from '@kbn/security-ui-components';
 
 interface Props extends PropsOf<typeof EuiText> {
@@ -44,7 +45,16 @@ function getDisplayValue(privilege: string | string[] | undefined) {
     (privileges.length === 1 && privileges.includes(constants.NO_PRIVILEGE_VALUE));
 
   if (isPrivilegeMissing) {
-    displayValue = <EuiIcon color="subdued" type={'minusInCircle'} />;
+    displayValue = (
+      <EuiIcon
+        color="subdued"
+        type={'minusCircle'}
+        aria-label={i18n.translate(
+          'xpack.security.management.editRole.privilegeDisplay.noPrivilegeAriaLabel',
+          { defaultMessage: 'None' }
+        )}
+      />
+    );
   } else {
     displayValue = privileges.map((p) => _.upperFirst(p)).join(', ');
   }

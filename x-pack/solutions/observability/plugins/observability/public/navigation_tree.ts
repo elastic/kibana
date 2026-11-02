@@ -4,29 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  PanelOpenerChildDefinition,
+} from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { lazy } from 'react';
-import { map, of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import type { Location } from 'history';
+import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
+import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
 import type { ObservabilityPublicPluginsStart } from './plugin';
-const LazyIconBriefcase = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
-);
-const LazyIconMl = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
-);
-const LazyIconProductStreamsWired = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
-    default: iconProductStreamsWired,
-  }))
-);
-const LazyIconProductCloudInfra = lazy(() =>
-  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
-    default: iconProductCloudInfra,
-  }))
-);
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -34,36 +29,79 @@ const title = i18n.translate(
     defaultMessage: 'Observability',
   }
 );
-const icon = 'logoObservability';
 
-function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
+/**
+ * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
+ * we need to maintain proper navigation state when users edit visualizations accessed
+ * from the Dashboard Viz tab. This keeps the Dashboard nav item active during editing.
+ */
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
+function createNavTree({
+  coreStart,
+  significantEventsAvailable,
+  streamsAvailable,
+  showAiAssistant,
+  isCloudEnabled,
+  ingestHubAvailable,
+  entityInventoryNavGroup,
+}: {
+  coreStart: CoreStart;
+  significantEventsAvailable: boolean;
+  streamsAvailable?: boolean;
+  showAiAssistant?: boolean;
+  isCloudEnabled?: boolean;
+  ingestHubAvailable?: boolean;
+  entityInventoryNavGroup?: PanelOpenerChildDefinition;
+}) {
   const navTree: NavigationTreeDefinition = {
     body: [
+      ...(significantEventsAvailable
+        ? [
+            {
+              link: 'nightshift' as const,
+              icon: NightshiftNavigationIcon,
+            },
+          ]
+        : []),
       {
         link: 'observability-overview',
-        title,
-        icon,
-        renderAs: 'home',
+        title: i18n.translate('xpack.observability.obltNav.overview', {
+          defaultMessage: 'Overview',
+        }),
+        icon: 'home',
       },
       {
         title: i18n.translate('xpack.observability.obltNav.discover', {
           defaultMessage: 'Discover',
         }),
         link: 'discover',
+        icon: 'productDiscover',
       },
       {
         link: 'dashboards',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
+        icon: 'productDashboard',
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
-        link: 'workflows',
+        link: EVALS_APP_ID,
+        icon: 'flask',
       },
-      {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-      },
+      ...getWorkflowsNavPanel(coreStart),
+      ...getAlertsNavPanel(coreStart),
       {
         link: 'observability-overview:cases',
         children: [
@@ -74,17 +112,17 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             link: 'observability-overview:cases_create',
           },
         ],
-        icon: LazyIconBriefcase,
+        icon: 'briefcase',
       },
       {
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...(streamsAvailable
         ? [
             {
               link: 'streams' as const,
-              icon: LazyIconProductStreamsWired,
+              icon: 'productStreamsWired',
             },
           ]
         : []),
@@ -136,6 +174,12 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 link: 'ux',
                 title: i18n.translate('xpack.observability.obltNav.apm.ux', {
                   defaultMessage: 'User experience',
+                }),
+              },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.observability.obltNav.apm.digitalExperience', {
+                  defaultMessage: 'Digital experience',
                 }),
               },
             ],
@@ -192,7 +236,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           defaultMessage: 'Infrastructure',
         }),
         renderAs: 'panelOpener',
-        icon: LazyIconProductCloudInfra,
+        icon: 'productCloudInfra',
         children: [
           {
             children: [
@@ -222,10 +266,11 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               },
             ],
           },
+          ...(entityInventoryNavGroup ? [entityInventoryNavGroup] : []),
           {
             id: 'profiling',
             title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
-              defaultMessage: 'Universal Profiling',
+              defaultMessage: 'Profiling',
             }),
             children: [
               {
@@ -241,13 +286,26 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
         ],
       },
+      ...(showAiAssistant
+        ? [
+            {
+              id: 'aiAssistantContainer',
+              title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
+                defaultMessage: 'AI Assistant',
+              }),
+              icon: 'sparkles',
+              link: 'observabilityAIAssistant' as const,
+            },
+          ]
+        : [
+            {
+              link: 'agent_builder' as const,
+              icon: 'productAgent',
+            },
+          ]),
       {
-        id: 'aiAssistantContainer',
-        title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
-          defaultMessage: 'AI Assistant',
-        }),
-        icon: 'sparkles',
-        link: 'observabilityAIAssistant',
+        icon: 'tableSparkles',
+        link: 'context_engine' as const,
       },
       {
         id: 'machine_learning-landing',
@@ -255,7 +313,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           defaultMessage: 'Machine Learning',
         }),
         renderAs: 'panelOpener',
-        icon: LazyIconMl,
+        icon: 'productML',
         children: [
           {
             title: '',
@@ -266,6 +324,22 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 link: 'ml:dataVisualizer',
               },
+              {
+                link: 'ml:dataDrift',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:dataDriftPage',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:fileUpload',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:indexDataVisualizer',
+                sideNavStatus: 'hidden',
+              },
             ],
           },
           {
@@ -275,6 +349,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             }),
             breadcrumbStatus: 'hidden',
             children: [
+              {
+                link: 'management:anomaly_detection',
+                title: i18n.translate(
+                  'xpack.observability.obltNav.ml.anomaly_detection.manage_jobs',
+                  {
+                    defaultMessage: 'Manage jobs',
+                  }
+                ),
+              },
               {
                 link: 'ml:anomalyExplorer',
               },
@@ -301,7 +384,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           {
             id: 'category-aiops_labs',
             title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-              defaultMessage: 'AIOps labs',
+              defaultMessage: 'AIOps Labs',
             }),
             breadcrumbStatus: 'hidden',
             children: [
@@ -309,10 +392,22 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 link: 'ml:logRateAnalysis',
               },
               {
+                link: 'ml:logRateAnalysisPage',
+                sideNavStatus: 'hidden',
+              },
+              {
                 link: 'ml:logPatternAnalysis',
               },
               {
+                link: 'ml:logPatternAnalysisPage',
+                sideNavStatus: 'hidden',
+              },
+              {
                 link: 'ml:changePointDetections',
+              },
+              {
+                link: 'ml:changePointDetectionsPage',
+                sideNavStatus: 'hidden',
               },
             ],
           },
@@ -338,25 +433,50 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Logs categories',
             }),
           },
-          { link: 'maps' },
-          { link: 'graph' },
           {
-            link: 'visualize',
-            title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
-              defaultMessage: 'Visualize library',
-            }),
+            link: 'maps',
+            getIsActive: ({ pathNameSerialized, location, prepend }) =>
+              !isEditingFromDashboard(location, pathNameSerialized, prepend) &&
+              pathNameSerialized.includes('/app/maps'),
           },
+          { link: 'graph' },
         ],
       },
     ],
     footer: [
-      {
-        title: i18n.translate('xpack.observability.obltNav.addData', {
-          defaultMessage: 'Add data',
-        }),
-        link: 'observabilityOnboarding',
-        icon: 'plusInCircle',
-      },
+      ingestHubAvailable
+        ? {
+            link: 'ingestHub' as const,
+            title: i18n.translate('xpack.observability.obltNav.ingestHub', {
+              defaultMessage: 'Ingest Hub',
+            }),
+            icon: 'rocket',
+            children: [
+              {
+                link: 'ingestHub' as const,
+                title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
+                  defaultMessage: 'Get started',
+                }),
+              },
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
+            ],
+          }
+        : {
+            title: i18n.translate('xpack.observability.obltNav.addData', {
+              defaultMessage: 'Add data',
+            }),
+            link: 'observabilityOnboarding' as const,
+            icon: 'plusCircle',
+            children: [
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
+            ],
+          },
       {
         id: 'devTools',
         title: i18n.translate('xpack.observability.obltNav.devTools', {
@@ -381,7 +501,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               description:
                 'The heading of a section in a navigation tree dedicated to data collection',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'integrations',
@@ -407,10 +526,12 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               description:
                 'Heading in a nav tree dedicated to UIs for leveraging various Elasticsearch features for data management',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:index_management',
+              },
+              {
+                link: 'management:data_federation',
               },
               {
                 link: 'management:index_lifecycle_management',
@@ -423,6 +544,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               },
               {
                 link: 'management:rollup_jobs',
+              },
+              {
+                link: 'management:esql_views',
               },
               {
                 link: 'management:data_quality',
@@ -443,7 +567,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           {
             id: 'stack_management_home',
             title: '',
-            renderAs: 'panelOpener',
             children: [
               {
                 // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
@@ -456,7 +579,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 }),
                 breadcrumbStatus: 'hidden',
               },
-              { link: 'monitoring' },
+              // Only show Cloud Connect in on-prem deployments (not cloud)
+              ...(isCloudEnabled
+                ? []
+                : [
+                    {
+                      id: 'cloud_connect' as const,
+                      link: 'cloud_connect' as const,
+                    },
+                  ]),
             ],
           },
           {
@@ -464,11 +595,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
               defaultMessage: 'Alerts and Insights',
             }),
-            renderAs: 'panelOpener',
             children: [
-              {
-                link: 'management:triggersActions',
-              },
+              ...(shouldIncludeStackManagementRules(coreStart)
+                ? [
+                    {
+                      link: 'management:triggersActions' as const,
+                    },
+                  ]
+                : []),
               {
                 link: 'management:triggersActionsConnectors',
               },
@@ -480,6 +614,19 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               },
               {
                 link: 'management:maintenanceWindows',
+              },
+            ],
+          },
+          {
+            id: 'cluster_performance',
+            title: i18n.translate('xpack.observability.obltNav.clusterPerformance', {
+              defaultMessage: 'Cluster performance',
+            }),
+            children: [
+              { link: 'monitoring' },
+              {
+                link: 'management:queryActivity',
+                badgeType: 'new',
               },
             ],
           },
@@ -497,12 +644,24 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ],
           },
           {
+            id: 'management_model_management',
+            title: i18n.translate('xpack.observability.obltNav.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
+            ],
+          },
+          {
             id: 'management_ai',
             title: i18n.translate('xpack.observability.obltNav.ai', {
               defaultMessage: 'AI',
             }),
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -511,7 +670,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.security', {
               defaultMessage: 'Security',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:users',
@@ -525,6 +683,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 link: 'management:role_mappings',
               },
+              {
+                link: 'management:service_accounts',
+              },
             ],
           },
           {
@@ -532,7 +693,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.data', {
               defaultMessage: 'Data',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:cross_cluster_replication',
@@ -547,7 +707,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.kibana', {
               defaultMessage: 'Kibana',
             }),
-            renderAs: 'panelOpener',
             children: [
               {
                 link: 'management:filesManagement',
@@ -581,14 +740,30 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
 }
 
 export const createDefinition = (
+  coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
-): AddSolutionNavigationArg => ({
-  id: 'oblt',
-  title,
-  icon: 'logoObservability',
-  homePage: 'observabilityOnboarding',
-  navigationTree$: (
-    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const })
-  ).pipe(map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))),
-  dataTestSubj: 'observabilitySideNav',
-});
+): AddSolutionNavigationArg => {
+  return {
+    id: 'oblt',
+    title,
+    icon: 'logoObservability',
+    navigationTree$: combineLatest([
+      pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+      pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+      coreStart.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
+    ]).pipe(
+      map(([{ status }, chatExperience, ingestHubAvailable, significantEventsAvailable]) =>
+        createNavTree({
+          coreStart,
+          significantEventsAvailable,
+          streamsAvailable: status === 'enabled',
+          showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+          ingestHubAvailable,
+          entityInventoryNavGroup: pluginsStart.entityInventoryApp?.navTreeGroup,
+        })
+      )
+    ),
+  };
+};

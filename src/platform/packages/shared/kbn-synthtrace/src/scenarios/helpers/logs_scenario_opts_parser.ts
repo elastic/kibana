@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const parseStringToBoolean = (value: string, defaultValue?: boolean): boolean => {
+export const parseStringToBoolean = (
+  value: string | undefined,
+  defaultValue?: boolean
+): boolean => {
   if (!value) return defaultValue ?? false;
 
   switch (value.trim().toLowerCase()) {
@@ -24,10 +27,12 @@ export interface LogsScenarioOpts {
   isLogsDb: boolean;
 }
 
+import { getStringOpt } from './scenario_opts_helpers';
+
 export const parseLogsScenarioOpts = (
-  scenarioOpts: Record<string, any> | undefined
+  scenarioOpts: Record<string, unknown> | undefined
 ): LogsScenarioOpts => {
-  const isLogsDb = parseStringToBoolean(scenarioOpts?.logsdb);
+  const isLogsDb = parseStringToBoolean(getStringOpt(scenarioOpts, 'logsdb'));
 
   return {
     isLogsDb,

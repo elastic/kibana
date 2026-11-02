@@ -9,7 +9,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { load, dump } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -31,7 +31,13 @@ interface IntegrationAttributes {
   install_source: string;
   [key: string]: any;
 }
-import { CustomIntegrationNotFoundError, NotACustomIntegrationError } from '../../../errors';
+import {
+  CustomIntegrationNotFoundError,
+  FleetUnauthorizedError,
+  NotACustomIntegrationError,
+} from '../../../errors';
+
+import { isTransform } from '../elasticsearch/transform/transform_utils';
 
 import { getInstalledPackageWithAssets } from './get';
 
@@ -98,10 +104,10 @@ export async function incrementVersionAndUpdate(
 
   const assetsMap = [...installedPkg!.assetsMap.entries()].reduce((acc, [path, content]) => {
     if (path === `${pkgName}-${installedPkg!.installation.install_version}/manifest.yml`) {
-      const yaml = load(content!.toString());
+      const yaml = parse(content!.toString());
       yaml.version = data.version;
 
-      content = Buffer.from(dump(yaml));
+      content = Buffer.from(stringify(yaml));
     }
 
     acc.set(
@@ -116,24 +122,24 @@ export async function incrementVersionAndUpdate(
     const manifestPath = `${pkgName}-${data.version}/manifest.yml`;
     const manifest = assetsMap.get(manifestPath);
     if (manifest) {
-      const yaml = load(manifest?.toString());
+      const yaml = parse(manifest?.toString());
       if (yaml) {
         yaml.categories = data.categories || [];
-        assetsMap.set(manifestPath, Buffer.from(dump(yaml)));
+        assetsMap.set(manifestPath, Buffer.from(stringify(yaml)));
       }
     }
   }
 
   assetsMap.set(
     `${pkgName}-${data.version}/docs/README.md`,
-    data.readme ? Buffer.from(data.readme) : undefined
+    data.readme ? Buffer.from(data.readme) : Buffer.from('')
   );
 
   // update the changelog asset as well by adding an entry
   const changelogPath = `${pkgName}-${data.version}/changelog.yml`;
   const changelog = assetsMap.get(changelogPath);
   if (changelog) {
-    const yaml = load(changelog?.toString());
+    const yaml = parse(changelog?.toString());
     if (yaml) {
       const newChangelogItem = {
         version: data.version,
@@ -147,11 +153,29 @@ export async function incrementVersionAndUpdate(
         ],
       };
       yaml.push(newChangelogItem);
-      assetsMap.set(changelogPath, Buffer.from(dump(yaml)));
+      assetsMap.set(changelogPath, Buffer.from(stringify(yaml)));
     }
   }
 
   const paths = [...assetsMap.keys()];
+
+  // Refuse before the state machine starts, not during it.
+  //
+  // This replays the stored archive with force: true, so a package that was originally uploaded
+  // has its real transforms recreated. Those must not be bound to the editing user — that would
+  // make a metadata edit an alternate reauthorization path around the install-source gate in
+  // handleTransformReauthorizeAndStart — so no request is passed below and transform
+  // installation cannot succeed. Letting it fail in-flight would be worse than refusing: this
+  // call omits `installedPkg`, so the first step overwrites the installation saved object with a
+  // new-version record and drops its transform and archive references, `keepFailedInstallation`
+  // then preserves that state, and installPackageWithStateMachine resolves with `{ error }`
+  // rather than throwing — so the route would answer 200 over a damaged installation with an
+  // untracked transform. Throwing here leaves the installation untouched and surfaces a 403.
+  if (paths.some(isTransform)) {
+    throw new FleetUnauthorizedError(
+      `Cannot update integration ${pkgName}: its archive contains Elasticsearch transforms, which stay bound to the privileges of the user who installed them and cannot be rebound by an edit. Reinstall the package instead.`
+    );
+  }
 
   const packageInfo = {
     ...installedPkg!.packageInfo,
@@ -176,7 +200,14 @@ export async function incrementVersionAndUpdate(
     spaceId: 'default',
     force: true,
     paths: packageInstallContext.paths,
-    authorizationHeader: null,
+    // Deliberately no request. This reinstall replays the stored archive with force: true, so a
+    // package that was originally uploaded has its real transforms recreated here. Passing the
+    // editing user's request would bind those caller-authored transforms to the editor's
+    // Elasticsearch privileges and start them — a README edit would become an alternate
+    // reauthorization path, bypassing the install-source gate in handleTransformReauthorizeAndStart.
+    // Consequence: editing an uploaded integration that ships transforms fails with a 403 until
+    // metadata-only edits stop reinstalling transforms. Failing closed is intended.
+    request: undefined,
     keepFailedInstallation: true,
   });
 

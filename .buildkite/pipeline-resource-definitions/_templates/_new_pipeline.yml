@@ -58,6 +58,7 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+        # Use READ_ONLY for pipelines that publish or promote artifacts
         everyone:
           access_level: BUILD_AND_READ
       # Scheduled runs for the pipeline

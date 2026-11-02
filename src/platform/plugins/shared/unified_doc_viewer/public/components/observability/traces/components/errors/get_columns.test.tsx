@@ -8,10 +8,16 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { createEvent, fireEvent, render } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { getColumns } from './get_columns';
 import type { ErrorsByTraceId } from '@kbn/apm-types';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
 
 // Mock the i18n module
 jest.mock('@kbn/i18n', () => ({
@@ -20,13 +26,26 @@ jest.mock('@kbn/i18n', () => ({
   },
 }));
 
+jest.mock('../../../../../hooks/use_discover_link_and_esql_query', () => ({
+  useDiscoverLinkAndEsqlQuery: jest.fn(),
+}));
+
+jest.mock('../../../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: jest.fn(),
+}));
+
+jest.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => ({
+  useDocViewerExtensionActionsContext: jest.fn(),
+}));
+
 describe('getColumns', () => {
-  const mockGenerateDiscoverLink = jest.fn();
   const traceId = 'trace-123';
   const docId = 'span-456';
   const errorId = 'error-789';
 
+  // source is now per-item, not passed to getColumns
   const mockErrorItem: ErrorsByTraceId['traceErrors'][0] = {
+    source: 'apm',
     error: {
       id: errorId,
       exception: {
@@ -36,9 +55,10 @@ describe('getColumns', () => {
       grouping_key: 'group-123',
     },
     timestamp: { us: 1234567890 },
-  };
+  } as unknown as ErrorsByTraceId['traceErrors'][0];
 
   const mockErrorItemWithLog: ErrorsByTraceId['traceErrors'][0] = {
+    source: 'apm',
     error: {
       id: errorId,
       log: {
@@ -47,141 +67,117 @@ describe('getColumns', () => {
       culprit: 'test-culprit',
     },
     timestamp: { us: 1234567890 },
-  };
+  } as unknown as ErrorsByTraceId['traceErrors'][0];
 
   const mockUnprocessedOtelErrorItem: ErrorsByTraceId['traceErrors'][0] = {
+    source: 'unprocessedOtel',
     error: {
       id: errorId,
       exception: {
         type: 'Error',
       },
     },
-  };
+  } as unknown as ErrorsByTraceId['traceErrors'][0];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useDataSourcesContext as jest.Mock).mockReturnValue({
+      indexes: { apm: { errors: 'apm-errors-*' } },
+    });
+    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      discoverUrl: '/app/discover#/?_a=1',
+      esqlQueryString: 'FROM apm-errors-* | WHERE true',
+    });
   });
 
-  describe('generateDiscoverLink functionality', () => {
-    it('should call generateDiscoverLink with correct parameters for APM source', () => {
-      const source = 'apm';
-      const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-        traceId,
-        docId,
-        source,
-      }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
+  it('renders an EuiLink when useDiscoverLinkAndEsqlQuery returns a discoverUrl', () => {
+    const columns = getColumns({
+      traceId,
+      docId,
+    }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
-      const ErrorRender = columns[0].render;
-      render(<>{ErrorRender?.(null, mockErrorItem)}</>);
+    const ErrorRender = columns[0].render;
+    const { getByTestId } = render(<>{ErrorRender?.(null, mockErrorItem)}</>);
 
-      expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
-        'trace.id': traceId,
-        'span.id': docId,
-        'processor.event': 'error',
-        'error.id': errorId,
-      });
+    expect(getByTestId('error-group-link')).toHaveAttribute('href', '/app/discover#/?_a=1');
+  });
+
+  it('renders plain text when both discoverUrl and openInNewTab are unavailable', () => {
+    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      discoverUrl: undefined,
+      esqlQueryString: undefined,
+    });
+    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue(undefined);
+
+    const columns = getColumns({
+      traceId,
+      docId,
+    }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
+
+    const ErrorRender = columns[0].render;
+    const { queryByTestId, getByTestId } = render(<>{ErrorRender?.(null, mockErrorItem)}</>);
+
+    expect(queryByTestId('error-group-link')).not.toBeInTheDocument();
+    expect(getByTestId('error-exception-message')).toBeInTheDocument();
+  });
+
+  it('calls openInNewTab on plain left click when esqlQueryString is available', () => {
+    const openInNewTab = jest.fn();
+    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
+    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      discoverUrl: '/app/discover#/?_a=1',
+      esqlQueryString: 'FROM apm-errors-* | WHERE trace.id == "trace-123"',
     });
 
-    it('should call generateDiscoverLink with correct parameters for OTEL processed source', () => {
-      const source = 'unprocessedOtel';
-      const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-        traceId,
-        docId,
-        source,
-      }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
+    const columns = getColumns({
+      traceId,
+      docId,
+    }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
-      const ErrorRender = columns[0].render;
-      render(<>{ErrorRender?.(null, mockErrorItem)}</>);
+    const ErrorRender = columns[0].render;
+    const { getByTestId } = render(<>{ErrorRender?.(null, mockErrorItem)}</>);
 
-      expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
-        'trace.id': traceId,
-        'span.id': docId,
-        'event.name': undefined,
-        'exception.message': 'Test error message',
-      });
+    const link = getByTestId('error-group-link');
+    const clickEvent = createEvent.click(link, { button: 0 });
+    fireEvent(link, clickEvent);
+
+    expect(clickEvent.defaultPrevented).toBe(true);
+    expect(openInNewTab).toHaveBeenCalledWith({
+      query: { esql: 'FROM apm-errors-* | WHERE trace.id == "trace-123"' },
+      tabLabel: 'Test error message',
+    });
+  });
+
+  it('does not intercept modifier click when href is present', () => {
+    const openInNewTab = jest.fn();
+    (useDocViewerExtensionActionsContext as jest.Mock).mockReturnValue({ openInNewTab });
+    (useDiscoverLinkAndEsqlQuery as jest.Mock).mockReturnValue({
+      discoverUrl: '/app/discover#/?_a=1',
+      esqlQueryString: 'FROM apm-errors-* | WHERE trace.id == "trace-123"',
     });
 
-    it('should call generateDiscoverLink with only traceId and docId for unknown source', () => {
-      const source = 'unknown';
-      const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-        traceId,
-        docId,
-        source,
-      }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
+    const columns = getColumns({
+      traceId,
+      docId,
+    }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
-      const ErrorRender = columns[0].render;
-      render(<>{ErrorRender?.(null, mockErrorItem)}</>);
+    const ErrorRender = columns[0].render;
+    const { getByTestId } = render(<>{ErrorRender?.(null, mockErrorItem)}</>);
 
-      expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
-        'trace.id': traceId,
-        'span.id': docId,
-      });
-    });
+    const link = getByTestId('error-group-link');
+    const ctrlClickEvent = createEvent.click(link, { button: 0, ctrlKey: true });
+    fireEvent(link, ctrlClickEvent);
 
-    it('should not include SPAN_ID when docId is not provided', () => {
-      const source = 'apm';
-      const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-        traceId,
-        source,
-      }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
-
-      const ErrorRender = columns[0].render;
-      render(<>{ErrorRender?.(null, mockErrorItem)}</>);
-
-      expect(mockGenerateDiscoverLink).toHaveBeenCalledWith({
-        'trace.id': traceId,
-        'processor.event': 'error',
-        'error.id': errorId,
-      });
-    });
-
-    it('should render link when generateDiscoverLink returns URL', () => {
-      mockGenerateDiscoverLink.mockReturnValue('/discover/error-link');
-      const source = 'apm';
-      const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-        traceId,
-        docId,
-        source,
-      }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
-
-      const ErrorRender = columns[0].render;
-      const { getByTestId } = render(<>{ErrorRender?.(null, mockErrorItem)}</>);
-
-      expect(getByTestId('error-group-link')).toHaveAttribute('href', '/discover/error-link');
-    });
-
-    it('should render plain text when generateDiscoverLink returns undefined', () => {
-      mockGenerateDiscoverLink.mockReturnValue(undefined);
-      const source = 'apm';
-      const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-        traceId,
-        docId,
-        source,
-      }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
-
-      const ErrorRender = columns[0].render;
-      const { queryByTestId, getByTestId } = render(<>{ErrorRender?.(null, mockErrorItem)}</>);
-
-      expect(queryByTestId('error-group-link')).not.toBeInTheDocument();
-      expect(getByTestId('error-exception-message')).toBeInTheDocument();
-    });
+    expect(openInNewTab).not.toHaveBeenCalled();
+    expect(ctrlClickEvent.defaultPrevented).toBe(false);
   });
 
   describe('exception message handling', () => {
     it('should render error message from exception when available', () => {
-      mockGenerateDiscoverLink.mockReturnValue('/discover/error-link');
-      const source = 'apm';
       const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
         docId,
-        source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
       const ErrorRender = columns[0].render;
@@ -191,13 +187,9 @@ describe('getColumns', () => {
     });
 
     it('should render error message from log when exception message is not available', () => {
-      mockGenerateDiscoverLink.mockReturnValue('/discover/error-link');
-      const source = 'apm';
       const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
         docId,
-        source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
       const ErrorRender = columns[0].render;
@@ -207,13 +199,9 @@ describe('getColumns', () => {
     });
 
     it('should render N/A when no error message is available', () => {
-      mockGenerateDiscoverLink.mockReturnValue('/discover/error-link');
-      const source = 'apm';
       const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
         docId,
-        source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
       const ErrorRender = columns[0].render;
@@ -225,13 +213,9 @@ describe('getColumns', () => {
 
   describe('culprit handling', () => {
     it('should render culprit when available', () => {
-      mockGenerateDiscoverLink.mockReturnValue('/discover/error-link');
-      const source = 'apm';
       const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
         docId,
-        source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
       const ErrorRender = columns[0].render;
@@ -241,19 +225,131 @@ describe('getColumns', () => {
     });
 
     it('should render N/A for culprit when not available', () => {
-      mockGenerateDiscoverLink.mockReturnValue('/discover/error-link');
-      const source = 'apm';
       const columns = getColumns({
-        generateDiscoverLink: mockGenerateDiscoverLink,
         traceId,
         docId,
-        source,
       }) as Array<EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>>;
 
       const ErrorRender = columns[0].render;
       const { getByTestId } = render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
 
       expect(getByTestId('error-culprit')).toHaveTextContent('N/A');
+    });
+  });
+
+  describe('where clause', () => {
+    const renderWhereClause = (item: ErrorsByTraceId['traceErrors'][0]) => {
+      const columns = getColumns({ traceId, docId }) as Array<
+        EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>
+      >;
+
+      const ErrorRender = columns[0].render;
+      render(<>{ErrorRender?.(null, item)}</>);
+
+      const { whereClause } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+        whereClause: ESQLAstExpression;
+      };
+
+      const query = esql.from('apm-errors-*');
+      query.where`${whereClause}`;
+      return query.print('pipe-multiline');
+    };
+
+    it('filters by error.id when the item has one', () => {
+      expect(renderWhereClause(mockErrorItem)).toBe(
+        `FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND processor.event == "error" AND error.id == "error-789"`
+      );
+    });
+
+    it('omits the error.id predicate when the item has no id', () => {
+      const itemWithoutErrorId = {
+        ...mockErrorItem,
+        error: { ...mockErrorItem.error, id: undefined },
+      } as ErrorsByTraceId['traceErrors'][0];
+
+      expect(renderWhereClause(itemWithoutErrorId)).toBe(
+        `FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND processor.event == "error"`
+      );
+    });
+
+    it('uses event_name (OTEL_EVENT_NAME) not event.name for unprocessed OTel items', () => {
+      const otelItem: ErrorsByTraceId['traceErrors'][0] = {
+        source: 'unprocessedOtel',
+        eventName: 'exception',
+        error: { exception: { message: String.raw`failed at C:\next\run.cs` } },
+      } as unknown as ErrorsByTraceId['traceErrors'][0];
+
+      expect(renderWhereClause(otelItem)).toBe(
+        // OTEL_EVENT_NAME is `event_name` (not `event.name`), and the message uses EXCEPTION_MESSAGE (`exception.message`)
+        String.raw`FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND event_name == "exception" AND exception.message == "failed at C:\\next\\run.cs"`
+      );
+    });
+
+    it('omits event_name predicate when item has no eventName', () => {
+      const otelItemNoEventName: ErrorsByTraceId['traceErrors'][0] = {
+        source: 'unprocessedOtel',
+        error: { exception: { message: 'Something went wrong' } },
+      } as unknown as ErrorsByTraceId['traceErrors'][0];
+
+      expect(renderWhereClause(otelItemNoEventName)).toBe(
+        `FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND exception.message == "Something went wrong"`
+      );
+    });
+  });
+
+  describe('index pattern selection', () => {
+    it('uses apm.errors pattern for APM error items', () => {
+      const columns = getColumns({ traceId, docId }) as Array<
+        EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>
+      >;
+      const ErrorRender = columns[0].render;
+      render(<>{ErrorRender?.(null, mockErrorItem)}</>);
+
+      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+        indexPattern: string;
+      };
+      expect(indexPattern).toBe('apm-errors-*');
+    });
+
+    it('uses logs pattern for unprocessed OTel items when logs index is configured', () => {
+      (useDataSourcesContext as jest.Mock).mockReturnValue({
+        indexes: { apm: { errors: 'apm-errors-*' }, logs: 'logs-*-*' },
+      });
+
+      const columns = getColumns({ traceId, docId }) as Array<
+        EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>
+      >;
+      const ErrorRender = columns[0].render;
+      render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
+
+      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+        indexPattern: string;
+      };
+      expect(indexPattern).toBe('logs-*-*');
+    });
+
+    it('does not fall back to apm.errors for unprocessed OTel items when no logs index is configured', () => {
+      // No indexes.logs
+      (useDataSourcesContext as jest.Mock).mockReturnValue({
+        indexes: { apm: { errors: 'apm-errors-*' } },
+      });
+
+      const columns = getColumns({ traceId, docId }) as Array<
+        EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>
+      >;
+      const ErrorRender = columns[0].render;
+      render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
+
+      const { indexPattern } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+        indexPattern?: string;
+      };
+      // The APM error pattern cannot match custom OTel log datasets, so no pattern is passed and
+      // `DiscoverEsqlLink` renders plain text instead of a link to an empty result.
+      expect(indexPattern).toBeUndefined();
     });
   });
 });

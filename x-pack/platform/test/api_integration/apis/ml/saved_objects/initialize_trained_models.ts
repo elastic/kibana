@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
-import type { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
+import type { PutTrainedModelConfig } from '@kbn/ml-common-types/trained_models';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';

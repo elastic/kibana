@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
-import type { Module } from '../../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { LABELS, type LabelId } from './overview_tab_content';
@@ -118,12 +118,12 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText size="m">
-                      <h4>{LABELS[assetId as LabelId]}</h4>
+                      <strong>{LABELS[assetId as LabelId]}</strong>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiNotificationBadge color="subdued" size="m">
-                      <h3>{module.kibana[assetId]!.length}</h3>
+                      {module.kibana[assetId]!.length}
                     </EuiNotificationBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>

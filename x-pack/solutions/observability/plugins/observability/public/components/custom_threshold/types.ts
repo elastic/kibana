@@ -25,6 +25,7 @@ import type {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Group } from '../../../common/typings';
 import {
   aggType,
@@ -33,6 +34,7 @@ import {
   type CustomMetricExpressionParams,
   type MetricExpressionParams,
   type ThresholdParams,
+  type NoDataBehavior,
 } from '../../../common/custom_threshold_rule/types';
 import type { ObservabilityPublicStart } from '../../plugin';
 
@@ -59,6 +61,7 @@ export interface AlertParams {
   alertOnGroupDisappear?: boolean;
   searchConfiguration: CustomThresholdSearchSourceFields;
   shouldDropPartialBuckets?: boolean;
+  noDataBehavior?: NoDataBehavior;
 }
 
 export interface InfraClientStartDeps {
@@ -77,6 +80,7 @@ export interface InfraClientStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   usageCollection: UsageCollectionStart;
 }
 

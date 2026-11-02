@@ -14,7 +14,7 @@
 import React from 'react';
 import type { DataStreamFlyoutWithContextProps } from './data_stream_flyout_with_context_types';
 import { httpService } from '../../../../services/http';
-import { notificationService } from '../../../../services/notification';
+import { NotificationService } from '../../../../services/notification';
 import { UiMetricService } from '../../../../services/ui_metric';
 import { documentationService } from '../../../../services';
 import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
@@ -36,8 +36,8 @@ export const DataStreamFlyoutWithContext: React.FC<DataStreamFlyoutWithContextPr
   // can't do it in an effect because then the first http call fails as the instantiation happens after first render
   if (!httpService.httpClient) {
     httpService.setup(core.http);
-    notificationService.setup(core.notifications);
   }
+  const notificationService = new NotificationService(core.notifications.toasts);
   documentationService.setup(core.docLinks);
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);

@@ -17,3 +17,4 @@ export const CASES_SETTINGS_SUB_PRIVILEGE_ID = 'cases_settings';
 export const CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID = 'create_comment';
 export const CASES_REOPEN_SUB_PRIVILEGE_ID = 'case_reopen';
 export const CASES_ASSIGN_SUB_PRIVILEGE_ID = 'cases_assign';
+export const CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID = 'cases_manage_templates';

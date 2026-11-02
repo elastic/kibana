@@ -7,6 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
+import type { ColdstartRateResponse } from '@kbn/apm-api-shared';
 import {
   FAAS_COLDSTART,
   SERVICE_NAME,
@@ -114,17 +115,6 @@ export async function getColdstartRate({
   const average = calculateTransactionColdstartRate(resp.aggregations.coldstartStates);
 
   return { transactionColdstartRate, average };
-}
-
-export interface ColdstartRateResponse {
-  currentPeriod: {
-    transactionColdstartRate: Coordinate[];
-    average: number | null;
-  };
-  previousPeriod: {
-    transactionColdstartRate: Coordinate[];
-    average: number | null;
-  };
 }
 
 export async function getColdstartRatePeriods({

@@ -87,6 +87,7 @@ export const useItemsAction = <T,>({
         {
           cases: casesToUpdate,
           successToasterTitle: successToasterTitle(selectedCasesToEdit.length),
+          originalCases: selectedCasesToEdit,
         },
         { onSuccess: onActionSuccess }
       );

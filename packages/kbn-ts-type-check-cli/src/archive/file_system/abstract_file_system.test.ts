@@ -15,7 +15,21 @@ import { AbstractFileSystem } from './abstract_file_system';
 
 jest.mock('../utils', () => ({
   cleanTypeCheckArtifacts: jest.fn(),
+  calculateFileHashes: jest.fn().mockResolvedValue({
+    'pnpm-lock.yaml': 'hash1',
+  }),
 }));
+
+// Use a per-process TMP_DIR: the sibling type-check CLI package's suite shares the real one,
+// and both suites delete it after each test, so running them concurrently races.
+jest.mock('../constants', () => {
+  const Os = jest.requireActual<typeof import('os')>('os');
+  const Path = jest.requireActual<typeof import('path')>('path');
+  return {
+    ...jest.requireActual<typeof import('../constants')>('../constants'),
+    TMP_DIR: Path.join(Os.tmpdir(), `kibana-ts-type-check-cache-test-${process.pid}`),
+  };
+});
 
 const { cleanTypeCheckArtifacts } = jest.requireMock('../utils') as {
   cleanTypeCheckArtifacts: jest.MockedFunction<(log: SomeDevLog) => Promise<void>>;
@@ -110,6 +124,23 @@ describe('AbstractFileSystem', () => {
         prNumber: '42',
       });
     });
+
+    it('stores file hashes when cache invalidation files are provided', async () => {
+      const log = createLog();
+      const fs = new TestFileSystem(log);
+
+      await fs.updateArchive({
+        files: ['fileA', 'fileB'],
+        sha: 'sha-with-hashes',
+        cacheInvalidationFiles: ['pnpm-lock.yaml'],
+      });
+
+      expect(fs.metadata.get('commits/sha-with-hashes/metadata.json')).toEqual({
+        commitSha: 'sha-with-hashes',
+        prNumber: undefined,
+        fileHashes: { 'pnpm-lock.yaml': 'hash1' },
+      });
+    });
   });
 
   describe('restoreArchive', () => {
@@ -148,6 +179,49 @@ describe('AbstractFileSystem', () => {
       expect((log.info as jest.Mock).mock.calls).toContainEqual([
         'No cached TypeScript build artifacts available to restore.',
       ]);
+    });
+
+    it('logs a warning when cache invalidation files have changed', async () => {
+      const log = createLog();
+      const fs = new TestFileSystem(log);
+      fs.metadata.set('commits/shaX/metadata.json', {
+        commitSha: 'shaX',
+        prNumber: undefined,
+        fileHashes: { 'pnpm-lock.yaml': 'oldhash' },
+      });
+      fs.availableArchives.add('commits/shaX/archive.tar.gz');
+
+      await fs.restoreArchive({
+        shas: ['shaX'],
+        cacheInvalidationFiles: ['pnpm-lock.yaml'],
+      });
+
+      expect(fs.extractCalls).toHaveLength(0);
+      expect(cleanTypeCheckArtifacts).not.toHaveBeenCalled();
+      expect((log.warning as jest.Mock).mock.calls).toContainEqual([
+        expect.stringContaining(
+          'Cached TypeScript build artifacts for shaX found, but cache invalidation files have changed:'
+        ),
+      ]);
+    });
+
+    it('proceeds with restore if hashes match', async () => {
+      const log = createLog();
+      const fs = new TestFileSystem(log);
+      fs.metadata.set('commits/shaY/metadata.json', {
+        commitSha: 'shaY',
+        prNumber: undefined,
+        fileHashes: { 'pnpm-lock.yaml': 'hash1' },
+      });
+      fs.availableArchives.add('commits/shaY/archive.tar.gz');
+
+      await fs.restoreArchive({
+        shas: ['shaY'],
+        cacheInvalidationFiles: ['pnpm-lock.yaml'],
+      });
+
+      expect(cleanTypeCheckArtifacts).toHaveBeenCalledTimes(1);
+      expect(fs.extractCalls).toEqual(['commits/shaY/archive.tar.gz']);
     });
   });
 });

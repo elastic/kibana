@@ -7,4 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MARKDOWN_EMBEDDABLE_TYPE = 'DASHBOARD_MARKDOWN';
+import { i18n } from '@kbn/i18n';
+
+export { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
+
+export const MARKDOWN_SAVED_OBJECT_TYPE = 'markdown';
+export const MARKDOWN_API_PATH = `/api/markdowns`;
+export const MARKDOWN_API_VERSION = '2023-10-31';
+
+export const APP_ICON = 'text';
+
+export const APP_NAME = i18n.translate('dashboardMarkdown.title', {
+  defaultMessage: 'Markdown',
+});
+
+export const DISPLAY_NAME = i18n.translate('dashboardMarkdown.displayName', {
+  defaultMessage: 'markdown',
+});

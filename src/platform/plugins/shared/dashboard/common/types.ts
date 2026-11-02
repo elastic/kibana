@@ -7,25 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardState } from '../server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardChangeSource } from './change_sources';
 
-export type { DashboardState };
-
+/**
+ * Capabilities object for the Dashboard application.
+ * Defines the permissions available for dashboard operations.
+ */
 export interface DashboardCapabilities {
+  /** Whether the user can see write controls (edit, save, etc.). */
   showWriteControls: boolean;
+  /** Whether the user can create new dashboards. */
   createNew: boolean;
+  /** Whether the user can view dashboards. */
   show: boolean;
+  /** Additional capability flags. */
   [key: string]: boolean;
 }
 
+/**
+ * Parameters for the dashboard locator.
+ * Used to navigate to a specific dashboard with optional state.
+ */
 export type DashboardLocatorParams = Partial<
-  DashboardState & {
-    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
-    references?: DashboardState['references'] & SerializableRecord;
-
+  Omit<DashboardState, 'filters' | 'query'> & {
+    /**
+     * Filters to apply. Pinned-ness is encoded on each filter (`$state.store`).
+     */
+    filters?: Filter[];
+    query?: Query;
     viewMode?: ViewMode;
 
     /**
@@ -51,9 +63,9 @@ export type DashboardLocatorParams = Partial<
     searchSessionId?: string;
 
     /**
-     * Set to pass state from solution to embeddables.
-     * See PassThroughContext presentation container interface for details
+     * Labels for the integrations that supplied this state, e.g. `agent`. They are reported with
+     * the next save of the opened dashboard.
      */
-    passThroughContext?: SerializableRecord;
+    changedBy?: DashboardChangeSource[];
   }
 >;

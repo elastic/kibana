@@ -8,7 +8,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
 
@@ -19,6 +24,10 @@ import {
   rowItems,
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../common/utils/execution_context';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import type { HostsComponentsQueryProps } from '../../hosts/pages/navigation/types';
 import { hostsActions, hostsModel, hostsSelectors } from '../../hosts/store';
@@ -29,6 +38,11 @@ import { AuthStackByField } from '../../../../common/search_strategy';
 const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 
 const tableType = hostsModel.HostsTableType.authentications;
+
+const HOSTS_AUTHENTICATIONS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'authentications'
+);
 
 const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
   endDate,
@@ -41,6 +55,53 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
   deleteQuery,
 }) => {
   const dispatch = useDispatch();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { openUserFlyout, openHostFlyout } = useFlyoutApi();
+
+  const openUserDetails = useCallback(
+    (userName: string) => {
+      if (enableNewFlyout) {
+        openUserFlyout({
+          userName,
+          contextID: 'authentications',
+          scopeId: 'authentications',
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: { userName, contextID: 'authentications', scopeId: 'authentications' },
+        },
+      });
+    },
+    [enableNewFlyout, openFlyout, openUserFlyout]
+  );
+
+  const openHostDetails = useCallback(
+    (hostName: string) => {
+      if (enableNewFlyout) {
+        openHostFlyout({
+          hostName,
+          contextID: 'authentications',
+          scopeId: 'authentications',
+          origin: FLYOUT_ORIGIN.AUTHENTICATIONS_TABLE,
+        });
+        return;
+      }
+
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: { hostName, contextID: 'authentications', scopeId: 'authentications' },
+        },
+      });
+    },
+    [enableNewFlyout, openFlyout, openHostFlyout]
+  );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -64,12 +125,13 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
     stackByField: AuthStackByField.userName,
     activePage,
     limit,
+    executionContext: HOSTS_AUTHENTICATIONS_CONTEXT,
   });
 
   const columns =
     type === hostsModel.HostsType.details
-      ? getHostDetailsAuthenticationColumns()
-      : getHostsPageAuthenticationColumns();
+      ? getHostDetailsAuthenticationColumns(openUserDetails)
+      : getHostsPageAuthenticationColumns(openUserDetails, openHostDetails);
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) =>

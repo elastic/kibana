@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/unified-metrics-grid",
-  "owner": "@elastic/obs-presentation-team",
-  "group": "platform",
-  "visibility": "shared"
-}

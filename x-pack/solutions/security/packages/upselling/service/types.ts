@@ -20,9 +20,11 @@ export type UpsellingSectionId =
   | 'endpoint_agent_tamper_protection'
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'
+  | 'cloud_defend_integration_installation'
   | 'ruleDetailsEndpointExceptions'
   | 'automatic_import'
-  | 'siem_migrations_start';
+  | 'siem_migrations_start'
+  | 'graph_visualization';
 
 export type UpsellingMessageId =
   | 'investigation_guide'
@@ -32,4 +34,6 @@ export type UpsellingMessageId =
   | 'alert_suppression_rule_details'
   | 'note_management_user_filter'
   | 'prebuilt_rule_customization'
-  | 'prebuilt_rule_customization_description';
+  | 'prebuilt_rule_customization_description'
+  | 'endpoint_custom_yara_signatures'
+  | 'endpoint_registry_credential_hardening';

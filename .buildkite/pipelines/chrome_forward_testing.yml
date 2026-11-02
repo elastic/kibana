@@ -12,11 +12,20 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
+  - command: .buildkite/scripts/steps/store_cache.sh
+    label: Store Cache for build
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    agents:
+      machineType: n2-highcpu-8
+
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
@@ -36,6 +45,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     timeout_in_minutes: 10
     depends_on:
@@ -49,28 +59,29 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
       LIMIT_CONFIG_TYPE: 'functional'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2-standard-4
     key: build_scout_tests
     timeout_in_minutes: 15
-    depends_on:
-      - build
     env:
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -98,7 +109,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -112,7 +123,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 10
+    parallelism: 11
     retry:
       automatic:
         - exit_status: '-1'
@@ -126,7 +137,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
@@ -154,7 +165,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -182,10 +193,12 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -196,7 +209,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -252,7 +265,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -266,7 +279,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 7
     retry:
       automatic:
         - exit_status: '-1'
@@ -294,7 +307,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
@@ -322,7 +335,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -364,7 +377,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 3
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -378,7 +391,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '-1'
@@ -387,7 +400,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       preemptible: true
     depends_on:
       - build
@@ -401,7 +414,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       preemptible: true
     depends_on:
       - build
@@ -416,11 +429,11 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
     depends_on:
       - build
-    timeout_in_minutes: 60
-    parallelism: 20
+    timeout_in_minutes: 75
+    parallelism: 22
     retry:
       automatic:
         - exit_status: '-1'
@@ -430,10 +443,10 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
     depends_on:
       - build
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
     retry:
       automatic:
@@ -447,4 +460,5 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2

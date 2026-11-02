@@ -1,0 +1,179 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
+import type { ActionPolicyFormState } from './types';
+
+export const GROUPING_MODE_OPTIONS: Array<{ id: GroupingMode; label: string }> = [
+  {
+    id: 'per_alert',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perAlert', {
+      defaultMessage: 'Alert',
+    }),
+  },
+  {
+    id: 'per_field',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup', {
+      defaultMessage: 'Group',
+    }),
+  },
+  {
+    id: 'all',
+    label: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest', {
+      defaultMessage: 'Digest',
+    }),
+  },
+];
+
+export const GROUPING_MODE_HELP_TEXT: Record<GroupingMode, string> = {
+  per_alert: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perAlert.help',
+    {
+      defaultMessage:
+        'Each matching alert triggers its own notification. Best for when you need individual visibility into each issue.',
+    }
+  ),
+  per_field: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.mode.perGroup.help',
+    {
+      defaultMessage:
+        'Bundles alerts that share the same field value into one notification per unique value. Best for reducing noise when a rule produces many related alerts, such as one per service or host.',
+    }
+  ),
+  all: i18n.translate('xpack.alertingV2.actionPolicy.form.notificationControls.mode.digest.help', {
+    defaultMessage:
+      "Combines all matching alerts into one notification on a set schedule. Best for periodic summaries when individual alerts aren't necessary.",
+  }),
+};
+
+export const PER_ALERT_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
+  {
+    value: 'on_status_change',
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange',
+      {
+        defaultMessage: 'On status change',
+      }
+    ),
+  },
+  {
+    value: 'per_status_interval',
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval',
+      {
+        defaultMessage: 'On status change + repeat at interval',
+      }
+    ),
+  },
+  {
+    value: 'every_time',
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime',
+      {
+        defaultMessage: 'Every evaluation',
+      }
+    ),
+  },
+];
+
+export const AGGREGATE_STRATEGY_OPTIONS: Array<{ value: ThrottleStrategy; text: string }> = [
+  {
+    value: 'time_interval',
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.timeInterval',
+      {
+        defaultMessage: 'At most once every...',
+      }
+    ),
+  },
+  {
+    value: 'every_time',
+    text: i18n.translate(
+      'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTimeAggregate',
+      { defaultMessage: 'Every evaluation' }
+    ),
+  },
+];
+
+export const DEFAULT_STRATEGY_FOR_MODE: Record<GroupingMode, ThrottleStrategy> = {
+  per_alert: 'on_status_change',
+  per_field: 'time_interval',
+  all: 'time_interval',
+};
+
+export const PER_ALERT_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
+  on_status_change: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.onStatusChange.help',
+    {
+      defaultMessage:
+        'Notifies once when an alert opens and once when it recovers. No repeat notifications while it remains active.',
+    }
+  ),
+  per_status_interval: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.perStatusInterval.help',
+    {
+      defaultMessage:
+        'Notifies on status change, then resends at a regular interval while the alert remains active. Use this when issues can stay open for long periods and you want ongoing notifications until they resolve.',
+    }
+  ),
+  every_time: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTime.help',
+    {
+      defaultMessage:
+        'Sends a notification on every rule evaluation per alert. Use only for infrequent rule schedules or when you need a full audit trail.',
+    }
+  ),
+};
+
+export const AGGREGATE_STRATEGY_HELP_TEXT: Partial<Record<ThrottleStrategy, string>> = {
+  time_interval: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.timeInterval.help',
+    {
+      defaultMessage:
+        'Sends at most one notification per group within the specified interval, regardless of how often the rule runs. Use this to limit notification volume for noisy rules.',
+    }
+  ),
+  every_time: i18n.translate(
+    'xpack.alertingV2.actionPolicy.form.notificationControls.strategy.everyTimeAggregate.help',
+    {
+      defaultMessage:
+        'Sends a notification for each group on every rule evaluation. Use only for infrequent rule schedules or when you need a full audit trail.',
+    }
+  ),
+};
+
+export const THROTTLE_INTERVAL_PATTERN = /^[1-9][0-9]*[dhms]$/;
+
+export const DEFAULT_THROTTLE_INTERVAL = '5m';
+
+export const DURATION_UNIT_LABELS: Record<string, string> = {
+  s: i18n.translate('xpack.alertingV2.actionPolicy.form.durationUnit.seconds', {
+    defaultMessage: 'second(s)',
+  }),
+  m: i18n.translate('xpack.alertingV2.actionPolicy.form.durationUnit.minutes', {
+    defaultMessage: 'minute(s)',
+  }),
+  h: i18n.translate('xpack.alertingV2.actionPolicy.form.durationUnit.hours', {
+    defaultMessage: 'hour(s)',
+  }),
+  d: i18n.translate('xpack.alertingV2.actionPolicy.form.durationUnit.days', {
+    defaultMessage: 'day(s)',
+  }),
+};
+
+export const DEFAULT_FORM_STATE: ActionPolicyFormState = {
+  name: '',
+  description: '',
+  matcher: null,
+  groupingMode: 'per_alert',
+  groupBy: [],
+  throttleStrategy: 'on_status_change',
+  throttleInterval: '',
+  destinations: [],
+  inlineActions: [],
+};

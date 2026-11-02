@@ -15,9 +15,10 @@ export function getRequestId(
   { allowFromAnyIp, ipAllowlist }: { allowFromAnyIp: boolean; ipAllowlist: string[] }
 ): string {
   const remoteAddress = request.raw.req.socket?.remoteAddress;
+  const opaqueId = request.headers['x-opaque-id'];
   return allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
     (remoteAddress && ipAllowlist.includes(remoteAddress))
-    ? request.headers['x-opaque-id'] ?? uuidv4()
+    ? (Array.isArray(opaqueId) ? opaqueId[0] : opaqueId) ?? uuidv4()
     : uuidv4();
 }

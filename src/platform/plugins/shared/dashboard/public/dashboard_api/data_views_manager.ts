@@ -7,52 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesDataViews } from '@kbn/presentation-publishing';
+import type { PublishesDataSources, PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesDataSources,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, of, switchMap } from 'rxjs';
+import { BehaviorSubject, switchMap } from 'rxjs';
 
 export function initializeDataViewsManager(
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
+  const dataSources$ = new BehaviorSubject<FilterableSource[] | undefined>([]);
 
-  const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) => {
-      return controlGroupApi ? controlGroupApi.dataViews$ : of([]);
-    })
-  );
-
-  const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
-    { children$ },
-    'dataViews$',
-    apiPublishesDataViews,
-    []
-  );
-
-  const dataViewsSubscription = combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
+  const dataSourcesSubscription = combineCompatibleChildrenApis<
+    PublishesDataSources,
+    FilterableSource[]
+  >({ children$ }, 'dataSources$', apiPublishesDataSources, [])
     .pipe(
-      switchMap(async ([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews];
-        return uniqBy(allDataViews, 'id');
+      switchMap(async (childDataSources) => {
+        return uniqBy(childDataSources, 'id');
       })
     )
-    .subscribe((nextDataViews) => {
-      dataViews$.next(nextDataViews);
+    .subscribe((nextDataSources) => {
+      dataSources$.next(nextDataSources);
     });
 
   return {
     api: {
-      dataViews$,
+      dataSources$,
     },
     cleanup: () => {
-      dataViewsSubscription.unsubscribe();
+      dataSourcesSubscription.unsubscribe();
     },
   };
 }

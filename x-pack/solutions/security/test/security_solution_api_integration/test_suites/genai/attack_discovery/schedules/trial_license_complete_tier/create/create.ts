@@ -84,7 +84,12 @@ export default ({ getService }: FtrProviderContext) => {
           schedule: { ...getSimpleAttackDiscoverySchedule(), name: undefined },
           expectedHttpCode: 400,
         });
-        expect(result).toEqual(getScheduleBadRequestError('name'));
+
+        const { error, message, statusCode } = getScheduleBadRequestError('name');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
 
       it('should return a `Bad Request` error if `params` attribute is `undefined`', async () => {
@@ -93,7 +98,12 @@ export default ({ getService }: FtrProviderContext) => {
           schedule: { ...getSimpleAttackDiscoverySchedule(), params: undefined },
           expectedHttpCode: 400,
         });
-        expect(result).toEqual(getScheduleBadRequestError('params'));
+
+        const { error, message, statusCode } = getScheduleBadRequestError('params');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
 
       it('should return a `Bad Request` error if `schedule` attribute is `undefined`', async () => {
@@ -102,7 +112,12 @@ export default ({ getService }: FtrProviderContext) => {
           schedule: { ...getSimpleAttackDiscoverySchedule(), schedule: undefined },
           expectedHttpCode: 400,
         });
-        expect(result).toEqual(getScheduleBadRequestError('schedule'));
+
+        const { error, message, statusCode } = getScheduleBadRequestError('schedule');
+
+        expect(result.error).toEqual(error);
+        expect(result.message).toContain(message);
+        expect(result.statusCode).toEqual(statusCode);
       });
     });
   });

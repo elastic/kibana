@@ -1,0 +1,226 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
+import type { MaybePromise } from '@kbn/utility-types';
+import type {
+  Attachment,
+  VersionedAttachmentWithOrigin,
+} from '@kbn/agent-builder-common/attachments';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { AttachmentBoundedTool } from './tools';
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.validate} function.
+ */
+export interface AttachmentValidateContext {
+  request: KibanaRequest;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.onOriginUpdated} hook.
+ */
+export interface AttachmentOriginUpdatedContext {
+  request: KibanaRequest;
+  conversationId: string;
+  /** The agent the conversation belongs to. */
+  agentId: string;
+  /** Whether the caller has the privilege to create and edit agents. */
+  canManageAgents: boolean;
+}
+
+/**
+ * Server-side definition of an attachment type.
+ */
+export interface AttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
+  /**
+   * Unique identifier for the attachment type to register.
+   */
+  id: TType;
+  /**
+   * validation function, which will be called when the attachment is added to the conversation.
+   */
+  validate: (
+    input: unknown,
+    context?: AttachmentValidateContext
+  ) => MaybePromise<AttachmentValidationResult<TContent>>;
+  /**
+   * format the attachment to presented to the LLM
+   */
+  format: (
+    attachment: Attachment<TType, TContent>,
+    context: AttachmentFormatContext
+  ) => MaybePromise<AgentFormattedAttachment>;
+  /**
+   * Receives origin (a saved object ID string) and returns resolved content.
+   * Only called once at add time — not on every read.
+   *
+   * When defined, the type supports by-reference creation:
+   * consumer provides origin string → `resolve()` called → content stored as `data`.
+   */
+  resolve?: (
+    origin: string,
+    context: AttachmentResolveContext
+  ) => MaybePromise<TContent | undefined>;
+  /**
+   * Optional hook to determine if the attachment's data is behind the referenced origin.
+   * Staleness is supported only when this function is provided; there is no automatic fallback.
+   * It is invoked only for attachments that have a populated `origin` — the attachment argument is
+   * Return true if the attachment is stale (i.e. behind the origin).
+   */
+  isStale?: (
+    attachment: VersionedAttachmentWithOrigin<TType, TContent>,
+    context: AttachmentResolveContext
+  ) => MaybePromise<boolean>;
+  /**
+   * Optional hook called by the update-origin route after a user links the attachment to an origin
+   * (e.g. a card that created a saved object). A thrown error does not fail the request: it is
+   * logged and returned to the client as a warning, so keep the message user-readable.
+   */
+  onOriginUpdated?: (
+    attachment: VersionedAttachmentWithOrigin<TType, TContent>,
+    context: AttachmentOriginUpdatedContext
+  ) => MaybePromise<void>;
+  /**
+   * should return the list of tools from the registry which should be exposed to the agent
+   * when attachments of that type are present in the conversation.
+   *
+   * Should be used to expose generic tools related to the attachment type.
+   *
+   * E.g. the "esql" attachment type exposes the "execute_esql" tool that way.
+   */
+  getTools?: () => string[];
+  /**
+   * can be used to provide a description of the attachment type,
+   * which will be exposed to the agent when attachments of that type
+   * are present in the conversation.
+   */
+  getAgentDescription?: () => string;
+  /**
+   * Whether attachments of this type are read-only. Defaults to false.
+   */
+  isReadonly?: boolean;
+  /**
+   * Maximum content length (in characters) for attachments of this type when presented inline
+   * to the LLM. Applied per-attachment — each attachment is truncated to its own type's limit.
+   * Defaults to the global DEFAULT_MAX_CONTENT_LENGTH (10 000).
+   */
+  maxContentLength?: number;
+  /**
+   * Maps the attachment, at the version being rendered, to a surface composition: what a person
+   * sees on a surface, such as Slack or the browser, never what the agent reads. It runs on the
+   * server, and the same composition renders on every surface, so it must not assume one.
+   * Without it, those surfaces leave the attachment out.
+   */
+  toSurfaceComposition?: (
+    attachment: Attachment<TType, TContent>,
+    context: AttachmentSurfaceCompositionContext
+  ) => MaybePromise<SurfaceComposition>;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.format} function.
+ */
+export interface AttachmentFormatContext {
+  request: KibanaRequest;
+  spaceId: string;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.resolve} hook.
+ */
+export interface AttachmentResolveContext extends AttachmentFormatContext {
+  /**
+   * Saved objects client scoped to the current user.
+   */
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.toSurfaceComposition} function: the
+ * request and space it renders for, like {@link AttachmentFormatContext}.
+ */
+export type AttachmentSurfaceCompositionContext = AttachmentFormatContext;
+
+/** A block of GitHub-flavored markdown in a {@link SurfaceComposition}. */
+export interface MarkdownNode extends PrimitiveNode {
+  type: 'markdown';
+  text: string;
+}
+
+/** The node types of a {@link SurfaceComposition}, the ones Agent Builder's Isomer pack renders. */
+export type SurfaceNode = MarkdownNode;
+
+/**
+ * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
+ * types: the same document renders to every surface, such as Slack. What an attachment type's
+ * `toSurfaceComposition` returns, and what a response message becomes.
+ */
+export type SurfaceComposition = Composition<SurfaceNode>;
+
+/**
+ * Return type for attachment's validation handlers.
+ * Refer to {@link AttachmentTypeDefinition.validate}
+ */
+export type AttachmentValidationResult<TValidatedData = unknown> =
+  /** valid attachment */
+  | { valid: true; data: TValidatedData }
+  /** validation failed */
+  | { valid: false; error: string };
+
+/**
+ * Text representation of an attachment when exposed to the LLM.
+ */
+export interface TextAttachmentRepresentation {
+  type: 'text';
+  /**
+   * Plain text representation of the attachment.
+   * Can either be text, markdown, json, xml...
+   */
+  value: string;
+}
+
+/**
+ * Image representation of an attachment when exposed to the LLM.
+ */
+export interface ImageAttachmentRepresentation {
+  type: 'image';
+  mimeType: string;
+  getBase64: () => MaybePromise<string>;
+}
+
+/**
+ * Representation of an attachment when exposed to the LLM.
+ */
+export type AttachmentRepresentation = TextAttachmentRepresentation | ImageAttachmentRepresentation;
+
+/**
+ * Structure containing all methods which will be used to present the attachment to the agent.
+ */
+export interface AgentFormattedAttachment {
+  /**
+   * Should return the representation of the attachment, which will be presented to the agent.
+   */
+  /**
+   * @deprecated Representation can be inferred from attachment data; prefer returning
+   * the raw data and let the formatter decide. If omitted, we will fall back to
+   * stringifying the attachment data.
+   */
+  getRepresentation?: () => MaybePromise<AttachmentRepresentation>;
+  /**
+   * Can be used to expose tools which are specific to the attachment instance.
+   *
+   * **Important**: when multiple attachments of the same type are present in the conversation,
+   * this function will be called for each of them, and all the tools will be exposed to the agent.
+   * This is why:
+   * - the tools should be "scoped" to the attachment instance (no id parameter for references, for example)
+   * - the tool ids should be unique (so generated based on the attachment instance or attachment id)
+   * - the descriptions should be explicit that they are specific to the attachment instance (specifying the attachment id for example)
+   */
+  getBoundedTools?: () => MaybePromise<AttachmentBoundedTool[]>;
+}

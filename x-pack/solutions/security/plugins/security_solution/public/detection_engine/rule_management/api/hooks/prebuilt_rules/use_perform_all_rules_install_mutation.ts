@@ -16,6 +16,7 @@ import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from './use_fetch_prebuilt_rules_deprecation_review_query';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
 export const PERFORM_ALL_RULES_INSTALLATION_KEY = [
@@ -34,6 +35,8 @@ export const usePerformAllRulesInstallMutation = (
     useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
+  const invalidateFetchPrebuiltRulesDeprecationReview =
+    useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
 
   return useMutation<PerformRuleInstallationResponseBody>(() => performInstallAllRules(), {
     ...options,
@@ -46,6 +49,7 @@ export const usePerformAllRulesInstallMutation = (
       invalidateFetchPrebuiltRulesInstallReview();
       invalidateRuleStatus();
       invalidateFetchCoverageOverviewQuery();
+      invalidateFetchPrebuiltRulesDeprecationReview();
 
       if (options?.onSettled) {
         options.onSettled(...args);

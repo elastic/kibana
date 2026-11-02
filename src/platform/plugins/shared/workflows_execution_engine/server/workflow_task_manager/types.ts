@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
+
+export const WORKFLOW_RESUME_TASK_TYPE = 'workflow:resume';
+
+export const WORKFLOW_SCHEDULED_TASK_TYPE = 'workflow:scheduled';
+
 export interface StartWorkflowExecutionParams {
   workflowRunId: string;
   spaceId: string;

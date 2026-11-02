@@ -13,7 +13,7 @@ import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EuiFlyout, EuiButton } from '@elastic/eui';
-import { ExportMenu, ManagedFlyout } from './export_integrations';
+import { ExportMenu, ManagedExportFlyout } from './export_integrations';
 import type { IShareContext } from '../context';
 import type { ExportShareConfig, ShareConfigs } from '../../types';
 
@@ -48,7 +48,7 @@ const mockShareContext: IShareContext = {
     },
   },
   objectType: 'type',
-  sharingData: { title: 'title', url: 'url' },
+  sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
   isDirty: false,
   onClose: jest.fn(),
 };
@@ -194,15 +194,19 @@ describe('Export Integrations', () => {
       config: {},
     };
 
-    function CsvExportFlyoutRender() {
+    function CsvExportFlyoutRender({
+      exportIntegration = mockCsvConfigForFlyout,
+    }: {
+      exportIntegration?: ExportShareConfig;
+    }) {
       const [isFlyoutVisible, setIsFlyoutVisible] = React.useState(false);
       let flyout;
 
       if (isFlyoutVisible) {
         flyout = (
-          <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)}>
-            <ManagedFlyout
-              exportIntegration={mockCsvConfigForFlyout}
+          <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-label="Export">
+            <ManagedExportFlyout
+              exportIntegration={exportIntegration}
               shareObjectType={mockShareContext.objectType}
               shareObjectTypeMeta={mockCsvObjectTypeMeta}
               isDirty={mockShareContext.isDirty}
@@ -234,6 +238,44 @@ describe('Export Integrations', () => {
         expect(screen.queryByTestId('exportItemDetailsFlyoutBody')).not.toBe(null);
         expect(screen.getByText('Test warning')).toBeInTheDocument();
       });
+    });
+
+    it('should render the badge with its tooltip next to the flyout title if defined', async () => {
+      const user = userEvent.setup();
+      render(
+        <CsvExportFlyoutRender
+          exportIntegration={{
+            ...mockCsvConfigForFlyout,
+            config: {
+              ...mockCsvConfigForFlyout.config,
+              badge: { label: 'Experimental', tooltipContent: 'This is experimental.' },
+            },
+          }}
+        />
+      );
+
+      await user.click(screen.getByText('Show flyout'));
+
+      expect(await screen.findByRole('heading', { level: 2 })).toHaveTextContent(
+        /^Export type as CSV$/
+      );
+      expect(screen.getByTestId('exportFlyoutTitleBadge')).toHaveTextContent('Experimental');
+
+      await user.hover(screen.getByTestId('exportFlyoutTitleBadge'));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('This is experimental.');
+    });
+
+    it('should not render a badge next to the flyout title if not defined', async () => {
+      const user = userEvent.setup();
+      render(<CsvExportFlyoutRender />);
+
+      await user.click(screen.getByText('Show flyout'));
+
+      expect(await screen.findByRole('heading', { level: 2 })).toHaveTextContent(
+        /^Export type as CSV$/
+      );
+      expect(screen.queryByTestId('exportFlyoutTitleBadge')).not.toBeInTheDocument();
     });
   });
 });

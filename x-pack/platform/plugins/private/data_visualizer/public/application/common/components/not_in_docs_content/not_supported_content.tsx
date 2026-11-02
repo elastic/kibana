@@ -12,7 +12,7 @@ import type { FC } from 'react';
 export const NotSupportedContent: FC = () => (
   <Fragment>
     <EuiText textAlign="center">
-      <EuiIcon type="warning" />
+      <EuiIcon aria-hidden={true} type="warning" />
     </EuiText>
     <EuiText textAlign="center" size={'xs'}>
       <FormattedMessage

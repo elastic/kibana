@@ -6,13 +6,13 @@
  */
 
 import { compose, mapProps } from 'react-recompose';
+import { getPlatform } from '@kbn/shared-ux-utility';
 import type { Props as ComponentProps } from './tool_tip_shortcut';
 import { ToolTipShortcut as Component } from './tool_tip_shortcut';
-import { getClientPlatform } from '../../lib/get_client_platform';
 import { keymap } from '../../lib/keymap';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
 
-const os = getClientPlatform();
+const platform = getPlatform();
 
 interface Props {
   /**
@@ -32,7 +32,7 @@ export const ToolTipShortcut = compose<ComponentProps, Props>(
       return { shortcut: '' };
     }
 
-    const shortcuts = shortcutMap[os] || [];
+    const shortcuts = shortcutMap[platform] || [];
     return { shortcut: getPrettyShortcut(shortcuts[0]) };
   })
 )(Component);

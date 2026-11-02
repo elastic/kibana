@@ -97,11 +97,17 @@ export const createNewChat = () => {
 };
 
 export const selectConnector = (connectorName: string) => {
+  const connectorOption = CONNECTOR_SELECT(connectorName);
+
   cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(CONNECTOR_SELECT(connectorName)).click();
+  // The connector list can be visible but not scrollable (e.g. only 1-2 connectors).
+  // In that case Cypress will retry `scrollTo()` until it times out unless we disable the scrollability check.
+  cy.get('[data-test-subj="aiAssistantConnectorSelector"] .euiSelectableList__list')
+    .should('be.visible')
+    .scrollTo('bottom', { ensureScrollable: false });
+  cy.get(connectorOption).scrollIntoView();
+  cy.get(connectorOption).should('be.visible').click();
   assertConnectorSelected(connectorName);
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(2000);
 };
 export const resetConversation = () => {
   cy.get(CONVERSATION_SETTINGS_MENU).click();
@@ -129,6 +135,7 @@ export const submitMessage = () => {
 };
 
 export const typeAndSendMessage = (message: string) => {
+  cy.get(USER_PROMPT).should('not.be.disabled');
   cy.get(USER_PROMPT).click();
   cy.get(USER_PROMPT).type(message);
   submitMessage();
@@ -276,21 +283,24 @@ export const openShareMenu = () => {
   cy.get(SHARE_BADGE_BUTTON).click();
   cy.get(SHARE_SELECT).should('be.visible');
 };
+// The visibility options live in a single selection EuiSelectable, which exposes the current
+// option through `aria-selected` on the `option` role. (`aria-checked` is only emitted for
+// multi selection lists, such as the user picker asserted by `assertShareUser` below.)
 export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted') => {
   cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', type);
   cy.get(PRIVATE_SELECT_OPTION).should(
     'have.attr',
-    'aria-checked',
+    'aria-selected',
     type === 'Private' ? 'true' : 'false'
   );
   cy.get(RESTRICTED_SELECT_OPTION).should(
     'have.attr',
-    'aria-checked',
+    'aria-selected',
     type === 'Restricted' ? 'true' : 'false'
   );
   cy.get(SHARED_SELECT_OPTION).should(
     'have.attr',
-    'aria-checked',
+    'aria-selected',
     type === 'Shared' ? 'true' : 'false'
   );
 };

@@ -7,9 +7,6 @@
 
 import { monaco } from '@kbn/monaco';
 import { findLast, map, uniqBy } from 'lodash';
-import { getOsqueryTableNames, osqueryTablesRecord } from './osquery_tables';
-
-export const osqueryTableNames = getOsqueryTableNames();
 
 export const keywords = [
   'select',
@@ -110,109 +107,98 @@ interface Range {
   endColumn: number;
 }
 
-interface IDisposable {
-  dispose: () => void;
-}
+export const initializeOsqueryEditor = (
+  tableNames: string[] = [],
+  tablesRecord: Record<string, { columns: Array<{ name: string }> }> = {}
+) => {
+  if (!monaco) return;
 
-const theme = {
-  base: 'vs' as const,
-  inherit: false,
-  rules: [
-    { token: 'osquery' },
-    { token: 'support.function', foreground: '4271AE' },
-    { token: 'keyword', foreground: '8959A8' },
-    { token: 'storage.type', foreground: '8959A8' },
-    { token: 'constant.language', foreground: 'F5871F' },
-    { token: 'comment', foreground: '8E908C' },
-    { token: 'string', foreground: '718C00' },
-    { token: 'constant.numeric', foreground: 'F5871F' },
-    { token: 'keyword.operator', foreground: '3E999F' },
-  ],
-  colors: {
-    'editorGutter.background': '#F6F6F6',
-  },
-};
-
-export const initializeOsqueryEditor = () => {
-  let disposable: IDisposable | null = null;
-  if (monaco) {
-    monaco?.editor.defineTheme('osquery', theme);
-    disposable = monaco.languages.onLanguage('sql', () => {
-      monaco.languages.setMonarchTokensProvider('sql', {
-        ignoreCase: true,
-        osqueryTableNames,
-        builtinFunctions,
-        keywords,
-        builtinConstants,
-        dataTypes,
-        brackets: [
-          { open: '[', close: ']', token: 'delimiter.square' },
-          { open: '(', close: ')', token: 'delimiter.parenthesis' },
+  const tokenDisposable = monaco.languages.setMonarchTokensProvider('sql', {
+    ignoreCase: true,
+    osqueryTableNames: tableNames,
+    builtinFunctions,
+    keywords,
+    builtinConstants,
+    dataTypes,
+    brackets: [
+      { open: '[', close: ']', token: 'delimiter.square' },
+      { open: '(', close: ')', token: 'delimiter.parenthesis' },
+    ],
+    tokenizer: {
+      root: [
+        [
+          '[a-zA-Z_$][a-zA-Z0-9_$]*\\b',
+          {
+            cases: {
+              '@osqueryTableNames': 'osquery',
+              '@builtinFunctions': 'support.function',
+              '@keywords': 'keyword',
+              '@builtinConstants': 'constant.language',
+              '@dataTypes': 'storage.type',
+            },
+          },
         ],
-        tokenizer: {
-          root: [
-            [
-              '[a-zA-Z_$][a-zA-Z0-9_$]*\\b',
-              {
-                cases: {
-                  '@osqueryTableNames': 'osquery',
-                  '@builtinFunctions': 'support.function',
-                  '@keywords': 'keyword',
-                  '@builtinConstants': 'constant.language',
-                  '@dataTypes': 'storage.type',
-                },
-              },
-            ],
-            ['--.*$', 'comment'],
-            ['/\\*.*\\*/', 'comment'],
-            ['".*?"', 'string'],
-            ["'.*?'", 'string'],
-            [/[ \t\r\n]+/, { token: 'whitespace' }],
-            ['[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b', 'constant.numeric'],
-            ['\\+|\\-|\\/|\\/\\/|%|<@>|@>|<@|&|\\^|~|<|>|<=|=>|==|!=|<>|=', 'keyword.operator'],
-            ['[\\(]', 'paren.lparen'],
-            ['[\\)]', 'paren.rparen'],
-            ['\\s+', 'text'],
-          ],
-        },
+        ['--.*$', 'comment'],
+        ['/\\*.*\\*/', 'comment'],
+        ['".*?"', 'string'],
+        ["'.*?'", 'string'],
+        [/[ \t\r\n]+/, { token: 'whitespace' }],
+        ['[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b', 'constant.numeric'],
+        ['\\+|\\-|\\/|\\/\\/|%|<@>|@>|<@|&|\\^|~|<|>|<=|=>|==|!=|<>|=', 'keyword.operator'],
+        ['[\\(]', 'paren.lparen'],
+        ['[\\)]', 'paren.rparen'],
+        ['\\s+', 'text'],
+      ],
+    },
+  });
+
+  const completionDisposable = monaco.languages.registerCompletionItemProvider('sql', {
+    triggerCharacters: ['.'],
+    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {
+      const value = model.getValue();
+      const tokens = monaco.editor.tokenize(value, 'sql');
+      const findOsqueryToken = findLast(
+        tokens[position.lineNumber - 1],
+        (token) => token.type === 'osquery.sql'
+      );
+
+      const osqueryTable = model.getWordAtPosition({
+        lineNumber: position.lineNumber,
+        column: (findOsqueryToken?.offset || 0) + 1,
       });
-      monaco?.languages.registerCompletionItemProvider('sql', {
-        triggerCharacters: ['.'],
-        provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {
-          const value = model.getValue();
-          const tokens = monaco.editor.tokenize(value, 'sql');
-          const findOsqueryToken = findLast(
-            tokens[position.lineNumber - 1],
-            (token) => token.type === 'osquery.sql'
-          );
 
-          const osqueryTable = model.getWordAtPosition({
-            lineNumber: position.lineNumber,
-            column: (findOsqueryToken?.offset || 0) + 1,
-          });
+      const lineContent = model.getLineContent(position.lineNumber);
 
-          const lineContent = model.getLineContent(position.lineNumber);
+      const word = model.getWordUntilPosition(position);
 
-          const word = model.getWordUntilPosition(position);
+      const isDot =
+        lineContent.charAt(lineContent.length - 1) === '.' ||
+        lineContent.charAt(lineContent.length - 2) === '.';
 
-          const isDot =
-            lineContent.charAt(lineContent.length - 1) === '.' ||
-            lineContent.charAt(lineContent.length - 2) === '.';
+      const range = {
+        startLineNumber: position.lineNumber,
+        endLineNumber: position.lineNumber,
+        startColumn: word.startColumn,
+        endColumn: word.endColumn,
+      };
 
-          const range = {
-            startLineNumber: position.lineNumber,
-            endLineNumber: position.lineNumber,
-            startColumn: word.startColumn,
-            endColumn: word.endColumn,
-          };
+      return getEditorAutoCompleteSuggestion(
+        range,
+        value,
+        isDot,
+        tableNames,
+        tablesRecord,
+        osqueryTable?.word
+      );
+    },
+  });
 
-          return getEditorAutoCompleteSuggestion(range, value, isDot, osqueryTable?.word);
-        },
-      });
-    });
-
-    return disposable;
-  }
+  return {
+    dispose: () => {
+      tokenDisposable.dispose();
+      completionDisposable.dispose();
+    },
+  };
 };
 
 const regex = /\s*[\s,]\s*/;
@@ -220,6 +206,8 @@ export const getEditorAutoCompleteSuggestion = (
   range: Range,
   value: string,
   isDot: boolean,
+  tableNames: string[] = [],
+  tablesRecord: Record<string, { columns: Array<{ name: string }> }> = {},
   name?: string
 ): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
   // we do not want to suggest the last word (currently being typed)
@@ -241,7 +229,7 @@ export const getEditorAutoCompleteSuggestion = (
   }));
 
   const osqueryColumns = name
-    ? map(osqueryTablesRecord[name]?.columns, ({ name: columnName }) => ({
+    ? map(tablesRecord[name]?.columns, ({ name: columnName }) => ({
         label: columnName,
         kind: monaco.languages.CompletionItemKind.Folder,
         detail: `${name} column`,
@@ -250,7 +238,7 @@ export const getEditorAutoCompleteSuggestion = (
       }))
     : [];
 
-  const tableNameKeywords = osqueryTableNames.map((tableName: string) => ({
+  const tableNameKeywords = tableNames.map((tableName: string) => ({
     label: tableName,
     kind: monaco.languages.CompletionItemKind.Folder,
     detail: 'Osquery',

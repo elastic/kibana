@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { ResourceType } from '@kbn/product-doc-common';
 import type { UninstallResponse } from '../../common/http_api/installation';
 import type { ProductDocBasePluginStart } from '../types';
 import { REACT_QUERY_KEYS } from './constants';
@@ -32,11 +33,17 @@ export function useUninstallProductDoc(
   const { onSuccess, onError } = options;
   const queryClient = useQueryClient();
 
-  return useMutation<UninstallResponse, ServerError, string | undefined>(
+  type UninstallVars = string | { inferenceId?: string; resourceType?: ResourceType } | undefined;
+
+  return useMutation<UninstallResponse, ServerError, UninstallVars>(
     [REACT_QUERY_KEYS.UNINSTALL_PRODUCT_DOC],
-    async (inferenceId?: string) => {
+    async (vars) => {
+      const inferenceId =
+        typeof vars === 'string' ? vars : vars?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+      const resourceType = typeof vars === 'string' ? undefined : vars?.resourceType;
       return productDocBase.installation.uninstall({
-        inferenceId: inferenceId || defaultInferenceEndpoints.ELSER,
+        inferenceId,
+        resourceType,
       });
     },
     {

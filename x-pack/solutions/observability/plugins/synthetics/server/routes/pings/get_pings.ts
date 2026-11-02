@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryNumber, optionalQueryString, MAX_DATE_RANGE_LENGTH } from '../zod_query';
 import { queryPings } from '../../queries/query_pings';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getPingsRouteQuerySchema = schema.object({
-  from: schema.string(),
-  to: schema.string(),
-  locations: schema.maybe(schema.string()),
-  excludedLocations: schema.maybe(schema.string()),
-  monitorId: schema.maybe(schema.string()),
-  index: schema.maybe(schema.number()),
-  size: schema.maybe(schema.number()),
-  pageIndex: schema.maybe(schema.number()),
-  sort: schema.maybe(schema.string()),
-  status: schema.maybe(schema.string()),
+export const getPingsRouteQuerySchema = z.strictObject({
+  from: z.string().max(MAX_DATE_RANGE_LENGTH),
+  to: z.string().max(MAX_DATE_RANGE_LENGTH),
+  locations: optionalQueryString,
+  excludedLocations: optionalQueryString,
+  monitorId: optionalQueryString,
+  index: queryNumber.optional(),
+  size: queryNumber.optional(),
+  pageIndex: queryNumber.optional(),
+  sort: optionalQueryString,
+  status: optionalQueryString,
+  remoteName: z.string().max(256).optional(),
 });
 
-type GetPingsRouteRequest = TypeOf<typeof getPingsRouteQuerySchema>;
+type GetPingsRouteRequest = z.infer<typeof getPingsRouteQuerySchema>;
 
 export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -44,6 +45,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
       pageIndex,
       locations,
       excludedLocations,
+      remoteName,
     } = request.query as GetPingsRouteRequest;
 
     return await queryPings({
@@ -57,6 +59,7 @@ export const syntheticsGetPingsRoute: SyntheticsRestApiRouteFactory = () => ({
       pageIndex,
       locations: locations ? JSON.parse(locations) : [],
       excludedLocations,
+      remoteName,
     });
   },
 });

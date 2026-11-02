@@ -12,6 +12,7 @@ import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { logProcessedAsAuditEvent } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { BackfillInitiator } from '../../../../../common/constants';
+import { SCHEDULE_TRUNCATED_WARNING } from '../../../../backfill_client/lib/calculate_schedule';
 import { GapFillSchedulePerRuleStatus } from './types';
 
 interface ProcessGapsBatchParams {
@@ -22,9 +23,10 @@ interface ProcessGapsBatchParams {
   initiatorId?: string;
 }
 
-interface ProcessGapsBatchResult {
+export interface ProcessGapsBatchResult {
   processedGapsCount: number;
   hasErrors: boolean;
+  truncatedRuleIds: string[];
   results: Array<{
     ruleId: string;
     processedGaps: number;
@@ -51,7 +53,7 @@ export const processGapsBatch = async (
 
   let totalProcessedGapsCount = 0;
   const gapsForScheduling: Gap[] = [];
-  const results = [];
+  const results: ProcessGapsBatchResult['results'] = [];
   const processedGapsByRuleId = new Map<string, number>();
 
   const startDate = new Date(start);
@@ -113,12 +115,16 @@ export const processGapsBatch = async (
       processedGapsCount: 0,
       results: [],
       hasErrors: false,
+      truncatedRuleIds: [],
     };
   }
 
   // Schedule all backfills in a single bulk operation
   const scheduleResults = await scheduleBackfill(context, schedulingPayloads, gapsForScheduling);
+
   let hasErrors = false;
+  const truncatedRuleIds: string[] = [];
+
   for (let i = 0; i < scheduleResults.length; i++) {
     const result = scheduleResults[i];
     const ruleId = schedulingPayloads[i].ruleId;
@@ -134,6 +140,11 @@ export const processGapsBatch = async (
       });
     } else {
       logProcessedAsAuditEvent(context, { id: ruleId, name: ruleId });
+
+      if (result.warnings?.includes(SCHEDULE_TRUNCATED_WARNING)) {
+        truncatedRuleIds.push(ruleId);
+      }
+
       results.push({
         ruleId,
         processedGaps,
@@ -146,5 +157,6 @@ export const processGapsBatch = async (
     processedGapsCount: totalProcessedGapsCount,
     results,
     hasErrors,
+    truncatedRuleIds,
   };
 };

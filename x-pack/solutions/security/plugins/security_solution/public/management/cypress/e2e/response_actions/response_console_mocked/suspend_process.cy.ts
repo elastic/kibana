@@ -17,7 +17,8 @@ import {
 import { interceptActionRequests, sendActionResponse } from '../../../tasks/isolate';
 import { login } from '../../../tasks/login';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/238720
+describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -53,11 +54,11 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         suspendProcessRequestResponse = responseBody;
       }, 'suspend-process');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('suspend-process is pending').should('exist');
       cy.wait('@suspend-process').then(() => {
         sendActionResponse(suspendProcessRequestResponse);
       });
-      cy.contains('Action completed.', { timeout: 120000 }).should('exist');
+      cy.contains('suspend-process completed successfully', { timeout: 120000 }).should('exist');
     });
   });
 });

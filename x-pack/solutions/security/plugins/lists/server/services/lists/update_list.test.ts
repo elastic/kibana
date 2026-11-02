@@ -32,11 +32,9 @@ describe('update_list', () => {
     jest.clearAllMocks();
   });
 
-  test('it returns a list with serializer and deserializer', async () => {
+  test('it returns an updated list', async () => {
     const list: ListSchema = {
       ...getListResponseMock(),
-      deserializer: '{{value}}',
-      serializer: '(?<value>)',
     };
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();
@@ -45,9 +43,7 @@ describe('update_list', () => {
     const updatedList = await updateList({ ...options, esClient });
     const expected: ListSchema = {
       ...getListResponseMock(),
-      deserializer: '{{value}}',
       id: list.id,
-      serializer: '(?<value>)',
     };
     expect(updatedList).toEqual(expected);
   });
@@ -62,8 +58,6 @@ describe('update_list', () => {
   test('throw error if no list was updated', async () => {
     const list: ListSchema = {
       ...getListResponseMock(),
-      deserializer: '{{value}}',
-      serializer: '(?<value>)',
     };
     (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
     const options = getUpdateListOptionsMock();

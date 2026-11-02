@@ -6,9 +6,9 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const strings = {
@@ -32,39 +32,52 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => (
-  <form
-    onSubmit={(e) => {
-      e.preventDefault();
-      commit(value);
-    }}
-    className="canvasAdvancedFilter"
-  >
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem>
-        <input
-          type="text"
-          className="canvasAdvancedFilter__input"
-          placeholder={strings.getInputPlaceholder()}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <button className="canvasAdvancedFilter__button" type="submit">
-          {strings.getApplyButtonLabel()}
-        </button>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </form>
-);
+export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      & .canvasAdvancedFilter__input {
+        background-color: ${euiTheme.colors.emptyShade};
+        border: ${euiTheme.border.thin};
+      }
 
-AdvancedFilter.defaultProps = {
-  value: '',
-};
+      & .canvasAdvancedFilter__button {
+        border: ${euiTheme.border.thin};
+        background-color: ${euiTheme.colors.emptyShade};
 
-AdvancedFilter.propTypes = {
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
-  commit: PropTypes.func.isRequired,
+        &:hover {
+          background-color: ${euiTheme.colors.lightestShade};
+        }
+      }
+    `,
+    [euiTheme]
+  );
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        commit(value);
+      }}
+      className="canvasAdvancedFilter"
+      css={styles}
+    >
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem>
+          <input
+            type="text"
+            className="canvasAdvancedFilter__input"
+            placeholder={strings.getInputPlaceholder()}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <button className="canvasAdvancedFilter__button" type="submit">
+            {strings.getApplyButtonLabel()}
+          </button>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
+  );
 };

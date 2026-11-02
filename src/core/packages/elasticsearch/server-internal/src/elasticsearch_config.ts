@@ -28,6 +28,21 @@ export const DEFAULT_API_VERSION = 'master';
 
 export const DEFAULT_HEALTH_CHECK_RETRY = 3;
 
+/** The longest delay a Node.js timer supports; a longer one fires after 1ms instead. */
+const MAX_HEALTH_CHECK_DELAY_MS = 2 ** 31 - 1;
+
+const healthCheckDelay = (options: { defaultValue?: number } = {}) =>
+  schema.duration({
+    ...options,
+    validate: (delay) =>
+      delay.asMilliseconds() > MAX_HEALTH_CHECK_DELAY_MS
+        ? `must be ${MAX_HEALTH_CHECK_DELAY_MS}ms (about 24.8 days) or less`
+        : undefined,
+  });
+
+/** Shorter health check delays poll Elasticsearch excessively, and are deprecated. */
+const MIN_HEALTH_CHECK_DELAY_MS = 100;
+
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 
 const requestHeadersWhitelistSchemas = [
@@ -42,6 +57,7 @@ const requestHeadersWhitelistSchemas = [
     },
   }),
   schema.arrayOf(schema.string(), {
+    maxSize: 100,
     // can't use `validate` option on union types, forced to validate each individual subtypes
     // see https://github.com/elastic/kibana/issues/64906
     validate: (headersWhitelist) => {
@@ -64,9 +80,12 @@ export const configSchema = schema.object({
     defaultValue: false,
   }),
   sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-    defaultValue: 'http://localhost:9200',
-  }),
+  hosts: schema.oneOf(
+    [hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 })],
+    {
+      defaultValue: 'http://localhost:9200',
+    }
+  ),
   maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   maxResponseSize: schema.oneOf([schema.literal(false), schema.byteSize()], {
@@ -128,7 +147,10 @@ export const configSchema = schema.object({
         { defaultValue: 'full' }
       ),
       certificateAuthorities: schema.maybe(
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+        ])
       ),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
@@ -156,8 +178,9 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
-    delay: schema.duration({ defaultValue: 2500 }),
-    startupDelay: schema.duration({ defaultValue: 500 }),
+    delay: healthCheckDelay({ defaultValue: 2500 }),
+    onFailureDelay: schema.maybe(healthCheckDelay()),
+    startupDelay: healthCheckDelay({ defaultValue: 500 }),
     retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
@@ -196,7 +219,7 @@ export const configSchema = schema.object({
       path: schema.string(),
       method: schema.maybe(schema.string()),
     }),
-    { defaultValue: [] }
+    { defaultValue: [], maxSize: 100 }
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
@@ -318,9 +341,62 @@ const deprecations: ConfigDeprecationProvider = () => [
         },
       });
     }
+
+    const addHealthCheckDelayDeprecation = (key: string, delayMs: number) => {
+      const setting = `${fromPath}.healthCheck.${key}`;
+      const min = `${MIN_HEALTH_CHECK_DELAY_MS}ms`;
+      addDeprecation({
+        configPath: setting,
+        title: i18n.translate('core.deprecations.elasticsearchHealthCheckDelay.title', {
+          defaultMessage: 'Setting "{setting}" below {min} is deprecated',
+          values: { setting, min },
+        }),
+        message: i18n.translate('core.deprecations.elasticsearchHealthCheckDelay.message', {
+          defaultMessage:
+            '"{setting}" is set to {value}ms, so Kibana checks the Elasticsearch connection more often than needed, adding load to Elasticsearch. Values below {min} will be rejected in a future major version.',
+          values: { setting, value: delayMs, min },
+        }),
+        level: 'warning',
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchHealthCheckDelay.manualSteps1', {
+              defaultMessage:
+                'Set "{setting}" to {min} or more, or remove it from your kibana configs to use the default.',
+              values: { setting, min },
+            }),
+          ],
+        },
+      });
+    };
+
+    const delayMs = toMilliseconds(es.healthCheck?.delay);
+    if (delayMs !== undefined && delayMs < MIN_HEALTH_CHECK_DELAY_MS) {
+      addHealthCheckDelayDeprecation('delay', delayMs);
+    }
+    // A zero startup or failure delay means "use `delay`".
+    const startupDelayMs = toMilliseconds(es.healthCheck?.startupDelay);
+    if (startupDelayMs && startupDelayMs < MIN_HEALTH_CHECK_DELAY_MS) {
+      addHealthCheckDelayDeprecation('startupDelay', startupDelayMs);
+    }
+    const onFailureDelayMs = toMilliseconds(es.healthCheck?.onFailureDelay);
+    if (onFailureDelayMs && onFailureDelayMs < MIN_HEALTH_CHECK_DELAY_MS) {
+      addHealthCheckDelayDeprecation('onFailureDelay', onFailureDelayMs);
+    }
     return;
   },
 ];
+
+/** A raw duration setting in milliseconds, or undefined if unset or invalid (validation reports it). */
+const toMilliseconds = (value: unknown): number | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  try {
+    return schema.duration().validate(value).asMilliseconds();
+  } catch {
+    return undefined;
+  }
+};
 
 export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
   path: 'elasticsearch',
@@ -352,6 +428,10 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   public readonly healthCheckDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch during failure.
+   */
+  public readonly healthCheckFailureInterval: Duration | undefined;
   /**
    * The number of times to retry the health check request
    */
@@ -499,6 +579,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckFailureInterval = rawConfig.healthCheck.onFailureDelay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
     this.healthCheckRetry = rawConfig.healthCheck.retry;
     this.username = rawConfig.username;

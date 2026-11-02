@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import {
+  buildAlertingV1RuleTemplateEngineFilter,
   buildConsumersFilter,
   buildFilter,
   buildRuleTypeIdsFilter,
+  buildTemplateSearchQuery,
+  buildTemplateSearchWildcardValue,
   combineFilterWithAuthorizationFilter,
   combineFilters,
+  toSavedObjectEsQuery,
 } from './filters';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 describe('filters', () => {
   describe('combineFilterWithAuthorizationFilter', () => {
@@ -159,16 +164,31 @@ describe('filters', () => {
 
   describe('buildFilter', () => {
     it('returns undefined if filters is undefined', () => {
-      expect(buildFilter({ filters: undefined, field: 'abc', operator: 'or' })).toBeUndefined();
+      expect(
+        buildFilter({
+          filters: undefined,
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined if filters is is an empty array', () => {
-      expect(buildFilter({ filters: [], field: 'abc', operator: 'or' })).toBeUndefined();
+      expect(
+        buildFilter({ filters: [], field: 'abc', operator: 'or', type: RULE_SAVED_OBJECT_TYPE })
+      ).toBeUndefined();
     });
 
     it('returns a KueryNode using or operator', () => {
-      expect(buildFilter({ filters: ['value1'], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({
+          filters: ['value1'],
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -189,8 +209,14 @@ describe('filters', () => {
     });
 
     it("returns multiple nodes or'd together", () => {
-      expect(buildFilter({ filters: ['value1', 'value2'], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({
+          filters: ['value1', 'value2'],
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -235,8 +261,14 @@ describe('filters', () => {
     it('does not escape special kql characters in the filter values', () => {
       const specialCharacters = 'awesome:()\\<>"*';
 
-      expect(buildFilter({ filters: [specialCharacters], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({
+          filters: [specialCharacters],
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -405,6 +437,116 @@ describe('filters', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('buildAlertingV1RuleTemplateEngineFilter', () => {
+    it('matches engine v1 or missing engine', () => {
+      expect(toKqlExpression(buildAlertingV1RuleTemplateEngineFilter())).toBe(
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *)'
+      );
+    });
+  });
+
+  describe('buildTemplateSearchQuery', () => {
+    const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matchesWildcard = (title: string, wildcardValue: string): boolean => {
+      let regex = '';
+      for (let i = 0; i < wildcardValue.length; i++) {
+        const character = wildcardValue[i];
+        if (character === '\\' && i + 1 < wildcardValue.length) {
+          regex += escapeRegex(wildcardValue[i + 1]);
+          i += 1;
+          continue;
+        }
+        regex += character === '*' ? '.*' : escapeRegex(character);
+      }
+      return new RegExp(`^${regex}$`, 'i').test(title);
+    };
+
+    it('returns undefined when search is empty or only quotes', () => {
+      expect(buildTemplateSearchQuery()).toBeUndefined();
+      expect(buildTemplateSearchQuery('')).toBeUndefined();
+      expect(buildTemplateSearchQuery('   ')).toBeUndefined();
+      expect(buildTemplateSearchQuery('""')).toBeUndefined();
+    });
+
+    it('emits wildcard on name/tags and match on description, with boosts', () => {
+      expect(buildTemplateSearchQuery('idle data')).toEqual({
+        bool: {
+          should: [
+            {
+              wildcard: {
+                'alerting_rule_template.name.keyword': { value: '*idle data*', boost: 3 },
+              },
+            },
+            {
+              wildcard: {
+                'alerting_rule_template.tags': {
+                  value: '*idle data*',
+                  case_insensitive: true,
+                  boost: 2,
+                },
+              },
+            },
+            {
+              match: {
+                'alerting_rule_template.description': { query: 'idle data', boost: 1 },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it.each([
+      ['Kubernetes idle data threshold', 'kub', '*kub*', true],
+      ['Kubernetes idle data threshold', 'thresh', '*thresh*', true],
+      ['Kubernetes idle data threshold', 'idle data', '*idle data*', true],
+      ['Kubernetes idle data threshold', 'data thresh', '*data thresh*', true],
+      ['Kubernetes idle data threshold', 'kub*', '*kub**', true],
+      ['Kubernetes idle data threshold', '*kub*', '**kub**', true],
+      ['[Kubernetes OTel] Container CPU throttling', 'kub', '*kub*', true],
+      ['Idle data streams', 'idle data', '*idle data*', true],
+      ['Maximum CPU threshold per service', 'CPU threshold', '*CPU threshold*', true],
+      ['CPU average combined with latency threshold', 'CPU threshold', '*CPU threshold*', false],
+      ['CPU average combined with latency threshold', 'CPU*threshold', '*CPU*threshold*', true],
+      ['Maximum CPU threshold per service', 'CPU*threshold', '*CPU*threshold*', true],
+      ['Maximum CPU threshold per service', '"CPU threshold"', '*CPU threshold*', true],
+      ['CPU average combined with latency threshold', '"CPU threshold"', '*CPU threshold*', false],
+      ['foo?', 'foo?', '*foo\\?*', true],
+      ['food', 'foo?', '*foo\\?*', false],
+      ['foo\\bar', 'foo\\', '*foo\\\\*', true],
+      ['foo*', 'foo\\', '*foo\\\\*', false],
+    ])('%s + %j', (title, search, wildcard, shouldMatch) => {
+      expect(buildTemplateSearchWildcardValue(search)).toBe(wildcard);
+      expect(matchesWildcard(title, wildcard)).toBe(shouldMatch);
+    });
+  });
+
+  describe('toSavedObjectEsQuery', () => {
+    it('rewrites type.attributes.field to the ES field path', () => {
+      const node = nodeBuilder.is('alerting_rule_template.attributes.engine', 'v1');
+      expect(toSavedObjectEsQuery(node)).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ match: { 'alerting_rule_template.engine': 'v1' } }],
+        },
+      });
+    });
+
+    it('does not rewrite .attributes. that appears inside a value literal', () => {
+      const node = nodeBuilder.is(
+        'alerting_rule_template.attributes.tags',
+        'team.attributes.alerting'
+      );
+      expect(toSavedObjectEsQuery(node)).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ match: { 'alerting_rule_template.tags': 'team.attributes.alerting' } }],
+        },
+      });
     });
   });
 

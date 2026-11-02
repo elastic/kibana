@@ -1,0 +1,8 @@
+summary: A bad request response.
+description: The request was rejected because the payload or query parameters are missing required fields or contain invalid values.
+value:
+  {
+    "statusCode": 400,
+    "error": "Bad Request",
+    "message": "[request body.data_view.title]: expected value of type [string] but got [undefined]"
+  }

@@ -22,12 +22,12 @@ interface NodeMetric {
 
 interface NodeMetrics {
   doc_count: number;
-  uptime: NodeMetric;
-  cpu: NodeMetric;
-  iowait: NodeMetric;
-  load: NodeMetric;
-  rx: RuntimeField;
-  tx: RuntimeField;
+  cpu?: NodeMetric;
+  load?: NodeMetric;
+  uptime?: NodeMetric;
+  iowait?: NodeMetric;
+  rx?: RuntimeField;
+  tx?: RuntimeField;
 }
 
 interface TimeSeriesMetric extends NodeMetrics {

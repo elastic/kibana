@@ -39,7 +39,7 @@ export const AddElasticRulesButton = ({
   return (
     <ButtonComponent
       fill={fill}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       color={'primary'}
       onClick={onClickLink}
       data-test-subj={dataTestSubj}

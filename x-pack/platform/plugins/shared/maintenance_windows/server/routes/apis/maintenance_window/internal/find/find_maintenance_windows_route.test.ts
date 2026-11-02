@@ -11,9 +11,9 @@ import { verifyApiAccess } from '../../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { maintenanceWindowClientMock } from '../../../../../maintenance_window_client.mock';
 import { findMaintenanceWindowsRoute } from './find_maintenance_windows_route';
-import { getMockMaintenanceWindow } from '../../../../../data/test_helpers';
+import { getMockMaintenanceWindowDomain } from '../../../../../data/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { rewriteMaintenanceWindowRes } from '../../../../lib';
+import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -27,14 +27,14 @@ const mockMaintenanceWindows = {
   total: 2,
   data: [
     {
-      ...getMockMaintenanceWindow(),
+      ...getMockMaintenanceWindowDomain(),
       eventStartTime: new Date().toISOString(),
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
     },
     {
-      ...getMockMaintenanceWindow(),
+      ...getMockMaintenanceWindowDomain(),
       eventStartTime: new Date().toISOString(),
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
@@ -80,7 +80,10 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({});
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+        data: mockMaintenanceWindows.data.map((data) => {
+          const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
+          return rewritePartialMaintenanceBodyRes(mwWithoutSchedule);
+        }),
         total: 2,
         page: 1,
         per_page: 3,
@@ -135,7 +138,10 @@ describe('findMaintenanceWindowsRoute', () => {
     });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+        data: mockMaintenanceWindows.data.map((data) => {
+          const { schedule, ...mwWithoutSchedule } = data; // internal api response doesn't have schedule
+          return rewritePartialMaintenanceBodyRes(mwWithoutSchedule);
+        }),
         total: 2,
         page: 1,
         per_page: 3,

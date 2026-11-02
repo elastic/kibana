@@ -128,10 +128,10 @@ export const PolicyList = memo(() => {
   }, [getAppUrl, policyListPath]);
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
+    'integrations',
     {
       path: pagePathGetters.add_integration_to_policy({
-        pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
+        pkgkey: endpointPackageInfo ? `endpoint-${endpointPackageInfo?.version}` : 'endpoint',
       })[1],
       state: {
         onCancelNavigateTo: [
@@ -406,6 +406,9 @@ export const PolicyList = memo(() => {
           <EuiHorizontalRule margin="xs" />
           {outdatedManifestsCallOut}
           <EuiBasicTable
+            tableCaption={i18n.translate('xpack.securitySolution.policy.list.tableCaption', {
+              defaultMessage: 'List of endpoint policies',
+            })}
             data-test-subj="policyListTable"
             items={data?.items || []}
             columns={policyColumns}

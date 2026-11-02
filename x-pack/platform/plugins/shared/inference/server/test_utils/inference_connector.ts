@@ -17,6 +17,8 @@ export const createInferenceConnectorMock = (
     connectorId: 'connector-id',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...parts,
   };
 };

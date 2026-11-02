@@ -9,9 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 import type { attachmentApiV1 } from '../../../../common/types/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyFindResponse } from '../../../common/attachments';
 
 export const findCommentsRoute = createCasesRoute({
   method: 'get',
@@ -24,9 +26,9 @@ export const findCommentsRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    summary: `Find case comments and alerts`,
+    summary: `Find case comments`,
     tags: ['oas-tag:cases'],
-    description: 'Retrieves a paginated list of comments and alerts for a case.',
+    description: 'Retrieves a paginated list of comments for a case.',
     // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
   },
   handler: async ({ context, request, response }) => {
@@ -35,10 +37,13 @@ export const findCommentsRoute = createCasesRoute({
       const client = await caseContext.getCasesClient();
       const query = request.query as attachmentApiV1.FindAttachmentsQueryParams;
 
-      const res: attachmentApiV1.AttachmentsFindResponse = await client.attachments.find({
+      // `find` resolves any type; this route only ever surfaces comments. `type`
+      // must be the unified string — `find` no longer recognizes legacy spellings.
+      const { data, ...rest } = await client.attachments.find({
         caseID: request.params.case_id,
-        findQueryParams: query,
+        findQueryParams: { ...query, type: [COMMENT_ATTACHMENT_TYPE] },
       });
+      const res = toLegacyFindResponse({ comments: data, ...rest });
 
       return response.ok({
         body: res,

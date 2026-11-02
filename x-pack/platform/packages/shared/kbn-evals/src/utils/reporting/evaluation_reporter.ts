@@ -6,42 +6,56 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import chalk from 'chalk';
-import type { EvaluationScoreRepository } from '../score_repository';
+import type { Model } from '@kbn/evals-common';
+import type { EvalsClient } from '../evals_client';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions } from '../../types';
-import { formatReportData } from '../report_model_score';
+
 export type EvaluationReporter = (
-  scoreRepository: EvaluationScoreRepository,
-  runId: string,
-  log: SomeDevLog
+  evalsClient: EvalsClient,
+  experimentId: string,
+  log: SomeDevLog,
+  options?: { taskModelId?: string; suiteId?: string; executionId?: string }
 ) => Promise<void>;
 
-function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
-  return [
-    `Model: ${model.id} (${model.family}/${model.provider})`,
-    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`,
-  ];
+function buildReportHeader(taskModel: Model, evaluatorModel: Model | undefined): string[] {
+  const lines = [`Model: ${taskModel.id} (${taskModel.family}/${taskModel.provider})`];
+  // Experiments scored only by code evaluators invoke no judge, so there is no line to print.
+  if (evaluatorModel) {
+    lines.push(
+      `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
+    );
+  }
+  return lines;
 }
 
 export function createDefaultTerminalReporter(
   options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
-    const docs = await scoreRepository.getScoresByRunId(runId);
+  return async (evalsClient: EvalsClient, experimentId: string, log: SomeDevLog, filter) => {
+    const experimentStats = await evalsClient.getExperimentStats(experimentId, filter);
 
-    if (docs.length === 0) {
-      log.error(`No evaluation results found for run ID: ${runId}`);
+    if (!experimentStats || experimentStats.stats.length === 0) {
+      const filterSuffix = [
+        filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
+        filter?.suiteId ? `metadata.suite_id=${filter.suiteId}` : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+
+      log.error(
+        `No evaluation results found for experiment ID: ${experimentId}${
+          filterSuffix ? ` (${filterSuffix})` : ''
+        }`
+      );
       return;
     }
 
-    const report = formatReportData(docs);
-
-    const header = buildReportHeader(report.model, report.evaluatorModel);
+    const header = buildReportHeader(experimentStats.taskModel, experimentStats.evaluatorModel);
     const summaryTable = createTable(
-      report.datasetScoresWithStats,
-      report.repetitions,
+      experimentStats.stats,
+      experimentStats.totalRepetitions,
       options.reportDisplayOptions
     );
 

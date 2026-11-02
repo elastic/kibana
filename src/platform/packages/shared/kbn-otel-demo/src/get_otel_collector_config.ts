@@ -7,21 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { stringify } from 'yaml';
+import { CONTAINER_LOG_OPERATORS } from './container_log_operators';
+
 /**
  * Generates the OTel Collector configuration for Kubernetes deployment.
- * Collects both OTLP telemetry and container logs from Kubernetes nodes.
+ * Collects container logs, Kubernetes metrics, and host metrics from Kubernetes nodes.
+ * OTLP traces are exported to Elasticsearch and used to generate span metrics.
+ * OTLP metrics are accepted but only exported to debug (not Elasticsearch).
  * Uses k8sattributes processor for proper pod/container metadata enrichment.
  */
 export function getFullOtelCollectorConfig({
   elasticsearchEndpoint,
   username,
   password,
-  logsIndex = 'logs',
+  logsIndex,
+  namespace = 'otel-demo',
+  demoId = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;
   username: string;
   password: string;
+  /** Index for container logs and k8s events. Unset: the default `logs-generic.otel-default` data stream. */
   logsIndex?: string;
+  namespace?: string;
+  demoId?: string;
 }): string {
   const configYaml = `
 receivers:
@@ -32,10 +42,102 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
+  # Kubernetes cluster metrics receiver - collects cluster-level metrics
+  k8s_cluster:
+    collection_interval: 60s
+    auth_type: serviceAccount
+    node_conditions_to_report:
+      - Ready
+      - MemoryPressure
+      - DiskPressure
+      - PIDPressure
+    allocatable_types_to_report:
+      - cpu
+      - memory
+      - storage
+    metadata_collection_interval: 5m
+    metrics:
+      k8s.pod.status_reason:
+        enabled: true
+
+  # Kubelet stats receiver - collects node, pod, and container metrics
+  kubeletstats:
+    collection_interval: 60s
+    auth_type: serviceAccount
+    endpoint: "\${env:OTEL_K8S_NODE_NAME}:10250"
+    node: "\${env:OTEL_K8S_NODE_NAME}"
+    insecure_skip_verify: true
+    extra_metadata_labels:
+      - container.id
+      - k8s.volume.type
+    k8s_api_config:
+      auth_type: serviceAccount
+    metrics:
+      k8s.pod.cpu.node.utilization:
+        enabled: true
+      k8s.pod.cpu_limit_utilization:
+        enabled: true
+      k8s.pod.cpu_request_utilization:
+        enabled: true
+      k8s.pod.memory_limit_utilization:
+        enabled: true
+      k8s.pod.memory_request_utilization:
+        enabled: true
+      k8s.container.cpu_limit_utilization:
+        enabled: true
+      k8s.container.cpu_request_utilization:
+        enabled: true
+      k8s.container.memory_limit_utilization:
+        enabled: true
+      k8s.container.memory_request_utilization:
+        enabled: true
+
+  # Host metrics receiver - collects host system metrics
+  hostmetrics:
+    collection_interval: 60s
+    root_path: /hostfs
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+          system.cpu.logical.count:
+            enabled: true
+          system.cpu.physical.count:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+          system.linux.memory.available:
+            enabled: true
+      network:
+      processes:
+        metrics:
+          system.processes.count:
+            enabled: true
+          system.processes.created:
+            enabled: true
+      load:
+      disk:
+      filesystem:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
+
+  # Kubernetes objects receiver - collects k8s events as logs
+  k8sobjects:
+    auth_type: serviceAccount
+    objects:
+      - name: events
+        mode: watch
+        group: events.k8s.io
+        namespaces: [${namespace}]
+
   # Filelog receiver for Kubernetes container logs
   filelog/k8s:
     include:
-      - /var/log/pods/otel-demo_*/*/*.log
+      - /var/log/pods/${namespace}_*/*/*.log
     exclude:
       - /var/log/pods/*/otel-collector/*.log
     start_at: end
@@ -46,70 +148,50 @@ receivers:
       initial_interval: 1s
       max_interval: 30s
     operators:
-      # Parse Docker JSON format logs (used by minikube with Docker driver)
-      # Format: {"log":"...","stream":"stdout|stderr","time":"..."}
+      # Container runtime parsing (Docker JSON or CRI) and multiline recombination,
+      # see container_log_operators.ts
+CONTAINER_LOG_OPERATORS_PLACEHOLDER
+
+      # Try to parse body as JSON (for structured logs from services)
+      # Only attempt if body looks like JSON (starts with { and ends with }, allowing trailing whitespace)
       - type: json_parser
-        id: parser-docker
-        timestamp:
-          parse_from: attributes.time
-          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-
-      # Recombine multiline logs (stack traces)
-      # First entry = starts with non-whitespace char (timestamps, log levels, etc.)
-      # Continuation = starts with whitespace, "at ", "Caused by:", etc.
-      - type: recombine
-        id: multiline
-        combine_field: attributes.log
-        is_first_entry: 'attributes.log != nil and attributes.log matches "^[^[:space:]]"'
-        combine_with: "\\n"
-        max_log_size: 102400
-        source_identifier: attributes["log.file.path"]
-
-      # Extract k8s metadata from file path
-      # Path format: /var/log/pods/<namespace>_<pod>_<uid>/<container>/<restart_count>.log
-      - type: regex_parser
-        id: extract_k8s_metadata
-        regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod>[^_]+)_(?P<uid>[^/]+)/(?P<container>[^/]+)/.*\\.log$'
-        parse_from: attributes["log.file.path"]
+        id: parse_application_json
+        parse_from: body
+        parse_to: attributes
+        if: 'body matches "^{.*}[[:space:]]*$"'
         on_error: send
 
-      # Move parsed k8s metadata to resource attributes
+      # Extract common JSON log fields to standardized attributes
+      # Only move fields that exist to avoid errors
       - type: move
-        id: move_namespace
-        from: attributes.namespace
-        to: resource["k8s.namespace.name"]
-        on_error: send
-
-      - type: move
-        id: move_pod
-        from: attributes.pod
-        to: resource["k8s.pod.name"]
-        on_error: send
-
-      - type: move
-        id: move_uid
-        from: attributes.uid
-        to: resource["k8s.pod.uid"]
-        on_error: send
-
-      - type: move
-        id: move_container
-        from: attributes.container
-        to: resource["k8s.container.name"]
-        on_error: send
-
-      # Move stream to attributes
-      - type: move
-        id: move_stream
-        from: attributes.stream
-        to: attributes["log.iostream"]
-        on_error: send
-
-      # Move the log message to body
-      - type: move
-        id: move_log_to_body
-        from: attributes.log
+        id: extract_json_message
+        from: attributes.message
         to: body
+        if: 'attributes.message != nil'
+
+      - type: move
+        id: extract_severity
+        from: attributes.severity
+        to: attributes["log.level"]
+        if: 'attributes.severity != nil'
+
+      - type: move
+        id: extract_level
+        from: attributes.level
+        to: attributes["log.level"]
+        if: 'attributes.level != nil'
+
+      - type: move
+        id: extract_timestamp
+        from: attributes.timestamp
+        to: attributes["log.timestamp"]
+        if: 'attributes.timestamp != nil'
+
+      - type: move
+        id: extract_time
+        from: attributes.time
+        to: attributes["log.timestamp"]
+        if: 'attributes.time != nil'
 
 processors:
   batch:
@@ -173,11 +255,17 @@ processors:
   resource:
     attributes:
       - key: service.namespace
-        value: otel-demo
+        value: ${namespace}
         action: upsert
       - key: deployment.environment
-        value: local-minikube
+        value: ${demoId}
         action: upsert
+      - key: deployment.environment.name
+        value: ${demoId}
+        action: upsert
+
+  # Convert cumulative histograms to delta (required by Elasticsearch exporter)
+  cumulativetodelta:
 
   # Filter to drop all OTLP logs (we only want filelog container logs)
   filter/drop_otlp_logs:
@@ -185,9 +273,6 @@ processors:
     logs:
       log_record:
         - 'true'
-
-connectors:
-  spanmetrics: {}
 
 exporters:
   debug:
@@ -197,7 +282,8 @@ exporters:
       - ELASTICSEARCH_ENDPOINT_PLACEHOLDER
     user: USERNAME_PLACEHOLDER
     password: PASSWORD_PLACEHOLDER
-    logs_index: LOGS_INDEX_PLACEHOLDER
+LOGS_INDEX_PLACEHOLDER
+    traces_index: traces-generic.otel-default
     mapping:
       mode: otel
     tls:
@@ -210,6 +296,22 @@ exporters:
       enabled: true
       initial_interval: 100ms
       max_interval: 30s
+
+connectors:
+  # Generates metrics from trace spans (latency, call counts, error rates)
+  spanmetrics:
+    histogram:
+      explicit:
+        buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2.5s, 5s, 10s]
+    dimensions:
+      - name: service.namespace
+      - name: deployment.environment
+      - name: k8s.namespace.name
+      - name: k8s.deployment.name
+    exemplars:
+      enabled: true
+    metrics_flush_interval: 15s
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
 
 extensions:
   health_check:
@@ -228,13 +330,25 @@ service:
       receivers: [filelog/k8s]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [elasticsearch, debug]
+    # Collect Kubernetes events as logs
+    logs/k8s_events:
+      receivers: [k8sobjects]
+      processors: [resourcedetection, resource, batch]
+      exporters: [elasticsearch, debug]
+    # Export traces to Elasticsearch and generate span metrics
     traces:
       receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [elasticsearch, spanmetrics, debug]
+    # Accept metrics from OTLP and span metrics connector
     metrics:
       receivers: [otlp, spanmetrics]
-      processors: [k8sattributes, resourcedetection, resource, batch]
+      processors: [k8sattributes, resourcedetection, resource, cumulativetodelta, batch]
+      exporters: [elasticsearch, debug]
+    # Collect Kubernetes metrics (cluster, kubelet, host)
+    metrics/k8s:
+      receivers: [k8s_cluster, kubeletstats, hostmetrics]
+      processors: [resourcedetection, resource, cumulativetodelta, batch]
       exporters: [elasticsearch, debug]
 `;
 
@@ -242,5 +356,11 @@ service:
     .replace(/ELASTICSEARCH_ENDPOINT_PLACEHOLDER/g, elasticsearchEndpoint)
     .replace(/USERNAME_PLACEHOLDER/g, username)
     .replace(/PASSWORD_PLACEHOLDER/g, password)
-    .replace(/LOGS_INDEX_PLACEHOLDER/g, logsIndex);
+    .replace('LOGS_INDEX_PLACEHOLDER\n', logsIndex ? `    logs_index: ${logsIndex}\n` : '')
+    .replace(
+      'CONTAINER_LOG_OPERATORS_PLACEHOLDER\n',
+      `${stringify([...CONTAINER_LOG_OPERATORS])
+        .trimEnd()
+        .replace(/^/gm, '      ')}\n`
+    );
 }

@@ -1,0 +1,63 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getExecutionResponseExample:
+            description: 'Example response returning a workflow execution with step details'
+            value:
+              id: exec-a1b2c3d4-e5f6-7890
+              spaceId: default
+              status: completed
+              isTestRun: false
+              startedAt: '2025-11-20T12:00:00.000Z'
+              finishedAt: '2025-11-20T12:00:03.000Z'
+              duration: 3000
+              workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              workflowDefinition:
+                name: Example definition
+                enabled: true
+                description: This is a workflow example
+                triggers:
+                  - type: manual
+                inputs:
+                  - name: message
+                    type: string
+                    default: hello world
+                steps:
+                  - name: hello_world_step
+                    type: console
+                    with:
+                      message: '{{ inputs.message }}'
+              executedBy: elastic
+              triggeredBy: manual
+              yaml: "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+              input:
+                message: 'hello world'
+              output: 'hello world'
+              stepExecutions:
+                - id: step-exec-001
+                  stepId: hello_world_step
+                  stepType: console
+                  workflowRunId: exec-a1b2c3d4-e5f6-7890
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  spaceId: default
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:01.000Z'
+                  finishedAt: '2025-11-20T12:00:02.000Z'
+                  executionTimeMs: 1000
+                  topologicalIndex: 0
+                  globalExecutionIndex: 0
+                  stepExecutionIndex: 0
+                  scopeStack: []
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}?includeInput=true&includeOutput=true" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions/{executionId}?includeInput=true&includeOutput=true

@@ -1040,3 +1040,35 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:4",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "beats",
+        "author": "Deep Author",
+        "comments": [
+          {
+            "user": "grace",
+            "message": "deeply insightful",
+            "date": "2024-04-01",
+            "rating": 5,
+            "metadata": {
+              "author": "graceinternal",
+              "tag": "review"
+            }
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": [
+        "*"
+      ],
+      "updated_at": "2024-04-05T10:30:00.000Z"
+    },
+    "type": "doc"
+  }
+}

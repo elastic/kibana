@@ -19,18 +19,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import type {
   Attachment,
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
-import type { Streams } from '@kbn/streams-schema';
-import React, { useCallback, useMemo, useState } from 'react';
+import { Streams } from '@kbn/streams-schema';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
 import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
+import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentDetailsFlyout } from './attachment_details_flyout';
 import {
@@ -52,11 +55,7 @@ const getCountByType = (attachments: Attachment[]): Record<AttachmentType, numbe
   );
 };
 
-export function StreamDetailAttachments({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+export function StreamDetailAttachments({ definition }: { definition: Streams.all.GetResponse }) {
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
@@ -76,6 +75,8 @@ export function StreamDetailAttachments({
     notifications,
   } = core;
 
+  const { onPageReady } = usePerformanceContext();
+
   const attachmentFilters = useMemo(
     () => ({
       ...(filters.debouncedQuery && { query: filters.debouncedQuery }),
@@ -92,6 +93,29 @@ export function StreamDetailAttachments({
   const { addAttachments, removeAttachments } = useAttachmentsApi({
     name: definition.stream.name,
   });
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !attachmentsFetch.loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      const processingStepsCount = Streams.ingest.all.Definition.is(definition.stream)
+        ? 'processors' in definition.stream.ingest.processing
+          ? definition.stream.ingest.processing.processors.length
+          : definition.stream.ingest.processing.steps.length
+        : 0;
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_attachments] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'attachment_count',
+          value1: attachmentsFetch.value?.attachments?.length ?? 0,
+          key2: 'processing_steps_count',
+          value2: processingStepsCount,
+        },
+      });
+    }
+  }, [definition, attachmentsFetch.loading, attachmentsFetch.value, onPageReady]);
 
   const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {
@@ -141,7 +165,7 @@ export function StreamDetailAttachments({
         title: i18n.translate('xpack.streams.attachments.addSuccess.title', {
           defaultMessage: 'Attachments added successfully',
         }),
-        iconType: 'cheer',
+        iconType: 'popper',
         text: toMountPoint(
           <FormattedMessage
             id="xpack.streams.attachments.addSuccess.text"
@@ -183,7 +207,7 @@ export function StreamDetailAttachments({
         title: i18n.translate('xpack.streams.attachments.removeSuccess.title', {
           defaultMessage: 'Attachments removed',
         }),
-        iconType: 'unlink',
+        iconType: 'linkSlash',
         text: toMountPoint(
           <FormattedMessage
             id="xpack.streams.attachments.removeSuccess.text"
@@ -209,9 +233,17 @@ export function StreamDetailAttachments({
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      justifyContent={hasNoAttachments ? 'center' : undefined}
+      alignItems={hasNoAttachments ? 'center' : undefined}
+      css={css`
+        height: 100%;
+      `}
+    >
       {hasNoAttachments ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <AttachmentsEmptyPrompt
             onAddAttachments={openAddAttachmentFlyout}
             disabled={!canLinkAttachments}
@@ -263,6 +295,10 @@ export function StreamDetailAttachments({
               {selectedAttachments.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailAttachments.selectionActionsPopoverAriaLabel',
+                      { defaultMessage: 'Selected attachments actions' }
+                    )}
                     id={selectionPopoverId}
                     button={
                       <EuiLink
@@ -281,8 +317,11 @@ export function StreamDetailAttachments({
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiIcon
-                              type={isSelectionPopoverOpen ? 'arrowUp' : 'arrowDown'}
+                              type={
+                                isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'
+                              }
                               size="s"
+                              aria-hidden={true}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -294,11 +333,10 @@ export function StreamDetailAttachments({
                     anchorPosition="downLeft"
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           key="unlink"
-                          icon="unlink"
+                          icon="linkSlash"
                           disabled={isUnlinkLoading}
                           onClick={() => {
                             setAttachmentsToUnlink(selectedAttachments);

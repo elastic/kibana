@@ -8,10 +8,7 @@
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type {
   ActionExecutionContext,
   UiActionsStart,
@@ -27,12 +24,10 @@ import type {
   DateRange,
 } from '@kbn/lens-common';
 
+import { getFormulaColumnsFromLayer, hasStateFormulaColumn } from '@kbn/lens-common';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
-import {
-  getFormulaColumnsFromLayer,
-  hasStateFormulaColumn,
-} from './operations/definitions/helpers';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 
 export function onRefreshIndexPattern() {

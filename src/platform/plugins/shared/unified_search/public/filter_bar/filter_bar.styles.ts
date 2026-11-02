@@ -12,12 +12,21 @@ import { css } from '@emotion/react';
 
 export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boolean) => {
   return {
-    group: css`
+    filterPillGroup: css`
       gap: ${euiTheme.size.xs};
 
       &:not(:empty) {
         margin-top: ${afterQueryBar ? euiTheme.size.s : 0};
       }
+    `,
+    /** Scrollable container for filter pills when expanded */
+    pillsScrollContainer: css`
+      max-height: calc(${euiTheme.size.base} * 10);
+      overflow-y: auto;
+      transition: max-height 200ms ease;
+    `,
+    filterBarContentCollapsed: css`
+      max-height: 0;
     `,
   };
 };

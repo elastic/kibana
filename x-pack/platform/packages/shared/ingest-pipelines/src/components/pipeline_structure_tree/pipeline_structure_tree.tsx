@@ -54,7 +54,7 @@ export const PipelineStructureTree = React.memo(
     return (
       <>
         {isExtension && (
-          <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
+          <EuiButtonEmpty iconType="chevronSingleLeft" onClick={goBack}>
             <FormattedMessage
               id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
               defaultMessage="Back to previous pipelines"

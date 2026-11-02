@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { LabelNodeViewModel } from '../..';
 import { Graph } from '../..';
@@ -23,6 +23,18 @@ const useCases = {
   'With IPs': { ips: ['10.200.0.202', '74.25.14.20'], countryCodes: [] },
   'With country codes': { ips: [], countryCodes: ['us', 'fr', 'es'] },
   'With both': { ips: ['10.200.0.202', '74.25.14.20'], countryCodes: ['us', 'fr', 'es'] },
+  'IP overflow badge': {
+    ips: ['10.200.0.202', '192.168.1.1', '74.25.14.20', '172.16.0.1'],
+    countryCodes: [],
+  },
+  'Flag overflow badge': {
+    ips: [],
+    countryCodes: ['us', 'fr', 'es', 'de', 'jp', 'br'],
+  },
+  'Both overflow badges': {
+    ips: ['10.200.0.202', '192.168.1.1', '74.25.14.20'],
+    countryCodes: ['us', 'fr', 'es', 'de', 'jp'],
+  },
 };
 
 const Template = () => {
@@ -41,17 +53,15 @@ const Template = () => {
   );
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
-      <Graph
-        css={css`
-          height: 100%;
-          width: 100%;
-        `}
-        nodes={nodes}
-        edges={[]}
-        interactive={true}
-      />
-    </ThemeProvider>
+    <Graph
+      css={css`
+        height: 100%;
+        width: 100%;
+      `}
+      nodes={nodes}
+      edges={[]}
+      interactive={true}
+    />
   );
 };
 

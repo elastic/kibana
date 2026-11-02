@@ -1,0 +1,90 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-system.security-default",
+    "template": {
+      "index_patterns": ["logs-system.security-*"],
+      "name": "scout-system-security-events",
+      "priority": 10000,
+      "data_stream": {},
+      "template": {
+        "settings": {
+          "number_of_shards": 1
+        },
+        "mappings": {
+          "properties": {
+            "@timestamp": { "type": "date" },
+            "event": {
+              "properties": {
+                "action": { "type": "keyword" },
+                "outcome": { "type": "keyword" },
+                "category": { "type": "keyword" },
+                "kind": { "type": "keyword" },
+                "module": { "type": "keyword" },
+                "type": { "type": "keyword" },
+                "code": { "type": "keyword" },
+                "dataset": { "type": "keyword" },
+                "id": { "type": "keyword" },
+                "created": { "type": "date" }
+              }
+            },
+            "host": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "name": { "type": "keyword" },
+                "hostname": { "type": "keyword" },
+                "domain": { "type": "keyword" },
+                "ip": { "type": "ip" },
+                "mac": { "type": "keyword" },
+                "os": {
+                  "properties": {
+                    "name": { "type": "keyword" },
+                    "type": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "user": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "name": { "type": "keyword" },
+                "email": { "type": "keyword" },
+                "domain": { "type": "keyword" }
+              }
+            },
+            "winlog": {
+              "properties": {
+                "logon": {
+                  "properties": {
+                    "type": { "type": "keyword" }
+                  }
+                }
+              }
+            },
+            "agent": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "type": { "type": "keyword" },
+                "version": { "type": "keyword" }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": { "type": "keyword" },
+                "namespace": { "type": "keyword" },
+                "type": { "type": "keyword" }
+              }
+            },
+            "source": {
+              "properties": {
+                "ip": { "type": "ip" },
+                "address": { "type": "keyword" }
+              }
+            },
+            "message": { "type": "text" }
+          }
+        }
+      }
+    }
+  }
+}

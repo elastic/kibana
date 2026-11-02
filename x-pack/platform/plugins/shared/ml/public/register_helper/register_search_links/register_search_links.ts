@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { BehaviorSubject } from 'rxjs';
 
 import type { AppUpdater } from '@kbn/core/public';
-import type { MlCapabilities } from '../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { getDeepLinks } from './search_deep_links';
 
 export function registerSearchLinks(

@@ -109,11 +109,13 @@ export const getPluginNameFromRequest = ({
 export const getMessageFromRawResponse = ({
   rawContent,
   metadata,
+  refusal,
   isError,
   traceData,
 }: {
   rawContent?: string;
   metadata?: MessageMetadata;
+  refusal?: string;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -122,6 +124,7 @@ export const getMessageFromRawResponse = ({
     return {
       role: 'assistant',
       content: rawContent,
+      ...(refusal ? { refusal } : {}),
       timestamp: dateTimeString,
       metadata,
       isError,
@@ -155,6 +158,27 @@ const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): strin
   return undefined;
 };
 
+export interface GetSystemPromptFromPromptIdParams {
+  promptId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+
+/**
+ * Fetches a system prompt by saved object id, when a request passes `promptId`.
+ */
+export const getSystemPromptFromPromptId = async ({
+  promptId,
+  promptsDataClient,
+}: GetSystemPromptFromPromptIdParams): Promise<string | undefined> => {
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${promptId}"`,
+  });
+
+  return extractPromptFromESResult(result);
+};
+
 export const getSystemPromptFromUserConversation = async ({
   conversationsDataClient,
   conversationId,
@@ -168,17 +192,17 @@ export const getSystemPromptFromUserConversation = async ({
   if (!currentSystemPromptId) {
     return undefined;
   }
-  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
-    perPage: 1,
-    page: 1,
-    filter: `_id: "${currentSystemPromptId}"`,
+
+  return getSystemPromptFromPromptId({
+    promptId: currentSystemPromptId,
+    promptsDataClient,
   });
-  return extractPromptFromESResult(result);
 };
 
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
+  messageRefusal?: string;
   replacements: Replacements;
   conversationId: string;
   contentReferences: ContentReferences;
@@ -189,6 +213,7 @@ export interface AppendAssistantMessageToConversationParams {
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
   messageContent,
+  messageRefusal,
   replacements,
   conversationId,
   contentReferences,
@@ -214,6 +239,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        refusal: messageRefusal,
         metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,

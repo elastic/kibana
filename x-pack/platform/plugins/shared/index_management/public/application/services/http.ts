@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 
 export class HttpService {
-  private client: any;
+  private client!: HttpSetup;
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;

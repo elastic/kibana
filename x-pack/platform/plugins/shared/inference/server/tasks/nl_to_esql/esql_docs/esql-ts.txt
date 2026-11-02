@@ -1,0 +1,61 @@
+# TS
+
+The TS source command enables time series semantics and allows the use of time series aggregation functions within the STATS command, such as AVG_OVER_TIME() or RATE. These functions are evaluated per time series and then aggregated by group using a secondary aggregation function. TS is similar to the FROM source command, but specifically targets time series indices and supports time series aggregations.
+
+## Syntax
+
+`TS index_pattern [METADATA fields]`
+
+### Parameters
+
+#### index_pattern
+
+A list of indices, data streams, or aliases to query. Supports wildcards and date math.
+
+#### fields
+
+A comma-separated list of metadata fields to retrieve. This parameter is optional.
+
+## Examples
+
+Calculates the total rate of search requests per host and hour for the past hour.
+
+```esql
+TS metrics
+  | WHERE @timestamp >= now() - 1 hour
+  | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
+```
+
+Returns the average of the most recent memory usage values for each time series.
+
+```esql
+TS metrics | STATS AVG(memory_usage)
+```
+
+Returns the average of the most recent memory usage values for each time series, explicitly using the LAST_OVER_TIME function.
+
+```esql
+TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
+```
+
+Calculates the average memory usage by first averaging per time series and then averaging those results.
+
+```esql
+TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
+```
+
+Calculates the sum of average memory usage per host and hourly bucket for the last day.
+
+```esql
+TS metrics
+| WHERE @timestamp >= now() - 1 day
+| STATS SUM(AVG_OVER_TIME(memory_usage)) BY host, TBUCKET(1 hour)
+```
+
+## Limitations
+
+- TS can only be used with time series indices.
+- Time series aggregation functions must be wrapped inside a regular aggregation function in STATS. Using a time series aggregation function as the outer function causes an error.
+- TS cannot be combined with certain operations (such as FORK) before the STATS command is applied.
+- Avoid aggregating multiple metrics with different dimensional cardinalities in the same query, as this can result in null values for some dimension combinations.
+- It is recommended to add a time range filter on `@timestamp` to limit the data volume scanned and improve query performance.

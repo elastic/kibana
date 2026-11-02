@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { Fragment } from 'react';
-import { snakeCase } from 'lodash';
+import { omit, snakeCase } from 'lodash';
 import type { CustomAnnotationTooltip } from '@elastic/charts';
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import moment from 'moment';
@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
@@ -28,13 +29,16 @@ import type {
   PointEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
+import { getLineAnnotationChartId } from '../helpers/annotation_click';
+import { getExtraFields } from '../helpers/get_extra_fields';
 
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
@@ -65,29 +69,12 @@ const TooltipAnnotationDetails = ({
         <EuiFlexGroup gutterSize="s" key={`${field.key}-${field.name}`}>
           <EuiFlexItem css={styles.tooltipExtraFieldsKey}>{field.name}:</EuiFlexItem>
           <EuiFlexItem css={styles.tooltipExtraFieldsValue}>
-            {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
+            {field.formatter ? field.formatter.convertToText(row[field.key]) : row[field.key]}
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
     </div>
   ) : null;
-};
-
-const getExtraFields = (
-  row: PointEventAnnotationRow,
-  formatFactory: FormatFactory,
-  columns: DatatableColumn[] | undefined
-) => {
-  return Object.keys(row)
-    .filter((key) => key.startsWith('field:'))
-    .map((key) => {
-      const columnFormatter = columns?.find((c) => c.id === key)?.meta?.params;
-      return {
-        key,
-        name: key.replace('field:', ''),
-        formatter: columnFormatter && formatFactory(columnFormatter),
-      };
-    });
 };
 
 const DISPLAYED_COUNT_OF_ROWS = 5;
@@ -97,7 +84,8 @@ const createCustomTooltip =
     rows: PointEventAnnotationRow[],
     formatFactory: FormatFactory,
     columns: DatatableColumn[] | undefined,
-    timeFormat: string
+    timeFormat: string,
+    isDarkMode: boolean
   ): CustomAnnotationTooltip =>
   () => {
     const lastElement = rows[rows.length - 1];
@@ -118,6 +106,10 @@ const createCustomTooltip =
         <div css={styles.tooltipRows}>
           {rows.slice(0, DISPLAYED_COUNT_OF_ROWS).map((row, index) => {
             const extraFields = getExtraFields(row, formatFactory, columns);
+            const resolvedColor = getResolvedAnnotationColor({
+              color: row.color,
+              isDarkMode,
+            });
 
             return (
               <Fragment key={row.time}>
@@ -133,7 +125,7 @@ const createCustomTooltip =
                     <EuiFlexItem grow={false}>
                       <AnnotationIcon
                         type={hasIcon(row.icon) ? row.icon : 'empty'}
-                        color={row.color}
+                        color={resolvedColor}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -183,13 +175,17 @@ function getCommonProperty<T, K extends keyof ManualPointEventAnnotationArgs>(
   return fallbackValue;
 }
 
-const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
+const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[], isDarkMode: boolean) => {
+  const commonColor = getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
+    configArr,
+    'color',
+    undefined
+  );
   return {
-    color: getCommonProperty<ManualPointEventAnnotationArgs['color'], 'color'>(
-      configArr,
-      'color',
-      defaultAnnotationColor
-    ),
+    color: getResolvedAnnotationColor({
+      color: commonColor,
+      isDarkMode,
+    }),
     lineWidth: getCommonProperty(configArr, 'lineWidth', 1),
     lineStyle: getCommonProperty(configArr, 'lineStyle', 'solid'),
     textVisibility: getCommonProperty(configArr, 'textVisibility', false),
@@ -212,7 +208,8 @@ export const getAnnotationsGroupedByInterval = (
   configs: EventAnnotationOutput[] | undefined,
   columns: DatatableColumn[] | undefined,
   formatFactory: FormatFactory,
-  timeFormat: string
+  timeFormat: string,
+  isDarkMode: boolean
 ) => {
   const visibleGroupedConfigs = annotations.reduce<Record<string, PointEventAnnotationRow[]>>(
     (acc, current) => {
@@ -226,6 +223,10 @@ export const getAnnotationsGroupedByInterval = (
   );
   return Object.entries(visibleGroupedConfigs).map(([timebucket, rowsPerBucket]) => {
     const firstRow = rowsPerBucket[0];
+    const resolvedRowColor = getResolvedAnnotationColor({
+      color: firstRow.color,
+      isDarkMode,
+    });
 
     const config = configs?.find((c) => c.id === firstRow.id);
     const textField = config && 'textField' in config && config?.textField;
@@ -233,25 +234,37 @@ export const getAnnotationsGroupedByInterval = (
     const formatter = columnFormatter && formatFactory(columnFormatter);
     const label =
       textField && formatter && `field:${textField}` in firstRow
-        ? formatter.convert(firstRow[`field:${textField}`])
+        ? formatter.convertToText(firstRow[`field:${textField}`])
         : firstRow.label;
     const mergedAnnotation: MergedAnnotation = {
       ...firstRow,
+      color: resolvedRowColor,
       label,
       icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
-      customTooltip: createCustomTooltip(rowsPerBucket, formatFactory, columns, timeFormat),
+      customTooltip: createCustomTooltip(
+        rowsPerBucket,
+        formatFactory,
+        columns,
+        timeFormat,
+        isDarkMode
+      ),
       isGrouped: false,
+      rows: rowsPerBucket,
     };
     if (rowsPerBucket.length > 1) {
-      const commonStyles = getCommonStyles(rowsPerBucket);
+      const commonStyles = getCommonStyles(rowsPerBucket, isDarkMode);
+      const count = rowsPerBucket.length;
       return {
         ...mergedAnnotation,
         ...commonStyles,
-        label: '',
+        label: i18n.translate('expressionXY.annotations.groupedMarkerAriaLabel', {
+          defaultMessage: '{count, plural, one {# event annotation} other {# event annotations}}',
+          values: { count },
+        }),
         isGrouped: true,
-        icon: String(rowsPerBucket.length),
+        icon: String(count),
       };
     }
     return mergedAnnotation;
@@ -272,6 +285,9 @@ export const Annotations = ({
   isBarChart,
   outsideDimension,
 }: AnnotationsProps) => {
+  const { colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
+
   return (
     <>
       {groupedLineAnnotations.map((annotation) => {
@@ -279,7 +295,7 @@ export const Annotations = ({
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
         const { timebucket, time, isGrouped, id: configId } = annotation;
         const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
-        const id = snakeCase(`${configId}-${time}`);
+        const id = getLineAnnotationChartId(configId, time);
         const markerBodyLabel =
           !simpleView && !isGrouped && annotation.textVisibility && !hasReducedPadding
             ? annotation.label
@@ -293,7 +309,7 @@ export const Annotations = ({
               !simpleView ? (
                 <Marker
                   {...{
-                    config: annotation,
+                    config: omit(annotation, 'rows'),
                     isHorizontal: !isHorizontal,
                     hasReducedPadding,
                     label: !isGrouped ? annotation.label : undefined,
@@ -327,7 +343,10 @@ export const Annotations = ({
             style={{
               line: {
                 strokeWidth,
-                stroke: annotation.color || defaultAnnotationColor,
+                stroke: getResolvedAnnotationColor({
+                  color: annotation.color,
+                  isDarkMode,
+                }),
                 dash:
                   annotation.lineStyle === 'dashed'
                     ? [strokeWidth * 3, strokeWidth]
@@ -341,6 +360,11 @@ export const Annotations = ({
         );
       })}
       {rangeAnnotations.map(({ id, label, time, color, endTime, outside }) => {
+        const resolvedColor = getResolvedAnnotationColor({
+          color,
+          isDarkMode,
+          isRange: true,
+        });
         return (
           <RectAnnotation
             id={id}
@@ -357,7 +381,7 @@ export const Annotations = ({
                 <div css={styles.tooltipRow}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="stopFilled" color={color} />
+                      <EuiIcon type="stopFill" color={resolvedColor} aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xxxs">
@@ -380,7 +404,7 @@ export const Annotations = ({
                 details: label,
               },
             ]}
-            style={{ fill: color || defaultAnnotationRangeColor, opacity: 1 }}
+            style={{ fill: resolvedColor, opacity: 1 }}
             outside={Boolean(outside)}
             outsideDimension={outsideDimension}
           />

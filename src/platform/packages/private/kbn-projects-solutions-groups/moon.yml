@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/projects-solutions-groups'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/projects-solutions-groups'
+  title: '@kbn/projects-solutions-groups'
   description: Moon project for @kbn/projects-solutions-groups
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-projects-solutions-groups
+  sourceRoot: src/platform/packages/private/kbn-projects-solutions-groups
 dependsOn: []
 tags:
   - shared-common

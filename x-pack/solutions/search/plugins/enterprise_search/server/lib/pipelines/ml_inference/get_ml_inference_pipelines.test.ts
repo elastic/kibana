@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
@@ -28,7 +27,7 @@ describe('getMlInferencePipelines', () => {
   it('should throw an error if Machine Learning is disabled in the current space', async () => {
     await expect(() =>
       getMlInferencePipelines(mockClient as unknown as ElasticsearchClient, undefined)
-    ).rejects.toThrowError('Machine Learning is not enabled');
+    ).rejects.toThrow('Machine Learning is not enabled');
   });
 
   it('should fetch inference pipelines and redact inaccessible model IDs', async () => {
@@ -103,24 +102,12 @@ describe('getMlInferencePipelines', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
-    expect(
-      (actualPipelines.pipeline1.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual('model1');
-    expect(
-      (actualPipelines.pipeline2.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual('model2');
-    expect(
-      (actualPipelines.pipeline3.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual(''); // Redacted model ID
-    expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toEqual('');
-    expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[2].inference?.model_id
-    ).toEqual('model2');
-    expect(
-      (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[3].inference?.model_id
-    ).toEqual('');
+    expect(actualPipelines.pipeline1.processors?.[1]?.inference?.model_id).toEqual('model1');
+    expect(actualPipelines.pipeline2.processors?.[1]?.inference?.model_id).toEqual('model2');
+    expect(actualPipelines.pipeline3.processors?.[1]?.inference?.model_id).toEqual(''); // Redacted model ID
+    expect(actualPipelines.pipeline4.processors?.[1]?.inference?.model_id).toEqual('');
+    expect(actualPipelines.pipeline4.processors?.[2]?.inference?.model_id).toEqual('model2');
+    expect(actualPipelines.pipeline4.processors?.[3]?.inference?.model_id).toEqual('');
     expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({ id: 'ml-inference-*' });
     expect(mockTrainedModelsProvider.getTrainedModels).toHaveBeenCalledWith({});
   });

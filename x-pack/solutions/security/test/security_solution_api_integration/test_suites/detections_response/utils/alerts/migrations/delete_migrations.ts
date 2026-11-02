@@ -43,7 +43,7 @@ export const deleteMigrationsIfExistent = async ({
         return res;
       } catch (e) {
         // do not throw error when migration already deleted/not found
-        if (e?.response?.status !== 404) {
+        if (e?.status !== 404) {
           throw e;
         }
       }

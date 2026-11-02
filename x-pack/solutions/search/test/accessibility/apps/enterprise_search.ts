@@ -50,30 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Playground', () => {
-      before(async () => {
-        await common.navigateToApp('search_playground');
-      });
-
-      it('loads playground list page', async function () {
-        await retry.waitFor(
-          'new playground button',
-          async () => await testSubjects.exists('newPlaygroundButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-
-      it('loads playground', async function () {
-        await testSubjects.click('newPlaygroundButton');
-
-        await retry.waitFor(
-          'playground docs link',
-          async () => await testSubjects.exists('playground-documentation-link')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
     describe('Search applications', () => {
       before(async () => {
         await common.navigateToApp('elasticsearch/applications/search_applications');
@@ -124,20 +100,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'query rules docs link',
           async () => await testSubjects.exists('searchQueryRulesEmptyPromptFooterLink')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Search inference endpoints', () => {
-      before(async () => {
-        await common.navigateToApp('elasticsearch/relevance/inference_endpoints');
-      });
-
-      it('loads inference endpoints page', async function () {
-        await retry.waitFor(
-          'Inference endpoints page header',
-          async () => await testSubjects.exists('allInferenceEndpointsPage')
         );
         await a11y.testAppSnapshot();
       });

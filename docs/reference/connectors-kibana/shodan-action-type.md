@@ -1,15 +1,15 @@
 ---
 navigation_title: "Shodan"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/shodan-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.3
   serverless: preview
 ---
 
 # Shodan connector [shodan-action-type]
 
 The Shodan connector communicates with the Shodan API for Internet-wide asset discovery and vulnerability scanning.
+
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Create connectors in {{kib}} [define-shodan-ui]
 

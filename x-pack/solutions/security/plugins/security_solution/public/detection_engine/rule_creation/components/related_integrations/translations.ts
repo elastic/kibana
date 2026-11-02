@@ -74,7 +74,7 @@ export const VERSION_DEPENDENCY_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.versionInvalid',
   {
     defaultMessage:
-      'Version constraint is invalid. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
+      'Version constraint is invalid. Use a valid semver range expression e.g. ^1.2.3, ~1.2.3, 1.2.3, >=1.2.3, or ^1.2.3 || ^2.0.0.',
   }
 );
 
@@ -120,3 +120,10 @@ export const INTEGRATION_ENABLED = (integrationTitle: string) =>
       },
     }
   );
+
+export const RELATED_INTEGRATIONS_HELP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.helpAriaLabel',
+  {
+    defaultMessage: 'Related integrations help',
+  }
+);

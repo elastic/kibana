@@ -10,7 +10,11 @@
 import React, { Fragment } from 'react';
 import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { AddFieldFilterHandler, BucketedAggregation } from '../../types';
+import type {
+  AddFieldFilterHandler,
+  AddOtherFilterHandler,
+  BucketedAggregation,
+} from '../../types';
 import FieldTopValuesBucket from './field_top_values_bucket';
 import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
@@ -23,6 +27,7 @@ export interface FieldTopValuesProps {
   color: string;
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
+  onAddOtherFilter?: AddOtherFilterHandler;
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
@@ -35,6 +40,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   color,
   'data-test-subj': dataTestSubject,
   onAddFilter,
+  onAddOtherFilter,
   overrideFieldTopValueBar,
 }) => {
   if (!buckets?.length) {
@@ -46,6 +52,16 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   const digitsRequired = buckets.some(
     (bucket) => !Number.isInteger(bucket.count / sampledValuesCount)
   );
+  // examples are not real top values, and scripted fields can't be queried with "exists"
+  const addOtherFilter =
+    onAddOtherFilter && !areExamples && !field.scripted
+      ? (options: { negate: boolean }) =>
+          onAddOtherFilter(
+            field,
+            buckets.map((bucket) => bucket.key),
+            options
+          )
+      : undefined;
 
   return (
     <div
@@ -56,7 +72,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
       <div data-test-subj={`${dataTestSubject}-topValues`}>
         {buckets.map((bucket, index) => {
           const fieldValue = bucket.key;
-          const formatted = formatter.convert(fieldValue);
+          const formatted = formatter.convertToText(fieldValue);
 
           return (
             <Fragment key={String(fieldValue)}>
@@ -97,6 +113,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
               color={color}
               data-test-subj={dataTestSubject}
               onAddFilter={onAddFilter}
+              onAddOtherFilter={addOtherFilter}
               overrideFieldTopValueBar={overrideFieldTopValueBar}
             />
           </>

@@ -37,6 +37,7 @@ import {
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
 import {
+  ANNOTATION_DATAVIEW_NOT_FOUND,
   ANNOTATION_INVALID_FILTER_QUERY,
   ANNOTATION_MISSING_TIME_FIELD,
   ANNOTATION_MISSING_TOOLTIP_FIELD,
@@ -104,6 +105,10 @@ export const hasAreaSeries = (layers: XYLayerConfig[]) =>
 export const getBarSeriesLayers = (layers: XYLayerConfig[]): XYDataLayerConfig[] =>
   getDataLayers(layers).filter((layer) => BAR_SERIES.includes(layer.seriesType));
 
+export function isLineSeries(seriesType: SeriesType) {
+  return seriesType === 'line';
+}
+
 export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }
@@ -138,7 +143,7 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
-  if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
+  if (isDataLayer(layer) && (layer.splitAccessors ?? []).length > 0 && !layer.collapseFn) {
     return null;
   }
   return (
@@ -152,7 +157,7 @@ export const getColumnToLabelMap = (
 ) => {
   const columnToLabel: Record<string, string> = {};
   layer.accessors
-    .concat(isDataLayer(layer) && layer.splitAccessor ? [layer.splitAccessor] : [])
+    .concat(isDataLayer(layer) && layer.splitAccessors ? layer.splitAccessors : [])
     .forEach((accessor) => {
       const operation = datasource?.getOperationForColumnId(accessor);
       if (operation?.label) {
@@ -253,6 +258,23 @@ export function getAnnotationLayerErrors(
   const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
 
   const invalidMessages: UserMessage[] = [];
+
+  // The annotation layer's data view can be missing (e.g. the referenced
+  // index-pattern saved object does not exist in the current space). Surface a
+  // clean error instead of dereferencing an undefined data view below.
+  if (!layerDataView) {
+    return [
+      createAnnotationErrorMessage(
+        ANNOTATION_DATAVIEW_NOT_FOUND,
+        i18n.translate('xpack.lens.xyChart.annotationError.dataViewNotFound', {
+          defaultMessage: 'Data view {dataView} not found',
+          values: { dataView: layer.indexPatternId },
+        }),
+        annotation.id,
+        annotation.label
+      ),
+    ];
+  }
 
   if (annotation.timeField == null || annotation.timeField === '') {
     invalidMessages.push(

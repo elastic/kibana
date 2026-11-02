@@ -16,8 +16,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ReactNode } from 'react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
+
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
@@ -28,6 +29,7 @@ export interface MonitoringStartPluginDependencies {
   fleet?: FleetStart;
   share: SharePluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  cloudConnect?: CloudConnectedPluginStart;
 }
 
 interface LegacyStartDependencies {
@@ -35,7 +37,7 @@ interface LegacyStartDependencies {
   core: CoreStart;
   isCloud: boolean;
   cloudBaseUrl?: string;
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
   appMountParameters: AppMountParameters;
@@ -45,9 +47,3 @@ export type LegacyMonitoringStartPluginDependencies = MonitoringStartPluginDepen
   LegacyStartDependencies;
 
 export type MonitoringStartServices = CoreStart & MonitoringStartPluginDependencies;
-
-export interface HeaderMenuPortalProps {
-  children: ReactNode;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-}

@@ -17,8 +17,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTextColor,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,7 +45,6 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
   onClose: () => void;
   onConfirm: (params: { updatePolicies: boolean }) => void;
 }> = ({ onClose, onConfirm, selectedItems }) => {
-  const { euiTheme } = useEuiTheme();
   const [updatePolicies, setUpdatePolicies] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -150,12 +147,10 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
           <EuiAccordion
             id="viewChangelog"
             buttonContent={
-              <EuiTextColor color={euiTheme.colors.link}>
-                <FormattedMessage
-                  id="xpack.fleet.installedIntegrations.bulkUpgradeModal.viewChangelogButton"
-                  defaultMessage="View Changelog"
-                />
-              </EuiTextColor>
+              <FormattedMessage
+                id="xpack.fleet.installedIntegrations.bulkUpgradeModal.viewChangelogButton"
+                defaultMessage="View Changelog"
+              />
             }
           >
             <ViewChangelog pkgName={selectedItems[0].name} pkgVersion={selectedItems[0].version} />
@@ -181,7 +176,7 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiText size="xs" color="subdued">
-          <EuiIcon type="info" size="m" />
+          <EuiIcon type="info" size="m" aria-hidden={true} />
           &nbsp;
           <FormattedMessage
             id="xpack.fleet.installedIntegrations.bulkUpgradeModal.policiesCallout"

@@ -16,7 +16,7 @@
     {
       "isOnline": true,
       "name": "whatever-01",
-      "nodeTypeClass": "starFilled",
+      "nodeTypeClass": "starFill",
       "nodeTypeLabel": "Master Node",
       "node_cpu_utilization": {
         "metric": {

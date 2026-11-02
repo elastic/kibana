@@ -22,14 +22,14 @@ import type {
   MessageStopEvent,
 } from '@aws-sdk/client-bedrock-runtime';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
 import { isMessageStopChunk, type CompletionChunk, type MessageStopChunk } from './types';
-export function processCompletionChunks() {
+
+export function processCompletionChunks(model?: string) {
   return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext(chunkBody: CompletionChunk) {
         if (isTokenCountCompletionChunk(chunkBody)) {
-          return emitTokenCountEvent(subscriber, chunkBody);
+          return emitTokenCountEvent(subscriber, chunkBody, model);
         }
 
         let completionChunk = '';
@@ -129,12 +129,12 @@ function isOfType<T extends ConverseCompletionChunk['body']>(
   return type === expectedType;
 }
 
-export function processConverseCompletionChunks() {
+export function processConverseCompletionChunks(model?: string) {
   return (source: Observable<ConverseCompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext({ type, body: chunkBody }: ConverseCompletionChunk) {
         if (type === 'metadata' && isConverseStreamMetadataEvent(chunkBody)) {
-          return emitTokenCountEvent(subscriber, chunkBody);
+          return emitTokenCountEvent(subscriber, chunkBody, model);
         }
 
         let completionChunk = '';
@@ -231,10 +231,13 @@ const isConverseStreamMetadataEvent = (
 
 function emitTokenCountEvent(
   subscriber: Subscriber<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>,
-  chunk: MessageStopChunk | ConverseStreamMetadataEvent
+  chunk: MessageStopChunk | ConverseStreamMetadataEvent,
+  model?: string
 ) {
   let inputTokenCount = 0;
   let outputTokenCount = 0;
+  let cachedTokenCount: number | undefined;
+  let cacheWriteTokenCount: number | undefined;
   // Response from BedRock Invoke API
   if (isMessageStopChunk(chunk)) {
     inputTokenCount = chunk['amazon-bedrock-invocationMetrics'].inputTokenCount;
@@ -242,8 +245,16 @@ function emitTokenCountEvent(
   }
   // Response from BedRock Converse API
   if (isConverseStreamMetadataEvent(chunk)) {
-    inputTokenCount = chunk.usage.inputTokens ?? 0;
-    outputTokenCount = chunk.usage.outputTokens ?? 0;
+    const {
+      inputTokens = 0,
+      outputTokens = 0,
+      cacheReadInputTokens,
+      cacheWriteInputTokens,
+    } = chunk.usage;
+    inputTokenCount = inputTokens + (cacheReadInputTokens ?? 0) + (cacheWriteInputTokens ?? 0);
+    outputTokenCount = outputTokens;
+    cachedTokenCount = cacheReadInputTokens;
+    cacheWriteTokenCount = cacheWriteInputTokens;
   }
 
   subscriber.next({
@@ -252,6 +263,9 @@ function emitTokenCountEvent(
       completion: outputTokenCount,
       prompt: inputTokenCount,
       total: inputTokenCount + outputTokenCount,
+      ...(cachedTokenCount !== undefined ? { cached: cachedTokenCount } : {}),
+      ...(cacheWriteTokenCount !== undefined ? { cacheWrite: cacheWriteTokenCount } : {}),
     },
+    ...(model ? { model } : {}),
   });
 }

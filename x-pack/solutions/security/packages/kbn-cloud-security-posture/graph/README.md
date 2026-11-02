@@ -5,6 +5,15 @@
 The idea behind this package is to have a reusable graph component, embedding the features available to the alert's flyout in
 security solution plugin.
 
+## License Requirements
+
+Graph Visualization requires specific license tiers depending on your deployment type:
+
+- **ESS/Self-Managed**: Platinum license or higher (Platinum, Enterprise, or Trial)
+- **Serverless**: Security Analytics Complete tier (not available in Essentials tier)
+
+The feature will not be available if the required license tier is not met.
+
 ## How to use this
 
 ### Step 1: Import the Component
@@ -113,7 +122,7 @@ Be sure to check out provided helpers
 ## Storybook
 
 General look of the component can be checked visually running the following storybook:
-`yarn storybook cloud_security_posture_graph`
+`pnpm storybook cloud_security_posture_graph`
 
 Note that all the interactions are mocked.
 

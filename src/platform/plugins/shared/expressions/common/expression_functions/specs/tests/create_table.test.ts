@@ -64,4 +64,23 @@ describe('clear', () => {
 
     expect(table.rows).toEqual([{ a: 'z' }, { b: 5 }]);
   });
+
+  describe('rowCount bounds', () => {
+    it('accepts rowCount at the maximum', () => {
+      const table = fn(null, { rowCount: 10_000 });
+      expect(table.rows).toHaveLength(10_000);
+    });
+
+    it('throws when rowCount exceeds the maximum', () => {
+      expect(() => fn(null, { rowCount: 10_001 })).toThrow(/rowCount must be an integer/);
+    });
+
+    it('throws on negative rowCount', () => {
+      expect(() => fn(null, { rowCount: -1 })).toThrow(/rowCount must be an integer/);
+    });
+
+    it('throws on non-integer rowCount', () => {
+      expect(() => fn(null, { rowCount: 1.5 })).toThrow(/rowCount must be an integer/);
+    });
+  });
 });

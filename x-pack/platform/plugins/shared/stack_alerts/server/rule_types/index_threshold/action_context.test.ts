@@ -7,11 +7,11 @@
 
 import type { BaseActionContext } from './action_context';
 import { addMessages } from './action_context';
-import { ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
+import { IndexThresholdRuleParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
 
 describe('ActionContext', () => {
   it('generates expected properties if aggField is null', async () => {
-    const params = ParamsSchema.validate({
+    const params = IndexThresholdRuleParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
       aggType: 'count',
@@ -41,7 +41,7 @@ describe('ActionContext', () => {
   });
 
   it('generates expected properties if aggField is not null', async () => {
-    const params = ParamsSchema.validate({
+    const params = IndexThresholdRuleParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
       aggType: 'avg',
@@ -72,7 +72,7 @@ describe('ActionContext', () => {
   });
 
   it('generates expected properties if comparator is between', async () => {
-    const params = ParamsSchema.validate({
+    const params = IndexThresholdRuleParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
       aggType: 'count',
@@ -102,7 +102,7 @@ describe('ActionContext', () => {
   });
 
   it('generates expected properties if value is string', async () => {
-    const params = ParamsSchema.validate({
+    const params = IndexThresholdRuleParamsSchema.validate({
       index: '[index]',
       timeField: '[timeField]',
       aggType: 'count',

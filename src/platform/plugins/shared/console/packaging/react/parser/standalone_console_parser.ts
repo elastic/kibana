@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createParser } from '@kbn/monaco/src/languages/console/parser';
+import { createParser } from '@kbn/monaco/src/languages/definitions/console/parser';
 
 interface ParsedRequest {
   method?: string;
@@ -36,10 +36,10 @@ export const createStandaloneConsoleParser = () => {
     }
 
     try {
-      const result = originalParser(text, undefined);
+      const result = originalParser(text);
       return {
-        requests: result.requests || [],
-        errors: result.errors || [],
+        requests: result?.requests ?? [],
+        errors: result?.errors ?? [],
       };
     } catch (error) {
       return {

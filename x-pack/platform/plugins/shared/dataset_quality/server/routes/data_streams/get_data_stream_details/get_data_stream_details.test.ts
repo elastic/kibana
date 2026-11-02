@@ -15,7 +15,13 @@ import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats'
 import { getDataStreamDetails } from '.';
 
 jest.mock('../../../services');
-jest.mock('../../../utils');
+jest.mock('../../../utils', () => {
+  const actual = jest.requireActual('../../../utils');
+  return {
+    ...actual,
+    createDatasetQualityESClient: jest.fn(),
+  };
+});
 jest.mock('../failed_docs/get_failed_docs');
 jest.mock('../get_data_streams');
 jest.mock('../get_data_streams_metering_stats');
@@ -56,7 +62,8 @@ describe('getDataStreamDetails', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
-    search: jest.MockedFunction<any>;
+    search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
@@ -64,10 +71,13 @@ describe('getDataStreamDetails', () => {
     mockESClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
       search: jest.fn(),
+      fieldCaps: jest.fn(),
     };
     esClient.asCurrentUser = mockESClient;
 
-    mockCreateDatasetQualityESClient.mockReturnValue(mockDatasetQualityESClient as any);
+    mockCreateDatasetQualityESClient.mockReturnValue(
+      mockDatasetQualityESClient as unknown as ReturnType<typeof createDatasetQualityESClient>
+    );
     mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
       'logs-test-default': {
         monitor: true,
@@ -86,14 +96,16 @@ describe('getDataStreamDetails', () => {
         },
       ],
       datasetUserPrivileges: { datasetsPrivilages: {} },
-    } as any);
-    mockGetFailedDocsPaginated.mockResolvedValue([{ count: 10 }] as any);
+    } as Awaited<ReturnType<typeof getDataStreams>>);
+    mockGetFailedDocsPaginated.mockResolvedValue([{ count: 10 }] as Awaited<
+      ReturnType<typeof getFailedDocsPaginated>
+    >);
     mockGetDataStreamsMeteringStats.mockResolvedValue({
       'logs-test-default': {
         totalDocs: 1000,
         sizeBytes: 5000,
       },
-    } as any);
+    } as Awaited<ReturnType<typeof getDataStreamsMeteringStats>>);
 
     mockDatasetQualityESClient.search.mockResolvedValue({
       aggregations: {
@@ -115,7 +127,18 @@ describe('getDataStreamDetails', () => {
           store: { size_in_bytes: 5000 },
         },
       },
-    } as any);
+    } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
+
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
+      fields: {
+        'host.name': {
+          keyword: { type: 'keyword', aggregatable: true },
+        },
+        'service.name': {
+          keyword: { type: 'keyword', aggregatable: true },
+        },
+      },
+    } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
   });
 
   afterEach(() => {
@@ -131,6 +154,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567890,
           isServerless: false,
+          isSecurityEnabled: true,
         })
       ).rejects.toThrow(badRequest('Data Stream name cannot be empty. Received value ""'));
     });
@@ -139,10 +163,11 @@ describe('getDataStreamDetails', () => {
       await expect(
         getDataStreamDetails({
           esClient,
-          dataStream: undefined as any,
+          dataStream: undefined as unknown as string,
           start: 1234567890,
           end: 1234567890,
           isServerless: false,
+          isSecurityEnabled: true,
         })
       ).rejects.toThrow(badRequest('Data Stream name cannot be empty. Received value "undefined"'));
     });
@@ -155,6 +180,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result).toEqual(detailsObject);
@@ -162,8 +188,24 @@ describe('getDataStreamDetails', () => {
         expect(mockDatasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
           esClient.asCurrentUser,
           ['logs-test-default'],
-          ['monitor', 'read_failure_store', 'manage_failure_store']
+          ['monitor', 'read_failure_store', 'manage_failure_store'],
+          true
         );
+
+        expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
+          index: 'logs-test-default',
+          fields: ['*'],
+          include_unmapped: false,
+          index_filter: {
+            range: {
+              '@timestamp': {
+                gte: 1234567890,
+                lte: 1234567900,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        });
       });
 
       it('throws when user lacks privileges', async () => {
@@ -181,6 +223,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(mockGetDataStreams).not.toHaveBeenCalled();
@@ -195,6 +238,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: true,
+          isSecurityEnabled: true,
         });
 
         expect(mockGetDataStreamsMeteringStats).toHaveBeenCalledWith({
@@ -211,6 +255,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(mockESClient.indices.stats).toHaveBeenCalledWith({
@@ -218,6 +263,45 @@ describe('getDataStreamDetails', () => {
           forbid_closed_indices: false,
         });
         expect(result).toMatchObject(detailsObject);
+      });
+
+      it('omits service.name agg when the field is not aggregatable (e.g. text without keyword)', async () => {
+        mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
+          fields: {
+            'host.name': {
+              keyword: { type: 'keyword', aggregatable: true },
+            },
+            'service.name': {
+              text: { type: 'text', aggregatable: false },
+            },
+          },
+        } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
+
+        mockDatasetQualityESClient.search.mockResolvedValue({
+          aggregations: {
+            total_count: { value: 1000 },
+            degraded_count: { doc_count: 50 },
+            'host.name': {
+              buckets: [{ key: 'host1' }, { key: 'host2' }],
+            },
+          },
+        });
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        const searchCall = mockDatasetQualityESClient.search.mock.calls[0][0] as {
+          aggs: Record<string, unknown>;
+        };
+        expect(searchCall.aggs).not.toHaveProperty('service.name');
+        expect(result.services).toEqual({});
+        expect(result.hosts).toEqual({ 'host.name': ['host1', 'host2'] });
       });
 
       it('calculates average document size correctly when docs count is zero', async () => {
@@ -234,6 +318,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result.docsCount).toBe(0);
@@ -252,7 +337,7 @@ describe('getDataStreamDetails', () => {
         });
 
         const error = new Error('Not Found');
-        (error as any).statusCode = 404;
+        (error as Error & { statusCode?: number }).statusCode = 404;
         mockDatasetQualityESClient.search.mockRejectedValue(error);
 
         const result = await getDataStreamDetails({
@@ -261,6 +346,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result).toEqual({});
@@ -276,7 +362,9 @@ describe('getDataStreamDetails', () => {
         });
 
         const error = new Error('Index closed');
-        (error as any).body = { error: { type: 'index_closed_exception' } };
+        (error as Error & { body?: { error?: { type?: string } } }).body = {
+          error: { type: 'index_closed_exception' },
+        };
         mockDatasetQualityESClient.search.mockRejectedValue(error);
 
         const result = await getDataStreamDetails({
@@ -285,9 +373,112 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result).toEqual({});
+      });
+
+      it('returns empty object when ES surfaces index_not_found_exception as 500 (e.g. partial-restored backing index)', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const error = new Error(
+          'index_not_found_exception: no such index [partial-.ds-logs-test-default-2026.03.21-000001]'
+        );
+        (
+          error as Error & { statusCode?: number; body?: { error?: { type?: string } } }
+        ).statusCode = 500;
+        (error as Error & { body?: { error?: { type?: string } } }).body = {
+          error: { type: 'index_not_found_exception' },
+        };
+        mockDatasetQualityESClient.search.mockRejectedValue(error);
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(result).toEqual({});
+      });
+
+      it('calls the wrapped fieldCaps (not the raw esClient.fieldCaps) so ignore_unavailable is applied', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
+          index: 'logs-test-default',
+          fields: ['*'],
+          include_unmapped: false,
+          index_filter: {
+            range: {
+              '@timestamp': {
+                gte: 1234567890,
+                lte: 1234567900,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        });
+        expect(mockESClient.fieldCaps).not.toHaveBeenCalled();
+        expect(result).toEqual(detailsObject);
+      });
+
+      it('returns docs/services/hosts but sizeBytes=0 when indices.stats throws index_not_found_exception', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const error = new Error(
+          'index_not_found_exception: no such index [partial-.ds-logs-test-default-2026.03.21-000001]'
+        );
+        (
+          error as Error & { statusCode?: number; body?: { error?: { type?: string } } }
+        ).statusCode = 500;
+        (error as Error & { body?: { error?: { type?: string } } }).body = {
+          error: { type: 'index_not_found_exception' },
+        };
+        mockESClient.indices.stats.mockRejectedValue(error);
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(result.docsCount).toBe(1000);
+        expect(result.sizeBytes).toBe(0);
+        expect(result.services).toEqual({ 'service.name': ['service1', 'service2'] });
       });
 
       it('throws error for other types of errors', async () => {
@@ -300,7 +491,7 @@ describe('getDataStreamDetails', () => {
         });
 
         const error = new Error('Internal Server Error');
-        (error as any).statusCode = 500;
+        (error as Error & { statusCode?: number }).statusCode = 500;
         mockDatasetQualityESClient.search.mockRejectedValue(error);
 
         await expect(
@@ -310,6 +501,7 @@ describe('getDataStreamDetails', () => {
             start: 1234567890,
             end: 1234567900,
             isServerless: false,
+            isSecurityEnabled: true,
           })
         ).rejects.toThrow('Internal Server Error');
       });
@@ -322,7 +514,7 @@ describe('getDataStreamDetails', () => {
             totalDocs: 20,
             sizeBytes: 30,
           },
-        } as any);
+        } as Awaited<ReturnType<typeof getDataStreamsMeteringStats>>);
 
         const result = await getDataStreamDetails({
           esClient,
@@ -330,6 +522,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: true,
+          isSecurityEnabled: true,
         });
 
         // avgDocSizeInBytes = 30 / 20 = 1.5
@@ -345,7 +538,7 @@ describe('getDataStreamDetails', () => {
               store: { size_in_bytes: 30 },
             },
           },
-        } as any);
+        } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
 
         const result = await getDataStreamDetails({
           esClient,
@@ -353,6 +546,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         // avgDocSizeInBytes = 30 / 20 = 1.5

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { EuiCard, EuiLoadingSpinner, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiLoadingSpinner, EuiTextColor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+
 import type { Space } from '../../../common';
-import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
+import { ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
 
@@ -65,9 +67,11 @@ function renderSpaceDescription(space: Space) {
   }
 
   return (
-    <EuiTextColor color="subdued" title={description} className="eui-textBreakWord">
-      {description}
-    </EuiTextColor>
+    <EuiToolTip content={space.description}>
+      <EuiTextColor color="subdued" className="eui-textBreakWord">
+        {description}
+      </EuiTextColor>
+    </EuiToolTip>
   );
 }
 

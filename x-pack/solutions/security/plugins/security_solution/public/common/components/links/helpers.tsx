@@ -22,6 +22,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 export interface ReputationLinkSetting {
   name: string;
@@ -54,7 +55,7 @@ const GenericLinkButtonComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   title?: string;
   iconType?: string;
-}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'expand' }) => {
+}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'maximize' }) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}
@@ -113,6 +114,10 @@ export const ReputationLinksOverflow = React.memo<ReputationLinkOverflowProps>(
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.reputationLinks.overflowPopover.ariaLabel',
+              { defaultMessage: 'More reputation links' }
+            )}
             button={button}
             isOpen={isOpen}
             closePopover={togglePopover}

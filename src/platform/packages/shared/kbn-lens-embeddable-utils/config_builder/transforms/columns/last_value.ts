@@ -7,24 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LastValueIndexPatternColumn } from '@kbn/lens-common';
+import type { DataType, LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
+import { LENS_LAST_VALUE_DEFAULT_MULTI_VALUE } from '../../schema/constants';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 
 export const fromLastValueAPItoLensState = (
-  options: LensApiLastValueOperation
+  options: LensApiLastValueOperation,
+  dataType?: DataType
 ): LastValueIndexPatternColumn => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { field, format, sort_by, show_array_values } = options;
+  const { field, format, time_field, multi_value } = options;
 
   return {
     operationType: 'last_value',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options),
+    ...getLensStateMetricSharedProps(options, dataType),
     params: {
-      sortField: sort_by,
-      showArrayValues: show_array_values,
+      sortField: time_field,
+      showArrayValues: multi_value,
       ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
     },
   };
@@ -36,8 +37,8 @@ export const fromLastValueLensStateToAPI = (
   return {
     operation: 'last_value',
     field: options.sourceField,
-    sort_by: options.params.sortField,
-    show_array_values: options.params.showArrayValues,
+    time_field: options.params.sortField,
+    multi_value: options.params.showArrayValues ?? LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

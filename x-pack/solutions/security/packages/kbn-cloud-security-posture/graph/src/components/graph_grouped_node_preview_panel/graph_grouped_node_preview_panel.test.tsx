@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GraphGroupedNodePreviewPanel } from './graph_grouped_node_preview_panel';
 import type { AlertItem, EntityItem, EventItem } from './components/grouped_item/types';
@@ -20,18 +20,29 @@ import {
   TOTAL_HITS_TEST_ID,
   ICON_TEST_ID,
   GROUPED_ITEMS_TYPE_TEST_ID,
+  GROUPED_ITEM_TEST_ID,
+  GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TARGET_TEST_ID,
+  GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID,
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
+import { getOrCreateFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 // Mock the hook
 jest.mock('./use_fetch_document_details');
 
+// Mock expandable flyout API
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: jest.fn(),
+  }),
+}));
+
 const mockUseFetchDocumentDetails = useFetchDocumentDetails as jest.MockedFunction<
   typeof useFetchDocumentDetails
 >;
-
 const createMockHookResult = (
   overrides?: Partial<ReturnType<typeof useFetchDocumentDetails>>
 ): ReturnType<typeof useFetchDocumentDetails> => ({
@@ -44,28 +55,53 @@ const createMockHookResult = (
   ...overrides,
 });
 
-describe('GraphGroupedNodePreviewPanel', () => {
-  const defaultProps = {
-    docMode: 'grouped-entities' as const,
-    dataViewId: 'test-data-view-id',
-    documentIds: ['doc-1', 'doc-2', 'doc-3'],
-    entityItems: [] as EntityItem[],
-  };
+const TEST_DATA_VIEW_ID = 'test-data-view-id';
 
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
+let defaultProps: {
+  scopeId: string;
+  docMode: 'grouped-entities';
+  dataViewId: string;
+  documentIds: string[];
+  entityItems: EntityItem[];
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+};
+
+describe('GraphGroupedNodePreviewPanel', () => {
   let entityIdCounter = 0;
 
   const createEntityItem = (overrides?: Partial<EntityItem>): EntityItem => {
     entityIdCounter += 1;
     return {
       id: `entity-${entityIdCounter}`,
-      type: 'host',
+      itemType: 'entity',
       icon: 'storage',
       label: 'Test Host',
+      entity: { type: 'host' },
       ...overrides,
-    } as EntityItem;
+    };
   };
 
   beforeEach(() => {
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
+    // Set defaultProps with the new scopeId
+    defaultProps = {
+      scopeId: TEST_SCOPE_ID,
+      docMode: 'grouped-entities' as const,
+      dataViewId: TEST_DATA_VIEW_ID,
+      documentIds: ['doc-1', 'doc-2', 'doc-3'],
+      entityItems: [] as EntityItem[],
+      onShowDocument: jest.fn(),
+      onShowEntity: jest.fn(),
+    };
+    getOrCreateFilterStore(TEST_SCOPE_ID);
     jest.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;
@@ -74,6 +110,10 @@ describe('GraphGroupedNodePreviewPanel', () => {
         data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
       })
     );
+  });
+
+  afterEach(() => {
+    destroyFilterStore(TEST_SCOPE_ID);
   });
 
   describe('Rendering States', () => {
@@ -150,7 +190,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should render icon, title, and grouped type in ContentBody', () => {
-        const entityItems = [createEntityItem({ icon: 'test-icon', type: 'host' })];
+        const entityItems = [createEntityItem({ icon: 'test-icon', entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toBeInTheDocument();
@@ -172,7 +212,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display correct groupedItemsType label', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
@@ -386,6 +426,40 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
       });
 
+      // Regression test for https://github.com/elastic/kibana/issues/275261
+      // When switching between grouped nodes, the flyout reuses the same panel
+      // component instance (same panel key => no remount) and only updates props.
+      // A grouped node can contain several items resolving to the same entity `id`
+      // (one per underlying event permutation). If the list keys are not unique,
+      // React fails to reconcile the list and leaves stale <li> nodes mounted, so
+      // the previous group's entities accumulate on top of the current group's.
+      it('should render exactly the current entityItems when switching groups (no accumulation)', () => {
+        // Group A: 4 items but only 2 unique entity ids (duplicate ids on purpose).
+        const groupA: EntityItem[] = [
+          createEntityItem({ id: 'user-1' }),
+          createEntityItem({ id: 'user-1' }),
+          createEntityItem({ id: 'user-2' }),
+          createEntityItem({ id: 'user-2' }),
+        ];
+        const groupB: EntityItem[] = [
+          createEntityItem({ id: 'bucket-1' }),
+          createEntityItem({ id: 'bucket-2' }),
+        ];
+
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupA} />
+        );
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(4);
+
+        // Switch to group B (same component instance, only props change).
+        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupB} />);
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(2);
+
+        // Switch back to group A: must show A's items only, not A+B accumulated.
+        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupA} />);
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(4);
+      });
+
       it('should use client-side pagination slicing', () => {
         const entityItems = Array.from({ length: 25 }, (_, i) =>
           createEntityItem({ id: `entity-${i}` })
@@ -421,8 +495,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
       it('should derive groupedItemsType from first entity type - this should never happened', () => {
         const entityItems = [
-          createEntityItem({ type: 'host' }),
-          createEntityItem({ type: 'user' }),
+          createEntityItem({ entity: { type: 'host' } }),
+          createEntityItem({ entity: { type: 'user' } }),
         ];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
@@ -430,30 +504,28 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display "Hosts" label for host type', () => {
-        const entityItems = [createEntityItem({ type: 'host' })];
+        const entityItems = [createEntityItem({ entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
       });
 
       it('should display "Users" label for user type', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
       });
 
       it('should display "Entities" label for unknown type', () => {
-        const entityItems = [
-          createEntityItem({ type: 'unknown' as unknown as EntityItem['type'] }),
-        ];
+        const entityItems = [createEntityItem({ entity: { type: 'unknown' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
       });
 
       it('should display "Entities" label when type is undefined', () => {
-        const entityItems = [createEntityItem({ type: undefined })];
+        const entityItems = [createEntityItem({ entity: { type: undefined } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
@@ -550,6 +622,120 @@ describe('GraphGroupedNodePreviewPanel', () => {
         render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Events');
+      });
+
+      it('should render each row with its actor, first target and a +N badge for extra targets', async () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: {
+              page: [
+                {
+                  id: 'event-1',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  action: 'google.iam.admin.v1.CreateRole',
+                  actor: { id: 'user:admin@example.com@gcp' },
+                  target: { ids: ['projects/acme-prod/roles/customRole'] },
+                },
+                {
+                  id: 'event-2',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  action: 'AssumeRole',
+                  actor: { id: 'user:alice@acme.com@aws' },
+                  target: {
+                    ids: [
+                      'service:sts.amazonaws.com',
+                      'arn:aws:iam::123456789012:role/DataPipelineRole',
+                      'arn:aws:iam::123456789012:role/AuditRole',
+                    ],
+                  },
+                },
+              ],
+              total: 2,
+            },
+          })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        const [singleTargetRow, multiTargetRow] = screen.getAllByTestId(GROUPED_ITEM_TEST_ID);
+
+        expect(within(singleTargetRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          'user:admin@example.com@gcp'
+        );
+        expect(within(singleTargetRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'projects/acme-prod/roles/customRole'
+        );
+        expect(
+          within(singleTargetRow).queryByTestId(GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID)
+        ).not.toBeInTheDocument();
+
+        expect(within(multiTargetRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'service:sts.amazonaws.com'
+        );
+        const overflowBadge = within(multiTargetRow).getByTestId(
+          GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID
+        );
+        expect(overflowBadge).toHaveTextContent('+2');
+
+        await userEvent.hover(overflowBadge);
+
+        expect(
+          await screen.findByText(
+            'arn:aws:iam::123456789012:role/DataPipelineRole, arn:aws:iam::123456789012:role/AuditRole'
+          )
+        ).toBeInTheDocument();
+      });
+
+      it('should render a dash for the side that could not be resolved and hide rows with neither', () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: {
+              page: [
+                {
+                  id: 'event-actor-only',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  actor: { id: 'user:admin@example.com@gcp' },
+                },
+                {
+                  id: 'event-target-only',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  target: { ids: ['host:web-01', 'host:web-02'] },
+                },
+                { id: 'event-no-identity', itemType: DOCUMENT_TYPE_EVENT },
+              ],
+              total: 3,
+            },
+          })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        const [actorOnlyRow, targetOnlyRow, noIdentityRow] =
+          screen.getAllByTestId(GROUPED_ITEM_TEST_ID);
+
+        expect(within(actorOnlyRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          'user:admin@example.com@gcp'
+        );
+        expect(within(actorOnlyRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          '-'
+        );
+
+        expect(within(targetOnlyRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          '-'
+        );
+        expect(within(targetOnlyRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'host:web-01'
+        );
+        expect(
+          within(targetOnlyRow).getByTestId(GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID)
+        ).toHaveTextContent('+1');
+
+        expect(
+          within(noIdentityRow).queryByTestId(GROUPED_ITEM_ACTOR_TEST_ID)
+        ).not.toBeInTheDocument();
+        expect(
+          within(noIdentityRow).queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)
+        ).not.toBeInTheDocument();
       });
 
       it('should use server-side pagination (fetch only current page)', async () => {

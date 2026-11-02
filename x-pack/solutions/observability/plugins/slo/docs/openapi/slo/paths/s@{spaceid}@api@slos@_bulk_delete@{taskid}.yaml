@@ -23,21 +23,62 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/bulk_delete_status_response.yaml'
+          examples:
+            bulkDeleteStatusComplete:
+              summary: Completed bulk deletion
+              value:
+                isDone: true
+                results:
+                  - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    success: true
+                  - id: d077e940-1515-11ee-9c50-9d096392f520
+                    success: true
+            bulkDeleteStatusPartialFailure:
+              summary: Completed with partial failure
+              value:
+                isDone: true
+                results:
+                  - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    success: true
+                  - id: d077e940-1515-11ee-9c50-9d096392f520
+                    success: false
+                    error: "SLO [d077e940-1515-11ee-9c50-9d096392f520] not found"
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestExample:
+              summary: Bad request
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: "Invalid value 'foo' supplied to: taskId"
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedExample:
+              summary: Unauthorized
+              value:
+                statusCode: 401
+                error: Unauthorized
+                message: "security_exception: unable to authenticate user for REST request [/api/observability/slos]"
     '403':
-      description: Unauthorized response
+      description: Forbidden response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenExample:
+              summary: Forbidden
+              value:
+                statusCode: 403
+                error: Forbidden
+                message: "security_exception: action [slo_write] is unauthorized for user"

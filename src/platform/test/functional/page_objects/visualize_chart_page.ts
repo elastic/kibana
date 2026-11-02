@@ -154,12 +154,10 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   private async toggleLegend() {
-    await this.retry.try(async () => {
-      const isVisible = await this.find.existsByCssSelector('.echLegend');
-      if (!isVisible) {
-        await this.testSubjects.click('vislibToggleLegend');
-      }
-    });
+    const isVisible = await this.find.existsByCssSelector('.echLegend');
+    if (!isVisible) {
+      await this.testSubjects.click('vislibToggleLegend');
+    }
   }
 
   public async filterLegend(name: string) {

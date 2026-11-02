@@ -6,7 +6,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import * as YAML from 'yaml';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   Action,
@@ -15,17 +14,11 @@ import {
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
 import type { AnyObject, Nullable } from '../types';
-import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
+import { generateDEK, encryptDEKWithRSA, encryptField, encryptDocumentAsJson } from './encryption';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
   return nextDate !== undefined && nextDate < endDate;
-}
-
-export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {
-  return YAML.parseAllDocuments(input as string).map((doc) => {
-    return doc.toJSON() as HealthDiagnosticQuery;
-  });
 }
 
 export function fieldNames<T>(documents: T): string[] {
@@ -52,33 +45,34 @@ export function fieldNames<T>(documents: T): string[] {
   return Array.from(result);
 }
 
-export function emptyStat(name: string, now: Date): HealthDiagnosticQueryStats {
-  return {
-    name,
-    started: now.toISOString(),
-    traceId: randomUUID(),
-    finished: new Date().toISOString(),
-    numDocs: 0,
-    passed: false,
-    fieldNames: [],
-  };
-}
+export const emptyStat = (name: string, now: Date): HealthDiagnosticQueryStats => ({
+  name,
+  started: now.toISOString(),
+  traceId: randomUUID(),
+  finished: new Date().toISOString(),
+  numDocs: 0,
+  passed: false,
+  fieldNames: [],
+  status: 'failed',
+});
 
 export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: Pick<HealthDiagnosticQuery, 'encryptionKeyId'>,
+  query?: { encryptionKeyId?: string; encryptDocument?: true },
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
 
-  const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
+  const needsDEK =
+    query?.encryptDocument === true ||
+    Object.values(rules).some((action) => action === Action.ENCRYPT);
   let dek: Nullable<Buffer>;
   let encryptedDEK: Nullable<Buffer>;
   let keyId: string | undefined;
 
-  if (hasEncryptAction) {
+  if (needsDEK) {
     if (!query?.encryptionKeyId) {
       throw new Error('encryptionKeyId is required when filterlist contains encrypt actions');
     }
@@ -86,7 +80,6 @@ export async function applyFilterlist(
       throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
     }
 
-    // same DEK for all the data
     keyId = query.encryptionKeyId;
     const publicKey = encryptionPublicKeys[keyId];
     dek = generateDEK();
@@ -183,23 +176,53 @@ export async function applyFilterlist(
     }
   };
 
+  if (query?.encryptDocument === true) {
+    if (!dek || !encryptedDEK || !keyId) {
+      throw new Error('Encryption configuration not initialized');
+    }
+    const hasRules = Object.keys(rules).length > 0;
+    const result: string[] = [];
+    for (const rawDoc of data) {
+      const doc = hasRules ? unflatten(rawDoc as AnyObject) : rawDoc;
+      const subDoc = hasRules ? await applyFilterToDoc(doc) : doc;
+      result.push(encryptDocumentAsJson(subDoc, dek, encryptedDEK, keyId));
+    }
+    dek.fill(0);
+    return result;
+  }
+
   for (const rawDoc of data) {
     const doc = unflatten(rawDoc as AnyObject);
-    if (Array.isArray(doc)) {
-      const docs = doc as unknown[];
-      const result = await Promise.all(
-        docs.map((d) => {
-          return applyFilterToDoc(d);
-        })
-      );
-      filteredResult.push(result);
+    filteredResult.push(await applyFilterToDoc(doc));
+  }
+
+  dek?.fill(0);
+  return filteredResult;
+}
+
+/**
+ * Merges two query arrays with v2 taking precedence on `id` conflicts.
+ * Queries without an `id` (ParseFailureQuery with no id field) are always
+ * included — they will be reported as skipped at execution time.
+ */
+export const mergeByPriority = (
+  v1Queries: HealthDiagnosticQuery[],
+  v2Queries: HealthDiagnosticQuery[]
+): HealthDiagnosticQuery[] => {
+  const map = new Map<string, HealthDiagnosticQuery>();
+  const idless: HealthDiagnosticQuery[] = [];
+
+  for (const q of [...v1Queries, ...v2Queries]) {
+    const id = (q as { id?: string }).id;
+    if (id !== undefined) {
+      map.set(id, q); // v2 entries overwrite v1 for the same id
     } else {
-      filteredResult.push(await applyFilterToDoc(doc));
+      idless.push(q);
     }
   }
 
-  return filteredResult;
-}
+  return [...map.values(), ...idless];
+};
 
 async function maskValue(value: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();

@@ -1,0 +1,53 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createDashboardRequest:
+          summary: Create a dashboard saved object
+          value:
+            attributes:
+              title: Example dashboard
+            references: []
+responses:
+  '200':
+    description: A successful create response.
+    content:
+      application/json:
+        examples:
+          createDashboardResponse:
+            summary: A created saved object
+            value:
+              id: example-dashboard-id
+              type: dashboard
+              attributes:
+                title: Example dashboard
+              references: []
+              namespaces:
+                - default
+              managed: false
+              updated_at: '2026-04-17T12:00:00.000Z'
+              version: WzEsMV0=
+  '409':
+    description: A conflict error.
+    content:
+      application/json:
+        examples:
+          conflictResponse:
+            summary: A conflict error
+            value:
+              statusCode: 409
+              error: Conflict
+              message: Saved object [dashboard/example-dashboard-id] conflict
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/saved_objects/dashboard/example-dashboard-id?overwrite=false" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"attributes":{"title":"Example dashboard"},"references":[]}'
+  - lang: Console
+    source: |
+      POST kbn://api/saved_objects/dashboard/example-dashboard-id?overwrite=false
+      {"attributes":{"title":"Example dashboard"},"references":[]}

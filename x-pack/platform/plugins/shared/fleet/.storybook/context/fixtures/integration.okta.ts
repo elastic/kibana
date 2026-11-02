@@ -44,6 +44,7 @@ export const item: GetInfoResponse['item'] = {
   assets: {
     kibana: {
       alerting_rule_template: [],
+      slo_template: [],
       dashboard: [
         {
           pkgkey: 'okta-1.2.0',

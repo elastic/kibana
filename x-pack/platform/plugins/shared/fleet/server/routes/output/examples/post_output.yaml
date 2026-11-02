@@ -1,0 +1,41 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postOutputRequestExample:
+          description: 'Create a new Elasticsearch output'
+          value:
+            name: 'My output'
+            type: 'elasticsearch'
+            hosts:
+              - 'https://elasticsearch.example.com:9200'
+            is_default: false
+            is_default_monitoring: false
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postOutputExample:
+            description: 'The created Fleet output'
+            value:
+              item:
+                id: 'output-id-2'
+                name: 'My output'
+                type: 'elasticsearch'
+                is_default: false
+                is_default_monitoring: false
+                hosts:
+                  - 'https://elasticsearch.example.com:9200'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

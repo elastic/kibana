@@ -13,11 +13,12 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type {
   BaseIndexPatternColumn,
+  ColumnBuildHints,
+  ESQLExpressionWithParams,
   DateRange,
   FormBasedLayer,
   GenericIndexPatternColumn,
@@ -31,6 +32,7 @@ import type {
   ParamEditorCustomProps,
   UserMessage,
 } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -159,7 +161,7 @@ export interface ParamEditorProps<
   dateRange: DateRange;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
   activeData?: FormBasedDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
@@ -184,6 +186,8 @@ export interface FieldInputProps<C> {
   operationSupportMatrix: OperationSupportMatrix;
   helpMessage?: React.ReactNode;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  /** Active visualization type id, used to derive new-column defaults. */
+  activeVisualizationTypeId?: string;
 }
 
 export interface HelpProps<C> {
@@ -421,7 +425,7 @@ interface BaseOperationDefinitionProps<
     layer: FormBasedLayer,
     uiSettings: IUiSettingsClient,
     dateRange: DateRange
-  ) => string | undefined;
+  ) => ESQLExpressionWithParams | undefined;
 }
 
 interface BaseBuildColumnArgs {
@@ -468,7 +472,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: P
   ) => C;
@@ -509,7 +513,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: P & {
       shift?: string;
@@ -607,7 +611,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       referenceIds: string[];
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       shift?: string;
@@ -635,7 +639,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] &
       FilterParams & { reducedTimeRange?: string },

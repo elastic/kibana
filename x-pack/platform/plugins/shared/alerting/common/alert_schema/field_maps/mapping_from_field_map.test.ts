@@ -208,7 +208,20 @@ describe('mappingFromFieldMap', () => {
             },
             original: {
               type: 'keyword',
-              ignore_above: 1024,
+              ignore_above: 32766,
+            },
+          },
+        },
+        data_stream: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            dataset: {
+              type: 'keyword',
+            },
+            namespace: {
+              type: 'keyword',
             },
           },
         },
@@ -335,7 +348,13 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                severity: {
+                  type: 'keyword',
+                },
                 severity_improving: {
+                  type: 'boolean',
+                },
+                snoozed: {
                   type: 'boolean',
                 },
                 start: {
@@ -347,6 +366,9 @@ describe('mappingFromFieldMap', () => {
                 time_range: {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
+                },
+                tracked: {
+                  type: 'boolean',
                 },
                 updated_at: {
                   type: 'date',
@@ -384,6 +406,16 @@ describe('mappingFromFieldMap', () => {
                 },
               },
             },
+            cps_scope: {
+              properties: {
+                expression: {
+                  type: 'keyword',
+                },
+                linked_projects: {
+                  type: 'flattened',
+                },
+              },
+            },
             space_ids: {
               type: 'keyword',
             },
@@ -394,6 +426,7 @@ describe('mappingFromFieldMap', () => {
         },
         tags: {
           type: 'keyword',
+          ignore_above: 1024,
         },
       },
     });
@@ -445,7 +478,7 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
-        ecs: { properties: { version: { type: 'keyword' } } },
+        ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
       },
     });
   });

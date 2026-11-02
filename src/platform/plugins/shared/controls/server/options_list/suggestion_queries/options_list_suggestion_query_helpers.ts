@@ -9,14 +9,14 @@
 
 import { get } from 'lodash';
 
-import type { OptionsListSortingType } from '../../../common/options_list/suggestions_sorting';
-import { OPTIONS_LIST_DEFAULT_SORT } from '../../../common/options_list/suggestions_sorting';
+import type { OptionsListSortingType } from '@kbn/controls-schemas';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { EsBucket } from '../types';
 
 export const getSortType = (sort?: OptionsListSortingType) => {
   return sort
     ? { [sort.by]: sort.direction }
-    : { [OPTIONS_LIST_DEFAULT_SORT.by]: OPTIONS_LIST_DEFAULT_SORT.direction };
+    : { [DEFAULT_DSL_OPTIONS_LIST_STATE.sort.by]: DEFAULT_DSL_OPTIONS_LIST_STATE.sort.direction };
 };
 
 export const getEscapedRegexQuery = (q: string = '') =>

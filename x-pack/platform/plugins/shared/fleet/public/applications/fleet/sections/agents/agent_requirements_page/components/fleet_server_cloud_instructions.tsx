@@ -23,7 +23,9 @@ import { useFleetStatus, useStartServices } from '../../../../hooks';
 
 const REFRESH_INTERVAL = 10000;
 
-export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl }) => {
+export const CloudInstructions: React.FC<{ deploymentEditUrl: string }> = ({
+  deploymentEditUrl,
+}) => {
   const { docLinks } = useStartServices();
 
   const { refetch } = useFleetStatus();
@@ -71,11 +73,11 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
           <>
             <EuiButton
               iconSide="right"
-              iconType="popout"
+              iconType="external"
               fill
               isLoading={false}
               type="submit"
-              href={`${deploymentUrl}/edit`}
+              href={deploymentEditUrl}
               target="_blank"
             >
               <FormattedMessage

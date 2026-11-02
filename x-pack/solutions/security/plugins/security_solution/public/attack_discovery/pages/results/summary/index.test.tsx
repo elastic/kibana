@@ -14,6 +14,19 @@ import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_a
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock(
+  '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
+  () => ({
+    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="anonymizationSettingsModal">
+        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  })
+);
+
 describe('Summary', () => {
   const defaultProps = {
     alertsCount: 20,
@@ -120,5 +133,44 @@ describe('Summary', () => {
     const toggleButton = screen.getByTestId('toggleAnonymized');
 
     expect(toggleButton).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('renders the anonymization settings button', () => {
+    render(
+      <TestProviders>
+        <Summary {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('anonymizationSettings')).toBeInTheDocument();
+  });
+
+  it('opens the anonymization settings modal when the settings button is clicked', () => {
+    render(
+      <TestProviders>
+        <Summary {...defaultProps} />
+      </TestProviders>
+    );
+
+    const settingsButton = screen.getByTestId('anonymizationSettings');
+    fireEvent.click(settingsButton);
+
+    expect(screen.getByTestId('anonymizationSettingsModal')).toBeInTheDocument();
+  });
+
+  it('closes the anonymization settings modal when onClose is triggered', () => {
+    render(
+      <TestProviders>
+        <Summary {...defaultProps} />
+      </TestProviders>
+    );
+
+    const settingsButton = screen.getByTestId('anonymizationSettings');
+    fireEvent.click(settingsButton);
+
+    const closeButton = screen.getByTestId('closeAnonymizationSettingsModal');
+    fireEvent.click(closeButton);
+
+    expect(screen.queryByTestId('anonymizationSettingsModal')).not.toBeInTheDocument();
   });
 });

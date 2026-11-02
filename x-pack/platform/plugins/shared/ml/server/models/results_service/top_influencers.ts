@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
-import type { MlClient } from '../../lib/ml_client';
 import type {
   GetTopInfluencersRequest as GetTopInfluencersParams,
   InfluencersByFieldResponse,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
+import type { MlClient } from '../../lib/ml_client';
 
 export async function getTopInfluencers(
   mlClient: MlClient,

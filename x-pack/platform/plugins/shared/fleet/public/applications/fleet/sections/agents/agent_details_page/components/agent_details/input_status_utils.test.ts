@@ -181,7 +181,7 @@ describe('getInputUnitsByPackage', () => {
 
   it('should return the agent component input units that belong to the package', () => {
     packageMock.id = 'df3a359d-9463-400c-8d8e-4d293ebf7821';
-    expect(getInputUnitsByPackage(agentComponents, packageMock)).toEqual([
+    expect(getInputUnitsByPackage(agentComponents, packageMock.id)).toEqual([
       {
         id: 'log-default-logfile-system-df3a359d-9463-400c-8d8e-4d293ebf7821',
         type: 'input',
@@ -198,7 +198,7 @@ describe('getInputUnitsByPackage', () => {
   });
 
   packageMock.id = '77fa4731-4502-4a44-bfbe-440b4662c08f';
-  expect(getInputUnitsByPackage(agentComponents, packageMock)).toEqual([
+  expect(getInputUnitsByPackage(agentComponents, packageMock.id)).toEqual([
     {
       id: 'log-default-logfile-apache-77fa4731-4502-4a44-bfbe-440b4662c08f',
       type: 'input',

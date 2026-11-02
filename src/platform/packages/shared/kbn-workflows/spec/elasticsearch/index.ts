@@ -41,8 +41,19 @@ export function getElasticsearchConnectors(): InternalConnectorContract[] {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('./generated');
 
-  return mergeEnhancedConnectors(
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    ENHANCED_ELASTICSEARCH_CONNECTORS
-  );
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { ELASTICSEARCH_OVERRIDES } = require('./overrides');
+
+  const connectors: InternalConnectorContract[] = [];
+
+  for (const connector of GENERATED_ELASTICSEARCH_CONNECTORS) {
+    const override = ELASTICSEARCH_OVERRIDES[connector.type];
+    if (override) {
+      connectors.push(override);
+    } else {
+      connectors.push(connector);
+    }
+  }
+
+  return mergeEnhancedConnectors(connectors, ENHANCED_ELASTICSEARCH_CONNECTORS);
 }

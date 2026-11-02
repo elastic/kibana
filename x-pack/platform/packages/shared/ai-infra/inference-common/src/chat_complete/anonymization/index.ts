@@ -6,14 +6,12 @@
  */
 
 export type {
-  AnonymizationRule,
   AnonymizationEntity,
   Anonymization,
   Deanonymization,
   AnonymizationOutput,
   DeanonymizationOutput,
   DeanonymizedMessage,
-  RegexAnonymizationRule,
-  NamedEntityRecognitionRule,
-  AnonymizationSettings,
+  AnonymizationResponseMetadata,
+  DeanonymizedMessageData,
 } from './types';

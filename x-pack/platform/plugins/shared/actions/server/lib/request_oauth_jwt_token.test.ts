@@ -29,9 +29,9 @@ describe('requestOAuthJWTToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        token_type: 'Bearer',
+        access_token: 'dfjsdfgdjhfgsjdf',
+        expires_in: 123,
       },
     });
     await requestOAuthJWTToken(
@@ -53,6 +53,7 @@ describe('requestOAuthJWTToken', () => {
           "beforeRedirect": [Function],
           "data": "assertion=someJWTvalueishere&client_id=client-id-1&client_secret=some-client-secret&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&scope=test",
           "headers": Object {
+            "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           },
           "httpAgent": undefined,

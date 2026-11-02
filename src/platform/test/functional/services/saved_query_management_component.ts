@@ -16,11 +16,36 @@ export class SavedQueryManagementComponentService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly config = this.ctx.getService('config');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly browser = this.ctx.getService('browser');
+
+  private async clickMenuButtonByTestSubject(testSubj: string) {
+    const cssSelector = this.testSubjects.getCssSelector(testSubj);
+    await this.retry.try(async () => {
+      await this.closeSavedQueryManagementComponent();
+      await this.openSavedQueryManagementComponent();
+      const clicked = await this.browser.execute((sel: string) => {
+        const el = document.querySelector(sel) as HTMLElement | null;
+        if (!el) return false;
+        el.click();
+        return true;
+      }, cssSelector);
+      if (!clicked) {
+        throw new Error(`Menu button '${testSubj}' not found`);
+      }
+    });
+  }
 
   public async getCurrentlyLoadedQueryID() {
     await this.openSavedQueryManagementComponent();
     try {
-      return await this.testSubjects.getVisibleText('savedQueryTitle');
+      let text = '';
+      await this.retry.try(async () => {
+        text = await this.testSubjects.getVisibleText('savedQueryTitle');
+        if (!text) {
+          throw new Error('Saved query title not yet rendered');
+        }
+      });
+      return text;
     } catch {
       return undefined;
     }
@@ -84,8 +109,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   public async loadSavedQuery(title: string) {
-    await this.openSavedQueryManagementComponent();
-    await this.testSubjects.click('saved-query-management-load-button');
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.testSubjects.click('saved-query-management-apply-changes-button');
     await this.retry.try(async () => {
@@ -100,18 +124,11 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   public async deleteSavedQuery(title: string) {
-    await this.openSavedQueryManagementComponent();
-    const shouldClickLoadMenu = await this.testSubjects.exists(
-      'saved-query-management-load-button'
-    );
-    if (shouldClickLoadMenu) {
-      await this.testSubjects.click('saved-query-management-load-button');
-    }
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
       await this.testSubjects.click(`delete-saved-query-button`);
-      const exists = await this.testSubjects.exists('confirmModalTitleText');
-      return exists === true;
+      return await this.testSubjects.waitForExists('confirmModalTitleText', { timeout: 2000 });
     });
     await this.common.clickConfirmOnModal();
   }
@@ -131,7 +148,16 @@ export class SavedQueryManagementComponentService extends FtrService {
     includeTimeFilter: boolean
   ) {
     if (title) {
-      await this.testSubjects.setValue('saveQueryFormTitle', title);
+      // Re-type until the value lands: the popover's focus trap can swallow keystrokes sent to `activeElement()`.
+      await this.retry.try(async () => {
+        await this.testSubjects.setValue('saveQueryFormTitle', title, { clearWithKeyboard: true });
+        const currentTitle = await this.testSubjects.getAttribute('saveQueryFormTitle', 'value');
+        if (currentTitle !== title) {
+          throw new Error(
+            `Failed to set saved query title to ${title}, instead it is ${currentTitle}`
+          );
+        }
+      });
     }
 
     const currentIncludeFiltersValue =
@@ -159,22 +185,14 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async savedQueryExist(title: string) {
-    await this.openSavedQueryManagementComponent();
-    await this.testSubjects.click('saved-query-management-load-button');
-    const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
+    const exists = await this.testSubjects.waitForExists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }
 
   async savedQueryExistOrFail(title: string) {
-    await this.retry.waitFor('load saved query', async () => {
-      await this.openSavedQueryManagementComponent();
-      const shouldClickLoadMenu = await this.testSubjects.exists(
-        'saved-query-management-load-button'
-      );
-      return shouldClickLoadMenu === true;
-    });
-    await this.testSubjects.click('saved-query-management-load-button');
+    await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
     await this.testSubjects.existOrFail(`~load-saved-query-${title}-button`);
   }
 
@@ -201,10 +219,12 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
-    if (isOpenAlready) return;
-
-    await this.testSubjects.click('showQueryBarMenu');
+    await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists('queryBarMenuPanel'))) {
+        await this.testSubjects.click('showQueryBarMenu');
+      }
+      await this.testSubjects.existOrFail('queryBarMenuPanel');
+    });
   }
 
   async closeSavedQueryManagementComponent() {

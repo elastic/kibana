@@ -9,8 +9,8 @@
 
 import type { IToasts, ToastsStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
+import type { DataSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useEffect } from 'react';
 import { debounceTime } from 'rxjs';
 
@@ -29,11 +29,11 @@ const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
 };
 
 export const useFiltersValidation = ({
-  savedSearch,
+  dataSource,
   filterManager,
   toastNotifications,
 }: {
-  savedSearch: SavedSearch;
+  dataSource: DataSource;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
 }) => {
@@ -43,15 +43,14 @@ export const useFiltersValidation = ({
       .pipe(debounceTime(500))
       .subscribe(() => {
         const currentFilters = filterManager.getFilters();
-        const dataView = savedSearch.searchSource.getField('index');
+        const dataViewId = dataSource.kind === 'esql' ? dataSource.datasetId : dataSource.id;
         const areFiltersInvalid =
-          dataView &&
-          !dataView.isPersisted() &&
-          !currentFilters.every((current) => current.meta.index === dataView.id);
+          !dataSource.isPersisted() &&
+          !currentFilters.every((current) => current.meta.index === dataViewId);
         if (areFiltersInvalid) {
           addInvalidFiltersWarn(toastNotifications);
         }
       });
     return () => subscription.unsubscribe();
-  }, [filterManager, savedSearch.searchSource, toastNotifications]);
+  }, [dataSource, filterManager, toastNotifications]);
 };

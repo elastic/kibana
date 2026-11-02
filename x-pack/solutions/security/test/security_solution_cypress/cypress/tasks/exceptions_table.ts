@@ -43,9 +43,9 @@ import {
   IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX,
   INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
   LINKED_RULES_BADGE,
-  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
-  MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
-  MANAGE_EXCEPTION_CREATE_LIST_BUTTON,
+  MANAGE_EXCEPTION_CREATE_ITEM,
+  MANAGE_EXCEPTION_MENU_DROPDOWN,
+  MANAGE_EXCEPTION_CREATE_LIST,
   MANAGE_RULES_SAVE,
   RULE_ACTION_LINK_RULE_SWITCH,
 } from '../screens/exceptions';
@@ -56,7 +56,7 @@ export const clearSearchSelection = () => {
   cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
 };
 
-export const importExceptionLists = (listsFile: string) => {
+export const importExceptionLists = (listsFile: Cypress.FileReference) => {
   cy.get(IMPORT_SHARED_EXCEPTION_LISTS_BTN).click();
   cy.get(INPUT_FILE).should('exist');
   cy.get(INPUT_FILE).trigger('click');
@@ -133,8 +133,7 @@ export const createSharedExceptionList = (
   { name, description }: { name: string; description?: string },
   submit: boolean
 ) => {
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).first().click();
-  cy.get(MANAGE_EXCEPTION_CREATE_LIST_BUTTON).first().click();
+  cy.get(MANAGE_EXCEPTION_CREATE_LIST).first().click();
 
   cy.get(CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT).type(`${name}`);
   cy.get(CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT).should('have.value', name);
@@ -146,7 +145,8 @@ export const createSharedExceptionList = (
   }
 
   if (submit) {
-    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click();
+    // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click({ force: true });
   }
 };
 
@@ -181,7 +181,8 @@ export const waitForExceptionListDetailToBeLoaded = () => {
 };
 
 export const findSharedExceptionListItemsByName = (listName: string, itemNames: string[]) => {
-  cy.contains(listName).click();
+  const escapedListName = listName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  cy.contains(new RegExp(`^${escapedListName}$`)).click();
   waitForExceptionListDetailToBeLoaded();
   assertExceptionItemsExists(EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME, itemNames);
 };
@@ -194,7 +195,8 @@ export const editExceptionLisDetails = ({
   description?: { original: string; updated: string | null };
 }) => {
   cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('exist');
-  cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN).first().click();
+  cy.get('[data-test-subj="app-menu-overflow-button"]').click();
+  cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN).click();
 
   if (name != null) {
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', name.original);
@@ -234,7 +236,8 @@ export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
 };
 
 export const saveLinkedRules = () => {
-  cy.get(MANAGE_RULES_SAVE).first().click();
+  // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+  cy.get(MANAGE_RULES_SAVE).first().click({ force: true });
 };
 
 export const validateSharedListLinkedRules = (
@@ -247,15 +250,19 @@ export const validateSharedListLinkedRules = (
   );
   cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU).click();
   linkedRulesNames.forEach((ruleName) => {
-    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM).contains('a', ruleName);
+    cy.get(EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM)
+      .contains(ruleName)
+      .closest('a')
+      .should('have.attr', 'href')
+      .and('include', '/rules/id/');
   });
 };
 
 export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
-  // Click on "Create shared exception list" button on the header
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
+  // Open the create menu from the chevron of the "Create shared exception list" split button
+  cy.get(MANAGE_EXCEPTION_MENU_DROPDOWN).click();
   // Click on "Create exception item"
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
+  cy.get(MANAGE_EXCEPTION_CREATE_ITEM).click();
 };
 
 export const importExceptionListWithSelectingOverwriteExistingOption = () => {
@@ -288,10 +295,23 @@ export const validateImportExceptionListFailedBecauseExistingListFound = () => {
   cy.wait('@import').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-    cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
+    cy.get(TOASTER_BODY)
+      .invoke('text')
+      .should((bodyText) => {
+        expect(bodyText).to.match(
+          /(Found that list_id|list_id.*already exists|already exists.*list_id)/i
+        );
+      });
   });
 };
 
-export const validateImportExceptionListCreateNewOptionDisabled = () => {
-  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).should('be.disabled');
+export const validateImportExceptionListFailedOnArtifactTypePrecheck = () => {
+  cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
+  cy.get(TOASTER_BODY)
+    .invoke('text')
+    .should((bodyText) => {
+      expect(bodyText).to.match(
+        /You can only import shared exception lists here, but at least one of the imported files contains endpoint artifacts. Import endpoint artifacts from their dedicated pages instead./i
+      );
+    });
 };

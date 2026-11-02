@@ -8,7 +8,8 @@
 import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +22,7 @@ import { createInventoryMetricFormatter } from '../../lib/create_inventory_metri
 import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 export interface Props {
   currentTime: number;
@@ -35,10 +37,12 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
   const { customMetrics, preferredSchema } = useWaffleOptionsContext();
+  const requestSchema = getInventoryRequestSchema(preferredSchema);
+  const { id: nodeIdField } = findInventoryFields(nodeType, requestSchema);
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
-      schema: preferredSchema ?? 'ecs',
+      schema: requestSchema,
     })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
@@ -49,7 +53,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   >;
 
   const { nodes, loading } = useSnapshot({
-    kuery: `"${model.fields.id}": ${node.id}`,
+    kuery: `"${nodeIdField}": "${escapeQuotes(node.id)}"`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -57,7 +61,8 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
-    schema: preferredSchema,
+    schema: requestSchema,
+    includeTimeseries: true,
   });
 
   const dataNode = first(nodes);
@@ -92,7 +97,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
           // if custom metric, find field and label from waffleOptionsContext result
           // because useSnapshot does not return it
           const customMetric =
-            name === 'custom' ? customMetrics.find((item) => item.id === metric.name) : null;
+            name === 'custom' ? customMetrics?.find((item) => item.id === metric.name) : null;
           const formatter = customMetric
             ? createFormatterForMetric(customMetric)
             : createInventoryMetricFormatter({ type: metricName });

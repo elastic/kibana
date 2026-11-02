@@ -90,6 +90,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           initialContext: undefined,
           storage: new Storage(localStorage),
           defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+          http: props.core.http,
         },
         {
           isFullEditor: true,
@@ -97,13 +98,13 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       ).then(
         ({
           datasourceStates: newDatasourceStates,
-          visualizationState: newVizState,
+          visualizationState: newVisState,
           indexPatterns,
           indexPatternRefs,
         }) => {
           dispatchLens(
             setState({
-              visualization: { ...visualizationState, state: newVizState },
+              visualization: { ...visualizationState, state: newVisState },
               datasourceStates: Object.entries(newDatasourceStates).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
@@ -130,6 +131,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     props.plugins.dataViews,
     props.core.uiSettings,
     props.plugins.eventAnnotationService,
+    props.core.http,
   ]);
 
   const onChangeIndexPattern = useCallback(

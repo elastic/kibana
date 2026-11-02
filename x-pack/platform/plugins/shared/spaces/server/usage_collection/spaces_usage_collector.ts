@@ -14,7 +14,7 @@ import type {
 } from '@kbn/usage-collection-plugin/server';
 
 import type { SolutionView } from '../../common';
-import type { PluginsSetup } from '../plugin';
+import type { SpacesPluginSetupDeps } from '../types';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
 interface SpacesAggregationResponse {
@@ -32,14 +32,14 @@ interface SpacesAggregationResponse {
  *
  * @param {ElasticsearchClient} esClient
  * @param {string} kibanaIndex
- * @param {PluginsSetup['features']} features
+ * @param {SpacesPluginSetupDeps['features']} features
  * @param {boolean} spacesAvailable
  * @return {UsageData}
  */
 async function getSpacesUsage(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
-  features: PluginsSetup['features'],
+  features: SpacesPluginSetupDeps['features'],
   spacesAvailable: boolean
 ) {
   if (!spacesAvailable) {
@@ -101,7 +101,6 @@ async function getSpacesUsage(
   }, {});
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { key, doc_count }) => {
       acc[key] = doc_count;
       return acc;
@@ -109,14 +108,10 @@ async function getSpacesUsage(
     initialCounts
   );
 
-  const solutions = solutionBuckets.reduce<Record<string, number>>(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    (acc, { key, doc_count }) => {
-      acc[key] = doc_count;
-      return acc;
-    },
-    initialSolutionCounts
-  );
+  const solutions = solutionBuckets.reduce<Record<string, number>>((acc, { key, doc_count }) => {
+    acc[key] = doc_count;
+    return acc;
+  }, initialSolutionCounts);
 
   const usesFeatureControls = Object.values(disabledFeatures).some(
     (disabledSpaceCount) => disabledSpaceCount > 0
@@ -179,8 +174,8 @@ export interface UsageData extends UsageStats {
 
 interface CollectorDeps {
   getIndexForType: (type: string) => Promise<string>;
-  features: PluginsSetup['features'];
-  licensing: PluginsSetup['licensing'];
+  features: SpacesPluginSetupDeps['features'];
+  licensing: SpacesPluginSetupDeps['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
 }
 

@@ -11,7 +11,6 @@ import { transformIn } from './transform_in';
 import { transformOut } from './transform_out';
 
 export const transforms = {
-  transformOutInjectsReferences: true,
   transformIn,
   transformOut,
 };

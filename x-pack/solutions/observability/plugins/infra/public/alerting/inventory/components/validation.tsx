@@ -105,7 +105,10 @@ export function validateMetricThreshold({
         });
       }
 
-      if (comparator === COMPARATORS.BETWEEN && (!threshold || threshold.length < 2)) {
+      if (
+        (comparator === COMPARATORS.BETWEEN || comparator === COMPARATORS.BETWEEN_INCLUSIVE) &&
+        (!threshold || threshold.length < 2)
+      ) {
         errors[id][type].threshold1.push(
           i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdRequired', {
             defaultMessage: 'Threshold is required.',

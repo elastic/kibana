@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import {
+  LENS_DATASOURCE_ID,
+  LENS_METRIC_GROUP_ID,
+  buildTrendlineBucketExpression,
+  buildTrendlineQueryWithMetricFieldMap,
+} from '@kbn/lens-common';
+
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
@@ -28,17 +33,17 @@ import type {
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
   UserMessage,
-  OperationMetadata,
   TextBasedPrivateState,
   TextBasedPersistedState,
   TextBasedLayerColumn,
   TextBasedField,
   Datasource,
   DatasourceSuggestion,
+  IndexPatternMap,
 } from '@kbn/lens-common';
-import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
+import { LayerSettingsPanel } from './layer_settings';
 import { toExpression } from './to_expression';
 import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
@@ -46,9 +51,12 @@ import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import {
   canColumnBeUsedBeInMetricDimension,
+  hasNumericColumn,
   isNotNumeric,
   isNumeric,
   MAX_NUM_OF_COLUMNS,
+  operationFromDataType,
+  resolveTextBasedColumnType,
 } from './utils';
 import {
   getColumnsFromCache,
@@ -76,7 +84,9 @@ const getSelectedFieldsFromColumns = memoizeOne(
 const getUnchangedSuggestionTable = (
   state: TextBasedPrivateState,
   allColumns: TextBasedLayerColumn[],
-  id: string
+  id: string,
+  resolveType: (column: TextBasedLayerColumn) => DataType,
+  hasNumberColumn: boolean
 ) => {
   return {
     state: {
@@ -88,14 +98,18 @@ const getUnchangedSuggestionTable = (
       layerId: id,
       columns:
         state.layers[id].columns?.map((f) => {
-          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, f?.meta?.type);
+          const dataType = resolveType(f);
+          const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+            hasNumberColumn,
+            allColumns.length,
+            dataType
+          );
           return {
             columnId: f.columnId,
             operation: {
-              dataType: f?.meta?.type as DataType,
+              dataType,
               label: f.fieldName,
-              isBucketed: Boolean(isNotNumeric(f)),
-              // makes non-number fields to act as metrics, used for datatable suggestions
+              isBucketed: dataType !== 'number',
               ...(inMetricDimension && {
                 inMetricDimension,
               }),
@@ -111,12 +125,15 @@ const getSuggestionsByRules = (
   state: TextBasedPrivateState,
   allColumns: TextBasedLayerColumn[],
   id: string,
-  rules: Array<{ isBucketed: boolean; allowAll?: boolean }>
+  rules: Array<{ isBucketed: boolean; allowAll?: boolean }>,
+  resolveType: (column: TextBasedLayerColumn) => DataType,
+  hasNumberColumn: boolean
 ) => {
   const columnsToKeep = rules.reduce<TextBasedLayerColumn[]>((acc, rule) => {
-    const fn = rule.isBucketed ? isNotNumeric : isNumeric;
+    const matchesRule = (col: TextBasedLayerColumn) =>
+      rule.isBucketed ? resolveType(col) !== 'number' : resolveType(col) === 'number';
     let column = state.layers[id].columns?.find(
-      (col) => fn(col) && !acc.some((c) => c.columnId === col.columnId)
+      (col) => matchesRule(col) && !acc.some((c) => c.columnId === col.columnId)
     );
     if (!column && rule.allowAll) {
       column = state.layers[id].columns?.find(
@@ -145,11 +162,16 @@ const getSuggestionsByRules = (
       layerId: id,
       columns:
         columnsToKeep?.map((f, i) => {
-          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, f?.meta?.type);
+          const dataType = resolveType(f);
+          const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+            hasNumberColumn,
+            allColumns.length,
+            dataType
+          );
           return {
             columnId: f.columnId,
             operation: {
-              dataType: f?.meta?.type as DataType,
+              dataType,
               label: f.fieldName,
               isBucketed: !!rules[i].isBucketed,
               // makes non-number fields to act as metrics, used for datatable suggestions
@@ -177,7 +199,12 @@ export function getTextBasedDatasource({
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
 }) {
-  const getSuggestionsForState = (state: TextBasedPrivateState) => {
+  const getSuggestionsForState = (
+    state: TextBasedPrivateState,
+    _indexPatterns?: IndexPatternMap,
+    _filterFn?: (layerId: string) => boolean,
+    activeData?: Record<string, Datatable>
+  ) => {
     return Object.entries(state.layers)?.flatMap(([id, layer]) => {
       const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
 
@@ -190,19 +217,53 @@ export function getTextBasedDatasource({
         addColumnsToCache(layer.query, layerColumns);
       }
 
-      const unchangedSuggestionTable = getUnchangedSuggestionTable(state, allColumns, id);
+      const activeColumns = activeData?.[id]?.columns;
+      // Resolve column types against the Query Result Type overlay (activeData) once per layer,
+      // falling back to the persisted meta.type when the layer has no inspector table yet.
+      const resolveType = (column: TextBasedLayerColumn) =>
+        resolveTextBasedColumnType(
+          column,
+          activeColumns?.find((col) => col.id === column.columnId)
+        );
+      const hasNumberColumn = hasNumericColumn(allColumns, activeColumns);
+
+      const unchangedSuggestionTable = getUnchangedSuggestionTable(
+        state,
+        allColumns,
+        id,
+        resolveType,
+        hasNumberColumn
+      );
 
       // we are trying here to cover the most common cases for the charts we offer
-      const metricTable = getSuggestionsByRules(state, allColumns, id, [{ isBucketed: false }]);
-      const metricBucketTable = getSuggestionsByRules(state, allColumns, id, [
-        { isBucketed: false },
-        { isBucketed: true, allowAll: true },
-      ]);
-      const metricBucketBucketTable = getSuggestionsByRules(state, allColumns, id, [
-        { isBucketed: false },
-        { isBucketed: true, allowAll: true },
-        { isBucketed: true, allowAll: true },
-      ]);
+      const metricTable = getSuggestionsByRules(
+        state,
+        allColumns,
+        id,
+        [{ isBucketed: false }],
+        resolveType,
+        hasNumberColumn
+      );
+      const metricBucketTable = getSuggestionsByRules(
+        state,
+        allColumns,
+        id,
+        [{ isBucketed: false }, { isBucketed: true, allowAll: true }],
+        resolveType,
+        hasNumberColumn
+      );
+      const metricBucketBucketTable = getSuggestionsByRules(
+        state,
+        allColumns,
+        id,
+        [
+          { isBucketed: false },
+          { isBucketed: true, allowAll: true },
+          { isBucketed: true, allowAll: true },
+        ],
+        resolveType,
+        hasNumberColumn
+      );
 
       return [unchangedSuggestionTable, metricBucketBucketTable, metricBucketTable, metricTable]
         .filter(nonNullable)
@@ -222,7 +283,7 @@ export function getTextBasedDatasource({
     const context = state.initialContext;
     // on text based mode we offer suggestions for the query and not for a specific field
     if (fieldName) return [];
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.id && context.query) {
       const newLayerId = generateId();
       const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
@@ -231,7 +292,8 @@ export function getTextBasedDatasource({
       const hasNumberTypeColumns = textBasedQueryColumns?.some(isNumeric);
       const newColumns = textBasedQueryColumns.map((c) => {
         const inMetricDimension = canColumnBeUsedBeInMetricDimension(
-          textBasedQueryColumns,
+          Boolean(hasNumberTypeColumns),
+          textBasedQueryColumns.length,
           c?.meta?.type
         );
         return {
@@ -260,7 +322,7 @@ export function getTextBasedDatasource({
               indexPatternRefs: [
                 {
                   id: context.dataViewSpec.id,
-                  title: context.dataViewSpec.title,
+                  title: context.dataViewSpec.title ?? '',
                   timeField: context.dataViewSpec.timeFieldName,
                 },
               ],
@@ -307,7 +369,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: 'textBased',
+    id: LENS_DATASOURCE_ID.TEXT_BASED,
 
     checkIntegrity: () => {
       return [];
@@ -348,7 +410,8 @@ export function getTextBasedDatasource({
         };
       });
 
-      const initState = state || { layers: {} };
+      const initState = state ?? { layers: {} };
+
       return {
         ...initState,
         indexPatternRefs: refs,
@@ -356,9 +419,155 @@ export function getTextBasedDatasource({
       };
     },
 
-    syncColumns({ state }) {
-      // TODO implement this for real
-      return state;
+    // Synchronizes columns between linked layers. When a visualization declares
+    // dimension links (e.g. a metric chart linking its primary metric column to
+    // the trendline layer), this method copies the source column definition into
+    // the target layer so that the trendline layer has the same field/meta info
+    // without the user manually configuring it.
+    syncColumns({ state, links }) {
+      if (!links?.length) return state;
+
+      let newState = state;
+      for (const link of links) {
+        const fromLayer = newState.layers[link.from.layerId];
+        const toLayer = newState.layers[link.to.layerId];
+        if (!fromLayer || !toLayer) continue;
+
+        const sourceCol = fromLayer.columns.find((c) => c.columnId === link.from.columnId);
+        if (!sourceCol) continue;
+
+        const trendlineLayerLinks = links.filter((l) => l.to.layerId === link.to.layerId);
+
+        // Collect metric field names from all links targeting the same
+        // trendline layer so the auto-generated STATS uses AVG(<field>)
+        // instead of COUNT(*) when the source query has no STATS.
+        const metricGroupIds: string[] = [
+          LENS_METRIC_GROUP_ID.METRIC,
+          LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
+        ];
+        const metricFields = trendlineLayerLinks
+          .filter((l) => metricGroupIds.includes(l.from.groupId))
+          .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
+          .filter((c): c is TextBasedLayerColumn => Boolean(c))
+          .map((c) => c.fieldName);
+
+        // The source (main) layer is authoritative after a query/index change.
+        // The trendline layer can still hold a previous index's time field.
+        const sourceTimeField = fromLayer.timeField ?? toLayer.timeField;
+
+        const groupByColumns = trendlineLayerLinks
+          .filter((l) => l.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY)
+          .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
+          .filter((c): c is TextBasedLayerColumn => Boolean(c))
+          .filter((c) => c.fieldName !== sourceTimeField);
+        const groupByFields = groupByColumns.map((c) => c.fieldName);
+
+        // Sync the trendline layer's query from the source layer.
+        // The trendline query is derived from the main query with an appropriate
+        // BUCKET() or TBUCKET() clause. When the main query changes we must regenerate it.
+        let updatedQuery = toLayer.query;
+        let metricFieldMap = new Map<string, string>();
+        let trendlineTimeField: string | undefined;
+        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && sourceTimeField) {
+          try {
+            const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
+              fromLayer.query.esql,
+              sourceTimeField,
+              metricFields,
+              groupByFields
+            );
+            metricFieldMap = trendlineQueryResult.metricFieldMap;
+            trendlineTimeField = trendlineQueryResult.timeField;
+            if (
+              !updatedQuery ||
+              !isOfAggregateQueryType(updatedQuery) ||
+              updatedQuery.esql !== trendlineQueryResult.query
+            ) {
+              updatedQuery = { esql: trendlineQueryResult.query };
+            }
+          } catch {
+            // Empty columns prevent execution and rendering of an obsolete trendline.
+            newState = {
+              ...newState,
+              layers: {
+                ...newState.layers,
+                [link.to.layerId]: { ...toLayer, query: undefined, columns: [] },
+              },
+            };
+            continue;
+          }
+        }
+
+        const shouldSkipColumn =
+          link.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY &&
+          !groupByColumns.some((c) => c.columnId === link.from.columnId);
+        const newCol: TextBasedLayerColumn = {
+          ...sourceCol,
+          columnId: link.to.columnId,
+          // When the source has no STATS, the shared trendline query helper wraps
+          // raw metric fields in AVG(); use its map so the column fieldName matches.
+          ...(metricFieldMap.has(sourceCol.fieldName) && {
+            fieldName: metricFieldMap.get(sourceCol.fieldName),
+          }),
+        };
+
+        const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
+
+        // Update columns: add if missing, update if field changed. The trendline
+        // time column is the only generated column not represented by a link.
+        const linkedTargetColumnIds = new Set(trendlineLayerLinks.map((item) => item.to.columnId));
+        const shouldUpdateTimeField = toLayer.columns.some(
+          (column) =>
+            trendlineTimeField &&
+            column.meta?.type === 'date' &&
+            !linkedTargetColumnIds.has(column.columnId) &&
+            column.fieldName !== trendlineTimeField
+        );
+        let updatedColumns = shouldUpdateTimeField
+          ? toLayer.columns.map((column) =>
+              column.meta?.type === 'date' && !linkedTargetColumnIds.has(column.columnId)
+                ? { ...column, fieldName: trendlineTimeField ?? column.fieldName }
+                : column
+            )
+          : toLayer.columns;
+        if (shouldSkipColumn) {
+          updatedColumns = updatedColumns.filter((c) => c.columnId !== link.to.columnId);
+        } else if (!existingCol) {
+          updatedColumns = [...updatedColumns, newCol];
+        } else if (existingCol.fieldName !== newCol.fieldName) {
+          updatedColumns = updatedColumns.map((c) =>
+            c.columnId === link.to.columnId ? newCol : c
+          );
+        }
+
+        const updatedTimeField = sourceTimeField ?? toLayer.timeField;
+        const updatedIndex = fromLayer.index ?? toLayer.index;
+
+        // Skip if nothing changed
+        if (
+          updatedColumns === toLayer.columns &&
+          updatedQuery === toLayer.query &&
+          updatedTimeField === toLayer.timeField &&
+          updatedIndex === toLayer.index
+        ) {
+          continue;
+        }
+
+        newState = {
+          ...newState,
+          layers: {
+            ...newState.layers,
+            [link.to.layerId]: {
+              ...toLayer,
+              columns: updatedColumns,
+              query: updatedQuery,
+              timeField: updatedTimeField,
+              index: updatedIndex,
+            },
+          },
+        };
+      }
+      return newState;
     },
 
     onRefreshIndexPattern() {},
@@ -389,13 +598,61 @@ export function getTextBasedDatasource({
         layer?.index ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
           state.indexPatternRefs[0].id);
+      // Resolve timeField from the source layer, or fall back to the index pattern ref
+      const timeField =
+        layer?.timeField ??
+        state.indexPatternRefs?.find((ref) => ref.id === (layer?.index ?? index))?.timeField;
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(index, query),
+          [newLayerId]: { ...blankLayer(index, query), timeField },
         },
       };
+    },
+    // Called by the visualization to pre-populate a dimension when a new layer is
+    // created. For metric trendline layers, this auto-initializes the time field
+    // column and applies the appropriate ES|QL time bucket so the trendline has
+    // time-series data without manual user configuration.
+    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
+      const layer = state.layers[layerId];
+      if (!layer) return state;
+      if (autoTimeField && layer.timeField) {
+        const tf = layer.timeField;
+        let trendlineTimeField = buildTrendlineBucketExpression(tf);
+
+        // Auto-modify query to add time bucketing for trendline and resolve the
+        // actual result column, including a user-defined TBUCKET alias.
+        let trendlineQuery = layer.query;
+        if (trendlineQuery && 'esql' in trendlineQuery) {
+          try {
+            const result = buildTrendlineQueryWithMetricFieldMap(trendlineQuery.esql, tf);
+            trendlineQuery = { esql: result.query };
+            trendlineTimeField = result.timeField;
+          } catch {
+            // If the query can't be parsed, keep the existing query unchanged
+          }
+        }
+
+        const timeColumn: TextBasedLayerColumn = {
+          columnId,
+          fieldName: trendlineTimeField,
+          meta: { type: 'date' },
+        };
+
+        return {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: {
+              ...layer,
+              query: trendlineQuery,
+              columns: [...layer.columns, timeColumn],
+            },
+          },
+        };
+      }
+      return state;
     },
     createEmptyLayer() {
       return {
@@ -405,19 +662,28 @@ export function getTextBasedDatasource({
     },
 
     cloneLayer(state, layerId, newLayerId, getNewId) {
+      const layer = state.layers[layerId];
+      if (!layer) {
+        return state;
+      }
       return {
         ...state,
+        layers: {
+          ...state.layers,
+          [newLayerId]: {
+            ...layer,
+            columns: layer.columns.map((column) => ({
+              ...column,
+              columnId: getNewId(column.columnId),
+            })),
+          },
+        },
       };
     },
 
     removeLayer(state: TextBasedPrivateState, layerId: string) {
-      const newLayers = {
-        ...state.layers,
-        [layerId]: {
-          ...state.layers[layerId],
-          columns: [],
-        },
-      };
+      const newLayers = { ...state.layers };
+      delete newLayers[layerId];
 
       return {
         removedLayerIds: [layerId],
@@ -444,15 +710,10 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    isTimeBased: (state, indexPatterns) => {
+    isTimeBased: (state) => {
       if (!state) return false;
       const { layers } = state;
-      return (
-        Boolean(layers) &&
-        Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
-        })
-      );
+      return Boolean(layers) && Object.values(layers).some((layer) => Boolean(layer.timeField));
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
       if (!layerId || !state.layers[layerId].index) {
@@ -473,18 +734,7 @@ export function getTextBasedDatasource({
       );
     },
 
-    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      return (
-        <TextBasedDataPanel
-          data={data}
-          dataViews={dataViews}
-          expressions={expressions}
-          layerFields={layerFields}
-          {...props}
-        />
-      );
-    },
+    DataPanelComponent: () => null,
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
@@ -498,13 +748,15 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
-      const context = state?.initialContext;
-      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
-        const language = getAggregateQueryMode(context.query);
-        // it will eventually log render_lens_esql_chart
-        return [`${language}_chart`];
-      }
-      return [];
+      const counters = flatten(
+        Object.values(state?.layers ?? {}).map((layer) => {
+          if (isOfAggregateQueryType(layer.query)) {
+            return ['esql_chart'];
+          }
+          return [];
+        })
+      );
+      return counters;
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
@@ -514,6 +766,8 @@ export function getTextBasedDatasource({
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
       return null;
     },
+
+    LayerSettingsComponent: LayerSettingsPanel,
 
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
@@ -525,7 +779,9 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(
+            column.customLabel ? column.label ?? column.fieldName : column.fieldName
+          );
         });
       });
 
@@ -533,47 +789,48 @@ export function getTextBasedDatasource({
     },
     getDropProps,
     onDrop,
-    getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
+    getPublicAPI({
+      state,
+      layerId,
+      indexPatterns,
+      activeDataTable,
+    }: PublicAPIProps<TextBasedPrivateState>) {
       return {
-        datasourceId: 'textBased',
+        datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
+          if (!column) {
+            return null;
+          }
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
-          let scale: OperationMetadata['scale'] = 'ordinal';
-          switch (column?.meta?.type) {
-            case 'date':
-              scale = 'interval';
-              break;
-            case 'number':
-              scale = 'ratio';
-              break;
-            default:
-              scale = 'ordinal';
-              break;
-          }
+          const resolvedType = resolveTextBasedColumnType(
+            column,
+            activeDataTable?.columns.find((col) => col.id === columnId)
+          );
+          const { dataType, isBucketed, scale } = operationFromDataType(resolvedType);
 
-          if (column) {
-            return {
-              dataType: column?.meta?.type as DataType,
-              label: columnLabelMap[columnId] ?? column?.fieldName,
-              isBucketed: Boolean(isNotNumeric(column)),
-              inMetricDimension: column.inMetricDimension,
-              hasTimeShift: false,
-              hasReducedTimeRange: false,
-              scale,
-            };
-          }
-          return null;
+          return {
+            dataType,
+            label: columnLabelMap[columnId] ?? column.fieldName,
+            isBucketed,
+            inMetricDimension: column.inMetricDimension,
+            hasTimeShift: false,
+            hasReducedTimeRange: false,
+            ...(column.customLabel ? { customLabel: true } : {}),
+            scale,
+          };
         },
         getVisualDefaults: () => ({}),
         isTextBasedLanguage: () => true,
@@ -596,7 +853,7 @@ export function getTextBasedDatasource({
             },
           };
         },
-        hasDefaultTimeField: () => false,
+        hasDefaultTimeField: () => Boolean(state.layers[layerId]?.timeField),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
@@ -654,7 +911,7 @@ export function getTextBasedDatasource({
     },
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
-    getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
+    getDatasourceSuggestionsForVisualizeCharts: (state) => getSuggestionsForState(state),
     isEqual: (
       persistableState1: TextBasedPersistedState,
       references1: Reference[],
@@ -672,27 +929,11 @@ export function getTextBasedDatasource({
           ...persistableState2,
         }
       ),
-    getDatasourceInfo: async (state, references, dataViewsService) => {
-      if (!dataViewsService) {
-        return [];
-      }
-      const indexPatterns: DataView[] = [];
-
-      for (const { query } of Object.values(state.layers)) {
-        if (query) {
-          const esqlAdhocDataview = await getESQLAdHocDataview({
-            dataViewsService,
-            query: query.esql,
-            options: { skipFetchFields: true },
-          });
-          indexPatterns.push(esqlAdhocDataview);
-        }
-      }
-
+    getDatasourceInfo: async (state) => {
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
-        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+        const columns = layer.columns.map((col) => {
           return {
-            id: colId,
+            id: col.columnId,
             role: isNotNumeric(col) ? ('split' as const) : ('metric' as const),
             operation: {
               dataType: col?.meta?.type as DataType,
@@ -707,11 +948,7 @@ export function getTextBasedDatasource({
           };
         });
 
-        acc.push({
-          layerId: key,
-          columns,
-          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
-        });
+        acc.push({ layerId: key, columns });
 
         return acc;
       }, []);

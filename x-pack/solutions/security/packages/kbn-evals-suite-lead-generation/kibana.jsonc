@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-lead-generation",
+  "owner": "@elastic/security-entity-analytics",
+  "group": "security",
+  "visibility": "private"
+}

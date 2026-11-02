@@ -8,13 +8,16 @@
  */
 
 import type { WorkflowsPageName } from './deep_links';
+import type { WORKFLOWS_APP_ID } from './constants';
 
 export { WorkflowsPageName } from './deep_links';
-
-export const WORKFLOWS_APP_ID = 'workflows';
+export type { WorkflowsPageName as WorkflowsPageNameType } from './deep_links';
+export { WORKFLOWS_APP_ID } from './constants';
+export { getWorkflowsNavPanel } from './get_workflows_nav_panel';
+export type { WorkflowsNavPanelCore } from './get_workflows_nav_panel';
 
 export type AppId = typeof WORKFLOWS_APP_ID;
 
-export type LinkId = `${WorkflowsPageName}`;
+export type LinkId = WorkflowsPageName;
 
 export type DeepLinkId = AppId | `${AppId}:${LinkId}`;

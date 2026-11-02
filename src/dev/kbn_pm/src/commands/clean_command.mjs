@@ -32,7 +32,7 @@ export const command = {
       filling out this form: https://ela.st/yarn-kbn-clean.
 
       Please note it might not solve problems with node_modules. To solve problems around node_modules
-      you might need to run 'yarn kbn reset'.
+      you might need to run 'pnpm kbn reset'.
     `);
 
     await cleanPaths(log, [
@@ -40,6 +40,8 @@ export const command = {
       ...collectBazelPaths(),
       Path.resolve(REPO_ROOT, '.moon', 'cache'),
       Path.resolve(REPO_ROOT, '.es', 'cache'),
+      Path.resolve(REPO_ROOT, 'target'),
+      Path.resolve(REPO_ROOT, 'node_modules', '.cache', '.rspack-cache'),
     ]);
   },
 };

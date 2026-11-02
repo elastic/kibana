@@ -22,6 +22,12 @@ export type {
   AddSolutionNavigationArg,
 } from './types';
 
+export type {
+  ProjectNavigationLinks,
+  ProjectNavigationLinkList,
+  ProjectNavigationLinkItem,
+} from '@kbn/core-chrome-browser';
+
 // Export plugin after all other imports
 import { NavigationPublicPlugin } from './plugin';
 export { NavigationPublicPlugin as Plugin };

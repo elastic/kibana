@@ -20,11 +20,14 @@ export function ErrorUiActionsContextMenu({ items }: Props) {
   return (
     <EuiPopover
       id="errorContextMenu"
+      aria-label={i18n.translate('xpack.apm.errorSampleDetails.investigateMenu', {
+        defaultMessage: 'Investigate',
+      })}
       button={
         <EuiButton
           data-test-subj="ErrorSampleDetailsButton"
           onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
         >
           {i18n.translate('xpack.apm.errorSampleDetails.investigateMenu', {

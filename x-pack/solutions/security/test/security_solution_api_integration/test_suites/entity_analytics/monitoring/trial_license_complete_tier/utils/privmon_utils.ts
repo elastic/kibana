@@ -183,21 +183,39 @@ export const PrivMonUtils = (
     });
   };
 
+  const getPrivMonTask = async () =>
+    kibanaServer.savedObjects.get({
+      type: 'task',
+      id: TASK_ID,
+    });
+
+  const waitForTaskIdle = async (): Promise<void> => {
+    await waitFor(
+      async () => {
+        const task = await getPrivMonTask();
+        return task.attributes.status === 'idle';
+      },
+      'waitForTaskIdle',
+      log,
+      60000
+    );
+  };
+
   const waitForSyncTaskRun = async (): Promise<void> => {
     const initialTime = new Date();
 
     await waitFor(
       async () => {
-        const task = await kibanaServer.savedObjects.get({
-          type: 'task',
-          id: TASK_ID,
-        });
+        const task = await getPrivMonTask();
         const runAtTime = task.attributes.runAt;
 
-        return !!runAtTime && new Date(runAtTime) > initialTime;
+        return (
+          task.attributes.status === 'idle' && !!runAtTime && new Date(runAtTime) > initialTime
+        );
       },
       'waitForSyncTaskRun',
-      log
+      log,
+      120000
     );
   };
 
@@ -256,6 +274,8 @@ export const PrivMonUtils = (
   };
 
   async function runSync() {
+    // Wait for the task to be idle before forcing a run so `runSoon` never collides with an in-flight task-manager claim (a version_conflict that wedges the task).
+    await waitForTaskIdle();
     await scheduleMonitoringEngineNow({ ignoreConflict: true });
     await waitForSyncTaskRun();
   }
@@ -320,7 +340,7 @@ export const PrivMonUtils = (
 
   async function getLastProcessedMarker(indexPattern: string) {
     const res = await api.listEntitySources({ query: {} });
-    const integration = res.body.find(
+    const integration = res.body.sources.find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
     return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
@@ -371,7 +391,7 @@ export const PrivMonUtils = (
       query: {},
     });
 
-    const sources = res.body as ListEntitySourcesResponse;
+    const { sources } = res.body as ListEntitySourcesResponse;
     const source = sources.find((s) => s.integrationName === integrationName);
     if (!source) {
       throw new Error(`No monitoring source found for integration ${integrationName}`);

@@ -57,6 +57,9 @@ export class CustomIntegrationsPlugin
       getAppendCustomIntegrations: () => {
         return this.customIngegrationRegistry.getAppendCustomIntegrations();
       },
+      registerDeferredIntegrations: (init: () => void) => {
+        this.customIngegrationRegistry.registerDeferredInitializer(init);
+      },
     } as CustomIntegrationsPluginSetup;
   }
 

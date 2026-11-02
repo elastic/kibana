@@ -14,17 +14,17 @@ import {
   UpdatePrivMonUserRequestParams,
   UpdatePrivMonUserRequestBody,
 } from '../../../../../../common/api/entity_analytics';
-import {
-  API_VERSIONS,
-  APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-  MONITORING_USERS_URL,
-} from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID, MONITORING_USERS_URL } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
-export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const updateUserRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -44,15 +44,22 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: UpdatePrivMonUserRequestBody,
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
-      async (context, request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
           const secSol = await context.securitySolution;
           const { elasticsearch } = await context.core;
 
@@ -72,6 +79,6 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

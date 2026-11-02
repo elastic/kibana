@@ -50,10 +50,6 @@ mockServices.dataViews.clearInstanceCache = jest.fn().mockResolvedValue(undefine
 
 const setFilters = jest.fn();
 
-const ControlGroupRenderer = (() => (
-  <span />
-)) as unknown as AlertFilterControlsProps['ControlGroupRenderer'];
-
 describe('AlertFilterControls', () => {
   const props: AlertFilterControlsProps = {
     ruleTypeIds: ['.es-query'],
@@ -63,8 +59,6 @@ describe('AlertFilterControls', () => {
     },
     onFiltersChange: setFilters,
     services: mockServices,
-    chainingSystem: 'HIERARCHICAL',
-    ControlGroupRenderer,
   };
 
   beforeEach(jest.clearAllMocks);

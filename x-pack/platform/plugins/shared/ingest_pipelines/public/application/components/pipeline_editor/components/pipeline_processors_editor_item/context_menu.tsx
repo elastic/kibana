@@ -8,7 +8,14 @@
 import React, { useState, forwardRef } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { i18nTexts } from './i18n_texts';
 
@@ -78,19 +85,25 @@ export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => 
     <div css={styles.container}>
       <EuiPopover
         data-test-subj={props['data-test-subj']}
+        aria-label={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.item.contextMenuAriaLabel',
+          { defaultMessage: 'Processor actions' }
+        )}
         anchorPosition="leftCenter"
         panelPaddingSize="none"
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         button={
-          <EuiButtonIcon
-            buttonRef={ref}
-            data-test-subj="button"
-            disabled={disabled}
-            onClick={() => setIsOpen((v) => !v)}
-            iconType="boxesHorizontal"
-            aria-label={i18nTexts.moreButtonAriaLabel}
-          />
+          <EuiToolTip content={i18nTexts.moreButtonAriaLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              buttonRef={ref}
+              data-test-subj="button"
+              disabled={disabled}
+              onClick={() => setIsOpen((v) => !v)}
+              iconType="boxesVertical"
+              aria-label={i18nTexts.moreButtonAriaLabel}
+            />
+          </EuiToolTip>
         }
       >
         <EuiContextMenuPanel items={contextMenuItems} />

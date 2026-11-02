@@ -1,0 +1,33 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postReauthorizeTransformsRequestExample:
+          description: 'Reauthorize transforms for a package'
+          value:
+            transforms:
+              - transformId: 'logs-transform-1'
+                destinations:
+                  - index: 'logs-transform-dest'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postReauthorizeTransformsExample:
+            description: 'Transforms successfully reauthorized'
+            value:
+              - transformId: 'logs-transform-1'
+                success: true
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

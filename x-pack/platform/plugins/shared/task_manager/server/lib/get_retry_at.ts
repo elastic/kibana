@@ -9,15 +9,20 @@ import { random } from 'lodash';
 import type { ConcreteTaskInstance, TaskDefinition } from '../task';
 import { DEFAULT_TIMEOUT } from '../task';
 import { isRetryableError } from '../task_running';
-import { intervalFromDate, maxIntervalFromDate } from './intervals';
+import { intervalFromDate, maxIntervalFromDate, parseIntervalAsSecond } from './intervals';
+
+type TaskRetryFields = Pick<ConcreteTaskInstance, 'schedule' | 'timeoutOverride' | 'attempts'>;
 
 export function getRetryAt(
-  task: ConcreteTaskInstance,
+  task: TaskRetryFields,
   taskDefinition: TaskDefinition | undefined
 ): Date | undefined {
   const taskTimeout = getTimeout(task, taskDefinition);
+  // If the task timeout is greater than 5m use a 5m timeout to calculate retryAt
+  const timeout = parseIntervalAsSecond(taskTimeout) > 300 ? DEFAULT_TIMEOUT : taskTimeout;
+
   if (task.schedule) {
-    return maxIntervalFromDate(new Date(), task.schedule.interval, taskTimeout);
+    return maxIntervalFromDate(new Date(), task.schedule.interval, timeout);
   }
 
   return getRetryDate({
@@ -25,7 +30,7 @@ export function getRetryAt(
     // Fake an error. This allows retry logic when tasks keep timing out
     // and lets us set a proper "retryAt" value each time.
     error: new Error('Task timeout'),
-    addDuration: taskTimeout,
+    addDuration: timeout,
   });
 }
 
@@ -69,7 +74,7 @@ export function calculateDelayBasedOnAttempts(attempts: number) {
 }
 
 export function getTimeout(
-  task: ConcreteTaskInstance,
+  task: Pick<TaskRetryFields, 'schedule' | 'timeoutOverride'>,
   taskDefinition: TaskDefinition | undefined
 ): string {
   if (task.schedule) {

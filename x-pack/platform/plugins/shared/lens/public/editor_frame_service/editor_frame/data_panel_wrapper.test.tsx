@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '@kbn/lens-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
 import type { LensRootStore } from '../../state_management';
-import { selectTriggerApplyChanges } from '../../state_management';
+import { selectApplyChangesCounter } from '../../state_management';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -74,40 +75,49 @@ describe('Data Panel Wrapper', () => {
 
     describe('setState', () => {
       it('applies state immediately when option true', async () => {
-        store.dispatch(disableAutoApply());
-        selectTriggerApplyChanges(store.getState());
+        act(() => {
+          store.dispatch(disableAutoApply());
+        });
 
         const newDatasourceState = { age: 'new' };
-        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        act(() => {
+          datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        });
 
         expect(store.getState().lens.datasourceStates.activeDatasource.state).toEqual(
           newDatasourceState
         );
-        expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
+        expect(selectApplyChangesCounter(store.getState())).toBe(1);
       });
       it('applies state immediately when option trueenz', async () => {
-        store.dispatch(disableAutoApply());
-        selectTriggerApplyChanges(store.getState());
+        act(() => {
+          store.dispatch(disableAutoApply());
+        });
 
         const newDatasourceState = { age: 'new' };
-        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        act(() => {
+          datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        });
 
         expect(store.getState().lens.datasourceStates.activeDatasource.state).toEqual(
           newDatasourceState
         );
-        expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
+        expect(selectApplyChangesCounter(store.getState())).toBe(1);
       });
 
       it('does not apply state immediately when option false', async () => {
-        store.dispatch(disableAutoApply());
-        selectTriggerApplyChanges(store.getState());
+        act(() => {
+          store.dispatch(disableAutoApply());
+        });
 
         const newDatasourceState = { age: 'new' };
-        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
+        act(() => {
+          datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
+        });
 
         const lensState = store.getState().lens;
         expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);
-        expect(selectTriggerApplyChanges(store.getState())).toBeFalsy();
+        expect(selectApplyChangesCounter(store.getState())).toBeUndefined();
       });
     });
   });

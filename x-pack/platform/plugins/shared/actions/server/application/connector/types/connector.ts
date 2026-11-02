@@ -21,6 +21,8 @@ export interface Connector {
   isDeprecated: ConnectorSchemaType['isDeprecated'];
   isSystemAction: ConnectorSchemaType['isSystemAction'];
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
+  authMode?: ConnectorSchemaType['authMode'];
+  isInboundEventsEnabled?: boolean;
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

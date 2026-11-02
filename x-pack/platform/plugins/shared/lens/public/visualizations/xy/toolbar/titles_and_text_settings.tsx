@@ -8,14 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ValueLabelsSettings } from '../../../shared_components';
-import type { XYState } from '../types';
+import type { XYVisualizationState } from '../types';
 
 export function XyTitlesAndTextSettings({
   state,
   setState,
 }: {
-  state: XYState;
-  setState: (newState: XYState) => void;
+  state: XYVisualizationState;
+  setState: (newState: XYVisualizationState) => void;
 }) {
   return (
     <ValueLabelsSettings

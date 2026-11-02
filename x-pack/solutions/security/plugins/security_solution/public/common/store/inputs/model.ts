@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InputsModelId } from './constants';
@@ -51,6 +51,8 @@ export type Refetch = () => void;
 export interface InspectQuery {
   dsl: string[];
   response: string[];
+  /** Optional index pattern(s) for the Statistics tab when the request body does not include an index field (e.g. entity store API). */
+  indexPattern?: string[];
 }
 
 export interface GlobalGenericQuery {
@@ -92,8 +94,6 @@ export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
   valueReport: InputsRangeTimeOnly;
-  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
-  socTrends?: InputsRangeTimeOnly;
 }
 export interface UrlInputsModelInputs {
   linkTo: InputsModelId[];
@@ -103,6 +103,4 @@ export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
   valueReport: UrlInputsModelInputs;
-  // TODO: remove ? when isSocTrendsEnabled feature flag is removed
-  socTrends?: UrlInputsModelInputs;
 }

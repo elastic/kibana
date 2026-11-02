@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 export const useOnboardingStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
   return css`
     .onboardingSection {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
     }
   `;
 };

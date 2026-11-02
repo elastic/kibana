@@ -55,11 +55,10 @@ export const NamespaceSelector = ({
         valueOfSelected={activeNamespace}
         onChange={onSelectedNamespaceChange}
         disabled={namespaces.length < 2}
-        hasDividers
         fullWidth
         compressed
         aria-label={label}
-        prepend={<span>{label}</span>}
+        prepend={label}
       />
     </div>
   );

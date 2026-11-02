@@ -8,23 +8,13 @@
  */
 
 import React from 'react';
+import { EuiIllustration } from '@elastic/eui';
+import { cloudRocketDeploy } from '@elastic/eui-illustrations';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
 import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiImage,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import searchRocketIcon from '../assets/search-rocket.svg';
-import {
-  EIS_PROMO_CALLOUT_CTA,
+  EIS_CALLOUT_DOCUMENTATION_BTN,
   EIS_PROMO_CALLOUT_DESCRIPTION,
-  EIS_PROMO_CALLOUT_DISMISS_ARIA,
-  EIS_PROMO_CALLOUT_ICON_ALT,
-  EIS_PROMO_CALLOUT_TITLE,
+  EIS_CALLOUT_TITLE,
 } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 
@@ -32,73 +22,42 @@ export interface EisPromotionalCalloutProps {
   ctaLink: string;
   promoId: string;
   isCloudEnabled: boolean;
-  direction: 'row' | 'column';
 }
 
 export const EisPromotionalCallout = ({
   ctaLink,
   promoId,
   isCloudEnabled,
-  direction,
 }: EisPromotionalCalloutProps) => {
-  const { isPromoVisible, onDismissTour } = useShowEisPromotionalContent({
-    promoId: `${promoId}Callout`,
-    isCloudEnabled,
+  const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
+    promoId: `${promoId}EisPromoCallout`,
   });
 
   const dataId = `${promoId}-eis-promo-callout`;
 
-  if (!isPromoVisible) {
+  if (!isPromoVisible || !isCloudEnabled) {
     return null;
   }
 
   return (
-    <EuiPanel
-      grow={false}
-      data-telemetry-id={dataId}
+    <AnnouncementBanner
       data-test-subj={dataId}
-      css={({ euiTheme }) => ({
-        color: euiTheme.colors.primaryText,
-        border: `1px ${euiTheme.colors.borderBaseSubdued} solid`,
-        position: 'relative',
-      })}
-      paddingSize="m"
-      color="subdued"
-    >
-      <div style={{ position: 'absolute', top: 8, right: 8 }}>
-        <EuiButtonIcon
-          data-test-subj="eisPromoCalloutDismissBtn"
-          iconType="cross"
-          aria-label={EIS_PROMO_CALLOUT_DISMISS_ARIA}
-          onClick={onDismissTour}
-          size="s"
-        />
-      </div>
-      <EuiFlexGroup direction={direction} alignItems="flexStart">
-        <EuiImage src={searchRocketIcon} alt={EIS_PROMO_CALLOUT_ICON_ALT} size="original" />
-        <div>
-          <EuiTitle size="xxs">
-            <h2>{EIS_PROMO_CALLOUT_TITLE}</h2>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText color="subdued" size="s">
-            <p>{EIS_PROMO_CALLOUT_DESCRIPTION}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiButton
-            fullWidth={false}
-            color="text"
-            size="s"
-            href={ctaLink}
-            data-test-subj="eisPromoCalloutCtaBtn"
-            target="_blank"
-            iconSide="right"
-            iconType="popout"
-          >
-            {EIS_PROMO_CALLOUT_CTA}
-          </EuiButton>
-        </div>
-      </EuiFlexGroup>
-    </EuiPanel>
+      title={EIS_CALLOUT_TITLE}
+      text={EIS_PROMO_CALLOUT_DESCRIPTION}
+      media={<EuiIllustration type={cloudRocketDeploy} alt="" />}
+      color="highlighted"
+      onDismiss={onDismissPromo}
+      actionProps={{
+        primary: {
+          children: EIS_CALLOUT_DOCUMENTATION_BTN,
+          href: ctaLink,
+          target: '_blank',
+          iconType: 'external',
+          iconSide: 'right',
+          'data-test-subj': 'eisPromoCalloutCtaBtn',
+          'data-telemetry-id': `${dataId}-viewEisDocs-link`,
+        },
+      }}
+    />
   );
 };

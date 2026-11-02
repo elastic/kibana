@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
-import type { LensRuntimeState } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
-import { DOC_TYPE } from '../../common/constants';
+import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -36,9 +35,9 @@ import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
+): EmbeddablePublicDefinition<LensWireAPIConfig, LensApi> => {
   return {
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param uuid      a unique identifier for the embeddable panel
@@ -54,16 +53,18 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
+      const titleManager = initializeTitleManager(initialState);
 
-      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
-      const initialRuntimeState = await deserializeState(services, initialState.rawState);
+      const initialRuntimeState = await deserializeState(services, initialState);
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -122,7 +123,7 @@ export const createLensEmbeddableFactory = (
         searchContextConfig.api,
         internalApi,
         services,
-        dynamicActionsManager
+        drilldownsManager
       );
 
       /**
@@ -138,10 +139,21 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
+      /**
+       * Tracks the most recent applySerializedState call so a slow-resolving
+       * older call cannot overwrite newer state.
+       */
+      let applyGeneration = 0;
+
+      const stateApi = initializeStateApi<LensWireAPIConfig>({
         uuid,
         parentApi,
-        serializeState: integrationsConfig.api.serializeState,
+        serializeState: () => {
+          if (internalApi.isEditingInProgress()) {
+            return initialState;
+          }
+          return integrationsConfig.api.serializeState();
+        },
         anyStateChange$: merge(
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
@@ -149,22 +161,32 @@ export const createLensEmbeddableFactory = (
           searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
-          return {
+          const comparators = {
             ...stateConfig.getComparators(),
             ...actionsConfig.getComparators(),
             ...dashboardServicesComparators,
             ...searchContextComparators,
             isNewPanel: 'skip',
             references: 'skip',
-          };
+          } as const;
+          // set all comparators to 'skip' when inline editing is in progress
+          if (internalApi.isEditingInProgress()) {
+            const keys = Object.keys(comparators) as (keyof typeof comparators)[];
+            return keys.reduce((acc, key) => {
+              acc[key] = 'skip';
+              return acc;
+            }, {} as Record<keyof typeof comparators, 'skip'>);
+          }
+          return comparators;
         },
-        onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved?.rawState);
-          dashboardConfig.reinitializeState(lastSaved?.rawState);
-          searchContextConfig.reinitializeState(lastSaved?.rawState);
-          if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState);
-          stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
+        applySerializedState: async (nextState) => {
+          const generation = ++applyGeneration;
+          const nextRuntimeState = await deserializeState(services, nextState);
+          if (generation !== applyGeneration) return; // superseded by a newer apply
+          actionsConfig.reinitializeState(nextState);
+          dashboardConfig.reinitializeState(nextRuntimeState);
+          searchContextConfig.reinitializeState(nextState);
+          stateConfig.reinitializeRuntimeState(nextRuntimeState);
         },
       });
 
@@ -177,7 +199,7 @@ export const createLensEmbeddableFactory = (
         // dashboardConfig who owns the savedObjectId after the
         // stateConfig one who owns the inline editing
         {
-          ...unsavedChangesApi,
+          ...stateApi,
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
@@ -185,6 +207,11 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
+          supportsJsonExport: true,
+          cancelRequests: (reason) => {
+            const abortController = internalApi.expressionAbortController$.getValue();
+            abortController.abort(reason);
+          },
         }
       );
 
@@ -197,7 +224,9 @@ export const createLensEmbeddableFactory = (
         api,
         parentApi,
         internalApi,
-        services
+        services,
+        undefined,
+        searchContextConfig.internalApi.setApproximationApplied
       );
 
       const onUnmount = () => {

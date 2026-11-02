@@ -48,3 +48,10 @@ export const TAGS_COLUMN = i18n.translate(
     defaultMessage: 'Tags',
   }
 );
+
+export const LINKED_RULES_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.linkedRulesAriaLabel',
+  {
+    defaultMessage: 'Linked rules',
+  }
+);

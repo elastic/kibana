@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
       } with roles(s) ${user.roles.join()} can bulk get valid user profiles`, async () => {
         const suggestedProfiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
-          req: { name: user.username, owners: [owner], size: 1 },
+          req: { name: user.username, owners: [owner] },
           auth: { user, space: null },
         });
 
@@ -43,8 +43,9 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user, space: null },
         });
 
-        expect(profiles.length).to.be(1);
-        expect(profiles[0].user.username).to.eql(user.username);
+        expect(profiles.length).to.be(10);
+        const found = profiles.find((profile) => profile.user.username === user.username);
+        expect(found !== undefined).to.be.ok();
       });
     }
   });

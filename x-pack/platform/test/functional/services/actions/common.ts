@@ -12,6 +12,7 @@ export type ActionsCommon = ProvidedType<typeof ActionsCommonServiceProvider>;
 
 export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async openNewConnectorForm(name: string) {
@@ -23,7 +24,17 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
         await testSubjects.click('createFirstActionButton');
       }
 
-      await testSubjects.click(`.${name}-card`);
+      // The card grid re-orders as the action types resolve and a click on a card React is
+      // re-creating is silently dropped, so the selection has to be retried. existOrFail
+      // defaults to the same 2 minute budget as retry.try, which would spend it all on the
+      // first attempt, so bound it. Skip the click once the form is up, since the card is
+      // gone by then and a slow form must not be mistaken for a dropped click.
+      await retry.try(async () => {
+        if (await testSubjects.exists(`.${name}-card`)) {
+          await testSubjects.click(`.${name}-card`);
+        }
+        await testSubjects.existOrFail('create-connector-flyout-save-btn', { timeout: 10_000 });
+      });
     },
 
     async cancelConnectorForm() {

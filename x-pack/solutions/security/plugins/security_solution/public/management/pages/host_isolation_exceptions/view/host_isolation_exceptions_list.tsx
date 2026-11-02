@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { HostIsolationExceptionsForm } from './components/form';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object.freeze({
+const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
   pageTitle: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageTitle', {
     defaultMessage: 'Host isolation exceptions',
   }),
@@ -27,6 +27,36 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
     'xpack.securitySolution.hostIsolationExceptions.pageAddButtonTitle',
     {
       defaultMessage: 'Add host isolation exception',
+    }
+  ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import host isolation exceptions',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export host isolation exceptions',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Host isolation exceptions exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.exportErrorToastTitle',
+    {
+      defaultMessage: 'Host isolation exceptions export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import host isolation exceptions here.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -106,6 +136,10 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add host isolation exception' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import host isolation exceptions' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.searchPlaceholderInfo',

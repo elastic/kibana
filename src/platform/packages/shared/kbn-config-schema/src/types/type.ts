@@ -16,7 +16,11 @@ import {
   type SchemaLike,
   type WhenOptions,
 } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
+import {
+  META_FIELD_X_OAS_AVAILABILITY,
+  META_FIELD_X_OAS_DEPRECATED,
+  META_FIELD_X_OAS_DISCONTINUED,
+} from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -24,7 +28,26 @@ import { Reference } from '../references';
  * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */
+export interface TypeMetaAvailability {
+  /** @default stable */
+  stability?: 'experimental' | 'stable' | 'tech_preview';
+  /**
+   * The stack version in which this field was introduced (eg: 9.4.0).
+   */
+  since?: string;
+}
+
 export interface TypeMeta {
+  /**
+   * A unique identifier for this type, reduces duplication.
+   */
+  id?: string;
+  /**
+   * A human-friendly title for this type to be used in documentation.
+   *
+   * Defaults to the `id`, if provided.
+   */
+  title?: string;
   /**
    * A human-friendly description of this type to be used in documentation.
    */
@@ -38,6 +61,10 @@ export interface TypeMeta {
    * @example 9.0.0
    */
   'x-discontinued'?: string;
+  /**
+   * Availability metadata for this field to be used in generated API docs.
+   */
+  availability?: TypeMetaAvailability;
 }
 
 export interface TypeOptions<T> {
@@ -96,6 +123,21 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
+let lazyDisabled =
+  typeof process !== 'undefined' && process.env?.KBN_DISABLE_LAZY_CONFIG_SCHEMA === 'true';
+
+/**
+ * Turns off lazy Joi construction: new schemas are built in their constructor (so invalid
+ * definitions throw at definition time, as before) and built schemas are held strongly.
+ * Also enabled at load time by `KBN_DISABLE_LAZY_CONFIG_SCHEMA=true`.
+ */
+export const setLazyConfigSchemaDisabled = (value: boolean): void => {
+  lazyDisabled = value;
+};
+
+const internalSchemaCache = new WeakMap<Type<any>, WeakRef<Schema>>();
+const strongSchemaCache = new WeakMap<Type<any>, Schema>();
+
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
   // fail if it wasn't initialized we use a "trick" to which basically just
@@ -105,13 +147,30 @@ export abstract class Type<V> {
   // used for the `isConfigSchema` typeguard
   public readonly __isKbnConfigSchemaType = true;
 
-  /**
-   * Internal "schema" backed by Joi.
-   * @type {Schema}
-   */
-  protected readonly internalSchema: Schema;
+  private readonly schemaFactory: () => Schema;
+  private readonly baseTypeOptions: TypeOptions<any>;
+  private readonly meta: TypeOptions<V>['meta'];
 
-  protected constructor(schema: Schema, options: TypeOptions<V> = {}) {
+  protected constructor(schemaOrFactory: Schema | (() => Schema), options: TypeOptions<V> = {}) {
+    this.meta = options.meta;
+    this.baseTypeOptions = { ...options };
+    this.schemaFactory =
+      typeof schemaOrFactory === 'function' ? schemaOrFactory : () => schemaOrFactory;
+
+    if (lazyDisabled) {
+      this.getSchema();
+    }
+  }
+
+  protected get internalSchema(): Schema {
+    const cached = strongSchemaCache.get(this) ?? internalSchemaCache.get(this)?.deref();
+    if (cached) {
+      return cached;
+    }
+
+    let schema = this.schemaFactory();
+    const options = this.baseTypeOptions;
+
     if (options.defaultValue !== undefined) {
       schema = schema.optional();
 
@@ -132,6 +191,11 @@ export abstract class Type<V> {
     }
 
     if (options.meta) {
+      const title = options.meta.title ?? options.meta.id;
+      if (title) {
+        schema = schema.meta({ title });
+      }
+
       if (options.meta.description) {
         schema = schema.description(options.meta.description);
       }
@@ -140,6 +204,9 @@ export abstract class Type<V> {
       }
       if (options.meta.deprecated && options.meta['x-discontinued'])
         schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta['x-discontinued'] });
+      if (options.meta.availability) {
+        schema = schema.meta({ [META_FIELD_X_OAS_AVAILABILITY]: options.meta.availability });
+      }
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
@@ -148,7 +215,12 @@ export abstract class Type<V> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    this.internalSchema = schema;
+    if (lazyDisabled) {
+      strongSchemaCache.set(this, schema);
+    } else {
+      internalSchemaCache.set(this, new WeakRef(schema));
+    }
+    return schema;
   }
 
   public extendsDeep(newOptions: ExtendsDeepOptions): Type<V> {
@@ -184,6 +256,10 @@ export abstract class Type<V> {
    */
   public getSchema() {
     return this.internalSchema;
+  }
+
+  public getMeta(): TypeOptions<V>['meta'] {
+    return this.meta;
   }
 
   public getSchemaStructure() {

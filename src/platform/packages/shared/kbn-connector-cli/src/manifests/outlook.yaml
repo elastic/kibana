@@ -1,0 +1,22 @@
+spec_id: .outlook
+name: "Outlook (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  authorizationUrl:
+    template: "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize"
+    vars:
+      tenantId:
+        vault: secret/ent-search-team/ws-sharepoint-onedrive
+        field: outlook-tenant-id
+  tokenUrl:
+    template: "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token"
+    vars:
+      tenantId:
+        vault: secret/ent-search-team/ws-sharepoint-onedrive
+        field: outlook-tenant-id
+  clientId:
+    vault: secret/ent-search-team/ws-sharepoint-onedrive
+    field: outlook-client-id
+  clientSecret:
+    vault: secret/ent-search-team/ws-sharepoint-onedrive
+    field: outlook-client-secret

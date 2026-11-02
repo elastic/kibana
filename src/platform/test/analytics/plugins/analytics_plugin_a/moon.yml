@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/analytics-plugin-a-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/analytics-plugin-a-plugin'
+  title: '@kbn/analytics-plugin-a-plugin'
   description: Moon project for @kbn/analytics-plugin-a-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/analytics/plugins/analytics_plugin_a
+  sourceRoot: src/platform/test/analytics/plugins/analytics_plugin_a
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

@@ -6,7 +6,6 @@
  */
 
 import { last } from 'lodash';
-import PropTypes from 'prop-types';
 import type { ReactElement, ValidationMap } from 'react';
 import React, { Fragment } from 'react';
 
@@ -64,12 +63,4 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
       ))}
     </Fragment>
   );
-};
-
-ItemGrid.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  items: PropTypes.array,
-  // @ts-expect-error upgrade typescript v5.9.3
-  itemsPerRow: PropTypes.number,
-  children: PropTypes.func.isRequired,
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
-import { createActor, toPromise } from 'xstate5';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
+import { createActor, toPromise } from 'xstate';
 import {
   loadMlCapabilitiesActor,
   type MlApiDependency,

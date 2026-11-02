@@ -9,9 +9,31 @@
 
 import type { Location } from 'history';
 import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import type { ReactElement } from 'react';
 import type { RequiredKeys, ValuesType, UnionToIntersection } from 'utility-types';
 import type { NormalizePath } from './utils';
+
+/**
+ * A route's `params` codec. io-ts (`t.Type`) is the original; `z.ZodType` is
+ * additive for the io-ts -> zod migration (elastic/kibana#243355). The helpers
+ * below derive param types from either, so io-ts inference is unchanged.
+ */
+export type RouteParamsRT = t.Type<any> | z.ZodType;
+
+// Decoded (post-parse) type — io-ts `TypeOf` / zod `output`. Used by getParams.
+export type TypeOfRouteParams<T> = T extends t.Type<any>
+  ? t.TypeOf<T>
+  : T extends z.ZodType
+  ? z.output<T>
+  : {};
+
+// Encoded (pre-parse) type — io-ts `OutputOf` / zod `input`. Used by link args.
+export type OutputOfRouteParams<T> = T extends t.Type<any>
+  ? t.OutputOf<T>
+  : T extends z.ZodType
+  ? z.input<T>
+  : {};
 
 export type PathsOf<TRouteMap extends RouteMap> = string &
   ValuesType<{
@@ -27,7 +49,7 @@ export type RouteMap = Record<string, Route>;
 export interface Route {
   element: ReactElement;
   children?: RouteMap;
-  params?: t.Type<any>;
+  params?: RouteParamsRT;
   defaults?: Record<string, Record<string, string>>;
   pre?: ReactElement;
 }
@@ -43,9 +65,9 @@ export interface RouteMatch<TRoute extends Route = Route> {
     path: string;
     url: string;
     params: TRoute extends {
-      params: t.Type<any>;
+      params: RouteParamsRT;
     }
-      ? t.TypeOf<TRoute['params']>
+      ? TypeOfRouteParams<TRoute['params']>
       : {};
   };
 }
@@ -66,9 +88,9 @@ export interface DefaultOutput {
 }
 
 type OutputOfRoute<TRoute extends Route> = TRoute extends {
-  params: t.Type<any>;
+  params: RouteParamsRT;
 }
-  ? t.OutputOf<TRoute['params']>
+  ? OutputOfRouteParams<TRoute['params']>
   : {};
 
 type OutputOfRoutes<TRoutes extends Route[]> = TRoutes extends [Route]
@@ -83,9 +105,9 @@ export type OutputOf<TRoutes extends RouteMap, TPath extends PathsOf<TRoutes>> =
   DefaultOutput;
 
 type TypeOfRoute<TRoute extends Route> = TRoute extends {
-  params: t.Type<any>;
+  params: RouteParamsRT;
 }
-  ? t.TypeOf<TRoute['params']>
+  ? TypeOfRouteParams<TRoute['params']>
   : {};
 
 type TypeOfRoutes<TRoutes extends Route[]> = TRoutes extends [Route]

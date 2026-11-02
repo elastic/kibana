@@ -8,19 +8,22 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { WelcomeMessage } from './welcome_message';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
-import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const mockConnectors: UseGenAIConnectorsResult = {
   connectors: [
-    createMockConnectorFindResult({
-      id: 'test-connector',
+    {
+      connectorId: 'test-connector',
       name: 'Test Connector',
-      actionTypeId: '.gen-ai',
-      referencedByCount: 0,
-    }),
+      type: InferenceConnectorType.OpenAI,
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
+    },
   ],
   loading: false,
   selectedConnector: 'test-connector',

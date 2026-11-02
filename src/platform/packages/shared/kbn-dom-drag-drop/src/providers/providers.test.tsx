@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DragContextValue } from './types';
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { RootDragDropProvider, useDragDropContext } from '.';
 
-jest.useFakeTimers({ legacyFakeTimers: true });
-
 describe('RootDragDropProvider', () => {
-  test('reuses contexts for each render', () => {
-    const contexts: Array<{}> = [];
+  it('reuses contexts for each render', () => {
+    const contexts: DragContextValue[] = [];
+
     const TestComponent = ({ name }: { name: string }) => {
       const context = useDragDropContext();
       contexts.push(context);
-      return (
-        <div data-test-subj="test-component">
-          {name} {!!context[0].dragging}
-        </div>
-      );
+
+      return <div>{`${name} ${context[0].dragging ? 'dragging' : 'idle'}`}</div>;
     };
 
     const RootComponent = ({ name }: { name: string }) => (
@@ -32,12 +29,15 @@ describe('RootDragDropProvider', () => {
       </RootDragDropProvider>
     );
 
-    const component = mount(<RootComponent name="aaaa" />);
+    const { rerender } = render(<RootComponent name="aaaa" />);
 
-    component.setProps({ name: 'bbbb' });
+    expect(screen.getByText('aaaa idle')).toBeVisible();
 
-    expect(component.find('[data-test-subj="test-component"]').text()).toContain('bbb');
-    expect(contexts.length).toEqual(2);
-    expect(contexts[0]).toStrictEqual(contexts[1]);
+    rerender(<RootComponent name="bbbb" />);
+
+    expect(screen.getByText('bbbb idle')).toBeVisible();
+    expect(contexts).toHaveLength(2);
+    expect(contexts[0][0]).toBe(contexts[1][0]);
+    expect(contexts[0][1]).toBe(contexts[1][1]);
   });
 });

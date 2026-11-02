@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import type { Logger } from '@kbn/logging';
 import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { ToolCallOfToolOptions } from '@kbn/inference-common';
@@ -14,21 +15,24 @@ import {
   createToolNotFoundError,
   createToolValidationError,
 } from '../../common/chat_complete/errors';
+import { repairJsonEncodedArguments } from './repair_json_encoded_arguments';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
+  logger,
+}: TToolOptions & {
+  toolCalls: UnvalidatedToolCall[];
+  logger: Pick<Logger, 'debug'>;
+}): ToolCallOfToolOptions<TToolOptions>[];
 
 export function validateToolCalls({
   toolCalls,
   toolChoice,
   tools,
-}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
-  const validator = new Ajv();
-  addFormats(validator, { mode: 'fast' });
-
+  logger,
+}: ToolOptions & { toolCalls: UnvalidatedToolCall[]; logger: Pick<Logger, 'debug'> }): ToolCall[] {
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
       `tool_choice was "none" but ${toolCalls
@@ -62,14 +66,39 @@ export function validateToolCalls({
       });
     }
 
-    const valid = validator.validate(toolSchema, serializedArguments);
+    try {
+      // ToolSchema is compatible with JsonSchema but TypeScript can't infer
+      // the recursive type compatibility, so we assert it as Record<string, unknown>
+      const zodSchema = fromJSONSchema(toolSchema as unknown as Record<string, unknown>);
+      if (zodSchema) {
+        const firstAttempt = zodSchema.safeParse(serializedArguments);
+        if (!firstAttempt.success) {
+          const repair = repairJsonEncodedArguments(serializedArguments, zodSchema);
+          if (!repair) {
+            throw firstAttempt.error;
+          }
+          logger.debug(
+            () =>
+              `Repaired JSON-encoded arguments of ${toolCall.function.name} (${
+                toolCall.toolCallId
+              }) at: ${repair.repairedPaths.join(', ')}`
+          );
+          serializedArguments = repair.repaired as Record<string, unknown>;
+        }
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof z.ZodError
+          ? error?.issues?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          : error instanceof Error
+          ? error.message
+          : 'Unknown validation error';
 
-    if (!valid) {
       throw createToolValidationError(
         `Tool call arguments for ${toolCall.function.name} (${toolCall.toolCallId}) were invalid`,
         {
           name: toolCall.function.name,
-          errorsText: validator.errorsText(),
+          errorsText: errorMessage,
           arguments: toolCall.function.arguments,
           toolCalls,
         }

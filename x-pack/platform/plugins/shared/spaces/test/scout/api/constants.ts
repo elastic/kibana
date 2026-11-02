@@ -41,3 +41,7 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
 };
+
+export const COMMON_HEADERS_NO_INTERNAL = {
+  'kbn-xsrf': 'some-xsrf-token',
+};

@@ -126,7 +126,7 @@ async function getSavedObjectAttributes(
 
     return body.attributes;
   } catch (err) {
-    if (err.response?.status === 404) {
+    if (err.status === 404) {
       return {};
     }
     throw err;

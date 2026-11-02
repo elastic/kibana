@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 import {
   NO_INTEGRATION_CALLOUT_DISMISS_BUTTON_TEST_ID,
@@ -44,7 +44,7 @@ describe('NoApiIntegrationKeyCallOut', () => {
     expect(queryByTestId(NO_INTEGRATION_CALLOUT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should hide when dismiss button is clicked', async () => {
+  it('should hide when dismiss button is clicked', () => {
     (useUserData as jest.Mock).mockReturnValue([{ hasEncryptionKey: false }]);
 
     const { getByTestId, queryByTestId } = render(<NoApiIntegrationKeyCallOut />);
@@ -53,10 +53,8 @@ describe('NoApiIntegrationKeyCallOut', () => {
 
     expect(button).toBeInTheDocument();
 
-    button.click();
+    fireEvent.click(button);
 
-    await waitFor(() => {
-      expect(queryByTestId(NO_INTEGRATION_CALLOUT_DISMISS_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    });
+    expect(queryByTestId(NO_INTEGRATION_CALLOUT_DISMISS_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

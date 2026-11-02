@@ -8,17 +8,39 @@
 import { rootRequest } from './common';
 
 /**
- * Deletes all existing Fleet packages, package policies and agent policies.
+ * Deletes all existing Fleet packages, package policies, agent policies, and agents.
  */
-export const cleanFleet = () => {
+export const cleanFleet = (): Cypress.Chainable => {
   // NOTE: order does matter.
-  return deletePackagePolicies()
+  return deleteAgents()
     .then(() => {
-      deletePackages();
+      return deletePackagePolicies();
     })
     .then(() => {
-      deleteAgentPolicies();
+      return deletePackages();
+    })
+    .then(() => {
+      return deleteAgentPolicies();
     });
+};
+
+const deleteAgents = () => {
+  return rootRequest<{ items: Array<{ id: string }> }>({
+    method: 'GET',
+    url: 'api/fleet/agents?perPage=1000',
+  }).then((response) => {
+    if (response.body.items && response.body.items.length > 0) {
+      // Delete agents in parallel
+      const deletePromises = response.body.items.map((agent: { id: string }) =>
+        rootRequest({
+          method: 'DELETE',
+          url: `api/fleet/agents/${agent.id}`,
+          failOnStatusCode: false, // Don't fail if agent is already deleted
+        })
+      );
+      return Cypress.Promise.all(deletePromises);
+    }
+  });
 };
 
 const deleteAgentPolicies = () => {
@@ -59,10 +81,14 @@ const deletePackages = () => {
     url: 'api/fleet/epm/packages',
   }).then((response) => {
     response.body.items.forEach((item) => {
-      if (item.status === 'installed') {
+      // `security_detection_engine` is installed and continuously reconciled by a background task,
+      // so deleting it here races that task (400/404) or times out on its slow uninstall — and it
+      // isn't installed by these tests, so it's excluded from this best-effort teardown.
+      if (item.status === 'installed' && item.name !== 'security_detection_engine') {
         rootRequest({
           method: 'DELETE',
           url: `api/fleet/epm/packages/${item.name}/${item.version}`,
+          failOnStatusCode: false, // Don't fail if the package is already uninstalled
         });
       }
     });

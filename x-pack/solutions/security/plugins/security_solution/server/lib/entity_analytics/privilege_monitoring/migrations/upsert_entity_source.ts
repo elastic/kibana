@@ -20,6 +20,7 @@ import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 export const upsertPrivilegedMonitoringEntitySource = async ({
   logger,
   getStartServices,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [core, { security, encryptedSavedObjects }] = await getStartServices();
 
@@ -27,7 +28,7 @@ export const upsertPrivilegedMonitoringEntitySource = async ({
 
   const engineClient = new PrivilegeMonitoringEngineDescriptorClient({
     soClient: soClientGlobal,
-    namespace: '*', // get all engines from all namespaces
+    namespace: spaceId ?? '*',
   });
   const engines = await engineClient.find();
 
@@ -36,7 +37,6 @@ export const upsertPrivilegedMonitoringEntitySource = async ({
     return;
   }
 
-  // namespaces where engines are installed
   const namespaces = engines.saved_objects.map((savedObject) => first(savedObject.namespaces));
 
   await asyncForEach(namespaces, async (namespace) => {

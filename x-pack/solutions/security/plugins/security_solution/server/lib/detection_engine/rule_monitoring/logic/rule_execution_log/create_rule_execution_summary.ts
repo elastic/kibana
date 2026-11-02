@@ -35,7 +35,8 @@ export const createRuleExecutionSummary = (
   // This last run object is public - it is exposed via the public Alerting HTTP API.
   const lastRunPublic = rule.lastRun;
 
-  if (rule.running) {
+  // Rule can have "running: true" but "enabled: false" if Kibana restarted after a crash.
+  if (rule.running && rule.enabled) {
     return {
       last_execution: {
         date: lastRunInternal.timestamp,

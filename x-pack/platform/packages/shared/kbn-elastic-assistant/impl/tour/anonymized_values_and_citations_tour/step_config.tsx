@@ -8,9 +8,8 @@
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isMac } from '@kbn/shared-ux-utility';
 import { AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID } from '../../assistant/assistant_header';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 export const anonymizedValuesAndCitationsTourStep1 = {
   title: (

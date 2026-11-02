@@ -10,7 +10,14 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { ActionsClientLlm } from '@kbn/langchain/server';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  resolveAttackDiscoveryTemplateCompletion,
+} from '@kbn/discoveries';
+import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
+import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
@@ -35,6 +42,7 @@ export const invokeAttackDiscoveryGraph = async ({
   end,
   esClient,
   filter,
+  inferenceClient,
   langSmithProject,
   langSmithApiKey,
   latestReplacements,
@@ -52,6 +60,7 @@ export const invokeAttackDiscoveryGraph = async ({
   end?: string;
   esClient: ElasticsearchClient;
   filter?: Record<string, unknown>;
+  inferenceClient?: InferenceClient;
   langSmithProject?: string;
   langSmithApiKey?: string;
   latestReplacements: Replacements;
@@ -67,6 +76,18 @@ export const invokeAttackDiscoveryGraph = async ({
   throwIfInvalidAnonymization(anonymizationFields);
 
   const llmType = getLlmType(apiConfig.actionTypeId);
+  const isInferenceEndpoint =
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference);
+
+  // Guard: inference endpoint connectors must always have an inferenceClient.
+  // Fail loudly here rather than silently routing to the legacy Actions path.
+  if (isInferenceEndpoint && inferenceClient == null) {
+    throw new Error(
+      `inferenceClient is required for connector "${apiConfig.connectorId}" ` +
+        `(actionTypeId: ${apiConfig.actionTypeId}) but was not provided`
+    );
+  }
+
   const model = apiConfig.model;
   const tags = [ATTACK_DISCOVERY_TAG, llmType, model].flatMap((tag) => tag ?? []);
 
@@ -81,32 +102,61 @@ export const invokeAttackDiscoveryGraph = async ({
     ],
   };
 
-  const llm = new ActionsClientLlm({
-    actionsClient,
-    connectorId: apiConfig.connectorId,
-    llmType,
-    logger,
-    model,
-    temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
-    timeout: connectorTimeout,
-    traceOptions,
-    telemetryMetadata: {
-      pluginId: 'security_attack_discovery',
-    },
-  });
-
-  if (llm == null) {
-    throw new Error('LLM is required for attack discoveries');
-  }
+  const llm: BaseLLM =
+    isInferenceEndpoint && inferenceClient != null
+      ? new InferenceClientLlm({
+          connectorId: apiConfig.connectorId,
+          inferenceClient,
+          llmType,
+          logger,
+          model,
+          temperature: 0,
+          timeout: connectorTimeout,
+          telemetryMetadata: {
+            pluginId: 'security_attack_discovery',
+          },
+        })
+      : new ActionsClientLlm({
+          actionsClient,
+          connectorId: apiConfig.connectorId,
+          llmType,
+          logger,
+          model,
+          temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+          timeout: connectorTimeout,
+          traceOptions,
+          telemetryMetadata: {
+            pluginId: 'security_attack_discovery',
+          },
+        });
 
   const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
-    actionsClient,
     connectorId: apiConfig.connectorId,
     // if in future oss has different prompt, add it as model here
     model,
     provider: llmType,
     savedObjectsClient,
   });
+
+  const completeWithTemplate = await resolveAttackDiscoveryTemplateCompletion({
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    connectorId: apiConfig.connectorId,
+    logger,
+    timeout: connectorTimeout,
+  });
+
+  // This route has no pre-supplied alerts. The graph retrieves `size` alerts and
+  // later reports that same count, so cap it before retrieval.
+  let sizeForGraph = size;
+  if (completeWithTemplate) {
+    const requestedSize = sizeForGraph;
+    sizeForGraph = capAttackDiscoveryTemplateCount(sizeForGraph) ?? sizeForGraph;
+    if (sizeForGraph < requestedSize) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(requestedSize - sizeForGraph, requestedSize)
+      );
+    }
+  }
 
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
@@ -119,8 +169,9 @@ export const invokeAttackDiscoveryGraph = async ({
     onNewReplacements,
     prompts: attackDiscoveryPrompts,
     replacements: latestReplacements,
-    size,
+    size: sizeForGraph,
     start,
+    ...(completeWithTemplate ? { completeWithTemplate } : {}),
   });
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');

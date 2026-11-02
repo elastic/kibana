@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
+import { sortBy } from 'lodash';
+import { stableStringify } from '@kbn/std';
 import { Version } from './versions_picker/constants';
 import {
   ThreeWayDiffOutcome,
+  type RequiredField,
+  type RequiredFieldInput,
   type ThreeWayDiff,
   ThreeWayDiffConflict,
 } from '../../../../../../../common/api/detection_engine';
 import { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { dedupeRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import * as i18n from './translations';
 
 /**
@@ -49,7 +53,77 @@ export const stringifyToSortedJson = (fieldValue: unknown): string => {
     return fieldValue;
   }
 
-  return stringify(fieldValue, { space: 2 });
+  return stringifyWithExpandedEmpties(fieldValue);
+};
+
+/**
+ * Stringifies a value to pretty-printed JSON with sorted keys,
+ * then expands inline empty arrays (`[]`) and objects (`{}`) to multi-line format.
+ *
+ * This expansion is needed because the diff view uses a line-based diff algorithm.
+ * Without it, a change from `[]` to a non-empty array (or object) shows as a full replacement
+ * (delete + insert) instead of a clean insertion, since the algorithm can't match
+ * the single-line `[]` against the opening `[` of a multi-line array.
+ *
+ * @param value - The value to stringify.
+ * @returns A pretty-printed JSON string with empty collections expanded to multi-line.
+ *
+ * @example
+ * // Input:  { "author": [], "name": "Test" }
+ * // Output:
+ * // {
+ * //   "author": [
+ * //   ],
+ * //   "name": "Test"
+ * // }
+ */
+export const stringifyWithExpandedEmpties = (value: unknown): string => {
+  const jsonString = stableStringify(value, { space: 2 });
+
+  if (jsonString === '[]') {
+    return '[\n]';
+  }
+
+  if (jsonString === '{}') {
+    return '{\n}';
+  }
+
+  const expanded = jsonString
+    // Expand nested empty arrays from "[]" to "[\n]"
+    .replace(/^(\s*)(.*): \[\]/gm, '$1$2: [\n$1]')
+    // Expand nested empty objects from "{}" to "{\n}"
+    .replace(/^(\s*)(.*): \{\}/gm, '$1$2: {\n$1}');
+
+  return expanded;
+};
+
+/**
+ * Normalizes required fields for display: deduplicates and sorts by `name` and `type`
+ * so order and duplicates don't show up as changes.
+ */
+export const normalizeRequiredFieldsForDisplay = <T extends RequiredFieldInput>(
+  requiredFields: T[]
+): T[] => sortBy(dedupeRequiredFields(requiredFields), ['name', 'type']);
+
+/**
+ * Stringifies required fields one field per line, which keeps diffs of long lists compact.
+ */
+export const stringifyRequiredFields = (requiredFields: RequiredField[] | undefined): string => {
+  if (requiredFields === undefined) {
+    return '';
+  }
+
+  const lines = normalizeRequiredFieldsForDisplay(requiredFields).map(
+    ({ name, type, ecs }) =>
+      `  { "name": ${JSON.stringify(name)}, "type": ${JSON.stringify(type)}, "ecs": ${ecs} }`
+  );
+
+  // Keeps empty arrays multi-line so the line-based diff renders additions as clean insertions
+  if (lines.length === 0) {
+    return '[\n]';
+  }
+
+  return `[\n${lines.join(',\n')}\n]`;
 };
 
 interface OptionDetails {

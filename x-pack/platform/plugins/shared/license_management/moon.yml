@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/license-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/license-management-plugin'
+  title: '@kbn/license-management-plugin'
   description: Moon project for @kbn/license-management-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/license_management
+  sourceRoot: x-pack/platform/plugins/shared/license_management
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
   - '@kbn/telemetry-management-section-plugin'
@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
   - '@kbn/config-schema'
-  - '@kbn/test-jest-helpers'
   - '@kbn/shared-ux-router'
   - '@kbn/utility-types'
   - '@kbn/share-plugin'
@@ -42,6 +41,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
@@ -50,16 +50,4 @@ fileGroups:
     - __jest__/**/*
     - __mocks__/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

@@ -44,6 +44,12 @@ export function applyFipsOverrides(vars: any) {
 
   vars.esTestCluster.serverArgs = newServerArgs;
 
+  vars.kbnTestServer = { ...(vars.kbnTestServer ?? {}) };
+  vars.kbnTestServer.serverArgs = [
+    ...(vars.kbnTestServer.serverArgs ?? []),
+    '--xpack.security.fipsMode.enabled=true',
+  ];
+
   return vars;
 }
 

@@ -34,16 +34,15 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
 
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
-      <div data-test-subj={LOADING_LOGO_WRAPPER_TEST_ID}>
-        <SecuritySolutionTemplateWrapper
-          isEmptyState
-          emptyPageBody={
-            <EuiPageTemplate.EmptyPrompt color="transparent">
-              <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
-            </EuiPageTemplate.EmptyPrompt>
-          }
-        />
-      </div>
+      <SecuritySolutionTemplateWrapper
+        data-test-subj={LOADING_LOGO_WRAPPER_TEST_ID}
+        isEmptyState
+        emptyPageBody={
+          <EuiPageTemplate.EmptyPrompt color="transparent">
+            <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
+          </EuiPageTemplate.EmptyPrompt>
+        }
+      />
     );
   }
 
@@ -52,9 +51,11 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
   return showIndicatorsPage ? (
     <>{children}</>
   ) : (
-    <div data-test-subj={EMPTY_PAGE_WRAPPER_TEST_ID}>
-      <SecuritySolutionTemplateWrapper isEmptyState emptyPageBody={<EmptyPage />} />
-    </div>
+    <SecuritySolutionTemplateWrapper
+      data-test-subj={EMPTY_PAGE_WRAPPER_TEST_ID}
+      isEmptyState
+      emptyPageBody={<EmptyPage />}
+    />
   );
 });
 

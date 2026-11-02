@@ -8,10 +8,12 @@
 import React, { useContext } from 'react';
 
 import { EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { WatchContext } from '../../watch_context';
 import { useAppContext } from '../../../../app_context';
+import { getWatcherListBack } from '../../../../lib/watcher_app_header';
 
 export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const { watch } = useContext(WatchContext);
@@ -28,18 +30,19 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   );
 
   return (
-    <EuiPageTemplate.EmptyPrompt
-      iconType=""
-      title={<h1>{pageTitle}</h1>}
-      body={<p>{systemWatchMessage}</p>}
-      actions={[
-        <EuiLink {...reactRouterNavigate(history, `/watches/watch/${watch.id}/status`)}>
-          <FormattedMessage
-            id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
-            defaultMessage="View watch status"
-          />
-        </EuiLink>,
-      ]}
-    />
+    <>
+      <AppHeader title={pageTitle} back={getWatcherListBack(history)} spacing="bleed" />
+      <EuiPageTemplate.EmptyPrompt
+        title={<h2>{systemWatchMessage}</h2>}
+        actions={[
+          <EuiLink {...reactRouterNavigate(history, `/watches/watch/${watch.id}/status`)}>
+            <FormattedMessage
+              id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
+              defaultMessage="View watch status"
+            />
+          </EuiLink>,
+        ]}
+      />
+    </>
   );
 };

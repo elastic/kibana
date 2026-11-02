@@ -1,0 +1,45 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getDataStreamsExample:
+            description: 'List of Fleet-managed data streams'
+            value:
+              data_streams:
+                - index: 'logs-nginx.access-default'
+                  dataset: 'nginx.access'
+                  namespace: 'default'
+                  type: 'logs'
+                  package: 'nginx'
+                  package_version: '1.20.0'
+                  last_activity_ms: 1700000000000
+                  size_in_bytes: 1048576
+                  size_in_bytes_formatted: '1mb'
+                  dashboards:
+                    - id: 'nginx-overview'
+                      title: 'Nginx Overview'
+                  serviceDetails: null
+                - index: 'metrics-system.cpu-default'
+                  dataset: 'system.cpu'
+                  namespace: 'default'
+                  type: 'metrics'
+                  package: 'system'
+                  package_version: '1.38.0'
+                  last_activity_ms: 1699999000000
+                  size_in_bytes: 524288
+                  size_in_bytes_formatted: '512kb'
+                  dashboards: []
+                  serviceDetails: null
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

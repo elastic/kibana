@@ -57,6 +57,14 @@ export const createManagementFooterItemsTree = (
             },
             {
               breadcrumbStatus: 'hidden',
+              link: 'management:data_federation',
+            },
+            {
+              breadcrumbStatus: 'hidden',
+              link: 'management:esql_views',
+            },
+            {
+              breadcrumbStatus: 'hidden',
               link: 'management:transform',
             },
             {
@@ -87,6 +95,14 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
             },
             {
+              link: 'management:application_connections',
+              breadcrumbStatus: 'hidden',
+            },
+            {
+              link: 'management:service_accounts',
+              breadcrumbStatus: 'hidden',
+            },
+            {
               link: 'management:roles',
               breadcrumbStatus: 'hidden',
             },
@@ -109,6 +125,7 @@ export const createManagementFooterItemsTree = (
           breadcrumbStatus: 'hidden',
           children: [
             {
+              id: 'stackRules',
               link: 'management:triggersActions',
               breadcrumbStatus: 'hidden',
             },
@@ -124,9 +141,16 @@ export const createManagementFooterItemsTree = (
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
+          ],
+        },
+        {
+          title: i18nStrings.projectPerformance.title,
+          breadcrumbStatus: 'hidden',
+          children: [
             {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
+              link: 'management:queryActivity',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
             },
           ],
         },
@@ -141,6 +165,14 @@ export const createManagementFooterItemsTree = (
           ],
         },
         {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
           children:
@@ -151,6 +183,14 @@ export const createManagementFooterItemsTree = (
                     breadcrumbStatus: 'hidden',
                   },
                   {
+                    link: 'management:aiAnonymizationSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
                     link: 'management:securityAiAssistantManagement',
                     breadcrumbStatus: 'hidden',
                   },
@@ -158,6 +198,14 @@ export const createManagementFooterItemsTree = (
               : [
                   {
                     link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:aiAnonymizationSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
                     breadcrumbStatus: 'hidden',
                   },
                 ],
@@ -191,7 +239,6 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
             },
             { link: 'maps' },
-            { link: 'visualize' },
           ],
         },
         {

@@ -24,10 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Interpolation, Theme } from '@emotion/react';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
+  getEditorInputSurface,
 } from './react_monaco_editor';
 import { remeasureFonts } from './utils/remeasure_fonts';
 import {
@@ -38,11 +39,12 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
-  RepositionSuggestionWidget,
+  usePersistHoverContentWidget,
 } from './mods';
 import { styles } from './editor.styles';
 
-export interface CodeEditorProps {
+export interface CodeEditorProps
+  extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -63,7 +65,7 @@ export interface CodeEditorProps {
    * Documentation of options can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
-  options?: monaco.editor.IStandaloneEditorConstructionOptions;
+  options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext'>;
 
   /**
    * Suggestion provider for autocompletion
@@ -106,6 +108,13 @@ export interface CodeEditorProps {
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html
    */
   codeActions?: monaco.languages.CodeActionProvider;
+
+  /**
+   * Document highlight provider for highlighting all occurrences of a symbol
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.DocumentHighlightProvider.html
+   */
+  documentHighlightProvider?: monaco.languages.DocumentHighlightProvider;
 
   /**
    * Function called before the editor is mounted in the view
@@ -205,12 +214,6 @@ export interface CodeEditorProps {
    */
   onFocus?: () => void;
   onBlur?: () => void;
-
-  /**
-   * Enables the suggestion widget repositioning. Enabled by default.
-   * Disabled for cases like embedded console.
-   */
-  enableSuggestWidgetRepositioning?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -232,6 +235,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   placeholder,
   languageConfiguration,
   codeActions,
+  documentHighlightProvider,
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
@@ -244,7 +248,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   fitToContent,
   accessibilityOverlayEnabled = true,
   enableFindAction,
-  dataTestSubj,
+  dataTestSubj = 'kibanaCodeEditor',
   classNameCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
@@ -252,7 +256,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   links = false,
   onFocus,
   onBlur,
-  enableSuggestWidgetRepositioning = true,
+  overflowWidgetsContainerZIndexOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -272,12 +276,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       allowFullScreen,
     });
 
+  const persistHoverContentWidget = usePersistHoverContentWidget();
+  const wireHoverContentPersistence = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      return persistHoverContentWidget(editor);
+    },
+    [persistHoverContentWidget]
+  );
+
   const isReadOnly = options?.readOnly ?? false;
 
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
+  const hoverContentPersistenceSubscription = useRef<monaco.IDisposable | undefined>(undefined);
 
   const [isHintActive, setIsHintActive] = useState(true);
 
@@ -306,7 +319,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       if (ev.keyCode === monaco.KeyCode.Escape) {
         const inspectTokensWidget = editor?.getContribution(
           'editor.contrib.inspectTokens'
-          // @ts-expect-errors -- "_widget" is not part of the TS interface but does exist
         )?._widget;
         // If the inspect tokens widget is open then we want to let monaco handle ESCAPE for it,
         // otherwise widget will not close.
@@ -412,7 +424,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               codeEditorAriaLabel: ariaLabel,
             },
           })}
-          data-test-subj={`codeEditorHint codeEditorHint--${isHintActive ? 'active' : 'inactive'}`}
+          data-test-subj="codeEditorHint"
+          data-code-hint-status={isHintActive ? 'active' : 'inactive'}
         />
       </EuiToolTip>
     );
@@ -465,6 +478,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         if (codeActions) {
           monaco.languages.registerCodeActionProvider(languageId, codeActions);
         }
+
+        if (documentHighlightProvider) {
+          monaco.languages.registerDocumentHighlightProvider(languageId, documentHighlightProvider);
+        }
       });
 
       monaco.editor.addKeybindingRule({
@@ -482,6 +499,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       hoverProvider,
       inlineCompletionsProvider,
       codeActions,
+      documentHighlightProvider,
       languageConfiguration,
       enableFindAction,
     ]
@@ -495,19 +513,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       remeasureFonts();
 
-      const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
-      if (textbox) {
-        // Make sure the textarea is not directly accessible with TAB
-        textbox.tabIndex = -1;
+      const inputSurface = getEditorInputSurface(editor.getDomNode());
+      if (inputSurface) {
+        // Make sure the real input surface is not directly accessible with TAB
+        inputSurface.tabIndex = -1;
 
         // The Monaco editor seems to override the tabindex and set it back to "0"
         // so we make sure that whenever the attributes change the tabindex stays at -1
         textboxMutationObserver.current = new MutationObserver(function onTextboxAttributeChange() {
-          if (textbox.tabIndex >= 0) {
-            textbox.tabIndex = -1;
+          if (inputSurface.tabIndex >= 0) {
+            inputSurface.tabIndex = -1;
           }
         });
-        textboxMutationObserver.current.observe(textbox, { attributes: true });
+        textboxMutationObserver.current.observe(inputSurface, { attributes: true });
       }
 
       editor.onKeyDown((ev: monaco.IKeyboardEvent) => {
@@ -516,19 +534,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       editor.onDidBlurEditorText(onBlurMonaco);
 
       const messageContribution = editor.getContribution('editor.contrib.messageController');
+
       editor.onDidAttemptReadOnlyEdit(() => {
-        // @ts-expect-error the show message API does exist and is documented here
-        // https://github.com/microsoft/vscode/commit/052f02175f4752c36024c18cfbca4e13403e10c3
-        messageContribution?.showMessage(readOnlyMessage, editor.getPosition());
+        messageContribution?.showMessage?.(readOnlyMessage, editor.getPosition());
       });
 
-      // "widget" is not part of the TS interface but does exist
-      // @ts-expect-errors
-      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
-        ?.value;
+      const suggestionController = editor.getContribution('editor.contrib.suggestController');
+      const suggestionWidget = suggestionController?.widget?.value;
 
-      // As I haven't found official documentation for "onDidShow" and "onDidHide"
-      // we guard from possible changes in the underlying lib
       if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
         suggestionWidget.onDidShow(() => {
           isSuggestionMenuOpen.current = true;
@@ -537,6 +550,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           isSuggestionMenuOpen.current = false;
         });
       }
+
+      hoverContentPersistenceSubscription.current?.dispose();
+      hoverContentPersistenceSubscription.current = wireHoverContentPersistence(editor);
 
       if (enableCustomContextMenu) {
         registerContextMenuActions({
@@ -558,6 +574,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       registerContextMenuActions,
       isReadOnly,
       customContextMenuActions,
+      wireHoverContentPersistence,
     ]
   );
 
@@ -568,6 +585,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       }
 
       editorWillUnmount?.();
+
+      // Clear the stored editor reference before it gets disposed, to avoid downstream
+      // effects/hooks attempting to call into a disposed editor instance.
+      setEditor(null);
+
+      hoverContentPersistenceSubscription.current?.dispose();
+      hoverContentPersistenceSubscription.current = undefined;
 
       const model = editor.getModel();
       model?.dispose();
@@ -584,10 +608,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     // apply aria described by on editor element
     if (_editor && ariaDescribedBy) {
-      _editor
-        .getDomNode()
-        ?.querySelector('textarea[aria-roledescription="editor"]')
-        ?.setAttribute('aria-describedby', ariaDescribedBy);
+      getEditorInputSurface(_editor.getDomNode())?.setAttribute(
+        'aria-describedby',
+        ariaDescribedBy
+      );
     }
   }, [_editor, ariaDescribedBy]);
 
@@ -602,11 +626,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div
-      css={[styles.container, classNameCss]}
+      css={styles.container}
       onKeyDown={onKeyDown}
-      data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
+      data-test-subj={dataTestSubj}
       className="kibanaCodeEditor"
     >
+      <Global styles={classNameCss} />
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
@@ -628,52 +653,63 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <ReBroadcastMouseDownEvents>
-          <RepositionSuggestionWidget
-            editor={_editor}
-            enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
-          >
-            {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
-            <MonacoEditor
-              theme={theme}
-              language={languageId}
-              value={value}
-              onChange={onChange}
-              width={isFullScreen ? '100vw' : width}
-              height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
-              editorWillMount={_editorWillMount}
-              editorDidMount={_editorDidMount}
-              editorWillUnmount={_editorWillUnmount}
-              options={{
-                padding: allowFullScreen || isCopyable ? { top: 24 } : {},
-                renderLineHighlight: 'none',
-                scrollBeyondLastLine: false,
-                minimap: {
-                  enabled: false,
-                },
-                scrollbar: {
-                  useShadows: false,
-                  // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
-                  // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
-                  // outer scrollbars.
-                  alwaysConsumeMouseWheel: false,
-                },
-                wordBasedSuggestions: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                matchBrackets: 'never',
-                fontFamily: 'Roboto Mono',
-                fontSize: isFullScreen ? 16 : 12,
-                lineHeight: isFullScreen ? 24 : 21,
-                contextmenu: enableCustomContextMenu,
-                fixedOverflowWidgets: enableSuggestWidgetRepositioning,
-                // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
-                'bracketPairColorization.enabled': false,
-                ...options,
-                // Explicit links prop always takes precedence over any value passed in options
-                links,
-              }}
-            />
-          </RepositionSuggestionWidget>
+          {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
+          <MonacoEditor
+            theme={theme}
+            language={languageId}
+            value={value}
+            onChange={onChange}
+            width={isFullScreen ? '100vw' : width}
+            height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
+            editorWillMount={_editorWillMount}
+            editorDidMount={_editorDidMount}
+            editorWillUnmount={_editorWillUnmount}
+            overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
+            options={{
+              padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+              // Opt-out of the new EditContext API for now.
+              editContext: false,
+              renderLineHighlight: 'none',
+              scrollBeyondLastLine: false,
+              stickyScroll: { enabled: false },
+              minimap: {
+                enabled: false,
+              },
+              quickSuggestions: {
+                other: 'on',
+              },
+              scrollbar: {
+                useShadows: false,
+                // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+                // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+                // outer scrollbars.
+                alwaysConsumeMouseWheel: false,
+              },
+              wordBasedSuggestions: 'off',
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              matchBrackets: 'never',
+              fontFamily: 'Roboto Mono',
+              fontSize: isFullScreen ? 16 : 12,
+              lineHeight: isFullScreen ? 24 : 21,
+              contextmenu: enableCustomContextMenu,
+              defaultColorDecorators: 'never',
+              lightbulb: {
+                enabled: monaco.editor.ShowLightbulbIconMode.On,
+              },
+              // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+              'bracketPairColorization.enabled': false,
+              ...options,
+              hover: {
+                sticky: true,
+                ...options?.hover,
+              },
+              // Explicit links prop always takes precedence over any value passed in options
+              links,
+              // Explicit not possible to override because of the way the suggestion widget is rendered in a separate container
+              fixedOverflowWidgets: true,
+            }}
+          />
         </ReBroadcastMouseDownEvents>
       </FullScreenDisplay>
     </div>

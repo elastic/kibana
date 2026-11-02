@@ -23,10 +23,10 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
     }, []);
 
     const handleNameSave = useCallback(() => {
-      setMigrationName(name);
+      setMigrationName(name.trim());
     }, [name, setMigrationName]);
 
-    const isInvalid = name.length === 0;
+    const isInvalid = name.trim().length === 0;
     const errors = useMemo(() => {
       if (isInvalid) {
         return [i18n.MIGRATION_NAME_INPUT_ERROR];
@@ -55,6 +55,7 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
           <EuiForm>
             <EuiFormRow isInvalid={isInvalid} error={errors} fullWidth>
               <EuiFieldText
+                aria-label={i18n.MIGRATION_NAME_INPUT_TITLE}
                 placeholder={i18n.MIGRATION_NAME_INPUT_DESCRIPTION}
                 value={name}
                 onChange={handleNameChange}

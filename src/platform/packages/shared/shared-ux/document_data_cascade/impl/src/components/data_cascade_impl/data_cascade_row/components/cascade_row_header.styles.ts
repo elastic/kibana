@@ -26,21 +26,14 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) =
   rowHeaderSlotContainer: css({
     minWidth: 0,
     maxWidth: 'fit-content',
-    overflowX: 'auto',
     justifyContent: 'center',
   }),
-  rowHeaderSlotContainerInner: css({ flexGrow: 0 }),
+  rowHeaderSlotContainerInner: css({ flexGrow: 0, width: '100%' }),
   rowHeaderSlotItemWrapper: css({
     justifyContent: 'center',
     alignItems: 'center',
     borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     paddingLeft: euiTheme.size.s,
     flexGrow: 0,
-
-    '& > *': {
-      // Ensure that all direct children of the slot wrapper
-      // that render numbers have the same font size and weight for consistency
-      fontVariantNumeric: 'tabular-nums',
-    },
   }),
 });

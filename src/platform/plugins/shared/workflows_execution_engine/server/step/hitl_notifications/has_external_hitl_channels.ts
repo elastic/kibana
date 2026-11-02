@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export interface ExternalHitlChannels {
+  slack?: { 'connector-id'?: string };
+  slack_api?: { 'connector-id'?: string; channels?: string[] };
+  email?: { 'connector-id'?: string; to?: string[] };
+  slack2?: { 'connector-id'?: string; channels?: string[] };
+  teams?: { 'connector-id'?: string; 'team-id'?: string; 'channel-id'?: string };
+  servicenow?: { 'connector-id'?: string; table?: string; 'sys-id'?: string };
+  http?: { 'connector-id'?: string; url?: string };
+}
+
+export function hasExternalHitlChannels(
+  channels: ExternalHitlChannels | undefined
+): channels is ExternalHitlChannels {
+  if (!channels) {
+    return false;
+  }
+
+  const hasSlack = Boolean(channels.slack?.['connector-id']);
+  const hasSlackApi =
+    Boolean(channels.slack_api?.['connector-id']) && Boolean(channels.slack_api?.channels?.length);
+  const hasEmail = Boolean(channels.email?.['connector-id']) && Boolean(channels.email?.to?.length);
+  const hasSlack2 =
+    Boolean(channels.slack2?.['connector-id']) && Boolean(channels.slack2?.channels?.length);
+  const hasTeams =
+    Boolean(channels.teams?.['connector-id']) &&
+    Boolean(channels.teams?.['team-id']) &&
+    Boolean(channels.teams?.['channel-id']);
+  const hasServiceNow =
+    Boolean(channels.servicenow?.['connector-id']) &&
+    Boolean(channels.servicenow?.table) &&
+    Boolean(channels.servicenow?.['sys-id']);
+  const hasHttp = Boolean(channels.http?.['connector-id'] || channels.http?.url);
+
+  return hasSlack || hasSlackApi || hasEmail || hasSlack2 || hasTeams || hasServiceNow || hasHttp;
+}

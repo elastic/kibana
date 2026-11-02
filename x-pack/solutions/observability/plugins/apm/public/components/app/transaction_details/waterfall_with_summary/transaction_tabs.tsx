@@ -7,25 +7,49 @@
 
 import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import { apmTraceLogsDefaultColumns, ProcessorEvent } from '@kbn/observability-plugin/common';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
+import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useDiscoverHref } from '../../../shared/links/discover_links/use_discover_href';
+import { getGenAiTabContent } from '../../../shared/genai_tab/get_genai_tab_content';
+import { getGenAiTabEbt } from '../../../shared/genai_tab/ebt_constants';
+import { useGenAiData } from '../../../shared/genai_tab/use_genai_data';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
-import { WaterfallContainer } from './waterfall_container';
-import type { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
+import { type UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
+import {
+  getTraceLogsColumns,
+  isDiscoverDefaultLogColumns,
+  shouldPersistTraceLogsColumnsToUrl,
+} from '../distribution/get_trace_logs_columns';
+import { TRACE_SAMPLE_EBT_ELEMENTS } from './ebt_constants';
+
+const EMPTY_TRACE_LOGS_DEFAULT_COLUMNS: string[] = [];
 
 export enum TransactionTab {
   timeline = 'timeline',
   metadata = 'metadata',
   logs = 'logs',
+  genAi = 'genAi',
+}
+
+interface TabContentDefinition {
+  label: React.ReactNode;
+  component: React.ReactNode;
+  prepend?: React.ReactNode;
+  dataTestSubj?: string;
+  ebt?: EbtClickAttrs;
 }
 
 interface Props {
   transaction?: Transaction;
   isLoading: boolean;
-  waterfall: IWaterfall;
   detailTab?: TransactionTab;
   serviceName?: string;
   waterfallItemId?: string;
@@ -34,11 +58,12 @@ interface Props {
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }
 
 export function TransactionTabs({
   transaction,
-  waterfall,
   isLoading,
   detailTab = TransactionTab.timeline,
   waterfallItemId,
@@ -48,9 +73,31 @@ export function TransactionTabs({
   onShowCriticalPathChange,
   logsTableConfig,
   onLogsTableConfigChange,
+  unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: Props) {
-  const tabs: Record<TransactionTab, { label: string; component: React.ReactNode }> = useMemo(
-    () => ({
+  const { metadata, isMetadataLoading, isGenAiSpan, genAi } = useGenAiData({
+    processorEvent: ProcessorEvent.transaction,
+    id: transaction?.transaction?.id,
+    timestamp: transaction?.['@timestamp'],
+  });
+
+  const {
+    services: { analytics },
+  } = useKibana();
+
+  const transactionId = transaction?.transaction?.id;
+
+  const tabs: Partial<Record<TransactionTab, TabContentDefinition>> = useMemo(() => {
+    const genAiTabContent = getGenAiTabContent({
+      isGenAiSpan,
+      genAi,
+      ebt: { element: TRACE_SAMPLE_EBT_ELEMENTS.TABS },
+      reportEvent: analytics.reportEvent,
+      resourceId: transactionId,
+    });
+
+    return {
       [TransactionTab.timeline]: {
         label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
           defaultMessage: 'Timeline',
@@ -59,9 +106,10 @@ export function TransactionTabs({
           <TimelineTabContent
             waterfallItemId={waterfallItemId}
             serviceName={serviceName}
-            waterfall={waterfall}
             showCriticalPath={showCriticalPath}
             onShowCriticalPathChange={onShowCriticalPathChange}
+            unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+            entryTransactionId={entryTransactionId}
           />
         ),
       },
@@ -69,7 +117,16 @@ export function TransactionTabs({
         label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
           defaultMessage: 'Metadata',
         }),
-        component: <>{transaction && <MetadataTabContent transaction={transaction} />}</>,
+        component: (
+          <>
+            {transaction && (
+              <MetadataTabContent
+                transaction={transaction}
+                prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
+              />
+            )}
+          </>
+        ),
       },
       [TransactionTab.logs]: {
         label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
@@ -79,7 +136,7 @@ export function TransactionTabs({
           <>
             {transaction && (
               <LogsTabContent
-                timestamp={transaction.timestamp.us}
+                timestamp={getTimestampUs(transaction)}
                 duration={transaction.transaction.duration.us}
                 traceId={transaction.trace.id}
                 logsTableConfig={logsTableConfig}
@@ -89,34 +146,57 @@ export function TransactionTabs({
           </>
         ),
       },
-    }),
-    [
-      logsTableConfig,
-      onLogsTableConfigChange,
-      onShowCriticalPathChange,
-      serviceName,
-      showCriticalPath,
-      transaction,
-      waterfall,
-      waterfallItemId,
-    ]
-  );
+      ...(genAiTabContent
+        ? {
+            [TransactionTab.genAi]: {
+              label: genAiTabContent.name,
+              component: genAiTabContent.content,
+              prepend: genAiTabContent.prepend,
+              dataTestSubj: genAiTabContent['data-test-subj'],
+              ebt: getGenAiTabEbt(TRACE_SAMPLE_EBT_ELEMENTS.TABS),
+            },
+          }
+        : {}),
+    };
+  }, [
+    analytics.reportEvent,
+    entryTransactionId,
+    genAi,
+    isGenAiSpan,
+    transactionId,
+    isMetadataLoading,
+    logsTableConfig,
+    metadata,
+    onLogsTableConfigChange,
+    onShowCriticalPathChange,
+    serviceName,
+    showCriticalPath,
+    transaction,
+    unifiedWaterfallFetchResult,
+    waterfallItemId,
+  ]);
 
-  const currentTab = tabs[detailTab];
+  // Fall back to the timeline tab when the tab from the URL is not available
+  // (e.g. a genAi deep link for a trace whose root is not a GenAI span).
+  const selectedTab = tabs[detailTab] ? detailTab : TransactionTab.timeline;
+  const currentTab = tabs[selectedTab]!;
   const TabContent = currentTab.component;
 
   return (
     <>
       <EuiTabs>
-        {(Object.keys(TransactionTab) as TransactionTab[]).map((key) => {
-          const { label } = tabs[key];
+        {(Object.keys(tabs) as TransactionTab[]).map((key) => {
+          const { label, prepend, dataTestSubj, ebt } = tabs[key]!;
           return (
             <EuiTab
               onClick={() => {
                 onTabClick(key);
               }}
-              isSelected={detailTab === key}
+              isSelected={selectedTab === key}
               key={key}
+              prepend={prepend}
+              data-test-subj={dataTestSubj}
+              {...(ebt ? getEbtProps(ebt) : {})}
             >
               {label}
             </EuiTab>
@@ -135,31 +215,60 @@ export function TransactionTabs({
 }
 
 function TimelineTabContent({
-  waterfall,
   waterfallItemId,
   serviceName,
   showCriticalPath,
   onShowCriticalPathChange,
+  unifiedWaterfallFetchResult,
+  entryTransactionId,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
-  waterfall: IWaterfall;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
+  entryTransactionId?: string;
 }) {
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation'
+  );
+  const traceId = unifiedWaterfallFetchResult.traceItems[0]?.traceId;
+  const discoverHref = useDiscoverHref({
+    indexType: 'traces',
+    rangeFrom,
+    rangeTo,
+    queryParams: { traceId, sortDirection: 'ASC' },
+  });
+
   return (
-    <WaterfallContainer
+    <UnifiedWaterfallContainer
+      traceItems={unifiedWaterfallFetchResult.traceItems}
+      errors={unifiedWaterfallFetchResult.errors}
+      agentMarks={unifiedWaterfallFetchResult.agentMarks}
       waterfallItemId={waterfallItemId}
       serviceName={serviceName}
-      waterfall={waterfall}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
+      traceDocsTotal={unifiedWaterfallFetchResult.traceDocsTotal}
+      maxTraceItems={unifiedWaterfallFetchResult.maxTraceItems}
+      discoverHref={discoverHref}
     />
   );
 }
 
-function MetadataTabContent({ transaction }: { transaction: Transaction }) {
-  return <TransactionMetadata transaction={transaction} />;
+function MetadataTabContent({
+  transaction,
+  prefetchedMetadata,
+}: {
+  transaction: Transaction;
+  prefetchedMetadata: React.ComponentProps<typeof TransactionMetadata>['prefetchedMetadata'];
+}) {
+  return <TransactionMetadata transaction={transaction} prefetchedMetadata={prefetchedMetadata} />;
 }
 
 function LogsTabContent({
@@ -185,10 +294,73 @@ function LogsTabContent({
       data: {
         search: { searchSource },
       },
+      settings,
     },
   } = useKibana();
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
+  const settingsClient = settings.client;
+
+  const [defaultColumns, setDefaultColumns] = useState<string[]>(
+    () =>
+      settingsClient.get<string[]>(apmTraceLogsDefaultColumns, EMPTY_TRACE_LOGS_DEFAULT_COLUMNS) ??
+      EMPTY_TRACE_LOGS_DEFAULT_COLUMNS
+  );
+
+  useEffect(() => {
+    const subscription = settingsClient
+      .get$(apmTraceLogsDefaultColumns, EMPTY_TRACE_LOGS_DEFAULT_COLUMNS)
+      .subscribe((value) => {
+        setDefaultColumns(Array.isArray(value) ? value : EMPTY_TRACE_LOGS_DEFAULT_COLUMNS);
+      });
+
+    return () => subscription.unsubscribe();
+  }, [settingsClient]);
+
+  const columns = useMemo(
+    () =>
+      getTraceLogsColumns({
+        urlColumns: logsTableConfig?.columns,
+        defaultColumns,
+      }),
+    [defaultColumns, logsTableConfig?.columns]
+  );
+
+  const resolveColumnsOnChange = useCallback(
+    (emittedColumns: string[] | undefined) => {
+      if (!isDiscoverDefaultLogColumns(emittedColumns)) {
+        return undefined;
+      }
+
+      return getTraceLogsColumns({
+        urlColumns: undefined,
+        defaultColumns,
+      });
+    },
+    [defaultColumns]
+  );
+
+  const handleLogsTableConfigChange = useCallback(
+    (config: SavedSearchTableConfig) => {
+      if (!onLogsTableConfigChange) {
+        return;
+      }
+
+      const columnsForUrl = shouldPersistTraceLogsColumnsToUrl({
+        emittedColumns: config.columns,
+        defaultColumns,
+      })
+        ? config.columns
+        : undefined;
+
+      onLogsTableConfigChange({
+        ...config,
+        columns: columnsForUrl,
+      });
+    },
+    [defaultColumns, onLogsTableConfigChange]
+  );
 
   const startTimestamp = Math.floor(timestamp / 1000);
   const endTimestamp = Math.ceil(startTimestamp + duration / 1000);
@@ -218,7 +390,7 @@ function LogsTabContent({
       index={logSources.value}
       timeRange={timeRange}
       query={query}
-      columns={logsTableConfig?.columns}
+      columns={columns}
       sort={logsTableConfig?.sort}
       grid={logsTableConfig?.grid}
       rowHeight={logsTableConfig?.rowHeight}
@@ -230,7 +402,8 @@ function LogsTabContent({
         enableDocumentViewer: true,
         enableFilters: false,
       }}
-      onTableConfigChange={onLogsTableConfigChange}
+      onTableConfigChange={handleLogsTableConfigChange}
+      resolveColumnsOnChange={resolveColumnsOnChange}
     />
   ) : null;
 }

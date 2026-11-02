@@ -53,7 +53,14 @@ export const parseMonitorLocations = (
         locs = prevPublicLocs;
         pvtLocs = prevPrivateLocs;
       } else {
-        if (!privateLocations) {
+        // Only carry forward the previous private locations when the caller
+        // provided no private-location information at all — either via the
+        // dedicated `private_locations` field or embedded as objects inside
+        // `locations`. Otherwise the `locations`/`private_locations` array
+        // is treated as the authoritative set, preventing accidental merge
+        // duplicates when editing a monitor's private location through the
+        // public API.
+        if (!privateLocations && extractPvtLocs.length === 0) {
           pvtLocs = [...(pvtLocs ?? []), ...prevPrivateLocs];
           if (locations?.length === 0) {
             locs = [];

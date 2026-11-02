@@ -6,7 +6,8 @@
  */
 
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useCallback } from 'react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { GetRuleMigrationPrebuiltRulesResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../common/siem_migrations/constants';
@@ -35,5 +36,22 @@ export const useGetMigrationPrebuiltRules = (migrationId: string) => {
         addError(error, { title: i18n.GET_MIGRATION_PREBUILT_RULES_FAILURE });
       },
     }
+  );
+};
+
+export const useInvalidateGetMigrationPrebuiltRules = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    (migrationId: string) => {
+      const SPECIFIC_MIGRATIONS_PREBUILT_RULES_PATH = replaceParams(
+        SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
+        { migration_id: migrationId }
+      );
+      queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATIONS_PREBUILT_RULES_PATH], {
+        refetchType: 'active',
+      });
+    },
+    [queryClient]
   );
 };

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useCallback, useEffect } from 'react';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
-} from '@reduxjs/toolkit';
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
+} from 'redux-toolkit-v1';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
@@ -20,7 +19,6 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { PageScope } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
@@ -42,11 +40,6 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const attacksAlertsAlignmentEnabled = services.featureFlags.getBooleanValue(
-    ATTACKS_ALERTS_ALIGNMENT_ENABLED,
-    false
-  );
 
   const {
     loading: loadingSignalIndex,
@@ -66,12 +59,6 @@ export const useInitDataViewManager = () => {
   }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    // Also, make sure it works exactly as x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/use_init_sourcerer.tsx
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     onSignalIndexUpdated();
     // because we only want onSignalIndexUpdated to run when signalIndexName updates,
     // but we want to know about the updates from the dependencies of onSignalIndexUpdated
@@ -79,22 +66,16 @@ export const useInitDataViewManager = () => {
   }, [signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener(
-      {
-        dataViews: services.dataViews,
-        http: services.http,
-        uiSettings: services.uiSettings,
-        application: services.application,
-        spaces: services.spaces,
-      },
-      attacksAlertsAlignmentEnabled
-    );
+    const dataViewsLoadingListener = createInitListener({
+      dataViews: services.dataViews,
+      http: services.http,
+      uiSettings: services.uiSettings,
+      notifications: services.notifications,
+      application: services.application,
+      spaces: services.spaces,
+      storage: services.storage,
+    });
 
     dispatch(addListener(dataViewsLoadingListener));
 
@@ -109,7 +90,10 @@ export const useInitDataViewManager = () => {
     ].map((scope) =>
       createDataViewSelectedListener({
         scope,
+        spaces: services.spaces,
         dataViews: services.dataViews,
+        notifications: services.notifications,
+        storage: services.storage,
       })
     );
 
@@ -126,20 +110,19 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
-    attacksAlertsAlignmentEnabled,
     dispatch,
-    newDataViewPickerEnabled,
     services.application,
     services.dataViews,
     services.http,
+    services.notifications,
     services.spaces,
+    services.storage,
     services.uiSettings,
   ]);
 
   return useCallback(
-    (initialSelection: SelectDataViewAsyncPayload[]) => {
-      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection));
-    },
+    (initialSelection: SelectDataViewAsyncPayload[]) =>
+      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection)),
     [dispatch]
   );
 };

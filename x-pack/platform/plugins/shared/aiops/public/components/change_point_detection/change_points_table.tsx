@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
@@ -35,6 +36,7 @@ export interface ChangePointsTableProps {
   isLoading: boolean;
   onSelectionChange?: (update: SelectedChangePoint[]) => void;
   onRenderComplete?: () => void;
+  parentApi?: unknown;
 }
 
 function getFilterConfig(
@@ -75,7 +77,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   fieldConfig,
   onSelectionChange,
   onRenderComplete,
+  parentApi,
 }) => {
+  const isInteractive = useIsInteractive(parentApi);
+
   const {
     fieldFormats,
     data: {
@@ -122,9 +127,20 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     [onRenderComplete, pagination.pageSize]
   );
 
-  const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
+  const isDashboardEmbedding = embeddingOrigin === 'dashboard';
+  const hasActions =
+    isInteractive && fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
+
+  // Prevents timestamp and p-value cells from wrapping excessively in narrow tables,
+  // which would make the values unreadable. Capped at 3 lines as a safe maximum.
+  const lineClampStyle: React.CSSProperties = {
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  };
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
@@ -134,10 +150,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       name: i18n.translate('xpack.aiops.changePointDetection.timeColumn', {
         defaultMessage: 'Time',
       }),
+      dataType: 'date',
       sortable: true,
       truncateText: false,
-      width: '230px',
-      render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
+      render: (timestamp: ChangePointAnnotation['timestamp']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {dateFormatter.convertToText(timestamp)}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '180px' : '20%',
     },
     {
       id: 'preview',
@@ -156,6 +177,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (annotation: ChangePointAnnotation) => {
         return (
           <MiniChartPreview
+            parentApi={parentApi}
             annotation={annotation}
             fieldConfig={fieldConfig}
             interval={bucketInterval.expression}
@@ -172,8 +194,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      truncateText: false,
+      truncateText: true,
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
+      width: isDashboardEmbedding ? '130px' : '15%',
     },
     {
       id: 'pValue',
@@ -190,29 +213,26 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       },
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePointAnnotation['p_value']) =>
-        pValue !== undefined ? pValue.toPrecision(3) : '-',
+      render: (pValue: ChangePointAnnotation['p_value']) => (
+        <span style={isDashboardEmbedding ? lineClampStyle : undefined}>
+          {pValue !== undefined ? pValue.toPrecision(3) : '-'}
+        </span>
+      ),
+      width: isDashboardEmbedding ? '120px' : '15%',
     },
     ...(fieldConfig.splitField
       ? [
           {
-            id: 'groupName',
-            'data-test-subj': 'aiopsChangePointGroupName',
-            field: 'group.name',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
-              defaultMessage: 'Field name',
-            }),
-            truncateText: false,
-          },
-          {
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldValueColumn', {
-              defaultMessage: 'Field value',
-            }),
+            name: fieldConfig.splitField,
             truncateText: false,
             sortable: true,
+            width: isDashboardEmbedding ? '120px' : '15%',
+            render: (value: string) => (
+              <span style={isDashboardEmbedding ? lineClampStyle : undefined}>{value}</span>
+            ),
           },
           ...(hasActions
             ? [
@@ -234,7 +254,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                           defaultMessage: 'Filter for value',
                         }
                       ),
-                      icon: 'plusInCircle',
+                      icon: 'plusCircle',
                       color: 'primary',
                       type: 'icon',
                       onClick: (item) => {
@@ -262,7 +282,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                           defaultMessage: 'Filter out value',
                         }
                       ),
-                      icon: 'minusInCircle',
+                      icon: 'minusCircle',
                       color: 'primary',
                       type: 'icon',
                       onClick: (item) => {
@@ -304,6 +324,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      tableLayout={isDashboardEmbedding ? 'auto' : 'fixed'}
+      tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
+        defaultMessage: 'Change point detection results',
+      })}
       itemId="id"
       selection={selectionValue}
       loading={isLoading}
@@ -313,7 +337,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       pagination={
         pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
       }
-      sorting={sorting}
+      sorting={{ ...sorting, ...(!isInteractive && { readOnly: true }) }}
       onTableChange={onTableChange}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
@@ -321,15 +345,16 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       noItemsMessage={
         isLoading ? (
           <EuiEmptyPrompt
-            iconType="search"
+            iconType="magnify"
             title={
-              <h2>
+              <h3>
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
                   defaultMessage="Fetching change points..."
                 />
-              </h2>
+              </h3>
             }
+            titleSize="xs"
           />
         ) : (
           <NoDataFoundWarning />
@@ -344,6 +369,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
   annotation,
   onRenderComplete,
   onLoading,
+  parentApi,
 }) => {
   const {
     lens: { EmbeddableComponent },
@@ -354,7 +380,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
   const { filters, query, attributes, timeRange } = useCommonChartProps({
     annotation,
     fieldConfig,
-    previewMode: true,
+    isInteractive: false,
     bucketInterval: bucketInterval.expression,
   });
 
@@ -392,12 +418,13 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({
         filters={filters}
         // @ts-ignore
         attributes={attributes}
-        renderMode={'preview'}
+        renderMode={'non-interactive'}
         executionContext={{
           type: 'aiops_change_point_detection_chart',
           name: 'Change point detection',
         }}
         onLoad={onLoading}
+        parentApi={parentApi}
       />
     </div>
   );

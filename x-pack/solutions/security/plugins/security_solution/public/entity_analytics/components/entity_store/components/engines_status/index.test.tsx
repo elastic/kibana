@@ -12,10 +12,18 @@ import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();
+const mockInstallMutate = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
-  useEnableEntityStoreMutation: () => ({
-    mutate: jest.fn(),
+  useInstallEntityStoreMutation: () => ({
+    mutate: mockInstallMutate,
+    isLoading: false,
+  }),
+}));
+
+jest.mock('../../hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => ({
+    data: { has_install_permissions: true },
     isLoading: false,
   }),
 }));
@@ -37,7 +45,9 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -49,7 +59,9 @@ describe('EngineStatus', () => {
       error: new Error('Error'),
     });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByText('There was an error loading the engine status')).toBeInTheDocument();
   });
@@ -61,7 +73,9 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByText('No engines found')).toBeInTheDocument();
   });
@@ -77,7 +91,9 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByText('User Store')).toBeInTheDocument();
     expect(screen.getByText('Download status')).toBeInTheDocument();
@@ -94,7 +110,9 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus />, {
+      wrapper: TestProviders,
+    });
 
     const downloadButton = screen.getByText('Download status');
     fireEvent.click(downloadButton);

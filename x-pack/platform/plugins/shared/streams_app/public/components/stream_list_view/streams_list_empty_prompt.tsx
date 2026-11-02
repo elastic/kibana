@@ -5,63 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
-import { EMPTY } from 'rxjs';
-import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import useAsync from 'react-use/lib/useAsync';
 import { AssetImage } from '../asset_image';
 import { useKibana } from '../../hooks/use_kibana';
+import { useOnboardingLink } from '../../hooks/use_onboarding_link';
 
 export const StreamsListEmptyPrompt = () => {
   const {
-    core: { docLinks, http },
-    dependencies: {
-      start: { spaces, share, cloud },
-    },
+    core: { docLinks },
   } = useKibana();
   const streamsDocsLink = docLinks.links.observability.logsStreams;
 
-  const observabilityOnboardingLocator =
-    share.url.locators.get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR);
-
-  // TODO: Replace with a locator when available
-  const securityOnboardingLink = `/app/security/${SecurityPageName.landing}`;
-  const agnosticOnboardingLink = '/app/integrations/browse';
-
-  const spaceObservable = useMemo(() => (spaces ? spaces.getActiveSpace$() : EMPTY), [spaces]);
-  const activeSpace = useObservable(spaceObservable);
-
-  const isObservabilitySpace =
-    cloud?.serverless?.projectType === 'observability' || activeSpace?.solution === 'oblt';
-  const isSecuritySpace =
-    cloud?.serverless?.projectType === 'security' || activeSpace?.solution === 'security';
-
-  const onboardingLink = useAsync(async () => {
-    if (observabilityOnboardingLocator && isObservabilitySpace) {
-      return await observabilityOnboardingLocator.getUrl({});
-    } else if (isSecuritySpace) {
-      return http.basePath.prepend(securityOnboardingLink);
-    }
-    return http.basePath.prepend(agnosticOnboardingLink);
-  }, [
-    observabilityOnboardingLocator,
-    isObservabilitySpace,
-    isSecuritySpace,
-    http.basePath,
-    securityOnboardingLink,
-  ]);
+  const onboardingLink = useOnboardingLink();
 
   return (
     <EuiEmptyPrompt
       css={{
-        maxInlineSize: '760px !important',
+        maxInlineSize: '960px !important',
+        '.euiEmptyPrompt__content': {
+          flexBasis: '35%',
+        },
+        '.euiEmptyPrompt__icon': {
+          maxInlineSize: 'unset !important',
+        },
+        '.euiEmptyPrompt__icon .euiImageWrapper': {
+          maxInlineSize: 'unset !important',
+        },
       }}
-      icon={<AssetImage type="addStreams" />}
+      icon={<AssetImage type="addStreams" size="fullWidth" />}
       title={
         <h2>
           {i18n.translate('xpack.streams.emptyState.title', {
@@ -75,18 +48,16 @@ export const StreamsListEmptyPrompt = () => {
         <p>
           {i18n.translate('xpack.streams.emptyState.body', {
             defaultMessage:
-              'Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don’t need to navigate to multiple applications or manually configure underlying Elasticsearch components.',
+              "Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don't need to navigate to multiple applications or manually configure underlying Elasticsearch components.",
           })}
         </p>
       }
       actions={
-        onboardingLink.value ? (
-          <EuiButton color="primary" fill href={onboardingLink.value}>
-            {i18n.translate('xpack.streams.emptyState.addDataButton', {
-              defaultMessage: 'Add data',
-            })}
-          </EuiButton>
-        ) : undefined
+        <EuiButton color="primary" fill href={onboardingLink}>
+          {i18n.translate('xpack.streams.emptyState.addDataButton', {
+            defaultMessage: 'Add data',
+          })}
+        </EuiButton>
       }
       footer={
         <>

@@ -146,6 +146,26 @@ export const from = {
     }
     return undefined;
   },
+  optionalXJsonArray: (v: string) => {
+    const trimmed = v.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    const collapsed = collapseEscapedStrings(trimmed);
+    try {
+      const parsed = JSON.parse(collapsed);
+      if (Array.isArray(parsed) && parsed.length === 0) {
+        return undefined;
+      }
+    } catch {
+      // If invalid JSON, keep the value; validation should catch invalid content.
+      // Fall back to the simplest empty array literal check.
+      if (collapsed === '[]') {
+        return undefined;
+      }
+    }
+    return v;
+  },
 };
 
 const isJSONString = (v: string) => {

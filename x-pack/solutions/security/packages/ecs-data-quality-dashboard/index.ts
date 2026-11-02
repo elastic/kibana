@@ -12,7 +12,6 @@ export { getIlmPhaseDescription } from './impl/data_quality_panel/utils/get_ilm_
 export {
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
   DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP,
-  DATA_QUALITY_SUBTITLE,
   DATA_QUALITY_SUGGESTED_USER_PROMPT,
   ILM_PHASE,
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
@@ -25,3 +24,16 @@ export {
   ECS_FIELD_REFERENCE_URL,
   MAPPING_URL,
 } from './impl/data_quality_panel/constants';
+
+export { checkIndex } from './impl/data_quality_panel/utils/check_index';
+
+export type {
+  OnCheckCompleted,
+  PartitionedFieldMetadata,
+  UnallowedValueCount,
+  AllowedValue,
+  IncompatibleFieldMappingItem,
+  IncompatibleFieldValueItem,
+  SameFamilyFieldItem,
+  StorageResult,
+} from './impl/data_quality_panel/types';

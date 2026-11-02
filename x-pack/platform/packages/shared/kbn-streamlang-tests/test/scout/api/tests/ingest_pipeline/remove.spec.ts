@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RemoveProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Remove Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should remove a field', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-remove-basic';
@@ -26,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ temp_field: 'to-be-removed', message: 'keep-this' }];
       await testBed.ingest(indexName, docs, processors);
@@ -34,8 +36,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('temp_field');
-      expect(source).toHaveProperty('message', 'keep-this');
+      expect(source?.temp_field).toBeUndefined();
+      expect(source?.message).toBe('keep-this');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -51,7 +53,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       await testBed.ingest(indexName, docs, processors);
@@ -59,7 +61,7 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('message', 'some_value');
+      expect(source?.message).toBe('some_value');
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -75,7 +77,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -99,7 +101,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { temp_data: { value: 'remove-me' }, event: { kind: 'test' }, message: 'doc1' },
@@ -111,14 +113,14 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // First doc should have temp_data removed (where condition matched)
-      const doc1 = ingestedDocs.find((d: any) => d.message === 'doc1');
-      expect(doc1).not.toHaveProperty('temp_data');
-      expect(doc1).toHaveProperty('event.kind', 'test');
+      const doc1 = ingestedDocs.find((d: Record<string, unknown>) => d.message === 'doc1');
+      expect(asDoc(doc1)?.temp_data).toBeUndefined();
+      expect(asDoc(asDoc(doc1)?.event)?.kind).toBe('test');
 
       // Second doc should keep temp_data (where condition not matched)
-      const doc2 = ingestedDocs.find((d: any) => d.message === 'doc2');
-      expect(doc2).toHaveProperty('temp_data.value', 'keep-me');
-      expect(doc2).toHaveProperty('event.kind', 'production');
+      const doc2 = ingestedDocs.find((d: Record<string, unknown>) => d.message === 'doc2');
+      expect(asDoc(asDoc(doc2)?.temp_data)?.value).toBe('keep-me');
+      expect(asDoc(asDoc(doc2)?.event)?.kind).toBe('production');
     });
 
     apiTest('default value of ignore_missing (false)', async ({ testBed }) => {
@@ -133,7 +135,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       // Field missing, should fail (ignore_missing defaults to false)
       const docs = [{ message: 'some_value' }];
@@ -162,7 +164,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

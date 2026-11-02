@@ -172,7 +172,7 @@ export const BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR = i18n.translate(
 export const BACKFILL_TABLE_TITLE = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillTable.title',
   {
-    defaultMessage: 'Manual runs',
+    defaultMessage: 'Manual/Gap fill tasks',
   }
 );
 
@@ -187,6 +187,27 @@ export const BACKFILL_TABLE_SUBTITLE = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillTable.subtitle',
   {
     defaultMessage: 'View and manage active manual runs',
+  }
+);
+
+export const BACKFILLS_TABLE_COLUMN_INITIATOR = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.initiator',
+  {
+    defaultMessage: 'Run type',
+  }
+);
+
+export const BACKFILLS_TABLE_INITIATOR_AUTO_GAP_FILL = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillsTable.initiator.autoGapFill',
+  {
+    defaultMessage: 'Auto gap fill',
+  }
+);
+
+export const BACKFILLS_TABLE_INITIATOR_MANUAL = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillsTable.initiator.manual',
+  {
+    defaultMessage: 'Manual',
   }
 );
 
@@ -218,7 +239,7 @@ export const BACKFILLS_TABLE_COLUMN_ACTION = i18n.translate(
 export const RULE_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.title',
   {
-    defaultMessage: 'Rule settings',
+    defaultMessage: 'Rule setting',
   }
 );
 
@@ -232,14 +253,15 @@ export const GAP_AUTO_FILL_HEADER = i18n.translate(
 export const GAP_AUTO_FILL_TOGGLE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillToggle',
   {
-    defaultMessage: 'Enable auto gap fill',
+    defaultMessage: 'Turn on auto gap fills',
   }
 );
 
 export const GAP_AUTO_FILL_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillDescription',
   {
-    defaultMessage: 'Detected run gaps will be automatically filled.',
+    defaultMessage:
+      'If this setting is turned on, all gaps in rule execution will be automatically filled. ',
   }
 );
 
@@ -250,17 +272,17 @@ export const RUN_SCHEDULE_LABEL = i18n.translate(
   }
 );
 
-export const AUTO_GAP_FILL_TOAST_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleSettings.save',
+export const RULE_SETTINGS_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.saveToastTitle',
   {
-    defaultMessage: 'Auto gap fill',
+    defaultMessage: 'Rule settings',
   }
 );
 
-export const AUTO_GAP_FILL_TOAST_TEXT = i18n.translate(
+export const RULE_SETTINGS_TOAST_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.saveSuccessToastText',
   {
-    defaultMessage: 'Auto gap fill settings updated successfully',
+    defaultMessage: 'Rule settings updated successfully',
   }
 );
 
@@ -275,5 +297,41 @@ export const RULE_SETTINGS_MODAL_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleSettings.save',
   {
     defaultMessage: 'Save',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_HEADER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeHeader',
+  {
+    defaultMessage: 'Gap detection scope',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_DESCRIPTION_WITH_AUTO_FILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescriptionWithAutoFill',
+  {
+    defaultMessage:
+      'Define what counts as a gap in your rule monitoring and what will be included in automatic gap filling.',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_DESCRIPTION_WITHOUT_AUTO_FILL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.gapDetectionScopeDescriptionWithoutAutoFill',
+  {
+    defaultMessage: 'Define what counts as a gap in your rule monitoring.',
+  }
+);
+
+export const GAP_DETECTION_SCOPE_INCLUDE_DISABLED_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.includeDisabledGapsLabel',
+  {
+    defaultMessage: 'Include gaps created when a rule was disabled.',
+  }
+);
+
+export const RULE_BACKFILLS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleGaps.backfillsTableCaption',
+  {
+    defaultMessage: 'Rule backfills',
   }
 );

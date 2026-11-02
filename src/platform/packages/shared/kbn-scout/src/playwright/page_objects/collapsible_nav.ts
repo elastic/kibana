@@ -29,10 +29,48 @@ export class CollapsibleNav {
     }
   }
 
-  async clickItem(itemName: 'Discover' | 'Dashboards' | 'Maps' | 'Machine Learning') {
+  async clickItem(
+    itemName:
+      | 'Discover'
+      | 'Dashboards'
+      | 'Maps'
+      | 'Machine Learning'
+      | 'stack_management'
+      | 'management:maintenanceWindows',
+    { lowercase = true }: { lowercase?: boolean } = {}
+  ) {
     await this.expandNav();
-    return this.config.serverless
-      ? this.page.testSubj.click(`*nav-item-id-${itemName.toLocaleLowerCase()}`)
-      : this.page.click(`[title="${itemName}"]`);
+    const itemId = lowercase ? itemName.toLocaleLowerCase() : itemName;
+    if (this.config.serverless) {
+      return this.page.testSubj.click(`*nav-item-id-${itemId}`);
+    }
+    // Stateful deployments render either the classic nav (title attribute) or the project nav.
+    return this.page.click(`[title="${itemName}"], [data-test-subj~="nav-item-id-${itemId}"]`);
+  }
+
+  async getNavLinks() {
+    const collapsibleNav = this.page.testSubj.locator('collapsibleNav');
+    if (!(await collapsibleNav.isVisible())) {
+      await this.toggleNavButton.click();
+      await collapsibleNav.waitFor({ state: 'visible' });
+    }
+    const navLinks = this.page.testSubj.locator('collapsibleNavAppLink');
+    return navLinks.allInnerTexts();
+  }
+
+  async openMoreMenu() {
+    await this.page.testSubj.click('kbnChromeNav-moreMenuTrigger');
+  }
+
+  async clickNavItemByDeepLinkId(deepLinkId: string) {
+    await this.page.testSubj.click(`~nav-item-deepLinkId-${deepLinkId}`);
+  }
+
+  getNavItemById(id: string) {
+    return this.page.testSubj.locator(`~nav-item-id-${id}`);
+  }
+
+  getNavItemByDeepLinkId(deepLinkId: string) {
+    return this.page.testSubj.locator(`~nav-item-deepLinkId-${deepLinkId}`);
   }
 }

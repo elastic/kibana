@@ -6,34 +6,6 @@
  */
 import type { Message } from '../messages';
 
-interface AnonymizationRuleBase {
-  type: string;
-  enabled: boolean;
-}
-
-export interface NamedEntityRecognitionRule extends AnonymizationRuleBase {
-  type: 'NER';
-  modelId: string;
-  timeoutSeconds?: number;
-  allowedEntityClasses?: Array<'PER' | 'ORG' | 'LOC' | 'MISC'>;
-}
-export interface RegexAnonymizationRule extends AnonymizationRuleBase {
-  type: 'RegExp';
-  pattern: string;
-  entityClass: string;
-  mask?: RuleMaskType;
-}
-
-export type AnonymizationRule = NamedEntityRecognitionRule | RegexAnonymizationRule;
-
-export interface AnonymizationSettings {
-  rules: AnonymizationRule[];
-}
-
-enum RuleMaskType {
-  hash = 'hash',
-}
-
 export interface AnonymizationEntity {
   class_name: string;
   value: string;
@@ -57,6 +29,7 @@ export interface AnonymizationOutput {
   messages: Message[];
   anonymizations: Anonymization[];
   system?: string;
+  replacementsId?: string;
 }
 
 export interface DeanonymizationOutput {
@@ -64,3 +37,21 @@ export interface DeanonymizationOutput {
 }
 
 export type DeanonymizedMessage = Message & { deanonymizations: Deanonymization[] };
+
+/**
+ * Anonymization metadata attached to inference responses and events.
+ */
+export interface AnonymizationResponseMetadata {
+  anonymization?: {
+    replacementsId?: string;
+  };
+}
+
+/**
+ * Deanonymization data for a single message, pairing the deanonymized message
+ * with the positions/entities that were restored.
+ */
+export interface DeanonymizedMessageData {
+  message: Message;
+  deanonymizations: Deanonymization[];
+}

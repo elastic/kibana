@@ -9,13 +9,15 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
+import type { RenderKeyValue } from '@kbn/key-value-metadata-table';
 import { KeyValueTable } from '@kbn/key-value-metadata-table';
 
 interface Props {
   properties: Array<{ field: string; value: string[] | number[] }>;
+  renderValue?: RenderKeyValue;
 }
 
-export function Section({ properties }: Props) {
+export function Section({ properties, renderValue }: Props) {
   if (!isEmpty(properties)) {
     return (
       <KeyValueTable
@@ -23,6 +25,7 @@ export function Section({ properties }: Props) {
           key: property.field,
           value: property.value,
         }))}
+        renderValue={renderValue}
       />
     );
   }

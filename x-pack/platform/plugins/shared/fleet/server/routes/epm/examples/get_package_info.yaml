@@ -1,0 +1,32 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getPackageInfoExample:
+            description: 'Package details and installation status'
+            value:
+              item:
+                name: 'aws'
+                version: '2.10.0'
+                title: 'AWS'
+                description: 'Collect logs and metrics from Amazon Web Services'
+                status: 'installed'
+                categories:
+                  - 'cloud'
+                assets:
+                  kibana:
+                    dashboard: []
+                    index_pattern: []
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

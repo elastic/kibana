@@ -13,6 +13,8 @@ import type {
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,
   IntegrationListExtractor,
+  StreamsFieldsExtractor,
+  StreamsFieldsSearchParams,
 } from './repositories/types';
 
 export type * from './repositories/types';
@@ -23,13 +25,16 @@ export interface FieldsMetadataServiceStartDeps {}
 export interface FieldsMetadataServiceSetup {
   registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => void;
   registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => void;
+  registerStreamsFieldsExtractor: (extractor: StreamsFieldsExtractor) => void;
 }
 
 export interface FieldsMetadataServiceStart {
   getClient(request: KibanaRequest): Promise<IFieldsMetadataClient>;
 }
 
-export interface GetFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {
+export interface GetFieldsMetadataOptions
+  extends Partial<IntegrationFieldsSearchParams>,
+    Partial<StreamsFieldsSearchParams> {
   source?: FieldSource | FieldSource[];
 }
 
@@ -43,4 +48,11 @@ export interface IFieldsMetadataClient {
     params?: GetFieldsMetadataOptions
   ): Promise<FieldMetadata | undefined>;
   find(params: FindFieldsMetadataOptions): Promise<FieldsMetadataDictionary>;
+  matchesAnyTypeForEventCategory(categories: string[], expectedTypes: string[]): Promise<boolean>;
+  getFieldChildren(
+    fieldName: FieldName,
+    params?: GetFieldsMetadataOptions
+  ): Promise<FieldsMetadataDictionary>;
+  /** Root ECS field set names (see ECS field reference). Derived from ECS flat field names only. */
+  getECSFieldsets(): Promise<string[]>;
 }

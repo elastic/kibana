@@ -9,6 +9,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
 export type IndicesMetadataPluginSetup = void;
 
@@ -20,4 +21,5 @@ export interface IndicesMetadataPluginSetupDeps {
 
 export interface IndicesMetadataPluginStartDeps {
   taskManager: TaskManagerStartContract;
+  telemetry: TelemetryPluginStart;
 }

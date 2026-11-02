@@ -7,22 +7,34 @@
 
 import { getOr, noop } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 
 import type { UsersComponentsQueryProps } from './types';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { UsersTable } from '../../components/all_users';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import * as i18n from './translations';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { usersSelectors } from '../../store';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useAllEntityStoreUsers } from '../../containers/users/use_all_entity_store_users';
 
 const UsersTableManage = manageQuery(UsersTable);
 
 const QUERY_ID = 'UsersTable';
+
+const USERS_ALL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_USERS_PAGE,
+  'users_all'
+);
 
 export const AllUsersQueryTabBody = ({
   endDate,
@@ -34,6 +46,7 @@ export const AllUsersQueryTabBody = ({
   type,
   deleteQuery,
 }: UsersComponentsQueryProps) => {
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const { toggleStatus } = useQueryToggle(QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -43,12 +56,19 @@ export const AllUsersQueryTabBody = ({
   const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getUsersSelector(state));
 
+  const commonUsersQueryArgs = {
+    endDate,
+    filterQuery,
+    indexNames,
+    startDate,
+  };
+
   const {
-    loading,
-    result: { users, pageInfo, totalCount },
+    loading: legacyLoading,
+    result: { users: legacyUsers, pageInfo: legacyPageInfo, totalCount: legacyTotalCount },
     search,
-    refetch,
-    inspect,
+    refetch: legacyRefetch,
+    inspect: legacyInspect,
   } = useSearchStrategy<UsersQueries.users>({
     factoryQueryType: UsersQueries.users,
     initialResult: {
@@ -61,11 +81,17 @@ export const AllUsersQueryTabBody = ({
       },
     },
     errorMessage: i18n.ERROR_FETCHING_USERS_DATA,
-    abort: querySkip,
+    abort: querySkip || entityStoreV2Enabled,
+    executionContext: USERS_ALL_CONTEXT,
+  });
+
+  const [entityStoreLoading, entityStoreUsersArgs] = useAllEntityStoreUsers({
+    ...commonUsersQueryArgs,
+    skip: querySkip || !entityStoreV2Enabled,
   });
 
   useEffect(() => {
-    if (!querySkip) {
+    if (!querySkip && !entityStoreV2Enabled) {
       search({
         filterQuery,
         defaultIndex: indexNames,
@@ -78,7 +104,25 @@ export const AllUsersQueryTabBody = ({
         sort,
       });
     }
-  }, [search, startDate, endDate, filterQuery, indexNames, querySkip, activePage, limit, sort]);
+  }, [
+    search,
+    startDate,
+    endDate,
+    filterQuery,
+    indexNames,
+    querySkip,
+    activePage,
+    limit,
+    sort,
+    entityStoreV2Enabled,
+  ]);
+
+  const loading = entityStoreV2Enabled ? entityStoreLoading : legacyLoading;
+  const users = entityStoreV2Enabled ? entityStoreUsersArgs.users : legacyUsers;
+  const pageInfo = entityStoreV2Enabled ? entityStoreUsersArgs.pageInfo : legacyPageInfo;
+  const totalCount = entityStoreV2Enabled ? entityStoreUsersArgs.totalCount : legacyTotalCount;
+  const refetch = entityStoreV2Enabled ? entityStoreUsersArgs.refetch : legacyRefetch;
+  const inspect = entityStoreV2Enabled ? entityStoreUsersArgs.inspect : legacyInspect;
 
   return (
     <UsersTableManage
@@ -88,7 +132,7 @@ export const AllUsersQueryTabBody = ({
       id={QUERY_ID}
       inspect={inspect}
       loading={loading}
-      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
+      loadPage={noop}
       refetch={refetch}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       setQuery={setQuery}

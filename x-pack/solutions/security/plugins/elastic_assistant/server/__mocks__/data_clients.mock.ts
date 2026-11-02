@@ -13,7 +13,7 @@ import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_cl
 import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import type { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import type { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
@@ -59,18 +59,18 @@ export const conversationsDataClientMock: {
 };
 
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => {
-  const mockDataClient = {
+  const mockDataClient: AttackDiscoveryDataClientMock = {
     bulkUpdateAttackDiscoveryAlerts: jest.fn(),
     getAdHocAlertsIndexPattern: jest.fn(),
     getScheduledAndAdHocIndexPattern: jest.fn(),
     createAttackDiscoveryAlerts: jest.fn(),
-    getAlertConnectorNames: jest.fn(),
     findAttackDiscoveryAlerts: jest.fn(),
     findDocuments: jest.fn(),
     getAttackDiscoveryGenerations: jest.fn(),
     getAttackDiscoveryGenerationById: jest.fn(),
     getReader: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+    isServiceAccountGeneration: jest.fn().mockResolvedValue(false),
     refreshEventLogIndex: jest.fn(),
     // Properties from AIAssistantDataClient
     spaceId: 'default',
@@ -97,7 +97,7 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
     currentUser: null,
     writerCache: new Map(),
     initializeWriter: jest.fn(),
-  } as AttackDiscoveryDataClientMock;
+  };
 
   return mockDataClient;
 };
@@ -116,6 +116,9 @@ const createAttackDiscoveryScheduleDataClientMock = (): AttackDiscoveryScheduleD
   deleteSchedule: jest.fn(),
   enableSchedule: jest.fn(),
   disableSchedule: jest.fn(),
+  bulkDeleteSchedules: jest.fn(),
+  bulkEnableSchedules: jest.fn(),
+  bulkDisableSchedules: jest.fn(),
 });
 
 export const attackDiscoveryScheduleDataClientMock: {

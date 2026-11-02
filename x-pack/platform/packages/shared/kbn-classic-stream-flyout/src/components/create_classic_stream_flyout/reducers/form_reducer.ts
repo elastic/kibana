@@ -55,6 +55,9 @@ export interface FormState {
 
   // Validation state
   validation: ValidationState;
+
+  // Submission state - tracks when onCreate is running
+  isSubmitting: boolean;
 }
 
 export type FormAction =
@@ -76,6 +79,9 @@ export type FormAction =
   | { type: 'ABORT_VALIDATION' }
   | { type: 'CLEAR_VALIDATION_ERROR' }
   | { type: 'RESET_VALIDATION' }
+  // Submission flow actions
+  | { type: 'START_SUBMITTING' }
+  | { type: 'STOP_SUBMITTING' }
   // Combined actions
   | { type: 'RESET_FORM' };
 
@@ -199,6 +205,12 @@ export const formReducer = (state: FormState, action: FormAction): FormState => 
     case 'RESET_FORM':
       return initialFormState;
 
+    case 'START_SUBMITTING':
+      return { ...state, isSubmitting: true };
+
+    case 'STOP_SUBMITTING':
+      return { ...state, isSubmitting: false };
+
     default:
       return state;
   }
@@ -218,4 +230,7 @@ export const initialFormState: FormState = {
     validationError: null,
     conflictingIndexPattern: undefined,
   },
+
+  // Submission state
+  isSubmitting: false,
 };

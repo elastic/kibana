@@ -7,11 +7,13 @@
 
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import type { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { IndicatorTypes } from '../../../domain/models';
-import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
+import type { EventOrigin, SloTelemetryService } from '../../../lib/telemetry';
+import { toEventOrigin } from '../../../lib/telemetry';
+import type { SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
-import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
+import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
 import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
 import type { TransformGenerator } from '../../transform_generators';
@@ -20,35 +22,34 @@ import { runBulkDelete } from './run_bulk_delete';
 
 export const TYPE = 'slo:bulk-delete-task';
 
+export interface BulkDeleteTaskParams extends BulkDeleteParams {
+  origin?: EventOrigin;
+}
+
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
   logFactory: LoggerFactory;
-  plugins: {
-    [key in keyof SLOPluginSetupDependencies]: {
-      setup: Required<SLOPluginSetupDependencies>[key];
-    };
-  } & {
-    [key in keyof SLOPluginStartDependencies]: {
-      start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
-    };
-  };
+  taskManager: TaskManagerSetupContract;
+  telemetryService: SloTelemetryService;
 }
 
 export class BulkDeleteTask {
   private logger: Logger;
+  private telemetryService: SloTelemetryService;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, plugins, logFactory } = setupContract;
+    const { core, taskManager, logFactory, telemetryService } = setupContract;
     this.logger = logFactory.get(TYPE);
+    this.telemetryService = telemetryService;
 
     this.logger.debug('Registering task with [10m] timeout');
 
-    plugins.taskManager.setup.registerTaskDefinitions({
+    taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO bulk delete',
         timeout: '10m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
@@ -71,18 +72,23 @@ export class BulkDeleteTask {
               const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
               const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
-              const repository = new KibanaSavedObjectsSLORepository(scopedSoClient, this.logger);
+              const repository = new DefaultSLODefinitionRepository(scopedSoClient, this.logger);
               const transformManager = new DefaultTransformManager(
                 {} as Record<IndicatorTypes, TransformGenerator>,
                 scopedClusterClient,
                 this.logger,
-                abortController
+                signal
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
-                new DefaultSummaryTransformGenerator(),
+                new DefaultSummaryTransformGenerator(false),
                 scopedClusterClient,
                 this.logger,
-                abortController
+                signal
+              );
+
+              const params = taskInstance.params as BulkDeleteTaskParams;
+              const telemetry = this.telemetryService.getReporter(
+                params.origin ?? toEventOrigin(fakeRequest)
               );
 
               const deleteSLO = new DeleteSLO(
@@ -91,18 +97,18 @@ export class BulkDeleteTask {
                 summaryTransformManager,
                 scopedClusterClient,
                 rulesClient,
-                abortController
+                this.logger,
+                telemetry,
+                signal
               );
 
               try {
-                const params = taskInstance.params as BulkDeleteParams;
-
                 const results = await runBulkDelete(params, {
                   deleteSLO,
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,
-                  abortController,
+                  signal,
                 });
 
                 return {
@@ -123,7 +129,6 @@ export class BulkDeleteTask {
                 };
               }
             },
-            cancel: async () => {},
           };
         },
       },

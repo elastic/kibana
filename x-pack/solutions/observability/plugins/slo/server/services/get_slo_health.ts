@@ -10,12 +10,12 @@ import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-sche
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
 import { keyBy, map, uniq } from 'lodash';
 import { computeHealth } from '../domain/services';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 
 export class GetSLOHealth {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository
+    private repository: SLODefinitionRepository
   ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {

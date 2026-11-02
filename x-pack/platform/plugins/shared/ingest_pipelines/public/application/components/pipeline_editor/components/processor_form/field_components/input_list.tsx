@@ -12,12 +12,13 @@ import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiFieldText,
   EuiFormRow,
+  EuiIcon,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -158,21 +159,26 @@ export function InputList({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {value.length > 1 ? (
-                  <EuiButtonIcon
-                    aria-label={i18nTexts.removeItemButtonAriaLabel}
-                    css={styles.removeButton}
-                    iconType="minusInCircle"
-                    color="danger"
-                    onClick={() => onRemove(item.id)}
-                    size="s"
-                  />
+                  <EuiToolTip
+                    content={i18nTexts.removeItemButtonAriaLabel}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18nTexts.removeItemButtonAriaLabel}
+                      css={styles.removeButton}
+                      iconType="minusCircle"
+                      color="danger"
+                      onClick={() => onRemove(item.id)}
+                      size="s"
+                    />
+                  </EuiToolTip>
                 ) : (
-                  <EuiIcon css={styles.removeButton} type="empty" />
+                  <EuiIcon css={styles.removeButton} type="empty" aria-hidden={true} />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>
           ))}
-          <EuiButtonEmpty iconType="plusInCircle" onClick={onAdd} data-test-subj="addButton">
+          <EuiButtonEmpty iconType="plusCircle" onClick={onAdd} data-test-subj="addButton">
             {addLabel}
           </EuiButtonEmpty>
         </div>

@@ -23,8 +23,9 @@ export class RelativeDateFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.DATE;
 
   textConvert: TextContextTypeConvert = (val: string | number) => {
-    if (val === null || val === undefined) {
-      return '-';
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
     }
 
     const date = moment(val);

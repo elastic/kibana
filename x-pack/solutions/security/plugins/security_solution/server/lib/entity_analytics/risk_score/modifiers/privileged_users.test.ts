@@ -226,6 +226,7 @@ describe('applyPrivmonModifier', () => {
         type: 'watchlist',
         subtype: 'privmon',
         metadata: {
+          watchlist_id: 'privmon',
           is_privileged_user: true,
         },
       });
@@ -402,6 +403,7 @@ describe('applyPrivmonModifier', () => {
         subtype: 'privmon',
         modifier_value: 1.5,
         metadata: {
+          watchlist_id: 'privmon',
           is_privileged_user: true,
         },
       });
@@ -410,6 +412,7 @@ describe('applyPrivmonModifier', () => {
         subtype: 'privmon',
         modifier_value: 1.5,
         metadata: {
+          watchlist_id: 'privmon',
           is_privileged_user: true,
         },
       });

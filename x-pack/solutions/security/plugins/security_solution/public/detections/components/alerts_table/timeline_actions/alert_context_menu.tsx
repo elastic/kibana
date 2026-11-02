@@ -7,14 +7,20 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
+import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from './use_run_document_workflow_panel';
+import { toDocumentSelections } from './to_document_selections';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -40,28 +46,22 @@ import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { TimelineId } from '../../../../../common/types/timeline';
-import type {
-  DataViewId,
-  IndexPatternArray,
-  RuleObjectId,
-  RuleSignatureId,
-  Status,
-} from '../../../../../common/api/detection_engine';
-import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
-import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
-import type { AlertTableContextMenuItem } from '../types';
+import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
+import { useAddToChatAction } from './use_add_to_chat_action';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { AlertRowActionMenu, getAlertRowActionGroups } from './action_menu/alert_row_action_menu';
+
 interface AlertContextMenuProps {
   ariaLabel?: string;
-  ariaRowindex: number;
-  columnValues: string;
-  disabled: boolean;
+  isRemoteDocument: boolean;
   ecsRowData: Ecs;
+  onRemoveFromCase?: (eventId: string) => void;
   onRuleChange?: () => void;
   scopeId: string;
   refetch: (() => void) | undefined;
@@ -69,10 +69,9 @@ interface AlertContextMenuProps {
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
-  ariaRowindex,
-  columnValues,
-  disabled,
+  isRemoteDocument,
   ecsRowData,
+  onRemoveFromCase,
   onRuleChange,
   scopeId,
   refetch,
@@ -96,8 +95,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
-  const ruleRuleId = get(0, ecsRowData?.kibana?.alert?.rule?.rule_id);
-  const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
 
   const flattenedEcsData = useMemo(() => {
     const flattened = flattenObject(ecsRowData);
@@ -111,7 +108,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsData: ecsRowData,
     nonEcsData: flattenedEcsData,
     onMenuItemClick,
-    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     refetch,
   });
 
@@ -160,11 +156,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     if (refetch) refetch();
   }, [scopeId, globalQuery, timelineQuery, refetch]);
 
-  const ruleIndex =
-    ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
-  const ruleDataViewId =
-    ecsRowData['kibana.alert.rule.parameters']?.data_view_id ??
-    ecsRowData?.signal?.rule?.data_view_id;
+  const hit = useMemo(
+    () =>
+      buildDataTableRecord({
+        _id: ecsRowData._id,
+        _index: ecsRowData._index,
+        _source: ecsRowData as unknown as EsHitRecord['_source'],
+      }),
+    [ecsRowData]
+  );
 
   const {
     exceptionFlyoutType,
@@ -234,53 +234,110 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     refetch: refetchAll,
   });
 
-  const items: AlertTableContextMenuItem[] = useMemo(
+  const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+    closePopover,
+    ecsRowData,
+  });
+
+  const documentIdsForWorkflow = useMemo(
+    () => toDocumentSelections([{ _id: ecsRowData._id, _index: ecsRowData._index }]),
+    [ecsRowData._id, ecsRowData._index]
+  );
+
+  const {
+    runWorkflowMenuItem: runDocumentWorkflowMenuItem,
+    runDocumentWorkflowPanel: runDocumentWorkflowPanels,
+  } = useRunDocumentWorkflowPanel({
+    closePopover,
+    documentIds: documentIdsForWorkflow,
+    originEventId: ecsRowData._id,
+  });
+
+  const { addToChatActionItems } = useAddToChatAction({
+    ecsData: flattenedEcsData,
+    onMenuItemClick,
+    alertId: ecsRowData._id,
+  });
+
+  const removeFromCaseItems = useMemo(
     () =>
-      !isEvent && ruleId
+      onRemoveFromCase
         ? [
-            ...addToCaseActionItems,
-            ...statusActionItems,
-            ...alertTagsItems,
-            ...alertAssigneesItems,
-            ...exceptionActionItems,
-            ...(agentId ? osqueryActionItems : []),
+            {
+              key: REMOVE_FROM_CASE_ACTION_ID,
+              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
+              name: i18n.REMOVE_FROM_CASE,
+              onClick: () => {
+                closePopover();
+                onRemoveFromCase(ecsRowData._id);
+              },
+            },
           ]
-        : [
-            ...addToCaseActionItems,
-            ...(canCreateEndpointEventFilters ? eventFilterActionItems : []),
-            ...(agentId ? osqueryActionItems : []),
-          ],
+        : [],
+    [closePopover, onRemoveFromCase, ecsRowData._id]
+  );
+
+  const isAlertActionMenu = !isEvent && Boolean(ruleId);
+  const hasAgent = Boolean(agentId);
+  const hasItems = useMemo(
+    () =>
+      getAlertRowActionGroups({
+        addToCaseItems: addToCaseActionItems,
+        addToChatItems: addToChatActionItems,
+        alertAssigneeItems: alertAssigneesItems,
+        alertTagItems: alertTagsItems,
+        canCreateEndpointEventFilters,
+        eventFilterItems: eventFilterActionItems,
+        exceptionItems: exceptionActionItems,
+        hasAgent,
+        isAlert: isAlertActionMenu,
+        osqueryItems: osqueryActionItems,
+        removeFromCaseItems,
+        runAlertWorkflowItems: runWorkflowMenuItem,
+        runDocumentWorkflowItems: runDocumentWorkflowMenuItem,
+        statusItems: statusActionItems,
+      }).some((group) => group.length > 0),
     [
-      isEvent,
-      ruleId,
       addToCaseActionItems,
-      statusActionItems,
-      exceptionActionItems,
-      agentId,
-      osqueryActionItems,
-      eventFilterActionItems,
-      canCreateEndpointEventFilters,
-      alertTagsItems,
+      addToChatActionItems,
       alertAssigneesItems,
+      alertTagsItems,
+      canCreateEndpointEventFilters,
+      eventFilterActionItems,
+      exceptionActionItems,
+      hasAgent,
+      isAlertActionMenu,
+      osqueryActionItems,
+      removeFromCaseItems,
+      runWorkflowMenuItem,
+      runDocumentWorkflowMenuItem,
+      statusActionItems,
     ]
   );
 
   const panels = useMemo(
     () => [
-      {
-        id: 0,
-        items,
-      },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
+      ...runAlertWorkflowPanel,
+      ...runDocumentWorkflowPanels,
     ],
-    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
+    [
+      alertTagsPanels,
+      alertAssigneesPanels,
+      statusActionPanels,
+      runAlertWorkflowPanel,
+      runDocumentWorkflowPanels,
+    ]
   );
 
   const button = useMemo(() => {
-    const hasItems = !!items.length;
-    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
+    const tooltipContent = isRemoteDocument
+      ? i18n.REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE
+      : hasItems
+      ? i18n.MORE_ACTIONS
+      : i18n.INSUFFICIENT_PRIVILEGES;
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>
@@ -288,15 +345,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           aria-label={ariaLabel}
           data-test-subj="timeline-context-menu-button"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           data-popover-open={isPopoverOpen}
           onClick={onButtonClick}
-          isDisabled={disabled || !hasItems}
+          isDisabled={isRemoteDocument || !hasItems}
           color={isPopoverOpen ? 'primary' : 'text'}
         />
       </EuiToolTip>
     );
-  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
+  }, [ariaLabel, hasItems, isPopoverOpen, onButtonClick, isRemoteDocument]);
 
   const osqueryFlyout = useMemo(() => {
     return (
@@ -315,6 +372,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiPopover
             id="singlePanel"
+            aria-label={ariaLabel}
             button={button}
             isOpen={isPopoverOpen}
             closePopover={closePopover}
@@ -322,33 +380,34 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <EuiContextMenu
-              size="s"
-              initialPanelId={0}
+            <AlertRowActionMenu
+              addToCaseItems={addToCaseActionItems}
+              addToChatItems={addToChatActionItems}
+              alertAssigneeItems={alertAssigneesItems}
+              alertTagItems={alertTagsItems}
+              canCreateEndpointEventFilters={canCreateEndpointEventFilters}
+              eventFilterItems={eventFilterActionItems}
+              exceptionItems={exceptionActionItems}
+              hasAgent={hasAgent}
+              isAlert={isAlertActionMenu}
+              osqueryItems={osqueryActionItems}
               panels={panels}
-              data-test-subj="actions-context-menu"
+              removeFromCaseItems={removeFromCaseItems}
+              runAlertWorkflowItems={runWorkflowMenuItem}
+              runDocumentWorkflowItems={runDocumentWorkflowMenuItem}
+              statusItems={statusActionItems}
             />
           </EuiPopover>
         </EventsTdContent>
       </div>
-      {openAddExceptionFlyout &&
-        ruleId &&
-        ruleRuleId &&
-        ruleName != null &&
-        ecsRowData?._id != null && (
-          <AddExceptionFlyoutWrapper
-            ruleId={ruleId}
-            ruleRuleId={ruleRuleId}
-            ruleIndices={ruleIndex}
-            ruleDataViewId={ruleDataViewId}
-            ruleName={ruleName}
-            exceptionListType={exceptionFlyoutType}
-            eventId={ecsRowData?._id}
-            onCancel={onAddExceptionCancel}
-            onConfirm={onAddExceptionConfirm}
-            alertStatus={alertStatus}
-          />
-        )}
+      {openAddExceptionFlyout && ruleId && ecsRowData._id && (
+        <AddExceptionFlyoutWrapper
+          hit={hit}
+          exceptionListType={exceptionFlyoutType}
+          onCancel={onAddExceptionCancel}
+          onConfirm={onAddExceptionConfirm}
+        />
+      )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
@@ -367,13 +426,9 @@ type AddExceptionFlyoutWrapperProps = Omit<
   | 'rules'
   | 'isBulkAction'
   | 'showAlertCloseOptions'
+  | 'alertStatus'
 > & {
-  eventId?: string;
-  ruleId: RuleObjectId;
-  ruleRuleId: RuleSignatureId;
-  ruleIndices: IndexPatternArray | undefined;
-  ruleDataViewId: DataViewId | undefined;
-  ruleName: Rule['name'];
+  hit: DataTableRecord;
   exceptionListType: ExceptionListTypeEnum | null;
 };
 
@@ -383,17 +438,23 @@ type AddExceptionFlyoutWrapperProps = Omit<
  * we cannot use the fetch hook within the flyout component itself
  */
 export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
-  ruleId,
-  ruleRuleId,
-  ruleIndices,
-  ruleDataViewId,
-  ruleName,
+  hit,
   exceptionListType,
-  eventId,
   onCancel,
   onConfirm,
-  alertStatus,
 }) => {
+  const eventId = hit.raw._id;
+  const alertStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS) as Status | undefined;
+  const ruleId = (getFieldValue(hit, ALERT_RULE_UUID) ??
+    getFieldValue(hit, 'signal.rule.id') ??
+    '') as string;
+  const rawIndices =
+    hit.flattened['kibana.alert.rule.parameters.index'] ?? hit.flattened['signal.rule.index'];
+  const ruleIndices =
+    rawIndices != null ? ([] as string[]).concat(rawIndices as string | string[]) : undefined;
+  const ruleDataViewId = (getFieldValue(hit, 'kibana.alert.rule.parameters.data_view_id') ??
+    getFieldValue(hit, 'signal.rule.data_view_id')) as string | undefined;
+
   const isEndpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
@@ -409,11 +470,11 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
 
   const enrichedAlert: AlertData | undefined = useMemo(() => {
     if (isLoadingAlertData === false) {
-      const hit = data?.hits.hits[0];
-      if (!hit) {
+      const esHit = data?.hits.hits[0];
+      if (!esHit) {
         return undefined;
       }
-      const { _id, _index, _source } = hit;
+      const { _id, _index, _source } = esHit;
       return { ..._source, _id, _index };
     }
   }, [data?.hits.hits, isLoadingAlertData]);

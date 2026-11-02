@@ -74,7 +74,16 @@ export const useFetchSessionViewProcessEvents = (
         },
       });
 
-      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
+      const events =
+        res.events?.map((event: any) => {
+          const source = event._source as ProcessEvent;
+
+          if (source?.kibana?.alert && event._index) {
+            source.kibana.alert.index = event._index;
+          }
+
+          return source;
+        }) ?? [];
 
       return { events, cursor, total: res.total };
     },
@@ -157,7 +166,16 @@ export const useFetchSessionViewAlerts = (
         },
       });
 
-      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
+      const events =
+        res.events?.map((event: any) => {
+          const source = event._source as ProcessEvent;
+
+          if (source?.kibana?.alert && event._index) {
+            source.kibana.alert.index = event._index;
+          }
+
+          return source;
+        }) ?? [];
 
       return {
         events,

@@ -109,6 +109,7 @@ function makeEsIndexMappings(
       '@timestamp': { type: 'date' },
       action_id: { ignore_above: 1024, type: 'keyword' },
       user_id: { ignore_above: 1024, type: 'keyword' },
+      user_profile_uid: { ignore_above: 1024, type: 'keyword' },
       expiration: { type: 'date' },
       event: {
         properties: {
@@ -122,6 +123,7 @@ function makeEsIndexMappings(
         ...((overrides.event as any) || {}),
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
+      tags: { ignore_above: 256, type: 'keyword' },
       ...overrides,
     },
   };
@@ -273,6 +275,46 @@ describe('createTransformIndices', () => {
           )
         ).toBe(false);
       });
+    });
+  });
+
+  // `action_data.space_id` gates a space-isolation boundary: reads fall back to
+  // it when Kibana's top-level `space_id` was dropped by the Fleet action
+  // transport (see buildSpaceIdFilter / matchActionDataSpaceId). It must be
+  // declared rather than left to ES dynamic mapping.
+  describe('action_data.space_id declaration', () => {
+    const actionDataProperties = (
+      actionResponsesMapping.properties?.action_data as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+
+    it('declares action_data.space_id as a keyword on the action responses mapping', () => {
+      expect(actionDataProperties.space_id).toEqual({
+        type: 'keyword',
+        ignore_above: 1024,
+      });
+    });
+
+    it('treats an index template missing action_data.space_id as outdated', () => {
+      const currentMappings = {
+        properties: {
+          ...actionResponsesMapping.properties,
+          action_data: {
+            properties: Object.fromEntries(
+              Object.entries(actionDataProperties).filter(([field]) => field !== 'space_id')
+            ),
+          },
+        },
+      };
+
+      expect(
+        isSubsetMapping(
+          actionResponsesMapping as Record<string, unknown>,
+          currentMappings as Record<string, unknown>,
+          logger
+        )
+      ).toBe(false);
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import type { LensPartitionVisualizationState } from '@kbn/lens-common';
-import type { XYState } from '../../../../../public';
+import type { XYVisualizationState } from '../../../../../public';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import {
   convertPartitionToLegendStats,
@@ -41,7 +41,7 @@ export function getUpdatedVisualizationState(
   state: LensAttributes['state'] & { visualization?: unknown }
 ): LensAttributes['state'] {
   if (visualizationType === 'lnsXY' && state?.visualization) {
-    const visState = state.visualization as XYState | DeprecatedLegendValueXYState;
+    const visState = state.visualization as XYVisualizationState | DeprecatedLegendValueXYState;
     return convertXYToLegendStats(visState);
   }
 

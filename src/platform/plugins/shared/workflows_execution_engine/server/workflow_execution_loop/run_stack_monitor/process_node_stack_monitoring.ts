@@ -34,11 +34,6 @@ export async function processNodeStackMonitoring(
 
   while (!nodeStack.isEmpty()) {
     const scopeData = nodeStack.getCurrentScope();
-
-    if (!scopeData) {
-      break;
-    }
-
     nodeStack = nodeStack.exitScope();
     const scopeStepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime(
       {
@@ -55,10 +50,12 @@ export async function processNodeStackMonitoring(
     }
   }
 
+  // Cancel is read from memory. The persistence flush loads the cancel fields from
+  // Elasticsearch; this pass must not, or every step waits on that read.
   await cancelWorkflowIfRequested(
-    params.workflowExecutionRepository,
     params.workflowExecutionState,
     monitoredStepExecutionRuntime,
+    params.workflowExecutionCursor,
     monitoredStepExecutionRuntime.abortController
   );
 }

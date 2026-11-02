@@ -5,10 +5,25 @@
  * 2.0.
  */
 
-import { generateKeyPairSync } from 'crypto';
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import { shouldExecute, applyFilterlist, fieldNames } from './health_diagnostic_utils';
-import { Action } from './health_diagnostic_service.types';
+import {
+  generateKeyPairSync,
+  privateDecrypt,
+  createDecipheriv,
+  constants as cryptoConstants,
+} from 'crypto';
+import {
+  shouldExecute,
+  applyFilterlist,
+  fieldNames,
+  mergeByPriority,
+} from './health_diagnostic_utils';
+import {
+  Action,
+  QueryType,
+  type IndexQuery,
+  type ParseFailureQuery,
+} from './health_diagnostic_service.types';
 
 describe('Security Solution - Health Diagnostic Queries - utils', () => {
   describe('applyFilterlist', () => {
@@ -254,6 +269,35 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       expect(secondBucket.doc_count).toBe(18);
       expect(Array.isArray(secondBucket.per_node.buckets)).toBe(true);
       expect(secondBucket.per_node.buckets).toHaveLength(3);
+    });
+
+    test('one rawDoc in data always produces exactly one entry in the result', async () => {
+      // unflatten() always returns a plain object — never an array — so each rawDoc maps
+      // to exactly one filtered doc, regardless of its internal shape.
+      const aggDoc = {
+        buckets: [
+          { key: 'a', doc_count: 1 },
+          { key: 'b', doc_count: 2 },
+        ],
+        sum_other_doc_count: 0,
+      };
+      const rules = { 'buckets.key': Action.KEEP, 'buckets.doc_count': Action.KEEP };
+
+      const result = await applyFilterlist([aggDoc], rules, mockSalt);
+
+      expect(result).toHaveLength(1);
+    });
+
+    test('two rawDocs in data produce exactly two entries in the result', async () => {
+      const doc1 = { 'user.name': 'alice', 'user.email': 'alice@example.com' };
+      const doc2 = { 'user.name': 'bob', 'user.email': 'bob@example.com' };
+      const rules = { 'user.name': Action.KEEP };
+
+      const result = await applyFilterlist([doc1, doc2], rules, mockSalt);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ user: { name: 'alice' } });
+      expect(result[1]).toEqual({ user: { name: 'bob' } });
     });
 
     test('should skip non-existent fields', async () => {
@@ -629,6 +673,215 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
         'user.name',
         'user.roles[]',
       ]);
+    });
+  });
+
+  describe('mergeByPriority', () => {
+    const makeV1 = (id: string): IndexQuery => ({
+      kind: 'index',
+      id,
+      name: `query-${id}`,
+      index: 'test-index',
+      type: QueryType.DSL,
+      query: '{"query":{"match_all":{}}}',
+      scheduleCron: '5m',
+      filterlist: { 'user.name': Action.KEEP },
+      enabled: true,
+    });
+
+    const makeV2 = (id: string): IndexQuery => ({
+      kind: 'index',
+      id,
+      name: `query-${id}`,
+      integrations: ['endpoint.*'],
+      type: QueryType.DSL,
+      query: '{"query":{"match_all":{}}}',
+      scheduleCron: '5m',
+      filterlist: { 'user.name': Action.KEEP },
+      enabled: true,
+    });
+
+    const makeParseFailure = (id?: string): ParseFailureQuery => ({
+      ...(id !== undefined ? { id } : {}),
+      name: 'bad-query',
+      _raw: { version: 99 },
+      failureReason: 'invalid_descriptor',
+    });
+
+    test('returns v2 queries unchanged when v1 is empty', () => {
+      const v2 = [makeV2('a'), makeV2('b')];
+      expect(mergeByPriority([], v2)).toEqual(v2);
+    });
+
+    test('returns v1 queries unchanged when v2 is empty', () => {
+      const v1 = [makeV1('a'), makeV1('b')];
+      expect(mergeByPriority(v1, [])).toEqual(v1);
+    });
+
+    test('returns empty array when both inputs are empty', () => {
+      expect(mergeByPriority([], [])).toEqual([]);
+    });
+
+    test('returns all queries when there is no id overlap', () => {
+      const v1 = [makeV1('a'), makeV1('b')];
+      const v2 = [makeV2('c'), makeV2('d')];
+      const result = mergeByPriority(v1, v2);
+      expect(result).toHaveLength(4);
+      const ids = result.map((q) => (q as { id: string }).id);
+      expect(ids).toContain('a');
+      expect(ids).toContain('b');
+      expect(ids).toContain('c');
+      expect(ids).toContain('d');
+    });
+
+    test('v2 version wins when both artifacts contain the same id', () => {
+      const v1Query = makeV1('shared-id');
+      const v2Query = makeV2('shared-id');
+      const result = mergeByPriority([v1Query], [v2Query]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(v2Query);
+    });
+
+    test('queries with the same name but different ids are both returned', () => {
+      const v1Query: IndexQuery = { ...makeV1('id-1'), name: 'same-name' };
+      const v2Query: IndexQuery = { ...makeV2('id-2'), name: 'same-name' };
+      const result = mergeByPriority([v1Query], [v2Query]);
+      expect(result).toHaveLength(2);
+    });
+
+    test('ParseFailureQuery with id participates in dedup (v2 wins)', () => {
+      const v1Failure = makeParseFailure('conflict-id');
+      const v2Query = makeV2('conflict-id');
+      const result = mergeByPriority([v1Failure], [v2Query]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(v2Query);
+    });
+
+    test('ParseFailureQuery without id is always included', () => {
+      const v2 = [makeV2('a')];
+      const failure = makeParseFailure();
+      const result = mergeByPriority([failure], v2);
+      expect(result).toHaveLength(2);
+      expect(result).toContain(failure);
+    });
+
+    test('multiple id-less ParseFailureQueries are all included', () => {
+      const f1 = makeParseFailure();
+      const f2 = makeParseFailure();
+      const result = mergeByPriority([f1], [f2]);
+      expect(result).toHaveLength(2);
+      expect(result).toContain(f1);
+      expect(result).toContain(f2);
+    });
+  });
+
+  describe('applyFilterlist in encryptDocument mode', () => {
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
+    const keys = { 'test-key': publicKey };
+    const query = { encryptionKeyId: 'test-key', encryptDocument: true as const };
+
+    const decryptBlob = (blob: string): unknown => {
+      const [, , encDEK, iv, ciphertext, authTag] = blob.split(':');
+      const dek = privateDecrypt(
+        { key: privateKey, padding: cryptoConstants.RSA_PKCS1_OAEP_PADDING, oaepHash: 'sha256' },
+        Buffer.from(encDEK, 'base64')
+      );
+      const decipher = createDecipheriv('aes-256-gcm', dek, Buffer.from(iv, 'base64'));
+      decipher.setAuthTag(Buffer.from(authTag, 'base64'));
+      const plain = Buffer.concat([
+        decipher.update(Buffer.from(ciphertext, 'base64')),
+        decipher.final(),
+      ]);
+      return JSON.parse(plain.toString('utf8'));
+    };
+
+    it('returns an array of v1 wire-format strings when no filterlist rules', async () => {
+      const data = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
+      const result = await applyFilterlist(data, {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(2);
+      for (const item of result) {
+        expect(typeof item).toBe('string');
+        expect((item as string).split(':')[0]).toBe('v1');
+      }
+    });
+
+    it('all documents share the same encryptedDEK component', async () => {
+      const data = [{ a: '1' }, { b: '2' }, { c: '3' }];
+      const result = await applyFilterlist(data, {}, 'salt', query, keys);
+
+      const deks = result.map((r) => (r as string).split(':')[2]);
+      expect(new Set(deks).size).toBe(1);
+    });
+
+    it('encrypts only the fields listed in filterlist rules', async () => {
+      const data = [{ 'process.name': 'cmd.exe', 'host.ip': '1.2.3.4', count: 5 }];
+      const rules = { 'process.name': Action.KEEP };
+      const result = await applyFilterlist(data, rules, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      const doc = decryptBlob(result[0] as string);
+      expect(doc).toEqual({ process: { name: 'cmd.exe' } });
+    });
+
+    it('applies mask to fields with mask action before encrypting', async () => {
+      const data = [{ 'host.ip': '1.2.3.4' }];
+      const rules = { 'host.ip': Action.MASK };
+      const result = await applyFilterlist(data, rules, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      const doc = decryptBlob(result[0] as string) as { host: { ip: string } };
+      // value should be masked (SHA-256 hex), not the original IP
+      expect(doc.host.ip).not.toBe('1.2.3.4');
+      expect(typeof doc.host.ip).toBe('string');
+    });
+
+    it('produces one encrypted blob per rawDoc even when rawDoc is array-shaped', async () => {
+      const arrayDoc = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
+      const result = await applyFilterlist([arrayDoc, arrayDoc], {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(2);
+      for (const item of result) {
+        expect((item as string).startsWith('v1:test-key:')).toBe(true);
+      }
+    });
+
+    it('encrypts an array-shaped rawDoc unchanged when no filterlist rules', async () => {
+      const arrayDoc = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
+      const result = await applyFilterlist([arrayDoc], {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      expect(decryptBlob(result[0] as string)).toEqual(arrayDoc);
+    });
+
+    it('encrypts the raw document without unflattening dotted keys when no filterlist rules', async () => {
+      const rawDoc = { 'process.name': 'cmd.exe', 'host.ip': '1.2.3.4' };
+      const result = await applyFilterlist([rawDoc], {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(1);
+      expect(decryptBlob(result[0] as string)).toEqual(rawDoc);
+    });
+
+    it('throws when encryptDocument is true but encryptionKeyId is missing', async () => {
+      await expect(
+        applyFilterlist([{ a: 1 }], {}, 'salt', { encryptDocument: true as const }, keys)
+      ).rejects.toThrow('encryptionKeyId is required');
+    });
+
+    it('throws when encryptionKeyId is not in encryptionPublicKeys', async () => {
+      await expect(
+        applyFilterlist(
+          [{ a: 1 }],
+          {},
+          'salt',
+          { encryptionKeyId: 'missing', encryptDocument: true as const },
+          keys
+        )
+      ).rejects.toThrow('Public key not found');
     });
   });
 

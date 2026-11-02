@@ -7,71 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
-import type { DashboardState } from '../../types';
+import type { RequestTiming } from '@kbn/core-http-server';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
-import { transformControlGroupIn } from './transform_control_group_in';
+import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
-import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
-import { isSearchSourceReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
-  dashboardState: DashboardState
-):
-  | {
-      attributes: DashboardSavedObjectAttributes;
-      references: SavedObjectReference[];
-      error: null;
-    }
-  | {
-      attributes: null;
-      references: null;
-      error: Error;
-    } => {
+  dashboardState: Partial<DashboardState>,
+  isDashboardAppRequest: boolean = false,
+  serverTiming?: RequestTiming
+): {
+  attributes: DashboardSavedObjectAttributes;
+  references: SavedObjectReference[];
+} => {
+  const timer = serverTiming?.start('transform-dashboard-in');
+
   try {
     const {
-      controlGroupInput,
+      pinned_panels,
       options,
       filters,
       panels,
       query,
-      references: incomingReferences,
       tags,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       time_range,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       refresh_interval,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       project_routing,
+      esql_approximation,
       ...rest
     } = dashboardState;
 
-    // TODO remove when references are removed from API
-    const hasTagReference = (incomingReferences ?? []).some(
-      ({ type }) => type === tagSavedObjectTypeName
-    );
-    if (hasTagReference) {
-      throw new Error(`Tag references are not supported. Pass tags in with 'data.tags'`);
-    }
-    // TODO remove when references are removed from API
-    const hasSearchSourceReference = (incomingReferences ?? []).some(isSearchSourceReference);
-    if (hasSearchSourceReference) {
-      throw new Error(
-        `Search source references are not supported. Pass filters in with injected references'`
-      );
-    }
-
-    const tagReferences = transformTagsIn(tags);
+    const { references: tagReferences } = toStoredTags({ tags });
 
     const {
       panelsJSON,
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels)
+      ? transformPanelsIn(panels, isDashboardAppRequest)
       : {
           panelsJSON: '',
           sections: undefined,
@@ -83,13 +63,18 @@ export const transformDashboardIn = (
       query
     );
 
+    const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
+      pinned_panels ?? []
+    );
+
     const attributes = {
       description: '',
+      title: '',
       ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
+      ...(Object.keys(pinnedPanels).length && {
+        pinned_panels: { panels: pinnedPanels },
       }),
-      optionsJSON: transformOptionsIn(options),
+      optionsJSON: transformOptionsIn(options ?? {}),
       panelsJSON,
       ...(refresh_interval && { refreshInterval: refresh_interval }),
       ...(sections?.length && { sections }),
@@ -98,18 +83,22 @@ export const transformDashboardIn = (
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
+      ...(esql_approximation !== undefined && { esqlApproximation: esql_approximation }),
     };
+
     return {
       attributes,
-      references: [
-        ...tagReferences,
-        ...(incomingReferences ?? []),
-        ...panelReferences,
-        ...searchSourceReferences,
-      ],
-      error: null,
+      references: uniqBy(
+        [
+          ...tagReferences,
+          ...panelReferences,
+          ...controlGroupReferences,
+          ...searchSourceReferences,
+        ],
+        'name'
+      ),
     };
-  } catch (e) {
-    return { attributes: null, references: null, error: e };
+  } finally {
+    timer?.end();
   }
 };

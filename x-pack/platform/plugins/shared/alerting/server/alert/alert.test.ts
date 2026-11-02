@@ -10,6 +10,7 @@ import { Alert } from './alert';
 import type { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
 import type { CombinedSummarizedAlerts } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -788,7 +789,6 @@ describe('resetPendingRecoveredCount', () => {
     expect(alert.getPendingRecoveredCount()).toEqual(0);
   });
 });
-
 describe('isFilteredOut', () => {
   const summarizedAlerts: CombinedSummarizedAlerts = {
     all: {
@@ -887,5 +887,73 @@ describe('resetActiveCount', () => {
     });
     alert.resetActiveCount();
     expect(alert.getActiveCount()).toEqual(0);
+  });
+});
+
+describe('isDelayed', () => {
+  test('returns false when status is not delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('active');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns false when status is not set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns true when status is delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('delayed');
+    expect(alert.isDelayed()).toEqual(true);
+  });
+});
+
+describe('setSnoozeConfig and getSnoozeConfig', () => {
+  test('stores and retrieves a snooze config with all fields', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const config: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+      expiresAt: '2024-12-31T00:00:00.000Z',
+    };
+    alert.setSnoozeConfig(config);
+    expect(alert.getSnoozeConfig()).toEqual(config);
+  });
+
+  test('stores and retrieves a snooze config without expiresAt (indefinite)', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const config: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    alert.setSnoozeConfig(config);
+    expect(alert.getSnoozeConfig()).toEqual(config);
+    expect(alert.getSnoozeConfig()?.expiresAt).toBeUndefined();
+  });
+
+  test('returns undefined when no snooze config has been set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getSnoozeConfig()).toBeUndefined();
+  });
+
+  test('overwrites a previously set snooze config', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const first: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user-a',
+    };
+    const second: RawRuleSnoozedInstance = {
+      instanceId: '1',
+      snoozedAt: '2025-06-01T00:00:00.000Z',
+      snoozedBy: 'user-b',
+      expiresAt: '2025-07-01T00:00:00.000Z',
+    };
+    alert.setSnoozeConfig(first);
+    alert.setSnoozeConfig(second);
+    expect(alert.getSnoozeConfig()).toEqual(second);
   });
 });

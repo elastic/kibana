@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ingest-pipelines-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ingest-pipelines-plugin'
+  title: '@kbn/ingest-pipelines-plugin'
   description: Moon project for @kbn/ingest-pipelines-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/ingest_pipelines
+  sourceRoot: x-pack/platform/plugins/shared/ingest_pipelines
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/features-plugin'
@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/analytics'
   - '@kbn/monaco'
-  - '@kbn/test-jest-helpers'
   - '@kbn/config-schema'
   - '@kbn/shared-ux-router'
   - '@kbn/core-ui-settings-browser'
@@ -51,29 +50,22 @@ dependsOn:
   - '@kbn/ingest-pipelines-shared'
   - '@kbn/licensing-types'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/code-editor-mock'
+  - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - __jest__/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+tasks: {}

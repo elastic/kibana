@@ -32,7 +32,7 @@ import {
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
 import type { GraphWorkspaceSavedObject } from '../types';
-import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
+import { saveWithConfirmation } from './saved_objects_utils';
 const savedWorkspaceType = 'graph-workspace';
 const mapping = {
   title: 'text',
@@ -162,11 +162,7 @@ export function deleteSavedWorkspace(contentClient: ContentClient, ids: string[]
 
 export async function saveSavedWorkspace(
   savedObject: GraphWorkspaceSavedObject,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-  }: SavedObjectSaveOpts = {},
+  { confirmOverwrite = false }: SavedObjectSaveOpts = {},
   services: {
     contentClient: ContentClient;
   } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
@@ -206,13 +202,6 @@ export async function saveSavedWorkspace(
     }
 
     savedObject.isSaving = true;
-
-    await checkForDuplicateTitle(
-      savedObject as any,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-      services
-    );
 
     const resp = confirmOverwrite
       ? await saveWithConfirmation(

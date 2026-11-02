@@ -10,6 +10,11 @@ import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BulkFillRuleGapsModal } from '.';
 import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('../../../../common/lib/kibana');
+
+const mockUseKibana = useKibana as jest.Mock;
 
 const convertToDatePickerFormat = (date: moment.Moment) => {
   return `${date.format('L')} ${date.format('LT')}`;
@@ -31,6 +36,14 @@ describe('BulkFillRuleGapsModal', () => {
   });
 
   beforeEach(() => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        uiSettings: {
+          get: jest.fn().mockReturnValue([]),
+        },
+      },
+    });
+
     render(
       <BulkFillRuleGapsModal onCancel={onCancelMock} onConfirm={onConfirmMock} rulesCount={10} />
     );

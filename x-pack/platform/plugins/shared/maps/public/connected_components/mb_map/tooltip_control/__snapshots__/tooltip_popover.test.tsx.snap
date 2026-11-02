@@ -3,6 +3,7 @@
 exports[`TooltipPopover render should render tooltip popover 1`] = `
 <EuiPopover
   anchorPosition="upCenter"
+  aria-label="Feature tooltip"
   button={
     <div
       style={
@@ -64,6 +65,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
 exports[`TooltipPopover render should render tooltip popover with custom tooltip content when renderTooltipContent provided 1`] = `
 <EuiPopover
   anchorPosition="upCenter"
+  aria-label="Feature tooltip"
   button={
     <div
       style={

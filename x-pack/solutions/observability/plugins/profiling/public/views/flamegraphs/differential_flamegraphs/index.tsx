@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 
@@ -12,16 +12,16 @@ import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
-import type { NormalizationOptions } from '../../../components/normalization_menu';
+import { NoProfilingDataPrompt } from '../../../components/no_profiling_data_prompt';
 import { NormalizationMode } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
-import { DifferentialFlameGraphSearchPanel } from './differential_flame_graph_search_panel';
 import { FramesSummary } from '../../../components/frames_summary';
 import { AsyncStatus } from '../../../hooks/use_async';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 
 export function DifferentialFlameGraphsView() {
   const {
@@ -57,9 +57,13 @@ export function DifferentialFlameGraphsView() {
   } = useProfilingDependencies();
 
   const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const { selectedSchema } = useProfilingSchema();
 
   const state = useTimeRangeAsync(
     ({ http }) => {
+      if (!selectedSchema) {
+        return undefined;
+      }
       return Promise.all([
         fetchElasticFlamechart({
           http,
@@ -67,6 +71,7 @@ export function DifferentialFlameGraphsView() {
           timeTo: new Date(timeRange.end).getTime(),
           kuery,
           showErrorFrames,
+          schema: selectedSchema,
         }),
         comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
@@ -75,6 +80,7 @@ export function DifferentialFlameGraphsView() {
               timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
               showErrorFrames,
+              schema: selectedSchema,
             })
           : Promise.resolve(undefined),
       ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
@@ -93,6 +99,7 @@ export function DifferentialFlameGraphsView() {
       comparisonTimeRange.end,
       comparisonKuery,
       showErrorFrames,
+      selectedSchema,
     ]
   );
 
@@ -104,13 +111,6 @@ export function DifferentialFlameGraphsView() {
 
   const baselineTime = 1;
   const comparisonTime = totalSeconds / totalComparisonSeconds;
-
-  const normalizationOptions: NormalizationOptions = {
-    baselineScale: baseline,
-    baselineTime,
-    comparisonScale: comparison,
-    comparisonTime,
-  };
 
   const { data } = state;
 
@@ -142,12 +142,6 @@ export function DifferentialFlameGraphsView() {
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         <EuiPanel hasShadow={false} color="subdued">
-          <DifferentialFlameGraphSearchPanel
-            comparisonMode={comparisonMode}
-            normalizationMode={normalizationMode}
-            normalizationOptions={normalizationOptions}
-          />
-          <EuiSpacer />
           <FramesSummary
             isLoading={state.status === AsyncStatus.Loading}
             baseValue={
@@ -175,16 +169,21 @@ export function DifferentialFlameGraphsView() {
       </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
-          <FlameGraph
-            id="flamechart"
-            primaryFlamegraph={data?.primaryFlamegraph}
-            comparisonFlamegraph={data?.comparisonFlamegraph}
-            comparisonMode={comparisonMode}
-            baseline={isNormalizedByTime ? baselineTime : baseline}
-            comparison={isNormalizedByTime ? comparisonTime : comparison}
-            searchText={searchText}
-            onChangeSearchText={handleSearchTextChange}
-          />
+          <NoProfilingDataPrompt
+            variant="baseline"
+            hasData={data?.primaryFlamegraph.TotalSamples !== 0}
+          >
+            <FlameGraph
+              id="flamechart"
+              primaryFlamegraph={data?.primaryFlamegraph}
+              comparisonFlamegraph={data?.comparisonFlamegraph}
+              comparisonMode={comparisonMode}
+              baseline={isNormalizedByTime ? baselineTime : baseline}
+              comparison={isNormalizedByTime ? comparisonTime : comparison}
+              searchText={searchText}
+              onChangeSearchText={handleSearchTextChange}
+            />
+          </NoProfilingDataPrompt>
         </AsyncComponent>
       </EuiFlexItem>
     </EuiFlexGroup>

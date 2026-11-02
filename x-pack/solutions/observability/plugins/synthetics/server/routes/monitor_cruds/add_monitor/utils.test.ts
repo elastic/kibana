@@ -219,4 +219,52 @@ describe('parseMonitorLocations', () => {
       privateLocations: ['test-private-location'],
     });
   });
+
+  // Regression test for https://github.com/elastic/kibana/issues/236388
+  // Switching a monitor's private location via the public PUT API (internal=false)
+  // by supplying the new private location as an object inside `locations` (and no
+  // `private_locations` field) used to merge the previous private location in,
+  // leaving the monitor attached to both locations. The new private location
+  // should fully replace the previous one.
+  it('should replace previous private location when new private location is provided inline via `locations`', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: [pvtLoc2],
+      } as any,
+      [pvtLoc1]
+    );
+
+    expect(result).toEqual({
+      locations: [],
+      privateLocations: ['test-private-location-2'],
+    });
+  });
+
+  it('should replace previous private locations when `locations` contains private objects along with public ones', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: [pvtLoc2, localLoc],
+      } as any,
+      [pvtLoc1, localLoc2]
+    );
+
+    expect(result).toEqual({
+      locations: ['local'],
+      privateLocations: ['test-private-location-2'],
+    });
+  });
+
+  it('should still carry forward previous private locations when `locations` has only public entries', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: [localLoc],
+      } as any,
+      [pvtLoc1, localLoc2]
+    );
+
+    expect(result).toEqual({
+      locations: ['local'],
+      privateLocations: ['test-private-location'],
+    });
+  });
 });

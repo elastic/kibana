@@ -14,6 +14,7 @@ import {
   EuiFormLabel,
   EuiIcon,
   EuiSpacer,
+  useEuiFontSize,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -50,37 +51,31 @@ export function SeverityOverride({
   mapping,
   indices,
 }: SeverityOverrideProps) {
-  const severityMappingLabel = useMemo(() => {
-    return (
-      <div>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          onClick={isDisabled ? undefined : onSeverityMappingChecked}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="severity-mapping-override"
-              checked={isMappingChecked}
-              disabled={isDisabled}
-              onChange={onSeverityMappingChecked}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>{i18n.SEVERITY_MAPPING}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <NestedContent>
-          <EuiText size="xs">{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
-        </NestedContent>
-      </div>
-    );
-  }, [onSeverityMappingChecked, isDisabled, isMappingChecked]);
+  const { fontSize: formLabelFontSize } = useEuiFontSize('xs');
+
+  const severityMappingLabel = (
+    <>
+      <EuiCheckbox
+        id="severity-mapping-override"
+        label={i18n.SEVERITY_MAPPING}
+        labelProps={{ css: { fontSize: formLabelFontSize } }}
+        checked={isMappingChecked}
+        disabled={isDisabled}
+        onChange={onSeverityMappingChecked}
+      />
+      <EuiSpacer size="xs" />
+      <NestedContent>
+        <EuiText size="xs">{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
+      </NestedContent>
+    </>
+  );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
 
   return (
     <EuiFormRow
       label={severityMappingLabel}
+      labelType="legend"
       helpText={
         isMappingChecked ? <NestedContent>{i18n.SEVERITY_MAPPING_DETAILS}</NestedContent> : ''
       }
@@ -176,7 +171,7 @@ function SeverityMappingRow({
 
         <EuiFlexItemComboBoxColumn>
           <AutocompleteFieldMatchComponent
-            autocompleteService={services.unifiedSearch.autocomplete}
+            autocompleteService={services.kql.autocomplete}
             placeholder=""
             selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
             selectedValue={severityMappingItem.value}
@@ -188,7 +183,7 @@ function SeverityMappingRow({
           />
         </EuiFlexItemComboBoxColumn>
         <EuiFlexItemIconColumn>
-          <EuiIcon type="sortRight" />
+          <EuiIcon type="sortRight" aria-hidden={true} />
         </EuiFlexItemIconColumn>
         <EuiFlexItemSeverityColumn>
           {severityOptions.find((o) => o.value === severityMappingItem.severity)?.inputDisplay}

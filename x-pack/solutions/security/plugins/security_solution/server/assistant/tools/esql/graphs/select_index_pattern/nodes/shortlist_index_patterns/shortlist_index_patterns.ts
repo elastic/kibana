@@ -6,18 +6,21 @@
  */
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { Command } from '@langchain/langgraph';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { SelectIndexPatternAnnotation } from '../../state';
 import type { CreateLlmInstance } from '../../../../utils/common';
 
-const ShortlistedIndexPatterns = z
-  .object({
-    shortlistedIndexPatterns: z.array(z.string()).describe('Shortlisted index patterns'),
-  })
-  .describe(
-    'Object containing array of shortlisted index patterns that might be used to generate the query'
-  );
+const ShortlistedIndexPatterns = lazySchema(() =>
+  z
+    .object({
+      shortlistedIndexPatterns: z.array(z.string()).describe('Shortlisted index patterns'),
+    })
+    .describe(
+      'Object containing array of shortlisted index patterns that might be used to generate the query'
+    )
+);
 
 export const getShortlistIndexPatterns = async ({
   createLlmInstance,
@@ -40,7 +43,7 @@ To generate the query you first need to identify which index pattern should be u
     });
 
     try {
-      const result = await llm
+      const result = await (llm as BaseChatModel)
         .withStructuredOutput(ShortlistedIndexPatterns, { name: 'shortlistedIndexPatterns' })
         .withRetry({
           stopAfterAttempt: 3,

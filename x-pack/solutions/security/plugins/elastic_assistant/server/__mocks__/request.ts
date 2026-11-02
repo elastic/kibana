@@ -8,6 +8,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES } from '../../common/constants';
 import type {
   CreateAttackDiscoverySchedulesRequestBody,
+  BulkActionAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
@@ -24,6 +25,9 @@ import {
   ELASTIC_USERS_SUGGEST_URL,
   ATTACK_DISCOVERY_GENERATE,
   ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
@@ -387,4 +391,31 @@ export const disableAttackDiscoverySchedulesRequest = (id: string) =>
     method: 'post',
     path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
     params: { id },
+  });
+
+export const bulkEnableAttackDiscoverySchedulesRequest = (
+  body: BulkActionAttackDiscoverySchedulesRequestBody
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
+    body,
+  });
+
+export const bulkDisableAttackDiscoverySchedulesRequest = (
+  body: BulkActionAttackDiscoverySchedulesRequestBody
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+    body,
+  });
+
+export const bulkDeleteAttackDiscoverySchedulesRequest = (
+  body: BulkActionAttackDiscoverySchedulesRequestBody
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+    body,
   });

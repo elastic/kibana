@@ -28,6 +28,7 @@ export const createExceptionListHandler = async (
     namespace_type: namespaceType,
     description,
     list_id: listId,
+    os_types: osTypes,
     type,
     version,
   } = request.body;
@@ -54,6 +55,7 @@ export const createExceptionListHandler = async (
       meta,
       name,
       namespaceType,
+      osTypes,
       tags,
       type,
       version,

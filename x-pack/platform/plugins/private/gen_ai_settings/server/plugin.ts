@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, KibanaRequest } from '@kbn/core/server';
 import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import {
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { registerServerRoutes } from './routes/register_routes';
 import type {
   GenAiSettingsPluginSetupDependencies,
   GenAiSettingsPluginStartDependencies,
 } from './types';
 import type { GenAiSettingsRouteHandlerResources } from './routes/types';
-import { NO_DEFAULT_CONNECTOR } from '../common/constants';
+import { NO_DEFAULT_CONNECTOR, FALLBACK_DEFAULT_CONNECTOR_ID } from '../common/constants';
 
 export type GenAiSettingsPluginSetup = Record<string, never>;
 export type GenAiSettingsPluginStart = Record<string, never>;
@@ -44,7 +48,7 @@ export class GenAiSettingsPlugin
   ): GenAiSettingsPluginSetup {
     const routeHandlerPlugins: Pick<
       GenAiSettingsRouteHandlerResources['plugins'],
-      'actions' | 'inference'
+      'actions' | 'inference' | 'agentBuilderPlatform'
     > = {
       actions: {
         setup: plugins.actions,
@@ -54,6 +58,14 @@ export class GenAiSettingsPlugin
         setup: plugins.inference,
         start: () => core.getStartServices().then(([, starts]) => starts.inference),
       },
+      ...(plugins.agentBuilderPlatform
+        ? {
+            agentBuilderPlatform: {
+              start: () =>
+                core.getStartServices().then(([, starts]) => starts.agentBuilderPlatform!),
+            },
+          }
+        : {}),
     };
 
     const withCore = {
@@ -79,6 +91,22 @@ export class GenAiSettingsPlugin
         readonly: true,
         schema: schema.string(),
         value: NO_DEFAULT_CONNECTOR,
+        getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
+          try {
+            if (!request) {
+              return NO_DEFAULT_CONNECTOR;
+            }
+            const [, startServices] = await core.getStartServices();
+            const actionsClient = await startServices.actions.getActionsClientWithRequest(request);
+            const connectors = await actionsClient.getAll();
+            const preferredExists = connectors.some(
+              (connector) => connector.id === FALLBACK_DEFAULT_CONNECTOR_ID
+            );
+            return preferredExists ? FALLBACK_DEFAULT_CONNECTOR_ID : NO_DEFAULT_CONNECTOR;
+          } catch (e) {
+            return NO_DEFAULT_CONNECTOR;
+          }
+        },
       },
     });
 
@@ -88,6 +116,47 @@ export class GenAiSettingsPlugin
         readonly: true,
         schema: schema.boolean(),
         value: false,
+      },
+    });
+
+    core.uiSettings.register({
+      [AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.arrayOf(schema.string(), { maxSize: 100 }),
+        value: [],
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
+        name: i18n.translate('xpack.genAiSettings.tokenUsageTracking.name', {
+          defaultMessage: 'Token usage tracking',
+        }),
+        description: i18n.translate('xpack.genAiSettings.tokenUsageTracking.description', {
+          defaultMessage:
+            'Track token usage for AI features. When enabled, token counts are logged for each LLM request, and a dashboard is available to monitor usage.',
+        }),
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_INFERENCE_STREAMING]: {
+        name: i18n.translate('xpack.genAiSettings.inferenceStreaming.name', {
+          defaultMessage: 'Stream inference endpoint responses',
+        }),
+        description: i18n.translate('xpack.genAiSettings.inferenceStreaming.description', {
+          defaultMessage:
+            "Stream LLM responses. If your LLM provider doesn't support streaming, turn this off and Kibana will wait for the full response instead. Services that do not support non-streaming chat completion keep streaming. This setting only applies to inference endpoints.",
+        }),
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: true,
       },
     });
 

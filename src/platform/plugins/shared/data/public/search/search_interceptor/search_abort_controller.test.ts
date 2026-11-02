@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { SearchAbortController } from './search_abort_controller';
 
 const timeTravel = (msToRun = 0) => {
@@ -45,10 +46,26 @@ describe('search abort controller', () => {
     const controller2 = new AbortController();
     sac.addAbortSignal(controller2.signal);
     expect(sac.getSignal().aborted).toBe(false);
-    controller.abort();
+    controller.abort(AbortReason.CANCELED);
     expect(sac.getSignal().aborted).toBe(false);
-    controller2.abort();
-    expect(sac.getSignal().aborted).toBe(true);
+    controller2.abort(AbortReason.CANCELED);
+    const signal = sac.getSignal();
+    expect(signal.aborted).toBe(true);
+    expect(signal.reason).toBe(AbortReason.CANCELED);
+  });
+
+  test('when the abort reason is CANCELED', () => {
+    const sac = new SearchAbortController();
+    sac.abort(AbortReason.CANCELED);
+    expect(sac.isCanceled()).toBe(true);
+    expect(sac.isTimeout()).toBe(false);
+  });
+
+  test('when the abort reason is TIMEOUT', () => {
+    const sac = new SearchAbortController();
+    sac.abort(AbortReason.TIMEOUT);
+    expect(sac.isTimeout()).toBe(true);
+    expect(sac.isCanceled()).toBe(false);
   });
 
   test('aborts explicitly even if all inputs are not aborted', () => {

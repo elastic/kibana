@@ -15,6 +15,7 @@ import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { MigrationDataInputContextProvider } from '../../../common/components';
 import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_missing_resources';
+import { MigrationSource } from '../../../common/types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -36,6 +37,7 @@ const baseProps = {
     created_at: '2023-01-01T00:00:00Z',
     last_updated_at: '2024-01-01T01:00:00Z',
     last_execution: {},
+    vendor: MigrationSource.SPLUNK,
   } as RuleMigrationStats,
   isCollapsed: false,
   onToggleCollapsed: jest.fn(),
@@ -64,7 +66,11 @@ const renderTestComponent = (
   return render(<RuleMigrationResultPanel {...baseProps} {...props} />, {
     wrapper: ({ children }) => (
       <TestProviders>
-        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+        <MigrationDataInputContextProvider
+          openFlyout={jest.fn()}
+          closeFlyout={jest.fn()}
+          isFlyoutOpen={false}
+        >
           {children}
         </MigrationDataInputContextProvider>
       </TestProviders>
@@ -103,7 +109,7 @@ describe('RuleMigrationResultPanel', () => {
         last_execution: { error: 'Something went wrong' },
       },
     });
-    expect(screen.getByTestId(/ruleMigrationLastError/)).toBeVisible();
+    expect(screen.getByTestId('ruleMigrationLastError')).toBeVisible();
   });
 
   it('renders loading spinner if translation stats are loading', () => {
@@ -118,6 +124,18 @@ describe('RuleMigrationResultPanel', () => {
   it('renders table when translation stats are loaded', async () => {
     renderTestComponent();
     await waitFor(() => expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument());
+  });
+
+  it('renders correct translation status counts', async () => {
+    renderTestComponent();
+    await waitFor(() => expect(screen.getByTestId('translatedResultsTable')).toBeInTheDocument());
+
+    expect(screen.getByTestId('translationStatusCount-Translated')).toHaveTextContent('1');
+    expect(screen.getByTestId('translationStatusCount-Partially translated')).toHaveTextContent(
+      '2'
+    );
+    expect(screen.getByTestId('translationStatusCount-Not translated')).toHaveTextContent('3');
+    expect(screen.getByTestId('translationStatusCount-Failed')).toHaveTextContent('4');
   });
 
   it('renders upload missing panel', () => {

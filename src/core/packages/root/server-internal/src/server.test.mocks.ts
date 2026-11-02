@@ -105,6 +105,7 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
 
 export const mockMetricsService = metricsServiceMock.create();
 jest.doMock('@kbn/core-metrics-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-metrics-server-internal'),
   MetricsService: jest.fn(() => mockMetricsService),
 }));
 
@@ -115,6 +116,7 @@ jest.doMock('@kbn/core-status-server-internal', () => ({
 
 export const mockLoggingService = loggingServiceMock.create();
 jest.doMock('@kbn/core-logging-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-logging-server-internal'),
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 
@@ -140,6 +142,7 @@ jest.doMock('@kbn/core-doc-links-server-internal', () => ({
 
 export const mockSecurityService = securityServiceMock.create();
 jest.doMock('@kbn/core-security-server-internal', () => ({
+  ...jest.requireActual('@kbn/core-security-server-internal'),
   SecurityService: jest.fn(() => mockSecurityService),
 }));
 

@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Scalar } from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import type { ExtendedAutocompleteContext } from './context/autocomplete.types';
+import { buildAutocompleteContext as buildContext } from './context/build_autocomplete_context';
 import {
   getCompletionItemProvider,
   WORKFLOW_COMPLETION_PROVIDER_ID,
@@ -16,10 +19,17 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
+import { createMockWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry.mock';
+
+import { isDeprecatedStepType } from '../../../../../common/schema';
+import { createStepInfo } from '../../../../shared/test_utils/step_info_factory';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
   getSuggestions: jest.fn(() => []),
+  isInsideLoopBody: jest.fn(() => false),
 }));
 
 jest.mock('./context/build_autocomplete_context', () => ({
@@ -27,7 +37,12 @@ jest.mock('./context/build_autocomplete_context', () => ({
     path: ['triggers', 0, 'type'],
     linePrefix: '  - type:',
     lineSuffix: '',
+    isInEsqlQueryField: false,
   })),
+}));
+
+jest.mock('../../../../../common/schema', () => ({
+  isDeprecatedStepType: jest.fn(() => false),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -57,22 +72,79 @@ describe('getCompletionItemProvider', () => {
     } as monaco.languages.CompletionContext;
 
     getState = jest.fn(() => ({} as any));
+    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
     clearAllYamlProviders();
   });
 
+  it.each([false, true])('never suggests identity values (managed=%s)', async (managed) => {
+    for (const stepType of ['workflow.execute', 'workflow.executeAsync']) {
+      const field = 'run-as-mode';
+      jest.mocked(buildContext).mockReturnValueOnce({
+        path: ['steps', 0, 'with', field],
+        focusedStepInfo: createStepInfo({ stepType }),
+        focusedYamlPair: {
+          path: ['with', field],
+          keyNode: new Scalar(field),
+          valueNode: new Scalar(''),
+        },
+        isCurrentWorkflowManaged: managed,
+      } as ExtendedAutocompleteContext);
+      const yamlProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'inherit',
+              insertText: 'inherit',
+              kind: monaco.languages.CompletionItemKind.EnumMember,
+              range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
+            },
+          ],
+        }),
+      };
+      clearAllYamlProviders();
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+      const provider = getCompletionItemProvider(
+        emptyRegistry,
+        getState,
+        undefined,
+        undefined,
+        undefined
+      );
+      const result = await provider.provideCompletionItems?.(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+      expect(result?.suggestions.map(({ label }) => label)).toEqual([]);
+    }
+  });
+
   describe('provider structure', () => {
     it('should have correct provider ID', () => {
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
 
       expect((provider as any).__providerId).toBe(WORKFLOW_COMPLETION_PROVIDER_ID);
     });
 
     it('should have correct trigger characters', () => {
-      const provider = getCompletionItemProvider(getState);
-      expect(provider.triggerCharacters).toEqual(['@', '.', ' ', '|', '{']);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      expect(provider.triggerCharacters).toEqual([
+        '@',
+        '.',
+        ' ',
+        '"',
+        "'",
+        '(',
+        ':',
+        '|',
+        '{',
+        '[',
+        '?',
+      ]);
     });
   });
 
@@ -82,7 +154,7 @@ describe('getCompletionItemProvider', () => {
       const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
       buildAutocompleteContext.mockReturnValueOnce(null);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -94,6 +166,54 @@ describe('getCompletionItemProvider', () => {
         suggestions: [],
         incomplete: false,
       });
+    });
+
+    it('should quote built-in #/kibana/definitions $ref values from monaco-yaml enum completions', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: '#/kibana/definitions/alertingV2NotificationGroup',
+              insertText: '#/kibana/definitions/alertingV2NotificationGroup',
+            },
+            {
+              label: '#/definitions/UserSchema',
+              insertText: '#/definitions/UserSchema',
+            },
+            {
+              label: 'already-quoted',
+              insertText: "'#/kibana/definitions/alertingV2NotificationGroup'",
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      const byLabel = Object.fromEntries(
+        (result?.suggestions ?? []).map((s) => [
+          typeof s.label === 'string' ? s.label : s.label.label,
+          s.insertText,
+        ])
+      );
+      expect(byLabel['#/kibana/definitions/alertingV2NotificationGroup']).toBe(
+        "'#/kibana/definitions/alertingV2NotificationGroup'"
+      );
+      expect(byLabel['#/definitions/UserSchema']).toBe('#/definitions/UserSchema');
+      expect(byLabel['already-quoted']).toBe("'#/kibana/definitions/alertingV2NotificationGroup'");
     });
 
     it('should merge workflow suggestions with YAML provider suggestions', async () => {
@@ -121,7 +241,7 @@ describe('getCompletionItemProvider', () => {
 
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -135,18 +255,102 @@ describe('getCompletionItemProvider', () => {
       );
     });
 
-    it('should deduplicate suggestions by label, preferring snippets', async () => {
+    it('should filter deprecated step types from workflow and YAML suggestions', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
-          label: 'alert',
-          insertText: 'alert snippet',
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          label: 'kibana.createCase',
+          insertText: 'kibana.createCase',
+          filterText: 'kibana.createCase',
         },
       ]);
 
       const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'kibana.createCaseDefaultSpace',
+              insertText: 'kibana.createCaseDefaultSpace',
+              filterText: 'kibana.createCaseDefaultSpace',
+            },
+            {
+              label: 'scheduled',
+              insertText: 'scheduled',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      const deprecatedStepTypes = new Set(['kibana.createCase', 'kibana.createCaseDefaultSpace']);
+      (isDeprecatedStepType as jest.Mock).mockImplementation((stepType: string) =>
+        deprecatedStepTypes.has(stepType)
+      );
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].label).toBe('scheduled');
+    });
+
+    it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'alerting.actions.alertAcked',
+          insertText: 'alerting.actions.alertAcked snippet',
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          filterText: 'alerting.actions.alertAcked',
+          detail: 'Alerting - Alert acknowledged',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'alerting.actions.alertAcked',
+              insertText: 'alerting.actions.alertAcked',
+              filterText: 'alerting.actions.alertAcked',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0]).toMatchObject({
+        label: 'alerting.actions.alertAcked',
+        detail: 'Alerting - Alert acknowledged',
+        filterText: 'alerting.actions.alertAcked',
+      });
+    });
+
+    it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProviderPlain: monaco.languages.CompletionItemProvider = {
         provideCompletionItems: jest.fn().mockResolvedValue({
           suggestions: [
             {
@@ -158,35 +362,7 @@ describe('getCompletionItemProvider', () => {
         }),
       };
 
-      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
-
-      const provider = getCompletionItemProvider(getState);
-      const result = await provider.provideCompletionItems!(
-        mockModel,
-        mockPosition,
-        mockCompletionContext,
-        {} as monaco.CancellationToken
-      );
-
-      // Should have only one suggestion (the one with snippet)
-      expect(result?.suggestions).toHaveLength(1);
-      expect(result?.suggestions?.[0].label).toBe('alert');
-      expect(result?.suggestions?.[0].insertTextRules).toBe(
-        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-      );
-    });
-
-    it('should prefer snippet over plain text when YAML provider has snippet', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getSuggestions } = require('./suggestions/get_suggestions');
-      getSuggestions.mockReturnValueOnce([
-        {
-          label: 'alert',
-          insertText: 'alert', // Plain text from workflow provider
-        },
-      ]);
-
-      const yamlProvider: monaco.languages.CompletionItemProvider = {
+      const yamlProviderSnippet: monaco.languages.CompletionItemProvider = {
         provideCompletionItems: jest.fn().mockResolvedValue({
           suggestions: [
             {
@@ -199,9 +375,10 @@ describe('getCompletionItemProvider', () => {
         }),
       };
 
-      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProviderPlain);
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProviderSnippet);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -209,11 +386,93 @@ describe('getCompletionItemProvider', () => {
         {} as monaco.CancellationToken
       );
 
-      // Should prefer the snippet version
       expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].label).toBe('alert');
       expect(result?.suggestions?.[0].insertTextRules).toBe(
         monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
       );
+    });
+
+    it('should keep workflow suggestion details when both sources return snippets for same key', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'alert',
+          insertText: 'workflow alert snippet',
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          detail: 'Workflow trigger',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'alert',
+              insertText: 'yaml alert snippet',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              detail: 'Schema duplicate',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].detail).toBe('Workflow trigger');
+      expect(result?.suggestions?.[0].insertText).toBe('workflow alert snippet');
+    });
+
+    it('should keep workflow suggestion when YAML has snippet for same key (workflow wins)', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'alert',
+          insertText: 'alert',
+          detail: 'From workflow',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'alert',
+              insertText: 'alert snippet',
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              detail: 'From schema',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0].detail).toBe('From workflow');
+      expect(result?.suggestions?.[0].insertText).toBe('alert');
+      expect(result?.suggestions?.[0].insertTextRules).toBeUndefined();
     });
 
     it('should handle multiple YAML providers', async () => {
@@ -243,7 +502,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -283,7 +542,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -313,7 +572,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const provider = getCompletionItemProvider(getState);
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await provider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -340,7 +599,7 @@ describe('getCompletionItemProvider', () => {
         provider as monaco.languages.CompletionItemProvider
       );
 
-      const completionProvider = getCompletionItemProvider(getState);
+      const completionProvider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await completionProvider.provideCompletionItems!(
         mockModel,
         mockPosition,
@@ -350,6 +609,88 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toEqual([]);
       expect(result?.incomplete).toBe(false);
+    });
+
+    it('should call YAML providers on empty lines outside liquid blocks', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: [],
+        line: '',
+        lineUpToCursor: '',
+        lineParseResult: { matchType: 'liquid-block-keyword', fullKey: '', match: null },
+        isInLiquidBlock: false,
+        isInEsqlQueryField: false,
+        focusedStepInfo: null,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            { label: 'consts', insertText: 'consts' },
+            { label: 'description', insertText: 'description' },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(yamlProvider.provideCompletionItems).toHaveBeenCalled();
+      expect(result?.suggestions).toHaveLength(2);
+      expect(result?.suggestions?.map((s) => s.label)).toEqual(
+        expect.arrayContaining(['consts', 'description'])
+      );
+    });
+
+    it('should skip YAML providers for liquid-block-keyword when inside a liquid block', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
+      buildAutocompleteContext.mockReturnValueOnce({
+        path: ['steps', 0, 'with', 'message'],
+        line: '  assign',
+        lineUpToCursor: '  assign',
+        lineParseResult: { matchType: 'liquid-block-keyword', fullKey: 'assign', match: null },
+        isInLiquidBlock: true,
+        isInEsqlQueryField: false,
+        focusedStepInfo: null,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [{ label: 'should-not-appear', insertText: 'nope' }],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(yamlProvider.provideCompletionItems).not.toHaveBeenCalled();
+      expect(result?.suggestions).toHaveLength(0);
     });
 
     it('should handle providers that return null or undefined', async () => {
@@ -368,7 +709,7 @@ describe('getCompletionItemProvider', () => {
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider1);
       monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, provider2);
 
-      const completionProvider = getCompletionItemProvider(getState);
+      const completionProvider = getCompletionItemProvider(emptyRegistry, getState);
       const result = await completionProvider.provideCompletionItems!(
         mockModel,
         mockPosition,

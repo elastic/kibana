@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/security-evals-alerts-snapshot",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private",
+  "devOnly": true
+}

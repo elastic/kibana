@@ -5,106 +5,142 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { z } from '@kbn/zod';
-import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
-import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
-import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
+import {
+  ResourceTypes,
+  resolveDefaultInferenceIdFromInferenceGet,
+  resolveInstalledProductDocInferenceId,
+} from '@kbn/product-doc-common';
+import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 
-const securityLabsSearchSchema = z.object({
-  query: z
-    .string()
-    .describe(
-      'A natural language query expressing the search request for Security Labs articles. Use this to find Security Labs content about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names.'
-    ),
-});
+const securityLabsSearchSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .describe(
+        'A natural language query expressing the search request for Security Labs articles. Use this to find Security Labs content about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names.'
+      ),
+  })
+);
 
 export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search');
 
-const getKnowledgeBaseIndex = (spaceId: string): string =>
-  `.kibana-elastic-ai-assistant-knowledge-base-${spaceId}`;
+// Path to GenAI Settings within the management app
+const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';
 
 export const securityLabsSearchTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  core: SecuritySolutionPluginCoreSetupDependencies
 ): BuiltinToolDefinition<typeof securityLabsSearchSchema> => {
   return {
     id: SECURITY_LABS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze Security Labs knowledge base content. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Automatically filters to Security Labs content only and limits results to 10 articles.`,
+    description: `Search and analyze Security Labs content installed via the AI knowledge base artifacts. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Limits results to 3 articles.`,
     schema: securityLabsSearchSchema,
+    // Tool is always available - handler will check if docs are installed and provide guidance
     availability: {
-      cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status === 'available') {
-            const [coreStart] = await core.getStartServices();
-            const esClient = coreStart.elasticsearch.client.asInternalUser;
-            const knowledgeBaseIndex = getKnowledgeBaseIndex(spaceId);
-
-            const response = await esClient.search({
-              index: knowledgeBaseIndex,
-              size: 1,
-              terminate_after: 1,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      term: {
-                        kb_resource: SECURITY_LABS_RESOURCE,
-                      },
-                    },
-                  ],
-                },
-              },
-            });
-
-            if (response.hits.hits.length > 0) {
-              return { status: 'available' };
-            }
-
-            return {
-              status: 'unavailable',
-              reason: 'Security Labs content not found in knowledge base',
-            };
-          }
-          return availability;
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check Security Labs knowledge base availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
+      cacheMode: 'global',
+      handler: async () => {
+        return { status: 'available' };
       },
     },
-    handler: async ({ query: nlQuery }, { request, esClient, modelProvider, events }) => {
+    handler: async ({ query: nlQuery }, { request, modelProvider, logger, spaceId }) => {
       logger.debug(`${SECURITY_LABS_SEARCH_TOOL_ID} tool called with query: ${nlQuery}`);
 
       try {
-        const spaceId = getSpaceIdFromRequest(request);
-        const knowledgeBaseIndex = getKnowledgeBaseIndex(spaceId);
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const llmTasks = pluginsStart.llmTasks;
+        if (!llmTasks) {
+          return {
+            results: [
+              createErrorResult({
+                message: 'Security Labs tool is not available. LlmTasks plugin is not available.',
+              }),
+            ],
+          };
+        }
 
-        // Enhance query to filter by Security Labs resource and limit results
-        const enhancedQuery = `${nlQuery} Filter to only Security Labs content (kb_resource: ${SECURITY_LABS_RESOURCE}). Limit to 3 results.`;
-
-        const results = await runSearchTool({
-          nlQuery: enhancedQuery,
-          index: knowledgeBaseIndex,
-          model: await modelProvider.getDefaultModel(),
-          esClient: esClient.asCurrentUser,
-          logger,
-          events,
+        // Prefer the environment default (Jina when its endpoint exists, else ELSER), then
+        // fall back through the remaining candidates to whichever model actually has
+        // Security Labs content installed. On-prem clusters without a Jina endpoint resolve
+        // to ELSER automatically.
+        const inferenceId = await resolveInstalledProductDocInferenceId({
+          getDefaultInferenceId: () =>
+            resolveDefaultInferenceIdFromInferenceGet(() =>
+              coreStart.elasticsearch.client.asInternalUser.inference.get({})
+            ),
+          isDocumentationAvailable: async (candidateInferenceId) =>
+            (await llmTasks.retrieveDocumentationAvailable({
+              inferenceId: candidateInferenceId,
+              resourceType: ResourceTypes.securityLabs,
+            })) ?? false,
         });
 
-        return { results };
+        if (!inferenceId) {
+          // Use serverBasePath (not request.basePath): Agent Builder requests can omit
+          // basePath, producing /app/... links the chat UI treats as external/broken.
+          const settingsUrl = addSpaceIdToPath(
+            coreStart.http.basePath.serverBasePath,
+            spaceId,
+            GENAI_SETTINGS_APP_PATH
+          );
+          return {
+            results: [
+              createErrorResult({
+                message: `Security Labs content is not installed. To use this tool, please install Security Labs from GenAI Settings. Provide the user with this exact markdown link and do not alter the URL path: [GenAI Settings](${settingsUrl}). Do not perform any other tool calls.`,
+                metadata: { settingsUrl },
+              }),
+            ],
+          };
+        }
+
+        const model = await modelProvider.getDefaultModel();
+        const connector = model.connector;
+
+        const result = await llmTasks.retrieveDocumentation({
+          searchTerm: nlQuery,
+          max: 3,
+          connectorId: connector.connectorId,
+          request,
+          inferenceId,
+          resourceTypes: [ResourceTypes.securityLabs],
+        });
+
+        if (!result.success) {
+          return {
+            results: [
+              createErrorResult({
+                message: 'Failed to retrieve Security Labs documentation for the given query.',
+                metadata: { query: nlQuery },
+              }),
+            ],
+          };
+        }
+
+        if (result.documents.length === 0) {
+          return { results: [] };
+        }
+
+        return {
+          results: result.documents.map((doc: RetrieveDocumentationResultDoc) => ({
+            type: ToolResultType.other,
+            data: {
+              reference: { url: doc.url, title: doc.title },
+              partial: doc.summarized,
+              content: {
+                title: doc.title,
+                url: doc.url,
+                content: doc.content,
+                summarized: doc.summarized,
+              },
+            },
+          })),
+        };
       } catch (error) {
         logger.error(`Error in ${SECURITY_LABS_SEARCH_TOOL_ID} tool: ${error.message}`);
         return {
@@ -120,5 +156,12 @@ export const securityLabsSearchTool = (
       }
     },
     tags: ['security', 'security-labs', 'knowledge-base', 'search'],
+    annotations: {
+      title: 'Search Security Labs',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

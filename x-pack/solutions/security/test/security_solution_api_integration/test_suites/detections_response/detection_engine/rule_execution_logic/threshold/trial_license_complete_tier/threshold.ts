@@ -26,6 +26,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
@@ -37,9 +38,15 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
+
+// Sorted by host.name: suricata-sensor-london < suricata-zeek-sensor-toronto.
+const LONDON_HOST_NAME = 'suricata-sensor-london';
+const TORONTO_HOST_NAME = 'suricata-zeek-sensor-toronto';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -51,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   describe('@ess @serverless @serverlessQA Threshold type rules', () => {
     before(async () => {
@@ -426,11 +434,33 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        // Threshold alerts aggregate by host.name and may not carry host.id in their source,
+        // so the EUID is name-based (host:<host.name>). Omit host.id to ensure the entity EUID
+        // matches what the detection engine computes from the threshold alert.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: LONDON_HOST_NAME },
+              entity: {
+                id: `host:${LONDON_HOST_NAME}`,
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 20 },
+              },
+            },
+            {
+              host: { name: TORONTO_HOST_NAME },
+              entity: {
+                id: `host:${TORONTO_HOST_NAME}`,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -453,15 +483,21 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        // Only the first alert (sorted by host.name) is asserted on — suricata-sensor-london.
+        // Use name-based EUID for the same reason as the risk index describe above.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: LONDON_HOST_NAME },
+              entity: { id: `host:${LONDON_HOST_NAME}`, type: 'host' },
+              asset: { criticality: 'high_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -742,6 +778,95 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests![1].description).toBe(
           'Find all terms that exceeds threshold value after host.id: f9c7ca2d33f548a8b37667f6fffc59ce'
         );
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          host: { id: 'host-1' },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          host: { id: 'host-2' },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          host: { id: 'host-3' },
+        };
+
+        await indexListOfDocuments([
+          docNamespace1,
+          docNamespace1,
+          docNamespace2,
+          docNamespace2,
+          docNamespace3,
+          docNamespace3,
+        ]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          threshold: {
+            field: ['host.id'],
+            value: 1,
+          },
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(2);
+        // @ts-expect-error namespace does not exist on type
+        const hostIds = previewAlerts.map((alert) => alert._source['host.id']);
+        expect(hostIds).toContain('host-1');
+        expect(hostIds).toContain('host-2');
+        expect(hostIds).not.toContain('host-3');
       });
     });
   });

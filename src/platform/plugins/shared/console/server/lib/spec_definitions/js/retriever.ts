@@ -28,6 +28,12 @@ export const retriever = (specService: SpecDefinitionsService) => {
       size: 10,
       rank_window_size: 100,
       query_vector: [],
+      query_vector_builder: {
+        text_embedding: {
+          model_id: '',
+          model_text: '',
+        },
+      },
       // lambda is only applicable for 'mmr' diversify type
       lambda: 0.5,
     },

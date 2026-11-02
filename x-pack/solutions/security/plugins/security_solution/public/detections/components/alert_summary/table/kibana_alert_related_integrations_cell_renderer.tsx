@@ -17,7 +17,7 @@ export const TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID =
 
 export interface KibanaAlertRelatedIntegrationsCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
   /**

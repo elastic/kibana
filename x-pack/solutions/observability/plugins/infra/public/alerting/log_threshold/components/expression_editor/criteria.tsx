@@ -255,7 +255,7 @@ const AddCriterionButton = ({ addCriterion }: { addCriterion: () => void }) => {
         color={'primary'}
         iconSide={'left'}
         flush={'left'}
-        iconType={'plusInCircleFilled'}
+        iconType={'plusCircle'}
         onClick={addCriterion}
       >
         <FormattedMessage

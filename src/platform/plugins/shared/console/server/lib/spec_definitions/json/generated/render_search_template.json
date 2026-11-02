@@ -6,6 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "id": "",
+      "file": "",
+      "params": {},
+      "source": ""
+    },
     "methods": [
       "GET",
       "POST"
@@ -15,6 +21,7 @@
       "_render/template/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-render-search-template",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-render-search-template",
     "availability": {
       "stack": true,
       "serverless": true

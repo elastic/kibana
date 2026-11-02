@@ -97,7 +97,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"url\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at url`,
             });
           });
       });
@@ -139,7 +139,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"apiKey\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiKey`,
             });
           });
       });
@@ -225,7 +225,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed (Field \"name\": Required)`,
+            service_message: `Request validation failed (✖ Invalid input: expected string, received undefined\n  → at name)`,
           });
         });
       });

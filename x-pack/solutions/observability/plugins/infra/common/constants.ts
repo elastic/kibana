@@ -7,14 +7,18 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { EntityTypes } from './http_api/shared/entity_type';
 export {
   HOST_NAME as HOST_NAME_FIELD,
+  HOST_HOSTNAME as HOST_HOSTNAME_FIELD,
   CONTAINER_ID as CONTAINER_ID_FIELD,
   KUBERNETES_POD_UID as KUBERNETES_POD_UID_FIELD,
 } from '@kbn/metrics-data-access-plugin/common';
 
+export const DEFAULT_SCHEMA: DataSchemaFormat = 'semconv';
+
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
-export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
 
@@ -75,4 +79,13 @@ export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {
 
 export const SNAPSHOT_API_MAX_METRICS = 20;
 
-export const SCHEMA_SELECTOR_DOCS_LINK = 'https://ela.st/schema-selector-hosts';
+/**
+ * Schema selector documentation, per entity type. `pod` is intentionally absent until the Kubernetes
+ * pods schema selector anchor is published (elastic/kibana#293229), so callers must handle `undefined`
+ * rather than falling back to the hosts documentation.
+ */
+export const SCHEMA_SELECTOR_DOCS_LINKS: Partial<Record<EntityTypes, string>> = {
+  host: 'https://ela.st/docs-otel-schema-selector-hosts',
+};
+
+export const MAX_HOST_COUNT_LIMIT = 10000;

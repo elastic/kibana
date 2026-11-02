@@ -10,13 +10,15 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import axios from 'axios';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import { API_BASE_PATH } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
 import { createStorageService } from '../lib/create_storage_service';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 const bodySchema = schema.object({
-  apiKey: schema.string({ minLength: 1 }),
+  apiKey: schema.string({ minLength: 1, maxLength: 1000 }),
 });
 
 interface CloudConnectedStartDeps {
@@ -40,13 +42,8 @@ export const registerAuthenticateRoute = ({
 }: AuthenticateRouteOptions) => {
   router.get(
     {
-      path: '/internal/cloud_connect/config',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route returns public configuration information.',
-        },
-      },
+      path: `${API_BASE_PATH}/config`,
+      security: CLOUD_CONNECT_READ_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -92,14 +89,8 @@ export const registerAuthenticateRoute = ({
 
   router.post(
     {
-      path: '/internal/cloud_connect/authenticate',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates authentication to the Cloud Connect API and handles authorization there.',
-        },
-      },
+      path: `${API_BASE_PATH}/authenticate`,
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: {
         body: bodySchema,
       },

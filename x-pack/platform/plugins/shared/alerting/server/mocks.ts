@@ -38,6 +38,7 @@ const createSetupMock = () => {
     }),
     getDataStreamAdapter: jest.fn(),
     registerConnectorAdapter: jest.fn(),
+    enableAlertStatusChanged: jest.fn(),
   });
 
   return mock;
@@ -66,6 +67,7 @@ const createStartMock = () => {
     getAlertIndicesAlias: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
+    getRulesClientWithRequestInSpace: jest.fn().mockResolvedValue(rulesClientMock.create()),
     getFrameworkHealth: jest.fn(),
   });
   return mock;
@@ -132,11 +134,9 @@ const createAbortableSearchServiceMock = () => {
 
 const createRuleMonitoringServiceMock = () => {
   const mock = lazyObject({
-    setLastRunMetricsTotalSearchDurationMs: jest.fn(),
-    setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
-    setLastRunMetricsTotalAlertsDetected: jest.fn(),
-    setLastRunMetricsTotalAlertsCreated: jest.fn(),
-    setLastRunMetricsGapDurationS: jest.fn(),
+    setMetric: jest.fn(),
+    setMetrics: jest.fn(),
+    clearGap: jest.fn(),
   }) as unknown as jest.Mocked<PublicRuleMonitoringService>;
 
   return mock;

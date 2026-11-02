@@ -33,6 +33,22 @@ export interface DataStreamDefinition<
   hidden?: boolean;
 
   /**
+   * Whether this is a system data stream.
+   *
+   * When set to `true`, Kibana verifies in dev mode that Elasticsearch recognizes the
+   * stream as a system data stream after creation. If it does not, Kibana throws a clear error
+   * so the misconfiguration is caught early — before it becomes a data-exposure risk in
+   * production. The check never runs in production.
+   *
+   * A `SystemDataStreamDescriptor` must be registered with Elasticsearch before the stream is
+   * initialized; otherwise the check will throw. See the "System data streams" section of the
+   * `@kbn/data-streams` README for guidance on how to register one.
+   *
+   * @remark Only set this to `true` after coordinating with the Elasticsearch team.
+   */
+  system?: boolean;
+
+  /**
    * @remark Must be **incremented** in order to release a new version of the template definition.
    * @remark Must be greater than 0
    */
@@ -45,8 +61,14 @@ export interface DataStreamDefinition<
    *  - api.IndicesPutIndexTemplateRequest
    *  - api.IndicesIndexTemplate
    *  - api.IndicesIndexTemplateSummary
+   *
+   * Lifecycle behavior:
+   *  - `template.lifecycle` is optional.
+   *  - If omitted, no lifecycle policy is configured by this definition.
+   *  - If you add, remove, or change `template.lifecycle`, increment `version` so the
+   *    updated template is applied.
    */
-  template: Pick<api.IndicesIndexTemplateSummary, 'aliases'> & {
+  template: Pick<api.IndicesIndexTemplateSummary, 'aliases' | 'lifecycle'> & {
     /** @default 100 */
     priority?: number;
 

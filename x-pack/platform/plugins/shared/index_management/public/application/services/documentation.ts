@@ -21,7 +21,6 @@ class DocumentationService {
   private indexSettings: string = '';
   private indexTemplates: string = '';
   private indexV1: string = '';
-  private inferenceApisConfigureChunking: string = '';
   private mapping: string = '';
   private mappingAnalyzer: string = '';
   private mappingCoerce: string = '';
@@ -71,6 +70,8 @@ class DocumentationService {
   private enrichIngestData: string = '';
   private mappingReference: string = '';
   private elasticInferenceService: string = '';
+  private elasticInferenceServicePricing: string = '';
+  private cloudPricing: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -84,7 +85,6 @@ class DocumentationService {
     this.indexManagement = links.management.indexManagement;
     this.indexSettings = links.elasticsearch.indexSettings;
     this.indexTemplates = links.elasticsearch.indexTemplates;
-    this.inferenceApisConfigureChunking = links.enterpriseSearch.inferenceApisConfigureChunking;
     this.indexV1 = links.apis.putIndexTemplateV1;
     this.mapping = links.elasticsearch.mapping;
     this.mappingAnalyzer = links.elasticsearch.mappingAnalyzer;
@@ -135,6 +135,8 @@ class DocumentationService {
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
     this.enrichIngestData = links.ingest.enrich;
     this.elasticInferenceService = links.enterpriseSearch.elasticInferenceService;
+    this.elasticInferenceServicePricing = links.enterpriseSearch.elasticInferenceServicePricing;
+    this.cloudPricing = links.cloud.cloudPricing;
   }
 
   public getEsDocsBase() {
@@ -163,10 +165,6 @@ class DocumentationService {
 
   public getIdxMgmtDocumentationLink() {
     return this.indexManagement;
-  }
-
-  public getConfigureChunkingDocLink() {
-    return this.inferenceApisConfigureChunking;
   }
 
   public getIndicesComponentTemplate() {
@@ -377,6 +375,14 @@ class DocumentationService {
 
   public getEisDocumentationLink() {
     return this.elasticInferenceService;
+  }
+
+  public getEisPricingDocumentationLink() {
+    return this.elasticInferenceServicePricing;
+  }
+
+  public getCloudPricing() {
+    return this.cloudPricing;
   }
 
   public getWellKnownTextLink() {

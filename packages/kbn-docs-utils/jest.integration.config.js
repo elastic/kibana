@@ -8,7 +8,13 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/jest/jest_integration_node',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-docs-utils'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-docs-utils',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/packages/kbn-docs-utils/src/**/*.{ts,tsx}',
+    '!<rootDir>/packages/kbn-docs-utils/src/**/*.test.ts',
+  ],
 };

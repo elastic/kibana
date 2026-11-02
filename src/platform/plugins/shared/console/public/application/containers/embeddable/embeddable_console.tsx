@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useMemo, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
@@ -22,6 +24,8 @@ import {
   useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 import { dynamic } from '@kbn/shared-ux-utility';
 
 import { Global } from '@emotion/react';
@@ -117,10 +121,42 @@ export const EmbeddableConsole = ({
     (consoleState.view === EmbeddableConsoleView.Console || alternateView === undefined);
   const showAlternateView =
     consoleState.view === EmbeddableConsoleView.Alternate && alternateView !== undefined;
-  const setIsConsoleOpen = (value: boolean) => {
-    consoleDispatch(value ? { type: 'open' } : { type: 'close' });
-  };
+  const setIsConsoleOpen = useCallback(
+    (value: boolean) => {
+      consoleDispatch(value ? { type: 'open' } : { type: 'close' });
+    },
+    [consoleDispatch]
+  );
   const toggleConsole = () => setIsConsoleOpen(!isOpen);
+
+  // Include chrome header and navigation in the focus trap so users can
+  // interact with global search, nav, etc. while the console is open.
+  const focusTrapShards = useMemo(() => {
+    return new Proxy([] as HTMLElement[], {
+      get(_, prop) {
+        const elements = Array.from(
+          document.querySelectorAll<HTMLElement>(euiIncludeSelectorInFocusTrap.selector)
+        );
+        const value = Reflect.get(elements, prop);
+        return typeof value === 'function' ? value.bind(elements) : value;
+      },
+    });
+  }, []);
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      // Only close when clicking inside the main app content area,
+      // not on overlays (toasts, flyouts, modals) or chrome (header, nav, sidebar)
+      if (target.closest(`.${APP_WRAPPER_CLASS}`)) {
+        setIsConsoleOpen(false);
+      }
+    },
+    [setIsConsoleOpen]
+  );
+
   const clickAlternateViewActivateButton: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
     switch (consoleState.view) {
@@ -146,7 +182,11 @@ export const EmbeddableConsole = ({
     <>
       <Global styles={styles.embeddableConsoleGlobal} />
       <EuiPortal>
-        <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
+        <EuiFocusTrap
+          onClickOutside={handleClickOutside}
+          disabled={!isOpen}
+          shards={focusTrapShards}
+        >
           <section
             aria-label={landmarkHeading}
             css={[
@@ -162,7 +202,7 @@ export const EmbeddableConsole = ({
             <EuiScreenReaderOnly>
               <h2>{landmarkHeading}</h2>
             </EuiScreenReaderOnly>
-            <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
+            <EuiThemeProvider wrapperProps={{ cloneElement: true }}>
               <div>
                 {isOpen && (
                   <EmbeddedConsoleResizeButton
@@ -171,31 +211,38 @@ export const EmbeddableConsole = ({
                   />
                 )}
 
-                <div css={styles.embeddableConsoleControls}>
-                  <EuiButtonEmpty
-                    color="text"
-                    iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-                    onClick={toggleConsole}
-                    css={styles.embeddableConsoleControlsButton}
-                    data-test-subj="consoleEmbeddedControlBar"
-                    data-telemetry-id="console-embedded-controlbar-button"
-                    aria-label={i18n.translate('console.embeddableConsole.toggleButtonAriaLabel', {
-                      defaultMessage: 'Toggle console',
-                    })}
-                  >
-                    {i18n.translate('console.embeddableConsole.title', {
-                      defaultMessage: 'Console',
-                    })}
-                  </EuiButtonEmpty>
+                <EuiFlexGroup css={styles.embeddableConsoleControls} gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      color="text"
+                      size="s"
+                      iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+                      onClick={toggleConsole}
+                      css={styles.embeddableConsoleControlsButton}
+                      data-test-subj="consoleEmbeddedControlBar"
+                      data-telemetry-id="console-embedded-controlbar-button"
+                      aria-label={i18n.translate(
+                        'console.embeddableConsole.toggleButtonAriaLabel',
+                        {
+                          defaultMessage: 'Toggle console',
+                        }
+                      )}
+                    >
+                      {i18n.translate('console.embeddableConsole.title', {
+                        defaultMessage: 'Console',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+
                   {alternateView && (
-                    <div css={styles.embeddableControlsAltViewButtonContainer}>
+                    <EuiFlexItem css={styles.embeddableControlsAltViewButtonContainer} grow={false}>
                       <alternateView.ActivationButton
                         activeView={showAlternateView}
                         onClick={clickAlternateViewActivateButton}
                       />
-                    </div>
+                    </EuiFlexItem>
                   )}
-                </div>
+                </EuiFlexGroup>
               </div>
             </EuiThemeProvider>
             {consoleState.consoleHasBeenOpened ? (

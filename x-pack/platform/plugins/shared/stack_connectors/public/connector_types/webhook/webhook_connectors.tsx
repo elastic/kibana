@@ -26,12 +26,13 @@ const HTTP_VERBS = [
   WebhookMethods.GET,
   WebhookMethods.DELETE,
 ];
-const { emptyField, urlField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
+  isEdit,
 }) => {
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
@@ -69,7 +70,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               label: i18n.URL_LABEL,
               validations: [
                 {
-                  validator: urlField(i18n.URL_INVALID),
+                  validator: ({ value }) => {
+                    if (typeof value === 'string' && /^https?:\/\/\S+$/i.test(value)) {
+                      return;
+                    }
+
+                    return {
+                      code: 'ERR_FIELD_FORMAT',
+                      formatType: 'URL',
+                      message: i18n.URL_INVALID,
+                    };
+                  },
                 },
               ],
             }}
@@ -84,6 +95,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazyLoadedAuthConfig
           readOnly={readOnly}
+          isEdit={isEdit}
           isPfxEnabled={isPfxEnabled}
           isOAuth2Enabled={true}
         />

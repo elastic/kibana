@@ -10,7 +10,7 @@
 import type { FormBasedPersistedState, HeatmapVisualizationState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
+import { DEFAULT_LAYER_ID } from '../constants';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
@@ -42,13 +42,14 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
     gridConfig: {
       type: 'heatmap_grid',
       isCellLabelVisible: false,
-      isXAxisLabelVisible: false,
+      isXAxisLabelVisible: config.axisLabel?.xAxis ?? false,
       isXAxisTitleVisible: false,
-      isYAxisLabelVisible: false,
+      isYAxisLabelVisible: config.axisLabel?.yAxis ?? false,
       isYAxisTitleVisible: false,
+      ...(config.ySort ? { ySortPredicate: config.ySort } : {}),
     },
     legend: {
-      isVisible: config.legend?.show || true,
+      isVisible: config.legend?.show ?? true,
       position: config.legend?.position || 'left',
       type: 'heatmap_legend',
     },

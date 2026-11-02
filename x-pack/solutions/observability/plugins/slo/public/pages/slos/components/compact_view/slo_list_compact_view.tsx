@@ -7,17 +7,17 @@
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { useQueryClient } from '@kbn/react-query';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useQueryClient } from '@kbn/react-query';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { paths } from '../../../../../common/locators/paths';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
@@ -41,6 +41,10 @@ import {
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
+import {
+  SloBurnRateWindowColumnHeader,
+  type SloBurnRateWindow,
+} from '../common/slo_burn_rate_window_column_header';
 import { SLOGroupings } from '../common/slo_groupings';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
@@ -50,9 +54,10 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
+  isInteractive?: boolean;
 }
 
-export function SloListCompactView({ sloList, loading, error }: Props) {
+export function SloListCompactView({ sloList, loading, error, isInteractive = true }: Props) {
   const { services } = useKibana();
   const {
     application: { navigateToUrl },
@@ -96,6 +101,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       sloList,
     });
 
+  const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
+  const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
+
   const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
     !!slo.remote && slo.remote.kibanaUrl !== '';
@@ -105,8 +113,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       <>
         {actionName}
         <EuiIcon
-          type="popout"
+          type="external"
           size="s"
+          aria-hidden={true}
           css={{
             marginLeft: '10px',
           }}
@@ -116,180 +125,182 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       actionName
     );
 
-  const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = [
-    {
-      type: 'icon',
-      icon: 'inspect',
-      name: i18n.translate('xpack.slo.item.actions.details', {
-        defaultMessage: 'Details',
-      }),
-      description: i18n.translate('xpack.slo.item.actions.details', {
-        defaultMessage: 'Details',
-      }),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
-        );
-        navigateToUrl(sloDetailsUrl);
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'pencil',
-      name: buildActionName(
-        i18n.translate('xpack.slo.item.actions.edit', {
-          defaultMessage: 'Edit',
-        })
-      ),
-      description: i18n.translate('xpack.slo.item.actions.edit', {
-        defaultMessage: 'Edit',
-      }),
-      'data-test-subj': 'sloActionsEdit',
-      enabled: (slo) =>
-        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        const remoteEditUrl = createRemoteSloEditUrl(slo, spaceId);
-        if (!!remoteEditUrl) {
-          window.open(remoteEditUrl, '_blank');
-        } else {
-          navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
-        }
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'bell',
-      name: i18n.translate('xpack.slo.item.actions.createRule', {
-        defaultMessage: 'Create new alert rule',
-      }),
-      description: i18n.translate('xpack.slo.item.actions.createRule', {
-        defaultMessage: 'Create new alert rule',
-      }),
-      'data-test-subj': 'sloActionsCreateRule',
-      enabled: (slo: SLOWithSummaryResponse) =>
-        !!permissions?.hasAllWriteRequested && !isRemote(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        setSloToAddRule(slo);
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'gear',
-      name: i18n.translate('xpack.slo.item.actions.manageRules', {
-        defaultMessage: 'Manage rules',
-      }),
-      description: i18n.translate('xpack.slo.item.actions.manageRules', {
-        defaultMessage: 'Manage rules',
-      }),
-      'data-test-subj': 'sloActionsManageRules',
-      enabled: (slo: SLOWithSummaryResponse) =>
-        !!permissions?.hasAllWriteRequested && !isRemote(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
-        locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
-      },
-    },
-    {
-      type: 'icon',
-      icon: (slo: SLOWithSummaryResponse) => (slo.enabled ? 'stop' : 'play'),
-      name: (slo: SLOWithSummaryResponse) =>
-        buildActionName(
-          slo.enabled
-            ? i18n.translate('xpack.slo.item.actions.disable', {
-                defaultMessage: 'Disable',
-              })
-            : i18n.translate('xpack.slo.item.actions.enable', {
-                defaultMessage: 'Enable',
-              })
-        )(slo),
-      description: (slo: SLOWithSummaryResponse) =>
-        slo.enabled
-          ? i18n.translate('xpack.slo.item.actions.disable', {
-              defaultMessage: 'Disable',
+  const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = !isInteractive
+    ? []
+    : [
+        {
+          type: 'icon',
+          icon: 'inspect',
+          name: i18n.translate('xpack.slo.item.actions.details', {
+            defaultMessage: 'Details',
+          }),
+          description: i18n.translate('xpack.slo.item.actions.details', {
+            defaultMessage: 'Details',
+          }),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            const sloDetailsUrl = basePath.prepend(
+              paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
+            );
+            navigateToUrl(sloDetailsUrl);
+          },
+        },
+        {
+          type: 'icon',
+          icon: 'pencil',
+          name: buildActionName(
+            i18n.translate('xpack.slo.item.actions.edit', {
+              defaultMessage: 'Edit',
             })
-          : i18n.translate('xpack.slo.item.actions.enable', {
-              defaultMessage: 'Enable',
-            }),
-      'data-test-subj': 'sloActionsManage',
-      enabled: (slo: SLOWithSummaryResponse) =>
-        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        const isEnabled = slo.enabled;
-        const remoteUrl = isEnabled
-          ? createRemoteSloDisableUrl(slo, spaceId)
-          : createRemoteSloEnableUrl(slo, spaceId);
-        if (!!remoteUrl) {
-          window.open(remoteUrl, '_blank');
-        } else {
-          triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
-        }
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'copy',
-      name: buildActionName(
-        i18n.translate('xpack.slo.item.actions.clone', {
-          defaultMessage: 'Clone',
-        })
-      ),
-      description: i18n.translate('xpack.slo.item.actions.clone', {
-        defaultMessage: 'Clone',
-      }),
-      'data-test-subj': 'sloActionsClone',
-      enabled: (slo: SLOWithSummaryResponse) =>
-        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        triggerAction({ item: slo, type: 'clone' });
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'trash',
-      name: buildActionName(
-        i18n.translate('xpack.slo.item.actions.delete', {
-          defaultMessage: 'Delete',
-        })
-      ),
-      description: i18n.translate('xpack.slo.item.actions.delete', {
-        defaultMessage: 'Delete',
-      }),
-      'data-test-subj': 'sloActionsDelete',
-      enabled: (slo: SLOWithSummaryResponse) =>
-        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
-        if (!!remoteDeleteUrl) {
-          window.open(remoteDeleteUrl, '_blank');
-        } else {
-          triggerAction({ item: slo, type: 'delete' });
-        }
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'refresh',
-      name: buildActionName(
-        i18n.translate('xpack.slo.item.actions.reset', {
-          defaultMessage: 'Reset',
-        })
-      ),
-      description: i18n.translate('xpack.slo.item.actions.reset', {
-        defaultMessage: 'Reset',
-      }),
-      'data-test-subj': 'sloActionsReset',
-      enabled: (slo: SLOWithSummaryResponse) =>
-        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
-      onClick: (slo: SLOWithSummaryResponse) => {
-        const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
-        if (!!remoteResetUrl) {
-          window.open(remoteResetUrl, '_blank');
-        } else {
-          triggerAction({ item: slo, type: 'reset' });
-        }
-      },
-    },
-  ];
+          ),
+          description: i18n.translate('xpack.slo.item.actions.edit', {
+            defaultMessage: 'Edit',
+          }),
+          'data-test-subj': 'sloActionsEdit',
+          enabled: (slo) =>
+            (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            const remoteEditUrl = createRemoteSloEditUrl(slo, spaceId);
+            if (!!remoteEditUrl) {
+              window.open(remoteEditUrl, '_blank');
+            } else {
+              navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
+            }
+          },
+        },
+        {
+          type: 'icon',
+          icon: 'bell',
+          name: i18n.translate('xpack.slo.item.actions.createRule', {
+            defaultMessage: 'Create new alert rule',
+          }),
+          description: i18n.translate('xpack.slo.item.actions.createRule', {
+            defaultMessage: 'Create new alert rule',
+          }),
+          'data-test-subj': 'sloActionsCreateRule',
+          enabled: (slo: SLOWithSummaryResponse) =>
+            !!permissions?.hasAllWriteRequested && !isRemote(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            setSloToAddRule(slo);
+          },
+        },
+        {
+          type: 'icon',
+          icon: 'gear',
+          name: i18n.translate('xpack.slo.item.actions.manageRules', {
+            defaultMessage: 'Manage rules',
+          }),
+          description: i18n.translate('xpack.slo.item.actions.manageRules', {
+            defaultMessage: 'Manage rules',
+          }),
+          'data-test-subj': 'sloActionsManageRules',
+          enabled: (slo: SLOWithSummaryResponse) =>
+            !!permissions?.hasAllWriteRequested && !isRemote(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
+            locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
+          },
+        },
+        {
+          type: 'icon',
+          icon: (slo: SLOWithSummaryResponse) => (slo.enabled ? 'stop' : 'play'),
+          name: (slo: SLOWithSummaryResponse) =>
+            buildActionName(
+              slo.enabled
+                ? i18n.translate('xpack.slo.item.actions.disable', {
+                    defaultMessage: 'Disable',
+                  })
+                : i18n.translate('xpack.slo.item.actions.enable', {
+                    defaultMessage: 'Enable',
+                  })
+            )(slo),
+          description: (slo: SLOWithSummaryResponse) =>
+            slo.enabled
+              ? i18n.translate('xpack.slo.item.actions.disable', {
+                  defaultMessage: 'Disable',
+                })
+              : i18n.translate('xpack.slo.item.actions.enable', {
+                  defaultMessage: 'Enable',
+                }),
+          'data-test-subj': 'sloActionsManage',
+          enabled: (slo: SLOWithSummaryResponse) =>
+            (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            const isEnabled = slo.enabled;
+            const remoteUrl = isEnabled
+              ? createRemoteSloDisableUrl(slo, spaceId)
+              : createRemoteSloEnableUrl(slo, spaceId);
+            if (!!remoteUrl) {
+              window.open(remoteUrl, '_blank');
+            } else {
+              triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
+            }
+          },
+        },
+        {
+          type: 'icon',
+          icon: 'copy',
+          name: buildActionName(
+            i18n.translate('xpack.slo.item.actions.clone', {
+              defaultMessage: 'Clone',
+            })
+          ),
+          description: i18n.translate('xpack.slo.item.actions.clone', {
+            defaultMessage: 'Clone',
+          }),
+          'data-test-subj': 'sloActionsClone',
+          enabled: (slo: SLOWithSummaryResponse) =>
+            (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            triggerAction({ item: slo, type: 'clone' });
+          },
+        },
+        {
+          type: 'icon',
+          icon: 'trash',
+          name: buildActionName(
+            i18n.translate('xpack.slo.item.actions.delete', {
+              defaultMessage: 'Delete',
+            })
+          ),
+          description: i18n.translate('xpack.slo.item.actions.delete', {
+            defaultMessage: 'Delete',
+          }),
+          'data-test-subj': 'sloActionsDelete',
+          enabled: (slo: SLOWithSummaryResponse) =>
+            (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
+            if (!!remoteDeleteUrl) {
+              window.open(remoteDeleteUrl, '_blank');
+            } else {
+              triggerAction({ item: slo, type: 'delete' });
+            }
+          },
+        },
+        {
+          type: 'icon',
+          icon: 'refresh',
+          name: buildActionName(
+            i18n.translate('xpack.slo.item.actions.reset', {
+              defaultMessage: 'Reset',
+            })
+          ),
+          description: i18n.translate('xpack.slo.item.actions.reset', {
+            defaultMessage: 'Reset',
+          }),
+          'data-test-subj': 'sloActionsReset',
+          enabled: (slo: SLOWithSummaryResponse) =>
+            (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+          onClick: (slo: SLOWithSummaryResponse) => {
+            const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
+            if (!!remoteResetUrl) {
+              window.open(remoteResetUrl, '_blank');
+            } else {
+              triggerAction({ item: slo, type: 'reset' });
+            }
+          },
+        },
+      ];
 
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = [
     {
@@ -312,13 +323,14 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         <>
           <SloRulesBadge
             rules={rulesBySlo?.[slo.id]}
-            onClick={() => setSloToAddRule(slo)}
+            onClick={isInteractive ? () => setSloToAddRule(slo) : undefined}
             isRemote={!!slo.remote}
           />
           <SloActiveAlertsBadge
             slo={slo}
             activeAlerts={activeAlertsBySlo.get(slo)}
             viewMode="compact"
+            isInteractive={isInteractive}
           />
         </>
       ),
@@ -336,9 +348,13 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
             <EuiText size="s" tabIndex={0}>
-              <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                {slo.name}
-              </a>
+              {isInteractive ? (
+                <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                  {slo.name}
+                </a>
+              ) : (
+                slo.name
+              )}
             </EuiText>
           </EuiToolTip>
         );
@@ -436,6 +452,40 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         );
       },
     },
+    {
+      name: (
+        <SloBurnRateWindowColumnHeader
+          burnRateWindow={burnRateWindow}
+          onBurnRateWindowChange={setBurnRateWindow}
+          isPopoverOpen={isBurnRatePopoverOpen}
+          setIsPopoverOpen={setIsBurnRatePopoverOpen}
+          buttonTestSubj="sloListCompactBurnRateWindowSelector"
+          popoverAriaLabel={i18n.translate(
+            'xpack.slo.sloListCompactView.burnRate.windowSelectorAriaLabel',
+            {
+              defaultMessage: 'Select burn rate window',
+            }
+          )}
+          burnRateLabel={i18n.translate('xpack.slo.sloListCompactView.columns.burnRate', {
+            defaultMessage: 'Burn rate',
+          })}
+          isInteractive={isInteractive}
+        />
+      ),
+      width: '160px',
+      render: (slo: SLOWithSummaryResponse) => {
+        if (slo.summary.status === 'NO_DATA') {
+          return NOT_AVAILABLE_LABEL;
+        }
+        const { fiveMinuteBurnRate, oneHourBurnRate, oneDayBurnRate } = slo.summary;
+        const windowValue = {
+          '5m': fiveMinuteBurnRate,
+          '1h': oneHourBurnRate,
+          '1d': oneDayBurnRate,
+        }[burnRateWindow];
+        return <EuiText size="s">{`${numeral(windowValue).format('0.[00]')}x`}</EuiText>;
+      },
+    },
 
     {
       name: 'Actions',
@@ -460,6 +510,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         loading={loading}
         noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
         tableLayout="auto"
+        tableCaption={i18n.translate('xpack.slo.sloListCompactView.tableCaption', {
+          defaultMessage: 'Compact SLO list',
+        })}
       />
       {sloToAddRule ? (
         <RuleFormFlyout

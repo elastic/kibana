@@ -63,7 +63,7 @@ export const PaginationControls = ({
       data-test-subj={PAGE_SIZE_BTN_TEST_ID}
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       aria-label={rowsPerPageLabel}
@@ -100,6 +100,7 @@ export const PaginationControls = ({
     >
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={rowsPerPageLabel}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}

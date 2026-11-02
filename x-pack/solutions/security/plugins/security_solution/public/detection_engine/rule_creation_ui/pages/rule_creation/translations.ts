@@ -57,3 +57,17 @@ export const COMPLETE_WITH_ENABLING = i18n.translate(
     defaultMessage: 'Create & enable rule',
   }
 );
+
+export const NEW_RULE_ATTACHMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabel',
+  {
+    defaultMessage: 'New Rule',
+  }
+);
+
+export const EXISTING_RULE_ATTACHMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationAttachmentLabelExisting',
+  {
+    defaultMessage: 'Rule',
+  }
+);

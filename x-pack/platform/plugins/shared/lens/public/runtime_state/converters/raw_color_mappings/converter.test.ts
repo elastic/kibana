@@ -359,8 +359,8 @@ describe('converter', () => {
   describe('#isDeprecatedColorMapping', () => {
     const baseAssignment = {
       color: {
-        type: 'categorical',
-        paletteId: 'default',
+        type: 'categorical' as const,
+        paletteId: 'default' as const,
         colorIndex: 3,
       },
       touched: false,
@@ -373,7 +373,7 @@ describe('converter', () => {
           {
             ...baseAssignment,
             rule: {
-              type: 'auto',
+              type: 'auto' as const,
             },
           },
         ],
@@ -388,7 +388,7 @@ describe('converter', () => {
           {
             ...baseAssignment,
             rule: {
-              type: 'other',
+              type: 'other' as const,
             },
           },
         ],

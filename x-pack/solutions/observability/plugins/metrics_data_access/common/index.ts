@@ -15,6 +15,7 @@ export {
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
+  isFilterWithAggregations,
 } from './inventory_models';
 
 export {
@@ -35,27 +36,50 @@ export type {
   MetricsUIAggregation,
   SnapshotMetricType,
   TSVBMetricModelCreator,
+  TSVBMetricModelCreatorOptions,
   TSVBMetricModel,
   DataSchemaFormat,
+  InventoryModelFields,
 } from './inventory_models/types';
+
+export {
+  CPU_USAGE_LABEL,
+  MEMORY_USAGE_LABEL,
+  NORMALIZED_LOAD_LABEL,
+  DISK_USAGE_LABEL,
+} from './inventory_models/shared/charts/labels';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export {
   METRICS_EXPLORER_API_MAX_METRICS,
   TIMESTAMP,
   HOST_NAME,
+  HOST_HOSTNAME,
   CONTAINER_ID,
   KUBERNETES_POD_UID,
+  K8S_POD_UID,
+  K8S_POD_NAME,
+  K8S_NAMESPACE_NAME,
+  K8S_NODE_NAME,
+  K8S_DEPLOYMENT_NAME,
   HOST_OS_NAME,
   CLOUD_PROVIDER,
   SERVICE_NAME,
   EVENT_MODULE,
   METRICSET_MODULE,
   METRICSET_NAME,
+  EVENT_DATASET,
   DATASTREAM_DATASET,
-  OS_NAME,
+  OS_TYPE,
   SYSTEM_INTEGRATION,
   HOST_METRICS_RECEIVER_OTEL,
+  KUBELET_STATS_RECEIVER_OTEL,
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_WORKING_SET,
+  SEMCONV_K8S_POD_NETWORK_IO,
 } from './constants';
 
 export {

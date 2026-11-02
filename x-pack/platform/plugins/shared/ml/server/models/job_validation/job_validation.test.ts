@@ -10,7 +10,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 
 import type { MlClient } from '../../lib/ml_client';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 import type { ValidateJobPayload } from './job_validation';
 import { validateJob } from './job_validation';
@@ -22,8 +21,6 @@ callAs.search.mockResponse({
   // @ts-expect-error incorrect types
   hits: { total: { value: 1, relation: ES_CLIENT_TOTAL_HITS_RELATION.EQ } },
 });
-
-const authHeader: AuthorizationHeader = Object.create(null);
 
 const mlClusterClient = {
   asCurrentUser: callAs,
@@ -50,7 +47,7 @@ describe('ML - validateJob', () => {
       job: { analysis_config: { detectors: [] } },
     } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
 
       expect(ids).toStrictEqual([
@@ -70,7 +67,7 @@ describe('ML - validateJob', () => {
           job_id: id,
         },
       } as unknown as ValidateJobPayload;
-      return validateJob(mlClusterClient, mlClient, payload, authHeader).catch(() => {
+      return validateJob(mlClusterClient, mlClient, payload).catch(() => {
         new Error('Promise should not fail for jobIdTests.');
       });
     });
@@ -91,7 +88,7 @@ describe('ML - validateJob', () => {
       job: { analysis_config: { detectors: [] }, groups: testIds },
     } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes(messageId)).toBe(true);
     });
@@ -131,7 +128,7 @@ describe('ML - validateJob', () => {
       const payload = {
         job: { analysis_config: { bucket_span: format, detectors: [] } },
       } as unknown as ValidateJobPayload;
-      return validateJob(mlClusterClient, mlClient, payload, authHeader).catch(() => {
+      return validateJob(mlClusterClient, mlClient, payload).catch(() => {
         new Error('Promise should not fail for bucketSpanFormatTests.');
       });
     });
@@ -170,7 +167,7 @@ describe('ML - validateJob', () => {
       function: undefined,
     });
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_empty')).toBe(true);
     });
@@ -184,7 +181,7 @@ describe('ML - validateJob', () => {
       function: 'count',
     });
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('detectors_function_not_empty')).toBe(true);
     });
@@ -196,7 +193,7 @@ describe('ML - validateJob', () => {
       fields: {},
     } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_invalid')).toBe(true);
     });
@@ -208,7 +205,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     } as unknown as ValidateJobPayload;
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids.includes('index_fields_valid')).toBe(true);
     });
@@ -236,7 +233,7 @@ describe('ML - validateJob', () => {
     const payload = getBasicPayload() as any;
     delete payload.job.analysis_config.influencers;
 
-    validateJob(mlClusterClient, mlClient, payload, authHeader).then(
+    validateJob(mlClusterClient, mlClient, payload).then(
       () =>
         done(
           new Error('Promise should not resolve for this test when influencers is not an Array.')
@@ -248,7 +245,7 @@ describe('ML - validateJob', () => {
   it('detect duplicate detectors', async () => {
     const payload = getBasicPayload() as any;
     payload.job.analysis_config.detectors.push({ function: 'count' });
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -271,7 +268,7 @@ describe('ML - validateJob', () => {
       { function: 'count', by_field_name: 'airline' },
       { function: 'count', partition_field_name: 'airline' },
     ];
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -285,7 +282,7 @@ describe('ML - validateJob', () => {
 
   it('basic validation passes, extended checks return some messages', async () => {
     const payload = getBasicPayload();
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -317,7 +314,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -350,7 +347,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -392,7 +389,7 @@ describe('ML - validateJob', () => {
       fields: { testField: {} },
     };
 
-    return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
+    return validateJob(mlClusterClient, mlClient, payload).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([
         'job_id_valid',
@@ -432,19 +429,17 @@ describe('ML - validateJob', () => {
       previewDatafeed: () => Promise.resolve({ body: [] }),
     } as unknown as MlClient;
 
-    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
-      (messages) => {
-        const ids = messages.map((m) => m.id);
-        expect(ids).toStrictEqual([
-          'job_id_valid',
-          'detectors_function_not_empty',
-          'index_fields_valid',
-          'field_not_aggregatable',
-          'time_field_invalid',
-          'datafeed_preview_no_documents',
-        ]);
-      }
-    );
+    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
+      expect(ids).toStrictEqual([
+        'job_id_valid',
+        'detectors_function_not_empty',
+        'index_fields_valid',
+        'field_not_aggregatable',
+        'time_field_invalid',
+        'datafeed_preview_no_documents',
+      ]);
+    });
   });
 
   it('datafeed preview failed', async () => {
@@ -474,18 +469,16 @@ describe('ML - validateJob', () => {
       previewDatafeed: () => Promise.reject({}),
     } as unknown as MlClient;
 
-    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload, authHeader).then(
-      (messages) => {
-        const ids = messages.map((m) => m.id);
-        expect(ids).toStrictEqual([
-          'job_id_valid',
-          'detectors_function_not_empty',
-          'index_fields_valid',
-          'field_not_aggregatable',
-          'time_field_invalid',
-          'datafeed_preview_failed',
-        ]);
-      }
-    );
+    return validateJob(mlClusterClient, mlClientEmptyDatafeedPreview, payload).then((messages) => {
+      const ids = messages.map((m) => m.id);
+      expect(ids).toStrictEqual([
+        'job_id_valid',
+        'detectors_function_not_empty',
+        'index_fields_valid',
+        'field_not_aggregatable',
+        'time_field_invalid',
+        'datafeed_preview_failed',
+      ]);
+    });
   });
 });

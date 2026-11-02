@@ -16,6 +16,7 @@ export const PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE =
   PRIVMON_USERS_CSV_MAX_SIZE_BYTES + PRIVMON_USERS_CSV_SIZE_TOLERANCE_BYTES;
 
 const MONITORING_URL = `/api/entity_analytics/monitoring` as const;
+const PAD_URL = `/api/entity_analytics/privileged_user_monitoring/pad` as const;
 
 // Monitoring users URLs
 export const MONITORING_USERS_URL = `${MONITORING_URL}/users` as const;
@@ -40,3 +41,7 @@ export const MONITORING_ENGINE_INIT_URL = `${MONITORING_ENGINE_URL}/init` as con
 export const MONITORING_ENGINE_SCHEDULE_NOW_URL = `${MONITORING_ENGINE_URL}/schedule_now` as const;
 export const MONITORING_ENGINE_DELETE_URL = `${MONITORING_ENGINE_URL}/delete` as const;
 export const MONITORING_ENGINE_DISABLE_URL = `${MONITORING_ENGINE_URL}/disable` as const;
+
+// Privileged Access Detection (PAD) URLs
+export const PAD_INSTALL_URL = `${PAD_URL}/install` as const;
+export const PAD_STATUS_URL = `${PAD_URL}/status` as const;

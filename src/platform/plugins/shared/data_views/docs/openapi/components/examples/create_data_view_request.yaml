@@ -1,4 +1,5 @@
 summary: Create a data view with runtime fields.
+description: Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.
 value:
   {
     "data_view": {

@@ -14,6 +14,7 @@ import type {
   RouteConfig,
   KibanaRequest,
   KibanaResponseFactory,
+  ResponseHeaders,
 } from '@kbn/core-http-server';
 import type {
   InternalHttpServiceSetup,
@@ -33,6 +34,26 @@ import type {
 } from '@kbn/core-http-resources-server';
 
 import type { InternalHttpResourcesSetup } from './types';
+
+const toArray = (val: string | string[] | undefined): string[] => {
+  if (val === undefined) return [];
+  return Array.isArray(val) ? val : [val];
+};
+
+const mergeRenderHeaders = (
+  renderHeaders: ResponseHeaders,
+  optionsHeaders: ResponseHeaders = {}
+): ResponseHeaders => {
+  const setCookie = [
+    ...toArray(renderHeaders['set-cookie']),
+    ...toArray(optionsHeaders['set-cookie']),
+  ];
+  return {
+    ...renderHeaders,
+    ...optionsHeaders,
+    ...(setCookie.length > 0 ? { 'set-cookie': setCookie } : {}),
+  };
+};
 
 /**
  * @internal
@@ -114,26 +135,26 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { body, headers: renderHeaders } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
           body,
-          headers: options.headers,
+          headers: mergeRenderHeaders(renderHeaders, options.headers),
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings, {
+        const { body, headers: renderHeaders } = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
           body,
-          headers: options.headers,
+          headers: mergeRenderHeaders(renderHeaders, options.headers),
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {

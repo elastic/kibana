@@ -11,17 +11,44 @@ import { TestProviders } from '../../../../common/mock';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HostRiskScoreQueryTabBody } from './host_risk_score_tab_body';
 import { HostsType } from '../../store/model';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score_kpi';
+import { useEntityStoreRiskScore } from '../../../../entity_analytics/api/hooks/use_entity_store_risk_score';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score_kpi');
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_entity_store_risk_score_kpi');
+jest.mock('../../../../entity_analytics/api/hooks/use_entity_store_risk_score');
 jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../../common/lib/kibana');
+
+const sharedRiskScoreReturn = {
+  data: [],
+  error: undefined,
+  hasEngineBeenInstalled: true,
+  inspect: { dsl: [], response: [] },
+  isAuthorized: true,
+  isInspected: false,
+  loading: false,
+  refetch: jest.fn(),
+  totalCount: 0,
+};
+
+const sharedKpiReturn = {
+  error: undefined,
+  inspect: { dsl: [], response: [] },
+  isModuleDisabled: false,
+  loading: false,
+  refetch: jest.fn(),
+  severityCount: {
+    [RiskSeverity.Unknown]: 12,
+    [RiskSeverity.Low]: 12,
+    [RiskSeverity.Moderate]: 12,
+    [RiskSeverity.High]: 12,
+    [RiskSeverity.Critical]: 12,
+  },
+};
 
 describe('Host risk score query tab body', () => {
-  const mockUseRiskScore = useRiskScore as jest.Mock;
-  const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
+  const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as jest.Mock;
+  const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     indexNames: [],
@@ -34,50 +61,70 @@ describe('Host risk score query tab body', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-    mockUseRiskScoreKpi.mockReturnValue({
-      loading: false,
-      severityCount: {
-        unknown: 12,
-        low: 12,
-        moderate: 12,
-        high: 12,
-        critical: 12,
-      },
-    });
-    mockUseRiskScore.mockReturnValue([
-      false,
-      {
-        hosts: [],
-        id: '123',
-        inspect: {
-          dsl: [],
-          response: [],
-        },
-        isInspected: false,
-        totalCount: 0,
-        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-        loadPage: jest.fn(),
-        refetch: jest.fn(),
-      },
-    ]);
+    mockUseEntityStoreRiskScore.mockReturnValue(sharedRiskScoreReturn);
+    mockUseEntityStoreRiskScoreKpi.mockReturnValue(sharedKpiReturn);
   });
-  it('toggleStatus=true, do not skip', () => {
+  it('toggleStatus=true: entity store hooks are not skipped', () => {
     render(
       <TestProviders>
         <HostRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
-    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseEntityStoreRiskScore.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseEntityStoreRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
-  it('toggleStatus=false, skip', () => {
+  it('labels the risk score and KPI queries with the hosts page execution context', () => {
+    render(
+      <TestProviders>
+        <HostRiskScoreQueryTabBody {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseEntityStoreRiskScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'hosts_risk_score',
+          },
+        },
+        statusExecutionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'hosts_risk_score_status',
+          },
+        },
+      })
+    );
+    expect(mockUseEntityStoreRiskScoreKpi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'hosts_risk_score_kpi',
+          },
+        },
+        statusExecutionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'hosts_risk_score_status',
+          },
+        },
+      })
+    );
+  });
+
+  it('toggleStatus=false: entity store hooks skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(
       <TestProviders>
         <HostRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
-    expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseEntityStoreRiskScore.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseEntityStoreRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 });

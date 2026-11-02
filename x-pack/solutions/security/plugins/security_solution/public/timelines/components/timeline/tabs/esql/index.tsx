@@ -15,15 +15,14 @@ import { from, type Subscription } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
-import { useDispatch } from 'react-redux';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useDispatch } from 'react-redux-v7';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
+import { defaultDiscoverTimeRange } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { applyTimelineStateToDiscover } from './apply_timeline_state_to_discover';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
@@ -32,9 +31,8 @@ import { timelineSelectors } from '../../../../store';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineDefaults } from '../../../../store/defaults';
-import { savedSearchComparator } from './utils';
+import { savedSearchComparator, hasNonEmptyEsqlQuery } from './utils';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
@@ -49,12 +47,7 @@ interface DiscoverTabContentProps {
 export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
   const history = useHistory();
   const {
-    services: {
-      customDataService: discoverDataService,
-      discover,
-      savedSearch: savedSearchService,
-      dataViews: dataViewService,
-    },
+    services: { customDataService: discoverDataService, discover, savedSearch: savedSearchService },
   } = useKibana();
   const {
     timelinePrivileges: { crud: canSaveTimeline },
@@ -62,25 +55,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const dispatch = useDispatch();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status: dataViewStatus } = useDataView(PageScope.alerts);
 
-  const { dataViewId } = useSourcererDataView(PageScope.alerts);
-
-  const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
-
-  const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
+  const [tabStateVersion, setTabStateVersion] = useState(0);
 
   const discoverAppStateSubscription = useRef<Subscription>();
   const discoverInternalStateSubscription = useRef<Subscription>();
-  const discoverSavedSearchStateSubscription = useRef<Subscription>();
-  const discoverTimerangeSubscription = useRef<Subscription>();
-
-  // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
-  useEffect(() => {
-    if (!dataViewId || newDataViewPickerEnabled) return;
-    dataViewService.get(dataViewId).then((dv) => setDataViewSpec(dv?.toSpec?.()));
-  }, [dataViewId, dataViewService, newDataViewPickerEnabled]);
+  const discoverTabStateSubscription = useRef<Subscription>();
 
   const {
     discoverStateContainer,
@@ -89,15 +70,10 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     updateSavedSearch,
     initializeLocalSavedSearch,
     defaultDiscoverAppState,
+    timelineRestorePending,
   } = useDiscoverInTimelineContext();
 
-  const {
-    discoverAppState,
-    discoverSavedSearchState,
-    setDiscoverSavedSearchState,
-    setDiscoverInternalState,
-    setDiscoverAppState,
-  } = useDiscoverState();
+  const { discoverAppState, setDiscoverInternalState, setDiscoverAppState } = useDiscoverState();
 
   const discoverCustomizationCallbacks = useSetDiscoverCustomizationCallbacks();
 
@@ -116,10 +92,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     queryFn: () => (savedSearchId ? savedSearchService.get(savedSearchId) : Promise.resolve(null)),
   });
 
-  const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {
-    if (!discoverSavedSearchState) return;
+  const getCombinedDiscoverSavedSearchState = useCallback(async (): Promise<
+    SavedSearch | undefined
+  > => {
+    const savedSearch = await discoverStateContainer.current?.getSavedSearchFromCurrentTab();
+    if (!savedSearch) return;
     return {
-      ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
+      ...savedSearch,
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
       refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
       breakdownField: discoverStateContainer.current?.getCurrentTab().appState.breakdownField,
@@ -127,13 +106,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
-  }, [
-    discoverSavedSearchState,
-    discoverStateContainer,
-    discoverDataService.query.timefilter.timefilter,
-    title,
-    description,
-  ]);
+  }, [discoverStateContainer, discoverDataService.query.timefilter.timefilter, title, description]);
 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
   useEffect(() => {
@@ -144,26 +117,53 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
       return;
     }
+    // Self-heal stale savedSearchIds from the phantom-creation bug. If the linked saved
+    // search has no actual ES|QL query, the savedSearchId was created when the user opened
+    // the ES|QL tab without typing anything (now prevented by the hasNonEmptyEsqlQuery guard
+    // above). Clear the stale reference so the timeline is no longer incorrectly flagged as
+    // ES|QL-incompatible. The user should save the timeline to persist this correction.
+    if (
+      savedSearchId &&
+      savedSearchById &&
+      !hasNonEmptyEsqlQuery(savedSearchById.searchSource.getField('query'))
+    ) {
+      dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
+      return;
+    }
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
-    const latestState = getCombinedDiscoverSavedSearchState();
-    const index = latestState?.searchSource.getField('index');
-    /* when a new timeline is loaded, a new discover instance is loaded which first emits
-     * discover's initial state which is then updated in the saved search. We want to avoid that.*/
-    if (!index) return;
-    if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
-    if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
     if (!canSaveTimeline) return;
-    updateSavedSearch(latestState, timelineId, function onUpdate() {
-      combinedDiscoverSavedSearchStateRef.current = latestState;
-    });
+
+    const syncSavedSearch = async () => {
+      const latestState = await getCombinedDiscoverSavedSearchState();
+      const index = latestState?.searchSource.getField('index');
+      /* when a new timeline is loaded, a new discover instance is loaded which first emits
+       * discover's initial state which is then updated in the saved search. We want to avoid that.*/
+      if (!index) return;
+      if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
+      if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
+      // Don't create a saved search just because the ES|QL tab was opened — only persist
+      // when there is an actual ES|QL query. Without this guard, visiting the tab with an
+      // empty Discover state sets savedSearchId on any KQL timeline, making it appear
+      // incompatible with Super Timeline even though no ES|QL query was ever authored.
+      // The guard only applies when no saved search exists yet; once savedSearchId is set,
+      // normal update-on-change behaviour continues unchanged.
+      if (!savedSearchId && !hasNonEmptyEsqlQuery(latestState.searchSource.getField('query'))) {
+        return;
+      }
+      await updateSavedSearch(latestState, timelineId, function onUpdate() {
+        combinedDiscoverSavedSearchStateRef.current = latestState;
+      });
+    };
+
+    syncSavedSearch();
   }, [
     getCombinedDiscoverSavedSearchState,
     savedSearchById,
     updateSavedSearch,
     activeTab,
     status,
-    discoverTimerange,
+    tabStateVersion,
     savedObjectId,
     isFetching,
     timelineId,
@@ -178,8 +178,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       [
         discoverAppStateSubscription.current,
         discoverInternalStateSubscription.current,
-        discoverSavedSearchStateSubscription.current,
-        discoverTimerangeSubscription.current,
+        discoverTabStateSubscription.current,
       ].forEach((sub) => {
         if (sub) sub.unsubscribe();
       });
@@ -187,6 +186,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
     return unSubscribeAll;
   }, [discoverStateContainer]);
+
+  // The timeline tabs are conditionally rendered, so this component unmounts whenever the user
+  // leaves the ES|QL tab, taking the Discover state container it published with it. Releasing the
+  // reference keeps callers from dispatching into a disposed container, where writes are accepted
+  // and silently dropped.
+  useEffect(() => () => setDiscoverStateContainer(undefined), [setDiscoverStateContainer]);
 
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
     async ({ stateContainer }) => {
@@ -210,34 +215,37 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      const hasESQLUrlState = (stateContainer.getCurrentTab().appState.query as { esql: string })
-        ?.esql;
+      // A different timeline was opened while this tab was unmounted, so it never got the chance
+      // to restore. The timeline is the source of truth for its own ES|QL tab: a restored
+      // timeline gets its saved session's state, a timeline without one gets the default. This
+      // deliberately wins over leftover Discover URL state, which belongs to the previously
+      // opened timeline and would otherwise be restored in its place — silently, since the two
+      // often share a query.
+      const isTimelineRestore = timelineRestorePending.current;
 
-      if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
-        if (savedSearchAppState?.savedSearch.timeRange) {
-          stateContainer.internalState.dispatch(
-            stateContainer.injectCurrentTab(stateContainer.internalStateActions.updateGlobalState)({
-              globalState: {
-                timeRange: savedSearchAppState.savedSearch.timeRange,
-              },
-            })
-          );
-        }
-        stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(stateContainer.internalStateActions.setAppState)({
-            appState: finalAppState,
-          })
-        );
-        await stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(
-            stateContainer.internalStateActions.updateAppStateAndReplaceUrl
-          )({
-            appState: finalAppState,
-          })
-        );
+      // Nothing of this timeline's own session is at stake: the URL carries no app state, or the
+      // tab holds no ES|QL query yet. Seeding it from the timeline cannot lose in-session work.
+      const hasNoEsqlStateToPreserve =
+        !stateContainer.stateStorage.get(APP_STATE_URL_KEY) ||
+        !(stateContainer.getCurrentTab().appState.query as { esql?: string })?.esql;
+
+      if (isTimelineRestore || hasNoEsqlStateToPreserve) {
+        timelineRestorePending.current = false;
+        await applyTimelineStateToDiscover({
+          stateContainer,
+          appState: finalAppState,
+          timeRange:
+            savedSearchAppState?.savedSearch.timeRange ??
+            // Only a restore may fall back to the default range. Remounting the same timeline
+            // must keep the range the user is looking at, which lives in the data service the
+            // ES|QL search reads from rather than in the saved session.
+            (isTimelineRestore
+              ? defaultDiscoverTimeRange
+              : discoverDataService.query.timefilter.timefilter.getTime()),
+        });
       }
 
-      const unsubscribeState = stateContainer.appState$.subscribe({
+      const unsubscribeState = stateContainer.createAppStateObservable().subscribe({
         next: setDiscoverAppState,
       });
 
@@ -245,38 +253,29 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
-        next: (latestSavedSearchState) => {
-          setDiscoverSavedSearchState(latestSavedSearchState);
+      const tabStateSub = stateContainer.createTabPersistableStateObservable().subscribe({
+        next: () => {
+          setTabStateVersion((prev) => prev + 1);
         },
       });
 
-      const timeRangeSub = discoverDataService.query.timefilter.timefilter
-        .getTimeUpdate$()
-        .subscribe({
-          next: () => {
-            setDiscoverTimerange(discoverDataService.query.timefilter.timefilter.getTime());
-          },
-        });
-
       discoverAppStateSubscription.current = unsubscribeState;
       discoverInternalStateSubscription.current = internalStateSubscription;
-      discoverSavedSearchStateSubscription.current = savedSearchStateSub;
-      discoverTimerangeSubscription.current = timeRangeSub;
+      discoverTabStateSubscription.current = tabStateSub;
     },
     [
       discoverAppState,
-      setDiscoverSavedSearchState,
       setDiscoverInternalState,
       setDiscoverAppState,
       setDiscoverStateContainer,
       getAppStateFromSavedSearch,
-      discoverDataService.query.timefilter.timefilter,
       savedSearchId,
       savedSearchService,
       defaultDiscoverAppState,
       timelineId,
       initializeLocalSavedSearch,
+      timelineRestorePending,
+      discoverDataService,
     ]
   );
 
@@ -296,9 +295,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = newDataViewPickerEnabled
-    ? dataViewStatus === 'loading' || dataViewStatus === 'pristine'
-    : !oldDataViewSpec; // TODO: (DV_PICKER) this should not work like that
+  const isLoading = dataViewStatus === 'loading' || dataViewStatus === 'pristine';
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">

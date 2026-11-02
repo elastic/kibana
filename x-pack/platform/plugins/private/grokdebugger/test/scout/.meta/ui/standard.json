@@ -1,0 +1,62 @@
+{
+  "sha1": "816c5c77e81d07c5eb559d2842fdc5898c93d245",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "0cae6b496fe9def-9b6d4b58dd229bb",
+      "title": "Grok Debugger loads the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
+        "line": 20,
+        "column": 59
+      }
+    },
+    {
+      "id": "0cae6b496fe9def-f21a272dd59726e",
+      "title": "Grok Debugger simulates a built-in grok pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
+        "line": 23,
+        "column": 5
+      }
+    },
+    {
+      "id": "0cae6b496fe9def-6484acdc1f8f28c",
+      "title": "Grok Debugger simulates a custom grok pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
+        "line": 38,
+        "column": 13
+      }
+    }
+  ]
+}

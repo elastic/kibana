@@ -19,6 +19,8 @@ import type {
   AlertItem as AlertItemType,
 } from './types';
 
+const STORYBOOK_SCOPE_ID = 'storybook-grouped-item';
+
 // Base interface for common props across all stories
 interface BaseStoryProps {
   isLoading?: boolean;
@@ -39,7 +41,7 @@ interface EntityStoryProps extends BaseStoryProps {
 interface EventAlertStoryProps extends BaseStoryProps {
   action?: string;
   actor?: { id: string; icon?: string; label?: string };
-  target?: { id: string; icon?: string; label?: string };
+  target?: { ids: string[]; icon?: string; label?: string };
 }
 
 const meta: Meta = {
@@ -55,10 +57,19 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
 }: EntityStoryProps) => {
   const item: EntityItemType = {
     itemType: DOCUMENT_TYPE_ENTITY,
+    entity: {},
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return (
+    <GroupedItemComp
+      isLoading={isLoading}
+      item={item}
+      scopeId={STORYBOOK_SCOPE_ID}
+      onShowDocument={() => {}}
+      onShowEntity={() => {}}
+    />
+  );
 };
 
 EntityItem.args = {
@@ -86,7 +97,15 @@ export const EventItem: StoryFn<EventAlertStoryProps> = ({
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return (
+    <GroupedItemComp
+      isLoading={isLoading}
+      item={item}
+      scopeId={STORYBOOK_SCOPE_ID}
+      onShowDocument={() => {}}
+      onShowEntity={() => {}}
+    />
+  );
 };
 
 EventItem.args = {
@@ -95,7 +114,7 @@ EventItem.args = {
   action: 'process_start',
   timestamp: Date.now(),
   actor: { id: 'actorId', label: 'user1', icon: 'user' },
-  target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
+  target: { ids: ['targetId'], label: 'proc.exe', icon: 'document' },
 };
 
 EventItem.argTypes = {
@@ -111,7 +130,15 @@ export const AlertItem: StoryFn<EventAlertStoryProps> = ({
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return (
+    <GroupedItemComp
+      isLoading={isLoading}
+      item={item}
+      scopeId={STORYBOOK_SCOPE_ID}
+      onShowDocument={() => {}}
+      onShowEntity={() => {}}
+    />
+  );
 };
 
 AlertItem.args = {
@@ -120,7 +147,7 @@ AlertItem.args = {
   action: 'suspicious_activity',
   timestamp: Date.now(),
   actor: { id: 'actorId', label: 'user1', icon: 'user' },
-  target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
+  target: { ids: ['targetId'], label: 'proc.exe', icon: 'document' },
 };
 
 AlertItem.argTypes = {

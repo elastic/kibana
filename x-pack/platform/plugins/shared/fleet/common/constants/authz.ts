@@ -150,6 +150,30 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readPolicyManagement',
   },
+  readScriptsManagement: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'readScriptsManagement',
+  },
+  writeScriptsManagement: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeScriptsManagement',
+  },
+  writeCustomYaraSignatures: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeCustomYaraSignatures',
+  },
+  readCustomYaraSignatures: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'readCustomYaraSignatures',
+  },
   writeActionsLogManagement: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',

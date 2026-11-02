@@ -9,31 +9,6 @@ import moment from 'moment';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 
-import type { ThreatArray } from '@kbn/security-solution-plugin/common/api/detection_engine';
-
-export const formatMitreAttackDescription = (mitre: ThreatArray) => {
-  return mitre
-    .map(
-      (threat) =>
-        `${threat.tactic.name} (${threat.tactic.id})${
-          threat.technique
-            ? threat.technique
-                .map((technique) => {
-                  return `${technique.name} (${technique.id})${
-                    technique.subtechnique
-                      ? technique.subtechnique
-                          .map((subtechnique) => `${subtechnique.name} (${subtechnique.id})`)
-                          .join('')
-                      : ''
-                  }`;
-                })
-                .join('')
-            : ''
-        }`
-    )
-    .join('');
-};
-
 export const elementsOverlap = ($element1: JQuery<HTMLElement>, $element2: JQuery<HTMLElement>) => {
   const rectA = $element1[0].getBoundingClientRect();
   const rectB = $element2[0].getBoundingClientRect();
@@ -89,6 +64,39 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
   'security-rule': {
     ...getPrebuiltRuleMock(),
     ...overrideParams,
+  },
+  type: 'security-rule',
+  references: [],
+  coreMigrationVersion: '8.6.0',
+  updated_at: '2022-11-01T12:56:39.717Z',
+  created_at: '2022-11-01T12:56:39.717Z',
+});
+
+/**
+ * A helper function to create a deprecated rule asset saved object (type: security-rule).
+ * Deprecated assets are minimal stubs — they only carry the fields needed to identify
+ * the rule as deprecated; the full rule schema fields are intentionally absent.
+ *
+ * @param params Identifying params for the deprecated rule asset
+ * @returns Created deprecated rule asset saved object
+ */
+export const createDeprecatedRuleAssetSavedObject = ({
+  rule_id,
+  version,
+  name = rule_id,
+  deprecated_reason,
+}: {
+  rule_id: string;
+  version: number;
+  name?: string;
+  deprecated_reason?: string;
+}) => ({
+  'security-rule': {
+    rule_id,
+    version,
+    name,
+    deprecated: true as const,
+    ...(deprecated_reason != null && { deprecated_reason }),
   },
   type: 'security-rule',
   references: [],

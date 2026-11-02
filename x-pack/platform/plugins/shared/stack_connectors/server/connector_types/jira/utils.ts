@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isAxiosError } from 'axios';
+
 // These characters need to be escaped per Jira's search syntax, see for more details: https://confluence.atlassian.com/jirasoftwareserver/search-syntax-for-text-fields-939938747.html
 export const JQL_SPECIAL_CHARACTERS_REGEX = /[-!^+&*()[\]/{}|:?~]/;
 
@@ -17,3 +19,7 @@ export const escapeJqlSpecialCharacters = (str: string) => {
     .replaceAll(/'/g, '\\\\')
     .replaceAll(new RegExp(JQL_SPECIAL_CHARACTERS_REGEX, 'g'), DOUBLE_BACKSLASH_REGEX);
 };
+
+export function isUserError(error: unknown): boolean {
+  return isAxiosError(error) && error.response?.status === 400;
+}

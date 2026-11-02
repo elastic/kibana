@@ -15,6 +15,7 @@ export type {
 export {
   findQuerySchema as findQuerySchemaV1,
   findResponseSchema as findResponseSchemaV1,
+  findBackfillExamples as findBackfillExamplesV1,
 } from './schemas/v1';
 export type {
   FindBackfillRequestQuery as FindBackfillRequestQueryV1,

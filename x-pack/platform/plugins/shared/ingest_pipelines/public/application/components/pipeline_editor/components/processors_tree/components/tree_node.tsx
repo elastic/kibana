@@ -27,6 +27,7 @@ export interface Props {
   onAction: OnActionHandler;
   level: number;
   movingProcessor?: ProcessorInfo;
+  movingProcessorLabel?: string;
 }
 
 const INDENTATION_PX = 34;
@@ -50,6 +51,7 @@ export const TreeNode: FunctionComponent<Props> = ({
   processorInfo,
   onAction,
   movingProcessor,
+  movingProcessorLabel,
   level,
 }) => {
   const stringSelector = useMemo(() => processorInfo.selector.join('.'), [processorInfo.selector]);
@@ -82,6 +84,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         <PrivateTree
           level={level + 1}
           movingProcessor={movingProcessor}
+          movingProcessorLabel={movingProcessorLabel}
           onAction={onAction}
           selector={processorInfo.selector.concat('onFailure')}
           processors={processor.onFailure}
@@ -99,7 +102,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         />
       </div>
     );
-  }, [processor.onFailure, stringSelector, onAction, movingProcessor, level]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [processor.onFailure, stringSelector, onAction, movingProcessor, movingProcessorLabel, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <PipelineProcessorsEditorItem

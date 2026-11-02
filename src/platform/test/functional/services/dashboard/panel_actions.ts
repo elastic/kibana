@@ -8,6 +8,7 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import expect from '@kbn/expect';
 import { asyncMap } from '@kbn/std';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -51,8 +52,6 @@ export class DashboardPanelActionsService extends FtrService {
       await Promise.all([
         // global fixed eui headers, TODO: remove when Kibana switched to grid layout
         this.find.allByCssSelector('[data-fixed-header="true"]', 500),
-        // fixed header with actions from project navigation
-        this.find.allByCssSelector('[data-test-subj="kibanaProjectHeaderActionMenu"]', 500),
         // sticky unified search bar
         this.find.allByCssSelector('[data-test-subj="globalQueryBar"]', 500),
       ])
@@ -269,8 +268,11 @@ export class DashboardPanelActionsService extends FtrService {
   async saveToLibrary(newTitle = '', oldTitle = '') {
     this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
     await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
-    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
-      clearWithKeyboard: true,
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+        clearWithKeyboard: true,
+      });
+      expect(await this.testSubjects.getAttribute('savedObjectTitle', 'value')).to.be(newTitle);
     });
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
@@ -397,7 +399,9 @@ export class DashboardPanelActionsService extends FtrService {
   async canConvertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('canConvertToLens');
     await this.openContextMenu(wrapper);
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+    // The panel menu renders only after its compatible actions are computed, so once it is
+    // open the action list is final.
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
   }
 
   async canConvertToLensByTitle(title = '') {

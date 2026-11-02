@@ -22,7 +22,6 @@ export function SloRulesBadge({ rules, onClick, isRemote }: Props) {
   if (isRemote) {
     return null;
   }
-
   return rules === undefined || rules.length > 0 ? null : (
     <EuiToolTip
       position="top"
@@ -35,8 +34,8 @@ export function SloRulesBadge({ rules, onClick, isRemote }: Props) {
       <span onClick={onClick} onKeyDown={onClick}>
         <EuiBadge
           color="text"
-          iconType="alert"
-          css={{ cursor: 'pointer' }}
+          iconType="warning"
+          {...(onClick && { css: { cursor: 'pointer' } })}
           onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation(); // stops propagation of metric onElementClick
           }}

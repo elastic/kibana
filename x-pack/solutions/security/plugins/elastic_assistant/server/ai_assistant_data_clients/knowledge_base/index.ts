@@ -12,7 +12,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 import type {
   DocumentEntry,
   IndexEntry,
@@ -920,11 +920,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       if (results) {
         const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
         const indexPatternFetcher = new IndexPatternsFetcher(esClient);
-        const existingIndices = await indexPatternFetcher.getExistingIndices(map(entries, 'index'));
+        const { matchedIndexPatterns } = await indexPatternFetcher.getIndexPatternMatches(
+          map(entries, 'index')
+        );
         return (
           entries
             // Filter out any IndexEntries that don't have an existing index
-            .filter((entry) => existingIndices.includes(entry.index))
+            .filter((entry) => matchedIndexPatterns.includes(entry.index))
             .map((indexEntry) => {
               return getStructuredToolForIndexEntry({
                 indexEntry,

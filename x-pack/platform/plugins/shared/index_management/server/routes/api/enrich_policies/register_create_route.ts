@@ -25,9 +25,9 @@ const validationSchema = schema.object({
       schema.literal('range'),
       schema.literal('geo_match'),
     ]),
-    matchField: schema.string(),
-    enrichFields: schema.arrayOf(schema.string()),
-    sourceIndices: schema.arrayOf(schema.string()),
+    matchField: schema.string({ maxLength: 1000 }),
+    enrichFields: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+    sourceIndices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
     query: schema.maybe(schema.any()),
   }),
 });
@@ -38,10 +38,13 @@ const querySchema = schema.object({
   ),
 });
 
-const getMatchingIndicesSchema = schema.object({ pattern: schema.string() }, { unknowns: 'allow' });
+const getMatchingIndicesSchema = schema.object(
+  { pattern: schema.string({ maxLength: 1000 }) },
+  { unknowns: 'allow' }
+);
 
 const getFieldsFromIndicesSchema = schema.object({
-  indices: schema.arrayOf(schema.string()),
+  indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
 });
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {

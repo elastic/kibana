@@ -12,7 +12,7 @@ type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
   error?: string | Error;
 }
 

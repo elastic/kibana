@@ -19,19 +19,26 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PanelText } from '../../../../common/components/panel_text';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
-import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
+import { type RuleMigrationSettings, type RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../migration_source_step/use_migration_source_step';
 import { MigrationSourceDropdown } from '../migration_source_step/migration_source_dropdown';
-import { useMissingResources } from './steps/hooks/use_missing_resources';
-import type { MigrationStepProps, Step } from '../../../common/types';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
+import type {
+  HandleMissingResourcesIndexed,
+  MigrationStepProps,
+  Step,
+} from '../../../common/types';
 import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
 import { STEP_COMPONENTS } from './configs';
+import { QradarDataInputStep, SentinelDataInputStep } from './types';
+import { useRuleMigrationVendorCopy } from '../../hooks/use_rule_migration_vendor_copy';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -42,11 +49,7 @@ export interface MigrationDataInputFlyoutProps {
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
 
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({
-    onClose,
-    migrationStats: initialMigrationSats,
-    migrationSource: initialMigrationSource = MigrationSource.SPLUNK,
-  }) => {
+  ({ onClose, migrationStats: initialMigrationStats }) => {
     const modalTitleId = useGeneratedHtmlId({
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
@@ -57,18 +60,70 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       migrationSourceDisabled,
       setMigrationSourceDisabled,
       migrationSourceOptions,
-    } = useMigrationSourceStep(initialMigrationSource);
+    } = useMigrationSourceStep(initialMigrationStats?.vendor ?? MigrationSource.SPLUNK);
+    const { copyrightNotice } = useRuleMigrationVendorCopy(migrationSource);
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
-      initialMigrationSats
+      initialMigrationStats
     );
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState(SplunkDataInputStep.Upload);
+    const [dataInputStep, setDataInputStep] = useState<number>(SplunkDataInputStep.Upload);
+
+    const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
+      ({ migrationSource: vendor, newMissingResourcesIndexed }) => {
+        if (vendor === MigrationSource.QRADAR) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(QradarDataInputStep.ReferenceSet);
+            return;
+          }
+
+          // when all reference sets are created, move to the next step
+          setDataInputStep((currentStep) => {
+            if (!migrationStats?.id) {
+              return QradarDataInputStep.Rules;
+            }
+            // If we are not on the Reference Set step, move to the End step
+            if (currentStep !== QradarDataInputStep.ReferenceSet) {
+              return QradarDataInputStep.End;
+            }
+            return QradarDataInputStep.Enhancements;
+          });
+          return;
+        }
+
+        if (vendor === MigrationSource.SENTINEL) {
+          if (newMissingResourcesIndexed?.lookups.length) {
+            setDataInputStep(SentinelDataInputStep.Watchlists);
+            return;
+          }
+          if (migrationStats?.id) {
+            setDataInputStep(SentinelDataInputStep.End);
+          }
+          return;
+        }
+
+        if (newMissingResourcesIndexed?.macros.length) {
+          setDataInputStep(SplunkDataInputStep.Macros);
+          return;
+        }
+
+        if (newMissingResourcesIndexed?.lookups.length) {
+          setDataInputStep(SplunkDataInputStep.Lookups);
+          return;
+        }
+
+        if (migrationStats?.id) {
+          setDataInputStep(SplunkDataInputStep.End);
+        }
+      },
+      [migrationStats?.id]
+    );
 
     const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
-      setDataInputStep,
+      handleMissingResourcesIndexed: setMissingResourcesStep,
+      migrationSource,
     });
 
     const onMigrationCreated = useCallback(
@@ -87,7 +142,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
         }
 
         startMigration(
-          migrationStats?.id as string,
+          migrationStats,
           isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
           settings
         );
@@ -119,7 +174,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={modalTitleId} aria-label={RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
+              <h2 id={modalTitleId}>
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title"
                   defaultMessage="Upload SIEM rules"
@@ -133,7 +188,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 <MigrationSourceDropdown
                   migrationSource={migrationSource}
                   setMigrationSource={setMigrationSource}
-                  disabled={migrationSourceDisabled}
+                  disabled={!!migrationStats?.id || migrationSourceDisabled}
                   migrationSourceOptions={migrationSourceOptions}
                 />
               </EuiFlexItem>
@@ -152,6 +207,11 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                   </EuiFlexItem>
                 ))}
               </>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{copyrightNotice}</p>
+                </PanelText>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

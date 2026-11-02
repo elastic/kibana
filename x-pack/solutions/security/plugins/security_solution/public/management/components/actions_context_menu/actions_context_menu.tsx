@@ -17,13 +17,18 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ActionsContextMenuProps {
   items: ContextMenuItemNavByRouterProps[];
-  /** Default icon is `boxesHorizontal` */
+  /** Default icon is `boxesVertical` */
   icon?: EuiIconProps['type'];
   'data-test-subj'?: string;
   /** If menu button should be disabled   */
   isDisabled?: boolean;
   /** If defined, then the disabled button will be wrapped in on-hover tooltip */
   disabledTooltip?: ReactNode;
+  /**
+   * Name of the item these actions belong to. It is included in the menu button's accessible name so
+   * that the button can be told apart from those of sibling items
+   */
+  itemName: string;
 }
 
 /**
@@ -33,9 +38,10 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
   ({
     items,
     'data-test-subj': dataTestSubj,
-    icon = 'boxesHorizontal',
+    icon = 'boxesVertical',
     isDisabled = false,
     disabledTooltip,
+    itemName,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isOpen, setIsOpen] = useState(false);
@@ -65,24 +71,30 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
     }, [handleCloseMenu, items]);
 
     const menuButton = useMemo(() => {
-      const button = (
-        <EuiButtonIcon
-          data-test-subj={getTestId('button')}
-          iconType={icon}
-          onClick={handleToggleMenu}
-          isDisabled={isDisabled}
-          aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
-            defaultMessage: 'Open',
-          })}
-        />
+      const openLabel = i18n.translate('xpack.securitySolution.actionsContextMenu.label', {
+        defaultMessage: 'Open',
+      });
+      const showDisabledTooltip = Boolean(isDisabled && disabledTooltip);
+
+      return (
+        <EuiToolTip
+          // Kept short, as the tooltip sits right next to the name of the item it belongs to
+          content={showDisabledTooltip ? disabledTooltip : openLabel}
+          disableScreenReaderOutput={!showDisabledTooltip}
+        >
+          <EuiButtonIcon
+            data-test-subj={getTestId('button')}
+            iconType={icon}
+            onClick={handleToggleMenu}
+            isDisabled={isDisabled}
+            aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.itemLabel', {
+              defaultMessage: 'Open actions for {itemName}',
+              values: { itemName },
+            })}
+          />
+        </EuiToolTip>
       );
-
-      if (isDisabled && disabledTooltip) {
-        return <EuiToolTip content={disabledTooltip}>{button}</EuiToolTip>;
-      }
-
-      return button;
-    }, [disabledTooltip, getTestId, handleToggleMenu, icon, isDisabled]);
+    }, [disabledTooltip, getTestId, handleToggleMenu, icon, isDisabled, itemName]);
 
     return (
       <EuiPopover
@@ -93,6 +105,9 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
         button={menuButton}
         isOpen={isOpen}
         closePopover={handleCloseMenu}
+        aria-label={i18n.translate('xpack.securitySolution.actionsContextMenu.popover.ariaLabel', {
+          defaultMessage: 'Actions menu',
+        })}
       >
         <EuiContextMenuPanel items={menuItems} data-test-subj={getTestId('contextMenuPanel')} />
       </EuiPopover>

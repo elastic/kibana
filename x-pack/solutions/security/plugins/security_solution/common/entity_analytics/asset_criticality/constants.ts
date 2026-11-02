@@ -14,6 +14,8 @@ export const ASSET_CRITICALITY_INTERNAL_STATUS_URL =
 export const ASSET_CRITICALITY_PUBLIC_URL = `/api/asset_criticality` as const;
 export const ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL =
   `${ASSET_CRITICALITY_PUBLIC_URL}/upload_csv` as const;
+export const ASSET_CRITICALITY_CSV_UPLOAD_V2_URL =
+  `${ASSET_CRITICALITY_INTERNAL_URL}/upload_csv_v2` as const;
 export const ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL =
   `${ASSET_CRITICALITY_PUBLIC_URL}/bulk` as const;
 export const ASSET_CRITICALITY_PUBLIC_LIST_URL = `${ASSET_CRITICALITY_PUBLIC_URL}/list` as const;
@@ -56,6 +58,22 @@ export const CriticalityModifiers: Record<CriticalityLevels, number> = {
   [CriticalityLevels.MEDIUM_IMPACT]: 1,
   [CriticalityLevels.LOW_IMPACT]: 0.5,
 };
+
+/**
+ * Severity rank of each assigned criticality level; a higher number is more critical.
+ */
+export const CRITICALITY_LEVEL_RANK: Record<CriticalityLevels, number> = {
+  [CriticalityLevels.EXTREME_IMPACT]: 4,
+  [CriticalityLevels.HIGH_IMPACT]: 3,
+  [CriticalityLevels.MEDIUM_IMPACT]: 2,
+  [CriticalityLevels.LOW_IMPACT]: 1,
+};
+
+/**
+ * Severity rank of a criticality value; `0` for `unassigned`, missing or unknown values.
+ */
+export const getCriticalityRank = (level?: string | null): number =>
+  (level != null && (CRITICALITY_LEVEL_RANK as Record<string, number>)[level]) || 0;
 
 export const CRITICALITY_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
 export const CRITICALITY_CSV_SIZE_TOLERANCE_BYTES = 1024 * 50; // ~= 50kb

@@ -6,9 +6,9 @@
  */
 
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          const cookie = parseCookie(response.headers['set-cookie'][0])!;
+          const cookie = findSessionCookie(response.headers['set-cookie']);
           const { body: profile } = await supertestWithoutAuth
             .get('/internal/security/user_profile')
             .set('Cookie', cookie.cookieString())
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send({
               avatar: {
                 initials: `some-initials-${userPrefix}`,
-                color: `some-color-${userPrefix}`,
+                color: `#f3f3f3`,
               },
               userSettings: { darkMode: `dark`, contrastMode: `high` },
             })
@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color-one",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials-one",
               },
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           Object {
             "data": Object {
               "avatar": Object {
-                "color": "some-color-two",
+                "color": "#f3f3f3",
                 "imageUrl": null,
                 "initials": "some-initials-two",
               },

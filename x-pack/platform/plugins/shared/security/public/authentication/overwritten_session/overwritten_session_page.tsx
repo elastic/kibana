@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -41,6 +41,7 @@ export function OverwrittenSessionPage({ authc, basePath }: Props) {
         />
       }
     >
+      <EuiSpacer size="xl" />
       <EuiButton href={parseNextURL(window.location.href, basePath.serverBasePath)}>
         <FormattedMessage
           id="xpack.security.overwrittenSession.continueAsUserText"

@@ -13,6 +13,10 @@ export function timeRangeFilter(
   timeField: string,
   { start, end }: { start: number; end: number }
 ): QueryDslQueryContainer[] {
+  if (!start || !end) {
+    return [];
+  }
+
   return [
     {
       range: {

@@ -1,0 +1,12 @@
+{
+  "overrides": [
+    {
+      "files": [
+        "**/*.d.ts"
+      ],
+      "rules": {
+        "spaced-comment": "off"
+      }
+    }
+  ]
+}

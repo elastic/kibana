@@ -96,6 +96,9 @@ const executeValidation = async <TField extends keyof Fields>(
   return results;
 };
 
+/** Normalize tags, treating `undefined` as an empty array. */
+const normalizeTagIds = (tags: string[] | undefined): string[] => tags ?? [];
+
 export const useMetadataForm = ({
   item,
   customValidators,
@@ -111,7 +114,7 @@ export const useMetadataForm = ({
       isChangingValue: false,
     },
     tags: {
-      value: item.tags ? item.tags.map(({ id }) => id) : [],
+      value: normalizeTagIds(item.tags),
       isChangingValue: false,
     },
   });

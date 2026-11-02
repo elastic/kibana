@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import { initTransform } from './object_transform';
 
 import type { ObjectMigrationDefinition, Version, VersionableObject } from './types';
@@ -74,7 +75,7 @@ describe('object transform', () => {
           // @ts-expect-error
           abc: { up: () => undefined },
         });
-      }).toThrowError('Invalid version number [abc].');
+      }).toThrow('Invalid version number [abc].');
     });
   });
 
@@ -135,6 +136,22 @@ describe('object transform', () => {
         expect(error!.message).toBe(
           `[Transform error] Cannot read properties of undefined (reading 'split').`
         );
+      });
+
+      test('it should validate using a Zod schema before up transform', () => {
+        const zodSchema = z.object({ fullName: z.string().min(1) });
+        const zodMigrationDef: ObjectMigrationDefinition = {
+          1: {
+            schema: zodSchema,
+            up: v1Tv2Transform,
+          },
+          2: fooDefV2,
+        };
+        const fooTransforms = setup(1, zodMigrationDef);
+        const invalidInput = { unknown: 'John Snow' };
+        const { error } = fooTransforms.up(invalidInput);
+        expect(error).toBeInstanceOf(Error);
+        expect(error?.message).toBe(z.prettifyError(zodSchema.safeParse(invalidInput)!.error!));
       });
     });
   });
@@ -242,7 +259,7 @@ describe('object transform', () => {
       transformsFactory = initTransform(7);
       expect(() => {
         transformsFactory(def).validate(123);
-      }).toThrowError('Invalid version number [7].');
+      }).toThrow('Invalid version number [7].');
     });
   });
 });

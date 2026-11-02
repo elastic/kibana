@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/es-query",
-    "@kbn/elastic-assistant-common",
+    "@kbn/utility-types",
+    "@kbn/core-capabilities-common",
   ],
   "exclude": [
     "target/**/*",

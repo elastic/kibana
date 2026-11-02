@@ -71,7 +71,7 @@ export function fork(...streams: Transform[]): Duplex {
   return proxy;
 }
 
-export function createFilterTransform(filter: (chunk: any) => boolean): Transform {
+export function createFilterTransform<T>(filter: (chunk: T) => boolean): Transform {
   const transform = new Transform({
     objectMode: true,
     transform(event, encoding, callback) {

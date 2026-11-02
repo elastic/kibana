@@ -1,9 +1,35 @@
-$schema: https://moonrepo.dev/schemas/tasks.json
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  toolchain: node
 
 fileGroups:
   sharedGlobals: [ ]
   default:
     - '**/*'
   production: [ ]
+  scoutGlobals:
+    - '/scripts/scout.js'
+    - '/package.json'
+    - '/pnpm-lock.yaml'
+    - '/.nvmrc'
+    - '/src/setup_node_env/**/*'
 
-tasks: {}
+tasks:
+  # Carry runtime source changes to downstream test suites.
+  test-source-upstream:
+    command: noop
+    inputs:
+      - '@group(default)'
+      - '!README*'
+      - '!jest.config.{js,cjs,json}'
+      - '!**/*.test.{js,mjs,ts,tsx}'
+      - '!**/*.spec.{js,mjs,ts,tsx}'
+      - '!**/__snapshots__/**/*'
+      - '!test/scout*/**/*playwright.config.ts'
+      - '!tests/**/*'
+    deps:
+      - target: '^:test-source-upstream'
+        cacheStrategy: hash
+    options:
+      internal: true

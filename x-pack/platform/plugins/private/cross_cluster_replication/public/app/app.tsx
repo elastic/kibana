@@ -17,11 +17,10 @@ import { EuiPageTemplate } from '@elastic/eui';
 
 import { getFatalErrors } from './services/notifications';
 import { routing } from './services/routing';
-// @ts-ignore
 import { loadPermissions } from './services/api';
+import { getErrorBody, isHttpFetchError, toCcrApiError } from './services/http_error';
 import { SectionLoading, PageError } from '../shared_imports';
 
-// @ts-ignore
 import {
   CrossClusterReplicationHome,
   AutoFollowPatternAdd,
@@ -35,15 +34,22 @@ interface AppProps {
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
+interface PermissionError {
+  error: string;
+  cause?: string[];
+  message?: string;
+  statusCode?: number;
+}
+
 interface AppState {
   isFetchingPermissions: boolean;
-  fetchPermissionError: any;
+  fetchPermissionError: PermissionError | undefined;
   hasPermission: boolean;
-  missingClusterPrivileges: any[];
+  missingClusterPrivileges: string[];
 }
 
 class AppComponent extends Component<AppProps, AppState> {
-  constructor(props: any) {
+  constructor(props: AppProps) {
     super(props);
     this.registerRouter();
 
@@ -72,19 +78,24 @@ class AppComponent extends Component<AppProps, AppState> {
         hasPermission,
         missingClusterPrivileges,
       });
-    } catch (error) {
-      // Expect an error in the shape provided by Angular's $http service.
-      if (error && error.body) {
+    } catch (error: unknown) {
+      const apiError = toCcrApiError(error);
+      if (isHttpFetchError(apiError)) {
+        const body = getErrorBody(apiError);
         return this.setState({
           isFetchingPermissions: false,
-          fetchPermissionError: error,
+          fetchPermissionError: {
+            error: body?.message ?? apiError.message,
+            message: body?.message,
+            statusCode: body?.statusCode,
+          },
         });
       }
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
       getFatalErrors().add(
-        error,
+        apiError,
         i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
           defaultMessage: 'Cross-Cluster Replication app',
         })

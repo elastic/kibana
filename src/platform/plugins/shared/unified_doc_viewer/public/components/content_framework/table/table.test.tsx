@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ContentFrameworkTableProps } from '.';
 import { ContentFrameworkTable } from '.';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../../__mocks__';
 import userEvent from '@testing-library/user-event';
 
@@ -34,7 +34,7 @@ jest.mock('../../../plugin', () => ({
       useFieldsMetadata: () => ({
         fieldsMetadata: {
           fieldA: { short: 'Short desc A' },
-          fieldB: { short: 'Short desc B' },
+          fieldB: { short: 'Short desc B', type: 'keyword' },
         },
       }),
     },
@@ -42,11 +42,16 @@ jest.mock('../../../plugin', () => ({
   }),
 }));
 
+jest.mock('@kbn/field-utils/src/components/field_icon', () => ({
+  FieldIcon: () => <span data-test-subj="fieldIcon" />,
+}));
+
 jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
   getFormattedFields: () => ({
     fieldA: 'formattedA',
     fieldB: 'formattedB',
     fieldC: 'formattedC',
+    fieldZero: '0',
   }),
 }));
 jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
@@ -54,12 +59,13 @@ jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
     fieldA: 'valueA',
     fieldB: 'valueB',
     fieldC: null,
+    fieldZero: 0,
   }),
 }));
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
 });
 
 const mockHit = buildHitMock({}, 'index', mockDataView);
@@ -71,14 +77,19 @@ const defaultProps: ContentFrameworkTableProps = {
     fieldA: {
       title: 'Field A Title',
       description: 'Custom description A',
-      formatter: (value, formatted) => <span>{`Custom: ${value} (${formatted})`}</span>,
+      formatter: (value, formattedValue) => (
+        <span>
+          {`Custom: ${value} (`}
+          {formattedValue}
+          {`)`}
+        </span>
+      ),
     },
     fieldB: {
       title: 'Field B Title',
     },
   },
   dataView: mockDataView,
-  columnsMeta: {},
   columns: ['fieldA', 'fieldB'],
   id: 'Test Table',
   filter: jest.fn(),
@@ -116,6 +127,21 @@ describe('ContentFrameworkTable', () => {
     expect(screen.queryByText('Field C Title')).not.toBeInTheDocument();
   });
 
+  it('renders fields whose value is zero', () => {
+    render(
+      <ContentFrameworkTable
+        {...defaultProps}
+        fieldNames={['fieldA', 'fieldZero']}
+        fieldConfigurations={{
+          ...defaultProps.fieldConfigurations,
+          fieldZero: { title: 'Field Zero Title' },
+        }}
+      />
+    );
+    expect(screen.getByText('Field Zero Title')).toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
   it('returns null if hit.flattened is empty', () => {
     const props = {
       ...defaultProps,
@@ -145,5 +171,16 @@ describe('ContentFrameworkTable', () => {
     await userEvent.click(expandPopoverButton);
 
     expect(screen.getByText('Short desc B')).toBeInTheDocument();
+  });
+
+  it('renders field type icon from metadata', async () => {
+    render(<ContentFrameworkTable {...defaultProps} />);
+
+    const tableCell = screen.getByText('Field B Title');
+    await userEvent.hover(tableCell);
+    const expandPopoverButton = screen.getByTestId('euiDataGridCellExpandButton');
+    await userEvent.click(expandPopoverButton);
+
+    expect(screen.getByTestId('fieldIcon')).toBeInTheDocument();
   });
 });

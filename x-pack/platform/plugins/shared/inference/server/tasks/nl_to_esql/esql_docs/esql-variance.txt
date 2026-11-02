@@ -1,0 +1,22 @@
+# VARIANCE
+
+The VARIANCE function calculates the population variance of a numeric field.
+
+## Syntax
+
+`VARIANCE(number)`
+
+### Parameters
+
+#### number
+
+The numeric field for which to calculate the population variance.
+
+## Examples
+
+Calculates the population variance of the `height` field across all employees.
+
+```esql
+FROM employees
+| STATS var_height = VARIANCE(height)
+```

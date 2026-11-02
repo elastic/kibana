@@ -7,12 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import type { AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
+import { type AddUploadedLookups } from '../../../../../../../common/components/migration_steps/types';
 import { LookupsFileUpload } from '../../../../../../../common/components';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import * as i18n from './translations';
+import type { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
@@ -23,16 +24,24 @@ export interface RulesFileUploadStepProps {
 export const useLookupsFileUploadStep = ({
   status,
   migrationStats,
+  missingLookups,
   addUploadedLookups,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const { upsertResources, isLoading, error } = useUpsertResources(addUploadedLookups);
+  const { resourceDataInputStep } = useRuleMigrationVendorCopy(
+    migrationStats.vendor as MigrationSource
+  );
 
   const upsertMigrationResources = useCallback(
     (lookupsFromFile: SiemMigrationResourceData[]) => {
       if (lookupsFromFile.length === 0) {
         return; // No lookups provided
       }
-      upsertResources(migrationStats.id, lookupsFromFile);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: lookupsFromFile,
+      });
     },
     [upsertResources, migrationStats]
   );
@@ -48,13 +57,15 @@ export const useLookupsFileUploadStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE,
+    title: resourceDataInputStep.fileUploadTitle,
     status: uploadStepStatus,
     children: (
       <LookupsFileUpload
         createResources={upsertMigrationResources}
         isLoading={isLoading}
         apiError={error?.message}
+        migrationSource={migrationStats.vendor as MigrationSource}
+        missingLookups={missingLookups}
       />
     ),
   };

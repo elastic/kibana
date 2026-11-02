@@ -9,7 +9,6 @@
 
 export enum VisGroups {
   PROMOTED = 'promoted',
-  TOOLS = 'tools',
   AGGBASED = 'aggbased',
   LEGACY = 'legacy',
 }

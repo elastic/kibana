@@ -30,6 +30,11 @@ import {
 import type { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
+import {
+  sessionEntityIdSchema,
+  sessionTimestampSchema,
+  sessionViewIndexPatternSchema,
+} from './validation';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
 
 export const registerProcessEventsRoute = (
@@ -54,10 +59,10 @@ export const registerProcessEventsRoute = (
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              cursor: schema.maybe(schema.string()),
+              index: sessionViewIndexPatternSchema,
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              cursor: schema.maybe(sessionTimestampSchema),
               forward: schema.maybe(schema.boolean()),
               pageSize: schema.maybe(schema.number({ min: 1, max: PROCESS_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
             }),

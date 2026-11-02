@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import type { DeepPartial } from '@kbn/ml-common-types/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -98,9 +98,8 @@ export default ({ getService }: FtrProviderContext) => {
             .set(getCommonRequestHeader('1'))
             .send(testConfig.config);
           ml.api.assertResponseStatusCode(200, status, body);
-
           expect(body).to.have.property('field_selection');
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           const { memory_estimation, field_selection } = body;
           const fieldObject = field_selection[0];
           expect(memory_estimation).to.have.property('expected_memory_with_disk');

@@ -10,19 +10,19 @@
 import React from 'react';
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { debounce } from 'lodash';
 
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
-import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
-  indexPattern: DataView;
-  field: DataViewField;
+  indexPattern: FilterableSource;
+  field: FilterableField;
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   suggestionsAbstraction?: SuggestionsAbstraction;
@@ -88,7 +88,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       return;
     }
     this.setState({ isLoading: true });
-    const suggestions = await this.services.unifiedSearch.autocomplete.getValueSuggestions({
+    const suggestions = await this.services.kql.autocomplete.getValueSuggestions({
       indexPattern,
       field,
       query,

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
+import { queryRolesResponseSchema } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
 import { transformElasticsearchRoleToRole } from '../../../authorization';
@@ -31,6 +32,7 @@ export function defineQueryRolesRoutes({
       path: '/api/security/role/_query',
       access: 'public',
       summary: `Query roles`,
+      description: 'Query Kibana roles with optional filters, paging, and sorting.',
       options: {
         tags: ['oas-tags:roles'],
       },
@@ -41,27 +43,103 @@ export function defineQueryRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    queryRolesRequest: {
+                      value: {
+                        query: 'kibana',
+                        from: 0,
+                        size: 25,
+                        sort: { field: 'name', direction: 'asc' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      queryRolesResponse: {
+                        value: {
+                          roles: [
+                            {
+                              name: 'my_kibana_role',
+                              description: 'My custom Kibana role.',
+                              elasticsearch: {
+                                cluster: ['monitor'],
+                                indices: [{ names: ['logs-*'], privileges: ['read'] }],
+                                run_as: [],
+                              },
+                              kibana: [{ spaces: ['default'], base: ['read'], feature: {} }],
+                              metadata: {},
+                              transient_metadata: { enabled: true },
+                              _unrecognized_applications: [],
+                            },
+                          ],
+                          count: 1,
+                          total: 1,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: {
-            body: schema.object({
-              query: schema.maybe(schema.string()),
-              from: schema.maybe(schema.number()),
-              size: schema.maybe(schema.number()),
-              sort: schema.maybe(
-                schema.object({
-                  field: schema.string(),
-                  direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
-                })
-              ),
-              filters: schema.maybe(
-                schema.object({
-                  showReservedRoles: schema.maybe(schema.boolean({ defaultValue: true })),
-                })
-              ),
-            }),
+            body: schema.object(
+              {
+                query: schema.maybe(schema.string()),
+                from: schema.maybe(schema.number()),
+                size: schema.maybe(schema.number()),
+                sort: schema.maybe(
+                  schema.object(
+                    {
+                      field: schema.string(),
+                      direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+                    },
+                    {
+                      meta: {
+                        id: 'security_query_roles_sort',
+                        description: 'The sort criteria for the query.',
+                      },
+                    }
+                  )
+                ),
+                filters: schema.maybe(
+                  schema.object(
+                    {
+                      showReservedRoles: schema.maybe(schema.boolean({ defaultValue: true })),
+                    },
+                    {
+                      meta: {
+                        id: 'security_query_roles_filters',
+                        description: 'The filter criteria for the query.',
+                      },
+                    }
+                  )
+                ),
+              },
+              {
+                meta: {
+                  id: 'security_query_roles_body',
+                  description: 'The request body for querying roles.',
+                },
+              }
+            ),
           },
           response: {
             200: {
+              body: () => queryRolesResponseSchema,
               description: 'Indicates a successful call.',
             },
           },

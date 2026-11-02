@@ -9,8 +9,5 @@ applies_to:
 
 # Product intercept settings in {{kib}} [product-intercept-settings-kb]
 
-Configure the product intercept settings in your `kibana.yml` configuration file. 
-A product intercept is a prompt for feedback about the Elastic product that appears periodically in the Kibana UI.
-
-`xpack.product_intercept.enabled`
-:   Enable or disable Elastic product feedback prompts. Defaults to `true`.
+:::{settings} /reference/configuration-reference/product-intercept-settings.yml
+:::

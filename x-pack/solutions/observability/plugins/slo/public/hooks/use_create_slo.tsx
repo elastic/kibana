@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLink } from '@elastic/eui';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { QueryKey } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { encode } from '@kbn/rison';
 import {
   ALL_VALUE,
@@ -14,16 +19,10 @@ import {
   type CreateSLOResponse,
   type FindSLOResponse,
 } from '@kbn/slo-schema';
-import type { QueryKey } from '@kbn/react-query';
-import { useMutation, useQueryClient } from '@kbn/react-query';
-import { EuiLink } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useKibana } from './use_kibana';
-import { paths } from '../../common/locators/paths';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
 import { sloKeys } from './query_key_factory';
+import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
@@ -37,7 +36,6 @@ export function useCreateSlo() {
     notifications: { toasts },
   } = useKibana().services;
   const { sloClient } = usePluginContext();
-  const services = useKibana().services;
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -60,29 +58,27 @@ export function useCreateSlo() {
         toasts.addSuccess(
           {
             title: toMountPoint(
-              <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
-                <FormattedMessage
-                  id="xpack.slo.create.successNotification"
-                  defaultMessage="Successfully created {name}. {editSLO} or {viewSLO}"
-                  values={{
-                    name: slo.name,
-                    editSLO: (
-                      <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
-                        {i18n.translate('xpack.slo.useCreateSlo.editSLOLinkLabel', {
-                          defaultMessage: 'Edit SLO',
-                        })}
-                      </EuiLink>
-                    ),
-                    viewSLO: (
-                      <EuiLink data-test-subj="o11yUseCreateSloViewSloLink" href={sloViewUrl}>
-                        {i18n.translate('xpack.slo.useCreateSlo.viewSLOLinkLabel', {
-                          defaultMessage: 'View SLO',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </RedirectAppLinks>,
+              <FormattedMessage
+                id="xpack.slo.create.successNotification"
+                defaultMessage="Successfully created {name}. {editSLO} or {viewSLO}"
+                values={{
+                  name: slo.name,
+                  editSLO: (
+                    <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
+                      {i18n.translate('xpack.slo.useCreateSlo.editSLOLinkLabel', {
+                        defaultMessage: 'Edit SLO',
+                      })}
+                    </EuiLink>
+                  ),
+                  viewSLO: (
+                    <EuiLink data-test-subj="o11yUseCreateSloViewSloLink" href={sloViewUrl}>
+                      {i18n.translate('xpack.slo.useCreateSlo.viewSLOLinkLabel', {
+                        defaultMessage: 'View SLO',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />,
               {
                 i18n: i18nStart,
                 theme,

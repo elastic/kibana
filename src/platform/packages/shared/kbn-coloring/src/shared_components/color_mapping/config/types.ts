@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KbnPaletteId } from '@kbn/palettes';
 import type { CategoricalColor, Color, ColorCode, GradientColor, LoopColor } from './colors';
 import type { ColorRule, RuleOthers } from './rules';
 
@@ -23,16 +24,18 @@ export interface AssignmentBase<R extends ColorRule | RuleOthers, C extends Colo
    */
   color: C;
   /**
-   * Specify if the color was changed from the original one
+   * @deprecated No longer written or read. Older saved objects may still carry it.
+   * Custom colors are now detected from the color itself (see `hasCustomColors`).
    */
-  touched: boolean;
+  touched?: boolean;
 }
 
 export type ColorStep = (CategoricalColor | ColorCode) & {
   /**
-   * A flag to know when assignment has been edited since last saved
+   * @deprecated No longer written or read. Older saved objects may still carry it.
+   * Custom colors are detected from the color itself (see `hasCustomColors`).
    */
-  touched: boolean;
+  touched?: boolean;
 };
 
 export interface CategoricalColorMode {
@@ -46,7 +49,7 @@ export interface GradientColorMode {
 }
 
 interface BaseConfig {
-  paletteId: string;
+  paletteId: KbnPaletteId;
   specialAssignments: Array<AssignmentBase<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
 }
 

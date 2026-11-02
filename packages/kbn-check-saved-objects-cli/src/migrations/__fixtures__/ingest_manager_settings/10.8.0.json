@@ -1,0 +1,53 @@
+{
+  "10.7.0": [
+    {
+      "has_seen_add_data_notice": true,
+      "prerelease_integrations_enabled": false,
+      "id": "id",
+      "version": "1",
+      "preconfigured_fields": ["fleet_server_hosts"],
+      "secret_storage_requirements_met": true,
+      "output_secret_storage_requirements_met": true,
+      "action_secret_storage_requirements_met": true,
+      "use_space_awareness_migration_status": "success",
+      "use_space_awareness_migration_started_at": "2022-10-11T13:45:20.123Z",
+      "delete_unenrolled_agents": {
+          "enabled": true,
+          "is_preconfigured": false
+      },
+      "ilm_migration_status": {
+          "logs": "success",
+          "metrics": "success",
+          "synthetics": null
+      },
+      "ssl_secret_storage_requirements_met": true,
+      "integration_knowledge_enabled": true
+    }
+  ],
+  "10.8.0": [
+    {
+      "has_seen_add_data_notice": true,
+      "prerelease_integrations_enabled": false,
+      "id": "id",
+      "version": "1",
+      "preconfigured_fields": ["fleet_server_hosts"],
+      "secret_storage_requirements_met": true,
+      "output_secret_storage_requirements_met": true,
+      "action_secret_storage_requirements_met": true,
+      "use_space_awareness_migration_status": "success",
+      "use_space_awareness_migration_started_at": "2022-10-11T13:45:20.123Z",
+      "delete_unenrolled_agents": {
+          "enabled": true,
+          "is_preconfigured": false
+      },
+      "ilm_migration_status": {
+          "logs": "success",
+          "metrics": "success",
+          "synthetics": null
+      },
+      "ssl_secret_storage_requirements_met": true,
+      "integration_knowledge_enabled": true,
+      "download_source_auth_secret_storage_requirements_met": true
+    }
+  ]
+}

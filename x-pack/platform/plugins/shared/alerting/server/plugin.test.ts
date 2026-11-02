@@ -21,7 +21,7 @@ import type { RuleType } from './types';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { dataPluginMock as unifiedSearchPluginMock } from '@kbn/unified-search-plugin/server/mocks';
+import { dataPluginMock as kqlPluginMock } from '@kbn/kql/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
@@ -29,6 +29,8 @@ import { maintenanceWindowsMock } from '@kbn/maintenance-windows-plugin/server/m
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import { AlertStatusChangedTriggerId } from '../common/workflows/triggers';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
@@ -76,7 +78,7 @@ describe('Alerting Plugin', () => {
           monitoringCollection: monitoringCollectionMock.createSetup(),
           data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
           features: featuresPluginMock.createSetup(),
-          unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
+          kql: kqlPluginMock.createSetupContract(),
           ...(useDataStreamForAlerts
             ? { serverless: serverlessPluginMock.createSetupContract() }
             : {}),
@@ -116,6 +118,30 @@ describe('Alerting Plugin', () => {
 
           expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
           expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+        });
+
+        it('registers the alert status changed trigger definition when workflowsExtensions is present, whether or not anyone has opted in', async () => {
+          const workflowsExtensions = workflowsExtensionsMock.createSetup();
+          plugin = new AlertingPlugin(
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
+          );
+          plugin.setup(setupMocks, { ...mockPlugins, workflowsExtensions });
+          await waitForSetupComplete(setupMocks);
+          expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+            expect.objectContaining({ id: AlertStatusChangedTriggerId })
+          );
+        });
+
+        it('lets another plugin opt in to the alert status changed trigger', async () => {
+          plugin = new AlertingPlugin(
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
+          );
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(() =>
+            setupContract.enableAlertStatusChanged({ isEnabled: async () => true })
+          ).not.toThrow();
         });
 
         it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {
@@ -165,6 +191,7 @@ describe('Alerting Plugin', () => {
             isUsingSecurity: false,
             minimumScheduleInterval: { value: '1m', enforce: false },
             run: { alerts: { max: 1000 }, actions: { max: 1000 } },
+            apiKeyType: 'es',
           });
 
           expect(setupContract.frameworkAlerts.enabled()).toEqual(false);
@@ -433,7 +460,7 @@ describe('Alerting Plugin', () => {
               monitoringCollection: monitoringCollectionMock.createSetup(),
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
-              unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
+              kql: kqlPluginMock.createSetupContract(),
               ...(useDataStreamForAlerts
                 ? { serverless: serverlessPluginMock.createSetupContract() }
                 : {}),
@@ -486,7 +513,7 @@ describe('Alerting Plugin', () => {
               monitoringCollection: monitoringCollectionMock.createSetup(),
               data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
               features: featuresPluginMock.createSetup(),
-              unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
+              kql: kqlPluginMock.createSetupContract(),
               ...(useDataStreamForAlerts
                 ? { serverless: serverlessPluginMock.createSetupContract() }
                 : {}),
@@ -551,7 +578,7 @@ describe('Alerting Plugin', () => {
             monitoringCollection: monitoringCollectionMock.createSetup(),
             data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
             features: featuresPluginMock.createSetup(),
-            unifiedSearch: unifiedSearchPluginMock.createSetupContract(),
+            kql: kqlPluginMock.createSetupContract(),
             ...(useDataStreamForAlerts
               ? { serverless: serverlessPluginMock.createSetupContract() }
               : {}),

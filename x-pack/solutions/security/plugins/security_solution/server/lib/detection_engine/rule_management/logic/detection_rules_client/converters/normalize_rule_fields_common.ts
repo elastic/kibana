@@ -6,7 +6,7 @@
  */
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RequiredOptional } from '@kbn/zod-helpers';
+import type { RequiredOptional } from '@kbn/zod-helpers/v4';
 import type { SharedResponseProps } from '../../../../../../../common/api/detection_engine/model';
 import {
   transformAlertToRuleAction,
@@ -57,8 +57,10 @@ export function normalizeCommonRuleFields(
     revision: rule.revision,
     updated_at: rule.updatedAt.toISOString(),
     updated_by: rule.updatedBy ?? 'elastic',
+    updated_by_profile_uid: rule.updatedByProfileUid ?? undefined,
     created_at: rule.createdAt.toISOString(),
     created_by: rule.createdBy ?? 'elastic',
+    created_by_profile_uid: rule.createdByProfileUid ?? undefined,
 
     // Rule schedule and execution-related data
     enabled: rule.enabled,

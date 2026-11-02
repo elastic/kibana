@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 
 type NavigationId = string;
 
@@ -16,28 +17,52 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const TIMEOUT_CHECK = 3000;
+const MORE_POPOVER = 'side-nav-popover-More';
+// Every primary item renders in the rail until the overflow split into "More" is measured a frame
+// later.
+const MEASURED_PRIMARY_NAV = '#kbnChromeNav-primaryNavigation[data-overflow-measured="true"]';
 
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
+  const find = ctx.getService('find');
 
   async function expandMoreIfNeeded() {
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger', { timeout: TIMEOUT_CHECK })) {
+    // Once the overflow split is measured, the trigger's presence is final. Ids are used because
+    // callers can override the nav's data-test-subj.
+    if (!(await find.existsByDisplayedByCssSelector(MEASURED_PRIMARY_NAV, TIMEOUT_CHECK))) {
+      throw new Error('Side navigation has not rendered');
+    }
+    const moreMenuExists = await testSubjects.exists('kbnChromeNav-moreMenuTrigger');
+
+    if (moreMenuExists) {
       await retry.try(async () => {
         const moreMenuItem = await testSubjects.find('kbnChromeNav-moreMenuTrigger', TIMEOUT_CHECK);
         let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
-        log.debug(
-          'SolutionNavigation.sidenav.expandMoreIfNeeded - More Popover Visible',
-          isExpanded
-        );
-        if (isExpanded === 'false') {
-          await moreMenuItem.click();
+
+        // If any popover is open, close it first with Escape to ensure clean state
+        // This handles cases where a nested panel might be showing
+        if (isExpanded === 'true') {
+          await browser.pressKeys(browser.keys.ESCAPE);
+          // Wait for popover to close
+          await retry.waitFor('popover to close after Escape', async () => {
+            const popoverExists = await testSubjects.exists(MORE_POPOVER);
+            return !popoverExists;
+          });
         }
+
+        // Now click to open the More menu
+        await moreMenuItem.click();
+        // Wait for the More menu popover to appear
+        await retry.waitFor('More menu popover to appear after click', async () => {
+          return await testSubjects.exists(MORE_POPOVER);
+        });
+
         isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         if (isExpanded === 'false') {
           throw new Error('More menu still hidden');
@@ -50,7 +75,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     log.debug(
       'SolutionNavigation.sidenav.collapseMoreIfNeeded - checking if "More" menu needs to be collapsed'
     );
-    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger', { timeout: TIMEOUT_CHECK })) {
+    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger')) {
       // TODO: find a better way to collapse
       // https://github.com/elastic/kibana/issues/236242
       await retry.try(async () => {
@@ -69,6 +94,48 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       });
     }
+  }
+
+  /**
+   * Resolves where a nav item lives and leaves the nav in a clickable state: "More" is a
+   * persistent popover, so while it is open its full-viewport mask intercepts every click on the
+   * nav behind it.
+   */
+  async function waitForNavItemClickable({
+    description,
+    waitForInNav,
+    existsInMore,
+  }: {
+    description: string;
+    waitForInNav: () => Promise<boolean>;
+    existsInMore: () => Promise<boolean>;
+  }) {
+    await retry.waitFor(`${description} to be clickable`, async () => {
+      if (!(await find.existsByDisplayedByCssSelector(MEASURED_PRIMARY_NAV, TIMEOUT_CHECK))) {
+        return false;
+      }
+
+      // Wait for the item rather than deciding from a single instantaneous probe: it may render
+      // after the nav does.
+      if (await waitForInNav()) {
+        if (await existsInMore()) {
+          return true;
+        }
+
+        await collapseMoreIfNeeded();
+        return true;
+      }
+
+      await expandMoreIfNeeded();
+
+      if (await existsInMore()) {
+        return true;
+      }
+
+      // The item is not under "More" after all, so take its mask back off the nav before retrying.
+      await collapseMoreIfNeeded();
+      return false;
+    });
   }
 
   async function getByVisibleText(
@@ -92,7 +159,12 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   return {
     // check that chrome ui is in project/solution mode
     async expectExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await retry.try(async () => {
+        const exists = await testSubjects.exists(CHROME_HEADER_TEST_SUBJECTS.root);
+        if (!exists) {
+          throw new Error(`${CHROME_HEADER_TEST_SUBJECTS.root} is not present`);
+        }
+      });
     },
     async clickLogo() {
       await testSubjects.click('nav-header-logo');
@@ -111,17 +183,34 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         log.debug('SolutionNavigation.sidenav.expectLinkExists', JSON.stringify(by));
 
         if ('deepLinkId' in by) {
-          await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
-            timeout: TIMEOUT_CHECK,
-          });
+          const exists = await testSubjects.exists(`~nav-item-deepLinkId-${by.deepLinkId}`);
+          if (!exists) {
+            await expandMoreIfNeeded();
+            await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
+              timeout: TIMEOUT_CHECK,
+            });
+          }
         } else if ('navId' in by) {
-          await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
+          const exists = await testSubjects.exists(`~nav-item-id-${by.navId}`);
+          if (!exists) {
+            await expandMoreIfNeeded();
+            await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
+          }
         } else if ('panelNavLinkId' in by) {
-          await testSubjects.existOrFail(`~nav-item-id-${by.panelNavLinkId}`, {
-            timeout: TIMEOUT_CHECK,
-          });
+          const exists = await testSubjects.exists(`~nav-item-id-${by.panelNavLinkId}`);
+          if (!exists) {
+            await expandMoreIfNeeded();
+            await testSubjects.existOrFail(`~nav-item-id-${by.panelNavLinkId}`, {
+              timeout: TIMEOUT_CHECK,
+            });
+          }
         } else {
-          expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
+          let link = await getByVisibleText('~nav-item', by.text);
+          if (!link) {
+            await expandMoreIfNeeded();
+            link = await getByVisibleText('~nav-item', by.text);
+          }
+          expect(link).not.be(null);
         }
       },
       async expectLinkMissing(
@@ -158,19 +247,63 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
-        // TODO: find a better way without expanding every time
-        // https://github.com/elastic/kibana/issues/236242
-        if ('deepLinkId' in by) {
-          await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
-          await testSubjects.click(`~nav-item-deepLinkId-${by.deepLinkId}`);
-        } else if ('navId' in by) {
-          await testSubjects.existOrFail(`~nav-item-id-${by.navId}`);
-          await testSubjects.click(`~nav-item-id-${by.navId}`);
-        } else {
-          await retry.try(async () => {
-            const link = await getByVisibleText('~nav-item', by.text);
-            await link!.click();
+        log.debug('SolutionNavigation.sidenav.clickLink', JSON.stringify(by));
+
+        const clickLinkByDeepLinkId = async (deepLinkId: string) => {
+          const selector = `~nav-item-deepLinkId-${deepLinkId}`;
+
+          await waitForNavItemClickable({
+            description: `deepLinkId ${deepLinkId}`,
+            waitForInNav: () => testSubjects.waitForExists(selector, { timeout: TIMEOUT_CHECK }),
+            existsInMore: () => testSubjects.exists(`${MORE_POPOVER} > ${selector}`),
           });
+
+          await retry.tryForTime(30000, async () => {
+            const link = await testSubjects.find(selector, TIMEOUT_CHECK);
+            await link.click();
+          });
+        };
+
+        const clickLinkByNavId = async (navId: string) => {
+          const selector = `~nav-item-id-${navId}`;
+
+          await waitForNavItemClickable({
+            description: `navId ${navId}`,
+            waitForInNav: () => testSubjects.waitForExists(selector, { timeout: TIMEOUT_CHECK }),
+            existsInMore: () => testSubjects.exists(`${MORE_POPOVER} > ${selector}`),
+          });
+
+          await retry.tryForTime(30000, async () => {
+            const link = await testSubjects.find(selector, TIMEOUT_CHECK);
+            await link.click();
+          });
+        };
+
+        const clickLinkByText = async (text: string) => {
+          await waitForNavItemClickable({
+            description: `link with text "${text}"`,
+            waitForInNav: async () =>
+              (await testSubjects.waitForExists('~nav-item', { timeout: TIMEOUT_CHECK })) &&
+              Boolean(await getByVisibleText('~nav-item', text)),
+            existsInMore: async () =>
+              Boolean(
+                await getByVisibleText(
+                  () => testSubjects.findAll(`${MORE_POPOVER} > ~nav-item`, 0),
+                  text
+                )
+              ),
+          });
+
+          const link = await getByVisibleText('~nav-item', text);
+          await link!.click();
+        };
+
+        if ('deepLinkId' in by) {
+          await clickLinkByDeepLinkId(by.deepLinkId);
+        } else if ('navId' in by) {
+          await clickLinkByNavId(by.navId);
+        } else {
+          await clickLinkByText(by.text);
         }
       },
       async findLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
@@ -219,30 +352,49 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickPanelLink(navId: string) {
-        // TODO: find a better way without trying to collapse every time
-        // https://github.com/elastic/kibana/issues/236242
-        await collapseMoreIfNeeded();
-        // TODO: find a better way without trying to dismiss feedback every time
-        // https://github.com/elastic/kibana/issues/236242
-        await this.feedbackCallout.dismiss();
         // TODO: properly distinguish between panel link and main nav link
         // https://github.com/elastic/kibana/issues/236242
-        await testSubjects.click(`~nav-item-id-${navId}`);
+        await retry.try(async () => {
+          const link = await testSubjects.find(`~nav-item-id-${navId}`, 2500);
+          await link.scrollIntoViewIfNecessary();
+          await link.moveMouseTo();
+          await link.click();
+        });
       },
 
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~kbnChromeNav-sidePanel_${sectionId}`, {
-          timeout: TIMEOUT_CHECK,
+
+        // `testSubjects.exists()` is an immediate probe; bound the panel render wait
+        await retry.tryForTime(30000, async () => {
+          if (!(await this.isPanelOpen(sectionId))) {
+            throw new Error(
+              `Expected panel "${sectionId}" to exist as either sidePanel or nestedPanel, but neither was found`
+            );
+          }
         });
       },
       async isPanelOpen(sectionId: NavigationId) {
         try {
-          const panel = await testSubjects.find(
+          // Each attempt is bounded rather than an instantaneous probe, so a panel that is
+          // still animating in is observed by the time the enclosing retry polls again.
+          // Check for side panel (when item is in main nav)
+          const sidePanelExists = await testSubjects.waitForExists(
             `~kbnChromeNav-sidePanel_${sectionId}`,
-            TIMEOUT_CHECK
+            { timeout: 500 }
           );
-          return !!panel;
+
+          if (sidePanelExists) {
+            return true;
+          }
+
+          // Check for nested panel (when item is in More menu)
+          const nestedPanelExists = await testSubjects.waitForExists(
+            `~kbnChromeNav-nestedPanel-${sectionId}`,
+            { timeout: 500 }
+          );
+
+          return nestedPanelExists;
         } catch (e) {
           return false;
         }
@@ -251,11 +403,50 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         log.debug('SolutionNavigation.sidenav.openPanel', sectionId);
 
         const isOpen = await this.isPanelOpen(sectionId);
-        if (isOpen) return;
+        if (isOpen) {
+          return;
+        }
 
-        const panelOpenerBtn = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
+        let panelOpenerBtn;
+        try {
+          // First try to find the panel opener button directly
+          panelOpenerBtn = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
+        } catch (firstError) {
+          // If not found, try expanding the More menu
+          try {
+            await expandMoreIfNeeded();
+
+            // Wait for button to appear and be clickable in the More menu popover
+            await retry.waitFor(`button ${sectionId} to be clickable in More menu`, async () => {
+              try {
+                const btn = await testSubjects.find(`~nav-item-id-${sectionId}`, 500);
+                const isDisplayed = await btn.isDisplayed();
+                const isEnabled = await btn.isEnabled();
+                return isDisplayed && isEnabled;
+              } catch (e) {
+                return false;
+              }
+            });
+
+            // Now find the button for interaction
+            panelOpenerBtn = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
+
+            // Ensure it's in view and move mouse to it
+            await panelOpenerBtn.scrollIntoViewIfNecessary();
+            await panelOpenerBtn.moveMouseTo();
+          } catch (secondError) {
+            throw new Error(
+              `Could not find panel opener button for "${sectionId}" in main nav or More menu`
+            );
+          }
+        }
 
         await panelOpenerBtn.click();
+
+        // Wait for panel to appear (checks both sidePanel and nestedPanel)
+        await retry.waitFor(`panel ${sectionId} to appear after click`, async () => {
+          return await this.isPanelOpen(sectionId);
+        });
       },
       async isCollapsed() {
         const selector = 'sideNavCollapseButton';
@@ -282,41 +473,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
-      },
-      feedbackCallout: {
-        async disable() {
-          await browser.setLocalStorageItem('sideNavigationFeedback', `${Date.now()}`);
-          await browser.refresh();
-        },
-        async reset() {
-          await browser.removeLocalStorageItem('sideNavigationFeedback');
-          await browser.refresh();
-        },
-        async getFeedbackTestSubjectId() {
-          return 'feedbackSnippetPanel';
-        },
-        async getFeedbackDismissTestSubjectId() {
-          return 'feedbackSnippetPanel > sideNavigationFeedbackPanelDismiss';
-        },
-        async expectExists() {
-          await testSubjects.existOrFail(await this.getFeedbackTestSubjectId(), {
-            timeout: TIMEOUT_CHECK,
-          });
-        },
-        async expectMissing() {
-          return await testSubjects.existOrFail('sideNavigationFeedbackButtonSurveyLink', {
-            timeout: TIMEOUT_CHECK,
-          });
-        },
-        async dismiss() {
-          // TODO: find a better way without trying to collapse every time
-          // https://github.com/elastic/kibana/issues/236242
-          await collapseMoreIfNeeded();
-          const feedbackTestSubjectId = await this.getFeedbackTestSubjectId();
-          if (await testSubjects.exists(feedbackTestSubjectId, { timeout: TIMEOUT_CHECK })) {
-            await testSubjects.click(await this.getFeedbackDismissTestSubjectId());
-          }
-        },
       },
     },
     breadcrumbs: {
@@ -360,7 +516,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
-      async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
+      async expectBreadcrumbTexts(
+        expectedBreadcrumbTexts: string[],
+        options?: { removeProjectName?: boolean }
+      ) {
         log.debug(
           'SolutionNavigation.breadcrumbs.expectBreadcrumbTexts',
           JSON.stringify(expectedBreadcrumbTexts)
@@ -368,9 +527,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await retry.try(async () => {
           const breadcrumbsContainer = await testSubjects.find('breadcrumbs', TIMEOUT_CHECK);
           const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
-          breadcrumbs.shift(); // remove home
-          expect(expectedBreadcrumbTexts.length).to.eql(breadcrumbs.length);
           const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
+          if (options?.removeProjectName) {
+            texts.shift(); // remove project name breadcrumb in serverless
+          }
+          expect(expectedBreadcrumbTexts.length).to.eql(texts.length);
           expect(expectedBreadcrumbTexts).to.eql(texts);
         });
       },

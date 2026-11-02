@@ -15,13 +15,42 @@ import {
   extractDiscardedCorruptDocs,
   extractTransformFailuresReason,
 } from '../../../model/extract_errors';
+import { isTypeof } from '../../actions';
 
 export const outdatedDocumentsSearchRead: ModelStage<
   'OUTDATED_DOCUMENTS_SEARCH_READ',
-  'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM' | 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT' | 'FATAL'
+  | 'OUTDATED_DOCUMENTS_SEARCH_READ'
+  | 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM'
+  | 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'
+  | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
-    throwBadResponse(state, res as never);
+    const left = res.left;
+    if (isTypeof(left, 'es_response_too_large')) {
+      if (state.batchSize === 1) {
+        return {
+          ...state,
+          controlState: 'FATAL',
+          reason: `After reducing the read batch size to a single document, the response content length was ${left.contentLength} bytes which still exceeded the Elasticsearch client maximum response size.`,
+        };
+      }
+
+      const batchSize = Math.max(Math.floor(state.batchSize / 2), 1);
+      return {
+        ...state,
+        batchSize,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+        logs: [
+          ...state.logs,
+          {
+            level: 'warning',
+            message: `Read a batch with a response content length of ${left.contentLength} bytes which exceeds the Elasticsearch client maximum response size, retrying by reducing the batch size in half to ${batchSize}.`,
+          },
+        ],
+      };
+    }
+
+    throwBadResponse(state, left as never);
   }
 
   let logs = state.logs;
@@ -31,6 +60,7 @@ export const outdatedDocumentsSearchRead: ModelStage<
     const progress = setProgressTotal(state.progress, res.right.totalHits);
     return {
       ...state,
+      pitId: res.right.pitId,
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM',
       outdatedDocuments: res.right.outdatedDocuments,
       lastHitSortValue: res.right.lastHitSortValue,
@@ -69,6 +99,7 @@ export const outdatedDocumentsSearchRead: ModelStage<
     // and can proceed to the next step
     return {
       ...state,
+      pitId: res.right.pitId,
       logs,
       controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
     };

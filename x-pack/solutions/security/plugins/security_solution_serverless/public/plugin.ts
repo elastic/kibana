@@ -12,7 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { AppStatus } from '@kbn/core-application-browser';
 
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
@@ -23,6 +23,7 @@ import type {
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
 } from './types';
+import { isAlertZeroAvailable } from '../common/alertzero_availability';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
 import { startNavigation } from './navigation';
@@ -45,6 +46,7 @@ export class SecuritySolutionServerlessPlugin
 {
   private config: ServerlessSecurityPublicConfig;
   private experimentalFeatures: ExperimentalFeatures;
+  private managementCardsSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
@@ -78,6 +80,7 @@ export class SecuritySolutionServerlessPlugin
     const { productTypes } = this.config;
     const services = createServices(core, startDeps, this.experimentalFeatures);
 
+    startDeps.alertzero?.setServerlessTierAvailable(isAlertZeroAvailable(productTypes));
     registerUpsellings(productTypes, services);
 
     securitySolution.setComponents({
@@ -86,12 +89,14 @@ export class SecuritySolutionServerlessPlugin
     });
 
     setOnboardingSettings(services);
-    startNavigation(services, productTypes);
+    this.managementCardsSubscription = startNavigation(services, productTypes);
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.managementCardsSubscription?.unsubscribe();
+  }
 }
 
 /**

@@ -26,7 +26,7 @@ describe('validate', () => {
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       const expected: BulkError = {
         error: {
-          message: 'name: Required',
+          message: 'name: Invalid input: expected string, received undefined',
           status_code: 500,
         },
         rule_id: 'rule-1',

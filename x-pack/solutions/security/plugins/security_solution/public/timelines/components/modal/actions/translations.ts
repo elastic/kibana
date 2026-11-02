@@ -15,6 +15,13 @@ export const NEW_TIMELINE_BTN = i18n.translate(
   }
 );
 
+export const NEW_TIMELINE_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.timeline.modal.newTimelinePopoverAriaLabel',
+  {
+    defaultMessage: 'New Timeline options',
+  }
+);
+
 export const NEW_TIMELINE = i18n.translate('xpack.securitySolution.timeline.modal.newTimeline', {
   defaultMessage: 'New Timeline',
 });
@@ -44,19 +51,6 @@ export const ATTACH_TO_CASE = i18n.translate(
   'xpack.securitySolution.timeline.modal.attachToCaseButtonLabel',
   {
     defaultMessage: 'Attach to case',
-  }
-);
-
-export const ATTACH_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to new case',
-  }
-);
-export const ATTACH_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to existing case',
   }
 );
 
@@ -117,7 +111,7 @@ export const CLOSE_MODAL = i18n.translate(
 export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineType) =>
   i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.warning.title', {
     values: {
-      timeline: timelineType === TimelineTypeEnum.template ? 'timeline template' : 'timeline',
+      timeline: timelineType === TimelineTypeEnum.template ? 'Timeline template' : 'Timeline',
     },
     defaultMessage: 'You have an unsaved {timeline}. Do you wish to save it?',
   });
@@ -150,6 +144,6 @@ export const TITLE = i18n.translate('xpack.securitySolution.timeline.saveTimelin
 export const SAVE_AS_NEW = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.saveAsNew',
   {
-    defaultMessage: 'Save as new timeline',
+    defaultMessage: 'Save as new Timeline',
   }
 );

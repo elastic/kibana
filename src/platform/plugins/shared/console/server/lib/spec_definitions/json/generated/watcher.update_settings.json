@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ],
@@ -13,6 +14,10 @@
         "-1",
         "0"
       ]
+    },
+    "data_autocomplete_rules": {
+      "index.auto_expand_replicas": "",
+      "index.number_of_replicas": ""
     },
     "methods": [
       "PUT"

@@ -10,13 +10,11 @@ import { generateKeyPairSync, createSign, randomBytes } from 'crypto';
 import { backOff } from 'exponential-backoff';
 
 import type { LoggerFactory, Logger } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import { MessageSigningError } from '../../../common/errors';
 
@@ -178,17 +176,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       return this._soClient;
     }
 
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-
-    this._soClient = appContextService.getSavedObjects().getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
+    this._soClient = appContextService.getSavedObjects().getUnsafeInternalClient({
       includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
     });
 

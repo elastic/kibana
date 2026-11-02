@@ -6,19 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiTitle,
-  EuiFilterGroup,
-  EuiIconTip,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiTitle, EuiFilterGroup, EuiIconTip } from '@elastic/eui';
 import { QualityIssuesTable } from './table';
 import {
   issuesTableName,
   overviewQualityIssueSectionTitleTooltip,
-  overviewQualityIssuesAccordionTechPreviewBadge,
 } from '../../../../../common/translations';
 import { FieldSelector, CurrentQualityIssuesToggle, IssueTypeSelector } from './filters';
 
@@ -35,15 +27,9 @@ export function QualityIssues() {
           <EuiTitle size="xs">
             <span>{issuesTableName}</span>
           </EuiTitle>
-          <EuiIconTip content={overviewQualityIssueSectionTitleTooltip} color="subdued" size="m" />
-          <EuiBetaBadge
-            label={overviewQualityIssuesAccordionTechPreviewBadge}
-            color="hollow"
-            data-test-subj="datasetQualityDetailsOverviewDegradedFieldsTechPreview"
-            size="s"
-          />
+          <EuiIconTip type="info" content={overviewQualityIssueSectionTitleTooltip} size="m" />
         </EuiFlexGroup>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <FieldSelector />
           <IssueTypeSelector />
           <CurrentQualityIssuesToggle />

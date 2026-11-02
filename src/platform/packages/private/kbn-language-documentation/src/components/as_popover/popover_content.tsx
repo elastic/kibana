@@ -196,7 +196,7 @@ function DocumentationContent({
                       <>
                         <EuiSpacer size="s" />
 
-                        <EuiListGroup gutterSize="none">
+                        <EuiListGroup>
                           {helpGroup.items.map((helpItem) => {
                             return (
                               <EuiListGroupItem
@@ -206,7 +206,6 @@ function DocumentationContent({
                                     {helpItem.label}
                                   </EuiHighlight>
                                 }
-                                size="s"
                                 onClick={() => {
                                   setSelectedSection(helpItem.label);
                                 }}

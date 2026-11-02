@@ -8,6 +8,9 @@
  */
 
 import type { IToasts, NotificationCoordinator } from './types';
+import type { FeedbackStart } from './feedback_types';
+import type { ToursStart } from './tours_types';
+import type { ScreenReaderStart } from './screen_reader_types';
 
 /**
  * {@link IToasts}
@@ -36,4 +39,21 @@ export interface NotificationsStart {
   /** {@link ToastsStart} */
   toasts: ToastsStart;
   showErrorDialog: (options: { title: string; error: Error }) => void;
+  /**
+   * Controls visibility of feedback elements
+   * @public
+   */
+  feedback: FeedbackStart;
+
+  /**
+   * Controls visibility of guided tours
+   * @public
+   */
+  tours: ToursStart;
+
+  /**
+   * Announces messages to screen reader users
+   * @public
+   */
+  screenReader: ScreenReaderStart;
 }

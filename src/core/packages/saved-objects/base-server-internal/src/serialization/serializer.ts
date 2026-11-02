@@ -151,7 +151,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       originId,
       attributes,
       migrationVersion,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
       updated_by: updatedBy,
       created_at: createdAt,

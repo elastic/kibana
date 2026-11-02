@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -20,10 +21,12 @@ import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getBlocklistsListPath,
+  getCustomYaraSignaturesListPath,
   getEndpointExceptionsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyDetailPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEndpointExceptionsPath,
@@ -39,6 +42,7 @@ import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
   isOnBlocklistsView,
+  isOnCustomYaraSignaturesView,
   isOnEndpointExceptionsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
@@ -63,14 +67,19 @@ import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../tr
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS } from '../../../custom_yara_signatures/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../trusted_devices/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { POLICY_PROTECTION_UPDATES_LABEL } from '../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { TrustedDevicesApiClient } from '../../../trusted_devices/service/api_client';
 import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_translations';
 import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../endpoint_exceptions/constants';
 import { EndpointExceptionsApiClient } from '../../../endpoint_exceptions/service/api_client';
 import { POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS } from './endpoint_exceptions_translations';
+import { POLICY_ARTIFACT_CUSTOM_YARA_SIGNATURES_LABELS } from './custom_yara_signatures_translations';
+import { CustomYaraSignaturesApiClient } from '../../../custom_yara_signatures/service/api_client';
+import { CustomYaraSignatureCriteria } from '../../../custom_yara_signatures/view/components/custom_yara_signature_criteria';
 import { TrustedAppsCardDecorator } from '../../../trusted_apps/view/trusted_apps_list';
 import { EventFiltersCardDecorator } from '../../../event_filters/view/event_filters_list';
 
@@ -83,6 +92,7 @@ enum PolicyTabKeys {
   PROTECTION_UPDATES = 'protectionUpdates',
   TRUSTED_DEVICES = 'trustedDevices',
   ENDPOINT_EXCEPTIONS = 'endpointExceptions',
+  CUSTOM_YARA_SIGNATURES = 'customYaraSignatures',
 }
 
 interface PolicyTab {
@@ -103,6 +113,7 @@ export const PolicyTabs = React.memo(() => {
   const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
+  const isInCustomYaraSignaturesTab = usePolicyDetailsSelector(isOnCustomYaraSignaturesView);
   const isInEndpointExceptionsTab = usePolicyDetailsSelector(isOnEndpointExceptionsView);
   const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
@@ -147,6 +158,8 @@ export const PolicyTabs = React.memo(() => {
     canWriteTrustedDevices,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canReadCustomYaraSignatures,
+    canWriteCustomYaraSignatures,
     loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
@@ -154,6 +167,9 @@ export const PolicyTabs = React.memo(() => {
   const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
   const isEndpointExceptionsMovedUnderManagementFeatureEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
+  );
+  const isCustomYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
+    'customYaraSignaturesEnabled'
   );
 
   const isEnterprise = useLicense().isEnterprise();
@@ -188,6 +204,7 @@ export const PolicyTabs = React.memo(() => {
       (isInEventFiltersTab && !canReadEventFilters) ||
       redirectHostIsolationException ||
       (isInBlocklistsTab && !canReadBlocklist) ||
+      (isInCustomYaraSignaturesTab && !canReadCustomYaraSignatures) ||
       (isInEndpointExceptionsTab && !canReadEndpointExceptions) ||
       (isInTrustedDevicesTab && !canReadTrustedDevices)
     ) {
@@ -201,6 +218,7 @@ export const PolicyTabs = React.memo(() => {
     }
   }, [
     canReadBlocklist,
+    canReadCustomYaraSignatures,
     canReadEndpointExceptions,
     canReadEventFilters,
     canReadHostIsolationExceptions,
@@ -210,6 +228,7 @@ export const PolicyTabs = React.memo(() => {
     history,
     isHostIsolationExceptionsAccessLoading,
     isInBlocklistsTab,
+    isInCustomYaraSignaturesTab,
     isInEndpointExceptionsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
@@ -245,6 +264,13 @@ export const PolicyTabs = React.memo(() => {
     () => EndpointExceptionsApiClient.getInstance(http),
     [http]
   );
+
+  const getCustomYaraSignaturesApiClientInstance = useCallback(
+    () => CustomYaraSignaturesApiClient.getInstance(http),
+    [http]
+  );
+
+  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
 
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
@@ -297,6 +323,17 @@ export const PolicyTabs = React.memo(() => {
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.blocklist.list.about"
           defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklist entries}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const customYaraSignaturesLabels = {
+      ...POLICY_ARTIFACT_CUSTOM_YARA_SIGNATURES_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.customYaraSignatures.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} custom YARA {count, plural, =1 {signature} other {signatures}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -481,22 +518,47 @@ export const PolicyTabs = React.memo(() => {
                     getArtifactPath={getEndpointExceptionsListPath}
                     getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
                     canWriteArtifact={canWriteEndpointExceptions}
+                    disableArtifactsByPolicy={!isPerPolicyOptIn?.status}
                   />
                 </>
               ),
               'data-test-subj': 'policyEndpointExceptionsTab',
             }
           : undefined,
+      [PolicyTabKeys.CUSTOM_YARA_SIGNATURES]:
+        isCustomYaraSignaturesEnabled && canReadCustomYaraSignatures
+          ? {
+              id: PolicyTabKeys.CUSTOM_YARA_SIGNATURES,
+              name: i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.tabs.customYaraSignatures',
+                {
+                  defaultMessage: 'Custom YARA signatures',
+                }
+              ),
+              content: (
+                <>
+                  <EuiSpacer />
+                  <PolicyArtifactsLayout
+                    policyItem={policyItem}
+                    labels={customYaraSignaturesLabels}
+                    getExceptionsListApiClient={getCustomYaraSignaturesApiClientInstance}
+                    searchableFields={CUSTOM_YARA_SIGNATURES_SEARCHABLE_FIELDS}
+                    getArtifactPath={getCustomYaraSignaturesListPath}
+                    getPolicyArtifactsPath={getPolicyCustomYaraSignaturesPath}
+                    canWriteArtifact={canWriteCustomYaraSignatures}
+                    CriteriaComponent={CustomYaraSignatureCriteria}
+                    showEnabledColumn
+                  />
+                </>
+              ),
+              'data-test-subj': 'policyCustomYaraSignaturesTab',
+            }
+          : undefined,
 
       [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
             id: PolicyTabKeys.PROTECTION_UPDATES,
-            name: i18n.translate(
-              'xpack.securitySolution.endpoint.policy.details.tabs.protectionUpdates',
-              {
-                defaultMessage: 'Protection updates',
-              }
-            ),
+            name: POLICY_PROTECTION_UPDATES_LABEL.label,
             content: (
               <>
                 <EuiSpacer />
@@ -532,6 +594,11 @@ export const PolicyTabs = React.memo(() => {
     canReadEndpointExceptions,
     getEndpointExceptionsApiClientInstance,
     canWriteEndpointExceptions,
+    isPerPolicyOptIn?.status,
+    isCustomYaraSignaturesEnabled,
+    canReadCustomYaraSignatures,
+    getCustomYaraSignaturesApiClientInstance,
+    canWriteCustomYaraSignatures,
     isEnterprise,
   ]);
 
@@ -559,6 +626,8 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.BLOCKLISTS];
     } else if (isInEndpointExceptionsTab) {
       selectedTab = tabs[PolicyTabKeys.ENDPOINT_EXCEPTIONS];
+    } else if (isInCustomYaraSignaturesTab) {
+      selectedTab = tabs[PolicyTabKeys.CUSTOM_YARA_SIGNATURES];
     } else if (isInProtectionUpdatesTab) {
       selectedTab = tabs[PolicyTabKeys.PROTECTION_UPDATES];
     }
@@ -573,6 +642,7 @@ export const PolicyTabs = React.memo(() => {
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
     isInEndpointExceptionsTab,
+    isInCustomYaraSignaturesTab,
     isInProtectionUpdatesTab,
   ]);
 
@@ -607,6 +677,9 @@ export const PolicyTabs = React.memo(() => {
           break;
         case PolicyTabKeys.ENDPOINT_EXCEPTIONS:
           path = getPolicyEndpointExceptionsPath(policyId);
+          break;
+        case PolicyTabKeys.CUSTOM_YARA_SIGNATURES:
+          path = getPolicyCustomYaraSignaturesPath(policyId);
           break;
         case PolicyTabKeys.PROTECTION_UPDATES:
           path = getPolicyProtectionUpdatesPath(policyId);

@@ -14,6 +14,7 @@ import type {
   OnboardClusterResponse,
   ApiKeyValidationResult,
   SubscriptionResponse,
+  UpdateClusterRequest,
 } from '../types';
 
 export class CloudConnectClient {
@@ -38,18 +39,15 @@ export class CloudConnectClient {
    * Returns whether the key is a "happy path" key (cluster-scoped) or an admin key
    */
   async validateApiKeyScope(apiKey: string): Promise<ApiKeyValidationResult> {
+    const url = `${this.cloudApiUrl}/saas/user?show_role_assignments=true`;
     try {
       this.logger.debug('Validating API key scope');
 
-      const response = await axios.get<CloudConnectUserResponse>(
-        `${this.cloudApiUrl}/saas/user?show_role_assignments=true`,
-        {
-          headers: {
-            Authorization: `apiKey ${apiKey}`,
-          },
-          timeout: 30000,
-        }
-      );
+      const response = await this.axiosInstance.get<CloudConnectUserResponse>(url, {
+        headers: {
+          Authorization: `apiKey ${apiKey}`,
+        },
+      });
 
       const roleAssignments = response.data.user.role_assignments.cloud_connected_resource;
 
@@ -87,7 +85,7 @@ export class CloudConnectClient {
         hasValidScope: true,
       };
     } catch (error) {
-      this.logger.error('Failed to validate API key scope', { error });
+      this.logger.error(`Failed to validate API key scope calling ${url}`, { error });
 
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
@@ -95,6 +93,14 @@ export class CloudConnectClient {
             isClusterScoped: false,
             hasValidScope: false,
             errorMessage: 'Invalid or expired API key',
+          };
+        }
+
+        if (error.response?.status === 403) {
+          return {
+            isClusterScoped: false,
+            hasValidScope: false,
+            errorMessage: `Access to ${url} was denied (HTTP 403). Ensure outbound HTTPS access to this endpoint is not blocked by a firewall or proxy.`,
           };
         }
       }
@@ -159,7 +165,7 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to onboard cluster', { error });
+      this.logger.error('Failed to onboard cluster at /cloud-connected/clusters', { error });
       throw error;
     }
   }
@@ -191,26 +197,28 @@ export class CloudConnectClient {
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to onboard cluster with key generation', { error });
+      this.logger.error(
+        'Failed to onboard cluster with key generation at /cloud-connected/clusters?create_api_key=true',
+        { error }
+      );
       throw error;
     }
   }
 
   /**
-   * Updates cluster services configuration
-   * Used to enable or disable services for a cluster
+   * Updates cluster configuration, including services and license
    */
-  async updateClusterServices(
+  async updateCluster(
     apiKey: string,
     clusterId: string,
-    services: Record<string, { enabled: boolean }>
+    clusterData: Partial<UpdateClusterRequest>
   ): Promise<OnboardClusterResponse> {
     try {
       this.logger.debug(`Updating services for cluster ID: ${clusterId}`);
 
       const response = await this.axiosInstance.patch<OnboardClusterResponse>(
         `/cloud-connected/clusters/${clusterId}`,
-        { services },
+        clusterData,
         {
           headers: {
             Authorization: `apiKey ${apiKey}`,
@@ -277,6 +285,69 @@ export class CloudConnectClient {
       this.logger.error(`Failed to fetch subscription for organization ID: ${organizationId}`, {
         error,
       });
+      throw error;
+    }
+  }
+
+  /**
+   * Rotates the API key for a cluster
+   * Returns a new API key that should be stored
+   */
+  async rotateClusterApiKey(apiKey: string, clusterId: string): Promise<{ key: string }> {
+    try {
+      this.logger.debug(`Rotating API key for cluster ID: ${clusterId}`);
+
+      const response = await this.axiosInstance.post<{ key: string }>(
+        `/cloud-connected/clusters/${clusterId}/apikey/_rotate`,
+        {},
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(`Successfully rotated API key for cluster: ${clusterId}`);
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Failed to rotate API key for cluster ID: ${clusterId}`, { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Rotates the API key for a specific service on a cluster
+   * Returns a new API key that should be used to configure the service
+   */
+  async rotateServiceApiKey(
+    apiKey: string,
+    clusterId: string,
+    serviceKey: string
+  ): Promise<{ key: string }> {
+    try {
+      this.logger.debug(`Rotating API key for service ${serviceKey} on cluster ID: ${clusterId}`);
+
+      const response = await this.axiosInstance.post<{ key: string }>(
+        `/cloud-connected/clusters/${clusterId}/apikey/${serviceKey}/_rotate`,
+        {},
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(
+        `Successfully rotated API key for service ${serviceKey} on cluster: ${clusterId}`
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to rotate API key for service ${serviceKey} on cluster ID: ${clusterId}`,
+        { error }
+      );
       throw error;
     }
   }

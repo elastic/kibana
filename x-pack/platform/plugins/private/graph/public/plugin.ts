@@ -28,8 +28,8 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { checkLicense } from '../common/check_license';
 import type { ConfigSchema } from '../server/config';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
@@ -43,7 +43,7 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   inspector: InspectorPublicPluginStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
@@ -62,10 +62,12 @@ export class GraphPlugin
     core: CoreSetup<GraphPluginStartDependencies>,
     { home, contentManagement }: GraphPluginSetupDependencies
   ) {
+    const graphTitle = i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' });
+
     if (home) {
       home.featureCatalogue.register({
         id: 'graph',
-        title: 'Graph',
+        title: graphTitle,
         subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
           defaultMessage: 'Reveal patterns and relationships.',
         }),
@@ -95,7 +97,7 @@ export class GraphPlugin
 
     core.application.register({
       id: 'graph',
-      title: 'Graph',
+      title: graphTitle,
       order: 6000,
       appRoute: '/app/graph',
       euiIconType: 'logoKibana',
@@ -103,9 +105,7 @@ export class GraphPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(
-          i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
-        );
+        coreStart.chrome.docTitle.change(graphTitle);
         const { renderApp } = await import('./application');
         return renderApp({
           ...params,
@@ -115,7 +115,7 @@ export class GraphPlugin
           coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
-          unifiedSearch: pluginsStart.unifiedSearch,
+          kql: pluginsStart.kql,
           contentClient: pluginsStart.contentManagement.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,

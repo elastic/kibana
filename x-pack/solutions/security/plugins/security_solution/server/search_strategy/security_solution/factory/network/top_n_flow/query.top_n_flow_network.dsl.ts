@@ -22,13 +22,13 @@ import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';
 import { getQueryOrder } from './helpers';
 
-interface AggregationsAggregationWithFieldsContainer extends AggregationsAggregationContainer {
+type AggregationsAggregationWithFieldsContainer = AggregationsAggregationContainer & {
   aggregations?: Record<string, AggregationsAggregationWithFieldsContainer>;
   aggs?: Record<string, AggregationsAggregationWithFieldsContainer>;
   top_hits?: AggregationsTopHitsAggregation & {
     fields?: Array<QueryDslFieldAndFormat | Field>; // fields is missing in the official types but it is used in the query
   };
-}
+};
 
 export const buildTopNFlowQuery = ({
   defaultIndex,

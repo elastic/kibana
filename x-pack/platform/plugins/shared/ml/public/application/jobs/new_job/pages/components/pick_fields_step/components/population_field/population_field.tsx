@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { useGeneratedHtmlId } from '@elastic/eui';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
+import { i18n } from '@kbn/i18n';
 import { SplitFieldSelect } from '../split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
@@ -22,9 +22,6 @@ export const PopulationFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator | RareJobCreator;
   const newJobCapsService = useNewJobCapsService();
-  const titleId = useGeneratedHtmlId({
-    prefix: 'populationFieldSelector',
-  });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
@@ -70,7 +67,12 @@ export const PopulationFieldSelector: FC = () => {
         selectedField={populationField}
         isClearable={false}
         testSubject="mlPopulationSplitFieldSelect"
-        titleId={titleId}
+        aria-label={i18n.translate(
+          'xpack.ml.newJob.wizard.pickFieldsStep.populationField.ariaLabel',
+          {
+            defaultMessage: 'Population field select',
+          }
+        )}
       />
     </Description>
   );

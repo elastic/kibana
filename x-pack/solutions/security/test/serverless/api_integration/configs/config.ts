@@ -25,7 +25,7 @@ export default createTestConfig({
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
-    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8089`,
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
@@ -33,7 +33,25 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
-    // Enables /internal/cloud_security_posture/graph API
-    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
+    // Complete tier enables graph visualization product feature
+    `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+      { product_line: 'security', product_tier: 'complete' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'complete' },
+    ])}`,
+    // config/serverless.security.yml list (CLI arrays replace it, not merge) plus
+    // `disable:customYaraSignaturesEnabled` to match MKI (kibana-controller override).
+    // Remove the YARA and registry credential hardening entries once those flags are enabled on
+    // serverless (planned for 9.6 GA).
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'riskScoreAssistantToolDisabled',
+      'disable:enableRiskScorePrivmonModifier',
+      'disable:kubernetesEnabled',
+      'trialCompanionEnabled',
+      'disable:linuxRansomwareProtection',
+      'disable:registryCredentialHardening',
+      'disable:customYaraSignaturesEnabled',
+    ])}`,
   ],
+  enableFleetDockerRegistry: false,
 });

@@ -6,15 +6,21 @@ source .buildkite/scripts/common/util.sh
 
 echo "--- Setup Node"
 
-NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
+NODE_VERSION="$(cat "$KIBANA_DIR/.nvmrc")"
 export NODE_VERSION
-NODE_VARIANT="glibc-217"
+NODE_VARIANT=""
+mkdir -p "$NODE_CACHE_DIR"
 if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
   echo ' -- Using Node.js variant with pointer compression enabled'
-  NODE_VARIANT="pointer-compression"
-  export NODE_DIR="$CACHE_DIR/node-pointer-compression/$NODE_VERSION"
+  NODE_VARIANT="node-pointer-compression/"
+  export NODE_DIR="$NODE_CACHE_DIR/node-pointer-compression/$NODE_VERSION"
+elif [[ "${CI_FORCE_NODE_GLIBC_217:-}" = "true" ]]; then
+  echo ' -- Using Node.js variant compatible with glibc 2.17'
+  NODE_VARIANT="node-glibc-217/"
+  export NODE_DIR="$NODE_CACHE_DIR/node-glibc-217/$NODE_VERSION"
 else
-  export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+  export NODE_DIR="$NODE_CACHE_DIR/node/$NODE_VERSION"
+  echo ' -- Using default Node.js'
 fi
 export NODE_BIN_DIR="$NODE_DIR/bin"
 
@@ -38,7 +44,7 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-${NODE_VARIANT}/dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
+nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${OS}-${classifier}"
 
 echo " -- node: version=v${NODE_VERSION} dir=$NODE_DIR"
 
@@ -65,15 +71,11 @@ fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
 
-echo "--- Setup Yarn"
+echo " -- node: version=$(node --version)"
 
-YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
-export YARN_VERSION
-
-if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  npm_install_global yarn "^$YARN_VERSION"
-fi
-
-YARN_GLOBAL_BIN=$(yarn global bin)
-export YARN_GLOBAL_BIN
-export PATH="$PATH:$YARN_GLOBAL_BIN"
+echo " -- enabling corepack-managed pnpm"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+PNPM_VERSION="$(node -p "require('${KIBANA_DIR}/package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+corepack enable
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
+echo " -- pnpm: version=$(pnpm --version)"

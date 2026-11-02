@@ -63,23 +63,44 @@ function normalizeBands(
     correctMax = min + rangeMax * ((max - min) / 100);
   }
 
+  // When firstRanges/lastRanges introduce the rangeMin/rangeMax boundary, a stop
+  // sitting exactly on that boundary would create a duplicate (zero-width) band.
+  // Track the effective bounds so such stops are excluded from the stop list.
+  let hasLowerBound = false;
+  let hasUpperBound = false;
+
   if (correctMin > min && isFinite(correctMin)) {
     firstRanges = [min, correctMin];
+    hasLowerBound = true;
   }
 
   if (correctMax < max && isFinite(correctMax)) {
     lastRanges = [correctMax, max];
+    hasUpperBound = true;
   }
 
   if (range === 'percent') {
-    const filteredStops = stops.filter((stop) => stop > 0 && stop < 100);
+    // rangeMin/rangeMax are percentages here, so compare stops directly against them.
+    const filteredStops = stops.filter(
+      (stop) =>
+        stop > 0 &&
+        stop < 100 &&
+        !(hasLowerBound && stop === rangeMin) &&
+        !(hasUpperBound && stop === rangeMax)
+    );
     return [
       ...firstRanges,
       ...filteredStops.map((step) => min + step * ((max - min) / 100)),
       ...lastRanges,
     ];
   }
-  const orderedStops = stops.filter((stop, i) => stop < max && stop > min);
+  const orderedStops = stops.filter(
+    (stop) =>
+      stop < max &&
+      stop > min &&
+      !(hasLowerBound && stop === correctMin) &&
+      !(hasUpperBound && stop === correctMax)
+  );
   return [...firstRanges, ...orderedStops, ...lastRanges];
 }
 
@@ -225,8 +246,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
       const nextValue = bands[valueIndex + 1];
 
       return overrideColors[
-        `${formatter?.convert(curValue) ?? curValue} - ${
-          formatter?.convert(nextValue) ?? nextValue
+        `${formatter?.convertToText(curValue) ?? curValue} - ${
+          formatter?.convertToText(nextValue) ?? nextValue
         }`
       ];
     },
@@ -404,8 +425,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
                 subtitle: labelMinor,
                 domain: [min, max],
                 ticks: ticks ? () => ticks : undefined,
-                valueFormatter: (tickValue) => tickFormatter.convert(tickValue),
-                tickFormatter: (tickValue) => tickFormatter.convert(tickValue),
+                valueFormatter: (tickValue) => tickFormatter.convertToText(tickValue),
+                tickFormatter: (tickValue) => tickFormatter.convertToText(tickValue),
               },
             ],
           ]}

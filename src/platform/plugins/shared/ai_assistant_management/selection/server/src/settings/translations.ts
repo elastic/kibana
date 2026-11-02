@@ -42,7 +42,7 @@ export const CHAT_EXPERIENCE_TITLE = i18n.translate(
 
 export const CLASSIC_AI_ASSISTANT = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueClassic',
-  { defaultMessage: 'Classic AI Assistant (default)' }
+  { defaultMessage: 'Classic AI Assistant' }
 );
 export const AI_AGENT = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueAgent',

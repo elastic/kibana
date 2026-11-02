@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-custom-branding-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-custom-branding-common'
+  title: '@kbn/core-custom-branding-common'
   description: Moon project for @kbn/core-custom-branding-common
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/core/packages/custom-branding/common
+  sourceRoot: src/core/packages/custom-branding/common
 dependsOn: []
 tags:
   - shared-common

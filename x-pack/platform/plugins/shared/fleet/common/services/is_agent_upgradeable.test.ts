@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Agent, AgentUpgradeDetails } from '../types/models/agent';
+import type { Agent, AgentUpgradeDetails, AgentUpgradeStateType } from '../types/models/agent';
 
 import {
   getRecentUpgradeInfoForAgent,
@@ -180,24 +180,27 @@ describe('Fleet - isAgentUpgradeable', () => {
       )
     ).toBe(false);
   });
-  it('returns true if agent reports upgradeable and has a failed upgrade status', () => {
-    expect(
-      isAgentUpgradeable(
-        getAgent({
-          version: '7.9.0',
-          upgradeable: true,
-          upgradeDetails: {
-            target_version: '8.0.0',
-            action_id: 'XXX',
-            state: 'UPG_FAILED',
-            metadata: {
-              error_msg: 'Upgrade timed out',
+  it.each<AgentUpgradeStateType>(['UPG_FAILED', 'UPG_ROLLBACK'])(
+    'returns true if agent reports upgradeable and has a %s upgrade status',
+    (state: AgentUpgradeStateType) => {
+      expect(
+        isAgentUpgradeable(
+          getAgent({
+            version: '7.9.0',
+            upgradeable: true,
+            upgradeDetails: {
+              target_version: '8.0.0',
+              action_id: 'XXX',
+              state,
+              metadata: {
+                error_msg: 'Upgrade timed out',
+              },
             },
-          },
-        })
-      )
-    ).toBe(true);
-  });
+          })
+        )
+      ).toBe(true);
+    }
+  );
   it('returns false if the agent reports upgradeable but was upgraded less than 10 minutes ago', () => {
     expect(
       isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 9 }))
@@ -484,7 +487,7 @@ describe('hasAgentBeenUpgradedRecently', () => {
 });
 
 describe('isAgentUpgrading', () => {
-  it('returns true if the agent has an upgrade status other than failed', () => {
+  it('returns true if the agent has an upgrade status other than failed, or rollback', () => {
     expect(
       isAgentUpgrading(
         getAgent({
@@ -499,23 +502,26 @@ describe('isAgentUpgrading', () => {
     ).toBe(true);
   });
 
-  it('returns false if the agent has a failed upgrade status', () => {
-    expect(
-      isAgentUpgrading(
-        getAgent({
-          version: '7.9.0',
-          upgradeDetails: {
-            target_version: '8.0.0',
-            action_id: 'XXX',
-            state: 'UPG_FAILED',
-            metadata: {
-              error_msg: 'Upgrade timed out',
+  it.each<AgentUpgradeStateType>(['UPG_FAILED', 'UPG_ROLLBACK'])(
+    'returns false if the agent has a %s upgrade status',
+    (state: AgentUpgradeStateType) => {
+      expect(
+        isAgentUpgrading(
+          getAgent({
+            version: '7.9.0',
+            upgradeDetails: {
+              target_version: '8.0.0',
+              action_id: 'XXX',
+              state,
+              metadata: {
+                error_msg: 'Upgrade timed out',
+              },
             },
-          },
-        })
-      )
-    ).toBe(false);
-  });
+          })
+        )
+      ).toBe(false);
+    }
+  );
 
   it('returns true if the agent is upgrading but has no upgrade details', () => {
     expect(

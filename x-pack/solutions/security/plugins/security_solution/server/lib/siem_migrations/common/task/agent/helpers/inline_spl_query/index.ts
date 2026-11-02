@@ -5,3 +5,4 @@
  * 2.0.
  */
 export * from './inline_spl_query';
+export * from './telemetry';

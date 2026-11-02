@@ -12,6 +12,7 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import type {
   LensAppState,
   LensAppServices,
@@ -33,6 +34,7 @@ import {
   useLensDispatch,
   selectSavedObjectFormat,
   updateIndexPatterns,
+  updateVisualizationState,
   selectActiveDatasourceId,
   selectFramePublicAPI,
   selectIsManaged,
@@ -46,9 +48,12 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
+  getTelemetrySource,
+  isSaveAndReturn,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
   useNavigateBackToApp,
@@ -57,10 +62,9 @@ import {
 import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 export type SaveProps = Simplify<
-  Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  Omit<OnSaveProps, 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;
@@ -75,7 +79,6 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
-  setHeaderActionMenu,
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
@@ -152,19 +155,19 @@ export function App({
   }
 
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
-  const savedObjectId = initialInput?.savedObjectId;
+  const savedObjectId = initialInput?.ref_id;
 
   const isFromLegacyEditorEmbeddable = isLegacyEditorEmbeddable(initialContext);
   const legacyEditorAppName =
-    initialContext && 'originatingApp' in initialContext
+    initialContext && 'legacyEditorOriginatingApp' in initialContext
+      ? initialContext.legacyEditorOriginatingApp
+      : initialContext && 'originatingApp' in initialContext
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
-    initialContext && 'vizEditorOriginatingAppUrl' in initialContext
-      ? initialContext.vizEditorOriginatingAppUrl
+    initialContext && 'visEditorOriginatingAppUrl' in initialContext
+      ? initialContext.visEditorOriginatingAppUrl
       : undefined;
-  const initialContextIsEmbedded = Boolean(legacyEditorAppName);
-
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
   }, [setIndicateNoData]);
@@ -262,19 +265,26 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
+    if (savedObjectId && !persistedDoc) {
+      return;
+    }
     const isByValueMode = getIsByValueMode();
     const currentDocTitle = getCurrentTitle(persistedDoc, isByValueMode, initialContext);
     setBreadcrumbsTitle(
       { application, chrome, serverless },
       {
-        isByValueMode,
         currentDocTitle,
         redirectToOrigin,
-        isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
+        incomingBreadcrumbs:
+          incomingState?.breadcrumbs ??
+          (initialContext && 'breadcrumbs' in initialContext
+            ? initialContext.breadcrumbs
+            : undefined),
         originatingAppName: getOriginatingAppName(),
       }
     );
   }, [
+    savedObjectId,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -286,6 +296,8 @@ export function App({
     legacyEditorAppName,
     serverless,
     initialContext,
+    incomingState?.originatingApp,
+    incomingState?.breadcrumbs,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -297,6 +309,31 @@ export function App({
   const runSave = useCallback(
     async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+
+      if (visualization.activeId === 'lnsXY') {
+        try {
+          const updatedVisState = await saveUpdatedLinkedAnnotationsToLibrary(
+            visualization.state,
+            lensAppServices.eventAnnotationService
+          );
+          if (updatedVisState !== visualization.state) {
+            dispatch(
+              updateVisualizationState({
+                visualizationId: visualization.activeId,
+                newState: updatedVisState,
+              })
+            );
+          }
+        } catch (err) {
+          notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+            title: i18n.translate('xpack.lens.app.saveLinkedAnnotationsError', {
+              defaultMessage: 'Failed to save linked annotation changes',
+            }),
+          });
+          return;
+        }
+      }
+
       const prevVisState =
         persistedDoc?.visualizationType === visualization.activeId
           ? persistedDoc?.state.visualization
@@ -320,13 +357,22 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: incomingState?.originatingApp,
+            originatingApp: isSaveAndReturn(incomingState)
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
           },
           saveProps,
           options
         );
+        // Track creation events for new visualizations
+        if (!initialInput?.ref_id || saveProps.newCopyOnSave) {
+          trackCreateUiCounterEvents(
+            isTextBasedAttributes(currentDoc) ? 'esql' : 'dsl',
+            getTelemetrySource(incomingState, saveProps.newCopyOnSave)
+          );
+        }
         if (newState) {
           dispatchSetState(newState);
           setIsSaveModalVisible(false);
@@ -350,18 +396,20 @@ export function App({
       onAppLeave,
       redirectTo,
       switchDatasource,
-      incomingState?.originatingApp,
+      incomingState,
+      initialContext?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
+      notifications.toasts,
     ]
   );
 
   const {
-    shouldShowGoBackToVizEditorModal,
+    shouldShowGoBackToVisEditorModal,
     goBackToOriginatingApp,
-    navigateToVizEditor,
-    closeGoBackToVizEditorModal,
+    navigateToVisEditor,
+    closeGoBackToVisEditorModal,
   } = useNavigateBackToApp({
     application,
     onAppLeave,
@@ -447,12 +495,12 @@ export function App({
       >
         <LensTopNavMenu
           initialInput={initialInput}
+          incomingState={incomingState}
           redirectToOrigin={redirectToOrigin}
           getIsByValueMode={getIsByValueMode}
           onAppLeave={onAppLeave}
           runSave={runSave}
           setIsSaveModalVisible={setIsSaveModalVisible}
-          setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
@@ -460,7 +508,6 @@ export function App({
           isCurrentStateDirty={!isLensEqualWrapper(persistedDoc)}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
-          initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
@@ -484,7 +531,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isLinkedToOriginatingApp
+            isSaveAndReturn(incomingState) || legacyEditorAppName
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }
@@ -513,7 +560,7 @@ export function App({
           }
         />
       )}
-      {shouldShowGoBackToVizEditorModal && (
+      {shouldShowGoBackToVisEditorModal && (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
@@ -521,8 +568,8 @@ export function App({
           })}
           titleProps={{ id: confirmModalTitleId }}
           maxWidth={600}
-          onCancel={closeGoBackToVizEditorModal}
-          onConfirm={navigateToVizEditor}
+          onCancel={closeGoBackToVisEditorModal}
+          onConfirm={navigateToVisEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
             defaultMessage: 'Cancel',
           })}

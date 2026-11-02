@@ -16,28 +16,31 @@ import { UserPanelKey } from '../../shared/constants';
 
 interface UseNavigateToUserDetailsParams {
   userName: string;
-  email?: string[];
+  entityId?: string;
   scopeId: string;
   contextID: string;
   isRiskScoreExist: boolean;
+  identityFields: Record<string, string>;
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
   isPreviewMode: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToUserDetails = ({
   userName,
-  email,
+  identityFields,
+  entityId,
   scopeId,
   contextID,
   isRiskScoreExist,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
   isPreviewMode,
+  entityStoreEntityId,
 }: UseNavigateToUserDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-
   return useCallback(
     (path: EntityDetailsPath) => {
       telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
@@ -47,15 +50,15 @@ export const useNavigateToUserDetails = ({
       const left = {
         id: UserDetailsPanelKey,
         params: {
+          userName,
+          identityFields,
           isRiskScoreExist,
           scopeId,
-          user: {
-            name: userName,
-            email,
-          },
           path,
+          entityId,
           hasMisconfigurationFindings,
           hasNonClosedAlerts,
+          entityStoreEntityId,
         },
       };
 
@@ -64,6 +67,8 @@ export const useNavigateToUserDetails = ({
         params: {
           contextID,
           userName,
+          identityFields,
+          entityId,
           scopeId,
         },
       };
@@ -77,15 +82,17 @@ export const useNavigateToUserDetails = ({
     [
       telemetry,
       openLeftPanel,
+      identityFields,
       isRiskScoreExist,
       scopeId,
-      userName,
-      email,
       hasMisconfigurationFindings,
       hasNonClosedAlerts,
       isPreviewMode,
       openFlyout,
       contextID,
+      userName,
+      entityId,
+      entityStoreEntityId,
     ]
   );
 };

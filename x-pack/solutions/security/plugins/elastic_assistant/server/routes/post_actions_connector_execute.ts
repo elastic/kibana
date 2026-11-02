@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import { withTimeout } from '@kbn/std';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
@@ -25,7 +26,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { getPrompt } from '../lib/prompt';
+import { getPrompt, getInferenceConnectorById } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
@@ -138,9 +139,11 @@ export const postActionsConnectorExecuteRoute = (
               inferenceId: defaultInferenceEndpoints.ELSER,
             })) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
-          const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          const connector = connectors.length > 0 ? connectors[0] : undefined;
-          const isOssModel = isOpenSourceModel(connector);
+          const inferenceConnector = await getInferenceConnectorById(
+            inference,
+            request
+          )(connectorId).catch(() => undefined);
+          const isOssModel = isOpenSourceModel(inferenceConnector);
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient({
@@ -171,6 +174,7 @@ export const postActionsConnectorExecuteRoute = (
 
           onLlmResponse = async ({
             content,
+            refusal,
             traceData,
             isError,
             interruptValue,
@@ -185,6 +189,7 @@ export const postActionsConnectorExecuteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
@@ -204,7 +209,7 @@ export const postActionsConnectorExecuteRoute = (
           }
           if (promptIds) {
             const additionalSystemPrompt = await getPrompt({
-              actionsClient,
+              getInferenceConnectorById: getInferenceConnectorById(inference, request),
               connectorId,
               // promptIds is promptId and promptGroupId
               ...promptIds,
@@ -217,16 +222,8 @@ export const postActionsConnectorExecuteRoute = (
                 : additionalSystemPrompt;
           }
 
-          const timeout = new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(
-                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
-              );
-            }, config?.responseTimeout as number);
-          }) as unknown as IKibanaResponse;
-
-          return await Promise.race([
-            langChainExecute({
+          const outcome = await withTimeout({
+            promise: langChainExecute({
               abortSignal,
               isStream: request.body.subAction !== 'invokeAI',
               actionsClient,
@@ -252,8 +249,12 @@ export const postActionsConnectorExecuteRoute = (
               systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
-            timeout,
-          ]);
+            timeoutMs: config?.responseTimeout as number,
+          });
+          if (outcome.timedout) {
+            throw new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout');
+          }
+          return outcome.value;
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

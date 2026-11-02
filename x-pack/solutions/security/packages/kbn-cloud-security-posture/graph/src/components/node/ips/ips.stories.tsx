@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider } from '@emotion/react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { Ips as IpsComponent, useIpPopover, type IpsProps } from './ips';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
@@ -38,7 +37,7 @@ const IpsStoryComponent: React.FC<IpsProps> = () => {
   const singleIpPopover = useIpPopover(singleIpClickable);
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       {/* Single IP without click handler - renders as text */}
       <div>
         <EuiText>{'Single IP (non-clickable):'}</EuiText>
@@ -66,7 +65,7 @@ const IpsStoryComponent: React.FC<IpsProps> = () => {
 
       <singleIpPopover.PopoverComponent />
       <multipleIpsPopover.PopoverComponent />
-    </ThemeProvider>
+    </>
   );
 };
 

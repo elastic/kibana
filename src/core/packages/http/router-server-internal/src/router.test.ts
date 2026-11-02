@@ -157,8 +157,8 @@ describe('Router', () => {
       const [{ handler }] = router.getRoutes();
       await handler(
         createRequestMock({
-          params: { foo: 1 },
-          query: { foo: 1 },
+          params: { foo: '1' },
+          query: { foo: '1' },
           payload: { foo: 1 },
         }),
         mockResponseToolkit
@@ -293,8 +293,8 @@ describe('Router', () => {
     for (let i = 0; i < 10; i++) {
       await handler(
         createRequestMock({
-          params: { foo: 1 },
-          query: { foo: 1 },
+          params: { foo: '1' },
+          query: { foo: '1' },
           payload: { foo: 1 },
         }),
         mockResponseToolkit
@@ -328,7 +328,13 @@ describe('Router', () => {
 
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
-      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      // Use dev mode to test eager schema construction and immediate error detection
+      const devOptions = getEnvOptions();
+      devOptions.cliArgs.dev = true;
+      const devEnv = createTestEnv({ envOptions: devOptions });
+      const devRouterOptions: RouterOptions = { ...routerOptions, env: devEnv };
+
+      const router = new Router('', logger, enhanceWithContext, devRouterOptions);
       expect(
         // we use 'any' because validate is a required field
         () => router.get({ path: '/' } as any, (context, req, res) => res.ok({}))
@@ -337,7 +343,13 @@ describe('Router', () => {
       );
     });
     it('throws if validation for a route is declared wrong', () => {
-      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      // Use dev mode to test eager schema construction and immediate error detection
+      const devOptions = getEnvOptions();
+      devOptions.cliArgs.dev = true;
+      const devEnv = createTestEnv({ envOptions: devOptions });
+      const devRouterOptions: RouterOptions = { ...routerOptions, env: devEnv };
+
+      const router = new Router('', logger, enhanceWithContext, devRouterOptions);
       expect(() =>
         router.get(
           // we use 'any' because validate requires valid Type or function usage

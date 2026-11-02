@@ -34,7 +34,7 @@ import type {
   TermsIndexPatternColumn,
   IndexPatternField,
 } from '@kbn/lens-common';
-import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
+import { LENS_DOCUMENT_FIELD_NAME, toEsqlRegistry, TERMS_ID } from '@kbn/lens-common';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import { ValuesInput } from './values_input';
@@ -44,9 +44,13 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
+import { getFirstValue } from '../../../pure_utils';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
+  getOrderAggErrorMessages,
+  getOrderAggLastValueSortFieldStatus,
+  isCustomLastValueOrderAgg,
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
@@ -141,6 +145,7 @@ export const termsOperation: OperationDefinition<
   priority: 3, // Higher than any metric
   input: 'field',
   scale: () => 'ordinal',
+  toESQL: toEsqlRegistry[TERMS_ID],
   getCurrentFields: (targetColumn) => {
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
   },
@@ -215,6 +220,7 @@ export const termsOperation: OperationDefinition<
       ...getInvalidFieldMessage(layer, columnId, indexPattern),
       ...getDisallowedTermsMessage(layer, columnId, indexPattern),
       ...getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern),
+      ...getOrderAggErrorMessages(layer, columnId, indexPattern),
     ];
   },
   getNonTransferableFields: (column, newIndexPattern) => {
@@ -234,10 +240,6 @@ export const termsOperation: OperationDefinition<
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
 
-    const previousBucketsLength = Object.values(layer.columns).filter(
-      (col) => col && col.isBucketed
-    ).length;
-
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -245,7 +247,7 @@ export const termsOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
+        size: columnParams?.size ?? DEFAULT_SIZE,
         orderBy:
           columnParams?.orderBy ??
           (existingMetricColumn
@@ -330,12 +332,28 @@ export const termsOperation: OperationDefinition<
       orderBy = 'custom';
       const def = operationDefinitionMap?.[orderAggColumn?.operationType];
       if (def && 'toEsAggsFn' in def) {
+        let resolvedOrderAggColumn = orderAggColumn;
+        if (isCustomLastValueOrderAgg(column)) {
+          const status = getOrderAggLastValueSortFieldStatus(column, _indexPattern);
+          const { orderAgg: lastValueOrderAgg } = column.params;
+          const resolvedOrderAgg = {
+            ...lastValueOrderAgg,
+            params: {
+              ...lastValueOrderAgg.params,
+              sortField:
+                status.status === 'missing-with-default'
+                  ? status.defaultField
+                  : lastValueOrderAgg.params?.sortField ?? '',
+            },
+          };
+          resolvedOrderAggColumn = resolvedOrderAgg;
+        }
         orderAgg = [
           {
             type: 'expression' as const,
             chain: [
               def.toEsAggsFn(
-                orderAggColumn,
+                resolvedOrderAggColumn,
                 `${columnId}-orderAgg`,
                 _indexPattern,
                 layer,
@@ -497,20 +515,21 @@ export const termsOperation: OperationDefinition<
           const possibleOperations = operationSupportMatrix.operationByField.get(sourcefield);
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
-            const newFieldOp = possibleOperations?.values().next().value;
-            return updateLayer(
-              insertOrReplaceColumn({
-                layer,
-                columnId,
-                indexPattern,
-                // @ts-expect-error upgrade typescript v5.9.3
-                op: newFieldOp,
-                field: mainField,
-                visualizationGroups: dimensionGroups,
-                targetGroup: groupId,
-                incompleteParams,
-              })
-            );
+            const newFieldOp = getFirstValue(possibleOperations);
+            if (newFieldOp) {
+              return updateLayer(
+                insertOrReplaceColumn({
+                  layer,
+                  columnId,
+                  indexPattern,
+                  op: newFieldOp,
+                  field: mainField,
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: groupId,
+                  incompleteParams,
+                })
+              );
+            }
           }
         }
         updateLayer({
@@ -556,7 +575,7 @@ export const termsOperation: OperationDefinition<
     const currentColumn = layer.columns[columnId];
 
     const fieldErrorMessage = getErrorMessage(
-      selectedColumn,
+      Boolean(props.incompleteField ?? selectedColumn?.sourceField),
       Boolean(props.incompleteOperation),
       'field',
       props.currentFieldIsInvalid
@@ -658,12 +677,27 @@ The top values of a specified field ranked by the chosen metric.
       };
     }
 
+    const getEffectiveLabel = (column: GenericIndexPatternColumn): string => {
+      if (column.customLabel) {
+        return column.label;
+      }
+      return (
+        (column.label ||
+          operationDefinitionMap[column.operationType]?.getDefaultLabel(
+            column,
+            layer.columns,
+            indexPattern
+          )) ??
+        ''
+      );
+    };
+
     const orderOptions = Object.entries(layer.columns)
       .filter(([sortId]) => isSortableByColumn(layer, sortId))
       .map(([sortId, column]) => {
         return {
           value: toValue({ type: 'column', columnId: sortId }),
-          text: column.label,
+          text: getEffectiveLabel(column),
         };
       });
     orderOptions.push({

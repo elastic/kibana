@@ -6,9 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { dump } from 'js-yaml';
 
 import { schema } from '@kbn/config-schema';
+
+import yaml from 'yaml';
 
 import type { FleetRequestHandlerContext } from '../..';
 
@@ -27,6 +28,7 @@ import {
 
 import { ListResponseSchema } from '../schema/utils';
 import { agentPolicyService } from '../../services';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 
 import {
@@ -676,7 +678,7 @@ describe('schema validation', () => {
   });
 
   it('download full agent policy should return valid response', async () => {
-    const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const expectedResponse = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     (agentPolicyService.getFullAgentPolicy as jest.Mock).mockResolvedValue(fullAgentPolicy);
     await downloadFullAgentPolicy(
       context,

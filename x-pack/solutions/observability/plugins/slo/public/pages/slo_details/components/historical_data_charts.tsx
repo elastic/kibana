@@ -45,24 +45,29 @@ export function HistoricalDataCharts({
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
+  const timeRange = range
+    ? { from: range.from.toISOString(), to: range.to.toISOString() }
+    : undefined;
+
   return (
     <>
       <EuiFlexItem>
         <SliChartPanel
+          slo={slo}
           data={historicalSliData}
           isLoading={isLoading}
-          slo={slo}
-          onBrushed={onBrushed}
+          timeRange={timeRange}
           hideHeaderDurationLabel={hideHeaderDurationLabel}
+          onBrushed={onBrushed}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <ErrorBudgetChartPanel
-          data={errorBudgetBurnDownData}
-          isLoading={isLoading}
           slo={slo}
-          onBrushed={onBrushed}
+          isLoading={isLoading}
+          data={errorBudgetBurnDownData}
           hideHeaderDurationLabel={hideHeaderDurationLabel}
+          onBrushed={onBrushed}
         />
       </EuiFlexItem>
     </>

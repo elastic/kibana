@@ -11,8 +11,10 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ClassicNavItem, ClassicNavItemDeepLink } from './types';
 import { stripTrailingSlash } from './utils';
+import { getSolutionNavFooter } from './solution_navigation_footer';
 
 type DeepLinksMap = Record<string, ChromeNavLink | undefined>;
 type SolutionNavItems = SolutionNavProps['items'];
@@ -20,7 +22,8 @@ type SolutionNavItems = SolutionNavProps['items'];
 export const classicNavigationFactory = (
   classicItems: ClassicNavItem[],
   core: CoreStart,
-  history: ScopedHistory<unknown>
+  history: ScopedHistory<unknown>,
+  spaces?: SpacesPluginStart
 ): SolutionNavProps | undefined => {
   const navLinks = core.chrome.navLinks.getAll();
   const deepLinks = navLinks.reduce((links: DeepLinksMap, link: ChromeNavLink) => {
@@ -36,6 +39,11 @@ export const classicNavigationFactory = (
     deepLinks,
     currentLocation
   );
+  const footer = getSolutionNavFooter({
+    application: core.application,
+    notifications: core.notifications,
+    spaces,
+  });
 
   return {
     items,
@@ -43,6 +51,7 @@ export const classicNavigationFactory = (
     name: i18n.translate('xpack.searchNavigation.classicNav.name', {
       defaultMessage: 'Elasticsearch',
     }),
+    footer,
   };
 };
 

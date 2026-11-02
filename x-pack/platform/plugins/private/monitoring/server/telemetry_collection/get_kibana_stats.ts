@@ -99,10 +99,8 @@ export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>
       dashboard,
       visualization,
       search,
-      /* eslint-disable @typescript-eslint/naming-convention */
       index_pattern,
       graph_workspace,
-      /* eslint-enable @typescript-eslint/naming-convention */
       xpack,
       ...pluginsTop
     } = currUsage;

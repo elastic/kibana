@@ -21,7 +21,7 @@ export const ReadonlyBadge = ({ featureId, tooltip }: ReadonlyBadgeProps) => {
     save
       ? undefined
       : {
-          iconType: 'glasses',
+          iconType: 'readOnly',
           text: i18n.translate('xpack.security.management.readonlyBadge.text', {
             defaultMessage: 'Read only',
           }),

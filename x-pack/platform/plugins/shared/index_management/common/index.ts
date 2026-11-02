@@ -17,6 +17,7 @@ export type {
   IndexSettings,
   IndexSettingsResponse,
   Mappings,
+  MappingsResponse,
   TemplateSerialized,
   TemplateDeserialized,
   TemplateType,
@@ -28,6 +29,7 @@ export type {
   DataStream,
   DataStreamIndex,
   DataRetention,
+  EsDataRetention,
   IndexMode,
   ComponentTemplateSerialized,
   ComponentTemplateDeserialized,
@@ -38,4 +40,5 @@ export type {
   FieldItem,
   IndexWithFields,
   FieldFromIndicesRequest,
+  SnapshotRepositoriesInfo,
 } from './types';

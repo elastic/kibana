@@ -11,7 +11,7 @@ import { IndexImportManageDataSource } from './index_import_manage_data_source';
 import { TestProviders } from '../../../common/mock';
 
 const mockUseFetchMonitoredIndices = jest.fn().mockImplementation(() => ({
-  data: [],
+  data: { sources: [] },
   isFetching: false,
   refetch: jest.fn(),
 }));
@@ -51,7 +51,7 @@ describe('IndexImportManageDataSource', () => {
 
   it('shows loading spinner when isFetching is true', () => {
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
-      data: [],
+      data: { sources: [] },
       isFetching: true,
       refetch: jest.fn(),
     }));
@@ -64,7 +64,7 @@ describe('IndexImportManageDataSource', () => {
 
   it('shows number of indices when indices exist', () => {
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
-      data: [{ indexPattern: 'foo,bar,baz' }],
+      data: { sources: [{ indexPattern: 'foo,bar,baz' }] },
       isFetching: false,
       refetch: jest.fn(),
     }));
@@ -89,7 +89,7 @@ describe('IndexImportManageDataSource', () => {
     const refetch = jest.fn();
 
     mockUseFetchMonitoredIndices.mockImplementation(() => ({
-      data: [{ indexPattern: 'foo,bar,baz' }],
+      data: { sources: [{ indexPattern: 'foo,bar,baz' }] },
       isFetching: false,
       refetch,
     }));

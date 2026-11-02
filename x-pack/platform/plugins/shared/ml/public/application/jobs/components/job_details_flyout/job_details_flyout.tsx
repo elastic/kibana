@@ -21,12 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlApi } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
 import { loadFullJob } from '../../jobs_list/components/utils';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useJobInfoFlyouts } from './job_details_flyout_context';
 import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 

@@ -9,7 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
-import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common';
 import { aiValueLinks } from '../../reports/links';
 import { configurationsLinks, getConfigurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
@@ -17,14 +17,14 @@ import { links as assetInventoryLinks } from '../../asset_inventory/links';
 import { siemReadinessLinks } from '../../siem_readiness/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
-import { alertDetectionsLinks, alertSummaryLink, alertsLink } from '../../detections/links';
+import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detections/links';
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { links as casesLinks } from '../../cases/links';
-import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
+import { getManagementFilteredLinks, links as managementLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
-import { onboardingLinks } from '../../onboarding/links';
+import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
@@ -53,24 +53,41 @@ export const appLinks: AppLinkItems = Object.freeze([
 
 export const getFilteredLinks = async (
   core: CoreStart,
-  plugins: StartPlugins
+  plugins: StartPlugins,
+  experimentalFeatures: ExperimentalFeatures
 ): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+  const managementFilteredLinks = await getManagementFilteredLinks(
+    core,
+    plugins,
+    experimentalFeatures
+  );
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    AIChatExperience.Agent
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
+  const { enableAlertsAndAttacksAlignment } = experimentalFeatures;
 
   return Object.freeze([
     dashboardsLinks,
-    core.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
-      ? alertDetectionsLinks
-      : alertsLink,
+    enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
-    attackDiscoveryLinks,
+    // When the new Attacks page is enabled, we hide the legacy Attack Discovery link from the
+    // side navigation, the global navigation, and global search. However, we keep it in the
+    // appLinks array so that SecurityRoutePageWrapper still considers the route
+    // authorized/available, allowing the redirect logic in attack_discovery/routes.tsx to run.
+    ...(enableAlertsAndAttacksAlignment
+      ? [
+          {
+            ...attackDiscoveryLinks,
+            sideNavDisabled: true,
+            globalNavPosition: undefined,
+            globalSearchDisabled: true,
+          },
+        ]
+      : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,
@@ -81,9 +98,7 @@ export const getFilteredLinks = async (
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,
-    onboardingLinks,
+    launchPadLinks,
     managementFilteredLinks,
-    siemReadinessLinks,
-    aiValueLinks,
   ]);
 };

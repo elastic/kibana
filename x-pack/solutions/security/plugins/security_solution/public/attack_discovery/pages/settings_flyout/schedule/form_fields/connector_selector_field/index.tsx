@@ -38,6 +38,7 @@ export const ConnectorSelectorField: React.FC<Props> = React.memo(
           onConnectorIdSelected={onConnectorIdSelected}
           selectedConnectorId={connectorId}
           explicitConnectorSelection={true}
+          loadConnectorFeatureId="attack_discovery"
         />
       </EuiFormRow>
     );

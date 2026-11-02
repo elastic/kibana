@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import type { ThunkDispatch } from 'redux-thunk';
-import type { AnyAction } from 'redux';
+import { connect } from 'react-redux-v7';
+import type { ThunkDispatch } from 'redux-thunk-v2';
+import type { AnyAction } from 'redux-v4';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { MapApp } from './map_app';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
@@ -47,12 +47,14 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       query,
       timeFilters,
       searchSessionId,
+      projectRouting,
     }: {
       filters?: Filter[];
       query?: Query;
       timeFilters?: TimeRange;
       forceRefresh?: boolean;
       searchSessionId?: string;
+      projectRouting?: ProjectRouting;
     }) => {
       dispatch(
         setQuery({
@@ -61,6 +63,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
           timeFilters,
           forceRefresh,
           searchSessionId,
+          projectRouting,
         })
       );
     },

@@ -191,7 +191,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `error validating connector type secrets: Field \"encrypted\": Required`,
+                message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at encrypted`,
               });
               break;
             default:

@@ -9,17 +9,19 @@
 
 import type React from 'react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 export interface LayoutServiceStartDeps {
   application: InternalApplicationStart;
-  chrome: InternalChromeStart;
   overlays: OverlayStart;
-}
-
-export interface LayoutServiceParams {
-  debug?: boolean;
+  http: InternalHttpStart;
+  docLinks: DocLinksStart;
+  customBranding: CustomBrandingStart;
+  notifications: NotificationsStart;
 }
 
 /**

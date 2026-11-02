@@ -6,4 +6,9 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/test').runJest();
+
+if (require('@kbn/dev-validation-runner').hasValidationRunFlags(process.argv.slice(2))) {
+  require('@kbn/jest').runJestContract();
+} else {
+  require('@kbn/jest').runJest();
+}

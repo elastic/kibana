@@ -1,4 +1,5 @@
 summary: The get data view API returns a JSON object that contains information about the data view.
+description: A complete data view object including all fields, runtime fields, and metadata.
 value:
   {
     "data_view": {

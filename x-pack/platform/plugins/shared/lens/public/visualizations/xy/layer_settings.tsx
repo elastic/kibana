@@ -9,7 +9,7 @@ import React from 'react';
 import type { VisualizationLayerSettingsProps } from '@kbn/lens-common';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
-import type { XYState } from './types';
+import type { XYVisualizationState } from './types';
 import { isAnnotationsLayer } from './visualization_helpers';
 
 export function LayerSettings({
@@ -17,7 +17,7 @@ export function LayerSettings({
   setState,
   section,
   layerId,
-}: VisualizationLayerSettingsProps<XYState> & { section: 'data' | 'appearance' }) {
+}: VisualizationLayerSettingsProps<XYVisualizationState> & { section: 'data' | 'appearance' }) {
   if (section === 'appearance') {
     return null;
   }

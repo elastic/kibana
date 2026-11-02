@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { test, testData } from '../../fixtures';
 
-test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
+test.describe('Storage explorer page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
 
   test.beforeEach(async ({ browserAuth }) => {
@@ -21,9 +24,29 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
     await expect(
       profilingStorageExplorerPage.page
-        .getByTestId('profilingPageTemplate')
+        .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
         .getByText('Storage explorer')
     ).toBeVisible();
+  });
+
+  test('remembers that the OpenTelemetry callout was dismissed', async ({
+    page,
+    pageObjects: { profilingStorageExplorerPage },
+  }) => {
+    await test.step('dismiss the callout', async () => {
+      // The callout shows because the global setup loads OTel profiling data
+      await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
+      await expect(profilingStorageExplorerPage.otelNotSupportedCallout).toBeVisible();
+
+      await profilingStorageExplorerPage.dismissOtelNotSupportedCallout();
+      await expect(profilingStorageExplorerPage.otelNotSupportedCallout).toBeHidden();
+    });
+
+    await test.step('reload the page', async () => {
+      await page.reload();
+      await expect(page.getByTestId('storageExplorer_hostBreakdownTab')).toBeVisible();
+      await expect(profilingStorageExplorerPage.otelNotSupportedCallout).toBeHidden();
+    });
   });
 
   test('Host agent breakdown tab displays host agent details', async ({
@@ -44,7 +67,7 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
       'href',
       `/app/profiling/flamegraphs/flamegraph?kuery=host.id%3A%20%228457605156473051743%22&rangeFrom=${encodeURIComponent(
         rangeFrom
-      )}&rangeTo=${encodeURIComponent(rangeTo)}`
+      )}&rangeTo=${encodeURIComponent(rangeTo)}&schema=${ProfilingSchema.ECS}`
     );
   });
 
@@ -54,13 +77,14 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo, 'host.id : "1234"');
     await expect(
       profilingStorageExplorerPage.page
-        .getByTestId('profilingPageTemplate')
+        .getByTestId(APP_HEADER_TEST_SUBJECTS.title)
         .getByText('Storage explorer')
     ).toBeVisible();
   });
 
   test('Data breakdown tab displays correct values per index', async ({
     pageObjects: { profilingStorageExplorerPage },
+    config,
   }) => {
     await profilingStorageExplorerPage.gotoWithTimeRange(rangeFrom, rangeTo);
 
@@ -75,6 +99,14 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
       { indexName: 'events', docSize: '3,242' },
     ];
 
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    const expectedData = config.isCloud
+      ? indexData.map((data) => ({
+          ...data,
+          docSize: (parseInt(data.docSize.replace(/,/g, ''), 10) * 2).toLocaleString(),
+        }))
+      : indexData;
+
     // Cloud ECH data
     // TODO check why it is different: https://github.com/elastic/kibana/issues/241822
     // const indexData = [
@@ -84,7 +116,7 @@ test.describe('Storage explorer page', { tag: ['@ess'] }, () => {
     //   { indexName: 'metrics', docSize: '0' },
     //   { indexName: 'events', docSize: '6,484' },
     // ];
-    for (const { indexName, docSize } of indexData) {
+    for (const { indexName, docSize } of expectedData) {
       await expect(
         profilingStorageExplorerPage.page.getByTestId(`${indexName}_docSize`)
       ).toContainText(docSize);

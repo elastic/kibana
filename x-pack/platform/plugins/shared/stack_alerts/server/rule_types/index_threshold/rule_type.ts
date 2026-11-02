@@ -16,7 +16,10 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { type Params, ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
+import {
+  type IndexThresholdRuleParams,
+  IndexThresholdRuleParamsSchema,
+} from '@kbn/response-ops-rule-params/index_threshold';
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { getComparatorScript, getHumanReadableComparator } from '../../../common';
@@ -30,7 +33,16 @@ export const ActionGroupId = 'threshold met';
 
 export function getRuleType(
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId, never, StackAlertType> {
+): RuleType<
+  IndexThresholdRuleParams,
+  never,
+  {},
+  {},
+  ActionContext,
+  typeof ActionGroupId,
+  never,
+  StackAlertType
+> {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -177,12 +189,12 @@ export function getRuleType(
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
-      params: ParamsSchema,
+      params: IndexThresholdRuleParamsSchema,
     },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: ParamsSchema,
+        schema: IndexThresholdRuleParamsSchema,
       },
     },
     actionVariables: {
@@ -221,7 +233,7 @@ export function getRuleType(
 
   async function executor(
     options: RuleExecutorOptions<
-      Params,
+      IndexThresholdRuleParams,
       {},
       {},
       ActionContext,

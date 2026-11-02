@@ -8,5 +8,35 @@
  */
 
 import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
+import {
+  getAffectedMoonProjectsFromChangedFiles,
+  getAffectedMoonJestTargets,
+  getMoonExecutablePath,
+  normalizeRepoRelativePath,
+  resolveMoonAffectedBase,
+  ROOT_MOON_PROJECT_ID,
+  summarizeAffectedMoonProjects,
+} from './query_projects';
+import { getMoonChangedFiles } from './query_changed_files';
+import { runMoonTestConfigsCli, selectMoonTestConfigs } from './test_config_selection';
 
-export { regenerateMoonProjects };
+export {
+  regenerateMoonProjects,
+  getAffectedMoonProjectsFromChangedFiles,
+  getAffectedMoonJestTargets,
+  getMoonChangedFiles,
+  getMoonExecutablePath,
+  normalizeRepoRelativePath,
+  resolveMoonAffectedBase,
+  ROOT_MOON_PROJECT_ID,
+  summarizeAffectedMoonProjects,
+  selectMoonTestConfigs,
+  runMoonTestConfigsCli,
+};
+export type { MoonTestKind, MoonTestConfigProject } from './test_config_selection';
+export type {
+  MoonProject,
+  MoonDownstreamMode,
+  MoonAffectedBase,
+  MoonAffectedProjectSummary,
+} from './query_projects';

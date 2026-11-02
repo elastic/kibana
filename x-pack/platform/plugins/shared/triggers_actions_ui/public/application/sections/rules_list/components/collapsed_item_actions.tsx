@@ -12,12 +12,13 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
-  EuiPopover,
   EuiContextMenu,
-  EuiPanel,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -319,7 +320,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           title: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="bellSlash" />
+                <EuiIcon type="bellSlash" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {i18n.translate(
@@ -350,13 +351,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     item.isEditable && (
       <>
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.popoverAriaLabel',
+            { defaultMessage: 'Rule actions' }
+          )}
           button={
-            <EuiButtonIcon
-              data-test-subj="selectActionButton"
-              data-testid="selectActionButton"
-              iconType="boxesHorizontal"
-              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
                 {
                   defaultMessage: 'Actions for "{name}" column',
@@ -365,7 +366,24 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
                   },
                 }
               )}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="selectActionButton"
+                data-testid="selectActionButton"
+                iconType="boxesVertical"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
+                  {
+                    defaultMessage: 'Actions for "{name}" column',
+                    values: {
+                      name: item.name,
+                    },
+                  }
+                )}
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={() => setIsPopoverOpen(false)}

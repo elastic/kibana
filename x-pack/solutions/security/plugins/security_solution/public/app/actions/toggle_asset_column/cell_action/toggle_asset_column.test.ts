@@ -66,7 +66,7 @@ describe('createToggleUserAssetFieldCellActionFactory', () => {
   });
 
   it('should return icon type', () => {
-    expect(toggleColumnAction.getIconType(context)).toEqual('listAdd');
+    expect(toggleColumnAction.getIconType(context)).toEqual('indexOpen');
   });
 
   describe('isCompatible', () => {

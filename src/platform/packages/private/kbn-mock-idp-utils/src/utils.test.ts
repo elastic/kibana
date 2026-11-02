@@ -23,17 +23,28 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { decodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { removePrefixEssuDev } from './jwt-codecs/encoder-prefix';
-import { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
+import {
+  createMockIdpMetadata,
+  createSAMLResponse,
+  createUiamOAuthAccessToken,
+  ensureSAMLRoleMapping,
+  getSAMLRequestId,
+} from './utils';
+
+jest.mock('./cosmos_db_seeder', () => ({
+  seedTestApiKey: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+  seedTestUser: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+}));
 
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
     it('should generate valid XML metadata with correct entity ID', async () => {
-      const kibanaUrl = 'http://localhost:5601';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
+      const metadata = await createMockIdpMetadata();
 
       expect(metadata).toContain('<?xml version="1.0" encoding="UTF-8"?>');
       expect(metadata).toContain(`entityID="${MOCK_IDP_ENTITY_ID}"`);
@@ -42,26 +53,15 @@ describe('mock-idp-utils', () => {
     });
 
     it('should include correct SSO service locations', async () => {
-      const kibanaUrl = 'http://localhost:5601';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
+      const metadata = await createMockIdpMetadata();
 
-      expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGIN_PATH}"`);
-      expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGOUT_PATH}"`);
-      expect(metadata).toContain('HTTP-POST');
+      expect(metadata).toContain(`Location="http://localhost:5601${MOCK_IDP_LOGIN_PATH}"`);
+      expect(metadata).toContain(`Location="http://localhost:5601${MOCK_IDP_LOGOUT_PATH}"`);
       expect(metadata).toContain('HTTP-Redirect');
     });
 
-    it('should trim trailing slash from kibana URL', async () => {
-      const kibanaUrl = 'http://localhost:5601/';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
-
-      expect(metadata).toContain('http://localhost:5601/mock_idp');
-      expect(metadata).not.toContain('http://localhost:5601//mock_idp');
-    });
-
     it('should include X509 certificate data', async () => {
-      const kibanaUrl = 'http://localhost:5601';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
+      const metadata = await createMockIdpMetadata();
 
       expect(metadata).toContain('ds:X509Certificate');
       expect(metadata).toContain('KeyDescriptor');
@@ -70,7 +70,6 @@ describe('mock-idp-utils', () => {
 
   describe('createSAMLResponse', () => {
     const baseOptions = {
-      kibanaUrl: 'http://localhost:5601/api/security/saml/callback',
       username: 'testuser',
       full_name: 'Test User',
       email: 'test@elastic.co',
@@ -254,13 +253,26 @@ describe('mock-idp-utils', () => {
         expect(payload.given_name).toBe('Test');
         expect(payload.family_name).toBe('User');
         expect(payload.ras).toBeDefined();
-        expect(payload.ras.project).toHaveLength(1);
-        expect(payload.ras.project[0].role_id).toBe('cloud-role-id');
-        expect(payload.ras.project[0].organization_id).toBe(
-          serverlessOptions.serverless.organizationId
-        );
-        expect(payload.ras.project[0].project_type).toBe(serverlessOptions.serverless.projectType);
-        expect(payload.ras.project[0].application_roles).toEqual(serverlessOptions.roles);
+        // One grant per canonical project type — origin project type first — so the session can
+        // reach cross-project (CPS) linked projects of any type.
+        expect(
+          payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
+        ).toEqual(['observability', 'elasticsearch', 'security', 'vectordb']);
+        // Organization membership is what grants organization actions such as creating a
+        // project-scoped service account. It must add no application roles of its own.
+        expect(payload.ras.organization).toEqual([
+          {
+            role_id: 'ess-default-organization',
+            organization_id: serverlessOptions.serverless.organizationId,
+            application_roles: [],
+          },
+        ]);
+        for (const grant of payload.ras.project) {
+          expect(grant.role_id).toBe(`${grant.project_type}-application-only`);
+          expect(grant.organization_id).toBe(serverlessOptions.serverless.organizationId);
+          expect(grant.application_roles).toEqual(serverlessOptions.roles);
+          expect(grant.project_scope).toEqual({ scope: 'all' });
+        }
 
         // Verify signature
         const signature = parts[2];
@@ -269,6 +281,29 @@ describe('mock-idp-utils', () => {
           .digest('base64url');
 
         expect(signature).toBe(expectedSignature);
+      });
+
+      it('should normalize aliased project types without duplicating grants', async () => {
+        const samlResponse = await createSAMLResponse({
+          ...serverlessOptions,
+          serverless: { ...serverlessOptions.serverless, projectType: 'oblt' },
+        });
+        const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
+
+        const accessTokenMatch = decoded.match(
+          new RegExp(
+            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+            's'
+          )
+        );
+        const jwt = decodeWithChecksum(removePrefixEssuDev(accessTokenMatch![1]));
+        const payload = JSON.parse(Buffer.from(jwt.split('.')[1], 'base64url').toString());
+
+        // The `oblt` alias normalizes to `observability`, which must not produce a second
+        // `observability` grant.
+        expect(
+          payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
+        ).toEqual(['observability', 'elasticsearch', 'security', 'vectordb']);
       });
 
       it('should generate refresh token with valid JWT structure', async () => {
@@ -299,6 +334,55 @@ describe('mock-idp-utils', () => {
         expect(payload.sub).toBe(serverlessOptions.username);
       });
 
+      it('should configure specified expiration dates for JWT access and refresh tokens', async () => {
+        // 1. Generate SAML response with short-lived access token.
+        const samlResponse = await createSAMLResponse({
+          ...serverlessOptions,
+          serverless: {
+            ...serverlessOptions.serverless,
+            accessTokenLifetimeSec: 5,
+            refreshTokenLifetimeSec: 10,
+          },
+        });
+
+        // 2. Extract raw encoded access and refresh tokens.
+        const [, accessTokenMatch] = Buffer.from(samlResponse, 'base64')
+          .toString('utf-8')
+          .match(
+            new RegExp(
+              `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+              's'
+            )
+          )!;
+        const [, refreshTokenMatch] = Buffer.from(samlResponse, 'base64')
+          .toString('utf-8')
+          .match(
+            new RegExp(
+              `${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+              's'
+            )
+          )!;
+
+        // 3. Unwrap the tokens and extract payloads (format: header.payload.signature).
+        const [, encodedAccessTokenPayload] = decodeWithChecksum(
+          removePrefixEssuDev(accessTokenMatch)
+        ).split('.');
+        const [, encodedRefreshTokenPayload] = decodeWithChecksum(
+          removePrefixEssuDev(refreshTokenMatch)
+        ).split('.');
+
+        // 4. Verify that exp = iat + 5 seconds.
+        const accessTokenPayload = JSON.parse(
+          Buffer.from(encodedAccessTokenPayload, 'base64url').toString()
+        );
+        expect(accessTokenPayload.exp).toBe(accessTokenPayload.iat + 5);
+
+        const refreshTokenPayload = JSON.parse(
+          Buffer.from(encodedRefreshTokenPayload, 'base64url').toString()
+        );
+        expect(refreshTokenPayload.exp).toBe(refreshTokenPayload.iat + 10);
+      });
+
       it('should not include UIAM tokens when uiamEnabled is false', async () => {
         const nonUiamOptions = {
           ...baseOptions,
@@ -314,6 +398,44 @@ describe('mock-idp-utils', () => {
         expect(decoded).not.toContain(`Name="${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}"`);
         expect(decoded).not.toContain(`Name="${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}"`);
       });
+    });
+  });
+
+  describe('createUiamOAuthAccessToken', () => {
+    it('should sign the token with the OAuth key set and name it in the `kid` header', async () => {
+      const wrappedToken = await createUiamOAuthAccessToken({
+        username: 'user1',
+        organizationId: 'org1234567890',
+        projectType: 'security',
+        roles: ['admin'],
+        audience: 'https://localhost:5620',
+      });
+      expect(wrappedToken).toMatch(/^essu_dev_/);
+
+      const [header, payload, signature] = decodeWithChecksum(
+        removePrefixEssuDev(wrappedToken)
+      ).split('.');
+
+      expect(JSON.parse(Buffer.from(header, 'base64url').toString())).toEqual({
+        typ: 'JWT',
+        alg: 'HS256',
+        kid: 'ot',
+      });
+
+      const claims = JSON.parse(Buffer.from(payload, 'base64url').toString());
+      expect(claims.typ).toBe('oauth-access-token');
+      expect(claims.aud).toBe('https://localhost:5620');
+
+      expect(signature).toBe(
+        createHmac('sha256', MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET)
+          .update(`${header}.${payload}`)
+          .digest('base64url')
+      );
+      expect(signature).not.toBe(
+        createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+          .update(`${header}.${payload}`)
+          .digest('base64url')
+      );
     });
   });
 
@@ -360,6 +482,27 @@ describe('mock-idp-utils', () => {
       } as any;
 
       await expect(ensureSAMLRoleMapping(mockClient)).rejects.toThrow('Elasticsearch error');
+    });
+  });
+
+  describe('getSAMLReuestId', () => {
+    it('should extract SAMLRequest ID from URL', async () => {
+      const url =
+        'http://localhost:5601/mock_idp/login?SAMLRequest=fZJvT8IwEMa%2FSnPvYVsnExqGQYmRxD8Epi98Q0q5SWPXzl6H8u2dggYT4tvePc9z97sOLz4qw7boSTubQ9KNgaFVbq3tSw6PxXWnDxejIcnK8FqMm7Cxc3xrkAJrhZbEvpJD461wkjQJKyskEZRYjO9uBe%2FGovYuOOUMsDER%2BtBGXTlLTYV%2BgX6rFT7Ob3PYhFCLKDJOSbNxFEQvi5NI1joiVI3XYRd9pUVt2aykegU2aefQVobv2U%2FLK6del3pdt%2B8v2gKbTnJYxhivB6XkPDtL0wT755hgT2a9lA9kkpWDslTIy7TfthM1OLUUpA058JhnnTjpJL0iyQTvi5R3z1P%2BDGx2WPFS2z26%2F3is9k0kbopi1pk9LApgTz8naBvgAFx8p%2Ftj0v8byx%2B8MDpJYxgd%2B%2F6e9b41mk5mzmi1Y2Nj3PuVRxkwh1IaQohGB%2BHfHzD6BA%3D%3D';
+      const requestId = await getSAMLRequestId(url);
+      expect(requestId).toEqual('_0e0d9fa2264331e87e1e5a65329a16f9ffce2f38');
+    });
+
+    it('should return undefined if SAMLRequest parameter is missing', async () => {
+      const noParamUrl = 'http://localhost:5601/mock_idp/login';
+      const requestId = await getSAMLRequestId(noParamUrl);
+      expect(requestId).toBeUndefined();
+    });
+
+    it('should return undefined if SAMLRequest parameter is invalid', async () => {
+      const invalidUrl = 'http://localhost:5601/mock_idp/login?SAMLRequest=YmxhaCBibGFoIGJsYWg=';
+      const requestId = await getSAMLRequestId(invalidUrl);
+      expect(requestId).toBeUndefined();
     });
   });
 });

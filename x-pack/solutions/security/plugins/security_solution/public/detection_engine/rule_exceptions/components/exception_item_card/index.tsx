@@ -63,7 +63,7 @@ const ExceptionItemCardComponent = ({
             actions={[
               {
                 key: 'edit',
-                icon: 'controlsHorizontal',
+                icon: 'controls',
                 label: isEndpoint
                   ? i18n.ENDPOINT_EXCEPTION_ITEM_EDIT_BUTTON
                   : i18n.EXCEPTION_ITEM_EDIT_BUTTON,

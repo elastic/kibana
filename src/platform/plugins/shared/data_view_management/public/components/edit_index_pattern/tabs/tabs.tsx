@@ -315,11 +315,13 @@ export const Tabs: React.FC<TabsProps> = ({
                   <EuiPopover
                     anchorPosition="downCenter"
                     data-test-subj="indexedFieldTypeFilterDropdown-popover"
+                    aria-label={filterAriaLabel}
+                    panelPaddingSize="s"
                     button={
                       <EuiFilterButton
                         aria-label={filterAriaLabel}
                         data-test-subj="indexedFieldTypeFilterDropdown"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         onClick={() => setIsIndexedFilterOpen(!isIndexedFilterOpen)}
                         isSelected={isIndexedFilterOpen}
                         numFilters={indexedFieldTypes.length}
@@ -349,11 +351,13 @@ export const Tabs: React.FC<TabsProps> = ({
                   <EuiPopover
                     anchorPosition="downCenter"
                     data-test-subj="schemaFieldTypeFilterDropdown-popover"
+                    aria-label={schemaAriaLabel}
+                    panelPaddingSize="s"
                     button={
                       <EuiFilterButton
                         aria-label={schemaAriaLabel}
                         data-test-subj="schemaFieldTypeFilterDropdown"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         onClick={() => setIsSchemaFilterOpen(!isSchemaFilterOpen)}
                         isSelected={isSchemaFilterOpen}
                         numFilters={SCHEMA_ITEMS.length}
@@ -399,7 +403,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     isLoading={isRefreshing}
                     isDisabled={isRefreshing}
                     size="m"
-                    color="success"
                     className="eui-fullWidth"
                   >
                     {refreshAriaLabel}
@@ -412,7 +415,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     size="m"
                     onClick={() => openFieldEditor()}
                     data-test-subj="addField"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     aria-label={addFieldButtonLabel}
                     color="primary"
                     fill
@@ -429,11 +432,12 @@ export const Tabs: React.FC<TabsProps> = ({
                 <EuiPopover
                   anchorPosition="downCenter"
                   data-test-subj="scriptedFieldLanguageFilterDropdown-popover"
+                  aria-label={scriptedFieldAriaLabel}
                   button={
                     <EuiFilterButton
                       aria-label={scriptedFieldAriaLabel}
                       data-test-subj="scriptedFieldLanguageFilterDropdown"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={() => setIsScriptedFieldFilterOpen(!isScriptedFieldFilterOpen)}
                       isSelected={isScriptedFieldFilterOpen}
                       numFilters={scriptedFieldLanguages.length}
@@ -567,11 +571,9 @@ export const Tabs: React.FC<TabsProps> = ({
               <EuiSpacer size="m" />
               <RelationshipsTable
                 basePath={http.basePath}
-                id={indexPattern.id!}
                 capabilities={application.capabilities}
                 relationships={relationships}
                 allowedTypes={allowedTypes}
-                navigateToUrl={application.navigateToUrl}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
                 savedObjectsTagging={savedObjectsTagging}

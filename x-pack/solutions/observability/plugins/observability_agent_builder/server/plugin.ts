@@ -12,11 +12,9 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
-import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
-import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
+import { registerSkills } from './skills/register_skills';
 import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -25,6 +23,10 @@ import type {
 } from './types';
 import { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 import { registerServerRoutes } from './routes/register_routes';
+import {
+  observabilityParentFeature,
+  observabilityAiInsightsInferenceFeatures,
+} from './inference_feature';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -50,43 +52,50 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginSetup {
-    // Routes must be registered synchronously during setup
-    registerServerRoutes({
+    registerSkills({ plugins, logger: this.logger });
+
+    registerTools({
+      core,
+      plugins,
+      dataRegistry: this.dataRegistry,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(`Error registering observability tools: ${error}`);
+    });
+
+    registerAttachments({
       core,
       plugins,
       logger: this.logger,
       dataRegistry: this.dataRegistry,
+    }).catch((error) => {
+      this.logger.error(`Error registering observability attachments: ${error}`);
     });
 
-    getIsObservabilityAgentEnabled(core)
-      .then((isObservabilityAgentEnabled) => {
-        if (!isObservabilityAgentEnabled) {
-          this.logger.debug(
-            `Skipping observability agent registration because feature flag "${OBSERVABILITY_AGENT_FEATURE_FLAG}" is set to false`
-          );
-          return;
+    registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
+
+      const failures: string[] = [];
+      for (const feature of observabilityAiInsightsInferenceFeatures) {
+        const result = plugins.searchInferenceEndpoints.features.register(feature);
+        if (!result.ok) {
+          failures.push(`${feature.featureId}: ${result.error}`);
         }
-
-        registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability agent: ${error}`);
-        });
-
-        registerTools({ core, plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability tools: ${error}`);
-        });
-
-        registerAttachments({
-          core,
-          plugins,
-          logger: this.logger,
-          dataRegistry: this.dataRegistry,
-        }).catch((error) => {
-          this.logger.error(`Error registering observability attachments: ${error}`);
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
-      });
+      }
+      if (failures.length) {
+        this.logger.warn(
+          `Failed to register inference endpoints for Observability AI Insights: ${failures.join(
+            '; '
+          )}`
+        );
+      } else {
+        this.logger.debug(
+          'Successfully registered inference endpoints for Observability AI Insights'
+        );
+      }
+    }
 
     return {
       registerDataProvider: (id, provider) => this.dataRegistry.registerDataProvider(id, provider),

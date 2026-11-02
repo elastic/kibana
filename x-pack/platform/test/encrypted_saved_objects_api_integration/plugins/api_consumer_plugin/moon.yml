@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eso-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/eso-plugin'
+  title: '@kbn/eso-plugin'
   description: Moon project for @kbn/eso-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+  sourceRoot: x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

@@ -7,6 +7,8 @@
 
 export const SIEM_MIGRATIONS_ASSISTANT_USER = 'assistant';
 
+export const SIEM_MIGRATION_INFERENCE_FEATURE_ID = 'siem_migrations';
+
 export const SIEM_MIGRATIONS_PATH = '/internal/siem_migrations' as const;
 
 // TODO: Move `SIEM_RULE_MIGRATIONS_PATH` and composed paths to rules/constants.ts
@@ -23,6 +25,8 @@ export const SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH =
   `${SIEM_RULE_MIGRATION_RULES_PATH}/enhance` as const;
 export const SIEM_RULE_MIGRATION_QRADAR_RULES_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/qradar/rules` as const;
+export const SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH =
+  `${SIEM_RULE_MIGRATION_PATH}/sentinel/rules` as const;
 export const SIEM_RULE_MIGRATION_START_PATH = `${SIEM_RULE_MIGRATION_PATH}/start` as const;
 export const SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH =
   `${SIEM_RULE_MIGRATION_PATH}/update_index_pattern` as const;
@@ -80,5 +84,8 @@ export const DEFAULT_TRANSLATION_FIELDS = {
   to: 'now',
   interval: '5m',
 } as const;
+
+export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
+export const SENTINEL_RULE_KIND_ANNOTATION_KEY = 'sentinel_rule_kind';
 
 export const SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER = '[indexPattern]';

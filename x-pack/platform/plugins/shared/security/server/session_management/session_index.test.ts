@@ -54,7 +54,9 @@ describe('Session index', () => {
       runAt: new Date(),
       status: TaskStatus.Idle,
     },
-    abortController: new AbortController(),
+    signal: new AbortController().signal,
+    executionUuid: 'test-execution-uuid',
+    setCustomTaskRunEventFields: jest.fn(),
   };
 
   const createSessionIndexOptions = (
@@ -460,6 +462,36 @@ describe('Session index', () => {
       } as SearchResponse);
       mockElasticsearchClient.bulk.mockResponse({ items: [{}] } as BulkResponse);
       jest.spyOn(Date, 'now').mockImplementation(() => now);
+    });
+
+    it('uses refreshed `pit_id` for subsequent searches and closePointInTime', async () => {
+      const firstBatch = Array.from({ length: 10_000 }, () => sessionValue);
+
+      mockElasticsearchClient.search.mockResponseOnce({
+        pit_id: 'PIT_ID_2',
+        hits: { hits: firstBatch },
+      } as SearchResponse);
+      mockElasticsearchClient.search.mockResponseOnce({
+        pit_id: 'PIT_ID_3',
+        hits: { hits: [] },
+      } as unknown as SearchResponse);
+
+      // Consume the generator directly to avoid the heavy cleanup flow (bulk deletes + audit logs).
+      for await (const _ of (sessionIndex as any).getSessionValuesInBatches()) {
+        // no-op
+      }
+
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.search.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ pit: expect.objectContaining({ id: 'PIT_ID' }) })
+      );
+      expect(mockElasticsearchClient.search.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ pit: expect.objectContaining({ id: 'PIT_ID_2' }) })
+      );
+
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledWith({
+        id: 'PIT_ID_3',
+      });
     });
 
     it('throws if search call to Elasticsearch fails', async () => {
@@ -1121,7 +1153,9 @@ describe('Session index', () => {
           ...mockRunContext.taskInstance,
           state: { shardMissingCounter: 9 },
         },
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
+        executionUuid: 'test-execution-uuid',
+        setCustomTaskRunEventFields: jest.fn(),
       };
 
       await expect(sessionIndex.cleanUp(runContext)).resolves.toEqual({

@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
 interface InfoPanelProps {
   title: string;
+  headerRightContent?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function InfoPanel({ title, children }: InfoPanelProps) {
+export function InfoPanel({ title, headerRightContent, children }: InfoPanelProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel
       hasBorder
-      borderRadius="none"
+      borderRadius="m"
       css={css`
         padding: 0;
-        border-radius: ${euiTheme.border.radius.medium};
       `}
     >
       <EuiText
@@ -31,10 +31,15 @@ export function InfoPanel({ title, children }: InfoPanelProps) {
           background: ${euiTheme.colors.backgroundBaseSubdued};
           padding: ${euiTheme.size.m};
           border-bottom: ${euiTheme.border.thin};
+          border-top-left-radius: ${euiTheme.border.radius.panel};
+          border-top-right-radius: ${euiTheme.border.radius.panel};
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >
-        {title}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={1}>{title}</EuiFlexItem>
+          {headerRightContent && <EuiFlexItem grow={false}>{headerRightContent}</EuiFlexItem>}
+        </EuiFlexGroup>
       </EuiText>
       <div
         css={css`

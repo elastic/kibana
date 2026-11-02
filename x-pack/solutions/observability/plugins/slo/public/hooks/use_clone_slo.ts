@@ -7,10 +7,10 @@
 
 import { encode } from '@kbn/rison';
 import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useCallback } from 'react';
-import { paths } from '../../common/locators/paths';
-import { createRemoteSloCloneUrl } from '../utils/slo/remote_slo_urls';
 import { transformSloToCloneState } from '../pages/slo_edit/helpers/transform_slo_to_clone_state';
+import { createRemoteSloCloneUrl } from '../utils/slo/remote_slo_urls';
 import { useKibana } from './use_kibana';
 import { useSpace } from './use_space';
 

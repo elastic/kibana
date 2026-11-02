@@ -13,14 +13,7 @@ import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
 
 export type ActionsCellProps = Pick<
   ComponentProps<GetTableProp<'renderActionsCell'>>,
-  /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
-   */
-  | 'alert'
-  /**
-   * The Ecs type is @deprecated but needed for the case actions within the more action dropdown
-   */
-  | 'ecsAlert'
+  'alert' | 'onRemoveFromCase'
 >;
 
 /**
@@ -31,13 +24,13 @@ export type ActionsCellProps = Pick<
  * - assistant
  * - more actions
  */
-export const ActionsCell = memo(({ alert, ecsAlert }: ActionsCellProps) => (
+export const ActionsCell = memo(({ alert, onRemoveFromCase }: ActionsCellProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem>
       <OpenFlyoutRowControlColumn alert={alert} />
     </EuiFlexItem>
     <EuiFlexItem>
-      <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
+      <MoreActionsRowControlColumn alert={alert} onRemoveFromCase={onRemoveFromCase} />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

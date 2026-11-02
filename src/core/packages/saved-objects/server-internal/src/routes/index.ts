@@ -41,7 +41,6 @@ export function registerRoutes({
   config,
   migratorPromise,
   kibanaVersion,
-  kibanaIndex,
   isServerless,
   docLinks,
 }: {
@@ -51,7 +50,6 @@ export function registerRoutes({
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
   kibanaVersion: string;
-  kibanaIndex: string;
   isServerless: boolean;
   docLinks: DocLinksServiceSetup;
 }) {
@@ -154,5 +152,5 @@ export function registerRoutes({
   );
 
   registerMigrateRoute(internalRouter, migratorPromise);
-  registerDeleteUnknownTypesRoute(internalRouter, { kibanaIndex, kibanaVersion });
+  registerDeleteUnknownTypesRoute(internalRouter, { kibanaVersion });
 }

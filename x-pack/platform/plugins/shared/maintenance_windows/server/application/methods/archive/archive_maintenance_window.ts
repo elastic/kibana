@@ -70,16 +70,23 @@ async function archiveWithOCC(
       events = mergeEvents({
         oldEvents: attributes.events,
         newEvents: generateMaintenanceWindowEvents({
-          rRule: attributes.rRule,
-          duration: attributes.duration,
+          schedule: attributes.schedule.custom,
           expirationDate,
         }),
       });
     }
 
+    // Decode raw SO attributes into the domain model first so the write transform sees the
+    // correct domain types (AlertingScopeAttributes with `enabled`) rather than the raw
+    // storage types (AlertsFilterQueryAttributes without `enabled`).
+    const domainWindow = transformMaintenanceWindowAttributesToMaintenanceWindow({
+      attributes,
+      id,
+    });
+
     const updatedMaintenanceWindowAttributes =
       transformMaintenanceWindowToMaintenanceWindowAttributes({
-        ...attributes,
+        ...domainWindow,
         events,
         expirationDate,
         updatedAt: modificationMetadata.updatedAt,

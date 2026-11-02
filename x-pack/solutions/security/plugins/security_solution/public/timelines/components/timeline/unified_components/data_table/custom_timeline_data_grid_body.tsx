@@ -8,7 +8,7 @@
 import type { EuiDataGridCustomBodyProps, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type EuiTheme } from '@kbn/react-kibana-context-styled';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
@@ -43,9 +43,14 @@ const VirtualizedCustomDataGridContainer = styled.div<{
     max-width: ${(props) => props.$maxWidth}px;
   }
 
+  .euiDataGridHeader {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
  .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn  .euiDataGridRowCell__content {
-    width: ${(props) => props.$maxWidth}px;
-    max-width: ${(props) => props.$maxWidth}px;
+    width: ${(props) => `min(100%, ${props.$maxWidth}px)`};
+    max-width: 100%;
     overflow-x: auto;
     scrollbar-width: thin;
     scroll-padding: 0 0 0 0,
@@ -223,6 +228,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                           return (
                             <div
                               role="row"
+                              aria-rowindex={index + 2}
                               style={style}
                               css={{ width: 'fit-content' }}
                               key={`${gridWidth}-${index}`}
@@ -265,7 +271,6 @@ const CustomGridRow = styled.div.attrs<{
   className?: string;
 }>((props) => ({
   className: `euiDataGridRow ${props.className ?? ''}`,
-  role: 'row',
 }))``;
 
 /* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
@@ -273,7 +278,6 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
   className?: string;
 }>((props) => ({
   className: `rowCellWrapper ${props.className ?? ''}`,
-  role: 'row',
 }))`
   height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,

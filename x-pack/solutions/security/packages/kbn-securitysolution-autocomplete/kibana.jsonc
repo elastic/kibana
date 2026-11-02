@@ -1,8 +1,8 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/securitysolution-autocomplete",
   "owner": [
-    "@elastic/security-detection-engine"
+    "@elastic/security-detection-engineering"
   ],
   "group": "security",
   "visibility": "private"

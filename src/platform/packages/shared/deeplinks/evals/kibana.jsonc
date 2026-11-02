@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-evals",
+  "owner": ["@elastic/nightshift-context-and-research-team"],
+  "group": "platform",
+  "visibility": "shared"
+}

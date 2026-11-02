@@ -59,7 +59,7 @@ describe('createFilterOutCellActionFactory', () => {
   });
 
   it('should return icon type', () => {
-    expect(filterOutAction.getIconType(context)).toEqual('minusInCircle');
+    expect(filterOutAction.getIconType(context)).toEqual('minusCircle');
   });
 
   describe('isCompatible', () => {
@@ -172,6 +172,65 @@ describe('createFilterOutCellActionFactory', () => {
             }),
           })
         );
+      });
+    });
+
+    describe('includeNullValues', () => {
+      const includeNullContext = {
+        ...context,
+        metadata: { includeNullValues: true },
+      } as SecurityCellActionExecutionContext;
+
+      it('should add a bool.should filter covering both the value and missing field', async () => {
+        await filterOutAction.execute(includeNullContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith([
+          expect.objectContaining({
+            meta: expect.objectContaining({ type: 'custom', negate: true }),
+            query: {
+              bool: {
+                should: [
+                  { match_phrase: { 'user.name': 'the value' } },
+                  { bool: { must_not: { exists: { field: 'user.name' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          }),
+        ]);
+      });
+
+      it('should use the global filterManager when not in timeline scope', async () => {
+        await filterOutAction.execute(includeNullContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalled();
+        expect(
+          mockServices.timelineDataService.query.filterManager.addFilters
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should use the timeline filterManager when in timeline scope', async () => {
+        await filterOutAction.execute({
+          ...includeNullContext,
+          metadata: { includeNullValues: true, scopeId: TimelineId.active },
+        });
+        expect(mockServices.timelineDataService.query.filterManager.addFilters).toHaveBeenCalled();
+        expect(mockGlobalFilterManager.addFilters).not.toHaveBeenCalled();
+      });
+
+      it('should set negate: true by default (exclude matching docs)', async () => {
+        await filterOutAction.execute(includeNullContext);
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith([
+          expect.objectContaining({ meta: expect.objectContaining({ negate: true }) }),
+        ]);
+      });
+
+      it('should set negate: false when negateFilters is true', async () => {
+        await filterOutAction.execute({
+          ...includeNullContext,
+          metadata: { includeNullValues: true, negateFilters: true },
+        });
+        expect(mockGlobalFilterManager.addFilters).toHaveBeenCalledWith([
+          expect.objectContaining({ meta: expect.objectContaining({ negate: false }) }),
+        ]);
       });
     });
   });

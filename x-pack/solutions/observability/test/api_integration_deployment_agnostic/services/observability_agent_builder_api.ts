@@ -11,6 +11,7 @@ import type { ClientRequestParamsOf, ReturnOf } from '@kbn/server-route-reposito
 import { formatRequest } from '@kbn/server-route-repository';
 import type { ObservabilityAgentBuilderServerRouteRepository } from '@kbn/observability-agent-builder-plugin/server';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import { parseSseResponse } from '../apis/observability_agent_builder/utils/sse';
 
 type APIEndpoint = keyof ObservabilityAgentBuilderServerRouteRepository;
 
@@ -49,7 +50,10 @@ function createObservabilityAgentBuilderApiClient({
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
-    const { method, pathname, version } = formatRequest(endpoint, params.path);
+    const { method, pathname, version } = formatRequest(
+      endpoint as string,
+      params.path as Record<string, string> | undefined
+    );
     const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
     const url = format({ pathname: pathnameWithSpaceId, query: params?.query });
 
@@ -65,6 +69,20 @@ function createObservabilityAgentBuilderApiClient({
       res = await supertestWithoutAuth[method](url).send(params.body).set(headers);
     } else {
       res = await supertestWithoutAuth[method](url).set(headers);
+    }
+
+    // SSE responses from the ai_insights routes need to be parsed into the AiInsightResponse
+    // shape the tests assert on. With `Content-Type: text/event-stream`, superagent exposes the
+    // body as text (`res.text`) rather than a buffered `res.body`, so parse whichever is
+    // populated. Guard on the content type so genuine non-SSE responses (e.g. 4xx error bodies)
+    // are left untouched.
+    const contentType = res.headers['content-type'] ?? '';
+    const isSseResponse = contentType.includes('text/event-stream') || Buffer.isBuffer(res.body);
+    if (endpoint.includes('ai_insights') && isSseResponse) {
+      const rawBody = Buffer.isBuffer(res.body) ? res.body : res.text;
+      if (rawBody) {
+        res.body = parseSseResponse(rawBody);
+      }
     }
 
     return res;

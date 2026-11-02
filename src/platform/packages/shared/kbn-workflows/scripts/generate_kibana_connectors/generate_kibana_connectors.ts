@@ -20,7 +20,8 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
-import { INCLUDED_OPERATIONS } from './included_operations';
+import { INCLUDED_OPERATIONS, OPERATION_TYPE_OVERRIDES } from './included_operations';
+import { postProcessOpenapiZodGen } from './post_process_openapi_zod_gen';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -37,6 +38,7 @@ import {
   getRequestSchemaName,
   getResponseSchemaName,
   getSchemaNamePrefix,
+  getStabilityFromXState,
   StaticImports,
   toSnakeCase,
 } from '../shared';
@@ -45,6 +47,7 @@ import type { OperationObjectWithOperationId } from '../shared/types';
 export async function run() {
   cleanGeneratedFolder();
   const contracts = generateContracts();
+  validateIncludedOperations(contracts);
   await generateZodSchemas(contracts);
   saveKibanaConnectors(contracts);
   eslintFixGeneratedCode({
@@ -58,6 +61,23 @@ export async function run() {
 function cleanGeneratedFolder() {
   fs.rmSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, { recursive: true, force: true });
   fs.mkdirSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH);
+}
+
+/**
+ * Validates that every operation in INCLUDED_OPERATIONS was found in the OpenAPI spec.
+ * Fails loudly if an upstream API renamed or removed a route, instead of silently skipping it.
+ */
+function validateIncludedOperations(contracts: ContractMeta[]) {
+  const matchedOperationIds = new Set(contracts.flatMap((c) => c.operations.map((op) => op.id)));
+  const missingOperations = INCLUDED_OPERATIONS.filter((op) => !matchedOperationIds.has(op));
+  if (missingOperations.length > 0) {
+    throw new Error(
+      `The following operations from INCLUDED_OPERATIONS were not found in the OpenAPI spec: ${missingOperations.join(
+        ', '
+      )}. ` +
+        `The upstream API may have changed their operation IDs. Update INCLUDED_OPERATIONS accordingly.`
+    );
+  }
 }
 
 function saveKibanaConnectors(contracts: ContractMeta[]) {
@@ -197,13 +217,8 @@ async function generateZodSchemas(contracts: ContractMeta[]) {
       `${OPENAPI_TS_OUTPUT_FILENAME}.gen.ts`
     );
 
-    // replace zod imports with @kbn/zod
     const zodSchemas = fs.readFileSync(zodPath, 'utf8');
-    fs.writeFileSync(
-      zodPath,
-      zodSchemas.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';"),
-      'utf8'
-    );
+    fs.writeFileSync(zodPath, postProcessOpenapiZodGen(zodSchemas), 'utf8');
     console.log(
       `- Zod imports replaced in ${formatDuration(replaceZodImportsStartedAt, performance.now())}`
     );
@@ -245,17 +260,31 @@ function generateContractMetasFromPath(
       continue;
     }
 
-    const type = `kibana.${toSnakeCase(operationId)}`;
+    // Use type override if available, otherwise use the default operationId
+    const typeBaseName = OPERATION_TYPE_OVERRIDES[operationId]?.type ?? operationId;
+    const type = `kibana.${typeBaseName}`;
     const summary = operation.summary ?? null;
     const description = operation.description ?? null;
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
-    const contractName = generateContractName(operationId);
-    const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
-    const paramsSchemaString = generateParamsSchemaString([operationId], {
-      // Adding fetcher to all kibana contracts at build time
-      fetcher: 'FetcherConfigSchema',
-    });
+    const contractName = generateContractName(typeBaseName);
+    const paramsSchemaString = generateParamsSchemaString(
+      [operationId],
+      {
+        // Adding fetcher to all kibana contracts at build time
+        fetcher: 'FetcherConfigSchema',
+      },
+      // Spread routing/debug meta options into all kibana connector schemas
+      ['KibanaStepMetaSchema']
+    );
     const outputSchemaString = generateOutputSchemaString([operation], openApiDocument);
+    const responseName = getResponseSchemaName(operationId);
+    const schemaImports = [
+      getRequestSchemaName(operationId),
+      // Only import response schema if it's actually referenced in the output schema
+      ...(outputSchemaString.includes(responseName) ? [responseName] : []),
+    ];
+
+    const stability = getStabilityFromXState(operation);
 
     contractMetas.push({
       type,
@@ -264,9 +293,10 @@ function generateContractMetasFromPath(
       methods: [method.toUpperCase() as HttpMethod],
       patterns: [path],
       documentation: getDocumentationUrl(operation),
+      stability,
       parameterTypes,
 
-      fileName: `kibana.${toSnakeCase(camelToSnake(operationId))}.gen.ts`,
+      fileName: `kibana.${toSnakeCase(camelToSnake(typeBaseName))}.gen.ts`,
       contractName,
       operations: [
         {
@@ -278,7 +308,9 @@ function generateContractMetasFromPath(
       paramsSchemaString,
       outputSchemaString,
       schemaImports,
-      additionalImports: ["import { FetcherConfigSchema } from '../../schema';"],
+      additionalImports: [
+        "import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';",
+      ],
     });
   }
   return contractMetas;

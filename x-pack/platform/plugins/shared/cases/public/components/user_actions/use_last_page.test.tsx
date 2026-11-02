@@ -23,6 +23,8 @@ const userActionsStats: CaseUserActionsStats = {
   totalDeletions: 0,
   totalComments: 2,
   totalCommentDeletions: 0,
+  totalCommentCreations: 10,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 3,
   totalOtherActionDeletions: 0,
 };
@@ -55,6 +57,8 @@ describe('useLastPage', () => {
           totalDeletions: 0,
           totalComments: 0,
           totalCommentDeletions: 0,
+          totalHiddenCommentUpdates: 0,
+          totalCommentCreations: 10,
           totalOtherActions: 0,
           totalOtherActionDeletions: 0,
         },
@@ -73,8 +77,10 @@ describe('useLastPage', () => {
         userActionsStats: {
           total: 38,
           totalDeletions: 0,
+          totalHiddenCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
+          totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
         },
@@ -94,7 +100,9 @@ describe('useLastPage', () => {
           total: 38,
           totalDeletions: 0,
           totalComments: 17,
+          totalHiddenCommentUpdates: 0,
           totalCommentDeletions: 0,
+          totalCommentCreations: 11,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
         },
@@ -116,8 +124,10 @@ describe('useLastPage', () => {
         userActionsStats: {
           total: 38,
           totalDeletions: 0,
+          totalHiddenCommentUpdates: 0,
           totalComments: 17,
           totalCommentDeletions: 0,
+          totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
         },
@@ -130,6 +140,81 @@ describe('useLastPage', () => {
 
     expect(result.current).toEqual({
       lastPage: 3,
+    });
+  });
+
+  it('returns 1 when a search term is active, regardless of stats', async () => {
+    const { result } = renderHook(() =>
+      useLastPage({
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalHiddenCommentUpdates: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalCommentCreations: 10,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
+        userActivityQueryParams: {
+          ...userActivityQueryParams,
+          search: 'hello world',
+        },
+      })
+    );
+
+    expect(result.current).toEqual({
+      lastPage: 1,
+    });
+  });
+
+  it('returns 1 when an author filter is active, regardless of stats', async () => {
+    const { result } = renderHook(() =>
+      useLastPage({
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalHiddenCommentUpdates: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalCommentCreations: 10,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
+        userActivityQueryParams: {
+          ...userActivityQueryParams,
+          authors: ['elastic'],
+        },
+      })
+    );
+
+    expect(result.current).toEqual({
+      lastPage: 1,
+    });
+  });
+
+  it('returns 1 when multiple authors are selected, regardless of stats', async () => {
+    const { result } = renderHook(() =>
+      useLastPage({
+        userActionsStats: {
+          total: 38,
+          totalDeletions: 0,
+          totalHiddenCommentUpdates: 0,
+          totalComments: 17,
+          totalCommentDeletions: 0,
+          totalCommentCreations: 10,
+          totalOtherActions: 21,
+          totalOtherActionDeletions: 0,
+        },
+        userActivityQueryParams: {
+          ...userActivityQueryParams,
+          authors: ['elastic', 'other'],
+        },
+      })
+    );
+
+    expect(result.current).toEqual({
+      lastPage: 1,
     });
   });
 });

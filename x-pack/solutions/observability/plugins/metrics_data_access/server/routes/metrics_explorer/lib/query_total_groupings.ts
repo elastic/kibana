@@ -6,7 +6,8 @@
  */
 
 import { castArray, isArray } from 'lodash';
-import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { existsQuery } from '@kbn/observability-utils-common/es/queries/exists_query';
+import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import type { MetricsAPIRequest } from '../../../../common/http_api';
 import type { ESSearchClient } from '../../../lib/metrics/types';
 

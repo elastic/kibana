@@ -1,0 +1,54 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateWorkflowEnableExample:
+          description: 'Example request to enable a workflow and update its tags'
+          value:
+            enabled: true
+            tags:
+              - production
+        updateWorkflowFullExample:
+          description: 'Example request to update multiple workflow fields'
+          value:
+            name: Updated example
+            description: Updated workflow description
+            enabled: true
+            tags:
+              - example
+              - updated
+            yaml: "name: Updated example\nenabled: true\ndescription: Updated workflow description\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          updateWorkflowResponseExample:
+            description: 'Example response returning the updated workflow'
+            value:
+              id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              lastUpdatedAt: '2026-03-23T13:38:59.568Z'
+              lastUpdatedBy: elastic
+              enabled: false
+              validationErrors: []
+              valid: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/workflows/workflow/{id}" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "enabled": true,
+          "tags": ["production"]
+        }'
+  - lang: Console
+    source: |
+      PUT kbn://api/workflows/workflow/{id}
+      {
+        "enabled": true,
+        "tags": ["production"]
+      }

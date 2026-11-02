@@ -35,7 +35,7 @@ export const StepNumberNav = ({
               data-test-subj="syntheticsStepNumberNavButton"
               onClick={handlePreviousStep}
               disabled={!hasPreviousStep}
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               aria-label={PREVIOUS_STEP_BUTTON_ARIA_LABEL}
             >
               {PREVIOUS_STEP_BUTTON_TEXT}
@@ -58,7 +58,7 @@ export const StepNumberNav = ({
               data-test-subj="syntheticsStepNumberNavButton"
               onClick={handleNextStep}
               disabled={!hasNextStep}
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               iconSide="right"
               aria-label={NEXT_STEP_BUTTON_ARIA_LABEL}
             >

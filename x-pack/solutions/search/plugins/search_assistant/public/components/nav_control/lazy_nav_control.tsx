@@ -28,7 +28,7 @@ export const NavControlInitiator = ({ coreStart, pluginsStart }: NavControlIniti
 
   useEffect(() => {
     const sub = coreStart.settings.client
-      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Classic)
+      .get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE)
       .subscribe((chatExperience) => {
         setIsClassicExperience(chatExperience === AIChatExperience.Classic);
       });
@@ -39,7 +39,7 @@ export const NavControlInitiator = ({ coreStart, pluginsStart }: NavControlIniti
   }, [coreStart.settings.client]);
 
   // Only render nav control for Classic chat experience
-  // AI Agents experience uses OnechatNavControl instead
+  // AI Agents experience uses AgentBuilderNavControl instead
   if (!isClassicExperience) {
     return null;
   }

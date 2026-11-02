@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SerializedPolicy } from '../../../../common/types';
+import type { RolloverRestrictionField, RolloverTriggerField } from './constants';
 
 export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
 
@@ -39,26 +40,32 @@ export interface DownsampleFields {
 
 interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields, DownsampleFields {
   /**
-   * By default rollover is enabled with set values for max age, max size and max docs. In this policy form
-   * opting in to default rollover overrides custom rollover values.
+   * Hot phase can be optional when editing policies that don't include it.
+   * For new policies (or policies that already contain hot), this remains enabled.
    */
-  isUsingDefaultRollover: boolean;
-
+  enabled?: boolean;
   readonlyEnabled: boolean;
 
   /**
-   * If a policy has defined values other than the default rollover {@link defaultRolloverAction}, we store
-   * them here.
+   * Rollover settings controlled by the policy form.
    */
   customRollover: {
     enabled: boolean;
+    triggerFields: RolloverTriggerField[];
+    restrictionFields: RolloverRestrictionField[];
     maxPrimaryShardSizeUnit?: string;
     maxAgeUnit?: string;
+    minPrimaryShardSizeUnit?: string;
+    minAgeUnit?: string;
 
     /**
      * @deprecated This is the byte size unit for the max_size field which will by removed in version 8+ of the stack.
      */
     maxStorageSizeUnit?: string;
+    /**
+     * @deprecated This is the byte size unit for the min_size field which will be removed with max_size.
+     */
+    minStorageSizeUnit?: string;
   };
 }
 

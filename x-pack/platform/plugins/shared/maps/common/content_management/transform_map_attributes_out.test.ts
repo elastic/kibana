@@ -85,6 +85,32 @@ describe('transformMapOut', () => {
     `);
   });
 
+  test('should remove mode from timeFilters', () => {
+    expect(
+      transformMapAttributesOut(
+        {
+          title: 'my map',
+          mapStateJSON: JSON.stringify({
+            timeFilters: {
+              from: 'now-17m',
+              to: 'now',
+              mode: 'quick',
+            },
+          }),
+        },
+        findReference
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "timeFilters": Object {
+          "from": "now-17m",
+          "to": "now",
+        },
+        "title": "my map",
+      }
+    `);
+  });
+
   test('uiStateJSON', () => {
     expect(
       transformMapAttributesOut(

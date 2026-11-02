@@ -20,6 +20,8 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -31,15 +33,21 @@ const DEFAULT_BAR_TARGET = 75;
 export const useData = (
   selectedDataView: DataView,
   contextId: string,
-  searchQuery: estypes.QueryDslQueryContainer,
+  searchQuery: NonNullable<estypes.QueryDslQueryContainer>,
   onUpdate?: (params: Dictionary<unknown>) => void,
   selectedSignificantItem?: SignificantItem,
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
-  timeRange?: { min: Moment; max: Moment }
+  timeRange?: { min: Moment; max: Moment },
+  projectRoutingOverride?: string,
+  /** ES|QL document scope; when set, document counts come from ES|QL instead of DSL. */
+  esqlQuery?: string,
+  /** Upper limit for the number of histogram buckets, instead of the `histogram:maxBars` setting. */
+  maxBars?: number
 ) => {
-  const { executionContext, uiSettings } = useAiopsAppContext();
+  const { executionContext, uiSettings, cps } = useAiopsAppContext();
+  const { projectRouting } = useProjectRouting(cps, projectRoutingOverride);
 
   useExecutionContext(executionContext, {
     name: AIOPS_PLUGIN_ID,
@@ -66,6 +74,9 @@ export const useData = (
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
       _timeBuckets.setBarTarget(barTarget);
+      if (maxBars !== undefined) {
+        _timeBuckets.setMaxBars(maxBars);
+      }
       return {
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
@@ -105,7 +116,9 @@ export const useData = (
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
     lastRefresh,
-    changePointsByDefault
+    changePointsByDefault,
+    projectRoutingOverride,
+    esqlQuery
   );
 
   useEffect(() => {
@@ -140,6 +153,12 @@ export const useData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (projectRouting) {
+      setLastRefresh(Date.now());
+    }
+  }, [projectRouting]);
+
   return {
     documentStats,
     timefilter,
@@ -151,3 +170,25 @@ export const useData = (
     forceRefresh: () => setLastRefresh(Date.now()),
   };
 };
+
+function useProjectRouting(
+  cps?: CPSPluginStart,
+  projectRoutingOverride?: string
+): { projectRouting: ProjectRouting | undefined } {
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
+    projectRoutingOverride ?? cps?.cpsManager?.getProjectRouting()
+  );
+
+  useEffect(() => {
+    const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe((newRouting) => {
+      if (projectRoutingOverride) {
+        return;
+      }
+      setProjectRouting(newRouting);
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [cps?.cpsManager, projectRoutingOverride]);
+
+  return { projectRouting };
+}

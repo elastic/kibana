@@ -1,0 +1,22 @@
+{
+  "sha1": "341738f6f8a7b777bcecfcc98d32ec7097b1deb8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "657ea335417d1f1-0d1e956b65b465c",
+      "title": "Initial solution setup selects Search and opens the Search home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_initial_solution_setup/ui/tests/initial_solution_setup.spec.ts",
+        "line": 13,
+        "column": 79
+      }
+    }
+  ]
+}

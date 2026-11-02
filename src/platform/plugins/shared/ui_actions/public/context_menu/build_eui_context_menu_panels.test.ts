@@ -35,7 +35,7 @@ const createTestAction = ({
     order,
     execute,
     grouping,
-    disabled,
+    ...(disabled !== undefined && { isDisabled: () => disabled }),
   });
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Factory, ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -19,33 +20,31 @@ import type {
  * @see {@link SavedObjectsClientContract}
  * @public
  */
-export type ISavedObjectsClientFactory = Factory<
-  SavedObjectsClientContract,
-  [SavedObjectsClientProviderOptions?]
->;
+export type ISavedObjectsClientFactory = (
+  options?: SavedObjectsClientProviderOptions
+) => SavedObjectsClientContract;
 
 /**
  * The Saved Objects client instance in the current HTTP request context.
  * @see {@link SavedObjectsClientContract}
  * @public
  */
-export const SavedObjectsClient = Symbol(
-  'SavedObjectsClient'
-) as ServiceIdentifier<SavedObjectsClientContract>;
+export const SavedObjectsClient: ServiceToken<SavedObjectsClientContract> =
+  createToken('SavedObjectsClient');
 
 /**
  * The Saved Objects client factory that constructs a client instance the current HTTP request context.
  * @public
  */
-export const SavedObjectsClientFactory = Symbol(
+export const SavedObjectsClientFactory: ServiceToken<ISavedObjectsClientFactory> = createToken(
   'SavedObjectsClientFactory'
-) as ServiceIdentifier<ISavedObjectsClientFactory>;
+);
 
 /**
  * The Saved Objects type registry.
  * @see {@link ISavedObjectTypeRegistry}
  * @public
  */
-export const SavedObjectsTypeRegistry = Symbol(
+export const SavedObjectsTypeRegistry: ServiceToken<ISavedObjectTypeRegistry> = createToken(
   'SavedObjectsTypeRegistry'
-) as ServiceIdentifier<ISavedObjectTypeRegistry>;
+);

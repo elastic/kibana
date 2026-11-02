@@ -16,10 +16,11 @@ import type {
 } from '@kbn/core/server';
 import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
 import type { ReportingCore } from '../..';
-import type { ScheduledReportType } from '../../types';
+import type { ReportingUser, ScheduledReportType } from '../../types';
 import {
   Frequency,
   TaskStatus,
@@ -29,6 +30,7 @@ import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 import type { CreatedAtSearchResponse } from './scheduled_reports_service';
 import { ScheduledReportsService } from './scheduled_reports_service';
 import type { UpdateScheduledReportParams } from './types/update';
+import { buildOwnedByFilter } from './lib/ownership';
 
 const fakeRawRequest = {
   headers: {
@@ -167,7 +169,7 @@ const nextRunResponse: BulkGetResult = [
       partition: 146,
       userScope: {
         apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKeyCreatedByUser: false,
       },
       apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
@@ -208,7 +210,7 @@ const nextRunResponse: BulkGetResult = [
       partition: 146,
       userScope: {
         apiKeyId: 'ueR7EJkB2N4RCOVIjhec',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         apiKeyCreatedByUser: false,
       },
       apiKey: 'dWVSN0VKa0IyTjRSQ09WSWpoZWM6OEUyZUYtWDlSNndKckdMY0hPTElpZw==',
@@ -288,7 +290,7 @@ describe('ScheduledReportsService', () => {
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
         search: 'cool dashboard',
@@ -430,7 +432,7 @@ describe('ScheduledReportsService', () => {
         request: fakeRawRequest,
       });
       await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -440,7 +442,7 @@ describe('ScheduledReportsService', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
-        filter: 'scheduled_report.attributes.createdBy: "somebody"',
+        filter: buildOwnedByFilter({ ids: [], username: 'somebody' }),
         searchFields: ['title', 'created_by'],
       });
       expect(client.search).toHaveBeenCalledTimes(1);
@@ -467,6 +469,52 @@ describe('ScheduledReportsService', () => {
       });
     });
 
+    it('filters by realm-qualified IDs and legacy username for a realm-bearing user', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      await scheduledReportsService.list({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        page: 1,
+        size: 10,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: buildOwnedByFilter({
+            ids: ['realm:["native","default_native","rshared"]'],
+            username: 'rshared',
+          }),
+        })
+      );
+    });
+
+    it('returns an empty list without querying saved objects when there is no authenticated user', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+
+      const result = await scheduledReportsService.list({
+        user: undefined,
+        page: 1,
+        size: 10,
+      });
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(result).toEqual({ page: 1, per_page: 10, total: 0, data: [] });
+    });
+
     it('should return an empty array when there are no hits', async () => {
       soClient.find = jest.fn().mockImplementationOnce(async () => ({
         page: 1,
@@ -475,7 +523,7 @@ describe('ScheduledReportsService', () => {
         saved_objects: [],
       }));
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -498,7 +546,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.list({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           page: 1,
           size: 10,
         })
@@ -519,7 +567,7 @@ describe('ScheduledReportsService', () => {
       });
 
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -591,7 +639,7 @@ describe('ScheduledReportsService', () => {
         throw new Error('task manager error');
       });
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -661,7 +709,7 @@ describe('ScheduledReportsService', () => {
         return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
       });
       const result = await scheduledReportsService.list({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         page: 1,
         size: 10,
       });
@@ -730,7 +778,7 @@ describe('ScheduledReportsService', () => {
   describe('bulkDisable', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -753,10 +801,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -806,6 +855,13 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not disable scheduled report when user does not have permissions', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdById: ['elastic-profile'] },
+      };
+      soClient.bulkGet = jest.fn().mockResolvedValue({
+        saved_objects: [ownedReport, savedObjects[1]],
+      });
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -827,7 +883,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -845,9 +901,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
@@ -905,6 +963,74 @@ describe('ScheduledReportsService', () => {
       });
     });
 
+    it('does not allow a same-username principal in a different realm to disable a report (cross-realm ownership)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const crossRealmReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'rshared',
+          createdById: ['realm:["file","default_file","rshared"]'],
+        },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [crossRealmReport] }));
+
+      const result = await scheduledReportsService.bulkDisable({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [crossRealmReport.id],
+      });
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: crossRealmReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+    });
+
+    it('leaves a legacy report unstamped on disable, so ownership is never claimed by a read-write path', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared' },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
+      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [{ id: legacyReport.id, type: 'scheduled_report', attributes: {} }],
+      }));
+
+      await scheduledReportsService.bulkDisable({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [legacyReport.id],
+      });
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        { id: legacyReport.id, type: 'scheduled_report', attributes: { enabled: false } },
+      ]);
+    });
+
     it('should handle errors in bulk get', async () => {
       soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
         saved_objects: [
@@ -935,7 +1061,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -953,9 +1079,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1011,7 +1139,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1063,7 +1191,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1085,10 +1213,11 @@ describe('ScheduledReportsService', () => {
       );
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       // TM still called with both in case the task was not disabled
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1139,7 +1268,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1162,9 +1291,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
       expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
@@ -1217,7 +1348,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1240,10 +1371,11 @@ describe('ScheduledReportsService', () => {
         },
       ]);
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith([
-        'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-        '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-      ]);
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        false,
+        { request: fakeRawRequest }
+      );
 
       expect(result).toEqual({
         scheduled_report_ids: ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
@@ -1266,7 +1398,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDisable({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -1310,9 +1442,53 @@ describe('ScheduledReportsService', () => {
         );
     });
 
+    it('allows enabling a legacy report when the username matches', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared', enabled: false },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
+      soClient.bulkUpdate = jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: legacyReport.id, type: 'scheduled_report', attributes: { enabled: true } },
+        ],
+      });
+      taskManager.bulkEnable = jest
+        .fn()
+        .mockResolvedValue({ tasks: [{ id: legacyReport.id }], errors: [] });
+      const result = await scheduledReportsService.bulkEnable({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [legacyReport.id],
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [legacyReport.id],
+        errors: [],
+        total: 1,
+      });
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        { id: legacyReport.id, type: 'scheduled_report', attributes: { enabled: true } },
+      ]);
+      expect(taskManager.bulkEnable).toHaveBeenCalledWith([legacyReport.id], false, {
+        request: fakeRawRequest,
+      });
+    });
+
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1337,7 +1513,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
@@ -1388,6 +1565,17 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not enable scheduled report when user does not have permissions', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdById: ['elastic-profile'],
+          enabled: false,
+        },
+      };
+      soClient.bulkGet = jest.fn().mockResolvedValue({
+        saved_objects: [ownedReport, savedObjects[1]],
+      });
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -1409,7 +1597,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1429,7 +1617,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(result).toEqual({
@@ -1518,7 +1707,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1538,7 +1727,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1595,7 +1785,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1647,7 +1837,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1671,7 +1861,8 @@ describe('ScheduledReportsService', () => {
       // TM still called with both in case the task was not disabled
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -1723,7 +1914,7 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1748,7 +1939,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(3);
@@ -1802,7 +1994,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkEnable({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1827,7 +2019,8 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(
         ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        false
+        false,
+        { request: fakeRawRequest }
       );
 
       expect(result).toEqual({
@@ -1851,7 +2044,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkEnable({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -1864,9 +2057,49 @@ describe('ScheduledReportsService', () => {
   });
 
   describe('bulkDelete', () => {
+    it('allows deleting a legacy report when the username matches', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared' },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
+      soClient.bulkDelete = jest.fn().mockResolvedValue({
+        statuses: [{ id: legacyReport.id, success: true }],
+      });
+      taskManager.bulkRemove = jest.fn().mockResolvedValue({
+        statuses: [{ id: legacyReport.id, success: true }],
+      });
+      const result = await scheduledReportsService.bulkDelete({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [legacyReport.id],
+      });
+
+      expect(result).toEqual({
+        scheduled_report_ids: [legacyReport.id],
+        errors: [],
+        total: 1,
+      });
+      expect(soClient.bulkDelete).toHaveBeenCalledWith([
+        { id: legacyReport.id, type: 'scheduled_report' },
+      ]);
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith([legacyReport.id]);
+    });
+
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'somebody' },
+        user: { username: 'somebody' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -1940,6 +2173,13 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should not delete scheduled report when user does not have permissions', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdById: ['elastic-profile'] },
+      };
+      soClient.bulkGet = jest.fn().mockResolvedValue({
+        saved_objects: [ownedReport, savedObjects[1]],
+      });
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -1959,7 +2199,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2034,6 +2274,83 @@ describe('ScheduledReportsService', () => {
       });
     });
 
+    it('does not allow a same-username principal in a different realm to delete a report (cross-realm ownership)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const crossRealmReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'rshared',
+          createdById: ['realm:["file","default_file","rshared"]'],
+        },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [crossRealmReport] }));
+
+      const result = await scheduledReportsService.bulkDelete({
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [crossRealmReport.id],
+      });
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: crossRealmReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "rshared" attempted to delete scheduled report "${crossRealmReport.id}" created by "rshared" without sufficient privileges.`
+      );
+    });
+
+    it('names a UIAM api key by its key id, which it also reports as its username', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: {
+          headers: { authorization: 'ApiKey essu_c29tZS1zZWNyZXQ' },
+          path: '/',
+        } as unknown as KibanaRequest,
+      });
+      const otherKeyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'other-uiam-key-id',
+          createdByApiKeyId: 'other-uiam-key-id',
+        },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [otherKeyReport] }));
+
+      await scheduledReportsService.bulkDelete({
+        user: {
+          username: 'uiam-key-id',
+          authentication_type: 'api_key',
+          api_key: { id: 'uiam-key-id', managed_by: 'cloud' },
+        } as unknown as ReportingUser,
+        ids: [otherKeyReport.id],
+      });
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `API key "uiam-key-id" attempted to delete scheduled report "${otherKeyReport.id}" created by "other-uiam-key-id" without sufficient privileges.`
+      );
+    });
+
     it('should handle errors in bulk get', async () => {
       soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
         saved_objects: [
@@ -2063,7 +2380,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2136,7 +2453,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2187,7 +2504,7 @@ describe('ScheduledReportsService', () => {
         statuses: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', success: true }],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2262,7 +2579,7 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDelete({
-        user: { username: 'elastic' },
+        user: { username: 'elastic' } as ReportingUser,
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
 
@@ -2309,7 +2626,7 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDelete({
-          user: { username: 'somebody' },
+          user: { username: 'somebody' } as ReportingUser,
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })
       ).rejects.toMatchInlineSnapshot(`
@@ -2341,7 +2658,7 @@ describe('ScheduledReportsService', () => {
     };
 
     const defaultUpdateParams = {
-      user: { username: 'somebody' },
+      user: { username: 'somebody' } as ReportingUser,
       id: savedObjects[0].id,
       updateParams: {
         title: 'foobar',
@@ -2364,7 +2681,7 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
         mockSchedule,
-        { request: fakeRawRequest }
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -2423,6 +2740,11 @@ describe('ScheduledReportsService', () => {
     });
 
     it('should update scheduled report when user does not have permissions but is the creator', async () => {
+      const ownedReport = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdById: ['elastic-profile'] },
+      };
+      soClient.get = jest.fn().mockResolvedValue(ownedReport);
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       scheduledReportsService = await ScheduledReportsService.build({
         logger: mockLogger,
@@ -2433,7 +2755,7 @@ describe('ScheduledReportsService', () => {
 
       await scheduledReportsService.update({
         ...defaultUpdateParams,
-        user: { username: 'elastic' },
+        user: { username: 'elastic', profile_uid: 'elastic-profile' } as ReportingUser,
       });
 
       expect(soClient.update).toHaveBeenCalledTimes(1);
@@ -2451,7 +2773,7 @@ describe('ScheduledReportsService', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         [savedObjects[0].id],
         mockSchedule,
-        { request: fakeRawRequest }
+        { request: fakeRawRequest, regenerateApiKey: true }
       );
 
       expect(auditLogger.log).toHaveBeenCalledTimes(1);
@@ -2514,6 +2836,91 @@ describe('ScheduledReportsService', () => {
         },
         message:
           'Failed attempt to update scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
+    });
+
+    it('does not allow a same-username principal in a different realm to update a report (cross-realm ownership)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const crossRealmReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'rshared',
+          createdById: ['realm:["file","default_file","rshared"]'],
+        },
+      };
+      soClient.get = jest.fn().mockResolvedValue(crossRealmReport);
+
+      await expect(
+        scheduledReportsService.update({
+          ...defaultUpdateParams,
+          id: crossRealmReport.id,
+          user: {
+            username: 'rshared',
+            lookup_realm: { type: 'native', name: 'default_native' },
+          } as ReportingUser,
+        })
+      ).rejects.toMatchObject({ body: 'Not found.', statusCode: 404 });
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves a legacy report unstamped on update, so ownership is never claimed implicitly', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared' },
+      };
+      soClient.get = jest.fn().mockResolvedValue(legacyReport);
+
+      await scheduledReportsService.update({
+        ...defaultUpdateParams,
+        id: legacyReport.id,
+        user: {
+          username: 'rshared',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', legacyReport.id, {
+        schedule: mockSchedule,
+        title: 'foobar',
+        notification: mockNotification,
+      });
+    });
+
+    it('does not stamp createdById when an admin updates another legacy report', async () => {
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'someone-else' },
+      };
+      soClient.get = jest.fn().mockResolvedValue(legacyReport);
+
+      await scheduledReportsService.update({
+        ...defaultUpdateParams,
+        id: legacyReport.id,
+        user: {
+          username: 'admin-user',
+          lookup_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', legacyReport.id, {
+        schedule: mockSchedule,
+        title: 'foobar',
+        notification: mockNotification,
       });
     });
 

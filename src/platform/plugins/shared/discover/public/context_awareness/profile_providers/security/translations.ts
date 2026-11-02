@@ -9,12 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const exploreRowActionLabel = (isAlert: boolean) =>
-  i18n.translate('discover.profile.security.rowAction.exploreButtonLabel', {
-    values: { isAlert },
-    defaultMessage: 'Explore {isAlert, select, true {Alert} other {Event}} in Security',
-  });
-
 export const overviewTabTitle = (isAlert: boolean) =>
   i18n.translate('discover.profile.security.flyout.overviewTabTitle', {
     values: { isAlert },
@@ -61,3 +55,23 @@ export const ecsDescriptionLoadingAriaLable = i18n.translate(
     defaultMessage: 'Loading ECS description',
   }
 );
+
+export const iocOverviewTabTitle = i18n.translate(
+  'discover.profile.security.flyout.iocOverviewTabTitle',
+  {
+    defaultMessage: 'Indicator Overview',
+  }
+);
+
+export const attackOverviewTabTitle = i18n.translate(
+  'discover.profile.security.flyout.attackOverviewTabTitle',
+  {
+    defaultMessage: 'Attack Overview',
+  }
+);
+
+export const alertFlyoutTitle = (ruleName: string) =>
+  i18n.translate('discover.profile.security.flyout.alertFlyoutTitle', {
+    values: { ruleName },
+    defaultMessage: 'Alert: {ruleName}',
+  });

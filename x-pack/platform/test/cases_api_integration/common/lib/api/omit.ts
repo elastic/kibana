@@ -41,6 +41,7 @@ export const removeServerGeneratedPropertiesFromCase = (theCase: Case): Partial<
     'closed_at',
     'in_progress_at',
     'time_to_acknowledge',
+    'incremental_id',
   ]);
 };
 

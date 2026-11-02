@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info:
+  title: Evaluate API endpoint
+  version: '1'
+paths:
+  /internal/evals/_evaluate:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: Evaluate
+      description: Executes one or more evaluators against a subject
+      summary: Evaluate
+      tags:
+        - Evals API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subject
+                - evaluators
+              properties:
+                subject:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluationSubject'
+                evaluators:
+                  type: array
+                  minItems: 1
+                  maxItems: 20
+                  items:
+                    type: object
+                    required:
+                      - name
+                    properties:
+                      name:
+                        type: string
+                        maxLength: 256
+                      version:
+                        type: string
+                        maxLength: 64
+                      connector_id:
+                        type: string
+                        maxLength: 256
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - results
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EvaluateResult'
+components:
+  schemas:
+    EvaluateResult:
+      type: object
+      required:
+        - status
+        - evaluator
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - error
+        evaluator:
+          $ref: '#/components/schemas/EvaluateResultEvaluator'
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluateResultScore'
+        error:
+          $ref: '#/components/schemas/EvaluateResultError'
+    EvaluateResultEvaluator:
+      type: object
+      required:
+        - name
+        - version
+        - kind
+      properties:
+        name:
+          type: string
+          maxLength: 256
+        version:
+          type: string
+          maxLength: 64
+        kind:
+          type: string
+          enum:
+            - llm
+            - code
+        direction:
+          type: string
+          enum:
+            - maximize
+            - minimize
+            - neutral
+          description: >-
+            Whether a higher score is an improvement (`maximize`),
+            a lower score is an improvement (`minimize`), or the
+            score cannot be compared across arms at all (`neutral`).
+        model:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+          description: >-
+            Model resolved from the evaluator's `connector_id`.
+            Absent for code evaluators, which invoke no model.
+    EvaluateResultScore:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 256
+        score:
+          type: number
+          nullable: true
+        label:
+          type: string
+          maxLength: 1024
+        explanation:
+          type: string
+          maxLength: 8192
+        metadata:
+          type: object
+          additionalProperties: true
+        direction:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Direction'
+          description: >-
+            This score's own direction, for evaluators whose scores do not all
+            share one. Absent means the evaluator's `direction` applies.
+    EvaluateResultError:
+      type: object
+      required:
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - evidence_unmet
+        message:
+          type: string
+          maxLength: 8192

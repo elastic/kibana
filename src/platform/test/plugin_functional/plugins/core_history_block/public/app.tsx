@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Prompt } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
@@ -63,7 +63,8 @@ export const renderApp = (
   { basePath, application }: AppOptions,
   { element, history }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <Router history={history}>
       <Routes>
         <Route path="/" exact={true}>
@@ -73,8 +74,7 @@ export const renderApp = (
           <FooPage basePath={basePath} application={application} />
         </Route>
       </Routes>
-    </Router>,
-    element
+    </Router>
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -13,14 +13,14 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper, EuiFieldTextWrapper } from '@kbn/scout-oblt';
+import { waitForApmMainContainer } from '../page_helpers';
 
 export class AgentConfigurationsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-configuration`);
-    await this.page.testSubj.waitForSelector('apmMainContainer');
+    await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
     await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
@@ -30,7 +30,8 @@ export class AgentConfigurationsPage {
     // Wait for the page to be fully loaded
     await this.page.getByRole('heading', { name: 'Configurations', exact: true }).waitFor();
 
-    return this.page.getByText('Create configuration');
+    await this.page.getByTestId('apmAgentConfigurationListCreateConfigurationButton').waitFor();
+    return this.page.getByTestId('apmAgentConfigurationListCreateConfigurationButton');
   }
 
   async isCreateConfigurationButtonAvailable() {
@@ -44,15 +45,9 @@ export class AgentConfigurationsPage {
   }
 
   async hasPermissionsError() {
-    try {
-      this.page.getByRole('heading', { name: 'Configurations', exact: true });
-
-      return await this.page
-        .getByText('Your user may not have the sufficient permissions')
-        .isVisible();
-    } catch {
-      return false;
-    }
+    return await this.page
+      .getByText('Your user may not have the sufficient permissions')
+      .isVisible({ timeout: 2500 });
   }
 
   async clickCreateConfiguration() {
@@ -61,8 +56,7 @@ export class AgentConfigurationsPage {
   }
 
   async selectServiceFromDropdown(serviceName: string) {
-    const serviceComboBox = new EuiComboBoxWrapper(this.page, 'serviceNameComboBox');
-    return await serviceComboBox.selectSingleOption(serviceName);
+    await this.page.components.comboBox('serviceNameComboBox').setSelectedOptions([serviceName]);
   }
 
   async selectEnvironment(environmentName: string) {
@@ -84,10 +78,7 @@ export class AgentConfigurationsPage {
   }
 
   async selectSettingValue(settingKey: string, value: string) {
-    const inputField = new EuiFieldTextWrapper(this.page, {
-      dataTestSubj: `row_${settingKey}`,
-    });
-    await inputField.fill(value);
+    await this.page.testSubj.locator(`row_${settingKey}`).locator('input').fill(value);
   }
 
   async clickSaveConfiguration() {

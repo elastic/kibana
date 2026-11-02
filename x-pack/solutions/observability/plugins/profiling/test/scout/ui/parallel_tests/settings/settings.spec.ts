@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
@@ -13,7 +14,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { test } from '../../fixtures';
 
-test.describe('Settings page', { tag: ['@ess'] }, () => {
+test.describe('Settings page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
@@ -35,7 +36,7 @@ test.describe('Settings page', { tag: ['@ess'] }, () => {
     await expect(profilingSettingsPage.page.getByText('Azure discount rate (%)')).toBeVisible();
     await expect(
       profilingSettingsPage.page.getByRole('heading', {
-        name: 'Show error frames in the Universal Profiling views',
+        name: 'Show error frames in Profiling views',
       })
     ).toBeVisible();
   });

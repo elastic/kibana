@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eso-model-version-example'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/eso-model-version-example'
+  title: '@kbn/eso-model-version-example'
   description: Moon project for @kbn/eso-model-version-example
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: examples/eso_model_version_example
+  sourceRoot: examples/eso_model_version_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'

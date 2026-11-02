@@ -7,32 +7,57 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ALERTS_PAGE_LOADING_TEST_ID, AlertsPage } from './alerts';
 import { useUserData } from '../../components/user_info';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
-import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
+import { useSignalHelpers } from '../../hooks/use_signal_helpers';
 import { TestProviders } from '../../../common/mock';
+import { ALERTS_PATH } from '../../../../common/constants';
 import { USER_UNAUTHENTICATED_TEST_ID } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_empty_page';
 import { NO_INTEGRATION_CALLOUT_TEST_ID } from '../../components/callouts/no_api_integration_key_callout';
 import { NEED_ADMIN_CALLOUT_TEST_ID } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileges';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../components/user_info');
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../sourcerer/containers/use_signal_helpers');
+jest.mock('../../hooks/use_signal_helpers');
+jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({ dataView: {}, status: 'ready' }),
+}));
 jest.mock('../../../common/hooks/use_missing_privileges');
+jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../components/alerts/wrapper', () => ({
   Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,
 }));
 
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
+
+const defaultAlertsPrivileges = {
+  hasAlertsAll: true,
+  hasAlertsRead: true,
+  hasEncryptionKey: true,
+  hasIndexManage: true,
+  hasIndexMaintenance: true,
+  hasIndexRead: true,
+  hasIndexWrite: true,
+  hasIndexUpdateDelete: true,
+  isAuthenticated: true,
+  loading: false,
+};
+
 const doMockRulesPrivileges = ({ read = false }) => {
   (useUserPrivileges as jest.Mock).mockReturnValue({
     rulesPrivileges: {
-      read,
-      edit: false,
+      rules: {
+        read,
+        edit: false,
+      },
     },
   });
 };
@@ -41,6 +66,7 @@ describe('<AlertsPageWrapper />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     doMockRulesPrivileges({});
+    mockUseAlertsPrivileges.mockReturnValue(defaultAlertsPrivileges);
   });
 
   describe('showing loading spinner', () => {
@@ -51,11 +77,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
       expect(getByTestId(ALERTS_PAGE_LOADING_TEST_ID)).toBeInTheDocument();
     });
 
@@ -66,11 +94,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
       expect(getByTestId(ALERTS_PAGE_LOADING_TEST_ID)).toBeInTheDocument();
     });
   });
@@ -83,11 +113,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(queryByTestId(ALERTS_PAGE_LOADING_TEST_ID)).not.toBeInTheDocument();
       expect(getByTestId(USER_UNAUTHENTICATED_TEST_ID)).toBeInTheDocument();
     });
@@ -101,11 +133,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(queryByTestId(ALERTS_PAGE_LOADING_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(USER_UNAUTHENTICATED_TEST_ID)).not.toBeInTheDocument();
       expect(getByTestId(NO_INDEX_TEST_ID)).toBeInTheDocument();
@@ -118,11 +152,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(getByTestId('header-page-title')).toBeInTheDocument();
+      expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
       expect(queryByTestId(ALERTS_PAGE_LOADING_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(USER_UNAUTHENTICATED_TEST_ID)).not.toBeInTheDocument();
       expect(getByTestId(NO_INDEX_TEST_ID)).toBeInTheDocument();
@@ -135,7 +171,6 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          hasIndexRead: true,
           hasEncryptionKey: false,
         },
       ]);
@@ -154,11 +189,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(getByTestId(NO_INTEGRATION_CALLOUT_TEST_ID)).toBeInTheDocument();
     });
 
@@ -167,7 +204,6 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          hasIndexRead: true,
           signalIndexMappingOutdated: true,
           hasIndexManage: false,
         },
@@ -187,11 +223,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(getByTestId(`callout-${NEED_ADMIN_CALLOUT_TEST_ID}`)).toBeInTheDocument();
     });
 
@@ -200,7 +238,6 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          hasIndexRead: true,
         },
       ]);
       doMockRulesPrivileges({ read: true });
@@ -218,24 +255,29 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByText, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(getByText('Insufficient privileges')).toBeInTheDocument();
     });
   });
 
   describe('showing the actual content', () => {
-    it('should render NoPrivileges', () => {
+    it('should render NoPrivileges when user cannot read alerts', () => {
       (useUserData as jest.Mock).mockReturnValue([
         {
           loading: false,
           isAuthenticated: true,
-          hasIndexRead: false,
         },
       ]);
+      mockUseAlertsPrivileges.mockReturnValue({
+        ...defaultAlertsPrivileges,
+        hasAlertsRead: false,
+      });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
@@ -250,11 +292,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(queryByTestId('alerts-page-data-view-wrapper')).not.toBeInTheDocument();
       expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
     });
@@ -264,10 +308,13 @@ describe('<AlertsPageWrapper />', () => {
         {
           loading: false,
           isAuthenticated: true,
-          hasIndexRead: true,
         },
       ]);
       doMockRulesPrivileges({ read: true });
+      mockUseAlertsPrivileges.mockReturnValue({
+        ...defaultAlertsPrivileges,
+        hasAlertsRead: true,
+      });
       (useListsConfig as jest.Mock).mockReturnValue({
         loading: false,
         needsConfiguration: false,
@@ -282,11 +329,13 @@ describe('<AlertsPageWrapper />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <AlertsPage />
+          <MemoryRouter initialEntries={[ALERTS_PATH]}>
+            <AlertsPage />
+          </MemoryRouter>
         </TestProviders>
       );
 
-      expect(queryByTestId('header-page-title')).not.toBeInTheDocument();
+      expect(queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
       expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
       expect(getByTestId('alerts-page-data-view-wrapper')).toBeInTheDocument();
     });

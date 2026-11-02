@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { MiniMap, type Node, type MiniMapNodeProps } from '@xyflow/react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { MiniMap, Panel, type Node, type MiniMapNodeProps } from '@xyflow/react';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme, useEuiShadow, transparentize } from '@elastic/eui';
+import { Global, css } from '@emotion/react';
 import {
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
+  GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
 } from '../test_ids';
 import type { NodeViewModel } from '../types';
-import { isEntityNode, isLabelNode, isStackNode } from '../utils';
+import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
 import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
@@ -78,6 +80,21 @@ const MiniMapNode = ({
     );
   }
 
+  // For relationship nodes, render with the same dark background color as in the graph
+  if (isRelationshipNode(data)) {
+    return (
+      <rect
+        data-id={data.id}
+        data-test-subj={GRAPH_MINIMAP_RELATIONSHIP_NODE_ID}
+        x={x}
+        y={y}
+        height={NODE_LABEL_HEIGHT}
+        width={NODE_LABEL_WIDTH}
+        fill={euiTheme.colors.backgroundFilledText}
+      />
+    );
+  }
+
   // Fallback for unknown types
   return (
     <rect
@@ -116,6 +133,9 @@ export interface MinimapProps {
   nodesState?: Node<NodeViewModel>[];
 }
 
+/** Height of the MiniMap in pixels — used to offset the collapse button above it. */
+const MINIMAP_HEIGHT = 120;
+
 /**
  * Minimap component for the Graph. Provides a scaled-down overview of the entire graph
  * with navigation capabilities.
@@ -132,6 +152,7 @@ export const Minimap = ({
   nodesState,
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Create a mapping of node ids to their data for easy lookup
   const nodeDataMap = React.useMemo(() => {
@@ -164,23 +185,104 @@ export const Minimap = ({
   );
 
   const defaultStyle: React.CSSProperties = {
-    height: 120,
+    height: MINIMAP_HEIGHT,
     width: 200,
     // NOTE MiniMap's `bgColor` prop affects the mask so we need to pass our custom bgColor within the `style` prop
     backgroundColor: euiTheme.colors.backgroundBasePlain,
   };
 
+  const border = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+  const radius = euiTheme.border.radius.medium;
+  const shadow = useEuiShadow('s');
+
   return (
-    <div data-test-subj={GRAPH_MINIMAP_ID}>
-      <MiniMap<Node<NodeViewModel>>
-        maskColor={transparentize(euiTheme.colors.backgroundBaseFormsControlDisabled, 0.75)}
-        nodeComponent={NodeRenderer}
-        style={{ ...defaultStyle, ...style }}
-        zoomable={zoomable}
-        pannable={pannable}
-        zoomStep={zoomStep}
-        position="bottom-left"
-      />
-    </div>
+    <>
+      {/* When expanded, style the ReactFlow MiniMap panel as the card-bottom half.
+          The button container above provides the card-top, together they look like one card. */}
+      {isExpanded && (
+        <Global
+          styles={css`
+            .react-flow__minimap {
+              border: ${border};
+              border-top: none;
+              border-radius: 0 0 ${radius} ${radius};
+              overflow: hidden;
+              padding: 0;
+            }
+          `}
+        />
+      )}
+
+      {/* Button panel — card-top when expanded, full card when collapsed. */}
+      <Panel
+        position="bottom-right"
+        style={{ marginBottom: isExpanded ? MINIMAP_HEIGHT + 15 : 0, padding: 0 }}
+      >
+        {isExpanded ? (
+          /* Expanded: 200px card-top bar, button right-aligned */
+          <div
+            style={{
+              width: 200,
+              background: euiTheme.colors.backgroundBasePlain,
+              border,
+              borderBottom: 'none',
+              borderRadius: `${radius} ${radius} 0 0`,
+              display: 'flex',
+              justifyContent: 'flex-end',
+              padding: 2,
+            }}
+          >
+            <EuiToolTip content="Collapse minimap" disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="minus"
+                aria-label="Collapse minimap"
+                onClick={() => setIsExpanded(false)}
+                size="xs"
+                color="text"
+              />
+            </EuiToolTip>
+          </div>
+        ) : (
+          /* Collapsed: small square card, icon centered */
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              background: euiTheme.colors.backgroundBasePlain,
+              border,
+              borderRadius: radius,
+              boxShadow: shadow,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <EuiToolTip content="Expand minimap" disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="map"
+                aria-label="Expand minimap"
+                size="xs"
+                color="text"
+                onClick={() => setIsExpanded(true)}
+              />
+            </EuiToolTip>
+          </div>
+        )}
+      </Panel>
+
+      <div data-test-subj={GRAPH_MINIMAP_ID}>
+        {isExpanded && (
+          <MiniMap<Node<NodeViewModel>>
+            maskColor={transparentize(euiTheme.colors.backgroundBaseFormsControlDisabled, 0.75)}
+            nodeComponent={NodeRenderer}
+            style={{ ...defaultStyle, ...style }}
+            zoomable={zoomable}
+            pannable={pannable}
+            zoomStep={zoomStep}
+            position="bottom-right"
+          />
+        )}
+      </div>
+    </>
   );
 };

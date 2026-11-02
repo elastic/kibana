@@ -6,6 +6,7 @@
  */
 
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import type { ResetSLOResponse } from '@kbn/slo-schema';
@@ -25,25 +26,31 @@ import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { SLO_RESET_EBT_EVENT_TYPE, toSloDefinitionEbtData } from '../lib/telemetry';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
+import { getSloApmLabels } from './utils';
 
 export class ResetSLO {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(sloId: string): Promise<ResetSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(originalSlo));
     await assertExpectedIndicatorSourceIndexPrivileges(
       originalSlo,
       this.scopedClusterClient.asCurrentUser
@@ -62,6 +69,8 @@ export class ResetSLO {
 
     await this.repository.update(resetedSlo);
 
+    this.telemetry.report(SLO_RESET_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(resetedSlo));
+
     return resetSLOResponseSchema.encode(resetedSlo);
   }
 
@@ -78,9 +87,15 @@ export class ResetSLO {
     } catch (err) {
       // Any errors here should not prevent moving forward.
       // Worst case we keep rolling up data for the orignal SLO
-      this.logger.debug(
-        `Deletion of the original SLO resources failed while resetting it: ${err}.`
-      );
+      this.logger.warn('Deletion of the original SLO resources failed while resetting it.', {
+        service: { name: 'reset_slo' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'cleanup_failed',
+        },
+        error: err,
+      });
     }
   }
 
@@ -148,7 +163,7 @@ export class ResetSLO {
       const tempDocPromise = this.createTempSummaryDocument(slo);
       rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
-      await Promise.all([
+      await allSettledOrThrow([
         sloPipelinePromise,
         rollupTransformPromise,
         summaryPipelinePromise,
@@ -157,20 +172,34 @@ export class ResetSLO {
       ]);
 
       // transforms can only be started after the pipelines are created
-      await Promise.all([
+      await allSettledOrThrow([
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.debug(
-        `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
-      );
+      this.logger.warn('Cannot reset the SLO. Rolling back.', {
+        service: { name: 'reset_slo' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'reset_failed',
+        },
+        error: err,
+      });
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.warn('Rollback operation failed.', {
+            service: { name: 'reset_slo' },
+            labels: {
+              slo_id: slo.id,
+              indicator_type: slo.indicator.type,
+              error_type: 'rollback_failed',
+            },
+            error: rollbackErr,
+          });
         }
       });
 
@@ -205,11 +234,14 @@ export class ResetSLO {
   async deleteTempSummaryDocument(slo: SLODefinition) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
+        this.scopedClusterClient.asCurrentUser.delete(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            refresh: true,
+          },
+          { ignore: [404] }
+        ),
       { logger: this.logger }
     );
   }

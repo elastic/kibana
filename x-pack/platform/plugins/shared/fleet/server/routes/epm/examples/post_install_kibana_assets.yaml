@@ -1,0 +1,30 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postInstallKibanaAssetsRequestExample:
+          description: 'Install Kibana assets for a specific package version'
+          value: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postInstallKibanaAssetsExample:
+            description: 'Kibana assets successfully installed'
+            value:
+              items:
+                - id: 'dashboard-id-1'
+                  type: 'dashboard'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

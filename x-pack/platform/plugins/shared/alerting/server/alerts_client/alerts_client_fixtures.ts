@@ -92,19 +92,25 @@ export const getParamsByMaintenanceWindowScopedQuery: GetMaintenanceWindowScoped
       {
         id: 'mw1',
         categoryIds: ['management'],
-        scopedQuery: {
-          kql: "kibana.alert.rule.name: 'test123'",
-          filters: [],
-          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        scope: {
+          alerting: {
+            enabled: true,
+            kql: "kibana.alert.rule.name: 'test123'",
+            filters: [],
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test123"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+          },
         },
       } as unknown as MaintenanceWindow,
       {
         id: 'mw2',
         categoryIds: ['management'],
-        scopedQuery: {
-          kql: "kibana.alert.rule.name: 'test456'",
-          filters: [],
-          dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test456"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+        scope: {
+          alerting: {
+            enabled: true,
+            kql: "kibana.alert.rule.name: 'test456'",
+            filters: [],
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"kibana.alert.rule.name":"test456"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+          },
         },
       } as unknown as MaintenanceWindow,
     ],
@@ -136,7 +142,12 @@ export const getExpectedQueryByExecutionUuid = ({
         { term: { 'kibana.alert.rule.execution.uuid': uuid } },
         { term: { 'kibana.alert.rule.uuid': ruleId } },
         {
-          bool: { must_not: { exists: { field: 'kibana.alert.maintenance_window_ids' } } },
+          bool: {
+            must_not: [
+              { exists: { field: 'kibana.alert.maintenance_window_ids' } },
+              { term: { 'kibana.alert.status': 'delayed' } },
+            ],
+          },
         },
         ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
         ...(!!excludedAlertInstanceIds?.length
@@ -254,7 +265,10 @@ export const getExpectedQueryByTimeRange = ({
         },
       },
     },
-    { term: { 'kibana.alert.rule.uuid': ruleId } }
+    { term: { 'kibana.alert.rule.uuid': ruleId } },
+    {
+      bool: { must_not: { term: { 'kibana.alert.status': 'delayed' } } },
+    }
   );
   if (excludedAlertInstanceIds?.length) {
     filter.push({

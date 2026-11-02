@@ -12,18 +12,23 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { DynamicGroupingProps, ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type {
+  DynamicGroupingProps,
+  GroupChildComponentRenderer,
+  GroupingSort,
+  GroupingBucket,
+  ParsedGroupingAggregation,
+} from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import type { estypes } from '@elastic/elasticsearch';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { GroupTakeActionItems } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { InspectButton } from '../../../common/components/inspect';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -53,6 +58,10 @@ interface OwnProps {
   globalQuery: Query;
   groupingLevel?: number;
   /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
+  /**
    * Function that returns the group aggregations by field.
    * This is then used to render values in the EuiAccordion `extraAction` section.
    */
@@ -67,8 +76,8 @@ interface OwnProps {
   pageIndex: number;
   pageSize: number;
   parentGroupingFilter?: string;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: RunTimeMappings;
+  renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
+  runtimeMappings?: RunTimeMappings;
   selectedGroup: string;
   setPageIndex: (newIndex: number) => void;
   setPageSize: (newSize: number) => void;
@@ -87,7 +96,7 @@ interface OwnProps {
    *
    * Using this property will create a bucket for each value of the multi-value fields in question.
    * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
-   * in 2 groups: one for mac1 and a second formac2.
+   * in 2 groups: one for mac1 and a second for mac2.
    */
   multiValueFieldsToFlatten?: string[];
 
@@ -106,6 +115,11 @@ interface OwnProps {
     aggs: ParsedGroupingAggregation<AlertsGroupingAggregation>,
     groupingLevel?: number
   ) => void;
+
+  /**
+   * Filter specifically for the unitsCount aggregation
+   */
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -117,6 +131,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   globalFilters,
   globalQuery,
   groupingLevel,
+  sort,
   groupStatsAggregations,
   groupTakeActionItems,
   loading,
@@ -136,29 +151,21 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   multiValueFieldsToFlatten,
   pageScope = PageScope.alerts,
   onAggregationsChange,
+  unitsCountFilter,
 }) => {
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(pageScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(pageScope);
-  const experimentalBrowserFields = useBrowserFields(pageScope);
-
-  const sourcererDataView = oldSourcererDataView;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(dataView);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && sourcererDataView) {
+      if (browserFields != null) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          dataViewSpec: sourcererDataView,
-          dataView: experimentalDataView,
+          dataView,
           browserFields,
           filters: [
             ...defaultFilters,
@@ -175,9 +182,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     },
     [
       browserFields,
-      sourcererDataView,
       uiSettings,
-      experimentalDataView,
+      dataView,
       defaultFilters,
       globalFilters,
       parentGroupingFilter,
@@ -207,6 +213,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
       groupStatsAggregations,
+      sort,
       additionalFilters,
       selectedGroup,
       uniqueValue,
@@ -216,6 +223,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       pageSize,
       pageIndex,
       multiValueFieldsToFlatten,
+      unitsCountFilter,
     });
   }, [
     additionalFilters,
@@ -228,6 +236,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     to,
     uniqueValue,
     multiValueFieldsToFlatten,
+    sort,
+    unitsCountFilter,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
@@ -310,17 +320,27 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) => {
+    (
+      groupFilters: Filter[],
+      groupNumber: number,
+      groupBucket: GroupingBucket<AlertsGroupingAggregation>,
+      closePopover: () => void
+    ) => {
       const takeActionParams = {
         groupNumber,
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
+        groupBucket,
+        closePopover,
+        // Forward the page-scoped data view runtime mappings so the group-level
+        // status update can resolve fields not natively mapped on the alerts index.
+        runtimeMappings,
       };
 
-      return groupTakeActionItems?.(takeActionParams) ?? { items: [], panels: [] };
+      return groupTakeActionItems?.(takeActionParams);
     },
-    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
+    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId, runtimeMappings]
   );
 
   const onChangeGroupsItemsPerPage = useCallback(

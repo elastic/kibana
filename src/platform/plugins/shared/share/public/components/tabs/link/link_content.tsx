@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import { isTimeRangeAbsoluteTime } from '../../../lib/time_utils';
 import { TimeTypeSection } from './time_type_section';
 import { useShareContext, type IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
@@ -56,13 +57,18 @@ export const LinkContent = ({
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAbsoluteTime, setIsAbsoluteTime] = useState(true);
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
-  const timeRange = shareableUrlLocatorParams?.params?.timeRange;
+  const timeRange = useMemo(() => {
+    return shareableUrlLocatorParams?.locator.getTimeRange
+      ? shareableUrlLocatorParams.locator.getTimeRange(shareableUrlLocatorParams?.params)
+      : undefined;
+  }, [shareableUrlLocatorParams]);
+  const isAbsoluteTimeByDefault = isTimeRangeAbsoluteTime(timeRange);
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
-  const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
+  const { delegatedShareUrlHandler, draftModeCallOut, helpText } = objectConfig;
   const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
@@ -141,8 +147,14 @@ export const LinkContent = ({
         <TimeTypeSection
           timeRange={timeRange}
           onTimeTypeChange={handleTimeTypeChange}
-          isAbsoluteTimeByDefault={isAbsoluteTime}
+          isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
         />
+        {helpText && (
+          <>
+            <EuiSpacer size="m" />
+            <div data-test-subj="shareLinkHelpText">{helpText}</div>
+          </>
+        )}
         {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
@@ -169,7 +181,7 @@ export const LinkContent = ({
             }
           >
             <EuiButton
-              iconType="copy"
+              iconType="link"
               fill
               data-test-subj="copyShareUrlButton"
               data-share-url={urlToCopy.current}

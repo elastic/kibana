@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MonitoringLabel } from '../../../../common/api/entity_analytics';
+import type {
+  MonitoringLabel,
+  MonitoringEntitySource,
+} from '../../../../common/api/entity_analytics';
 
 export type PrivMonUserSource = 'csv' | 'api' | 'index_sync' | 'entity_analytics_integration';
 
@@ -18,3 +21,5 @@ export interface PrivMonBulkUser {
 }
 
 export type MonitoringEntitySyncType = 'entity_analytics_integration' | 'index';
+
+export type PartialMonitoringEntitySource = Partial<MonitoringEntitySource> & { id: string };

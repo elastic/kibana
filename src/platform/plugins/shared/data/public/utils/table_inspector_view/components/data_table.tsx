@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -29,6 +28,7 @@ import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataViewRow, DataViewColumn } from '../types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -44,13 +44,14 @@ interface DataTableFormatProps {
   fieldFormats: FieldFormatsStart;
   uiActions: UiActionsStart;
   isFilterable: (column: DatatableColumn) => boolean;
+  missingValueDisplay?: 'text' | 'table';
 }
 
 interface RenderCellArguments {
   table: Datatable;
   columnIndex: number;
   rowIndex: number;
-  formattedValue: string;
+  formattedValue: ReactNode;
   uiActions: UiActionsStart;
   isFilterable: boolean;
 }
@@ -59,14 +60,6 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes: Record<string, PropTypes.Validator<unknown>> = {
-    data: PropTypes.object.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    fieldFormats: PropTypes.object.isRequired,
-    uiActions: PropTypes.object.isRequired,
-    isFilterable: PropTypes.func.isRequired,
-  };
-
   csvSeparator = this.props.uiSettings.get('csv:separator', ',');
   quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
@@ -96,7 +89,7 @@ class DataTableFormatClass extends Component<
                 }
               >
                 <EuiButtonIcon
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   color="text"
                   aria-label={i18n.translate('data.inspector.table.filterForValueButtonAriaLabel', {
                     defaultMessage: 'Filter for value',
@@ -106,7 +99,7 @@ class DataTableFormatClass extends Component<
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
-                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                    uiActions.executeTriggerActions(ON_CLICK_VALUE, {
                       data: { data: [eventData] },
                     });
                   }}
@@ -126,7 +119,7 @@ class DataTableFormatClass extends Component<
                   }
                 >
                   <EuiButtonIcon
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     color="text"
                     aria-label={i18n.translate(
                       'data.inspector.table.filterOutValueButtonAriaLabel',
@@ -139,7 +132,7 @@ class DataTableFormatClass extends Component<
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
-                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                      uiActions.executeTriggerActions(ON_CLICK_VALUE, {
                         data: { data: [eventData], negate: true },
                       });
                     }}
@@ -158,6 +151,7 @@ class DataTableFormatClass extends Component<
     uiActions,
     fieldFormats,
     isFilterable,
+    missingValueDisplay,
   }: DataTableFormatProps) {
     if (!data) {
       return {
@@ -175,7 +169,17 @@ class DataTableFormatClass extends Component<
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
-          const formattedValue = fieldFormatter.convert(value);
+          // Cells are rendered directly inside `EuiFlexItem` (not inside an anchor/img), so
+          // `convertToReact` is safe for every value — no risk of wrapping a formatter's own
+          // anchor in another one. In `'table'` mode we therefore use React for all values so
+          // URL/color/etc. formatters render richly and missing values pick up the accessible
+          // dash + tooltip that `convertToReact` produces. Other consumers stay on
+          // `convertToText` to preserve the plain `(null)` label chart inspectors have always
+          // shown.
+          const formattedValue =
+            missingValueDisplay === 'table'
+              ? fieldFormatter.convertToReact(value)
+              : fieldFormatter.convertToText(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
           return DataTableFormatClass.renderCell({
@@ -203,6 +207,9 @@ class DataTableFormatClass extends Component<
 
     return (
       <EuiInMemoryTable
+        tableCaption={i18n.translate('data.inspector.table.tableCaption', {
+          defaultMessage: 'Inspector data',
+        })}
         tableLayout="auto"
         className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"

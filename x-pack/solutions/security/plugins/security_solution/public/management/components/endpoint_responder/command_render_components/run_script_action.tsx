@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { parsedExecuteTimeout } from '../lib/utils';
 import type { ParsedCommandInput } from '../../console/service/types';
-import { RunscriptActionResult } from '../../runscript_action_result';
 import type { ArgSelectorState, SupportedArguments } from '../../console';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
-import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
+import type {
+  EndpointRunScriptActionRequestParams,
+  RunScriptActionRequestBody,
+} from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionRunScriptOutputContent,
@@ -39,11 +41,18 @@ export interface SentinelOneRunScriptActionParameters extends SupportedArguments
   inputParams: string;
 }
 
+export interface EndpointRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
+  timeout: string;
+}
+
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
     | CrowdStrikeRunScriptActionParameters
     | MicrosoftDefenderEndpointRunScriptActionParameters
-    | SentinelOneRunScriptActionParameters,
+    | SentinelOneRunScriptActionParameters
+    | EndpointRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -82,17 +91,30 @@ export const RunScriptActionResult = memo<
         };
       }
 
-      if (agentType === 'sentinel_one') {
-        const { inputParams } =
-          args as ParsedCommandInput<SentinelOneRunScriptActionParameters>['args'];
+      if (agentType === 'sentinel_one' || agentType === 'endpoint') {
+        const { inputParams, timeout } = args as ParsedCommandInput<
+          SentinelOneRunScriptActionParameters | EndpointRunScriptActionParameters
+        >['args'];
         const scriptSelectionState: ArgSelectorState<CustomScriptSelectorState>[] | undefined =
           command.argState?.script;
 
         if (scriptSelectionState && scriptSelectionState?.[0].store?.selectedOption?.id) {
-          return {
+          const params: RunScriptActionRequestBody['parameters'] = {
             scriptId: scriptSelectionState[0].store.selectedOption.id,
             scriptInput: inputParams?.[0],
           };
+
+          if (agentType === 'endpoint') {
+            const timeoutInSeconds = parsedExecuteTimeout(timeout?.[0] as string);
+
+            if (timeoutInSeconds) {
+              (
+                params as RunScriptActionRequestBody<EndpointRunScriptActionRequestParams>['parameters']
+              ).timeout = timeoutInSeconds;
+            }
+          }
+
+          return params;
         }
       }
 
@@ -107,7 +129,7 @@ export const RunScriptActionResult = memo<
     } as unknown as RunScriptActionRequestBody;
   }, [command]);
 
-  const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
+  return useConsoleActionSubmitter<
     RunScriptActionRequestBody,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
@@ -120,27 +142,6 @@ export const RunScriptActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'runscript',
-  });
-
-  if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
-    return result;
-  }
-
-  return (
-    <ResultComponent
-      data-test-subj="executeSuccess"
-      showAs="success"
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.runScriptAction.successTitle',
-        { defaultMessage: 'RunScript was successful.' }
-      )}
-    >
-      <RunscriptActionResult
-        action={completedActionDetails}
-        data-test-subj="runscriptResult"
-        textSize="s"
-      />
-    </ResultComponent>
-  );
+  }).result;
 });
 RunScriptActionResult.displayName = 'RunScriptActionResult';

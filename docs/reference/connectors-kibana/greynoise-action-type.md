@@ -1,15 +1,15 @@
 ---
 navigation_title: "GreyNoise"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/greynoise-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.3
   serverless: preview
 ---
 
 # GreyNoise connector [greynoise-action-type]
 
 The GreyNoise connector communicates with the GreyNoise API to detect and classify Internet scanning noise.
+
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Create connectors in {{kib}} [define-greynoise-ui]
 

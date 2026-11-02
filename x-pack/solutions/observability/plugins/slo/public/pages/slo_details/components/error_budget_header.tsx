@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-
-import { ErrorBudgetActions } from './error_budget_actions';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   hideTitle?: boolean;
   hideHeaderDurationLabel?: boolean;
-  isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
 }
 
@@ -27,7 +23,6 @@ export function ErrorBudgetHeader({
   slo,
   hideTitle = false,
   hideHeaderDurationLabel = false,
-  isMouseOver,
   setDashboardAttachmentReady,
 }: Props) {
   const { executionContext } = useKibana().services;
@@ -49,21 +44,24 @@ export function ErrorBudgetHeader({
               </EuiTitle>
             </EuiFlexItem>
           )}
-          {!isDashboardContext && (
-            <EuiFlexGroup justifyContent="flexEnd" wrap>
-              {isMouseOver && (
-                <EuiFlexItem grow={false}>
-                  <ErrorBudgetActions setDashboardAttachmentReady={setDashboardAttachmentReady} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+          {!isDashboardContext && setDashboardAttachmentReady && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => setDashboardAttachmentReady(true)}
+                data-test-subj="sloActionsAddToDashboard"
+              >
+                {i18n.translate('xpack.slo.item.actions.addToDashboard', {
+                  defaultMessage: 'Add to dashboard',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
       {!hideHeaderDurationLabel && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
-            {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+            {slo.timeWindow.type === 'rolling'
               ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
                   defaultMessage: 'Last {duration}',
                   values: { duration: toDurationLabel(slo.timeWindow.duration) },

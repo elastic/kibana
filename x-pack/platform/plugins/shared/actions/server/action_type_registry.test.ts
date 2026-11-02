@@ -7,7 +7,7 @@
 
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionType } from './types';
@@ -89,6 +89,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -141,6 +142,19 @@ describe('actionTypeRegistry', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid feature ids \\"foo\\" for connector type \\"my-connector-type\\"."`
+      );
+    });
+
+    test('throws if a supported feature id exceeds the max length', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: ['a'.repeat(101)],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
       );
     });
 
@@ -236,6 +250,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -294,6 +309,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -307,6 +323,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
 
@@ -317,15 +334,14 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
+              \\"origin\\": \\"string\\",
               \\"code\\": \\"too_small\\",
               \\"minimum\\": 1,
-              \\"type\\": \\"string\\",
               \\"inclusive\\": true,
-              \\"exact\\": false,
-              \\"message\\": \\"String must contain at least 1 character(s)\\",
               \\"path\\": [
                 \\"text\\"
-              ]
+              ],
+              \\"message\\": \\"Too small: expected string to have >=1 characters\\"
             }
           ]"
         `);
@@ -336,13 +352,12 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
-              \\"code\\": \\"invalid_type\\",
               \\"expected\\": \\"string\\",
-              \\"received\\": \\"undefined\\",
+              \\"code\\": \\"invalid_type\\",
               \\"path\\": [
                 \\"text\\"
               ],
-              \\"message\\": \\"Required\\"
+              \\"message\\": \\"Invalid input: expected string, received undefined\\"
             }
           ]"
         `);
@@ -356,16 +371,15 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
+              \\"origin\\": \\"number\\",
               \\"code\\": \\"too_small\\",
               \\"minimum\\": 5,
-              \\"type\\": \\"number\\",
               \\"inclusive\\": true,
-              \\"exact\\": false,
-              \\"message\\": \\"Number must be greater than or equal to 5\\",
               \\"path\\": [
                 \\"subActionParams\\",
                 \\"value\\"
-              ]
+              ],
+              \\"message\\": \\"Too small: expected number to be >=5\\"
             }
           ]"
         `);
@@ -380,45 +394,40 @@ describe('actionTypeRegistry', () => {
           "[
             {
               \\"code\\": \\"invalid_union\\",
-              \\"unionErrors\\": [
-                {
-                  \\"issues\\": [
-                    {
-                      \\"received\\": \\"subaction4\\",
-                      \\"code\\": \\"invalid_literal\\",
-                      \\"expected\\": \\"subaction1\\",
-                      \\"path\\": [
-                        \\"subAction\\"
-                      ],
-                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction1\\\\\\"\\"
-                    }
-                  ],
-                  \\"name\\": \\"ZodError\\"
-                },
-                {
-                  \\"issues\\": [
-                    {
-                      \\"received\\": \\"subaction4\\",
-                      \\"code\\": \\"invalid_literal\\",
-                      \\"expected\\": \\"subaction2\\",
-                      \\"path\\": [
-                        \\"subAction\\"
-                      ],
-                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction2\\\\\\"\\"
-                    },
-                    {
-                      \\"code\\": \\"invalid_type\\",
-                      \\"expected\\": \\"string\\",
-                      \\"received\\": \\"undefined\\",
-                      \\"path\\": [
-                        \\"subActionParams\\",
-                        \\"message\\"
-                      ],
-                      \\"message\\": \\"Required\\"
-                    }
-                  ],
-                  \\"name\\": \\"ZodError\\"
-                }
+              \\"errors\\": [
+                [
+                  {
+                    \\"code\\": \\"invalid_value\\",
+                    \\"values\\": [
+                      \\"subaction1\\"
+                    ],
+                    \\"path\\": [
+                      \\"subAction\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction1\\\\\\"\\"
+                  }
+                ],
+                [
+                  {
+                    \\"code\\": \\"invalid_value\\",
+                    \\"values\\": [
+                      \\"subaction2\\"
+                    ],
+                    \\"path\\": [
+                      \\"subAction\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction2\\\\\\"\\"
+                  },
+                  {
+                    \\"expected\\": \\"string\\",
+                    \\"code\\": \\"invalid_type\\",
+                    \\"path\\": [
+                      \\"subActionParams\\",
+                      \\"message\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected string, received undefined\\"
+                  }
+                ]
               ],
               \\"path\\": [],
               \\"message\\": \\"Invalid input\\"
@@ -428,6 +437,28 @@ describe('actionTypeRegistry', () => {
       }
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('returns only sandbox-capable connector types when asked', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'spec-type', sandboxSupportedAuthTypes: ['bearer'] })
+      );
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'hook-type', isSandboxCapable: () => true })
+      );
+
+      expect(actionTypeRegistry.list({ sandboxCapableOnly: true }).map(({ id }) => id)).toEqual([
+        'spec-type',
+        'hook-type',
+      ]);
+      expect(actionTypeRegistry.list().map(({ id }) => id)).toEqual([
+        'my-connector-type',
+        'spec-type',
+        'hook-type',
+      ]);
     });
 
     test('returns list of connector types filtered by feature id if provided', () => {
@@ -453,6 +484,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -486,6 +518,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: true,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -520,6 +553,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -938,6 +972,86 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('getSpec()', () => {
+    it('returns the source spec for a spec-backed type', () => {
+      const spec = { metadata: { id: 'spec-backed' } };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-backed',
+          spec,
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('spec-backed')).toBe(spec);
+    });
+
+    it('returns undefined for a classic type without a spec', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+
+      expect(actionTypeRegistry.getSpec('my-connector-type')).toBeUndefined();
+    });
+
+    it('returns undefined for an unknown id without throwing', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
+    });
+  });
+
+  describe('register() - optional executor and params', () => {
+    const defaultValidateNoParams = {
+      config: { schema: z.object({}) },
+      secrets: { schema: z.object({}) },
+    };
+
+    it('allows workflows-only connectors to be registered without executor and params', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const workflowsConnector = getConnectorType({
+        id: 'workflows-connector',
+        name: 'Workflows Connector',
+        supportedFeatureIds: ['workflows'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
+      });
+
+      expect(() => actionTypeRegistry.register(workflowsConnector)).not.toThrow();
+      expect(actionTypeRegistry.has('workflows-connector')).toBe(true);
+      expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
+
+    it('skips task registration for workflows connectors without executor and params', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      mockTaskManager.registerTaskDefinitions.mockClear();
+
+      const workflowsConnector = getConnectorType({
+        id: 'workflows-connector-no-executor-params',
+        name: 'Workflows Connector No Executor Params',
+        supportedFeatureIds: ['workflows'],
+        executor: undefined,
+        validate: defaultValidateNoParams,
+      });
+
+      actionTypeRegistry.register(workflowsConnector);
+
+      expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
+    });
+
+    it('requires both executor and params for connectors with multiple feature IDs including workflows', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const workflowsConnector = getConnectorType({
+        id: 'workflows-connector-multi-feature',
+        name: 'Workflows Connector Multi Feature',
+        supportedFeatureIds: ['workflows', 'alerting'],
+      });
+      // Keep both executor and params for multi-feature connectors
+      expect(() => actionTypeRegistry.register(workflowsConnector)).not.toThrow();
+      expect(actionTypeRegistry.has('workflows-connector-multi-feature')).toBe(true);
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalled();
     });
   });
 });

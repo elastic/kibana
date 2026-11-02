@@ -118,6 +118,17 @@ describe('MaintenanceWindowClient - finish', () => {
         freq: Frequency.WEEKLY,
         count: 5,
       } as MaintenanceWindow['rRule'],
+      schedule: {
+        custom: {
+          start: '2023-03-26T00:00:00.000Z',
+          timezone: 'CET',
+          duration: '1h',
+          recurring: {
+            every: '1w',
+            occurrences: 5,
+          },
+        },
+      },
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
     });
@@ -179,7 +190,7 @@ describe('MaintenanceWindowClient - finish', () => {
 
     await expect(async () => {
       await finishMaintenanceWindow(mockContext, { id: 'test-id' });
-    }).rejects.toThrowError();
+    }).rejects.toThrow();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to finish maintenance window by id: test-id, Error: Error: Cannot finish maintenance window that is not running'

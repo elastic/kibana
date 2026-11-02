@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   const adJobId1 = 'fq_single_1';
@@ -19,11 +18,10 @@ export default function ({ getService }: FtrProviderContext) {
   const dfaJobId1 = 'ihp_od_1';
   const dfaJobIdES = 'ihp_od_es';
 
-  describe('synchronize', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/283874
+  describe.skip('synchronize', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

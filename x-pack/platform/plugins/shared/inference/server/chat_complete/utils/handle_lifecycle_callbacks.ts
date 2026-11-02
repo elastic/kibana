@@ -18,12 +18,16 @@ export function handleLifecycleCallbacks({
 }): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
   return (source$) => {
     let tokenCount: ChatCompletionTokenCount | undefined;
+    let model: string | undefined;
 
     return new Observable<ChatCompletionEvent>((subscriber) => {
       return source$.subscribe({
         next: (value) => {
           if (isChatCompletionTokenCountEvent(value)) {
             tokenCount = value.tokens;
+            if (value.model) {
+              model = value.model;
+            }
           }
           subscriber.next(value);
         },
@@ -36,6 +40,7 @@ export function handleLifecycleCallbacks({
         complete: () => {
           callbackManager.onComplete({
             tokens: tokenCount,
+            model,
           });
           subscriber.complete();
         },

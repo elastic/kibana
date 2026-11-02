@@ -30,6 +30,7 @@ export interface UseFetchIntegrationsResult {
  * - splunk
  * - google_secops
  * - microsoft_sentinel
+ * - ibm_qradar
  * - sentinel_one
  * - crowdstrike
  * - elastic_security

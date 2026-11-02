@@ -15,7 +15,7 @@ describe('useTestQuery', () => {
       initialProps: () =>
         Promise.resolve({
           testResults: {
-            results: [{ group: 'all documents', hits: [], count: 1, sourceFields: [] }],
+            results: [{ group: 'all documents', hits: [], count: 1, sourceFields: {} }],
             truncated: false,
           },
           isGrouped: false,
@@ -46,8 +46,8 @@ describe('useTestQuery', () => {
         Promise.resolve({
           testResults: {
             results: [
-              { group: 'a', count: 1, value: 10, hits: [], sourceFields: [] },
-              { group: 'b', count: 2, value: 20, hits: [], sourceFields: [] },
+              { group: 'a', count: 1, value: 10, hits: [], sourceFields: {} },
+              { group: 'b', count: 2, value: 20, hits: [], sourceFields: {} },
             ],
             truncated: false,
           },
@@ -81,8 +81,8 @@ describe('useTestQuery', () => {
         Promise.resolve({
           testResults: {
             results: [
-              { group: 'a', count: 1, value: 10, hits: [], sourceFields: [] },
-              { group: 'b', count: 2, value: 20, hits: [], sourceFields: [] },
+              { group: 'a', count: 1, value: 10, hits: [], sourceFields: {} },
+              { group: 'b', count: 2, value: 20, hits: [], sourceFields: {} },
             ],
             truncated: false,
           },
@@ -131,8 +131,8 @@ describe('useTestQuery', () => {
         Promise.resolve({
           testResults: {
             results: [
-              { group: 'a', count: 1, value: 10, hits: [], sourceFields: [] },
-              { group: 'b', count: 2, value: 20, hits: [], sourceFields: [] },
+              { group: 'a', count: 1, value: 10, hits: [], sourceFields: {} },
+              { group: 'b', count: 2, value: 20, hits: [], sourceFields: {} },
             ],
             truncated: false,
           },
@@ -159,5 +159,27 @@ describe('useTestQuery', () => {
       cols: [{ id: 'grouped', name: 'grouped', field: 'grouped', actions: false }],
       rows: [{ grouped: 'test' }],
     });
+  });
+
+  test('resetTestQueryResponse clears all state', async () => {
+    const errorMsg = 'How dare you writing such a query';
+    const { result } = renderHook(useTestQuery, {
+      initialProps: () => Promise.reject({ message: errorMsg }),
+    });
+
+    await act(async () => {
+      await result.current.onTestQuery();
+    });
+    expect(result.current.testQueryError).toContain(errorMsg);
+
+    act(() => {
+      result.current.resetTestQueryResponse();
+    });
+
+    expect(result.current.testQueryLoading).toBe(false);
+    expect(result.current.testQueryError).toBe(null);
+    expect(result.current.testQueryWarning).toBe(null);
+    expect(result.current.testQueryResult).toBe(null);
+    expect(result.current.testQueryPreview).toBe(null);
   });
 });

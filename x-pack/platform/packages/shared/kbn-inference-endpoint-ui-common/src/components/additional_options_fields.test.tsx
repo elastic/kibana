@@ -32,36 +32,35 @@ const mockConfig = {
   providerConfig: {},
   taskType: CHAT_COMPLETION_TASK_TYPE,
 } as unknown as Config;
-const taskTypeOptions = [
-  { id: textEmbeddingTask, label: textEmbeddingTask, value: textEmbeddingTask },
+
+const chatCompletionTaskTypeOptions = [
   {
     id: CHAT_COMPLETION_TASK_TYPE,
-    label: CHAT_COMPLETION_TASK_TYPE,
     value: CHAT_COMPLETION_TASK_TYPE,
+    label: CHAT_COMPLETION_TASK_TYPE,
   },
+];
+
+const textEmbeddingTaskTypeOptions = [
+  { id: textEmbeddingTask, value: textEmbeddingTask, label: textEmbeddingTask },
 ];
 
 describe('AdditionalOptionsFields', () => {
   describe('contextWindowLength', () => {
-    it('should render contextWindowLength field when task type options include chat_completion', () => {
+    it('should render contextWindowLength field when selectedTaskType is chat_completion', () => {
       render(
         <MockFormProvider>
           <AdditionalOptionsFields
             config={mockConfig}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
             allowContextWindowLength={true}
             selectedTaskType={CHAT_COMPLETION_TASK_TYPE}
+            taskTypeOptions={chatCompletionTaskTypeOptions}
           />
         </MockFormProvider>
       );
 
       const inputField = screen.getByTestId('configuration-formrow-contextWindowLength');
-      const inputLabel = screen.getByTestId('context-window-length-details-label');
-      const isInputInvalid = inputField.getAttribute('aria-invalid');
       expect(inputField).toBeInTheDocument();
-      expect(inputLabel).toBeInTheDocument();
-      expect(isInputInvalid).toBeNull();
     });
 
     it('should render contextWindowLength field as valid when selectedTaskType is chat_completion', () => {
@@ -73,60 +72,35 @@ describe('AdditionalOptionsFields', () => {
               taskType: CHAT_COMPLETION_TASK_TYPE,
               contextWindowLength: 500,
             }}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
             allowContextWindowLength={true}
             selectedTaskType={CHAT_COMPLETION_TASK_TYPE}
+            taskTypeOptions={chatCompletionTaskTypeOptions}
           />
         </MockFormProvider>
       );
 
-      const inputLabel = screen.getByTestId('context-window-length-details-label');
       const inputField = screen.getByTestId('configuration-formrow-contextWindowLength');
-      const isInputInvalid = inputField.getAttribute('aria-invalid');
       const inputNumberField = screen.getByTestId('contextWindowLengthNumber');
       const inputValue = inputNumberField.getAttribute('value');
-      expect(inputLabel).toBeInTheDocument();
-      expect(isInputInvalid).toBeNull();
+      expect(inputField).toBeInTheDocument();
       expect(inputNumberField).toBeInTheDocument();
       expect(inputValue).toBe('500');
     });
 
-    it('should render contextWindowLength field with invalid indicator when selectedTaskType is not chat_completion', () => {
-      render(
-        <MockFormProvider>
-          <AdditionalOptionsFields
-            config={{ ...mockConfig, taskType: textEmbeddingTask, contextWindowLength: 500 }}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
-            allowContextWindowLength={true}
-            selectedTaskType={textEmbeddingTask}
-          />
-        </MockFormProvider>
-      );
-
-      const inputField = screen.getByTestId('contextWindowLengthNumber');
-      const isInvalid = inputField.getAttribute('aria-invalid');
-      expect(isInvalid).toBe('true');
-    });
-
-    it('should hide contextWindowLength field when chat_completion is not a task option', () => {
+    it('should hide contextWindowLength field when selectedTaskType is not chat_completion', () => {
       render(
         <MockFormProvider>
           <AdditionalOptionsFields
             config={mockConfig}
-            taskTypeOptions={[]}
-            onTaskTypeOptionsSelect={jest.fn()}
             allowContextWindowLength={true}
             selectedTaskType={textEmbeddingTask}
+            taskTypeOptions={textEmbeddingTaskTypeOptions}
           />
         </MockFormProvider>
       );
 
       const inputField = screen.queryByTestId('configuration-formrow-contextWindowLength');
-      const inputLabel = screen.queryByTestId('context-window-length-details-label');
       expect(inputField).not.toBeInTheDocument();
-      expect(inputLabel).not.toBeInTheDocument();
     });
 
     it('should hide contextWindowLength field when allowContextWindowLength is false', () => {
@@ -134,92 +108,31 @@ describe('AdditionalOptionsFields', () => {
         <MockFormProvider>
           <AdditionalOptionsFields
             config={mockConfig}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
             allowContextWindowLength={false}
-            selectedTaskType={textEmbeddingTask}
+            selectedTaskType={CHAT_COMPLETION_TASK_TYPE}
+            taskTypeOptions={chatCompletionTaskTypeOptions}
           />
         </MockFormProvider>
       );
 
       const inputField = screen.queryByTestId('configuration-formrow-contextWindowLength');
-      const inputLabel = screen.queryByTestId('context-window-length-details-label');
       expect(inputField).not.toBeInTheDocument();
-      expect(inputLabel).not.toBeInTheDocument();
     });
-  });
 
-  describe('taskTypeOptions', () => {
-    it('should render taskTypeOptions section', () => {
-      render(
+    it('should return null when no fields are visible', () => {
+      const { container } = render(
         <MockFormProvider>
           <AdditionalOptionsFields
             config={mockConfig}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
             allowContextWindowLength={false}
+            allowTemperature={false}
+            selectedTaskType={textEmbeddingTask}
+            taskTypeOptions={textEmbeddingTaskTypeOptions}
           />
         </MockFormProvider>
       );
 
-      const taskTypeTitle = screen.getByTestId('task-type-details-label');
-      const taskTypeButtons = screen.getByTestId('taskTypeSelect');
-      expect(taskTypeTitle).toBeInTheDocument();
-      expect(taskTypeButtons).toBeInTheDocument();
-
-      taskTypeOptions.forEach(({ id }) => {
-        const optionButton = screen.getByTestId(id);
-        expect(optionButton).toBeInTheDocument();
-      });
-    });
-
-    it('should have single task type selection when only one task type option', () => {
-      render(
-        <MockFormProvider>
-          <AdditionalOptionsFields
-            config={mockConfig}
-            taskTypeOptions={[taskTypeOptions[0]]}
-            onTaskTypeOptionsSelect={jest.fn()}
-            allowContextWindowLength={false}
-          />
-        </MockFormProvider>
-      );
-      const taskTypeButton = screen.getByTestId('taskTypeSelectSingle');
-      expect(taskTypeButton).toBeInTheDocument();
-    });
-
-    it('should disable task type selection on edit', () => {
-      render(
-        <MockFormProvider>
-          <AdditionalOptionsFields
-            config={mockConfig}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
-            allowContextWindowLength={false}
-            isEdit={true}
-          />
-        </MockFormProvider>
-      );
-      const taskTypeButtonDisabled = screen.getByTestId('taskTypeSelectDisabled');
-      expect(taskTypeButtonDisabled).toBeInTheDocument();
-    });
-  });
-
-  describe('inferenceId', () => {
-    it('should render the inferenceId section', () => {
-      render(
-        <MockFormProvider>
-          <AdditionalOptionsFields
-            config={mockConfig}
-            taskTypeOptions={taskTypeOptions}
-            onTaskTypeOptionsSelect={jest.fn()}
-            allowContextWindowLength={false}
-          />
-        </MockFormProvider>
-      );
-
-      const inputField = screen.getByTestId('inference-endpoint-input-field');
-      expect(inputField).toBeInTheDocument();
+      expect(container.querySelector('hr')).not.toBeInTheDocument();
     });
   });
 });

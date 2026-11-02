@@ -47,7 +47,7 @@ export const IntegrationPageRouteCallout = ({ workflowName }: IntegrationPageRou
           ? INTEGRATION_CALLOUT_TITLE_MISCONFIGURATION
           : INTEGRATION_CALLOUT_TITLE_VULNERABILITY
       }
-      iconType="cheer"
+      iconType="popper"
       onDismiss={() => setUserHasDismissedCallout(true)}
     >
       <EuiFlexGroup justifyContent="flexStart">

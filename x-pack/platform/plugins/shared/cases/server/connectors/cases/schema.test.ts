@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { MAX_ALERTS_PER_CASE, MAX_DOCS_PER_PAGE } from '../../../common/constants';
-import { CasesConnectorRunParamsSchema } from './schema';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_DOCS_PER_PAGE,
+  ABSOLUTE_MAX_CASES_PER_RUN,
+} from '../../../common/constants';
+import {
+  CasesConnectorRuleActionParamsSchema,
+  CasesConnectorRunParamsSchema,
+  resolveCasesConnectorActionSource,
+  ZCasesConnectorRunParamsSchema,
+} from './schema';
 
 describe('CasesConnectorRunParamsSchema', () => {
   const getParams = (overrides = {}) => ({
@@ -14,6 +23,7 @@ describe('CasesConnectorRunParamsSchema', () => {
     groupingBy: ['host.name'],
     rule: { id: 'rule-id', name: 'Test rule', tags: [], ruleUrl: 'https://example.com' },
     owner: 'cases',
+    source: 'rule',
     ...overrides,
   });
 
@@ -26,11 +36,11 @@ describe('CasesConnectorRunParamsSchema', () => {
             "_index": "alert-index",
           },
         ],
+        "autoPushCase": null,
         "groupedAlerts": null,
         "groupingBy": Array [
           "host.name",
         ],
-        "internallyManagedAlerts": null,
         "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
@@ -40,7 +50,9 @@ describe('CasesConnectorRunParamsSchema', () => {
           "ruleUrl": "https://example.com",
           "tags": Array [],
         },
+        "source": "rule",
         "templateId": null,
+        "templateVersion": null,
         "timeWindow": "7d",
       }
     `);
@@ -192,14 +204,18 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
-    it('does not accept maximumCasesToOpen to be more than 20', () => {
-      const params = getParams();
+    it('accepts maximumCasesToOpen values above the default maximum', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ maximumCasesToOpen: 21 }))
+          .maximumCasesToOpen
+      ).toBe(21);
+    });
 
+    it('does not accept maximumCasesToOpen above ABSOLUTE_MAX_CASES_PER_RUN', () => {
       expect(() =>
-        CasesConnectorRunParamsSchema.validate({
-          ...params,
-          maximumCasesToOpen: 21,
-        })
+        CasesConnectorRunParamsSchema.validate(
+          getParams({ maximumCasesToOpen: ABSOLUTE_MAX_CASES_PER_RUN + 1 })
+        )
       ).toThrow();
     });
   });
@@ -214,6 +230,53 @@ describe('CasesConnectorRunParamsSchema', () => {
         CasesConnectorRunParamsSchema.validate(getParams({ templateId: 'case_template_key' }))
           .templateId
       ).toBe('case_template_key');
+    });
+  });
+
+  describe('templateVersion', () => {
+    it('defaults the templateVersion to null', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).templateVersion).toBe(null);
+    });
+
+    it('accepts templateVersion as a string', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ templateVersion: '1' })).templateVersion
+      ).toBe('1');
+    });
+
+    it('accepts templateVersion as null', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ templateVersion: null })).templateVersion
+      ).toBe(null);
+    });
+  });
+
+  describe('extractObservables', () => {
+    it('defaults to undefined when omitted', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams()).extractObservables
+      ).toBeUndefined();
+    });
+
+    it('accepts extractObservables as true', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: true }))
+          .extractObservables
+      ).toBe(true);
+    });
+
+    it('accepts extractObservables as false', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: false }))
+          .extractObservables
+      ).toBe(false);
+    });
+
+    it('accepts extractObservables as null', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ extractObservables: null }))
+          .extractObservables
+      ).toBe(null);
     });
   });
 
@@ -335,11 +398,99 @@ describe('CasesConnectorRunParamsSchema', () => {
     });
   });
 
-  describe('internallyManagedAlerts', () => {
-    it('defaults the internallyManagedAlerts to null', () => {
-      expect(CasesConnectorRunParamsSchema.validate(getParams()).internallyManagedAlerts).toBe(
-        null
+  describe('source', () => {
+    it('accepts `rule`', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ source: 'rule' })).source).toBe(
+        'rule'
       );
+    });
+
+    it('accepts `attack`', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams({ source: 'attack' })).source).toBe(
+        'attack'
+      );
+    });
+
+    it('accepts a missing source', () => {
+      const { source, ...rest } = getParams();
+      expect(CasesConnectorRunParamsSchema.validate(rest).source).toBeUndefined();
+    });
+
+    it('accepts legacy internallyManagedAlerts without source', () => {
+      const { source, ...rest } = getParams();
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate({ ...rest, internallyManagedAlerts: true })
+      ).not.toThrow();
+    });
+
+    it('throws for an unsupported value', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ source: 'admin' }))
+      ).toThrow();
+    });
+  });
+
+  describe('ZCasesConnectorRunParamsSchema', () => {
+    it('accepts a pre-upgrade payload with internallyManagedAlerts and no source', () => {
+      const { source, ...rest } = getParams();
+
+      expect(() =>
+        ZCasesConnectorRunParamsSchema.parse({ ...rest, internallyManagedAlerts: true })
+      ).not.toThrow();
+    });
+
+    it.each([true, false, null])('accepts an extractObservables of %s', (extractObservables) => {
+      expect(
+        ZCasesConnectorRunParamsSchema.parse(getParams({ extractObservables })).extractObservables
+      ).toBe(extractObservables);
+    });
+
+    it('accepts a payload that omits extractObservables', () => {
+      expect(ZCasesConnectorRunParamsSchema.parse(getParams()).extractObservables).toBeUndefined();
+    });
+  });
+
+  describe('CasesConnectorRuleActionParamsSchema', () => {
+    const getRuleActionParams = (overrides = {}) => ({
+      subAction: 'run' as const,
+      subActionParams: {
+        groupingBy: [],
+        reopenClosedCases: false,
+        timeWindow: '7d',
+        templateId: null,
+        templateVersion: null,
+        ...overrides,
+      },
+    });
+
+    it.each([true, false, null])('accepts an extractObservables of %s', (extractObservables) => {
+      expect(
+        CasesConnectorRuleActionParamsSchema.validate(getRuleActionParams({ extractObservables }))
+          .subActionParams.extractObservables
+      ).toBe(extractObservables);
+    });
+
+    it('accepts params saved before the field existed', () => {
+      expect(
+        CasesConnectorRuleActionParamsSchema.validate(getRuleActionParams()).subActionParams
+          .extractObservables
+      ).toBeUndefined();
+    });
+  });
+
+  describe('resolveCasesConnectorActionSource', () => {
+    it('prefers an explicit source', () => {
+      expect(
+        resolveCasesConnectorActionSource({ source: 'rule', internallyManagedAlerts: true })
+      ).toBe('rule');
+    });
+
+    it('maps internallyManagedAlerts true to attack when source is omitted', () => {
+      expect(resolveCasesConnectorActionSource({ internallyManagedAlerts: true })).toBe('attack');
+    });
+
+    it('defaults to rule', () => {
+      expect(resolveCasesConnectorActionSource({})).toBe('rule');
     });
   });
 });

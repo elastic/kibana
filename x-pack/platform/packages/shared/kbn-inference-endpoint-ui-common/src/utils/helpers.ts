@@ -11,6 +11,14 @@ import { FieldType } from '../types/types';
 import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
+import {
+  CHAT_COMPLETION_TASK_TYPE,
+  PROVIDER_CONFIG,
+  PROVIDER_SECRETS,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  TASK_TYPE_CONFIG,
+} from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -18,8 +26,19 @@ export interface TaskTypeOption {
   label: string;
 }
 
+/** Orders task types so that `chat_completion` is first (and therefore the default) when supported. */
+export const orderTaskTypes = (taskTypes: string[]): string[] => {
+  if (!taskTypes.includes(CHAT_COMPLETION_TASK_TYPE)) {
+    return taskTypes;
+  }
+  return [
+    CHAT_COMPLETION_TASK_TYPE,
+    ...taskTypes.filter((taskType) => taskType !== CHAT_COMPLETION_TASK_TYPE),
+  ];
+};
+
 export const getTaskTypeOptions = (taskTypes: string[]): TaskTypeOption[] =>
-  taskTypes.map((taskType) => ({
+  orderTaskTypes(taskTypes).map((taskType) => ({
     id: taskType,
     label: taskType,
     value: taskType,
@@ -51,20 +70,26 @@ export const getNonEmptyValidator = (
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular
           if (isSecrets ? field.sensitive : !field.sensitive) {
-            if (
-              !configData[field.key] ||
-              (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
-            ) {
-              field.validationErrors = [LABELS.getRequiredMessage(field.label)];
-              field.isValid = false;
-              hasErrors = true;
-            } else {
-              field.validationErrors = [];
-              field.isValid = true;
+            const fieldLocation = isSecrets
+              ? PROVIDER_SECRETS
+              : field.location === TASK_SETTINGS
+              ? TASK_TYPE_CONFIG
+              : PROVIDER_CONFIG;
+            if (path.includes(fieldLocation)) {
+              if (
+                !configData[field.key] ||
+                (typeof configData[field.key] === 'string' && isEmpty(configData[field.key]))
+              ) {
+                field.validationErrors = [LABELS.getRequiredMessage(field.label)];
+                field.isValid = false;
+                hasErrors = true;
+              } else {
+                field.validationErrors = [];
+                field.isValid = true;
+              }
             }
           }
         }
-
         updatedFormFields.push(field);
       });
 
@@ -96,19 +121,37 @@ export const mapProviderFields = (
     });
   }
 
+  // fieldOverrides.supplementalData is a temporary solution until the 'location' field is added for the services api.
+  if (fieldOverrides?.supplementalData) {
+    fieldOverrides?.supplementalData.forEach((supplementalDataField) => {
+      const fieldKey = Object.keys(supplementalDataField)[0];
+      if (newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = {
+          ...newProvider.configurations[fieldKey],
+          ...supplementalDataField[fieldKey],
+        };
+      }
+    });
+  }
+
   return Object.keys(newProvider.configurations ?? {})
     .filter(
       (pk) =>
         (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
         (fieldOverrides?.hidden ?? []).indexOf(pk) === -1
     )
-    .map(
-      (k): ConfigEntryView => ({
+    .map((k): ConfigEntryView => {
+      // Use override defaultValues if provider config doesn't have a default_value set
+      const configDefaultValue = newProvider.configurations[k].default_value;
+      const overrideDefaultValue = fieldOverrides?.defaultValues?.[k];
+      const resolvedDefaultValue = configDefaultValue ?? overrideDefaultValue ?? null;
+
+      return {
         key: k,
         isValid: true,
         validationErrors: [],
-        value: newProvider.configurations[k].default_value ?? null,
-        default_value: newProvider.configurations[k].default_value ?? null,
+        value: resolvedDefaultValue,
+        default_value: resolvedDefaultValue,
         description: newProvider.configurations[k].description ?? null,
         label: newProvider.configurations[k].label ?? '',
         required: newProvider.configurations[k].required ?? false,
@@ -116,6 +159,7 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
-      })
-    );
+        location: newProvider.configurations[k].location ?? SERVICE_SETTINGS,
+      };
+    });
 };

@@ -75,6 +75,8 @@ export class ExplorerChartSingleMetric extends React.Component {
     cursor$: PropTypes.object,
     id: PropTypes.string.isRequired,
     euiTheme: PropTypes.object.isRequired,
+    isEmbeddable: PropTypes.bool,
+    isInteractive: PropTypes.bool,
   };
 
   constructor(props) {
@@ -121,9 +123,9 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
+      isInteractive,
       id: chartId,
     } = this.props;
-
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
@@ -192,7 +194,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .append('text')
         .text((d) => {
           if (fieldFormat !== undefined) {
-            return fieldFormat.convert(d, 'text');
+            return fieldFormat.convertToText(d);
           } else {
             return lineChartYScale.tickFormat()(d);
           }
@@ -331,7 +333,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .tickPadding(10);
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
+        yAxis.tickFormat((d) => fieldFormat.convertToText(d));
       }
 
       const axes = lineChartGroup.append('g');
@@ -402,16 +404,16 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
       // Create any new dots that are needed i.e. if number of chart points has increased.
-      dots
-        .enter()
-        .append('circle')
-        .attr('r', LINE_CHART_ANOMALY_RADIUS)
-        .on('click', function (d) {
+      const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
+      if (isInteractive) {
+        dot.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
           showAnomalyPopover(d, this);
-        })
-        // Don't use an arrow function since we need access to `this`.
+        });
+      }
+      // Don't use an arrow function since we need access to `this`.
+      dot
         .on('mouseover', function (d) {
           // Show the tooltip only if the actions menu isn't active
           if (that.state.popoverData === null) {
@@ -465,13 +467,17 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr(
           'class',
           (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`
-        )
-        .on('click', function (d) {
+        );
+
+      if (isInteractive) {
+        multiBucketMarkers.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
           showAnomalyPopover(d, this);
-        })
-        // Don't use an arrow function since we need access to `this`.
+        });
+      }
+      // Don't use an arrow function since we need access to `this`.
+      multiBucketMarkers
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })
@@ -703,7 +709,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   };
 
   render() {
-    const { seriesConfig } = this.props;
+    const { seriesConfig, isEmbeddable } = this.props;
 
     if (typeof seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -712,12 +718,16 @@ export class ExplorerChartSingleMetric extends React.Component {
 
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
+    const telemetrySource = isEmbeddable
+      ? 'embeddable_single_metric_chart'
+      : 'explorer_single_metric_chart';
 
     return (
       <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout
@@ -734,6 +744,9 @@ export class ExplorerChartSingleMetric extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate('xpack.ml.explorerChart.anomalyActionsPopoverAriaLabel', {
+                defaultMessage: 'Anomaly actions',
+              })}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"

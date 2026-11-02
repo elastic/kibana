@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/safer-lodash-set'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/safer-lodash-set'
+  title: '@kbn/safer-lodash-set'
   description: Moon project for @kbn/safer-lodash-set
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-safer-lodash-set
+  sourceRoot: src/platform/packages/shared/kbn-safer-lodash-set
 tags:
   - shared-common
   - package

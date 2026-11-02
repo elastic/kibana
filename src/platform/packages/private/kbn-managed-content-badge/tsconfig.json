@@ -15,6 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/navigation-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import {
+  MAX_MONITOR_BATCH_SIZE,
+  MAX_ROUTE_ID_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+  routeId,
+} from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
 import type { TrendsQuery } from './fetch_trends';
@@ -38,7 +43,7 @@ export async function fetchTrends(
       for (const location of byLocation.buckets) {
         nTable[String(key) + String(location.key)] = {
           configId: String(key),
-          locationId: String(location.key),
+          locationIds: [String(location.key)],
           data: location.last50.buckets.map((durationBucket, x) => ({
             x,
             y: durationBucket.max.value!,
@@ -58,13 +63,15 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: false,
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.arrayOf(
-      schema.object({
-        configId: schema.string(),
-        locationId: schema.string(),
-        schedule: schema.string(),
-      })
-    ) as unknown as ObjectType,
+    body: z
+      .array(
+        z.strictObject({
+          configId: routeId,
+          locationIds: z.array(z.string().max(MAX_ROUTE_ID_LENGTH)).max(100),
+          schedule: z.string().max(MAX_ROUTE_STRING_LENGTH),
+        })
+      )
+      .max(MAX_MONITOR_BATCH_SIZE),
   },
   handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;
@@ -73,12 +80,12 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
     const configs = body.reduce(
       (
         acc: Record<string, { locations: string[]; interval: number }>,
-        { configId, locationId, schedule }
+        { configId, locationIds, schedule }
       ) => {
         if (!acc[configId]) {
-          acc[configId] = { locations: [locationId], interval: getIntervalForCheckCount(schedule) };
+          acc[configId] = { locations: locationIds, interval: getIntervalForCheckCount(schedule) };
         } else {
-          acc[configId].locations.push(locationId);
+          acc[configId].locations.push(...locationIds);
         }
         return acc;
       },

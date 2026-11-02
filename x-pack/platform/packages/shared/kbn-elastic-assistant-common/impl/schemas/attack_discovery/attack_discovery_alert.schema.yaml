@@ -28,6 +28,9 @@ components:
         alertRuleUuid:
           description: The optional kibana.alert.rule.uuid of the rule that generated this attack discovery (not applicable to ad hock runs)
           type: string
+        alertWorkflowReason:
+          description: The optional kibana.alert.workflow_reason of this attack discovery, which records why the workflow status was last changed
+          type: string
         alertWorkflowStatus:
           description: The optional kibana.alert.workflow_status of this attack discovery
           type: string
@@ -95,3 +98,16 @@ components:
           description: The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
           items:
             $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+        assignees:
+          type: array
+          description: The optional array of user-IDs who have been assigned the attack
+          items:
+            type: string
+        tags:
+          type: array
+          description: The optional array of tags assigned the attack
+          items:
+            type: string
+        index:
+          description: The concrete Elasticsearch index where this attack discovery is stored
+          type: string

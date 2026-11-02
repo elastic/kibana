@@ -29,8 +29,10 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   handler: async (services): Promise<GetRelatedDashboardsResponse | IKibanaResponse> => {
     const { dependencies, params, request, response, context, logger } = services;
     const { alertId } = params.query;
-    const { ruleRegistry, dashboard } = dependencies;
-    const { getDashboard, scanDashboards } = dashboard;
+    const {
+      ruleRegistry,
+      dashboard: { client, scanDashboards },
+    } = dependencies;
     const { savedObjects } = await context.core;
 
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
@@ -40,8 +42,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
 
     const dashboardParser = new RelatedDashboardsClient(
       logger,
-      (id: string) => getDashboard(context, id),
-      (page: number, perPage: number) => scanDashboards(context, page, perPage),
+      (id: string) => client.read(savedObjects.client, id),
+      (page: number, perPage: number) => scanDashboards(savedObjects.client, page, perPage),
       investigateAlertsClient,
       alertId,
       referencedPanelManager

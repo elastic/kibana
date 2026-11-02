@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   EuiTourStep,
   useEuiTour,
 } from '@elastic/eui';
@@ -59,7 +60,7 @@ const stepsConfig: EuiStatelessTourStep[] = [
 ];
 
 export const RuleFeatureTour: FC = () => {
-  const { storage } = useKibana().services;
+  const { storage, notifications } = useKibana().services;
 
   const restoredState = useMemo<EuiTourState>(
     () => ({
@@ -76,11 +77,12 @@ export const RuleFeatureTour: FC = () => {
     storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
+  const isTourEnabled = notifications.tours.isEnabled();
   const isTourAnchorMounted = useIsElementMounted(CREATE_NEW_RULE_TOUR_ANCHOR);
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   // Display the tour only if the user has permissions to create/edit rules,
   // otherwise they could not follow the tour steps
-  const shouldShowRuleUpgradeTour = isTourAnchorMounted && canEditRules;
+  const shouldShowRuleUpgradeTour = isTourEnabled && isTourAnchorMounted && canEditRules;
 
   const enhancedSteps = useMemo(
     () =>
@@ -94,22 +96,26 @@ export const RuleFeatureTour: FC = () => {
                 <EuiSpacer size="s" />
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowLeft"
-                      aria-label={i18n.PREVIOUS_STEP_LABEL}
-                      display="empty"
-                      disabled={index === 0}
-                      onClick={tourActions.decrementStep}
-                    />
+                    <EuiToolTip content={i18n.PREVIOUS_STEP_LABEL} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="chevronSingleLeft"
+                        aria-label={i18n.PREVIOUS_STEP_LABEL}
+                        display="empty"
+                        disabled={index === 0}
+                        onClick={tourActions.decrementStep}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowRight"
-                      aria-label={i18n.NEXT_STEP_LABEL}
-                      display="base"
-                      disabled={index === tourSteps.length - 1}
-                      onClick={tourActions.incrementStep}
-                    />
+                    <EuiToolTip content={i18n.NEXT_STEP_LABEL} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="chevronSingleRight"
+                        aria-label={i18n.NEXT_STEP_LABEL}
+                        display="base"
+                        disabled={index === tourSteps.length - 1}
+                        onClick={tourActions.incrementStep}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </>

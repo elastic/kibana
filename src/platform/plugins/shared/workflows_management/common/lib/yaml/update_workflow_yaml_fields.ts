@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflow } from '@kbn/workflows';
-import { updateYamlField } from './update_yaml_field';
+import { updateYamlField } from '@kbn/workflows-yaml';
 
 /**
  * Checks if a workflow update affects YAML metadata fields

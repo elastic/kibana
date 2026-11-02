@@ -40,6 +40,7 @@ export const FilterBar = ({ query, onQueryChange }: FilterBarComponentProps) => 
       onChange={onChange}
       isClearable={true}
       aria-label={ariaLabel}
+      compressed
     />
   );
 };

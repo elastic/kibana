@@ -102,6 +102,10 @@ export const OfExpression = ({
   return (
     <EuiPopover
       id="aggFieldPopover"
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.of.popoverAriaLabel',
+        { defaultMessage: 'Of' }
+      )}
       button={
         <EuiExpression
           description={i18n.translate(
@@ -145,6 +149,10 @@ export const OfExpression = ({
               error={errors.aggField as string[]}
               data-test-subj="availableFieldsOptionsFormRow"
               helpText={helpText}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.of.aggFieldAriaLabel',
+                { defaultMessage: 'Aggregate field' }
+              )}
             >
               <EuiComboBox
                 fullWidth

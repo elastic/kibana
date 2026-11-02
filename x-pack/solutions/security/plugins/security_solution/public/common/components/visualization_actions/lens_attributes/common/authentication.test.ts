@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
@@ -18,15 +19,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
@@ -36,6 +28,15 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
     },
   ]),
 }));
+
+const mockEuiTheme = {
+  colors: {
+    vis: {
+      euiColorVis0: '#000',
+      euiColorVis7: '#111',
+    },
+  },
+} as unknown as EuiThemeComputed;
 
 describe('getAuthenticationLensAttributes', () => {
   beforeAll(() => {
@@ -59,5 +60,19 @@ describe('getAuthenticationLensAttributes', () => {
     );
 
     expect(result?.current).toMatchSnapshot();
+  });
+
+  it('merges extraOptions.filters after the authentication category filter (host details identity scope)', () => {
+    const identityScopeFilter = {
+      query: { bool: { must: [{ term: { 'host.entity.id': 'host-entity-1' } }] } },
+      meta: {},
+    };
+    const attrs = getAuthenticationLensAttributes({
+      euiTheme: mockEuiTheme,
+      extraOptions: { filters: [identityScopeFilter] },
+    });
+
+    expect(attrs.state.filters).toHaveLength(2);
+    expect(attrs.state.filters[1]).toEqual(identityScopeFilter);
   });
 });

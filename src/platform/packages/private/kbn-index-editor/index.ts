@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-  ACTION_EDIT_LOOKUP_INDEX,
-  registerIndexEditorActions,
-} from './src/ui_action';
+export { ACTION_EDIT_LOOKUP_INDEX, registerIndexEditorActions } from './src/ui_action';
 
 export { registerIndexEditorAnalyticsEvents } from './src/telemetry/events_registration';
 

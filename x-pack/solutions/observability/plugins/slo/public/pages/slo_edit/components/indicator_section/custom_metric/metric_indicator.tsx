@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -279,23 +280,27 @@ export function MetricIndicator({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={0}>
-                  <EuiButtonIcon
-                    data-test-subj="o11yMetricIndicatorButton"
-                    iconType="trash"
-                    color="danger"
-                    style={{ marginTop: '1.5em' }}
-                    onClick={handleDeleteMetric(index)}
-                    disabled={disableDelete}
-                    title={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.slo.sloEdit.sliType.customMetric.deleteLabel', {
                       defaultMessage: 'Delete metric',
                     })}
-                    aria-label={i18n.translate(
-                      'xpack.slo.sloEdit.sliType.customMetric.deleteLabel',
-                      {
-                        defaultMessage: 'Delete metric',
-                      }
-                    )}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="o11yMetricIndicatorButton"
+                      iconType="trash"
+                      color="danger"
+                      style={{ marginTop: '1.5em' }}
+                      onClick={handleDeleteMetric(index)}
+                      disabled={disableDelete}
+                      aria-label={i18n.translate(
+                        'xpack.slo.sloEdit.sliType.customMetric.deleteLabel',
+                        {
+                          defaultMessage: 'Delete metric',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <QueryBuilder
@@ -327,7 +332,7 @@ export function MetricIndicator({
               data-test-subj="customMetricIndicatorAddMetricButton"
               color={'primary'}
               size="xs"
-              iconType={'plusInCircleFilled'}
+              iconType={'plusCircle'}
               onClick={handleAddMetric}
               isDisabled={disableAdd}
               aria-label={i18n.translate(

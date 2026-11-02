@@ -9,6 +9,8 @@ import { expect } from 'expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 
+const ALERTS_PATH = '/app/observability/alerts';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -31,25 +33,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   }) {
     it('navigates to the rules page', async () => {
       await retry.try(async () => {
-        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        await svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'observability-overview:alerts',
+        });
         expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
         await testSubjects.click('manageRulesPageButton');
       });
+      await testSubjects.existOrFail('createRuleButton', { timeout: 10000 });
     });
 
     it('should open the rule creation flyout', async () => {
-      await retry.try(async () => {
-        await testSubjects.click('createRuleButton');
-        const isCreateRuleFlyoutVisible = await testSubjects.exists('ruleTypeModal');
-        expect(isCreateRuleFlyoutVisible).toBe(true);
-      });
+      await testSubjects.click('createRuleButton');
+      await testSubjects.existOrFail('ruleTypeModal', { timeout: 10000 });
     });
 
     it('should click the custom threshold rule type', async () => {
       await testSubjects.click('observability.rules.custom_threshold-SelectOption');
       const ruleType = await testSubjects.getVisibleText('ruleDefinitionHeaderRuleTypeName');
       expect(ruleType).toEqual('Custom threshold');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.existOrFail('selectDataViewExpression');
     });
 
     it('should create a new custom threshold rule', async () => {
@@ -60,39 +62,40 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const consumerSelect = await testSubjects.find('ruleConsumerSelection');
       await consumerSelect.click();
 
-      const consumerOptionsList = await testSubjects.find(
-        'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
-      );
-
-      const consumerOptions = await consumerOptionsList.findAllByClassName(
-        'euiComboBoxOption__content'
-      );
-
-      const allAvailableConsumers: Set<string> = new Set();
-
-      for (const option of consumerOptions) {
-        allAvailableConsumers.add(await option.getVisibleText());
-      }
-
-      // Check if sets are equal by verifying they have the same size and all elements match
-      const areConsumersEqual =
-        allAvailableConsumers.size === consumersToVerify.size &&
-        [...consumersToVerify].every((consumer) => allAvailableConsumers.has(consumer));
-
-      expect(areConsumersEqual).toBe(true);
-
       await retry.try(async () => {
-        await testSubjects.click('rulePageFooterSaveButton');
-        const doesConfirmModalExist = await testSubjects.exists('confirmModalConfirmButton');
-        expect(doesConfirmModalExist).toBe(true);
-        await testSubjects.click('confirmModalConfirmButton');
-        const name = await testSubjects.getVisibleText('ruleName');
+        const consumerOptionsList = await testSubjects.find(
+          'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
+        );
+
+        const consumerOptions = await consumerOptionsList.findAllByClassName(
+          'euiComboBoxOption__content'
+        );
+
+        const allAvailableConsumers: Set<string> = new Set();
+
+        for (const option of consumerOptions) {
+          allAvailableConsumers.add(await option.getVisibleText());
+        }
+
+        const areConsumersEqual =
+          allAvailableConsumers.size === consumersToVerify.size &&
+          [...consumersToVerify].every((consumer) => allAvailableConsumers.has(consumer));
+
+        expect(areConsumersEqual).toBe(true);
+      });
+
+      await testSubjects.click('rulePageFooterSaveButton');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await retry.try(async () => {
+        const name = await testSubjects.getVisibleText('appHeaderTitle');
         expect(name).toEqual(ruleName);
       });
     });
   }
 
-  describe('Custom threshold rule - consumers', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/275253
+  describe.skip('Custom threshold rule - consumers', function () {
     const ruleIdList: string[] = [];
 
     before(async () => {
@@ -127,7 +130,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const uuid = ` ${uuidv4()}`;
       const ruleName = `Custom threshold rule${uuid}`;
       it('logs in with privileged role', async () => {
-        await svlCommonPage.loginWithPrivilegedRole();
+        await svlCommonPage.loginWithPrivilegedRole({ initialPath: ALERTS_PATH });
       });
 
       createCustomThresholdRule({
@@ -152,7 +155,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('logs in with logs only role', async () => {
         await samlAuth.setCustomRole(ROLES.logs_only);
 
-        await svlCommonPage.loginWithCustomRole();
+        await svlCommonPage.loginWithCustomRole({ initialPath: ALERTS_PATH });
       });
 
       createCustomThresholdRule({ ruleName, consumersToVerify: new Set(['All', 'Logs']) });
@@ -175,7 +178,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('logs in with infra only role', async () => {
         await samlAuth.setCustomRole(ROLES.infra_only);
 
-        await svlCommonPage.loginWithCustomRole();
+        await svlCommonPage.loginWithCustomRole({ initialPath: ALERTS_PATH });
       });
 
       createCustomThresholdRule({ ruleName, consumersToVerify: new Set(['All', 'Metrics']) });

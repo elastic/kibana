@@ -82,6 +82,7 @@ describe('reindex API', () => {
           security: securityMockInstance,
           version,
           rollupsEnabled: true,
+          isServerless: false,
         });
       },
     };

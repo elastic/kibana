@@ -37,10 +37,18 @@ interface TableVisSplitProps {
   visConfig: TableVisConfig;
   uiStateProps: TableVisUseUiStateProps;
   enforceMinWidth?: boolean;
+  isInteractive?: boolean;
 }
 
 export const TableVisSplit = memo(
-  ({ fireEvent, tables, visConfig, uiStateProps, enforceMinWidth }: TableVisSplitProps) => {
+  ({
+    fireEvent,
+    tables,
+    visConfig,
+    uiStateProps,
+    enforceMinWidth,
+    isInteractive = true,
+  }: TableVisSplitProps) => {
     const styles = useMemoCss(tableVisSplitStyles);
 
     return (
@@ -72,6 +80,7 @@ export const TableVisSplit = memo(
                 visConfig={visConfig}
                 title={title}
                 uiStateProps={uiStateProps}
+                isInteractive={isInteractive}
               />
             </div>
           );

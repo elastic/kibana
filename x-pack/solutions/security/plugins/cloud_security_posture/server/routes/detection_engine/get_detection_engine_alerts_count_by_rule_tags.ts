@@ -17,6 +17,13 @@ import type { CspRouter } from '../../types';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts-default' as const;
 
+// Keep this aligned with the alerting rule tag contract in
+// x-pack/platform/plugins/shared/alerting/common/constants/limits.ts.
+const RULE_TAG_MAX_LENGTH = 512;
+// maxSize mirrors the cspBenchmarkRuleMetadataSchema tags ceiling: rules
+// are not expected to carry more than 100 tags.
+const RULE_TAGS_MAX_SIZE = 100;
+
 export const getDetectionEngineAlertsCountByRuleTags = async (
   esClient: ElasticsearchClient,
   tags: string[]
@@ -65,7 +72,10 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
         validate: {
           request: {
             query: schema.object({
-              tags: schema.arrayOf(schema.string()),
+              // maxSize is set to 100 as it's not expected to have more than 100 tags
+              tags: schema.arrayOf(schema.string({ maxLength: RULE_TAG_MAX_LENGTH }), {
+                maxSize: RULE_TAGS_MAX_SIZE,
+              }),
             }),
           },
         },

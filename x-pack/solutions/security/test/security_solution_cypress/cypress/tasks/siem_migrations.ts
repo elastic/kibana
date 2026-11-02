@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import { MIGRATIONS_PANEL_BTN, TRANSLATED_RULES_PAGE } from '../screens/security_header';
 import {
-  FOOTER_LAUNCHPAD,
-  openNavigationPanel,
-  RULES_PANEL_BTN as RULES_PANEL_BTN_SERVERLESS,
-  TRANSLATED_RULES_PAGE as TRANSLATED_RULES_PAGE_SERVERLESS,
-} from '../screens/serverless_security_header';
+  MIGRATIONS_PANEL_BTN,
+  TRANSLATED_RULES_PAGE,
+  LAUNCHPAD_PANEL_BTN,
+  LAUNCHPAD_TRANSLATED_RULES_PAGE,
+} from '../screens/security_header';
+import { openNavigationPanel } from '../screens/serverless_security_header';
 import * as SELECTORS from '../screens/siem_migrations';
+import { TRANSLATED_RULES_PAGE_URL } from '../urls/navigation';
+import { visit } from './navigation';
 import { bedrockConnectorAPIPayload } from './api_calls/connectors';
+import { setCodeEditorValue } from './common/monaco';
 
-export const navigateToTranslatedRulesPage = () => {
+export const navigateToTranslatedRulesPage = (isClassicNavUpdateEnabled: boolean) => {
   if (Cypress.env('IS_SERVERLESS')) {
-    openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
-    cy.get(FOOTER_LAUNCHPAD).click();
-    cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
+    visit(TRANSLATED_RULES_PAGE_URL);
+  } else if (isClassicNavUpdateEnabled) {
+    // ESS with classic nav: navigate through Launchpad group to reach Migrations
+    openNavigationPanel(LAUNCHPAD_PANEL_BTN);
+    cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
   } else {
+    // ESS without classic nav: navigate directly to Migrations in the side nav
     openNavigationPanel(MIGRATIONS_PANEL_BTN);
     cy.get(TRANSLATED_RULES_PAGE).click();
   }
@@ -37,8 +43,11 @@ export const toggleSiemMigrationsCard = () => {
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.AI_CONNECTORS).click();
 };
 
-export const selectMigrationConnector = () => {
+export const selectAutomaticMigrationTopic = () => {
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_TOPIC).click();
+};
+
+export const selectMigrationConnector = () => {
   toggleSiemMigrationsCard();
   cy.get(SELECTORS.ONBOARDING_SIEM_MIGRATION_CARDS.SELECT_CONNECTORS).click();
   cy.get(SELECTORS.FAKE_BEDROCK_SELECTOR).click();
@@ -73,6 +82,13 @@ export const openUploadDashboardsFlyout = () => {
 
 export const saveDefaultMigrationName = () => {
   cy.get(SELECTORS.MIGRATION_NAME_INPUT).should('exist');
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).blur();
+};
+
+export const setMigrationName = (name = 'New Migration') => {
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).should('exist');
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).clear();
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).type(name);
   cy.get(SELECTORS.MIGRATION_NAME_INPUT).blur();
 };
 
@@ -119,17 +135,21 @@ export const updateTranslatedRuleQuery = (newQuery: string) => {
   cy.get(SELECTORS.TRANSLATED_RULE_EDIT_BTN).click();
   cy.get(SELECTORS.TRANSLATED_RULE_SAVE_BTN).should('be.visible');
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(
-    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}',
-    { force: true }
+  setCodeEditorValue(
+    SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT,
+    Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}'
   );
 
-  cy.get(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_INPUT).type(newQuery, { force: true });
+  setCodeEditorValue(SELECTORS.TRANSLATED_RULE_QUERY_EDITOR_PARENT, newQuery);
 };
 
 export const editTranslatedRuleByRow = (rowNum: number) => {
   cy.get(SELECTORS.TRANSLATED_RULES_RESULT_TABLE.RULE_NAME).eq(rowNum).click();
   cy.get(SELECTORS.TRANSLATED_RULE_DETAILS_FLYOUT).should('be.visible');
+};
+
+export const switchToOverviewTab = () => {
+  cy.get(SELECTORS.TRANSLATED_RULE_OVERVIEW_TAB).click();
 };
 
 export const openReprocessDialog = () => {
@@ -155,6 +175,51 @@ export const reprocessWithoutPrebuiltRulesMatching = () => {
 export const reprocessDashboards = () => {
   cy.get(SELECTORS.START_MIGRATION_MODAL.MODAL).should('be.visible');
   cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
+};
+
+export const selectQRadarMigrationSource = () => {
+  cy.get(SELECTORS.MIGRATION_SOURCE_DROPDOWN).click();
+  cy.get(SELECTORS.MIGRATION_SOURCE_QRADAR_OPTION).click();
+};
+
+export const selectSentinelMigrationSource = () => {
+  cy.get(SELECTORS.MIGRATION_SOURCE_DROPDOWN).click();
+  cy.get(SELECTORS.MIGRATION_SOURCE_SENTINEL_OPTION).click();
+};
+
+export const uploadQRadarRules = (xmlContent: string) => {
+  cy.get(SELECTORS.UPLOAD_RULES_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(xmlContent),
+    fileName: 'rules.xml',
+    mimeType: 'text/xml',
+  });
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const uploadSentinelRules = (jsonContent: object) => {
+  cy.get(SELECTORS.UPLOAD_RULES_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(jsonContent)),
+    fileName: 'sentinel_rules.arm.json',
+    mimeType: 'text/plain',
+  });
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const uploadSentinelWatchlist = (jsonContent: object) => {
+  cy.get(SELECTORS.WATCHLISTS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(jsonContent)),
+    fileName: 'sentinel_watchlist.arm.json',
+    mimeType: 'text/plain',
+  });
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const selectSentinelWatchlistFile = (fileContent: string) => {
+  cy.get(SELECTORS.WATCHLISTS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(fileContent),
+    fileName: 'sentinel_watchlist.arm.json',
+    mimeType: 'text/plain',
+  });
 };
 
 export const renameMigration = (newName: string) => {

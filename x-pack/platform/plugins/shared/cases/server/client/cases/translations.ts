@@ -36,3 +36,10 @@ export const ALERTS_URL = (url: string) =>
 export const UNKNOWN = i18n.translate('xpack.cases.server.unknown', {
   defaultMessage: 'Unknown',
 });
+
+export const INVALID_CLOSE_REASON = (closeReason: string) =>
+  i18n.translate('xpack.cases.server.invalidCloseReason', {
+    defaultMessage:
+      'Invalid close reason: "{closeReason}". Must be one of the default close reasons or a configured custom close reason.',
+    values: { closeReason },
+  });

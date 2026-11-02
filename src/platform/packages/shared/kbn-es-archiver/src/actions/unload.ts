@@ -30,12 +30,11 @@ export async function unloadAction({
   inputDir,
   client,
   log,
-  kbnClient,
 }: {
   inputDir: string;
   client: Client;
   log: ToolingLog;
-  kbnClient: KbnClient;
+  kbnClient?: KbnClient;
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);

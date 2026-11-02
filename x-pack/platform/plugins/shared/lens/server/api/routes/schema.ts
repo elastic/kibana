@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './visualizations/schema';
+export * from './internal/schema';

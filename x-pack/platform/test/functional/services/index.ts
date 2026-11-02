@@ -8,14 +8,13 @@
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { ReportingFunctionalProvider } from '../../reporting_functional/services';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services/reporting_functional_provider';
 import { AceEditorProvider } from './ace_editor';
 import { ActionsServiceProvider } from './actions';
 import { AiopsProvider } from './aiops';
 import { CanvasElementProvider } from './canvas_element';
 import { CasesServiceProvider } from './cases';
 import { DataStreamProvider } from './data_stream';
-import { GrokDebuggerProvider } from './grok_debugger';
 import { MachineLearningProvider } from './ml';
 import { PipelineEditorProvider } from './pipeline_editor';
 import { PipelineListProvider } from './pipeline_list';
@@ -76,7 +75,6 @@ export const services = {
   aceEditor: AceEditorProvider,
   rules: RulesServiceProvider,
   sampleData: SampleDataServiceProvider,
-  grokDebugger: GrokDebuggerProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,

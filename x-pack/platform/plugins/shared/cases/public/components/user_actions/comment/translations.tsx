@@ -15,6 +15,13 @@ export const ATTACHMENT_NOT_REGISTERED_ERROR = i18n.translate(
   }
 );
 
+export const ATTACHMENT_RENDER_ERROR = i18n.translate(
+  'xpack.cases.userActions.attachmentRenderErrorMsg',
+  {
+    defaultMessage: "Couldn't render this attachment",
+  }
+);
+
 export const DEFAULT_EVENT_ATTACHMENT_TITLE = i18n.translate(
   'xpack.cases.userActions.defaultEventAttachmentTitle',
   {
@@ -22,42 +29,31 @@ export const DEFAULT_EVENT_ATTACHMENT_TITLE = i18n.translate(
   }
 );
 
-export const MULTIPLE_ALERTS = (totalAlerts: number): string =>
-  i18n.translate('xpack.cases.caseView.alerts.multipleAlerts', {
-    values: { totalAlerts },
-    defaultMessage:
-      '{totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
 export const ATTACHMENT = i18n.translate('xpack.cases.userActions.attachment', {
   defaultMessage: 'Attachment',
 });
+
+export const EDITED_COMMENT = i18n.translate('xpack.cases.userActions.comment.editedComment', {
+  defaultMessage: 'edited comment',
+});
+
+export const EDITED_ATTACHMENT = i18n.translate(
+  'xpack.cases.userActions.comment.editedAttachment',
+  {
+    defaultMessage: 'edited attachment',
+  }
+);
+
+export const EDITED_ATTACHMENTS = (attachments: string) =>
+  i18n.translate('xpack.cases.userActions.comment.editedAttachments', {
+    defaultMessage: 'edited {attachments}',
+    values: { attachments },
+  });
 
 export const UNSAVED_DRAFT_COMMENT = i18n.translate(
   'xpack.cases.userActions.comment.unsavedDraftComment',
   {
     defaultMessage: 'You have unsaved edits for this comment',
-  }
-);
-
-export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
-  i18n.translate('xpack.cases.userActions.attachments.alerts.successToasterTitle', {
-    defaultMessage:
-      'Deleted {totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',
-    values: { totalAlerts },
-  });
-
-export const DELETE_EVENTS_SUCCESS_TITLE = (totalEvents: number) =>
-  i18n.translate('xpack.cases.userActions.attachments.events.successToasterTitle', {
-    defaultMessage:
-      'Deleted {totalEvents, plural, =1 {one} other {{totalEvents}}} {totalEvents, plural, =1 {event} other {events}}',
-    values: { totalEvents },
-  });
-
-export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
-  'xpack.cases.userActions.attachments.comment.successToasterTitle',
-  {
-    defaultMessage: 'Deleted comment',
   }
 );
 

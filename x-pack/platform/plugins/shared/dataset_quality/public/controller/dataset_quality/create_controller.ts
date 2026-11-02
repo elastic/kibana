@@ -6,10 +6,10 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { getDevToolsOptions } from '@kbn/xstate-utils';
+import { createConsoleInspector } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
-import { interpret } from 'xstate';
+import { createActor } from 'xstate';
 import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
 import type { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import {
@@ -46,12 +46,12 @@ export const createDatasetQualityControllerFactory =
       ),
     });
 
-    const service = interpret(machine, {
-      devTools: getDevToolsOptions(),
+    const service = createActor(machine, {
+      inspect: createConsoleInspector(),
     });
 
     const state$ = from(service).pipe(
-      map(({ context }) => getPublicStateFromContext(context)),
+      map((snapshot) => getPublicStateFromContext(snapshot.context)),
       distinctUntilChanged(equal)
     );
 

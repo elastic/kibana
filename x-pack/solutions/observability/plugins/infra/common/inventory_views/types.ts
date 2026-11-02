@@ -24,11 +24,28 @@ export const inventoryColorPaletteRT = rt.keyof({
   negative: null,
 });
 
-const inventoryLegendOptionsRT = rt.type({
-  palette: inventoryColorPaletteRT,
-  steps: inRangeRt(2, 18),
-  reverseColors: rt.boolean,
+const inventoryLegendTypeRT = rt.keyof({
+  gradient: null,
+  steps: null,
 });
+
+const inventoryLegendStepRT = rt.type({
+  color: rt.string,
+  value: rt.number,
+  label: rt.string,
+});
+
+const inventoryLegendOptionsRT = rt.intersection([
+  rt.type({
+    palette: inventoryColorPaletteRT,
+    steps: inRangeRt(2, 18),
+    reverseColors: rt.boolean,
+  }),
+  rt.partial({
+    type: inventoryLegendTypeRT,
+    rules: rt.array(inventoryLegendStepRT),
+  }),
+]);
 
 export const inventorySortOptionRT = rt.type({
   by: rt.keyof({ name: null, value: null }),

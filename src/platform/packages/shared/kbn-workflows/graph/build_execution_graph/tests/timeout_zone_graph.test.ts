@@ -8,7 +8,8 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { ConnectorStep, WorkflowYaml } from '../../../spec/schema';
+import type { ConnectorStep, WorkflowExecuteStep, WorkflowYaml } from '../../../spec/schema';
+import { WorkflowGraph } from '../../workflow_graph/workflow_graph';
 import { convertToWorkflowGraph } from '../build_execution_graph';
 
 describe('convertToWorkflowGraph', () => {
@@ -73,6 +74,87 @@ describe('convertToWorkflowGraph', () => {
         stepId: 'testAtomicStep1',
         stepType: 'step_level_timeout',
       });
+    });
+
+    it('only steps with an explicit timeout get a wrapping enter-timeout-zone node', () => {
+      const multiStepWorkflow = {
+        name: 'Parent with timed step then workflow.execute',
+        version: '1' as const,
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          {
+            name: 'parent-preflight',
+            type: 'console',
+            timeout: '30s',
+            with: { message: 'started' },
+          },
+          {
+            name: 'run-child-sync',
+            type: 'workflow.execute',
+            with: { 'workflow-id': 'child-workflow-id' },
+          } as WorkflowExecuteStep,
+        ],
+      } as WorkflowYaml;
+
+      const executionGraph = convertToWorkflowGraph(multiStepWorkflow);
+
+      expect(executionGraph.node('enterTimeoutZone_parent-preflight')).toEqual(
+        expect.objectContaining({
+          type: 'enter-timeout-zone',
+          stepId: 'parent-preflight',
+          timeout: '30s',
+        })
+      );
+      expect(executionGraph.node('enterTimeoutZone_run-child-sync')).toBeUndefined();
+    });
+
+    it.each(['elasticsearch.search', 'kibana.request'])(
+      'keeps the timeout on the %s step node',
+      (type) => {
+        const executionGraph = convertToWorkflowGraph({
+          steps: [{ name: 'request', type, timeout: '10m', with: {} }],
+        } as unknown as WorkflowYaml);
+
+        expect(executionGraph.node('enterTimeoutZone_request')).toEqual(
+          expect.objectContaining({ timeout: '10m' })
+        );
+        expect(executionGraph.node('request')).toEqual(
+          expect.objectContaining({
+            configuration: expect.objectContaining({ timeout: '10m' }),
+          })
+        );
+      }
+    );
+
+    it('keeps the timeout on a step with step-level foreach', () => {
+      const executionGraph = convertToWorkflowGraph({
+        steps: [
+          {
+            name: 'request',
+            type: 'elasticsearch.search',
+            foreach: '[1,2,3]',
+            timeout: '10m',
+            with: {},
+          },
+        ],
+      } as unknown as WorkflowYaml);
+
+      expect(executionGraph.node('request')).toEqual(
+        expect.objectContaining({
+          configuration: expect.objectContaining({ timeout: '10m' }),
+        })
+      );
+    });
+
+    it('does not keep the timeout on other step nodes', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+
+      expect(executionGraph.node('testAtomicStep1')).toEqual(
+        expect.objectContaining({
+          configuration: expect.not.objectContaining({ timeout: expect.anything() }),
+        })
+      );
     });
   });
 
@@ -181,6 +263,26 @@ describe('convertToWorkflowGraph', () => {
         })
       );
     });
+
+    it('WorkflowGraph.getWorkflowLevelTimeout returns the workflow-level timeout string', () => {
+      const workflowDefinition = {
+        settings: {
+          timeout: '5m',
+        },
+        steps: [
+          {
+            name: 'testAtomicStep1',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {
+              message: 'Hello from atomic step 1',
+            },
+          } as ConnectorStep,
+        ],
+      } as Partial<WorkflowYaml>;
+      const wfGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+      expect(wfGraph.getWorkflowLevelTimeout()).toBe('5m');
+    });
   });
 
   describe('steps with timeout and step level flow-control', () => {
@@ -202,11 +304,11 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
       const topSort = graphlib.alg.topsort(executionGraph);
       expect(topSort).toEqual([
-        'enterForeach_foreach_testAtomicStep1',
         'enterTimeoutZone_testAtomicStep1',
+        'enterForeach_foreach_testAtomicStep1',
         'testAtomicStep1',
-        'exitTimeoutZone_testAtomicStep1',
         'exitForeach_foreach_testAtomicStep1',
+        'exitTimeoutZone_testAtomicStep1',
       ]);
     });
 

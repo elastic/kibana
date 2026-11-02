@@ -52,6 +52,7 @@ export const getCasesFeature = (
         createComment: [observabilityFeatureId],
         reopenCase: [observabilityFeatureId],
         assign: [observabilityFeatureId],
+        manageTemplates: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
@@ -62,13 +63,20 @@ export const getCasesFeature = (
         ...casesCapabilities.createComment,
         ...casesCapabilities.reopenCase,
         ...casesCapabilities.assignCase,
+        ...casesCapabilities.manageTemplates,
       ],
       replacedBy: {
         default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
         minimal: [
           {
             feature: casesFeatureIdV3,
-            privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+            privileges: [
+              'minimal_all',
+              'create_comment',
+              'case_reopen',
+              'cases_assign',
+              'cases_manage_templates',
+            ],
           },
         ],
       },

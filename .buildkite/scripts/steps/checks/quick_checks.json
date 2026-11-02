@@ -16,6 +16,10 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/verify_user_activity_docs.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/event_log.sh",
     "mayChangeFiles": true
   },
@@ -48,7 +52,11 @@
     "script": ".buildkite/scripts/steps/checks/ftr_configs.sh"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/yarn_deduplicate.sh",
+    "script": ".buildkite/scripts/steps/checks/deduplicate_dependencies.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/pkg_json_semver_ranges.sh",
     "mayChangeFiles": true
   },
   {
@@ -75,6 +83,13 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/sync_pull_request_fragments.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/buildkite_unit_tests.sh"
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
   },
   {
@@ -88,5 +103,12 @@
   {
     "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/unused_deps.sh",
+    "requiresStableWorkspace": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/jest_negative.sh"
   }
 ]

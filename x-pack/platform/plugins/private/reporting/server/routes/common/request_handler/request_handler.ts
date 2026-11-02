@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import moment from 'moment';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -17,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { BaseParams } from '@kbn/reporting-common/types';
+import type { ScheduleType } from '@kbn/reporting-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
@@ -26,16 +26,17 @@ import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';
 import type { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
+import { validateJobParams } from './validator';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
 };
 
-const ParamsValidation = schema.recordOf(schema.string(), schema.string());
-const QueryValidation = schema.nullable(
+export const ParamsValidation = schema.recordOf(schema.string(), schema.string());
+export const QueryValidation = schema.nullable(
   schema.recordOf(schema.string(), schema.maybe(schema.string()))
 );
-const BodyValidation = schema.nullable(
+export const BodyValidation = schema.nullable(
   schema.recordOf(schema.string(), schema.maybe(schema.any()))
 );
 
@@ -121,6 +122,17 @@ export abstract class RequestHandler<
         body: `invalid rison: ${jobParamsRison}`,
       });
     }
+    try {
+      jobParams = validateJobParams(jobParams) as BaseParams;
+    } catch (err) {
+      this.opts.logger.error(`Job param validation failed: ${err.message}`, {
+        error: { stack_trace: err.stack },
+      });
+      throw res.customError({
+        statusCode: 400,
+        body: `invalid params: ${err.message}`,
+      });
+    }
 
     return jobParams;
   }
@@ -137,7 +149,11 @@ export abstract class RequestHandler<
     }
 
     // 1. Ensure the incoming params have a version field (should be set by the UI)
-    const version = checkParamsVersion(jobParams, this.opts.logger);
+    const version = checkParamsVersion(
+      jobParams,
+      this.opts.logger,
+      this.opts.reporting.getKibanaPackageInfo().version
+    );
 
     // 2. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = await exportType.createJob(jobParams, this.opts.context, this.opts.req);
@@ -145,10 +161,7 @@ export abstract class RequestHandler<
     return { job, version, jobType: exportType.jobType, name: exportType.name };
   }
 
-  protected async checkLicenseAndTimezone(
-    exportTypeId: string,
-    browserTimezone: string
-  ): Promise<IKibanaResponse | null> {
+  protected async checkLicense(exportTypeId: string): Promise<IKibanaResponse | null> {
     const { reporting, context, res } = this.opts;
 
     // ensure the async dependencies are loaded
@@ -167,10 +180,17 @@ export abstract class RequestHandler<
       return res.forbidden({ body: licenseResults.message });
     }
 
-    if (browserTimezone && !moment.tz.zone(browserTimezone)) {
-      return res.badRequest({
-        body: `Invalid timezone "${browserTimezone ?? ''}".`,
-      });
+    return null;
+  }
+
+  protected async checkExportTypeEnabled(
+    exportTypeId: string,
+    scheduleType: ScheduleType
+  ): Promise<IKibanaResponse | null> {
+    const { reporting, res } = this.opts;
+
+    if (!(await reporting.isExportTypeEnabled(exportTypeId, scheduleType))) {
+      return res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });
     }
 
     return null;

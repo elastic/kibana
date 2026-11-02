@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from './publishing_batcher';
+export { useBatchedPublishingSubjects } from './publishing_batcher';
 export { useStateFromPublishingSubject, usePublishingSubject } from './publishing_subject';
 export type {
   PublishingSubject,

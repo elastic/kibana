@@ -64,7 +64,7 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
           data-test-subj="serverlessSearchApiKeyPanelNewApiKeyButton"
           isDisabled={!connector.index_name || !apiKeysData?.canManageOwnApiKey}
           isLoading={isLoading}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           color="primary"
           onClick={() => {
             if (connector.index_name) {

@@ -7,14 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/server';
-import { aiPromptStepDefinition } from './ai/ai_prompt_step';
+import {
+  dataAggregateStepDefinition,
+  dataConcatStepDefinition,
+  dataDedupeStepDefinition,
+  dataFilterStepDefinition,
+  dataFindStepDefinition,
+  dataMapStepDefinition,
+  dataParseJsonStepDefinition,
+  dataRegexExtractStepDefinition,
+  dataRegexReplaceStepDefinition,
+  dataStringifyJsonStepDefinition,
+} from './data';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
-export const registerInternalStepDefinitions = (
-  core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
-  serverStepRegistry: ServerStepRegistry
-) => {
-  serverStepRegistry.register(aiPromptStepDefinition(core));
+export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
+  serverStepRegistry.register(dataMapStepDefinition);
+  serverStepRegistry.register(dataDedupeStepDefinition);
+  serverStepRegistry.register(dataFilterStepDefinition);
+  serverStepRegistry.register(dataFindStepDefinition);
+  serverStepRegistry.register(dataRegexExtractStepDefinition);
+  serverStepRegistry.register(dataRegexReplaceStepDefinition);
+  serverStepRegistry.register(dataAggregateStepDefinition);
+  serverStepRegistry.register(dataConcatStepDefinition);
+  serverStepRegistry.register(dataParseJsonStepDefinition);
+  serverStepRegistry.register(dataStringifyJsonStepDefinition);
 };

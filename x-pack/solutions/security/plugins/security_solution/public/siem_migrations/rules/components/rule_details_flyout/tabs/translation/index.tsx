@@ -35,10 +35,14 @@ interface TranslationTabProps {
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
+const contentColumnStyle: React.CSSProperties = {
+  flexBasis: 0,
+  minWidth: 0,
+};
+
 export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
   ({ migrationRule, matchedPrebuiltRule, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
-
     const isInstalled = !!migrationRule.elastic_rule?.id;
 
     return (
@@ -79,7 +83,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner grow>
               <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem grow={1} style={contentColumnStyle}>
                   <OriginalRuleQuery migrationRule={migrationRule} />
                 </EuiFlexItem>
                 <EuiFlexItem
@@ -89,7 +93,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                     border-right: ${euiTheme.border.thin};
                   `}
                 />
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem grow={1} style={contentColumnStyle}>
                   <TranslatedRuleQuery
                     migrationRule={migrationRule}
                     matchedPrebuiltRule={matchedPrebuiltRule}

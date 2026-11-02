@@ -22,13 +22,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
-  XYState,
+  XYVisualizationState,
   DateHistogramIndexPatternColumn,
   FormulaIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { StartDependencies } from './plugin';
 
 // Generate a Lens state based on some app-specific input parameters.
@@ -58,7 +58,7 @@ function getLensAttributes(color: string, dataView: DataView): TypedLensByValueI
     },
   };
 
-  const xyConfig: XYState = {
+  const xyConfig: XYVisualizationState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
     fittingFunction: 'None',
     gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -167,7 +167,7 @@ export const App = (props: {
                   props.plugins.lens.navigateToPrefilledEditor(
                     {
                       id: '',
-                      timeRange: time,
+                      time_range: time,
                       attributes,
                     },
                     {
@@ -191,7 +191,7 @@ export const App = (props: {
                   props.plugins.lens.navigateToPrefilledEditor(
                     {
                       id: '',
-                      timeRange: time,
+                      time_range: time,
                       attributes,
                     },
                     {

@@ -1,6 +1,6 @@
 # MV_APPEND
 
-Concatenates the values of two multi-value fields into a single field.
+The MV_APPEND function concatenates the values of two multi-value fields into a single multi-value field.
 
 ## Syntax
 
@@ -8,28 +8,22 @@ Concatenates the values of two multi-value fields into a single field.
 
 ### Parameters
 
-#### `field1`
+#### field1
 
-The first multi-value field to concatenate.
+The first multi-value field whose values will be concatenated.
 
-#### `field2`
+#### field2
 
-The second multi-value field to concatenate.
+The second multi-value field whose values will be concatenated.
 
 ## Examples
 
-```esql
-ROW a = ["foo", "bar"], b = ["baz", "qux"]
-| EVAL c = MV_APPEND(a, b)
-| KEEP a, b, c
-```
+Concatenates the birth_date and hire_date fields into a new multi-value field called dates for employees with emp_no 10039 or 10040, and displays the relevant fields.
 
 ```esql
-ROW x = [1, 2, 3], y = [4, 5, 6]
-| EVAL z = MV_APPEND(x, y)
-| KEEP x, y, z
+FROM employees
+| WHERE emp_no == 10039 OR emp_no == 10040
+| SORT emp_no
+| EVAL dates = MV_APPEND(birth_date, hire_date)
+| KEEP emp_no, birth_date, hire_date, dates
 ```
-
-## Limitations
-
-No specific limitations are mentioned in the source documentation.

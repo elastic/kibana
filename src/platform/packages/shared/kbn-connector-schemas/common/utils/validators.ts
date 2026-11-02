@@ -8,17 +8,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export const FIELDS_MAX_LENGTH_ERROR = (length: number, fieldName: string) =>
-  i18n.translate('xpack.stackConnectors.schema.otherFieldsLengthError', {
+  i18n.translate('connectors.schema.otherFieldsLengthError', {
     values: { length, fieldName },
     defaultMessage:
       'A maximum of {length, plural, =1 {{length} field} other {{length} fields}} in {fieldName} can be defined at a time.',
   });
 
 export const FIELDS_KEY_NOT_ALLOWED_ERROR = (properties: string, fieldName: string) =>
-  i18n.translate('xpack.stackConnectors.schema.otherFieldsPropertyError', {
+  i18n.translate('connectors.schema.otherFieldsPropertyError', {
     values: { properties, fieldName },
     defaultMessage: 'The following properties cannot be defined inside {fieldName}: {properties}.',
   });
@@ -60,5 +60,35 @@ export const validateKeysAllowed = ({
       code: z.ZodIssueCode.custom,
       message: FIELDS_KEY_NOT_ALLOWED_ERROR(key, fieldName),
     });
+  }
+};
+
+/**
+ * Validates record keys at the record level (not the key schema level).
+ * In Zod v4, z.record() wraps key-level validation errors with a generic
+ * "Invalid key in record" message, losing custom messages from superRefine.
+ * By validating at the record level with explicit paths, custom messages are preserved.
+ */
+export const validateRecordKeysAllowed = ({
+  record,
+  ctx,
+  disallowList,
+  fieldName,
+}: {
+  record: Record<string, unknown>;
+  ctx: z.RefinementCtx;
+  disallowList: string[];
+  fieldName: string;
+}) => {
+  const propertiesSet = new Set(disallowList);
+
+  for (const key of Object.keys(record)) {
+    if (propertiesSet.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: FIELDS_KEY_NOT_ALLOWED_ERROR(key, fieldName),
+        path: [key],
+      });
+    }
   }
 };

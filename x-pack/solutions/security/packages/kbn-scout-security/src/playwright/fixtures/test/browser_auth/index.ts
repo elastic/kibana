@@ -17,8 +17,35 @@ import type {
 import type { RoleDescriptorsFixture } from '../../worker';
 import { roleDescriptorsFixture } from '../../worker';
 
+/**
+ * Index privileges added on top of a project role when it is cloned into a stateful custom role.
+ *
+ * On serverless these tests log in as the real project user, whose effective permissions come
+ * from more than the role definition. On stateful we build a custom role out of that definition
+ * alone, so a verbatim clone is short of what the test needs. This closes that gap in the test
+ * setup instead of in `project_roles/security/roles.yml`, which mirrors the ES controller and
+ * must not drift from it. Keep the entries minimal and scoped to the role that needs them.
+ */
+const STATEFUL_EXTRA_INDEX_PRIVILEGES: Record<
+  string,
+  NonNullable<ElasticsearchRoleDescriptor['indices']>
+> = {
+  // Closing and assigning an alert writes the alerts backing index, which the project role does
+  // not name. See https://github.com/elastic/kibana/pull/272769.
+  platform_engineer: [
+    {
+      names: ['.internal.alerts-security.alerts-*'],
+      privileges: ['all'],
+      allow_restricted_indices: false,
+    },
+  ],
+};
+
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;
+  loginAsT1Analyst: () => Promise<void>;
+  loginAsEndpointPolicyManager: () => Promise<void>;
+  loginAsSecurityRole: (roleName: string) => Promise<void>;
 }
 
 export const securityBrowserAuthFixture = mergeTests(
@@ -48,26 +75,40 @@ export const securityBrowserAuthFixture = mergeTests(
       return browserAuth.loginAs(samlAuth.customRoleName);
     };
 
-    const loginAsPlatformEngineer = async () => {
-      const roleName = 'platform_engineer';
+    const loginAsSecurityRole = async (roleName: string) => {
       if (!config.serverless) {
-        const roleDesciptor = roleDescriptors.serverless?.get(
+        const roleDescriptor = roleDescriptors.serverless?.get(
           roleName
         ) as ElasticsearchRoleDescriptor;
-        if (!roleDesciptor) {
+        if (!roleDescriptor) {
           throw new Error(`No role descriptors found for ${roleName}`);
         }
+        const extraIndexPrivileges = STATEFUL_EXTRA_INDEX_PRIVILEGES[roleName];
         log.debug(`Using "${roleName}" role to execute the test`);
-        return loginWithCustomRole(roleDesciptor);
+        return loginWithCustomRole(
+          extraIndexPrivileges
+            ? {
+                ...roleDescriptor,
+                indices: [...(roleDescriptor.indices ?? []), ...extraIndexPrivileges],
+              }
+            : roleDescriptor
+        );
       } else {
         return browserAuth.loginAs(roleName);
       }
     };
 
+    const loginAsPlatformEngineer = () => loginAsSecurityRole('platform_engineer');
+    const loginAsT1Analyst = () => loginAsSecurityRole('t1_analyst');
+    const loginAsEndpointPolicyManager = () => loginAsSecurityRole('endpoint_policy_manager');
+
     await use({
       ...browserAuth,
       loginWithCustomRole,
       loginAsPlatformEngineer,
+      loginAsT1Analyst,
+      loginAsEndpointPolicyManager,
+      loginAsSecurityRole,
     });
   },
 });

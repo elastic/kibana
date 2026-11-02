@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import {
   EuiColorPalettePicker,
   EuiConfirmModal,
@@ -17,40 +17,45 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { KbnPalettes } from '@kbn/palettes';
+import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import { getAppendedTag } from '@kbn/palettes';
 import type { RootState } from '../../state/color_mapping';
 import { updatePalette } from '../../state/color_mapping';
-import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
+import {
+  hasCustomColors,
+  updateAssignmentsPalette,
+  updateColorModePalette,
+} from '../../config/assignments';
 
 export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
   const dispatch = useDispatch();
   const model = useSelector((state: RootState) => state.colorMapping);
 
   const switchPaletteFn = useCallback(
-    (selectedPaletteId: string, preserveColorChanges: boolean) => {
+    (selectedPaletteId: KbnPaletteId, preserveColorChanges: boolean) => {
       dispatch(
         updatePalette({
           paletteId: selectedPaletteId,
           assignments: updateAssignmentsPalette(
-            model.assignments,
+            model,
             model.colorMode,
             selectedPaletteId,
             palettes,
             preserveColorChanges
           ),
           colorMode: updateColorModePalette(
-            model.colorMode,
+            model,
             selectedPaletteId,
-            preserveColorChanges
+            preserveColorChanges,
+            palettes
           ),
         })
       );
     },
-    [dispatch, model.assignments, model.colorMode, palettes]
+    [dispatch, model, palettes]
   );
 
-  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<string | null>(null);
+  const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<KbnPaletteId | null>(null);
 
   const confirmModalTitleId = useGeneratedHtmlId();
 
@@ -118,13 +123,11 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               type: 'fixed',
             }))}
           onChange={(selectedPaletteId) => {
-            const hasChanges = model.assignments.some((a) => a.touched);
-            const hasGradientChanges =
-              model.colorMode.type === 'gradient' && model.colorMode.steps.some((a) => a.touched);
-            if (hasChanges || hasGradientChanges) {
-              setPreserveModalPaletteId(selectedPaletteId);
+            const paletteId = selectedPaletteId as KbnPaletteId;
+            if (hasCustomColors(model, palettes)) {
+              setPreserveModalPaletteId(paletteId);
             } else {
-              switchPaletteFn(selectedPaletteId, false);
+              switchPaletteFn(paletteId, false);
             }
           }}
           valueOfSelected={currentPaletteId}

@@ -15,6 +15,7 @@ export type BackfillStatus = Backfill['status'];
 
 export type Gap = FindGapsResponseBody['data']['0'];
 export type GapStatus = Gap['status'];
+export type GapReasonType = NonNullable<Gap['reason']>['type'];
 
 export interface BackfillStats {
   total: number;
@@ -47,6 +48,7 @@ export interface GapAutoFillSchedulerBase {
   maxBackfills: number;
   numRetries: number;
   enabled: boolean;
+  excludedReasons?: string[];
 }
 
 export type GapAutoFillSchedulerResponse = GapAutoFillSchedulerBase & {

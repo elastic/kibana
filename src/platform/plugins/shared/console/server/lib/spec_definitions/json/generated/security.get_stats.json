@@ -1,0 +1,21 @@
+{
+  "security.get_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/stats"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-stats",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

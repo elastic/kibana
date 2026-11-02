@@ -6,9 +6,10 @@
  */
 
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { SearchSourceFields } from '@kbn/data-plugin/public';
 
 export interface DataViewAndSavedSearch {
   savedSearch: SavedSearch | null;
@@ -35,7 +36,28 @@ export const getDataViewAndSavedSearchCallback =
       return resp;
     }
     const dataViewId = ss.references?.find((r) => r.type === 'index-pattern')?.id;
-    resp.dataView = await deps.dataViewsService.get(dataViewId!);
+    if (dataViewId) {
+      resp.dataView = await deps.dataViewsService.get(dataViewId);
+    } else {
+      try {
+        const json: SearchSourceFields = JSON.parse(
+          ss.tabs![0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        if (!json.index) {
+          throw new Error('No data view found in Discover session');
+        }
+        resp.dataView = await deps.dataViewsService.create({
+          id: undefined,
+          title: json.index.title,
+          name: json.index.name,
+          timeFieldName: json.index.timeFieldName,
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('No data view found in Discover session', error);
+        throw new Error('No data view found in Discover session');
+      }
+    }
     resp.savedSearch = ss;
     return resp;
   };
@@ -52,7 +74,7 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
  * which means it is cross-cluster
  */
 export function isCcsIndexPattern(indexPattern: string) {
-  return isCCSRemoteIndexName(indexPattern);
+  return isNonLocalIndexName(indexPattern);
 }
 
 export function findMessageField(

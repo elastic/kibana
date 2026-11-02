@@ -1,0 +1,62 @@
+{
+  "sha1": "210b4365d81f2def867914705cba7c25db0c004a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7be5439397f16ff-bbc7720216a77fc",
+      "title": "POST api/grokdebugger/simulate simulates a valid pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/api/tests/simulate_api.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "7be5439397f16ff-91e3df775ed879c",
+      "title": "POST api/grokdebugger/simulate returns an error response for an invalid pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/api/tests/simulate_api.spec.ts",
+        "line": 39,
+        "column": 20
+      }
+    },
+    {
+      "id": "7be5439397f16ff-d95c7915d616334",
+      "title": "POST api/grokdebugger/simulate simulates with a valid custom pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/api/tests/simulate_api.spec.ts",
+        "line": 57,
+        "column": 20
+      }
+    }
+  ]
+}

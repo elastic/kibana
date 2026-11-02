@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { RenderContentPanelProps } from '@kbn/response-ops-alerts-table/types';
+import { ALERT_TAG_ACTION_ID } from '../../../constants/action_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import type { BulkAlertTagsPanelComponentProps } from './alert_bulk_tags';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
@@ -26,7 +27,7 @@ export interface UseBulkAlertTagsPanel {
 }
 
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const setAlertTags = useSetAlertTags();
   const handleOnAlertTagsSubmit = useCallback<BulkAlertTagsPanelComponentProps['onSubmit']>(
     async (tags, ids, onSuccess, setIsLoading) => {
@@ -39,19 +40,21 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
 
   const alertTagsItems = useMemo(
     () =>
-      hasIndexWrite
+      hasAlertsUpdate
         ? [
             {
-              key: 'manage-alert-tags',
+              key: ALERT_TAG_ACTION_ID,
               'data-test-subj': 'alert-tags-context-menu-item',
               name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
               panel: 1,
               label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
               disableOnQuery: true,
+              icon: 'tag' as const,
+              groupId: 'tags' as const,
             },
           ]
         : [],
-    [hasIndexWrite]
+    [hasAlertsUpdate]
   );
 
   const TitleContent = useMemo(
@@ -89,7 +92,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
 
   const alertTagsPanels: UseBulkAlertTagsPanel[] = useMemo(
     () =>
-      hasIndexWrite
+      hasAlertsUpdate
         ? [
             {
               id: 1,
@@ -99,7 +102,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
             },
           ]
         : [],
-    [TitleContent, hasIndexWrite, renderContent]
+    [TitleContent, hasAlertsUpdate, renderContent]
   );
 
   return useMemo(() => {

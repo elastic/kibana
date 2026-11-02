@@ -16,17 +16,42 @@ describe('Jira formatter', () => {
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);
-    expect(res).toEqual({ ...theCase.connector.fields, labels: theCase.tags });
+    expect(res).toEqual({ ...theCase.connector.fields, otherFields: null, labels: theCase.tags });
   });
 
   it('it formats correctly when fields do not exist ', async () => {
     const invalidFields = { tags: ['tag'], connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
-    expect(res).toEqual({ priority: null, issueType: null, parent: null, labels: theCase.tags });
+    expect(res).toEqual({
+      priority: null,
+      issueType: null,
+      parent: null,
+      otherFields: null,
+      labels: theCase.tags,
+    });
   });
 
   it('it replace white spaces with hyphens on tags', async () => {
     const res = await format({ ...theCase, tags: ['a tag with spaces'] }, []);
-    expect(res).toEqual({ ...theCase.connector.fields, labels: ['a-tag-with-spaces'] });
+    expect(res).toEqual({
+      ...theCase.connector.fields,
+      otherFields: null,
+      labels: ['a-tag-with-spaces'],
+    });
+  });
+
+  it('it formats correctly with otherFields', async () => {
+    const caseWithOtherFields = {
+      ...theCase,
+      connector: {
+        fields: {
+          ...theCase.connector.fields,
+          otherFields: '{"customfield_123456":"Blue team"}',
+        },
+      },
+    } as Case;
+
+    const res = await format(caseWithOtherFields, []);
+    expect(res).toEqual({ ...caseWithOtherFields.connector.fields, labels: theCase.tags });
   });
 });

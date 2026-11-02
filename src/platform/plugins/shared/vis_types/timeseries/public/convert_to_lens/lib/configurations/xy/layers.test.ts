@@ -397,7 +397,7 @@ describe('getLayers', () => {
           layerType: 'data',
           accessors: ['column-id-1'],
           xAccessor: 'column-id-2',
-          splitAccessor: 'column-id-3',
+          splitAccessors: ['column-id-3'],
           seriesType: 'area',
           layerId: 'test-layer-1',
           yConfig: [
@@ -418,7 +418,7 @@ describe('getLayers', () => {
           layerType: 'data',
           accessors: ['column-id-1'],
           xAccessor: 'column-id-2',
-          splitAccessor: 'column-id-3',
+          splitAccessors: ['column-id-3'],
           seriesType: 'area',
           layerId: 'test-layer-1',
           yConfig: [
@@ -710,7 +710,7 @@ describe('getLayers', () => {
         },
       ].map(expect.objectContaining)
     );
-    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(3);
+    expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(3);
   });
 
   test('should return annotation layer gets correct dataView when none is defined', async () => {
@@ -771,6 +771,6 @@ describe('getLayers', () => {
         },
       ].map(expect.objectContaining)
     );
-    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(1);
+    expect(mockExtractOrGenerateDatasourceInfo).toHaveBeenCalledTimes(1);
   });
 });

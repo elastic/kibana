@@ -9,8 +9,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { NavigationServerPlugin } from './plugin';
-
 export async function plugin(initContext: PluginInitializerContext) {
+  const { NavigationServerPlugin } = await import('./plugin');
   return new NavigationServerPlugin(initContext);
 }

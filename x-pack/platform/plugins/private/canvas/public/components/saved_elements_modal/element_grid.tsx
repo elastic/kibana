@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
 import type { CustomElement } from '../../../types';
-import { ElementCard } from '../element_card';
+import { ElementCard, ElementCardWrapper } from '../element_card';
 
 export interface Props {
   /**
@@ -36,7 +35,7 @@ export interface Props {
   onDelete: (element: CustomElement) => void;
 }
 
-export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }: Props) => {
+export const ElementGrid = ({ elements, filterText = '', onClick, onEdit, onDelete }: Props) => {
   filterText = filterText.toLowerCase();
 
   return (
@@ -55,7 +54,7 @@ export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }:
         }
 
         return (
-          <EuiFlexItem key={index} className="canvasElementCard__wrapper">
+          <ElementCardWrapper key={index}>
             <ElementCard
               title={displayName || name}
               description={help}
@@ -63,21 +62,9 @@ export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }:
               onClick={whenClicked}
             />
             <ElementControls onEdit={() => onEdit(element)} onDelete={() => onDelete(element)} />
-          </EuiFlexItem>
+          </ElementCardWrapper>
         );
       })}
     </EuiFlexGrid>
   );
-};
-
-ElementGrid.propTypes = {
-  elements: PropTypes.array.isRequired,
-  filterText: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-};
-
-ElementGrid.defaultProps = {
-  filterText: '',
 };

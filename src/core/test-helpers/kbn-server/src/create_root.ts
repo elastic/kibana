@@ -8,7 +8,6 @@
  */
 
 import { join } from 'path';
-import loadJsonFile from 'load-json-file';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
@@ -27,9 +26,11 @@ import {
 } from '@kbn/test';
 import type { CliArgs, RawPackageInfo } from '@kbn/config';
 import { Env } from '@kbn/config';
+import { loadJsonFile } from '@kbn/utils';
 
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { resolveKibanaVersion } from './utils';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put' | 'patch';
 
@@ -67,6 +68,16 @@ const DEFAULTS_SETTINGS = {
   migrations: { skip: false },
 };
 
+/**
+ * Creates a test {@link Root} instance with the given configuration overrides.
+ *
+ * @param settings - Config key/value pairs merged on top of the default test settings.
+ * @param cliArgs - CLI argument overrides applied to the Kibana environment.
+ * @param customKibanaVersion - When provided, overrides the Kibana version from `package.json`.
+ *   Accepts a concrete semver string (e.g. `'9.0.0'`). Special version tokens such as
+ *   `'nextMinor'` and `'previousMinor'` must be resolved to a concrete version first
+ *   (e.g. via {@link resolveKibanaVersion} in {@link createTestServers}).
+ */
 export function createRootWithSettings(
   settings: Record<string, any>,
   cliArgs: Partial<CliArgs> = {},
@@ -74,7 +85,7 @@ export function createRootWithSettings(
 ) {
   let pkg: RawPackageInfo | undefined;
   if (customKibanaVersion) {
-    pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+    pkg = loadJsonFile<RawPackageInfo>(join(REPO_ROOT, 'package.json'));
     pkg.version = customKibanaVersion;
   }
 
@@ -82,11 +93,34 @@ export function createRootWithSettings(
    * Most of these integration tests expect OSS to default to true, but FIPS
    * requires the security plugin to be enabled
    */
-  let oss = true;
+  const oss = true;
   if (getFips() === 1) {
     set(settings, 'xpack.security.fipsMode.enabled', true);
-    oss = false;
-    delete cliArgs.oss;
+    // Keep oss=true to avoid loading all xpack plugins on startup — heavy plugins like
+    // streams, fleet, and reporting do significant ES initialization that exhausts the
+    // test cluster. Instead, inject only the minimal set of xpack plugins required for
+    // FIPS security compliance, including the full requiredBundles transitive closure for
+    // the security plugin (spaces, remoteClusters, indexManagement, runtimeFields).
+    const existingPaths = Array.isArray(settings?.plugins?.paths)
+      ? (settings.plugins.paths as string[])
+      : [];
+    set(settings, 'plugins.paths', [
+      ...existingPaths,
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/licensing'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/features'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/task_manager'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/security'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/spaces'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/private/remote_clusters'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/shared/index_management'),
+      join(REPO_ROOT, 'x-pack/platform/plugins/private/runtime_fields'),
+    ]);
+    if (cliArgs.serverless) {
+      // spaces config keys use schema.literal(false) with no defaultValue in serverless
+      // mode; set them explicitly since the spaces plugin is now loaded via plugins.paths.
+      set(settings, 'xpack.spaces.allowFeatureVisibility', false);
+      set(settings, 'xpack.spaces.allowSolutionVisibility', false);
+    }
   }
 
   const env = Env.createDefault(
@@ -312,7 +346,7 @@ export function createTestServers({
           hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
           password: kibanaServerTestUser.password,
-          ...(getFips() ? kbnSettings.elasticsearch : {}),
+          ...(getFips() === 1 ? kbnSettings.elasticsearch : {}),
         };
       }
 
@@ -325,7 +359,20 @@ export function createTestServers({
       };
     },
     startKibana: async (abortSignal?: AbortSignal) => {
-      const root = createRootWithCorePlugins(kbnSettings, cliArgs, customKibanaVersion);
+      // Only fetch the live ES version when a relative token ('nextMinor' / 'previousMinor')
+      // is used. Calling info() unconditionally breaks callers that run startES() and
+      // startKibana() concurrently with Promise.all(), because ES may not be listening yet.
+      let resolvedKibanaVersion: string | undefined;
+      if (customKibanaVersion === 'nextMinor' || customKibanaVersion === 'previousMinor') {
+        const {
+          version: { number: esVersion },
+        } = await es.getClient().info();
+        resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, esVersion);
+      } else {
+        resolvedKibanaVersion = resolveKibanaVersion(customKibanaVersion, '');
+      }
+
+      const root = createRootWithCorePlugins(kbnSettings, cliArgs, resolvedKibanaVersion);
 
       abortSignal?.addEventListener('abort', async () => await root.shutdown());
 

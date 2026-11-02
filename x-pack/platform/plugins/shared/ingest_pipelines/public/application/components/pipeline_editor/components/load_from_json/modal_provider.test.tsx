@@ -5,90 +5,92 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
+
 import React from 'react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { OnDoneLoadJsonHandler } from './modal_provider';
 import { ModalProvider } from './modal_provider';
 
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
 
   return {
     ...original,
-    debounce: (fn: any) => fn,
+    debounce: (fn: (...args: unknown[]) => unknown) => fn,
   };
 });
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
-        }}
-      />
-    ),
-  };
-});
-
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-
-const setup = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
-  return registerTestBed(
-    () => (
+const renderModalProvider = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
+  render(
+    <I18nProvider>
       <KibanaContextProvider services={{ uiSettings: uiSettingsServiceMock.createSetupContract() }}>
         <ModalProvider onDone={onDone}>
-          {(openModal) => {
-            return (
-              <button onClick={openModal} data-test-subj="button">
-                Load JSON
-              </button>
-            );
-          }}
+          {(openModal) => (
+            <button onClick={openModal} data-test-subj="button">
+              Load JSON
+            </button>
+          )}
         </ModalProvider>
       </KibanaContextProvider>
-    ),
-    {
-      memoryRouter: {
-        wrapComponent: false,
-      },
-    }
-  )();
+    </I18nProvider>
+  );
 };
 
 describe('Load from JSON ModalProvider', () => {
-  let testBed: TestBed;
   let onDone: jest.Mock;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     onDone = jest.fn();
-    testBed = await setup({ onDone });
+    renderModalProvider({ onDone });
   });
 
   it('displays errors', () => {
-    const { find, exists } = testBed;
-    find('button').simulate('click');
-    expect(exists('loadJsonConfirmationModal'));
+    fireEvent.click(screen.getByTestId('button'));
+
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
     const invalidPipeline = '{}';
-    find('mockCodeEditor').simulate('change', { jsonString: invalidPipeline });
-    find('confirmModalConfirmButton').simulate('click');
-    const errorCallout = find('loadJsonConfirmationModal.errorCallOut');
-    expect(errorCallout.text()).toContain('Please ensure the JSON is a valid pipeline object.');
-    expect(onDone).toHaveBeenCalledTimes(0);
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: invalidPipeline } });
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
+    expect(within(modal).getByTestId('errorCallOut')).toHaveTextContent(
+      'Please ensure the JSON is a valid pipeline object.'
+    );
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    expect(onDone).not.toHaveBeenCalled();
   });
 
-  it('passes through a valid pipeline object', () => {
-    const { find, exists } = testBed;
-    find('button').simulate('click');
-    expect(exists('loadJsonConfirmationModal'));
+  it('clears serialization errors on edit and re-enables submit', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
+
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: '{}' } });
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    expect(within(modal).getByTestId('errorCallOut')).toBeInTheDocument();
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).toBeDisabled();
+
+    const validPipeline = JSON.stringify({ processors: [] });
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: validPipeline } });
+
+    expect(within(modal).queryByTestId('errorCallOut')).not.toBeInTheDocument();
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).not.toBeDisabled();
+
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes through a valid pipeline object', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
     const validPipeline = JSON.stringify({
       processors: [{ set: { field: 'test', value: 123 } }, { badType1: null }, { badType2: 1 }],
       on_failure: [
@@ -101,12 +103,13 @@ describe('Load from JSON ModalProvider', () => {
         },
       ],
     });
-    // Set the value of the mock code editor
-    find('mockCodeEditor').getDOMNode().setAttribute('data-currentvalue', validPipeline);
-    find('mockCodeEditor').simulate('change');
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: validPipeline } });
 
-    find('confirmModalConfirmButton').simulate('click');
-    expect(!exists('loadJsonConfirmationModal'));
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
+
     expect(onDone).toHaveBeenCalledTimes(1);
     expect(onDone.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
@@ -131,6 +134,47 @@ describe('Load from JSON ModalProvider', () => {
           },
           Object {
             "badType2": 1,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('passes through a valid pipeline object with triple-quoted strings (xJSON)', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
+    const validPipelineWithTripleQuotes = `{
+      "processors": [
+        {
+          "script": {
+            "description": "add a test_field",
+            "lang": "painless",
+            "source": """
+              ctx['test_field'] = 'This is a test'
+            """
+          }
+        }
+      ]
+    }`;
+    const codeEditor = within(modal).getByTestId('mockedCodeEditor');
+    fireEvent.change(codeEditor, { target: { value: validPipelineWithTripleQuotes } });
+
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onDone.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "processors": Array [
+          Object {
+            "script": Object {
+              "description": "add a test_field",
+              "lang": "painless",
+              "source": "
+                    ctx['test_field'] = 'This is a test'
+                  ",
+            },
           },
         ],
       }

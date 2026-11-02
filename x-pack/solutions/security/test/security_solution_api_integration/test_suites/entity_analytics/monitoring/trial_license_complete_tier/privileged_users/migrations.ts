@@ -12,18 +12,14 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import { getPrivilegedMonitorUsersIndex } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/utils';
 import { asyncForEach } from '@kbn/std';
-import { monitoringEntitySourceTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/saved_objects';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { entityAnalyticsRouteHelpersFactory } from '../../../utils/entity_analytics';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
-  const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log);
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const spacesService = getService('spaces');
 
@@ -32,17 +28,12 @@ export default ({ getService }: FtrProviderContext) => {
       .body as ListEntitySourcesResponse;
 
     const entitySourcesToDelete = names
-      ? entitySources.filter((s) => !names?.includes(s.name!))
-      : entitySources;
+      ? entitySources.sources.filter((s) => !names?.includes(s.name!))
+      : entitySources.sources;
 
-    await asyncForEach(entitySourcesToDelete, async ({ id }) =>
-      kibanaServer.savedObjects.delete({
-        // Hack because deleteEntitySource API doesn't exist
-        type: monitoringEntitySourceTypeName,
-        space: namespace,
-        id,
-      })
-    );
+    await asyncForEach(entitySourcesToDelete, async (source) => {
+      await entityAnalyticsApi.deleteEntitySource({ params: { id: source.id } }, namespace);
+    });
   };
 
   const createDeprecatedPrivMonUser = (
@@ -67,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const expectAllDefaultSourcesToExist = async (namespace: string) => {
     const sources = await entityAnalyticsApi.listEntitySources({ query: {} }, namespace);
-    const names = (sources.body as ListEntitySourcesResponse).map((s) => s.name);
+    const names = (sources.body as ListEntitySourcesResponse).sources.map((s) => s.name);
 
     expect(names.sort()).toEqual(
       [
@@ -89,7 +80,6 @@ export default ({ getService }: FtrProviderContext) => {
             name: space,
           });
         }
-        await enablePrivmonSetting(kibanaServer, space);
         await PrivMonUtils(getService, space).initPrivMonEngine();
       });
     });
@@ -97,7 +87,6 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await asyncForEach(SPACES, async (space) => {
         await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } }, space);
-        await disablePrivmonSetting(kibanaServer, space);
         if (space !== 'default') {
           await spacesService.delete(space);
         }
@@ -105,6 +94,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     SPACES.forEach((namespace) => {
+      const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log, namespace);
+
       describe(`source_index migration for space ${namespace}`, () => {
         it(`should run the migration when users have source_index field`, async () => {
           const indexPattern = 'INDEX1';

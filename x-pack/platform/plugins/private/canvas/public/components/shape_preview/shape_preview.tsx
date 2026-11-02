@@ -7,7 +7,6 @@
 
 import type { FC, RefCallback } from 'react';
 import React, { useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
 import { ShapeDrawerComponent } from '../../../canvas_plugin_src/renderers/shape/components';
 import type { SvgConfig, ShapeRef, ViewBoxParams } from '../shape_drawer';
 import { getDefaultShapeData } from '../shape_drawer';
@@ -49,8 +48,4 @@ export const ShapePreview: FC<Props> = ({ shape }) => {
       />
     </div>
   );
-};
-
-ShapePreview.propTypes = {
-  shape: PropTypes.string,
 };

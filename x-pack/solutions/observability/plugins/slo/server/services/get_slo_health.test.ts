@@ -10,13 +10,13 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { createSLO } from './fixtures/slo';
 import { GetSLOHealth } from './get_slo_health';
 import { createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import * as compute_health from '../domain/services/compute_health';
 
 jest.spyOn(compute_health, 'computeHealth');
 
 describe('GetSLOHealth', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 
@@ -72,8 +72,8 @@ describe('GetSLOHealth', () => {
   });
 
   it('delegates to computeHealth with the correct parameters', async () => {
-    const slo1 = createSLO({ id: 'slo_1' });
-    const slo2 = createSLO({ id: 'slo_2', enabled: false });
+    const slo1 = createSLO({ id: 'slo_id_1' });
+    const slo2 = createSLO({ id: 'slo_id_2', enabled: false });
     mockRepository.findAllByIds.mockResolvedValueOnce([slo1, slo2]);
     mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
       transforms: [],
@@ -82,21 +82,21 @@ describe('GetSLOHealth', () => {
 
     await getSLOHealth.execute({
       list: [
-        { id: 'slo_1', instanceId: ALL_VALUE },
-        { id: 'slo_2', instanceId: 'instance_1' },
+        { id: 'slo_id_1', instanceId: ALL_VALUE },
+        { id: 'slo_id_2', instanceId: 'instance_1' },
       ],
     });
     expect(compute_health.computeHealth).toHaveBeenCalledWith(
       [
         {
-          id: 'slo_1',
+          id: 'slo_id_1',
           instanceId: ALL_VALUE,
           revision: slo1.revision,
           name: slo1.name,
           enabled: slo1.enabled,
         },
         {
-          id: 'slo_2',
+          id: 'slo_id_2',
           instanceId: 'instance_1',
           revision: slo2.revision,
           name: slo2.name,

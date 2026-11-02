@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CoreAppsService, URL_MAX_LENGTH } from './src';
+export { CoreAppsService } from './src';
 export type { CoreAppsServiceSetupDeps, CoreAppsServiceStartDeps } from './src';

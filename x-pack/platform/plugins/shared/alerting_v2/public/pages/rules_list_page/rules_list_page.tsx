@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo } from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
+import { useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useBoolean } from '@kbn/react-hooks';
+import { UserCapabilities } from '../../services/user_capabilities';
+import { RULES_CONTENT_LIST_ID } from '../../constants';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import {
+  KindFilter,
+  RULES_LIST_FEATURES_FIELDS,
+  StatusFilter,
+  TagsFilter,
+} from './rules_list_filters';
+import { useAlertingLocators } from '../../application/locator_context';
+import { RulesListHeader } from './rules_list_header';
+import { RulesListTableContainer } from './rules_list_table_container';
+import { useRulesDataSource } from './rules_data_source';
+import { UniversalAlertingIntroBanner } from './universal_alerting_intro_banner';
+
+export const RulesListPage = () => {
+  useBreadcrumbs('rules_list');
+
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+  const dataSource = useRulesDataSource();
+
+  const [
+    isCreateOptionsFlyoutOpen,
+    { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
+  const createSessionHistoryKey = useMemo(() => Symbol('rulesListCreateRule'), []);
+  const {
+    flyout,
+    confirmationModal,
+    openCreateFlyout,
+    openCreateBuilderFlyout,
+    openEditFlyout,
+    openCloneFlyout,
+    isOpen: isAuthoringFlyoutOpen,
+    requestClose: requestAuthoringClose,
+  } = useComposeDiscoverFlyout({
+    historyKey: isCreateOptionsFlyoutOpen ? createSessionHistoryKey : undefined,
+    onDismiss: closeCreateOptionsFlyout,
+  });
+
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const showBuildSequence = useAlertingV2ExperimentalFeatures();
+  const { rulesLocators } = useAlertingLocators();
+  const navigateToSequenceBuilder = useCallback(() => {
+    rulesLocators.navigateSync({ page: 'sequence_create' });
+  }, [rulesLocators]);
+  const handlePickerClose = useCallback(() => {
+    if (isAuthoringFlyoutOpen) {
+      requestAuthoringClose();
+      return;
+    }
+    closeCreateOptionsFlyout();
+  }, [isAuthoringFlyoutOpen, requestAuthoringClose, closeCreateOptionsFlyout]);
+
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToAgentBuilder();
+  };
+  const onBuildSequenceFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToSequenceBuilder();
+  };
+  const onCreateThresholdRuleFromOptionsFlyout = () => {
+    openCreateBuilderFlyout('threshold');
+  };
+
+  const emptyState = canWrite ? (
+    <RuleCreateOptionsPanel
+      onCreateEsqlRule={openCreateFlyout}
+      onCreateWithAgent={navigateToAgentBuilder}
+      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+    />
+  ) : (
+    <EuiEmptyPrompt
+      iconType="bell"
+      data-test-subj="rulesListReadOnlyEmpty"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
+            defaultMessage="No Universal rules"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
+            defaultMessage="There are no Universal rules to display."
+          />
+        </p>
+      }
+    />
+  );
+
+  return (
+    <div>
+      <ContentListProvider
+        id={RULES_CONTENT_LIST_ID}
+        queryKeyScope={RULES_CONTENT_LIST_ID}
+        labels={{
+          entity: i18n.translate('xpack.alertingV2.rulesList.entity', {
+            defaultMessage: 'rule',
+          }),
+          entityPlural: i18n.translate('xpack.alertingV2.rulesList.entityPlural', {
+            defaultMessage: 'rules',
+          }),
+          searchPlaceholder: i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
+            defaultMessage: 'Search rules',
+          }),
+        }}
+        dataSource={dataSource}
+        features={{
+          sorting: {
+            initialSort: { field: 'name', direction: 'asc' },
+            fields: [
+              {
+                field: 'name',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.name', {
+                  defaultMessage: 'Name',
+                }),
+              },
+              {
+                field: 'kind',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.kind', {
+                  defaultMessage: 'Outcome',
+                }),
+              },
+              {
+                field: 'enabled',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.enabled', {
+                  defaultMessage: 'Enabled',
+                }),
+              },
+            ],
+          },
+          pagination: { initialPageSize: 20 },
+          search: true,
+          // useBulkSelect owns selection — Content List's page-scoped selectedIds
+          // cannot express select-all-with-exclusions.
+          selection: false,
+          fields: RULES_LIST_FEATURES_FIELDS,
+        }}
+      >
+        <RulesListHeader
+          canWrite={canWrite}
+          onCreateRule={openCreateOptionsFlyout}
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateWithAgent={navigateToAgentBuilder}
+        />
+        <UniversalAlertingIntroBanner />
+        <ContentList emptyState={emptyState} data-test-subj="rulesList">
+          <ContentListToolbar>
+            <ContentListToolbar.Filters>
+              <StatusFilter />
+              <TagsFilter />
+              <KindFilter />
+            </ContentListToolbar.Filters>
+          </ContentListToolbar>
+          <RulesListTableContainer
+            onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
+          />
+        </ContentList>
+      </ContentListProvider>
+      {isCreateOptionsFlyoutOpen ? (
+        <RuleCreateOptionsFlyout
+          historyKey={createSessionHistoryKey}
+          retainOnCascade={isAuthoringFlyoutOpen}
+          onClose={handlePickerClose}
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+          onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
+        />
+      ) : null}
+      {flyout}
+      {confirmationModal}
+    </div>
+  );
+};

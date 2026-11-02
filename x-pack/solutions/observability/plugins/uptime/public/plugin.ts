@@ -56,6 +56,7 @@ import type {
   ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { PLUGIN } from '../common/constants/plugin';
 import type { UptimeConfig } from '../common/config';
 import {
@@ -87,6 +88,7 @@ export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
@@ -128,7 +130,9 @@ export class UptimePlugin
       this.initContext.config.get().experimental || this.experimentalFeatures;
   }
 
-  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({
+    status: AppStatus.inaccessible,
+  }));
   private experimentalFeatures: UptimeConfig['experimental'] = {
     ruleFormV2Enabled: false,
   };
@@ -204,7 +208,12 @@ export class UptimePlugin
       keywords: appKeywords,
       deepLinks: [
         { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
-        { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+        {
+          id: 'Certificates',
+          title: 'TLS Certificates',
+          path: '/certificates',
+          visibleIn: ['globalSearch', 'projectSideNav'],
+        },
         { id: 'Settings', title: 'Settings', path: '/settings' },
       ],
       mount: async (params: AppMountParameters) => {
@@ -311,16 +320,24 @@ function setUptimeAppStatus(
     const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
     if (hasUptimePrivileges) {
       const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
-      indexStatusPromise.then((indexStatus) => {
-        if (indexStatus.indexExists) {
-          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-          updater.next(() => ({ status: AppStatus.accessible }));
-          registerAlertRules(coreStart, pluginsStart, stackVersion, false);
-        } else {
+      indexStatusPromise
+        .then((indexStatus) => {
+          if (indexStatus.indexExists) {
+            registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+            updater.next(() => ({ status: AppStatus.accessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, false);
+          } else {
+            updater.next(() => ({ status: AppStatus.inaccessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, true);
+          }
+        })
+        .catch(() => {
+          // The index-status check runs as the current user, so feature visibility
+          // without ES index read privileges returns a 403 (not a 404). Keep the app
+          // hidden on any failure instead of leaving the promise rejection unhandled.
           updater.next(() => ({ status: AppStatus.inaccessible }));
           registerAlertRules(coreStart, pluginsStart, stackVersion, true);
-        }
-      });
+        });
     }
   }
 }

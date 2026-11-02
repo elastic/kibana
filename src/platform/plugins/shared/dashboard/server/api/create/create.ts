@@ -7,50 +7,90 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { RequestTiming } from '@kbn/core-http-server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardCreateRequestBody } from './types';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
-import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import type { DashboardRequestServices } from '../types';
 import type { DashboardCreateResponseBody } from './types';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequence,
+  INITIAL_HISTORY_SEQUENCE,
+} from '../../change_history/utils';
+
+export interface CreateOptions {
+  id?: string;
+  serverTiming?: RequestTiming;
+  spaceId?: string;
+  isDashboardAppRequest?: boolean;
+}
 
 export async function create(
-  requestCtx: RequestHandlerContext,
-  createBody: DashboardCreateRequestBody
+  services: DashboardRequestServices,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  createBody: DashboardState,
+  { id, serverTiming, spaceId, isDashboardAppRequest = false }: CreateOptions = {}
 ): Promise<DashboardCreateResponseBody> {
-  const { core } = await requestCtx.resolve(['core']);
-  const { access_control: accessControl, ...restOfData } = createBody.data;
+  const { access_control: accessControl, ...restOfData } = createBody;
 
-  const {
-    attributes: soAttributes,
-    references: soReferences,
-    error: transformInError,
-  } = transformDashboardIn(restOfData);
-  if (transformInError) {
-    throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
-  }
+  const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
+    restOfData,
+    isDashboardAppRequest,
+    serverTiming
+  );
 
-  const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
+  const supportsAccessControl = services.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
 
-  const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
+  // a recreated ID may still have history from a deleted dashboard, so continue from it
+  const historySequence = id
+    ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence: undefined })
+    : INITIAL_HISTORY_SEQUENCE;
+
+  const savedObject = await services.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
-    soAttributes,
+    { ...soAttributes, historySequence },
     {
+      ...(id !== undefined && { id }),
       references: soReferences,
-      ...(createBody.id && { id: createBody.id }),
-      ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
       ...(accessControl?.access_mode &&
         supportsAccessControl && {
           accessControl: {
-            accessMode: accessControl.access_mode ?? 'default',
+            accessMode: accessControl.access_mode,
           },
         }),
     }
   );
+  // Rebuilt from stored attributes, not createBody: restore replays snapshots in dashboard-app format,
+  // and panel IDs are only generated on the way in.
+  const snapshot = getHistorySnapshot({
+    dashboardId: savedObject.id,
+    attributes: soAttributes,
+    references: soReferences,
+    strictValidationSchema,
+  });
+  if (snapshot) {
+    await addToHistory({
+      user: services.security.authc.getCurrentUser(),
+      dashboardId: savedObject.id,
+      snapshot,
+      spaceId,
+      sequence: historySequence,
+      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      type: 'create',
+    });
+  }
 
-  return getDashboardCRUResponseBody(savedObject, 'create');
+  return getDashboardCRUResponseBody(
+    savedObject,
+    'create',
+    strictValidationSchema,
+    isDashboardAppRequest,
+    serverTiming
+  );
 }

@@ -52,10 +52,10 @@ export const generateOpenApiDocument = async (
   if (filters.access === 'public' && !filters.version) {
     filters = { ...filters, version: SERVERLESS_VERSION_2023_10_31 };
   }
-  const converter = new OasConverter();
+  const env = opts.env || { serverless: false };
+  const converter = new OasConverter(env);
   const paths: OpenAPIV3.PathsObject = {};
   const getOpId = createOpIdGenerator();
-  const env = opts.env || { serverless: false };
   for (const router of appRouters.routers) {
     const result = await processRouter({
       appRouter: router,

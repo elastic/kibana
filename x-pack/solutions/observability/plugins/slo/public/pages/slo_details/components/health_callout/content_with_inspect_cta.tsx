@@ -32,7 +32,7 @@ export function ContentWithInspectCta({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="inspect" color="danger" />
+              <EuiIcon type="inspect" color="danger" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size={textSize} color="danger">

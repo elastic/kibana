@@ -10,10 +10,9 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type { GroupingBucket } from '@kbn/grouping/src';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -21,6 +20,7 @@ import type { Note } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/model';
 import type { ControlColumnProps, RowRenderer } from '../../../../common/types';
+import type { AlertsGroupingAggregation } from './grouping_settings/types';
 
 export interface SetEventsLoadingProps {
   eventIds: string[];
@@ -78,12 +78,19 @@ export interface SecurityAlertsTableContext {
   leadingControlColumn: ControlColumnProps;
   userProfiles: AlertsUserProfilesData;
   pageScope: PageScope;
+  /**
+   * Stable callback from `usePaginatedFlyout` that opens the document at the
+   * given absolute index. Passed here so `ActionsCell` can dispatch row-expand
+   * actions without accessing the store directly.
+   */
+  openDocumentFlyout: (documentIndex: number) => void;
+  /** Adds a "Remove from case" item to each row's more actions menu. */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;
 export type GetSecurityAlertsTableProp<PropKey extends keyof SecurityAlertsTableProps> =
   NonNullable<SecurityAlertsTableProps[PropKey]>;
-export type { AlertWithLegacyFormats } from '@kbn/response-ops-alerts-table/types';
 
 export type GroupTakeActionItems = (props: {
   /**
@@ -102,7 +109,18 @@ export type GroupTakeActionItems = (props: {
    * Selected group to know which group is extended/visible. This is coming from the getLevel function in the detections alert grouping code.
    */
   selectedGroup: string;
-}) => {
-  items: EuiContextMenuPanelItemDescriptor[];
-  panels: EuiContextMenuPanelDescriptor[];
-};
+  /**
+   * Meta-data about the selected group
+   */
+  groupBucket: GroupingBucket<AlertsGroupingAggregation>;
+  /**
+   * Callback to close the containing popover menu
+   */
+  closePopover: () => void;
+  /**
+   * Runtime mappings from the active data view, forwarded to the status-update
+   * request so the close query can reference fields not natively mapped on the
+   * alerts index (e.g. scripted data view runtime fields).
+   */
+  runtimeMappings?: MappingRuntimeFields;
+}) => JSX.Element | undefined;

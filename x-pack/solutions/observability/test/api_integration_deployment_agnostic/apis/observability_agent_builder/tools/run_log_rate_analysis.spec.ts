@@ -7,18 +7,18 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import {
+  generateLogRateAnalysisSpikeData,
+  LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
+  LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
+  LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
+} from '@kbn/synthtrace';
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
-import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { ErrorResult } from '@kbn/onechat-common';
-import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/run_log_rate_analysis/run_log_rate_analysis';
+import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ErrorResult } from '@kbn/agent-builder-common';
+import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/run_log_rate_analysis/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import {
-  LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
-  LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
-  LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
-  createLogRateAnalysisSpikeData,
-} from '../utils/synthtrace_scenarios';
 
 interface RunLogRateAnalysisToolResult {
   type: ToolResultType.other;
@@ -51,7 +51,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
 
       logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-      await createLogRateAnalysisSpikeData({ logsSynthtraceEsClient });
+      await logsSynthtraceEsClient.clean();
+      const { client, generator } = generateLogRateAnalysisSpikeData({
+        logsEsClient: logsSynthtraceEsClient,
+      });
+      await client.index(generator);
     });
 
     after(async () => {
@@ -88,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('when filtering the analysis with searchQuery', () => {
+    describe('when filtering the analysis with kqlFilter', () => {
       function executeToolWithRegionFilter(region?: string) {
         return agentBuilderApiClient.executeTool<RunLogRateAnalysisToolResult>({
           id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
@@ -96,7 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             index: LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
             baseline: LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
             deviation: LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
-            ...(region ? { searchQuery: { term: { 'cloud.region': region } } } : {}),
+            ...(region ? { kqlFilter: `cloud.region: "${region}"` } : {}),
           },
         });
       }

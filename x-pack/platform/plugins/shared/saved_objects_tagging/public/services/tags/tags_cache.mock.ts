@@ -15,17 +15,19 @@ const createTagsCacheMock = () => {
   const mock: TagsCacheMock = {
     getState: jest.fn(),
     getState$: jest.fn(),
+    isInitialized: jest.fn(),
     initialize: jest.fn(),
     stop: jest.fn(),
 
-    onDelete: jest.fn(),
-    onCreate: jest.fn(),
-    onUpdate: jest.fn(),
-    onGetAll: jest.fn(),
+    onDidDelete: jest.fn(),
+    onDidCreate: jest.fn(),
+    onDidUpdate: jest.fn(),
+    onDidGetAll: jest.fn(),
   };
 
   mock.getState.mockReturnValue([]);
   mock.getState$.mockReturnValue(of([]));
+  mock.isInitialized.mockReturnValue(false);
   mock.initialize.mockResolvedValue(undefined);
 
   return mock;

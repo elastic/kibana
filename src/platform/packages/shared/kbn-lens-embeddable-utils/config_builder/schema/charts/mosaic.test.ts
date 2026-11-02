@@ -7,126 +7,632 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import { mosaicStateSchema } from './mosaic';
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './mosaic';
+import { mosaicConfigSchema } from './mosaic';
 
 describe('Mosaic Schema', () => {
-  const baseMosaicConfig = {
-    type: 'mosaic' as const,
-    dataset: {
-      type: 'dataView' as const,
-      id: 'test-data-view',
+  const baseMosaicConfig: Pick<
+    MosaicConfigNoESQL,
+    'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
+  > = {
+    type: 'mosaic',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
-  };
-
-  const defaultValues = {
-    sampling: 1,
     ignore_global_filters: false,
+    sampling: 0,
   };
 
-  it('validates minimal configuration', () => {
-    const input = {
-      ...baseMosaicConfig,
-      metrics: [
-        {
-          operation: 'count' as const,
-          field: 'test_field',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+  describe('Non-ES|QL Schema', () => {
+    it('validates minimal configuration with single outer grouping', () => {
+      const input: MosaicConfig = {
+        ...baseMosaicConfig,
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
         },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-        },
-      ],
-    };
+        group_by: [
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['category'],
+          },
+        ],
+      };
 
-    const validated = mosaicStateSchema.validate(input);
-    expect(validated).toEqual({
-      ...defaultValues,
-      ...input,
-      group_by: [{ ...input.group_by[0], size: 5 }],
+      const validated = mosaicConfigSchema.parse(input);
+      expect(validated.type).toBe('mosaic');
+      expect(validated.metric).toHaveProperty('operation', 'count');
+      expect(validated.group_by).toHaveLength(1);
     });
-  });
 
-  it('validates full configuration', () => {
-    const input = {
-      ...baseMosaicConfig,
-      title: 'Sales Mosaic',
-      description: 'Sales data visualization',
-      metrics: [
-        {
-          operation: 'sum' as const,
+    it('should throw if no grouping is defined', () => {
+      const input = {
+        ...baseMosaicConfig,
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      };
+
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
+      );
+    });
+
+    it('validates configuration with both outer and inner grouping', () => {
+      const input: MosaicConfig = {
+        ...baseMosaicConfig,
+        metric: {
+          operation: 'sum',
+          empty_as_null: false,
           field: 'sales',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          color: {
-            type: 'static' as const,
-            color: '#blue',
+        },
+        group_by: [
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['category'],
+          },
+        ],
+        group_breakdown_by: [
+          {
+            operation: 'date_histogram',
+            field: 'date_field',
+            suggested_interval: 'auto',
+            use_original_time_range: false,
+            include_empty_rows: true,
+          },
+        ],
+      };
+
+      const validated = mosaicConfigSchema.parse(input);
+      expect(validated.metric).toHaveProperty('operation', 'sum');
+      expect(validated.group_by).toHaveLength(1);
+      expect(validated.group_breakdown_by).toHaveLength(1);
+    });
+
+    it('validates configuration with collapsed dimensions', () => {
+      const input: MosaicConfig = {
+        ...baseMosaicConfig,
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
+        group_by: [
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['region'],
+            collapse_by: 'sum',
+          },
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['category'],
+          },
+        ],
+        group_breakdown_by: [
+          {
+            operation: 'date_histogram',
+            field: 'date_field',
+            collapse_by: 'avg',
+            suggested_interval: 'auto',
+            use_original_time_range: false,
+            include_empty_rows: true,
+          },
+        ],
+      };
+
+      const validated = mosaicConfigSchema.parse(input);
+      expect(validated.group_by).toHaveLength(2);
+      expect(validated.group_breakdown_by).toHaveLength(1);
+    });
+
+    it('validates full configuration with legend and value display', () => {
+      const input: MosaicConfig = {
+        ...baseMosaicConfig,
+        title: 'Sales Mosaic',
+        description: 'Sales data visualization',
+        metric: {
+          operation: 'sum',
+          empty_as_null: false,
+          field: 'sales',
+        },
+        group_by: [
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['category'],
+          },
+        ],
+        group_breakdown_by: [
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['subcategory'],
+          },
+        ],
+        legend: {
+          nested: true,
+          truncate_after_lines: 5,
+          visibility: 'visible',
+          size: 's',
+        },
+        styling: {
+          values: {
+            visible: false,
           },
         },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-          collapse_by: 'avg' as const,
-        },
-      ],
-      legend: {
-        nested: true,
-        truncate_after_lines: 5,
-        visible: 'hide' as const,
-        size: 'small' as const,
-      },
-      value_display: {
-        mode: 'hidden' as const,
-      },
-    };
+      };
 
-    const validated = mosaicStateSchema.validate(input);
-    expect(validated).toEqual({
-      ...defaultValues,
-      ...input,
-      group_by: [{ ...input.group_by[0], size: 5 }],
+      const validated = mosaicConfigSchema.parse(input);
+      expect(validated.title).toBe('Sales Mosaic');
+      expect(validated.legend?.nested).toBe(true);
+      expect(validated.styling?.values?.visible).toBe(false);
+    });
+
+    it('throws on empty group_by array', () => {
+      const input: MosaicConfig = {
+        ...baseMosaicConfig,
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
+        group_by: [],
+      };
+
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Either a group_by or a group_breakdown_by dimension must be specified
+        ✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
+    });
+
+    it('throws on empty group_breakdown_by array', () => {
+      const input: MosaicConfig = {
+        ...baseMosaicConfig,
+        metric: {
+          operation: 'count',
+          empty_as_null: true,
+        },
+        group_by: [
+          {
+            operation: 'terms',
+            limit: 5,
+            fields: ['category'],
+          },
+        ],
+        group_breakdown_by: [],
+      };
+
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_breakdown_by"
+      `);
+    });
+
+    describe('Grouping Cardinality Validation', () => {
+      it('allows single non-collapsed dimension in group_by', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+          ],
+        };
+
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+      });
+
+      it('allows multiple collapsed dimensions in group_by', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['region'],
+              collapse_by: 'sum',
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+              collapse_by: 'avg',
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['product'],
+            },
+          ],
+        };
+
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+      });
+
+      it('throws when group_by has multiple non-collapsed dimensions', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['region'],
+            },
+          ],
+        };
+
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
+        );
+      });
+
+      it('throws when group_by has multiple non-collapsed dimensions with some collapsed', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['region'],
+              collapse_by: 'sum',
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['product'],
+            },
+          ],
+        };
+
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
+        );
+      });
+
+      it('allows single non-collapsed dimension in group_breakdown_by', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+          ],
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+          ],
+        };
+
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+      });
+
+      it('allows multiple collapsed dimensions in group_breakdown_by', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+          ],
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              collapse_by: 'sum',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+            {
+              operation: 'histogram',
+              field: 'price_field',
+              collapse_by: 'avg',
+              granularity: 'auto',
+              include_empty_rows: false,
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['brand'],
+            },
+          ],
+        };
+
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+      });
+
+      it('throws when group_breakdown_by has multiple non-collapsed dimensions', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+          ],
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+            {
+              operation: 'histogram',
+              field: 'price_field',
+              granularity: 'auto',
+              include_empty_rows: false,
+            },
+          ],
+        };
+
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
+        );
+      });
+
+      it('throws when group_breakdown_by has multiple non-collapsed dimensions with some collapsed', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+            },
+          ],
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              collapse_by: 'sum',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+            {
+              operation: 'histogram',
+              field: 'price_field',
+              granularity: 'auto',
+              include_empty_rows: false,
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['brand'],
+            },
+          ],
+        };
+
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
+        );
+      });
+
+      it('throws when no grouping dimension are defined', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+        };
+
+        const result = mosaicConfigSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(
+          `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
+        );
+      });
+
+      it('allows only the group_breakdown_by definition without group_by', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              collapse_by: 'sum',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+            {
+              operation: 'histogram',
+              field: 'price_field',
+              granularity: 'auto',
+              include_empty_rows: false,
+              collapse_by: 'sum',
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['brand'],
+            },
+          ],
+        };
+
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+      });
+
+      it('allows valid combination with both outer and inner having multiple collapsed dimensions', () => {
+        const input: MosaicConfig = {
+          ...baseMosaicConfig,
+          metric: {
+            operation: 'sum',
+            empty_as_null: false,
+            field: 'sales',
+          },
+          group_by: [
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['region'],
+              collapse_by: 'sum',
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['category'],
+              collapse_by: 'avg',
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['product'],
+            },
+          ],
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              collapse_by: 'max',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+            {
+              operation: 'histogram',
+              field: 'price_field',
+              collapse_by: 'min',
+              granularity: 'auto',
+              include_empty_rows: false,
+            },
+            {
+              operation: 'terms',
+              limit: 5,
+              fields: ['brand'],
+            },
+          ],
+        };
+
+        expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+      });
     });
   });
 
-  it('validates default values are applied', () => {
-    const input = {
-      ...baseMosaicConfig,
-      metrics: [
-        {
-          operation: 'count' as const,
-          field: 'test_field',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-        },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-        },
-      ],
-      legend: {},
+  describe('ES|QL Schema', () => {
+    const baseESQLMosaicConfig: Pick<
+      MosaicConfigESQL,
+      'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
+    > = {
+      type: 'mosaic',
+      data_source: {
+        type: 'esql',
+        query: 'FROM blah | KEEP foo, bar',
+      },
+      ignore_global_filters: false,
+      sampling: 0,
     };
 
-    const validated = mosaicStateSchema.validate(input);
-    expect(validated.legend).toEqual({});
-  });
-
-  it('throws on empty group_by array', () => {
-    const input = {
-      ...baseMosaicConfig,
-      metrics: [
-        {
-          operation: 'count' as const,
-          field: 'test_field',
+    it('throws when no grouping dimension are defined', () => {
+      const input: MosaicConfig = {
+        ...baseESQLMosaicConfig,
+        metric: {
+          column: 'foo',
         },
-      ],
-      group_by: [],
-    };
+      };
 
-    expect(() => mosaicStateSchema.validate(input)).toThrow();
+      const result = mosaicConfigSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
+      );
+    });
+
+    it('allows only the group_breakdown_by definition without group_by', () => {
+      const input: MosaicConfig = {
+        ...baseESQLMosaicConfig,
+        metric: {
+          column: 'foo',
+        },
+        group_breakdown_by: [
+          {
+            column: 'bar',
+            collapse_by: 'sum',
+          },
+          {
+            column: 'bar',
+            collapse_by: 'sum',
+          },
+          {
+            column: 'bar',
+          },
+        ],
+      };
+
+      expect(() => mosaicConfigSchema.parse(input)).not.toThrow();
+    });
   });
 });

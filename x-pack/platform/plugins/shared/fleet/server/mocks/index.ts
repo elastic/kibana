@@ -22,6 +22,7 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -33,7 +34,11 @@ import { createArtifactsClientMock } from '../services/artifacts/mocks';
 import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
-import type { AgentPolicyServiceInterface, CloudConnectorServiceInterface } from '../services';
+import type {
+  AgentlessPoliciesService,
+  AgentPolicyServiceInterface,
+  CloudConnectorServiceInterface,
+} from '../services';
 import type { FleetAppContext, FleetStartContract } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
@@ -144,6 +149,14 @@ export const createAppContextStartContractMock = (
     return internalSoClient;
   });
 
+  mockedSavedObject.getUnsafeInternalClient.mockImplementation((options) => {
+    if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
+      return internalSoClientWithoutSpaceExtension;
+    }
+
+    return internalSoClient;
+  });
+
   return {
     taskManagerStart: taskManagerMock.createStart(),
     elasticsearch: elasticsearchServiceMock.createStart(),
@@ -151,6 +164,7 @@ export const createAppContextStartContractMock = (
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     encryptedSavedObjectsSetup: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     savedObjects: mockedSavedObject,
+    isFipsEnabled: false,
     securityCoreStart: securityServiceMock.createStart(),
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
@@ -189,6 +203,15 @@ export const createAppContextStartContractMock = (
     autoInstallContentPackagesTask: {} as any,
     alertingStart: {
       getRulesClientWithRequest: jest.fn(),
+      getRulesClientWithRequestInSpace: jest.fn(),
+    } as any,
+    reportingStart: reportingMock.createStart(),
+    featureFlags: coreMock.createStart().featureFlags,
+    lockManagerService: {
+      withLock: jest
+        .fn()
+        .mockImplementation((_lockId: string, callback: () => Promise<unknown>) => callback()),
+      getLock: jest.fn().mockResolvedValue(undefined),
     } as any,
   };
 };
@@ -241,6 +264,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     listIds: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    bulkUpdatePartial: jest.fn(),
     bulkUpgrade: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
@@ -249,6 +273,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     getUpgradeDryRunDiff: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
+    getSummaryForAgentPolicies: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
       return Promise.resolve({
         async *[Symbol.asyncIterator]() {
@@ -266,11 +291,13 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
       });
     }),
     removeOutputFromAll: jest.fn(),
+    getSpacesForPoliciesUsingOutput: jest.fn(),
     getPackagePolicySavedObjects: jest.fn(),
     rollback: jest.fn(),
     restoreRollback: jest.fn(),
     cleanupRollbackSavedObjects: jest.fn(),
     bumpAgentPolicyRevisionAfterRollback: jest.fn(),
+    compilePackagePolicyForVersions: jest.fn(),
   };
 };
 
@@ -286,10 +313,31 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     delete: jest.fn().mockReturnValue(Promise.resolve()),
     getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     getByIds: jest.fn().mockReturnValue(Promise.resolve()),
+    bumpRevision: jest.fn().mockReturnValue(Promise.resolve()),
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
     deployPolicy: jest.fn().mockRejectedValue(Promise.resolve()),
+    getSpacesForPoliciesUsingOutput: jest.fn(),
+    getSpacesForPoliciesUsingFleetServerHost: jest.fn(),
+    getSpacesForPoliciesUsingDownloadSource: jest.fn(),
+  };
+};
+
+/**
+ * Create mock AgentPolicyService
+ */
+export const createMockAgentlessPoliciesService = (): jest.Mocked<AgentlessPoliciesService> => {
+  return {
+    createAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    updateAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    deleteAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getAgentlessPolicy: jest.fn().mockReturnValue(Promise.resolve(null)),
+    listAgentlessPolicies: jest
+      .fn()
+      .mockReturnValue(Promise.resolve({ items: [], total: 0, page: 1, perPage: 20 })),
+    bulkUpgradeAgentlessPolicies: jest.fn().mockReturnValue(Promise.resolve([])),
+    getAgentlessPolicyUpgradeDryRunDiff: jest.fn().mockReturnValue(Promise.resolve([])),
   };
 };
 
@@ -366,6 +414,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     agentService: createMockAgentService(),
     packagePolicyService: createPackagePolicyServiceMock(),
     agentPolicyService: createMockAgentPolicyService(),
+    agentlessPoliciesService: createMockAgentlessPoliciesService(),
     cloudConnectorService: {
       create: jest.fn().mockReturnValue(Promise.resolve()),
       getList: jest.fn().mockReturnValue(Promise.resolve()),

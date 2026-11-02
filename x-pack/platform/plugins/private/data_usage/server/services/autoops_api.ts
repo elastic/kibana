@@ -226,10 +226,13 @@ const UsageMetricsAutoOpsResponseSchema = {
           error: schema.nullable(schema.string()),
           data: schema.maybe(
             schema.nullable(
-              schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }))
+              schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }), {
+                maxSize: 1000,
+              })
             )
           ),
-        })
+        }),
+        { maxSize: 1000 }
       )
     ),
 };

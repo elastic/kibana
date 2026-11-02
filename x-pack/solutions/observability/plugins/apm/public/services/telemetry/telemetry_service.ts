@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { TelemetryServiceSetupParams, ITelemetryClient, TelemetryEventParams } from './types';
+import type { TelemetryServiceSetupParams, ITelemetryClient } from './types';
 import { apmTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryClient } from './telemetry_client';
 
@@ -19,7 +19,7 @@ export class TelemetryService {
     this.analytics = analytics;
 
     apmTelemetryEventBasedTypes.forEach((eventConfig) =>
-      analytics.registerEventType<TelemetryEventParams>(eventConfig)
+      analytics.registerEventType<typeof eventConfig.schema>(eventConfig)
     );
   }
 

@@ -57,7 +57,7 @@ export interface ProcessTreeDeps {
 
   // a map for alerts with updated status and process.entity_id
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
-  onShowAlertDetails: (alertUuid: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
   onJumpToOutput: (entityId: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;

@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface EntryTitleProps {
@@ -30,13 +31,16 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
       name,
     },
-    preferredSchema: searchCriteria?.preferredSchema ?? 'semconv',
+    preferredSchema: searchCriteria?.preferredSchema ?? DEFAULT_SCHEMA,
   });
 
-  const providerName = cloudProvider ?? 'Unknown';
+  const providerName =
+    cloudProvider ??
+    i18n.translate('xpack.infra.hostsViewPage.table.unknownCloudProvider', {
+      defaultMessage: 'Unknown',
+    });
   return (
     <EuiToolTip
-      delay="long"
       anchorClassName="eui-displayBlock"
       content={i18n.translate('xpack.infra.hostsViewPage.table.nameTooltip', {
         defaultMessage: '{providerName}: {name}',
@@ -45,14 +49,16 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
           name,
         },
       })}
+      // The link's aria-label already conveys the host name and cloud provider
+      disableScreenReaderOutput
     >
       <EuiLink
         data-test-subj="hostsViewTableEntryTitleLink"
         aria-label={i18n.translate(
           'xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel',
           {
-            defaultMessage: 'Open host details {hostName}',
-            values: { hostName: name },
+            defaultMessage: 'Open host details {hostName}, cloud provider {providerName}',
+            values: { hostName: name, providerName },
           }
         )}
         {...link}

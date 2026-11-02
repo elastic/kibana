@@ -7,27 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec, OAuthGetTokenOpts } from '../connector_spec';
 import * as i18n from './translations';
 
-const authSchema = z
-  .object({
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
-    clientId: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
-    clientSecret: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
-  })
-  .meta({ label: i18n.OAUTH_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      tokenUrl: z
+        .url()
+        .meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
+      clientId: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+      scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+      clientSecret: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+      tokenEndpointAuthMethod: z
+        .enum(['client_secret_post', 'client_secret_basic'])
+        .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true })
+        .optional(),
+      tokenType: z
+        .string()
+        .min(1)
+        .max(128)
+        .optional()
+        .meta({ label: i18n.OAUTH_TOKEN_TYPE_LABEL, hidden: true }),
+    })
+    .meta({ label: i18n.OAUTH_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
+
+const buildGetTokenOpts = (secret: AuthSchemaType): OAuthGetTokenOpts => ({
+  authType: 'oauth',
+  tokenUrl: secret.tokenUrl,
+  scope: secret.scope,
+  clientId: secret.clientId,
+  clientSecret: secret.clientSecret,
+  tokenEndpointAuthMethod: secret.tokenEndpointAuthMethod ?? 'client_secret_post',
+  tokenType: secret.tokenType,
+});
+
+const resolveAccessToken = async (ctx: AuthContext, secret: AuthSchemaType): Promise<string> => {
+  let token;
+  try {
+    token = await ctx.getToken(buildGetTokenOpts(secret));
+  } catch (error) {
+    throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
+  }
+
+  if (!token) {
+    throw new Error(`Unable to retrieve new access token`);
+  }
+
+  return token;
+};
 
 /**
  * OAuth2 Client Credentials Flow
@@ -40,25 +79,15 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    let token;
-    try {
-      token = await ctx.getToken({
-        tokenUrl: secret.tokenUrl,
-        scope: secret.scope,
-        clientId: secret.clientId,
-        clientSecret: secret.clientSecret,
-      });
-    } catch (error) {
-      throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
-    }
-
-    if (!token) {
-      throw new Error(`Unable to retrieve new access token`);
-    }
-
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
+    axiosInstance.defaults.headers.common.Authorization = await resolveAccessToken(ctx, secret);
 
     return axiosInstance;
   },
+  getAuthHeaders: async (
+    ctx: AuthContext,
+    secret: AuthSchemaType
+  ): Promise<Record<string, string>> => ({
+    Authorization: await resolveAccessToken(ctx, secret),
+  }),
 };

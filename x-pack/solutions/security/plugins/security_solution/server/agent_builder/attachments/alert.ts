@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import type { Attachment } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
@@ -16,10 +16,13 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ALERTS_TOOL_ID,
 } from '../tools';
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const alertAttachmentDataSchema = z.object({
-  alert: z.string(),
-});
+export const alertAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    alert: z.string(),
+  })
+);
 
 /**
  * Data for an alert attachment.
@@ -51,7 +54,7 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
       // Extract data to allow proper type narrowing
       const data = attachment.data;
       // Necessary because we cannot currently use the AttachmentType type as agent is not
-      // registered with enum AttachmentType in onechat attachment_types.ts
+      // registered with enum AttachmentType in agentBuilder attachment_types.ts
       if (!isAlertAttachmentData(data)) {
         throw new Error(`Invalid alert attachment data for attachment ${attachment.id}`);
       }

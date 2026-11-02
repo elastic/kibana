@@ -7,93 +7,89 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { lazy } from 'react';
+import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-const LazyIconAssets = lazy(() =>
-  import('./custom_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
-);
+// All artifact tab paths under the security management section.
+// Used to keep the Artifacts nav node active regardless of which tab is open,
+// since the deep link only points to the first allowed tab path.
+const SECURITY_MANAGEMENT_PATH = '/app/security/administration';
+const ARTIFACT_TAB_PATHS_RECORD: Record<keyof typeof ENDPOINT_ARTIFACT_LISTS, string> = {
+  trustedApps: `${SECURITY_MANAGEMENT_PATH}/trusted_apps`,
+  trustedDevices: `${SECURITY_MANAGEMENT_PATH}/trusted_devices`,
+  eventFilters: `${SECURITY_MANAGEMENT_PATH}/event_filters`,
+  hostIsolationExceptions: `${SECURITY_MANAGEMENT_PATH}/host_isolation_exceptions`,
+  blocklists: `${SECURITY_MANAGEMENT_PATH}/blocklist`,
+  endpointExceptions: `${SECURITY_MANAGEMENT_PATH}/endpoint_exceptions`,
+  customYaraSignatures: `${SECURITY_MANAGEMENT_PATH}/custom_yara_signatures`,
+} as const;
+const ARTIFACT_TAB_PATHS = Object.values(ARTIFACT_TAB_PATHS_RECORD);
 
-export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => ({
-  id: SecurityGroupName.assets,
-  icon: LazyIconAssets,
-  title: SecurityLinkGroup[SecurityGroupName.assets].title,
-  renderAs: 'panelOpener',
-  children: [
-    {
-      link: 'fleet',
-      title: i18nStrings.assets.fleet.title,
-      children: [
-        {
-          link: 'fleet:agents',
-        },
-        {
-          link: 'fleet:policies',
-          title: i18nStrings.assets.fleet.policies,
-        },
-        {
-          link: 'fleet:enrollment_tokens',
-        },
-        {
-          link: 'fleet:uninstall_tokens',
-        },
-        {
-          link: 'fleet:data_streams',
-        },
-        {
-          link: 'fleet:settings',
-        },
-      ],
-    },
-    {
-      id: SecurityPageName.endpoints,
-      title: i18nStrings.assets.endpoints.title,
-      children: [
-        {
-          id: SecurityPageName.endpoints,
-          link: securityLink(SecurityPageName.endpoints),
-          breadcrumbStatus: 'hidden',
-        },
-        {
-          id: SecurityPageName.policies,
-          link: securityLink(SecurityPageName.policies),
-        },
-        {
-          id: SecurityPageName.trustedApps,
-          link: securityLink(SecurityPageName.trustedApps),
-        },
-        {
-          id: SecurityPageName.trustedDevices,
-          link: securityLink(SecurityPageName.trustedDevices),
-        },
-        {
-          id: SecurityPageName.eventFilters,
-          link: securityLink(SecurityPageName.eventFilters),
-        },
-        {
-          id: SecurityPageName.hostIsolationExceptions,
-          link: securityLink(SecurityPageName.hostIsolationExceptions),
-        },
-        {
-          id: SecurityPageName.blocklist,
-          link: securityLink(SecurityPageName.blocklist),
-        },
-        {
-          id: SecurityPageName.endpointExceptions,
-          link: securityLink(SecurityPageName.endpointExceptions),
-        },
-        {
-          id: SecurityPageName.responseActionsHistory,
-          link: securityLink(SecurityPageName.responseActionsHistory),
-        },
-        {
-          id: SecurityPageName.scriptsLibrary,
-          link: securityLink(SecurityPageName.scriptsLibrary),
-        },
-      ],
-    },
-  ],
-});
+export const createAssetsNavigationTree = (_core: CoreStart): NodeDefinition => {
+  return {
+    id: SecurityGroupName.assets,
+    icon: 'display',
+    title: SecurityLinkGroup[SecurityGroupName.assets].title,
+    renderAs: 'panelOpener',
+    children: [
+      {
+        link: 'fleet',
+        title: i18nStrings.assets.fleet.title,
+        children: [
+          {
+            link: 'fleet:agents',
+          },
+          {
+            link: 'fleet:policies',
+            title: i18nStrings.assets.fleet.policies,
+          },
+          {
+            link: 'fleet:enrollment_tokens',
+          },
+          {
+            link: 'fleet:uninstall_tokens',
+          },
+          {
+            link: 'fleet:data_streams',
+          },
+          {
+            link: 'fleet:settings',
+          },
+        ],
+      },
+      {
+        id: SecurityPageName.endpoints,
+        title: i18nStrings.assets.endpoints.title,
+        children: [
+          {
+            id: SecurityPageName.endpoints,
+            link: securityLink(SecurityPageName.endpoints),
+            breadcrumbStatus: 'hidden',
+          },
+          {
+            id: SecurityPageName.policies,
+            link: securityLink(SecurityPageName.policies),
+          },
+          {
+            id: SecurityPageName.artifacts,
+            title: i18nStrings.assets.artifacts.title,
+            link: securityLink(SecurityPageName.artifacts),
+            getIsActive: ({ pathNameSerialized, prepend }) =>
+              ARTIFACT_TAB_PATHS.some((path) => pathNameSerialized.startsWith(prepend(path))),
+          },
+          {
+            id: SecurityPageName.responseActionsHistory,
+            link: securityLink(SecurityPageName.responseActionsHistory),
+          },
+          {
+            id: SecurityPageName.scriptLibrary,
+            link: securityLink(SecurityPageName.scriptLibrary),
+          },
+        ],
+      },
+    ],
+  };
+};

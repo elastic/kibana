@@ -6,6 +6,9 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
+import { EXTENDED_TIMEOUT } from '..';
 
 export class FunctionsPage {
   public co2PerKWHField: Locator;
@@ -13,35 +16,44 @@ export class FunctionsPage {
   public perCPUWattX86Field: Locator;
   public saveChangesButton: Locator;
   constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.co2PerKWHField = this.page.testSubj.locator(
+    this.co2PerKWHField = this.page.getByTestId(
       'management-settings-editField-profiling.co2PerKWH'
     );
-    this.datacenterPUEField = this.page.testSubj.locator(
+    this.datacenterPUEField = this.page.getByTestId(
       'management-settings-editField-profiling.datacenterPUE'
     );
-    this.perCPUWattX86Field = this.page.testSubj.locator(
+    this.perCPUWattX86Field = this.page.getByTestId(
       'management-settings-editField-profiling.perCPUWattX86'
     );
-    this.saveChangesButton = this.page.testSubj.locator('management-settings-saveChangesButton');
+    this.saveChangesButton = this.page.getByTestId('management-settings-saveChangesButton');
   }
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/functions`);
-    await this.page.waitForLoadingIndicatorHidden();
+
+    await this.waitForDifferentialTopNFunctionsTab();
   }
 
-  async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
-    await this.page.goto(
-      `${this.kbnUrl.app('profiling')}/functions?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`
-    );
-    await this.page.waitForLoadingIndicatorHidden();
+  async gotoWithTimeRange(
+    rangeFrom: string,
+    rangeTo: string,
+    { schema }: { schema?: ProfilingSchema } = {}
+  ) {
+    const searchParams = new URLSearchParams({ rangeFrom, rangeTo, ...(schema && { schema }) });
+    await this.page.goto(`${this.kbnUrl.app('profiling')}/functions?${searchParams}`);
+    await this.waitForDifferentialTopNFunctionsTab();
+  }
+
+  /*
+   * Waits for the Differential TopN functions tab to be visible
+   */
+  private async waitForDifferentialTopNFunctionsTab() {
+    await this.page
+      .getByRole('tab', { name: 'Differential TopN functions' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // TopN Functions methods
-  async getTopNFunctionsTable() {
-    return this.page.locator('[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]');
-  }
-
   async getTopNFunctionsRow(rowIndex: number) {
     return this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
   }
@@ -57,17 +69,21 @@ export class FunctionsPage {
     await this.page.locator(firstRowSelector).click();
   }
 
+  async getNoDataPrompt() {
+    return this.page.getByTestId('profilingNoDataPrompt');
+  }
+
   // Frame Information Window methods
   async getFrameInformationWindow() {
-    return this.page.testSubj.locator('frameInformationWindow');
+    return this.page.getByTestId('frameInformationWindow');
   }
 
   async getFrameInformationRow(key: string) {
-    return this.page.testSubj.locator(`informationRows_${key}`);
+    return this.page.getByTestId(`informationRows_${key}`);
   }
 
   async getImpactEstimateRow(key: string) {
-    return this.page.testSubj.locator(`impactEstimates_${key}`);
+    return this.page.getByTestId(`impactEstimates_${key}`);
   }
 
   async clickFirstRowActionButton(firstRowSelector: string) {
@@ -77,7 +93,7 @@ export class FunctionsPage {
   }
 
   async getFrameInformationLocator(parentKey: string, key: string) {
-    return this.page.testSubj.locator(`${parentKey}_${key}`);
+    return this.page.getByTestId(`${parentKey}_${key}`);
   }
 
   // KQL Filter methods
@@ -86,34 +102,30 @@ export class FunctionsPage {
     await this.page.getByTestId('tableSearchInput').clear();
     await this.page.getByTestId('tableSearchInput').fill(`${key}:"${value}"`);
     await this.page.keyboard.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   async clearKqlFilter() {
     await this.page.getByTestId('tableSearchInput').clear();
     await this.page.keyboard.press('Enter');
-    await this.page.waitForLoadingIndicatorHidden();
   }
 
   // Differential TopN Functions methods
   async getDifferentialTopNFunctionsTable() {
-    return this.page.testSubj.locator('differentialTopnFunctionsTable');
+    return this.page.getByTestId('differentialTopnFunctionsTable');
   }
 
   async getDifferentialTopNFunctionsRow(rowIndex: number) {
-    return this.page.testSubj.locator(`differentialDataGridRow-${rowIndex}`);
+    return this.page.getByTestId(`differentialDataGridRow-${rowIndex}`);
   }
 
   // Settings methods
   async clickSettingsButton() {
-    await this.page
-      .getByTestId('headerAppActionMenu')
-      .getByRole('link', { name: 'Settings' })
-      .click();
+    await this.page.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton).click();
+    await this.page.getByTestId(getAppMenuItemTestSubj('settings')).click();
   }
 
   async getSettingsModal() {
-    return this.page.testSubj.locator('profilingSettingsModal');
+    return this.page.getByTestId('profilingSettingsModal');
   }
 
   async updateCo2Settings(co2PerKWH: number, datacenterPUE: number, perCPUWatt: number) {

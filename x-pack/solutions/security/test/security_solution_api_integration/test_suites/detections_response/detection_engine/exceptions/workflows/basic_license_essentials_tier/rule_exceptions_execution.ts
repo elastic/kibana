@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from 'expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
@@ -197,6 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
+        await waitForAlertsToBePresent(supertest, log, 10, [createdRule.id]);
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
         const alertsOpen2 = await getOpenAlerts(supertest, log, es, createdRule2);
         // Expect alerts here because all values are "Ubuntu"

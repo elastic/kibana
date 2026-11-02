@@ -60,6 +60,6 @@ describe('OpenAPI Bundler - different OAS versions', () => {
         1: spec1,
         2: spec2,
       })
-    ).rejects.toThrowError(new RegExp('^OpenAPI specs must use the same OpenAPI version'));
+    ).rejects.toThrow(new RegExp('^OpenAPI specs must use the same OpenAPI version'));
   });
 });

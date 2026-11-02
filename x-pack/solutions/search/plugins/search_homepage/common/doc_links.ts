@@ -19,6 +19,12 @@ class ESDocLinks {
   public cloudSecurityPosture: string = '';
   public installElasticDefend: string = '';
   public languageClients: string = '';
+  public elasticTraining: string = '';
+  public cloudConnect: string = '';
+  public elasticCloud: string = '';
+  public releaseNotes: string = '';
+  public serverlessReleaseNotes: string = '';
+  public hostedCloudReleaseNotes: string = '';
 
   constructor() {}
 
@@ -34,6 +40,12 @@ class ESDocLinks {
     this.cloudSecurityPosture = newDocLinks.securitySolution.cloudSecurityPosture;
     this.installElasticDefend = newDocLinks.securitySolution.installElasticDefend;
     this.languageClients = newDocLinks.clients.guide;
+    this.elasticTraining = newDocLinks.searchGettingStarted.elasticTraining;
+    this.cloudConnect = newDocLinks.cloud.cloudConnect;
+    this.elasticCloud = newDocLinks.searchHomepage.elasticCloud;
+    this.releaseNotes = newDocLinks.releaseNotes;
+    this.serverlessReleaseNotes = newDocLinks.serverlessReleaseNotes;
+    this.hostedCloudReleaseNotes = newDocLinks.hostedCloudReleaseNotes;
   }
 }
 

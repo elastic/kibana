@@ -18,7 +18,7 @@ export const DEFAULT_TIMELINE_TITLE = i18n.translate(
 export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.defaultTimelineDescription',
   {
-    defaultMessage: 'Timeline offered by default when creating new timeline.',
+    defaultMessage: 'Timeline offered by default when creating new Timeline.',
   }
 );
 

@@ -7,14 +7,17 @@
 
 import { sortBy } from 'lodash';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  calculateThroughputWithRange,
+  getDurationFieldForTransactions,
+} from '@kbn/apm-data-access-plugin/server/utils';
+import type { TopTracesPrimaryStatsResponse } from '@kbn/apm-api-shared';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateImpactBuilder } from './calculate_impact_builder';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import {
-  getDurationFieldForTransactions,
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
   isRootTransaction,
@@ -41,19 +44,6 @@ interface TopTracesParams {
   randomSampler: RandomSampler;
 }
 
-export interface TopTracesPrimaryStatsResponse {
-  // sort by impact by default so most impactful services are not cut off
-  items: Array<{
-    key: BucketKey;
-    serviceName: string;
-    transactionName: string;
-    averageResponseTime: number | null;
-    transactionsPerMinute: number;
-    transactionType: string;
-    impact: number;
-    agentName: AgentName;
-  }>;
-}
 export async function getTopTracesPrimaryStats({
   environment,
   kuery,

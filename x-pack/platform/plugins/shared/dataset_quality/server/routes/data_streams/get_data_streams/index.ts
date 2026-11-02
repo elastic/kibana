@@ -19,8 +19,9 @@ export async function getDataStreams(options: {
   types?: DataStreamType[];
   datasetQuery?: string;
   uncategorisedOnly?: boolean;
+  isSecurityEnabled: boolean;
 }) {
-  const { esClient, types = [], datasetQuery, uncategorisedOnly } = options;
+  const { esClient, types = [], datasetQuery, uncategorisedOnly, isSecurityEnabled } = options;
 
   const datasetNames = datasetQuery
     ? [datasetQuery]
@@ -33,7 +34,8 @@ export async function getDataStreams(options: {
 
   const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
     esClient,
-    datasetNames
+    datasetNames,
+    isSecurityEnabled
   );
 
   const canMonitor = Object.values(datasetUserPrivileges.datasetsPrivilages).some(
@@ -62,7 +64,8 @@ export async function getDataStreams(options: {
     ? await datasetQualityPrivileges.getHasIndexPrivileges(
         esClient,
         filteredDataStreams.map(({ name }) => name),
-        ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE]
+        ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+        isSecurityEnabled
       )
     : {};
 
@@ -98,8 +101,9 @@ export async function getDataStreams(options: {
 export async function getDatasetTypesPrivileges(options: {
   esClient: ElasticsearchClient;
   types: DataStreamType[];
+  isSecurityEnabled: boolean;
 }) {
-  const { esClient, types } = options;
+  const { esClient, types, isSecurityEnabled } = options;
 
   const datasetNames = types.map((type) =>
     streamPartsToIndexPattern({
@@ -110,7 +114,8 @@ export async function getDatasetTypesPrivileges(options: {
 
   const { datasetsPrivilages } = await datasetQualityPrivileges.getDatasetPrivileges(
     esClient,
-    datasetNames
+    datasetNames,
+    isSecurityEnabled
   );
 
   return {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MISSING_UIAM_API_KEY_TAG } from '@kbn/alerting-plugin/common';
 import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { applyRuleDefaults } from '../apply_rule_defaults';
 import { calculateRuleSource } from './calculate_rule_source';
@@ -36,6 +37,10 @@ const getSampleRule = () => {
 };
 
 describe('calculateRuleSource', () => {
+  beforeEach(() => {
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockClear();
+  });
+
   it('returns an internal rule source when the rule is not prebuilt', async () => {
     const rule = getSampleRule();
     rule.immutable = false;
@@ -55,7 +60,7 @@ describe('calculateRuleSource', () => {
     rule.immutable = true;
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
@@ -78,7 +83,7 @@ describe('calculateRuleSource', () => {
     rule.tags = ['Updated tag'];
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
@@ -95,15 +100,13 @@ describe('calculateRuleSource', () => {
     );
   });
 
-  it('returns is_customized false when the rule has only changes to revision, updated_at, updated_by', async () => {
+  it('returns is_customized false when the rule only has the missing UIAM API key tag added', async () => {
     const rule = getSampleRule();
     rule.immutable = true;
-    rule.revision = 5;
-    rule.updated_at = '2024-01-01T00:00:00Z';
-    rule.updated_by = 'new-user';
+    rule.tags = [...rule.tags, MISSING_UIAM_API_KEY_TAG];
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
@@ -120,13 +123,153 @@ describe('calculateRuleSource', () => {
     );
   });
 
+  it('returns is_customized false when the rule has only changes to revision, updated_at, updated_by', async () => {
+    const rule = getSampleRule();
+    rule.immutable = true;
+    rule.revision = 5;
+    rule.updated_at = '2024-01-01T00:00:00Z';
+    rule.updated_by = 'new-user';
+
+    const baseRule = getSampleRuleAsset();
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
+
+    const result = await calculateRuleSource({
+      prebuiltRuleAssetClient,
+      nextRule: rule,
+      currentRule: getSampleRule(),
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'external',
+        is_customized: false,
+        customized_fields: [],
+        has_base_version: true,
+      })
+    );
+  });
+
+  it('uses a prefetched matchingAsset and does not fetch', async () => {
+    const rule = getSampleRule();
+    rule.immutable = true;
+    const baseRule = getSampleRuleAsset();
+
+    const result = await calculateRuleSource({
+      prebuiltRuleAssetClient,
+      nextRule: rule,
+      currentRule: undefined,
+      matchingAsset: baseRule,
+    });
+
+    expect(prebuiltRuleAssetClient.fetchAssetsByVersion).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'external',
+        is_customized: false,
+        has_base_version: true,
+      })
+    );
+  });
+
+  describe('required_fields', () => {
+    const baseRequiredFields = [
+      { name: 'host.name', type: 'keyword' },
+      { name: 'custom.field', type: 'keyword' },
+    ];
+
+    const getRuleAssetWithRequiredFields = () => ({
+      ...getSampleRuleAsset(),
+      required_fields: [
+        { name: 'host.name', type: 'keyword', ecs: true },
+        { name: 'custom.field', type: 'keyword', ecs: false },
+      ],
+    });
+
+    const getRuleWithRequiredFields = () => ({
+      ...getSampleRule(),
+      immutable: true,
+      required_fields: getRuleAssetWithRequiredFields().required_fields,
+    });
+
+    it('returns is_customized false when required_fields differ only in order', async () => {
+      const rule = getRuleWithRequiredFields();
+      rule.required_fields = [...rule.required_fields].reverse();
+
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
+        assets: [getRuleAssetWithRequiredFields()],
+      });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: getRuleWithRequiredFields(),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        })
+      );
+    });
+
+    it('returns is_customized false when required_fields differ only in "ecs"', async () => {
+      const rule = getRuleWithRequiredFields();
+      rule.required_fields = baseRequiredFields.map((field) => ({ ...field, ecs: true }));
+
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
+        assets: [getRuleAssetWithRequiredFields()],
+      });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: getRuleWithRequiredFields(),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+        })
+      );
+    });
+
+    it('returns is_customized true when required_fields have an extra field', async () => {
+      const rule = getRuleWithRequiredFields();
+      rule.required_fields = [
+        ...rule.required_fields,
+        { name: 'user.name', type: 'keyword', ecs: true },
+      ];
+
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
+        assets: [getRuleAssetWithRequiredFields()],
+      });
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: getRuleWithRequiredFields(),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'required_fields' }],
+        })
+      );
+    });
+  });
+
   describe('missing base versions', () => {
     it('return is_customized false when the base version and current version are missing', async () => {
       const rule = getSampleRule();
       rule.immutable = true;
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -154,7 +297,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -182,7 +325,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -215,7 +358,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -227,6 +370,26 @@ describe('calculateRuleSource', () => {
           type: 'external',
           is_customized: true,
           customized_fields: [],
+          has_base_version: false,
+        })
+      );
+    });
+
+    it('treats an explicit null matchingAsset as a missing base version', async () => {
+      const rule = getSampleRule();
+      rule.immutable = true;
+
+      const result = await calculateRuleSource({
+        prebuiltRuleAssetClient,
+        nextRule: rule,
+        currentRule: undefined,
+        matchingAsset: null,
+      });
+
+      expect(prebuiltRuleAssetClient.fetchAssetsByVersion).not.toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'external',
           has_base_version: false,
         })
       );
@@ -244,7 +407,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,

@@ -33,6 +33,7 @@ export const ConfigSchema = schema.object({
   networkPolicy: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     rules: schema.arrayOf(RulesSchema, {
+      maxSize: 100,
       defaultValue: [
         { host: undefined, allow: true, protocol: 'http:' },
         { host: undefined, allow: true, protocol: 'https:' },
@@ -63,7 +64,7 @@ export const ConfigSchema = schema.object({
         bypass: schema.conditional(
           schema.siblingRef('enabled'),
           true,
-          schema.arrayOf(schema.string()),
+          schema.arrayOf(schema.string(), { maxSize: 100 }),
           schema.maybe(schema.never())
         ),
       }),

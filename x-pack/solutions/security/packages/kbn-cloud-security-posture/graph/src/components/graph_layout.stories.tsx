@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
 import type { Writable } from '@kbn/utility-types';
+import type { EdgeColor } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,
@@ -16,25 +17,39 @@ import type {
   NodeViewModel,
   EntityNodeViewModel,
   GroupNodeViewModel,
+  RelationshipNodeViewModel,
 } from '.';
 import { Graph } from '.';
+
+/** Reusable toolbar items for entity node Storybook previews. */
+const storybookToolbarItems = () => [
+  { iconType: 'cluster', label: 'Show entity relationships', onClick: () => {} },
+  { iconType: 'sortRight', label: "Show this entity's actions", onClick: () => {} },
+  { iconType: 'sortLeft', label: 'Show actions done to this entity', onClick: () => {} },
+  { iconType: 'analyzeEvent', label: 'Show related events', onClick: () => {} },
+  { iconType: 'maximize', label: 'Show entity details', onClick: () => {} },
+];
+
+/** Reusable toolbar items for label (event) node Storybook previews. */
+const storybookLabelToolbarItems = () => [
+  { iconType: 'filter', label: 'Show events with this action', onClick: () => {} },
+  { iconType: 'inspect', label: 'Show event details', onClick: () => {} },
+];
 
 type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
 
 const meta = {
   render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <Graph
-          css={css`
-            height: 100%;
-            width: 100%;
-          `}
-          nodes={nodes ?? []}
-          edges={edges ?? []}
-          interactive={interactive ?? false}
-        />
-      </ThemeProvider>
+      <Graph
+        css={css`
+          height: 100%;
+          width: 100%;
+        `}
+        nodes={nodes ?? []}
+        edges={edges ?? []}
+        interactive={interactive ?? false}
+      />
     );
   },
   title: 'Components/Graph Components/Graph Layout',
@@ -53,36 +68,47 @@ type Story = StoryObj<typeof Graph>;
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
   | GroupNodeViewModel
-  | (LabelNodeViewModel & { source: string; target: string });
+  | (LabelNodeViewModel & { source: string; target: string })
+  | (RelationshipNodeViewModel & { source: string; target: string });
+
+// Helper to get edge color for connector nodes (label or relationship)
+const getConnectorEdgeColor = (node: LabelNodeViewModel | RelationshipNodeViewModel): EdgeColor => {
+  // Relationship nodes use 'subdued' color, label nodes use their color property
+  return node.shape === 'relationship' ? 'subdued' : node.color;
+};
 
 const extractEdges = (
   graphData: EnhancedNodeViewModel[]
 ): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
-  // Process nodes, transform nodes of id in the format of a(source)-b(target) to edges from a to label and from label to b
-  // If there are multiple edges from a to b, create a parent node and group the labels under it. The parent node will be a group node.
-  // Connect from a to the group node and from the group node to all the labels. and from the labels to the group again and from the group to b.
+  // Process nodes, transform connector nodes (label/relationship) to edges
+  // If there are multiple connectors from a to b, create a parent node and group them under it.
+  // The parent node will be a group node.
   const nodesMetadata: { [key: string]: { edgesIn: number; edgesOut: number } } = {};
   const edgesMetadata: {
     [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
   } = {};
-  const labelsMetadata: {
-    [key: string]: { source: string; target: string; labelsNodes: LabelNodeViewModel[] };
+  const connectorsMetadata: {
+    [key: string]: {
+      source: string;
+      target: string;
+      connectorNodes: Array<LabelNodeViewModel | RelationshipNodeViewModel>;
+    };
   } = {};
   const nodes: { [key: string]: NodeViewModel } = {};
   const edges: EdgeViewModel[] = [];
 
   graphData.forEach((node) => {
-    if (node.shape === 'label') {
-      const labelNode: LabelNodeViewModel = { ...node, id: `${node.id}label(${node.label})` };
+    if (node.shape === 'label' || node.shape === 'relationship') {
+      const connectorNode = { ...node, id: `${node.id}connector(${node.label})` };
       const { source, target } = node;
 
-      if (labelsMetadata[node.id]) {
-        labelsMetadata[node.id].labelsNodes.push(labelNode);
+      if (connectorsMetadata[node.id]) {
+        connectorsMetadata[node.id].connectorNodes.push(connectorNode);
       } else {
-        labelsMetadata[node.id] = { source, target, labelsNodes: [labelNode] };
+        connectorsMetadata[node.id] = { source, target, connectorNodes: [connectorNode] };
       }
 
-      nodes[labelNode.id] = labelNode;
+      nodes[connectorNode.id] = connectorNode;
 
       // Set metadata
       const edgeId = node.id;
@@ -97,7 +123,7 @@ const extractEdges = (
           source,
           target,
           edgesStacked: 1,
-          edges: [labelNode.id],
+          edges: [connectorNode.id],
         };
       }
     } else {
@@ -106,70 +132,78 @@ const extractEdges = (
     }
   });
 
-  Object.values(labelsMetadata).forEach((edge) => {
-    if (edge.labelsNodes.length > 1) {
+  Object.values(connectorsMetadata).forEach((connector) => {
+    if (connector.connectorNodes.length > 1) {
       const groupNode: NodeViewModel = {
-        id: `grp(a(${edge.source})-b(${edge.target}))`,
+        id: `grp(a(${connector.source})-b(${connector.target}))`,
         shape: 'group',
       };
 
+      const firstConnectorColor = getConnectorEdgeColor(connector.connectorNodes[0]);
+
       nodes[groupNode.id] = groupNode;
       edges.push({
-        id: `a(${edge.source})-b(${groupNode.id})`,
-        source: edge.source,
-        sourceShape: nodes[edge.source].shape,
+        id: `a(${connector.source})-b(${groupNode.id})`,
+        source: connector.source,
+        sourceShape: nodes[connector.source].shape,
         target: groupNode.id,
         targetShape: groupNode.shape,
-        color: edge.labelsNodes[0].color,
+        color: firstConnectorColor,
       });
 
       edges.push({
-        id: `a(${groupNode.id})-b(${edge.target})`,
+        id: `a(${groupNode.id})-b(${connector.target})`,
         source: groupNode.id,
         sourceShape: groupNode.shape,
-        target: edge.target,
-        targetShape: nodes[edge.target].shape,
-        color: edge.labelsNodes[0].color,
+        target: connector.target,
+        targetShape: nodes[connector.target].shape,
+        color: firstConnectorColor,
       });
 
-      edge.labelsNodes.forEach((labelNode: Writable<LabelNodeViewModel>) => {
-        labelNode.parentId = groupNode.id;
+      connector.connectorNodes.forEach(
+        (connectorNode: Writable<LabelNodeViewModel | RelationshipNodeViewModel>) => {
+          connectorNode.parentId = groupNode.id;
+          const edgeColor = getConnectorEdgeColor(connectorNode);
 
-        edges.push({
-          id: `a(${groupNode.id})-b(${labelNode.id})`,
-          source: groupNode.id,
-          sourceShape: groupNode.shape,
-          target: labelNode.id,
-          targetShape: labelNode.shape,
-          color: labelNode.color,
-        });
+          edges.push({
+            id: `a(${groupNode.id})-b(${connectorNode.id})`,
+            source: groupNode.id,
+            sourceShape: groupNode.shape,
+            target: connectorNode.id,
+            targetShape: connectorNode.shape,
+            color: edgeColor,
+          });
 
-        edges.push({
-          id: `a(${labelNode.id})-b(${groupNode.id})`,
-          source: labelNode.id,
-          sourceShape: labelNode.shape,
-          target: groupNode.id,
-          targetShape: groupNode.shape,
-          color: labelNode.color,
-        });
-      });
+          edges.push({
+            id: `a(${connectorNode.id})-b(${groupNode.id})`,
+            source: connectorNode.id,
+            sourceShape: connectorNode.shape,
+            target: groupNode.id,
+            targetShape: groupNode.shape,
+            color: edgeColor,
+          });
+        }
+      );
     } else {
+      const connectorNode = connector.connectorNodes[0];
+      const edgeColor = getConnectorEdgeColor(connectorNode);
+
       edges.push({
-        id: `a(${edge.source})-b(${edge.labelsNodes[0].id})`,
-        source: edge.source,
-        sourceShape: nodes[edge.source].shape,
-        target: edge.labelsNodes[0].id,
-        targetShape: edge.labelsNodes[0].shape,
-        color: edge.labelsNodes[0].color,
+        id: `a(${connector.source})-b(${connectorNode.id})`,
+        source: connector.source,
+        sourceShape: nodes[connector.source].shape,
+        target: connectorNode.id,
+        targetShape: connectorNode.shape,
+        color: edgeColor,
       });
 
       edges.push({
-        id: `a(${edge.labelsNodes[0].id})-b(${edge.target})`,
-        source: edge.labelsNodes[0].id,
-        sourceShape: edge.labelsNodes[0].shape,
-        target: edge.target,
-        targetShape: nodes[edge.target].shape,
-        color: edge.labelsNodes[0].color,
+        id: `a(${connectorNode.id})-b(${connector.target})`,
+        source: connectorNode.id,
+        sourceShape: connectorNode.shape,
+        target: connector.target,
+        targetShape: nodes[connector.target].shape,
+        color: edgeColor,
       });
     }
   });
@@ -258,6 +292,7 @@ export const GroupWithWarningAPIMock: Story = {
         color: 'warning',
         shape: 'label',
         parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
       {
         id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
@@ -267,6 +302,7 @@ export const GroupWithWarningAPIMock: Story = {
         color: 'primary',
         shape: 'label',
         parentId: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
     ],
     edges: [
@@ -352,6 +388,7 @@ export const GroupWithAlertAPIMock: Story = {
         uniqueAlertsCount: 1,
         shape: 'label',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
       {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
@@ -359,6 +396,7 @@ export const GroupWithAlertAPIMock: Story = {
         color: 'primary',
         shape: 'label',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        toolbarItemsFn: storybookLabelToolbarItems,
       },
     ],
     edges: [
@@ -423,10 +461,48 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'hexagon',
     icon: 'storage',
-    ips: ['213.180.204.3'],
-    countryCodes: ['RU'],
+    ips: ['213.180.204.3', '10.0.0.1', '192.168.1.5'],
+    countryCodes: ['RU', 'US'],
     tag: 'Host',
     count: 3,
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 55.0, max: 95.0 },
+    assetCriticality: [
+      { level: 'high_impact', count: 2 },
+      { level: 'low_impact', count: 1 },
+    ],
+    documentsData: [
+      {
+        id: 'host:host-instance-1',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          name: 'host-instance-1',
+          sources: ['cloud_asset_inventory'],
+        },
+      },
+      {
+        id: 'host:host-instance-2',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          name: 'host-instance-2',
+          sources: ['endpoint'],
+        },
+      },
+      {
+        id: 'host:host-instance-3',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          name: 'host-instance-3',
+          sources: ['cloud_asset_inventory'],
+        },
+      },
+    ],
   },
   {
     id: '213.180.204.3',
@@ -434,6 +510,22 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'diamond',
     icon: 'globe',
+    tag: 'IP',
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 81.0, max: 81.0 },
+    assetCriticality: [{ level: 'medium_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'ip:213.180.204.3',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'generic',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'host.ip': '213.180.204.3' },
+        },
+      },
+    ],
   },
   {
     id: 'user',
@@ -441,10 +533,48 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'ellipse',
     icon: 'user',
-    ips: ['213.180.204.3'],
-    countryCodes: ['RU'],
-    tag: 'Host',
+    ips: ['213.180.204.3', '10.0.0.2'],
+    countryCodes: ['RU', 'DE'],
+    tag: 'User',
     count: 3,
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 70.0, max: 88.5 },
+    assetCriticality: [
+      { level: 'extreme_impact', count: 1 },
+      { level: 'medium_impact', count: 2 },
+    ],
+    documentsData: [
+      {
+        id: 'user:alice@example.com',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'alice@example.com',
+          sources: ['active_directory', 'okta'],
+        },
+      },
+      {
+        id: 'user:bob@example.com',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'bob@example.com',
+          sources: ['okta'],
+        },
+      },
+      {
+        id: 'user:charlie@example.com',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'charlie@example.com',
+          sources: ['active_directory'],
+        },
+      },
+    ],
   },
   {
     id: 'oktauser',
@@ -452,6 +582,22 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'ellipse',
     icon: 'user',
+    tag: 'User',
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 42.0, max: 42.0 },
+    assetCriticality: [{ level: 'low_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'user:pluni@elastic.co',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'user',
+          name: 'pluni@elastic.co',
+          sources: ['okta'],
+        },
+      },
+    ],
   },
   {
     id: 'hackeruser',
@@ -459,6 +605,22 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'ellipse',
     icon: 'user',
+    tag: 'User',
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 90.01, max: 90.01 },
+    assetCriticality: [{ level: 'high_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'user:hacker@threat.io',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: false,
+          engine_type: 'user',
+          name: 'hacker@threat.io',
+          sources: ['endpoint'],
+        },
+      },
+    ],
   },
   {
     id: 's3',
@@ -466,6 +628,22 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'rectangle',
     icon: 'aws_s3',
+    tag: 'Storage',
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 35.0, max: 35.0 },
+    assetCriticality: [{ level: 'extreme_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'generic:s3-customer-pii',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'generic',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'cloud.resource_id': 's3-customer-pii' },
+        },
+      },
+    ],
   },
   {
     id: 'ec2',
@@ -473,6 +651,22 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'rectangle',
     icon: 'aws_ec2',
+    tag: 'Host',
+    toolbarItemsFn: storybookToolbarItems,
+    riskScore: { min: 60.5, max: 60.5 },
+    assetCriticality: [{ level: 'high_impact', count: 1 }],
+    documentsData: [
+      {
+        id: 'host:aws-ec2-instance',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: true,
+          engine_type: 'host',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'host.id': 'aws-ec2-instance' },
+        },
+      },
+    ],
   },
   {
     id: 'aws',
@@ -480,6 +674,20 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'primary',
     shape: 'rectangle',
     icon: 'aws',
+    tag: 'Service',
+    toolbarItemsFn: storybookToolbarItems,
+    documentsData: [
+      {
+        id: 'generic:aws-cloudtrail',
+        type: 'entity' as 'event' | 'alert' | 'entity',
+        entity: {
+          availableInEntityStore: false,
+          engine_type: 'generic',
+          sources: ['cloud_asset_inventory'],
+          sourceFields: { 'cloud.service.name': 'cloudtrail' },
+        },
+      },
+    ],
   },
   {
     id: 'a(siem-windows)-b(user)',
@@ -1069,5 +1277,303 @@ export const SingleAndGroupNodes: Story = {
         countryCodes: ['US', 'IT'],
       },
     ]),
+  },
+};
+
+/**
+ * Story: Events and Relationships Combined
+ * Demonstrates a realistic AWS/cloud scenario with both:
+ * - Event connections (label nodes): Actions performed by a user (ConsoleLogin, AssumeRole)
+ * - Relationship connections (relationship nodes): Static ownership/access relationships
+ *
+ * Scenario: A user logs into a host, assumes a role, and has ownership/access relationships to multiple hosts
+ */
+export const EventsAndEntityRelationships: Story = {
+  args: {
+    ...extractEdges([
+      // Entity nodes
+      {
+        id: 'user-john',
+        label: 'john.doe@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'host-prod-1',
+        label: 'prod-ec2-instance-01',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'processor',
+      },
+      {
+        id: 'host-prod-2',
+        label: 'prod-ec2-instance-02',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'processor',
+      },
+      {
+        id: 'iam-role',
+        label: 'AdminRole',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'key',
+      },
+
+      // Event edges (activity-based) - Actions performed by the user
+      {
+        id: 'evt-console-login',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'ConsoleLogin',
+        color: 'primary',
+        shape: 'label',
+        uniqueEventsCount: 3,
+      },
+      {
+        id: 'evt-assume-role',
+        source: 'user-john',
+        target: 'iam-role',
+        label: 'AssumeRole',
+        color: 'primary',
+        shape: 'label',
+        uniqueEventsCount: 1,
+      },
+
+      // Relationship edges (static/configuration-based) - Ownership and access permissions
+      {
+        id: 'rel-user-owns-host1',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'rel-user-owns-host2',
+        source: 'user-john',
+        target: 'host-prod-2',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'rel-user-access-host1',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+    ]),
+  },
+};
+
+export const EventsAndRelationshipsStacked: Story = {
+  args: {
+    ...extractEdges([
+      // Entity nodes
+      {
+        id: 'user-john',
+        label: 'john.doe@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'host-prod-1',
+        label: 'prod-ec2-instance-01',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'processor',
+      },
+      // Relationship edges (static/configuration-based) - Ownership and access permissions
+      // Nodes with the same id + same source/target will be stacked together
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'ConsoleLogin',
+        shape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'DescribeInstance',
+        shape: 'label',
+        color: 'primary',
+      },
+
+      // Additional entity nodes for multi-user ownership scenario
+      {
+        id: 'user-1',
+        label: 'user-1@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'user-2',
+        label: 'user-2@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'hosts-group',
+        label: 'hosts',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'processor',
+        count: 3,
+      },
+
+      // Connect subgraphs: user-john supervises user-1 and user-2
+      {
+        id: 'a(user-john)-b(user-1)',
+        source: 'user-john',
+        target: 'user-1',
+        label: 'Supervises',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-john)-b(user-2)',
+        source: 'user-john',
+        target: 'user-2',
+        label: 'Supervises',
+        shape: 'relationship',
+      },
+
+      // user-1 owns and has access to hosts (stacked)
+      {
+        id: 'a(user-1)-b(hosts-group)',
+        source: 'user-1',
+        target: 'hosts-group',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-1)-b(hosts-group)',
+        source: 'user-1',
+        target: 'hosts-group',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+
+      // user-2 owns and has access to the same hosts (stacked)
+      {
+        id: 'a(user-2)-b(hosts-group)',
+        source: 'user-2',
+        target: 'hosts-group',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-2)-b(hosts-group)',
+        source: 'user-2',
+        target: 'hosts-group',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+    ]),
+  },
+};
+
+/**
+ * This story tests the fan-out layout with three target nodes
+ * to verify proper distribution when there are more than two targets.
+ *
+ * Graph structure:
+ *   Actor → Label → Target1
+ *                ├─→ Target2
+ *                └─→ Target3
+ */
+export const FanOutThreeTargets: Story = {
+  args: {
+    ...meta.args,
+    nodes: [
+      {
+        id: 'actor',
+        label: 'actor@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'target1',
+        label: 'Target Identity 1',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'target2',
+        label: 'Target Storage 2',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'storage',
+      },
+      {
+        id: 'target3',
+        label: 'Target Resource 3',
+        color: 'primary',
+        shape: 'rectangle',
+        icon: 'question',
+      },
+      {
+        id: 'label',
+        label: 'MultiTargetAction',
+        color: 'primary',
+        shape: 'label',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(actor)-b(label)',
+        source: 'actor',
+        sourceShape: 'ellipse',
+        target: 'label',
+        targetShape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target1)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target1',
+        targetShape: 'ellipse',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target2)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target2',
+        targetShape: 'hexagon',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target3)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target3',
+        targetShape: 'rectangle',
+        color: 'primary',
+      },
+    ],
   },
 };

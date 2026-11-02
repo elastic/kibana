@@ -6,7 +6,7 @@
  */
 
 import { getParseOriginalDashboardNode } from './parse_original_dashboard';
-import type { MigrateDashboardState } from '../../types';
+import type { MigrateDashboardGraphParams, MigrateDashboardState } from '../../types';
 import { SplunkXmlDashboardParser } from '../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 
@@ -14,6 +14,13 @@ import { MigrationTranslationResult } from '../../../../../../../../common/siem_
 jest.mock('../../../../../../../../common/siem_migrations/parsers/splunk/dashboard_xml');
 
 const mockSplunkXmlDashboardParser = SplunkXmlDashboardParser;
+
+const getTestNode = () =>
+  getParseOriginalDashboardNode({
+    experimentalFeatures: {
+      splunkV2DashboardsEnabled: false,
+    },
+  } as unknown as MigrateDashboardGraphParams);
 
 describe('getParseOriginalDashboardNode', () => {
   const mockState = {
@@ -61,12 +68,13 @@ describe('getParseOriginalDashboardNode', () => {
       getPanelPosition: jest.fn(),
       getPanelTitle: jest.fn(),
       getPanelQuery: jest.fn(),
+      getVersion: jest.fn().mockResolvedValue('1.1'),
     };
     jest
       .mocked(mockSplunkXmlDashboardParser)
       .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
     const result = await node(mockState, mockConfig);
 
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
@@ -92,7 +100,7 @@ describe('getParseOriginalDashboardNode', () => {
       },
     };
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
 
     await expect(node(unsupportedState as MigrateDashboardState, mockConfig)).rejects.toThrow(
       'Unsupported dashboard vendor'
@@ -105,7 +113,7 @@ describe('getParseOriginalDashboardNode', () => {
       reason: 'Unsupported root tag: form',
     });
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
     const result = await node(mockState, mockConfig);
 
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
@@ -133,7 +141,7 @@ describe('getParseOriginalDashboardNode', () => {
       reason: 'Unsupported version. Only version 1.1 is supported.',
     });
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
     const result = await node(mockState, mockConfig);
 
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
@@ -161,7 +169,7 @@ describe('getParseOriginalDashboardNode', () => {
       reason: 'No <row> elements found in the provided Dashboard XML.',
     });
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
     const result = await node(mockState, mockConfig);
 
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
@@ -189,13 +197,14 @@ describe('getParseOriginalDashboardNode', () => {
     });
 
     const mockParserInstance = {
+      getVersion: jest.fn().mockResolvedValue('1.1'),
       extractPanels: jest.fn().mockRejectedValue(new Error('Parser error')),
     };
     jest
       .mocked(mockSplunkXmlDashboardParser)
       .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
 
     await expect(node(mockState, mockConfig)).rejects.toThrow('Parser error');
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
@@ -209,13 +218,14 @@ describe('getParseOriginalDashboardNode', () => {
     });
 
     const mockParserInstance = {
+      getVersion: jest.fn().mockResolvedValue('1.1'),
       extractPanels: jest.fn().mockResolvedValue([]),
     };
     jest
       .mocked(mockSplunkXmlDashboardParser)
       .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
     const result = await node(mockState, mockConfig);
 
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(
@@ -252,13 +262,14 @@ describe('getParseOriginalDashboardNode', () => {
     });
 
     const mockParserInstance = {
+      getVersion: jest.fn().mockResolvedValue('1.1'),
       extractPanels: jest.fn().mockResolvedValue(mockPanels),
     };
     jest
       .mocked(mockSplunkXmlDashboardParser)
       .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
 
-    const node = getParseOriginalDashboardNode();
+    const node = getTestNode();
     const result = await node(mockState, mockConfig);
 
     expect(mockSplunkXmlDashboardParser.isSupportedSplunkXml).toHaveBeenCalledWith(

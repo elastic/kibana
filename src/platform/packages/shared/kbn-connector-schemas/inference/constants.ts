@@ -41,5 +41,20 @@ export enum SUB_ACTION {
   COMPLETION_STREAM = 'completion_stream',
 }
 
+/**
+ * Mapping of sub_action to task_type for inference connectors.
+ * This maps each executable sub-action to its corresponding inference endpoint task type.
+ */
+export const TASK_TYPE_BY_SUB_ACTION: Record<SUB_ACTION, string> = {
+  [SUB_ACTION.UNIFIED_COMPLETION]: 'chat_completion',
+  [SUB_ACTION.UNIFIED_COMPLETION_STREAM]: 'chat_completion',
+  [SUB_ACTION.UNIFIED_COMPLETION_ASYNC_ITERATOR]: 'chat_completion',
+  [SUB_ACTION.COMPLETION]: 'completion',
+  [SUB_ACTION.COMPLETION_STREAM]: 'completion',
+  [SUB_ACTION.RERANK]: 'rerank',
+  [SUB_ACTION.TEXT_EMBEDDING]: 'text_embedding',
+  [SUB_ACTION.SPARSE_EMBEDDING]: 'sparse_embedding',
+};
+
 export const DEFAULT_PROVIDER = 'openai';
 export const DEFAULT_TASK_TYPE = 'completion';

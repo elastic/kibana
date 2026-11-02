@@ -41,16 +41,9 @@ const baseNavItems = [
       {
         'data-test-subj': 'searchSideNav-Indices',
         href: '/app/elasticsearch/index_management',
-        id: 'search_indices',
+        id: 'index_management',
         items: undefined,
         name: 'Index Management',
-      },
-      {
-        'data-test-subj': 'searchSideNav-Playground',
-        href: '/app/search_playground',
-        id: 'playground',
-        items: undefined,
-        name: 'Playground',
       },
       {
         'data-test-subj': 'searchSideNav-SearchApplications',
@@ -80,13 +73,6 @@ const baseNavItems = [
         items: undefined,
         name: 'Query rules',
       },
-      {
-        'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        href: '/app/elasticsearch/relevance/inference_endpoints',
-        id: 'inference_endpoints',
-        items: undefined,
-        name: 'Inference endpoints',
-      },
     ],
     name: 'Relevance',
   },
@@ -103,11 +89,6 @@ const mockNavLinks = [
     url: '/app/elasticsearch/index_management',
   },
   {
-    id: 'searchPlayground',
-    title: 'Playground',
-    url: '/app/search_playground',
-  },
-  {
     id: 'enterpriseSearchApplications:searchApplications',
     title: 'Search applications',
     url: '/app/elasticsearch/applications/search_applications',
@@ -116,11 +97,6 @@ const mockNavLinks = [
     id: 'enterpriseSearchAnalytics',
     title: 'Behavioral Analytics',
     url: '/app/elasticsearch/analytics',
-  },
-  {
-    id: 'searchInferenceEndpoints:inferenceEndpoints',
-    title: 'Inference endpoints',
-    url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {
     id: 'searchSynonyms:synonyms',

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { apiTest as profilingFixtures } from '../../common/fixtures';
 import { APM_AGENT_POLICY_ID } from '../../common/fixtures/constants';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, profilingFixtures);
 
 globalSetupHook(
   'Set up Profiling Resources and Data',
-  { tag: ['@ess'] },
-  async ({ profilingSetup, apiServices, log }) => {
+  { tag: tags.stateful.classic },
+  async ({ profilingSetup, profilingHelper, apiServices, log }) => {
     try {
       // Create APM agent policy via Fleet API
       await apiServices.fleet.internal.setup();
@@ -28,15 +31,15 @@ globalSetupHook(
       );
 
       if (!apmPolicyData) {
-        await apiServices.fleet.agent_policies.create(
-          'Elastic APM',
-          'default',
-          false, // sysMonitoring
-          {
+        await apiServices.fleet.agent_policies.create({
+          policyName: 'Elastic APM',
+          policyNamespace: 'default',
+          sysMonitoring: false,
+          params: {
             id: APM_AGENT_POLICY_ID,
             description: 'Elastic APM agent policy created via Fleet API',
-          }
-        );
+          },
+        });
         log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' is created`);
       } else {
         log.info(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
@@ -64,6 +67,10 @@ globalSetupHook(
       } else {
         log.info('Profiling data already loaded.');
       }
+
+      log.info('Loading OTel profiling data...');
+      await profilingHelper.loadOtelData();
+      log.info('[Done] Loading OTel profiling data.');
     } catch (error) {
       log.error(`Error setting up profiling: ${error}`);
       throw error;

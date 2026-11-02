@@ -6,13 +6,13 @@
  */
 
 import type { GeneralDatasourceStates } from '@kbn/lens-common';
-import type { XYState } from '../types';
+import type { XYVisualizationState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
-  state: XYState,
+  state: XYVisualizationState,
   datasourceStates?: Readonly<GeneralDatasourceStates>
-): XYState {
+): XYVisualizationState {
   return getRuntimeConverters(datasourceStates).reduce(
     (newState, fn) => fn(newState),
     structuredClone(state)

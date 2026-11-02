@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { Controller } from 'react-hook-form';
 import { isQueryRuleFieldError } from '../../../utils/field_error_utils';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -81,7 +82,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
-    update,
   } = useQueryRuleFlyoutState({
     createMode,
     rulesetId,
@@ -104,12 +104,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   const pinExcludeText =
     pinType === 'pinned' ? (
       <FormattedMessage
-        id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionType.pinned.description"
+        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.actionType.pinned.description"
         defaultMessage="Pin documents to the top of the search results."
       />
     ) : (
       <FormattedMessage
-        id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionType.exclude.description"
+        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.actionType.exclude.description"
         defaultMessage="Exclude documents from the search results."
       />
     );
@@ -139,7 +139,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiText size="s">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.actionTypeHeading"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.actionTypeHeading"
                     defaultMessage="I want to"
                   />
                 </b>
@@ -165,7 +165,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiText size="s">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.documentCount"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.documentCount"
                     defaultMessage="{documentCount, plural, one {# document} other {# documents}}"
                     values={{
                       documentCount,
@@ -176,10 +176,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.findDocuments"
+                  id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.findDocuments"
                   defaultMessage="Find your documents IDs into "
                 />
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiLink
                   data-test-subj="searchQueryRulesQueryRuleFlyoutLink"
                   external
@@ -192,7 +191,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   }}
                 >
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.DiscoverDocumentsLink"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.DiscoverDocumentsLink"
                     defaultMessage="Discover"
                   />
                 </EuiLink>
@@ -202,21 +201,20 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
 
               {isIdRule && (
                 <>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
-                    title="Document action using 'ids' are unsupported"
-                    color="warning"
+                    title={i18n.translate(
+                      'xpack.queryRules.queryRuleset.queryRuleFlyout.documentActionUsingidsLabel',
+                      { defaultMessage: "Document action using 'ids' are unsupported" }
+                    )}
                     size="s"
-                  >
-                    <EuiText size="s">
-                      <p>
-                        <FormattedMessage
-                          id="xpack.search.queryRuleset.queryRuleFlyout.idsActionDeprecation"
-                          defaultMessage="Query rules pinning/excluding documents using ids only are not supported in the UIs. Please convert them to pinning by docs"
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiCallOut>
+                    text={
+                      <FormattedMessage
+                        id="xpack.queryRules.queryRuleset.queryRuleFlyout.idsActionDeprecation"
+                        defaultMessage="Query rules pinning/excluding documents using ids only are not supported in the UIs. Please convert them to pinning by docs"
+                      />
+                    }
+                  />
                   <EuiSpacer size="m" />
                 </>
               )}
@@ -235,13 +233,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                 />
               </EuiFlexItem>
               {pinType === 'pinned' && documentCount !== 0 && (
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
-                  iconType="transitionTopIn"
                   size="s"
                   title={
                     <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.organicResultsCallout"
+                      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.organicResultsCallout"
                       defaultMessage="All other organic results will be displayed below"
                     />
                   }
@@ -266,7 +263,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiText size="s">
                 <b>
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteriaHeading"
+                    id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteriaHeading"
                     defaultMessage="Criteria"
                   />
                 </b>
@@ -286,7 +283,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiText size="xs" color="subdued">
                     <p>
                       <FormattedMessage
-                        id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteria.custom.description"
+                        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteria.custom.description"
                         defaultMessage="Define the conditions that trigger this rule."
                       />
                     </p>
@@ -296,16 +293,19 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiSpacer size="m" />
               {shouldShowCriteriaCallout && (
                 <>
-                  <EuiCallOut
+                  <KbnInfoCallout
                     announceOnMount
-                    iconType="info"
                     size="s"
                     onDismiss={() => {
                       setCriteriaCalloutActive(false);
                     }}
+                    aria-label={i18n.translate(
+                      'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout.ariaLabel',
+                      { defaultMessage: 'All criteria must be met for the rule to be applied' }
+                    )}
                     title={
                       <FormattedMessage
-                        id="xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
+                        id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
                         defaultMessage="All criteria must be met for the rule to be applied"
                       />
                     }
@@ -320,16 +320,24 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                       const error = formState.errors?.criteria?.[index];
                       return (
                         <React.Fragment key={field.id}>
-                          <QueryRuleMetadataEditor
-                            criteria={field}
-                            key={field.id}
-                            onChange={(newCriteria) => {
-                              update(index, newCriteria);
+                          <Controller
+                            control={control}
+                            name={`criteria.${index}`}
+                            render={({ field: { onChange, value } }) => {
+                              return (
+                                <QueryRuleMetadataEditor
+                                  criteria={value}
+                                  key={field.id}
+                                  onRemove={() => {
+                                    remove(index);
+                                  }}
+                                  error={isQueryRuleFieldError(error) ? error : undefined}
+                                  onChange={(newCriteria) => {
+                                    onChange(newCriteria);
+                                  }}
+                                />
+                              );
                             }}
-                            onRemove={() => {
-                              remove(index);
-                            }}
-                            error={isQueryRuleFieldError(error) ? error : undefined}
                           />
                           <EuiSpacer size="m" />
                         </React.Fragment>
@@ -337,14 +345,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     })
                   ) : (
                     <>
-                      <EuiCallOut
+                      <KbnWarningCallout
                         announceOnMount
-                        iconType="info"
                         size="s"
-                        color="warning"
                         title={
                           <FormattedMessage
-                            id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteriaRequiredCallout"
+                            id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteriaRequiredCallout"
                             defaultMessage="At least one criteria is required."
                           />
                         }
@@ -356,14 +362,14 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiButton
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                     onClick={handleAddCriteria}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     iconSide="left"
                     size="s"
                     color={criteriaCount === 0 ? 'primary' : 'text'}
                     fill={criteriaCount === 0}
                   >
                     <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.addCriteriaButton"
+                      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.addCriteriaButton"
                       defaultMessage="AND"
                     />
                   </EuiButton>
@@ -381,7 +387,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               onClick={onClose}
             >
               <FormattedMessage
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.closeButton"
+                id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -402,12 +408,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
             >
               {createMode ? (
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.createButton"
+                  id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.createButton"
                   defaultMessage="Create rule"
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"
+                  id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.updateButton"
                   defaultMessage="Update rule"
                 />
               )}

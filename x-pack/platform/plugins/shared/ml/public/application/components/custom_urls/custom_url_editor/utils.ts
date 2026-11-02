@@ -30,6 +30,10 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { isAnomalyDetectionJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
@@ -46,8 +50,6 @@ import {
 } from '../../../util/custom_url_utils';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
-import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
-import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 import type { TimeRangeType } from './constants';
 import type { MlApi } from '../../../services/ml_api_service';
 
@@ -283,7 +285,7 @@ async function buildDashboardUrlFromSettings(
 
   const filters =
     Array.isArray(dashboard.attributes.filters) && dashboard.attributes.filters.length > 0
-      ? dashboard.attributes.filters
+      ? toStoredFilters(dashboard.attributes.filters)
       : settings?.kibanaSettings?.filters;
 
   const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);

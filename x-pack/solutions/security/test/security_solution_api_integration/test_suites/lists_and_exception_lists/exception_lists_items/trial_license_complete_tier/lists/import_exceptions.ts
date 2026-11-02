@@ -14,12 +14,15 @@ import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 import { deleteAllExceptions } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @serverlessQA import_exceptions', () => {
@@ -707,6 +710,60 @@ export default ({ getService }: FtrProviderContext): void => {
         success_exception_lists: true,
         success: true,
         success_count: 200,
+      });
+    });
+
+    describe('@skipInServerless with read rules and all exceptions role', () => {
+      const role = ROLES.rules_read_exceptions_all;
+
+      beforeEach(async () => {
+        await deleteAndReCreateUserRole(getService, role);
+      });
+
+      it('should report that it imported an exception list successfully', async () => {
+        const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
+        const restrictedApis = exceptionsApi.withUser(restrictedUser);
+
+        const { body } = await restrictedApis
+          .importExceptionList({ query: { overwrite: false } })
+          .attach(
+            'file',
+            Buffer.from(toNdJsonString([getImportExceptionsListSchemaMock()])),
+            'exceptions.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+          success_count_exception_list_items: 0,
+          success_count_exception_lists: 1,
+          success_exception_list_items: true,
+          success_exception_lists: true,
+        });
+      });
+    });
+    describe('@skipInServerless with read rules and read exceptions role', () => {
+      const role = ROLES.rules_read_exceptions_read;
+
+      beforeEach(async () => {
+        await deleteAndReCreateUserRole(getService, role);
+      });
+
+      it('should NOT import an exception list', async () => {
+        const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
+        const restrictedApis = exceptionsApi.withUser(restrictedUser);
+
+        await restrictedApis
+          .importExceptionList({ query: { overwrite: false } })
+          .attach(
+            'file',
+            Buffer.from(toNdJsonString([getImportExceptionsListSchemaMock()])),
+            'exceptions.ndjson'
+          )
+          .expect(403);
       });
     });
   });

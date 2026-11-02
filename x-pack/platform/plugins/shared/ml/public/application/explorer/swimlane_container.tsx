@@ -40,6 +40,8 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
@@ -47,8 +49,6 @@ import type {
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
-import type { SwimlaneType } from './explorer_constants';
-import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
@@ -147,6 +147,7 @@ export interface SwimlaneProps {
   swimlaneLimit?: number;
   onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
   isLoading: boolean;
+  isInteractive?: boolean;
   noDataWarning: string | JSX.Element | null;
   /**
    * Unique id of the chart
@@ -174,6 +175,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   swimlaneLimit,
   onPaginationChange,
   isLoading,
+  isInteractive = true,
   noDataWarning,
   filterActive,
   swimlaneData,
@@ -329,6 +331,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           textColor: euiTheme.colors.textSubdued,
           fontSize: parseInt(euiFontSizeXS, 10),
         },
+        // The brush colors branch on `isDarkTheme` and hard-code literals instead of reading
+        // `euiTheme` tokens, so they won't follow theme or token changes. EUI updates
+        // `colorMode` one render before `euiTheme`, so mixing the two can briefly disagree.
         brushMask: {
           visible: showBrush,
           fill: isDarkTheme
@@ -344,14 +349,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     };
 
     return theme;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showSwimlane,
-    swimlaneType,
-    swimlaneData?.fieldName,
+    showYAxis,
+    yAxisWidth,
+    showTimeline,
+    showLegend,
+    showBrush,
+    euiFontSizeXS,
+    euiTheme,
     isDarkTheme,
-    timeBuckets,
-    onCellsSelection,
   ]);
 
   const chartRef = useRef(null);
@@ -418,10 +425,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     onRenderComplete?.();
   }
   const swimlaneStyles = css({
-    '.echLegendListContainer': {
+    '.echLegendGridListContainer': {
       height: '34px !important',
     },
-    '.echLegendList': {
+    '.echLegendGridList': {
       display: 'flex !important',
       justifyContent: 'space-between !important',
       flexWrap: 'nowrap',
@@ -590,6 +597,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 fromPage={fromPage!}
                 perPage={perPage!}
                 onPaginationChange={onPaginationChange!}
+                isInteractive={isInteractive}
               />
             </EuiFlexItem>
           )}

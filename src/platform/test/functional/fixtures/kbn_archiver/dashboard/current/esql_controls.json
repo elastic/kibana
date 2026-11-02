@@ -1,0 +1,32 @@
+{
+  "accessControl": {
+    "accessMode": "default",
+    "owner": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+  },
+  "attributes": {
+    "controlGroupInput": {
+      "panelsJSON": "{\"esql-control-1\":{\"order\":0,\"width\":\"medium\",\"type\":\"esqlControl\",\"explicitInput\":{\"id\":\"esql-control-1\",\"title\":\"Destination\",\"enhancements\":{},\"selected_options\":[\"AF\"],\"variable_name\":\"variable\",\"variable_type\":\"values\",\"esql_query\":\"FROM logstash-* | STATS BY geo.dest\",\"control_type\":\"VALUES_FROM_QUERY\",\"available_options\":[]}}}"
+    },
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"esql\":\"FROM logstash-* | WHERE geo.dest == ?variable | STATS count = COUNT(*) BY BUCKET(@timestamp, 100 millisecond), geo.dest | LIMIT 100000\"},\"attributes\":{\"title\":\"count over BUCKET(@timestamp, 100 millisecond)\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"f13b5fd1-eb67-4609-992b-b5d1a1daaf53\":{\"index\":\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\",\"query\":{\"esql\":\"FROM logstash-* | WHERE geo.dest == ?variable | STATS count = COUNT(*) BY BUCKET(@timestamp, 100 millisecond), geo.dest | LIMIT 100000\"},\"columns\":[{\"columnId\":\"count\",\"fieldName\":\"count\",\"label\":\"count\",\"customLabel\":false,\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true},{\"columnId\":\"BUCKET(@timestamp, 100 millisecond)\",\"fieldName\":\"BUCKET(@timestamp, 100 millisecond)\",\"label\":\"BUCKET(@timestamp, 100 millisecond)\",\"customLabel\":false,\"meta\":{\"type\":\"date\",\"esType\":\"date\"}},{\"columnId\":\"geo.dest\",\"fieldName\":\"geo.dest\",\"label\":\"geo.dest\",\"customLabel\":false,\"meta\":{\"type\":\"string\",\"esType\":\"keyword\"}}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\",\"title\":\"logstash-*\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM logstash-* | WHERE geo.dest == ?variable | STATS count = COUNT(*) BY BUCKET(@timestamp, 100 millisecond), geo.dest | LIMIT 100000\"},\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"bar_stacked\",\"layers\":[{\"layerId\":\"f13b5fd1-eb67-4609-992b-b5d1a1daaf53\",\"seriesType\":\"bar_stacked\",\"xAccessor\":\"BUCKET(@timestamp, 100 millisecond)\",\"splitAccessors\":[\"geo.dest\"],\"accessors\":[\"count\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}}]},\"adHocDataViews\":{\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\":{\"id\":\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\",\"title\":\"logstash-*\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"logstash-*\",\"allowHidden\":false,\"managed\":false}},\"needsRefresh\":false},\"visualizationType\":\"lnsXY\",\"version\":2}},\"panelIndex\":\"a80119a4-d6fa-4e9a-887e-d6407cf38007\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"a80119a4-d6fa-4e9a-887e-d6407cf38007\"}}]",
+    "timeFrom": "2015-09-19T00:00:00.000Z",
+    "timeRestore": true,
+    "timeTo": "2015-09-23T18:31:44.000Z",
+    "title": "ES|QL controls fixture dashboard"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-01-30T20:41:52.508Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "f45f45a4-c078-4f1f-8ca3-4b5b0aa118d3",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-01-30T20:46:20.259Z",
+  "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "version": "WzE4LDFd"
+}

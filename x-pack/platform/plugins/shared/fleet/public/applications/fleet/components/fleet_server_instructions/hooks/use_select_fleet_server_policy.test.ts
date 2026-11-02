@@ -41,7 +41,6 @@ jest.mocked(useGetEnrollmentSettings).mockReturnValue({
         id: 'default-proxy',
         name: 'default-proxy',
         url: 'https://defaultproxy',
-        is_preconfigured: false,
       },
       has_active: true,
     },

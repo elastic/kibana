@@ -10,7 +10,10 @@ import {
   getResultJobsHealthRuleConfig,
   resolveLookbackInterval,
 } from './alerts';
-import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
+import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
 describe('resolveLookbackInterval', () => {
   test('resolves interval for bucket spans bigger than 1m', () => {
@@ -94,6 +97,8 @@ describe('getResultJobsHealthRuleConfig', () => {
         docsCount: 1,
         enabled: true,
         timeInterval: null,
+        thresholdType: DELAYED_DATA_THRESHOLD_TYPE.COUNT,
+        docsCountPercentage: 20,
       },
       errorMessages: {
         enabled: true,
@@ -121,10 +126,34 @@ describe('getResultJobsHealthRuleConfig', () => {
         docsCount: 1,
         enabled: true,
         timeInterval: null,
+        thresholdType: DELAYED_DATA_THRESHOLD_TYPE.COUNT,
+        docsCountPercentage: 20,
       },
       errorMessages: {
         enabled: true,
       },
+    });
+  });
+  test('returns config with percentage threshold mode when provided', () => {
+    expect(
+      getResultJobsHealthRuleConfig({
+        delayedData: {
+          enabled: true,
+          thresholdType: DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE,
+          docsCountPercentage: 15,
+        },
+      })
+    ).toEqual({
+      datafeed: { enabled: true },
+      mml: { enabled: true },
+      delayedData: {
+        docsCount: 1,
+        enabled: true,
+        timeInterval: null,
+        thresholdType: DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE,
+        docsCountPercentage: 15,
+      },
+      errorMessages: { enabled: true },
     });
   });
 });

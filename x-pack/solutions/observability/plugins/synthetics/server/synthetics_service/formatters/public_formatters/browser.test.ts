@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser';
+import { publicTimeoutFormatter } from './formatting_utils';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -65,6 +66,66 @@ describe('formatters', () => {
           ConfigKey.THROTTLING_CONFIG
         )
       ).toEqual({ download: 1.25, upload: 0.75, latency: 150 });
+    });
+  });
+
+  describe('timeout formatter', () => {
+    it('returns null for browser monitors', () => {
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
+            [ConfigKey.TIMEOUT]: '60',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toBeNull();
+    });
+
+    it('returns timeout for non-browser monitors', () => {
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '45',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual('45s');
+    });
+
+    it('omits the timeout for lightweight monitors when it matches the Heartbeat default', () => {
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '16',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toBeNull();
+
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: 16,
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toBeNull();
+    });
+
+    it('keeps a fractional lightweight timeout that only truncates to the default', () => {
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '16.5',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual('16.5s');
     });
   });
 });

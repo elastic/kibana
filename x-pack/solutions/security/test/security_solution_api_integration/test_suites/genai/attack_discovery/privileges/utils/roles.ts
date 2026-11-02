@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import {
+  SECURITY_FEATURE_ID,
+  ALERTS_FEATURE_ID,
+} from '@kbn/security-solution-plugin/common/constants';
 import type { Role } from '../../../utils/auth/types';
 
 export const noIndexPrivileges: Role = {
@@ -17,9 +20,11 @@ export const noIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
+          [ALERTS_FEATURE_ID]: ['read'],
           [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },
@@ -41,9 +46,11 @@ export const noAdhocIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
+          [ALERTS_FEATURE_ID]: ['read'],
           [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },
@@ -65,9 +72,11 @@ export const noAttacksIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
+          [ALERTS_FEATURE_ID]: ['read'],
           [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },
@@ -89,9 +98,11 @@ export const allIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
+          [ALERTS_FEATURE_ID]: ['read'],
           [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },

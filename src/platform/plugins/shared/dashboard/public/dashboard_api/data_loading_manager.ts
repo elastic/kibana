@@ -9,8 +9,12 @@
 
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import type { PublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesDataLoading } from '@kbn/presentation-publishing';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import {
+  apiCanCancelRequests,
+  apiPublishesDataLoading,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-publishing';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 
 export function initializeDataLoadingManager(
@@ -34,9 +38,19 @@ export function initializeDataLoadingManager(
     dataLoading$.next(isAtLeastOneChildLoading);
   });
 
+  const cancelAllRequests = () => {
+    const children = children$.getValue();
+    Object.values(children).forEach((childApi) => {
+      if (apiCanCancelRequests(childApi)) {
+        childApi.cancelRequests(AbortReason.CANCELED);
+      }
+    });
+  };
+
   return {
     api: {
       dataLoading$,
+      cancelAllRequests,
     },
     internalApi: {
       waitForPanelsToLoad$: dataLoading$.pipe(

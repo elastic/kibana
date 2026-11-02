@@ -24,6 +24,7 @@ describe('NewAgentBuilderAttachment', () => {
       isAgentBuilderEnabled: true,
       hasAgentBuilderPrivilege: true,
       isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
     });
   });
 
@@ -34,8 +35,7 @@ describe('NewAgentBuilderAttachment', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
-    expect(screen.getByText(i18n.ADD_TO_CHAT)).toBeInTheDocument();
+    expect(screen.getByTestId('newAgentBuilderAttachment')).toHaveTextContent(i18n.ADD_TO_CHAT);
   });
 
   it('renders with custom color', () => {
@@ -60,6 +60,30 @@ describe('NewAgentBuilderAttachment', () => {
     expect(button).toBeInTheDocument();
   });
 
+  it('renders the productAgent icon by default', () => {
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.getByTestId('newAgentBuilderAttachment').querySelector('[data-euiicon-type]')
+    ).toHaveAttribute('data-euiicon-type', 'productAgent');
+  });
+
+  it('renders the provided iconType', () => {
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} iconType="sparkles" />
+      </TestProviders>
+    );
+
+    expect(
+      screen.getByTestId('newAgentBuilderAttachment').querySelector('[data-euiicon-type]')
+    ).toHaveAttribute('data-euiicon-type', 'sparkles');
+  });
+
   it('calls onClick callback when button is clicked', () => {
     const onClick = jest.fn();
     render(
@@ -81,5 +105,22 @@ describe('NewAgentBuilderAttachment', () => {
     );
 
     expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+  });
+
+  it('renders disabled when license is invalid', () => {
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentBuilderEnabled: false,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    });
+
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeDisabled();
   });
 });

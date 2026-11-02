@@ -13,12 +13,12 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_dependency_detail_operations_breadcrumb';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
-import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../transaction_details/use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
@@ -95,12 +95,14 @@ export function DependencyOperationDetailView() {
     return samples.find((sample) => sample.spanId === spanId);
   }, [samples, spanId]);
 
-  const waterfallFetch = useWaterfallFetcher({
-    traceId: selectedSample?.traceId,
-    transactionId: selectedSample?.transactionId,
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
     end,
+    traceId: selectedSample?.traceId,
+    entryTransactionId: selectedSample?.transactionId,
   });
+
+  const serviceName = unifiedWaterfallFetchResult.entryTransaction?.service.name;
 
   const queryRef = useRef(query);
 
@@ -119,10 +121,9 @@ export function DependencyOperationDetailView() {
   }, [samples, spanId, history, queryRef, router, spanFetch.status]);
 
   const isWaterfallLoading =
-    spanFetch.status === FETCH_STATUS.NOT_INITIATED ||
-    (spanFetch.status === FETCH_STATUS.LOADING && samples.length === 0) ||
-    (waterfallFetch.status === FETCH_STATUS.LOADING &&
-      !waterfallFetch.waterfall.entryWaterfallTransaction);
+    (isPending(spanFetch.status) && samples.length === 0) ||
+    (isPending(unifiedWaterfallFetchResult.status) &&
+      !unifiedWaterfallFetchResult.entryTransaction);
 
   const onSampleClick = useCallback(
     (sample: any) => {
@@ -152,6 +153,7 @@ export function DependencyOperationDetailView() {
     },
     [history]
   );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -180,19 +182,21 @@ export function DependencyOperationDetailView() {
         <EuiPanel hasBorder>
           <ResettingHeightRetainer reset={!isWaterfallLoading}>
             <WaterfallWithSummary
-              environment={environment}
-              waterfallFetchResult={waterfallFetch.waterfall}
-              waterfallFetchStatus={waterfallFetch.status}
               traceSamples={samples}
               traceSamplesFetchStatus={spanFetch.status}
               onSampleClick={onSampleClick}
               onTabClick={onTabClick}
-              serviceName={waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name}
+              serviceName={serviceName}
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
               onShowCriticalPathChange={onShowCriticalPathChange}
+              unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+              entryTransactionId={selectedSample?.transactionId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              traceId={selectedSample?.traceId}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

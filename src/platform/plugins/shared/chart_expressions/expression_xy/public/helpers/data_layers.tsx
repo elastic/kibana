@@ -16,8 +16,10 @@ import type {
   StackMode,
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
+  LinearGradient,
 } from '@elastic/charts';
 import { ColorVariant, ScaleType } from '@elastic/charts';
+import { easing } from 'ts-easing';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -26,7 +28,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
-import type { RawValue } from '@kbn/data-plugin/common';
+import { MULTI_FIELD_KEY_SEPARATOR, type RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import type {
   CommonXYDataLayerConfig,
@@ -34,7 +36,7 @@ import type {
   XScaleType,
   PointVisibility,
 } from '../../common';
-import { AxisModes, SeriesTypes } from '../../common/constants';
+import { AreaFillOptions, AxisModes, SeriesTypes } from '../../common/constants';
 import type { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import type { ColorAssignments } from './color_assignment';
@@ -42,6 +44,7 @@ import type { GroupsConfiguration } from './axes_configuration';
 import type { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
+import type { AreaFillOption } from '../../common/types/expression_functions';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 export type InvertedRawValueMap = Map<string, Map<string, RawValue>>;
@@ -61,6 +64,7 @@ type GetSeriesPropsFn = (config: {
   syncColors: boolean;
   timeZone: string;
   emphasizeFitting?: boolean;
+  areaFill?: AreaFillOption;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
   defaultXScaleType: XScaleType;
@@ -143,7 +147,7 @@ export const getFormattedRow = (
         (id === xAccessor && xScaleType === 'ordinal') ||
         (id !== xAccessor && categoricalAccessors.includes(id))
       ) {
-        const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
+        const formattedValue = columnsFormatters[id]?.convertToText(record) ?? '';
         invertedRawValueMap.get(id)?.set(formattedValue, record);
         return {
           row: { ...formattedInfo.row, [id]: formattedValue },
@@ -176,6 +180,8 @@ export const getFormattedTable = (
     {}
   );
 
+  // The InvertedRawValueMap is a link between a table columnId and a map
+  // with links between each row formatterValue and its original raw value
   const invertedRawValueMap: InvertedRawValueMap = new Map(
     table.columns.map((c) => [c.id, new Map<string, RawValue>()])
   );
@@ -252,7 +258,7 @@ function getSplitValues(
       const splitFormatter = splitAccessorsFormats[splitColumnId].formatter;
       return [
         ...acc,
-        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convert(value),
+        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convertToText(value),
       ];
     }
 
@@ -292,10 +298,12 @@ export const getSeriesName: GetSeriesNameFn = (
     if (splitValues.length === 0) {
       return yAccessorTitle;
     }
-    return `${splitValues.join(' - ')}${yAccessorTitle ? ' - ' + yAccessorTitle : ''}`;
+    return `${splitValues.join(MULTI_FIELD_KEY_SEPARATOR)}${
+      yAccessorTitle ? ' - ' + yAccessorTitle : ''
+    }`;
   }
 
-  return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
+  return splitValues.length > 0 ? splitValues.join(MULTI_FIELD_KEY_SEPARATOR) : yAccessorTitle;
 };
 
 const getPointConfig: GetPointConfigFn = ({
@@ -405,6 +413,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   xAxis,
   timeZone,
   emphasizeFitting,
+  areaFill,
   fillOpacity,
   formattedDatatableInfo,
   defaultXScaleType,
@@ -436,6 +445,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     layer.isHistogram &&
     (isStacked || !splitColumnIds.length) &&
     (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
+
+  const hasBreakdown = Boolean(layer.splitAccessors && layer.splitAccessors.length > 0);
 
   const formatter = table?.columns.find(
     (column) => column.id === (Array.isArray(accessor) ? accessor[0] : accessor)
@@ -479,7 +490,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     return getSeriesName(
       d,
       {
-        splitAccessors: layer.splitAccessors || [],
+        splitAccessors: layer.splitAccessors ?? [],
         accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
         alreadyFormattedColumns: formattedColumns,
         columns: formattedTable.columns,
@@ -501,9 +512,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           isDarkMode,
           {
             type: 'categories',
-            categories: getColorCategories(table.rows, splitColumnIds[0]),
+            categories: getColorCategories(table.rows, splitColumnIds),
           },
-          splitColumnIds[0]
+          splitColumnIds
         )
       : (series) =>
           getColor(
@@ -519,6 +530,40 @@ export const getSeriesProps: GetSeriesPropsFn = ({
             singleTable
           );
 
+  const areaStyle: Partial<AreaSeriesStyle['area']> | undefined = (() => {
+    const style: Partial<AreaSeriesStyle['area']> = {};
+
+    if (fillOpacity !== undefined) {
+      style.opacity = fillOpacity;
+    }
+    if (
+      areaFill === AreaFillOptions.GRADIENT &&
+      (style.opacity === undefined || style.opacity > 0)
+    ) {
+      // here we divide by default fill opacity so that the stops we set here are the resulting opacity values,
+      // so it's more intuitive and matches the default case where it's used. It's still
+      // reactive to changes in the fill opacity, as it should.
+      const defaultOpacityCorrection = 0.3;
+
+      const startOpacity = (isStacked && hasBreakdown ? 0.1 : 0.05) / defaultOpacityCorrection;
+      const endOpacity = 0.4 / defaultOpacityCorrection;
+      const stopCount = 12;
+
+      const gradient: LinearGradient = {
+        type: 'linear',
+        stops: Array.from({ length: stopCount }, (_, i) => ({
+          offset: i / (stopCount - 1),
+          opacity:
+            startOpacity + (endOpacity - startOpacity) * easing.inOutSine(i / (stopCount - 1)),
+          color: ColorVariant.Series,
+        })),
+      };
+      style.gradient = gradient;
+    }
+
+    return Object.keys(style).length > 0 ? style : undefined;
+  })();
+
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
     stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
@@ -531,7 +576,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: Array.isArray(accessor) ? accessor : [accessor],
     markSizeAccessor: markSizeColumnId,
-    markFormat: (value) => markFormatter.convert(value),
+    markFormat: (value) => markFormatter.convertToText(value),
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
@@ -551,7 +596,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         pointVisibility,
         pointsRadius: layer.pointsRadius,
       }),
-      ...(fillOpacity && { area: { opacity: fillOpacity } }),
+      ...(areaStyle && { area: areaStyle }),
       ...(emphasizeFitting && {
         fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
       }),

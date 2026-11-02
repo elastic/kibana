@@ -4,21 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
+import { queryBoolean, routeId } from '../zod_query';
+import { editMonitorRequestBody } from './monitor_request_body';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
 import {
   InvalidLocationError,
   InvalidScheduleError,
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
-import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
+import { getPrivateLocationsForNamespaces } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
+import {
+  assertCanPerformMonitorBulkActionInAllSpaces,
+  validateMonitorPrivateLocationSpaces,
+} from './monitor_locations_utils';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import type {
   MonitorFields,
@@ -37,25 +46,30 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
+import { isSecretConnectionsEnabled } from '../../config';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id}',
+  options: {
+    summary: 'Update a monitor',
+    description:
+      "Update a monitor with the specified attributes.\nThe required and default fields may vary based on the monitor type.\n\nYou must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.\n\nYou can also partially update a monitor.\nThis will only update the fields that are specified in the request body.\nAll other fields are left unchanged.\nThe specified fields should conform to the monitor type.\nFor example, you can't update the `inline_script` field of a HTTP monitor.",
+    operationId: 'put-synthetic-monitor',
+    oasOperationObject: () => path.join(__dirname, 'examples/put_monitor.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        monitorId: schema.string(),
+      params: z.strictObject({
+        id: routeId.describe('The identifier for the monitor that you want to update.'),
       }),
-      query: schema.object({
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
+      query: z.strictObject({
+        internal: queryBoolean.optional().default(false).describe('For internal use only.'),
       }),
-      body: schema.any(),
+      body: editMonitorRequestBody,
     },
   },
   handler: async (routeContext): Promise<any> => {
@@ -63,7 +77,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
     const reqQuery = request.query as { internal?: boolean };
-    const { monitorId } = request.params;
+    const { id: monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
       return response.badRequest({
@@ -106,7 +120,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       );
 
       const { errorMessage: unsupportedKeysErrors, formattedConfig } = normalizeAPIConfig(
-        editedMonitor as CreateMonitorPayLoad
+        editedMonitor as CreateMonitorPayLoad,
+        { previousParams: (normalizedPreviousMonitor as MonitorFields)[ConfigKey.PARAMS] }
       );
       if (unsupportedKeysErrors) {
         return response.badRequest({
@@ -117,13 +132,24 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
+      const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
+      const maintenanceWindows = maintenanceWindowRefs?.length
+        ? (await routeContext.syntheticsMonitorClient.getMaintenanceWindows(spaceId)) ?? []
+        : [];
+
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
         monitor as CreateMonitorPayLoad,
-        previousMonitor.attributes.locations
+        previousMonitor.attributes.locations,
+        maintenanceWindows
       );
 
-      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
+      const validationResult = validateMonitor(
+        editedMonitor as MonitorFields,
+        spaceId,
+        undefined,
+        isSecretConnectionsEnabled(server.config)
+      );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
@@ -137,6 +163,36 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
             message: err,
           },
         });
+      }
+
+      const editedMonitorSpaces = new Set([
+        ...(decryptedMonitorPrevMonitor.namespaces ?? []),
+        ...((editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? []),
+      ]);
+      if (editedMonitorSpaces.size > 0) {
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
+          routeContext,
+          [...editedMonitorSpaces],
+          decryptedMonitorPrevMonitor.type
+        );
+        if (spaceAuthError) {
+          return spaceAuthError;
+        }
+      }
+
+      if (editMonitorAPI.allPrivateLocations && editMonitorAPI.allPrivateLocations.length > 0) {
+        const plSpaceError = validateMonitorPrivateLocationSpaces(
+          editedMonitor as MonitorFields,
+          editMonitorAPI.allPrivateLocations
+        );
+        if (plSpaceError) {
+          return response.badRequest({
+            body: {
+              message: plSpaceError.message,
+              attributes: plSpaceError.attributes,
+            },
+          });
+        }
       }
 
       const monitorWithRevision = {
@@ -178,18 +234,26 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      return mapSavedObjectToMonitor({
+      editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
+
+      const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
+      const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
           ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
           created_at: previousMonitor.created_at,
         },
       });
+      return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
-      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+      if (
+        error instanceof InvalidLocationError ||
+        error instanceof InvalidScheduleError ||
+        error instanceof InvalidMaintenanceWindowError
+      ) {
         return response.badRequest({ body: { message: error.message } });
       }
       if (error instanceof MonitorValidationError) {
@@ -246,40 +310,51 @@ export const syncEditedMonitor = async ({
   routeContext: RouteContext;
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient, monitorConfigRepository } =
-    routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+
+  const monitorId = decryptedPreviousMonitor.id;
+  const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
+    (loc) => !loc.isServiceManaged
+  );
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
+  const references = monitorPrivateLocations.map((loc) => ({
+    id: `${monitorId}-${loc.id}`,
+    name: `${monitorId}-${loc.id}`,
+    type: packagePolicySoType,
+  }));
+
   try {
     const monitorWithId = {
       ...normalizedMonitor,
-      [ConfigKey.MONITOR_QUERY_ID]:
-        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-      [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+      [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
+      [ConfigKey.CONFIG_ID]: monitorId,
       [ConfigKey.KIBANA_SPACES]:
         normalizedMonitor[ConfigKey.KIBANA_SPACES] || decryptedPreviousMonitor.namespaces,
     };
     const formattedMonitor = formatSecrets(monitorWithId);
-    const editedSOPromise = monitorConfigRepository.update(
-      decryptedPreviousMonitor.id,
-      formattedMonitor,
-      decryptedPreviousMonitor
-    );
 
-    const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
-
-    const editSyncPromise = syntheticsMonitorClient.editMonitors(
-      [
-        {
-          monitor: monitorWithId as MonitorFields,
-          id: decryptedPreviousMonitor.id,
-          decryptedPreviousMonitor,
-        },
-      ],
-      allPrivateLocations,
-      spaceId
+    const monitorSpaces = (monitorWithId as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? [];
+    const namespacesForLookup = [...new Set([spaceId, ...monitorSpaces])].filter(Boolean);
+    const internalClient = server.coreStart.savedObjects.createInternalRepository();
+    const allPrivateLocations = await getPrivateLocationsForNamespaces(
+      internalClient,
+      namespacesForLookup
     );
 
     const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
-      [editedSOPromise, editSyncPromise]
+      [
+        monitorConfigRepository.update(
+          monitorId,
+          formattedMonitor,
+          decryptedPreviousMonitor,
+          references.length > 0 ? references : undefined
+        ),
+        syntheticsMonitorClient.editMonitors(
+          [{ monitor: monitorWithId as MonitorFields, id: monitorId, decryptedPreviousMonitor }],
+          allPrivateLocations,
+          spaceId
+        ),
+      ]
     );
 
     sendTelemetryEvents(

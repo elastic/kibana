@@ -43,7 +43,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampleCount)}
+                .convertToText(sampleCount)}
             </strong>
           ),
         }}
@@ -59,7 +59,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
         className={'columnHeader__icon'}
       />
     ) : (
-      <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} />
+      <EuiIcon aria-hidden={true} type="database" size={'m'} className={'columnHeader__icon'} />
     )
   ) : null;
 

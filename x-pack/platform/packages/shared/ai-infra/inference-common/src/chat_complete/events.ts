@@ -6,8 +6,7 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import type { Deanonymization } from './anonymization';
-import type { Message } from './messages';
+import type { AnonymizationResponseMetadata, DeanonymizedMessageData } from './anonymization';
 import type { ToolOptions } from './tools';
 import type { ToolCallOfToolOptions } from './tools_of';
 
@@ -33,13 +32,21 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       content: string;
       /**
+       * Optional refusal reason returned by the model when content is filtered.
+       */
+      refusal?: string;
+      /**
        * Optional deanonymized input messages metadata
        */
-      deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+      deanonymized_input?: DeanonymizedMessageData[];
       /**
        * Optional deanonymized output metadata
        */
-      deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+      deanonymized_output?: DeanonymizedMessageData;
+      /**
+       * Optional metadata attached by inference runtime.
+       */
+      metadata?: AnonymizationResponseMetadata;
       /**
        * Tool calls from the LLM
        */
@@ -85,17 +92,29 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      */
     content: string;
     /**
+     * Optional refusal reason chunk.
+     */
+    refusal?: string;
+    /**
+     * Optional reasoning (thinking) text chunk.
+     */
+    reasoning?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
     /**
      * Optional deanonymized input messages metadata
      */
-    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+    deanonymized_input?: DeanonymizedMessageData[];
     /**
      * Optional deanonymized output metadata
      */
-    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
+    deanonymized_output?: DeanonymizedMessageData;
+    /**
+     * Optional metadata attached by inference runtime.
+     */
+    metadata?: AnonymizationResponseMetadata;
   }
 >;
 
@@ -104,7 +123,7 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
  */
 export interface ChatCompletionTokenCount {
   /**
-   * Input token count
+   * Total input token count, including tokens served from or written to the prompt cache.
    */
   prompt: number;
   /**
@@ -112,13 +131,21 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Total token count
+   * Thinking token count, if available. Not included in `completion`.
+   */
+  thinking?: number;
+  /**
+   * Total token count (prompt + completion + thinking)
    */
   total: number;
   /**
-   * Cached prompt tokens
+   * Input tokens served from the prompt cache. Subset of `prompt`, not additive.
    */
   cached?: number;
+  /**
+   * Input tokens written to the prompt cache. Subset of `prompt`, not additive.
+   */
+  cacheWrite?: number;
 }
 
 /**
@@ -132,6 +159,7 @@ export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
+    model?: string;
   }
 >;
 

@@ -1,0 +1,64 @@
+{
+  "sha1": "b7bd2cb444c9113319bb23c0fa5f33faf9c5c5b9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "41f7c3765e55e50-0c4803a19d1706a",
+      "title": "Digital Experience feature privileges registers the feature with its privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
+        "line": 52,
+        "column": 21
+      }
+    },
+    {
+      "id": "41f7c3765e55e50-7dea886f8c355d8",
+      "title": "Digital Experience feature privileges resolves show and save for the all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
+        "line": 85,
+        "column": 23
+      }
+    },
+    {
+      "id": "41f7c3765e55e50-ffa37e824ce68d9",
+      "title": "Digital Experience feature privileges resolves show only for the read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
+        "line": 85,
+        "column": 23
+      }
+    },
+    {
+      "id": "41f7c3765e55e50-ec8e902d7e4258a",
+      "title": "Digital Experience feature privileges resolves no access without the digital_experience privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/api/tests/feature_privileges.spec.ts",
+        "line": 85,
+        "column": 23
+      }
+    }
+  ]
+}

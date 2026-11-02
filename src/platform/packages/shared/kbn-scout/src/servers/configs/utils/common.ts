@@ -8,7 +8,6 @@
  */
 
 import getopts from 'getopts';
-import type { ServerlessProjectType } from '@kbn/es';
 
 export const formatCurrentDate = () => {
   const now = new Date();
@@ -20,11 +19,6 @@ export const formatCurrentDate = () => {
     `${format(now.getHours(), 2)}:${format(now.getMinutes(), 2)}:${format(now.getSeconds(), 2)}.` +
     `${format(now.getMilliseconds(), 3)}`
   );
-};
-
-export const getProjectType = (kbnServerArgs: string[]) => {
-  const options = getopts(kbnServerArgs);
-  return options.serverless as ServerlessProjectType;
 };
 
 export const getOrganizationId = (kbnServerArgs: string[]) => {

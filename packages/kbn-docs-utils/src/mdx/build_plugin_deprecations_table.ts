@@ -8,14 +8,13 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import Path from 'path';
+import path from 'path';
 import type { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
 import { getPluginApiDocId } from '../utils';
 
 export function buildPluginDeprecationsTable(
-  folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
-  log: ToolingLog
+  _log: ToolingLog
 ): string {
   const tableMdx = Object.keys(deprecationsByPlugin)
     .sort()
@@ -44,18 +43,19 @@ export function buildPluginDeprecationsTable(
           api.parentPluginId
         )}" section="${api.id}" text="${api.label}"/>`;
 
-        const firstTen = refs.splice(0, 10);
+        const firstTen = refs.slice(0, 10);
+        const remainingCount = refs.length - 10;
         const referencedLocations =
           firstTen
             .map(
               (ref) =>
                 `[${ref.path.substr(
-                  ref.path.lastIndexOf(Path.sep) + 1
+                  ref.path.lastIndexOf(path.sep) + 1
                 )}](https://github.com/elastic/kibana/tree/main/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
-            .join(', ') + (refs.length > 0 ? `+ ${refs.length} more` : '');
+            .join(', ') + (remainingCount > 0 ? `+ ${remainingCount} more` : '');
 
         const removeBy = api.removeBy ? api.removeBy : '-';
 

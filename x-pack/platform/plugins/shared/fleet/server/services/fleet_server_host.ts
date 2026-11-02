@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObjectsClientContract,
   SavedObject,
-  KibanaRequest,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -35,12 +35,14 @@ import type {
 import {
   FleetServerHostUnauthorizedError,
   FleetServerHostNotFoundError,
+  FleetServerHostInvalidError,
   FleetEncryptedSavedObjectEncryptionKeyRequired,
 } from '../errors';
 
 import { appContextService } from './app_context';
 
 import { agentPolicyService } from './agent_policy';
+import { assertPrivilegesInSpaces } from './security/assert_privileges_in_spaces';
 import { escapeSearchQueryPhrase } from './saved_object';
 import {
   deleteFleetServerHostsSecrets,
@@ -49,11 +51,39 @@ import {
   extractAndWriteFleetServerHostsSecrets,
   isSecretStorageEnabled,
 } from './secrets';
+import { FLEET_SERVER_HOST_SECRET_FIELDS } from './secrets/fleet_server_hosts';
+import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
+
+/** The SSL credentials of a Fleet Server host that can be stored as a secret. */
+const FLEET_SERVER_HOST_SSL_SECRET_KEYS = ['key', 'es_key', 'agent_key'] as const;
+
+/**
+ * A credential is sent either in plain text or as a secret, never both: the two would disagree,
+ * and the agent policy only ever carries the secret. As for an output, a preconfigured host only
+ * warns, so that a mistake in the Kibana config file does not abort Fleet setup.
+ */
+function ensureNoDuplicateSecrets(
+  fleetServerHost: Partial<NewFleetServerHost>,
+  isPreconfigured: boolean
+): void {
+  for (const key of FLEET_SERVER_HOST_SSL_SECRET_KEYS) {
+    if (fleetServerHost.ssl?.[key] && fleetServerHost.secrets?.ssl?.[key]) {
+      const message = `Cannot specify both ssl.${key} and secrets.ssl.${key}`;
+      if (!isPreconfigured) {
+        throw new FleetServerHostInvalidError(message);
+      }
+      appContextService
+        .getLogger()
+        .warn(`Preconfigured Fleet Server host failed validation: ${message}`);
+    }
+  }
+}
 
 function savedObjectToFleetServerHost(
   so: SavedObject<FleetServerHostSOAttributes>
 ): FleetServerHost {
-  const { ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+  // the references of the secrets an update removed are kept as `null` by the saved object update
+  const { ssl, proxy_id: proxyId, ...attributes } = omitNullSecrets(so.attributes);
 
   return {
     id: so.id,
@@ -63,24 +93,9 @@ function savedObjectToFleetServerHost(
   };
 }
 
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
-
 class FleetServerHostService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {
@@ -101,6 +116,12 @@ class FleetServerHostService {
     const logger = appContextService.getLogger();
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
 
+    validateFleetSavedObjectId(options?.id);
+    ensureNoDuplicateSecrets(
+      fleetServerHost,
+      (options?.fromPreconfiguration || fleetServerHost.is_preconfigured) ?? false
+    );
+
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
         `Fleet server host needs encrypted saved object api key to be set`
@@ -115,7 +136,11 @@ class FleetServerHostService {
           esClient,
           defaultItem.id,
           { is_default: false },
-          { fromPreconfiguration: options?.fromPreconfiguration }
+          // fromPreconfiguration: true so the internal unsetting of is_default on the
+          // existing default host bypasses the preconfiguration edit restriction. This is a
+          // system-level side effect of setting a new default, not a user edit, so it must be
+          // allowed even when the current default is a preconfigured host.
+          { fromPreconfiguration: true }
         );
       }
     }
@@ -159,6 +184,102 @@ class FleetServerHostService {
         res.id
       );
     return savedObjectToFleetServerHost(retrievedSo);
+  }
+
+  // Returns void rather than FleetServerHost[]: preconfiguration callers don't use the return value,
+  // so we skip the post-create decrypt re-fetch that create() requires.
+  public async bulkCreateForPreconfiguration(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    hosts: Array<NewFleetServerHost & { id: string; secretHashes?: Record<string, any> }>,
+    options?: { fromPreconfiguration?: boolean }
+  ): Promise<void> {
+    if (hosts.length === 0) return;
+
+    hosts.forEach((host) =>
+      ensureNoDuplicateSecrets(
+        host,
+        (options?.fromPreconfiguration || host.is_preconfigured) ?? false
+      )
+    );
+
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `Fleet server host needs encrypted saved object api key to be set`
+      );
+    }
+
+    // Handle default deduplication once: if any incoming host is_default, unset the current default
+    const newDefaultHost = hosts.find((h) => h.is_default);
+    if (newDefaultHost) {
+      const currentDefault = await this.getDefaultFleetServerHost();
+      if (currentDefault && currentDefault.id !== newDefaultHost.id) {
+        await this.update(
+          soClient,
+          esClient,
+          currentDefault.id,
+          { is_default: false },
+          { fromPreconfiguration: options?.fromPreconfiguration }
+        );
+      }
+    }
+
+    // Prepare attributes for each host in parallel
+    const hostDataList = await Promise.all(
+      hosts.map(async ({ id, secretHashes, ...fleetServerHost }) => {
+        const data: FleetServerHostSOAttributes = {
+          ...omit(fleetServerHost, ['ssl', 'secrets']),
+        };
+
+        if (fleetServerHost.host_urls) {
+          data.host_urls = fleetServerHost.host_urls.map(normalizeHostsForAgents);
+        }
+        if (fleetServerHost.ssl) {
+          data.ssl = JSON.stringify(fleetServerHost.ssl);
+        }
+
+        if (await isSecretStorageEnabled(esClient, soClient)) {
+          const { fleetServerHost: withSecrets } = await extractAndWriteFleetServerHostsSecrets({
+            fleetServerHost,
+            esClient,
+            secretHashes: fleetServerHost.is_preconfigured ? secretHashes : undefined,
+          });
+          if (withSecrets.secrets) {
+            data.secrets = withSecrets.secrets as FleetServerHostSOAttributes['secrets'];
+          }
+        } else {
+          if (
+            (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
+            (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) ||
+            (!fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key)
+          ) {
+            data.ssl = JSON.stringify({
+              ...fleetServerHost.ssl,
+              ...fleetServerHost.secrets?.ssl,
+            });
+          }
+        }
+
+        return { id, data };
+      })
+    );
+
+    const res = await this.soClient.bulkCreate<FleetServerHostSOAttributes>(
+      hostDataList.map(({ id, data }) => ({
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        id,
+        attributes: data,
+      })),
+      { overwrite: true }
+    );
+
+    const logger = appContextService.getLogger();
+    for (const so of res.saved_objects) {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
+      logger.debug(`Created fleet server host ${so.id}`);
+    }
   }
 
   public async get(id: string): Promise<FleetServerHost> {
@@ -222,7 +343,7 @@ class FleetServerHostService {
   public async delete(
     esClient: ElasticsearchClient,
     id: string,
-    options?: { fromPreconfiguration?: boolean }
+    options?: { fromPreconfiguration?: boolean; request?: KibanaRequest }
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting fleet server host ${id}`);
@@ -239,6 +360,25 @@ class FleetServerHostService {
       throw new FleetServerHostUnauthorizedError(
         `Default Fleet Server hosts ${id} cannot be deleted.`
       );
+    }
+
+    if (options?.request) {
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id);
+        if (truncated) {
+          throw new FleetServerHostUnauthorizedError(
+            `Unable to verify delete authorization for Fleet Server host ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to delete Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
+      }
     }
 
     await agentPolicyService.removeFleetServerHostFromAll(esClient, id, {
@@ -259,7 +399,15 @@ class FleetServerHostService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<FleetServerHost>,
-    options?: { fromPreconfiguration?: boolean; secretHashes?: Record<string, any> }
+    options?: {
+      fromPreconfiguration?: boolean;
+      secretHashes?: Record<string, any>;
+      /**
+       * The payload declares the whole host, so the secrets it leaves out are removed rather than
+       * kept. Set by preconfiguration, for which the Kibana config file is authoritative.
+       */
+      declaresAllSecrets?: boolean;
+    }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -267,9 +415,30 @@ class FleetServerHostService {
     logger.debug(`Updating fleet server host ${id}`);
 
     const originalItem = await this.get(id);
+    ensureNoDuplicateSecrets(
+      data,
+      (options?.fromPreconfiguration || originalItem.is_preconfigured) ?? false
+    );
+
     const updateData: Partial<FleetServerHostSOAttributes> = {
       ...omit(data, ['ssl', 'secrets']),
     };
+
+    if (originalItem.is_preconfigured && !options?.fromPreconfiguration) {
+      const allowEditFields = originalItem.allow_edit ?? [];
+      const allKeys = Object.keys(data) as Array<keyof FleetServerHost>;
+      for (const key of allKeys) {
+        if (
+          (!!originalItem[key] || !!data[key]) &&
+          !allowEditFields.includes(key) &&
+          !isEqual(originalItem[key], data[key])
+        ) {
+          throw new FleetServerHostUnauthorizedError(
+            `Preconfigured Fleet Server host ${id} ${key} cannot be updated outside of the Kibana config file.`
+          );
+        }
+      }
+    }
 
     if (data.is_preconfigured && !options?.fromPreconfiguration) {
       throw new FleetServerHostUnauthorizedError(
@@ -287,13 +456,29 @@ class FleetServerHostService {
           {
             is_default: false,
           },
-          { fromPreconfiguration: options?.fromPreconfiguration }
+          // fromPreconfiguration: true so the internal unsetting of is_default on the
+          // existing default host bypasses the preconfiguration edit restriction. This is a
+          // system-level side effect of setting a new default, not a user edit, so it must be
+          // allowed even when the current default is a preconfigured host.
+          { fromPreconfiguration: true }
         );
       }
     }
 
     if (data.host_urls) {
       updateData.host_urls = data.host_urls.map(normalizeHostsForAgents);
+    }
+
+    const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
+    if (secretStorageEnabled && !options?.declaresAllSecrets) {
+      // an update that does not touch a credential kept as a secret keeps it, and a plain text
+      // value for such a credential is stored as a secret too. Applied after the checks above, so
+      // that they still see the payload the caller sent.
+      data = withSavedSecrets({
+        fields: FLEET_SERVER_HOST_SECRET_FIELDS,
+        original: originalItem,
+        update: data,
+      });
     }
 
     if (data.ssl) {
@@ -304,7 +489,7 @@ class FleetServerHostService {
     }
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
+    if (secretStorageEnabled) {
       const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
         oldFleetServerHost: originalItem,
         fleetServerHostUpdate: data,
@@ -340,10 +525,11 @@ class FleetServerHostService {
     }
 
     logger.debug(`Updated fleet server host ${id}`);
-    return {
+    // the secrets the update removed are `null`, as they are in the saved object
+    return omitNullSecrets({
       ...originalItem,
       ...updateData,
-    };
+    });
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {

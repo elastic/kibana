@@ -20,6 +20,7 @@
       "_transform/{transform_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-delete-transform",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-transform-delete-transform",
     "availability": {
       "stack": true,
       "serverless": true

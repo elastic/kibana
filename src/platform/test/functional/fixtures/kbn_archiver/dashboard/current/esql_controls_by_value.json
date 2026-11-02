@@ -1,0 +1,22 @@
+{
+  "id": "9d9bd1b9-4e6b-4d0c-9ad5-1f1d0f2e0001",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "attributes": {
+    "description": "",
+    "title": "ESQL control unlink test dashboard",
+    "optionsJSON": "{\"autoApplyFilters\":true,\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"syncColors\":false,\"syncTooltips\":false,\"syncCursor\":true}",
+    "panelsJSON": "[{\"type\":\"esql_control\",\"embeddableConfig\":{\"selected_options\":[\"AE\"],\"variable_name\":\"geo_dest\",\"single_select\":true,\"variable_type\":\"values\",\"control_type\":\"VALUES_FROM_QUERY\",\"esql_query\":\"FROM logstash-* | WHERE @timestamp <= ?_tend and @timestamp > ?_tstart | STATS BY geo.dest\",\"title\":\"geo_dest\"},\"panelIndex\":\"db3afa49-e315-4caa-8173-8b0f9e45dca6\",\"gridData\":{\"w\":12,\"h\":2,\"x\":0,\"y\":0,\"i\":\"db3afa49-e315-4caa-8173-8b0f9e45dca6\"}},{\"type\":\"discover_session\",\"embeddableConfig\":{\"title\":\"ESQL control unlink test\",\"description\":\"\",\"drilldowns\":[],\"sort\":[],\"columns\":[],\"attributes\":{\"sort\":[],\"columns\":[],\"grid\":{},\"hideChart\":false,\"hideTable\":false,\"isTextBasedQuery\":true,\"kibanaSavedObjectMeta\":{\"searchSourceJSON\":\"{\\\"query\\\":{\\\"esql\\\":\\\"FROM logstash-* | WHERE geo.dest == ?geo_dest\\\"}}\"},\"title\":\"ESQL control unlink test\",\"description\":\"\",\"tabs\":[{\"id\":\"discover_session_embeddable_synthetic_tab_id\",\"label\":\"discover_session_embeddable_synthetic_tab_label\",\"attributes\":{\"sort\":[],\"columns\":[],\"grid\":{},\"hideChart\":false,\"hideTable\":false,\"isTextBasedQuery\":true,\"kibanaSavedObjectMeta\":{\"searchSourceJSON\":\"{\\\"query\\\":{\\\"esql\\\":\\\"FROM logstash-* | WHERE geo.dest == ?geo_dest\\\"}}\"}}}]}},\"panelIndex\":\"5208853d-918d-41b0-bf4f-97c458ead356\",\"gridData\":{\"x\":0,\"y\":2,\"w\":24,\"h\":15,\"i\":\"5208853d-918d-41b0-bf4f-97c458ead356\"}}]",
+    "timeRestore": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "esqlApproximation": false
+  },
+  "references": [],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.3.0"
+}

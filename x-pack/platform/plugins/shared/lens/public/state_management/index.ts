@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  configureStore,
-  getDefaultMiddleware,
-  type PreloadedState,
-  type Action,
-  type Dispatch,
-  type MiddlewareAPI,
-} from '@reduxjs/toolkit';
-import type { TypedUseSelectorHook } from 'react-redux';
+import { configureStore, type Middleware } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import type { LensState, LensStoreDeps } from '@kbn/lens-common';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
@@ -22,6 +14,7 @@ import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
 export * from './selectors';
+export { getUpdatedFrameWithDatasourceState } from './utils';
 
 export const {
   loadInitial,
@@ -52,6 +45,7 @@ export const {
   cloneLayer,
   addLayer,
   onDropToDimension,
+  setDimensionAndUpdateDatasource,
   setLayerDefaultDimension,
   removeDimension,
   setIsLoadLibraryVisible,
@@ -59,41 +53,37 @@ export const {
   changeIndexPattern,
 } = lensActions;
 
-type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;
-
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
-  preloadedState?: PreloadedState<LensState> | undefined,
-  customMiddleware?: CustomMiddleware
+  preloadedState?: Partial<LensState>,
+  customMiddleware?: Middleware<{}, LensState>
 ) => {
-  const middleware = [
-    ...getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActionPaths: [
-          'payload.activeData',
-          'payload.dataViews.indexPatterns',
-          'payload.redirectCallback',
-          'payload.history',
-          'payload.newState.dataViews',
-          `payload.source.filterOperations`,
-          'payload.target.filterOperations',
-        ],
-        ignoredPaths: ['lens.dataViews.indexPatterns', 'lens.activeData'],
-      },
-    }),
-    initMiddleware(storeDeps),
-    contextMiddleware(storeDeps),
-    fullscreenMiddleware(storeDeps),
-    optimizingMiddleware(),
-  ];
-  if (customMiddleware) {
-    middleware.push(customMiddleware);
-  }
   return configureStore({
     reducer: {
       lens: makeLensReducer(storeDeps),
     },
-    middleware,
+    middleware: (getDefaultMiddleware) => {
+      const middleware = getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActionPaths: [
+            'payload.activeData',
+            'payload.dataViews.indexPatterns',
+            'payload.redirectCallback',
+            'payload.history',
+            'payload.newState.dataViews',
+            `payload.source.filterOperations`,
+            'payload.target.filterOperations',
+          ],
+          ignoredPaths: ['lens.dataViews.indexPatterns', 'lens.activeData'],
+        },
+      }).concat(
+        initMiddleware(storeDeps),
+        contextMiddleware(storeDeps),
+        fullscreenMiddleware(storeDeps),
+        optimizingMiddleware()
+      );
+      return customMiddleware ? middleware.concat(customMiddleware) : middleware;
+    },
     preloadedState: preloadedState ?? {
       lens: getPreloadedState(storeDeps),
     },
@@ -106,5 +96,5 @@ export type LensDispatch = LensRootStore['dispatch'];
 export type LensGetState = LensRootStore['getState'];
 export type LensRootState = ReturnType<LensGetState>;
 
-export const useLensDispatch = () => useDispatch<LensDispatch>();
-export const useLensSelector: TypedUseSelectorHook<LensRootState> = useSelector;
+export const useLensDispatch = useDispatch.withTypes<LensDispatch>();
+export const useLensSelector = useSelector.withTypes<LensRootState>();

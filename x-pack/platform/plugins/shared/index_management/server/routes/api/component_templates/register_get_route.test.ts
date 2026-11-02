@@ -8,12 +8,7 @@
 import { registerComponentTemplateRoutes } from '.';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
-import {
-  RouterMock,
-  routeDependencies,
-  withStubbedHandleEsError,
-  asMock,
-} from '../../../test/helpers';
+import { RouterMock, routeDependencies, withStubbedHandleEsError } from '../../../test/helpers';
 
 import {
   deserializeComponentTemplate,
@@ -34,6 +29,9 @@ const router = new RouterMock();
 const getComponentTemplate = router.getMockESApiFn('cluster.getComponentTemplate');
 const getIndexTemplate = router.getMockESApiFn('indices.getIndexTemplate');
 
+const deserializeComponentTemplateMock = jest.mocked(deserializeComponentTemplate);
+const deserializeComponentTemplateListMock = jest.mocked(deserializeComponentTemplateList);
+
 beforeEach(() => {
   jest.clearAllMocks();
   registerComponentTemplateRoutes({
@@ -42,8 +40,8 @@ beforeEach(() => {
   });
 
   const actualLib = jest.requireActual('../../../../common/lib');
-  asMock(deserializeComponentTemplate).mockImplementation(actualLib.deserializeComponentTemplate);
-  asMock(deserializeComponentTemplateList).mockImplementation(
+  deserializeComponentTemplateMock.mockImplementation(actualLib.deserializeComponentTemplate);
+  deserializeComponentTemplateListMock.mockImplementation(
     actualLib.deserializeComponentTemplateList
   );
 });

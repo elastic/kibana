@@ -6,103 +6,76 @@
  */
 
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
-import { renderWithTestingProviders } from '../../common/mock';
-import { useUrlParams } from '../../common/navigation/hooks';
 import { CaseViewPage } from './case_view_page';
-import { caseData, caseViewProps } from './mocks';
-import type { CaseViewPageProps } from './types';
-import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
+import { renderWithTestingProviders } from '../../common/mock';
+import { basicCase } from '../../containers/mock';
+import { useOnUpdateField } from './use_on_update_field';
+import type { CaseViewPageComponentProps } from './case_view_page';
 
-jest.mock('../../common/navigation/hooks');
-jest.mock('../use_breadcrumbs');
+jest.mock('./use_on_update_field');
 jest.mock('./use_on_refresh_case_view_page');
-jest.mock('../../common/hooks');
-jest.mock('../../common/lib/kibana');
+jest.mock('../use_breadcrumbs');
 
-jest.mock('../header_page', () => ({
-  HeaderPage: jest.fn(() => <div data-test-subj="test-case-view-header">{'Case view header'}</div>),
+jest.mock('./components/case_details_header', () => ({
+  CaseDetailsAppHeader: () => <div data-test-subj="case-details-app-header" />,
 }));
 
 jest.mock('./metrics', () => ({
-  CaseViewMetrics: jest.fn(() => (
-    <div data-test-subj="test-case-view-metrics">{'Case view metrics'}</div>
-  )),
+  CaseViewMetrics: () => <div data-test-subj="case-view-metrics" />,
 }));
 
-jest.mock('./components/case_view_activity', () => ({
-  CaseViewActivity: jest.fn(() => (
-    <div data-test-subj="test-case-view-activity">{'Case view activity'}</div>
-  )),
+jest.mock('./components/case_view_tab_content', () => ({
+  CaseViewTabContent: () => <div data-test-subj="case-view-tab-content" />,
 }));
 
-jest.mock('./components/case_view_alerts', () => ({
-  CaseViewAlerts: jest.fn(() => (
-    <div data-test-subj="test-case-view-alerts">{'Case view alerts'}</div>
-  )),
-}));
-
-jest.mock('./components/case_view_files', () => ({
-  CaseViewFiles: jest.fn(() => (
-    <div data-test-subj="test-case-view-files">{'Case view files'}</div>
-  )),
-}));
-
-jest.mock('./components/case_view_observables', () => ({
-  CaseViewObservables: jest.fn(() => (
-    <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
-  )),
-}));
-
-jest.mock('./components/case_view_similar_cases', () => ({
-  CaseViewSimilarCases: jest.fn(() => (
-    <div data-test-subj="test-case-view-similar-cases">{'Case view similar cases'}</div>
-  )),
-}));
-
-const useUrlParamsMock = useUrlParams as jest.Mock;
-const useCasesTitleBreadcrumbsMock = useCasesTitleBreadcrumbs as jest.Mock;
-
-const caseProps: CaseViewPageProps = {
-  ...caseViewProps,
-  caseData,
-  fetchCase: jest.fn(),
-};
+(useOnUpdateField as jest.Mock).mockReturnValue({
+  isLoading: false,
+  onUpdateField: jest.fn(),
+});
 
 describe('CaseViewPage', () => {
+  const defaultProps: CaseViewPageComponentProps = {
+    caseData: basicCase,
+    refreshRef: { current: null },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
-    useUrlParamsMock.mockReturnValue({});
+    (useOnUpdateField as jest.Mock).mockReturnValue({
+      isLoading: false,
+      onUpdateField: jest.fn(),
+    });
   });
 
-  it('shows the header section', async () => {
-    renderWithTestingProviders(<CaseViewPage {...caseProps} />);
+  it('renders the case details header', async () => {
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} />);
 
-    expect(await screen.findByTestId('test-case-view-header')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-details-app-header')).toBeInTheDocument();
   });
 
-  it('shows the metrics section', async () => {
-    renderWithTestingProviders(<CaseViewPage {...caseProps} />);
+  it('renders the tab content', async () => {
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} />);
 
-    expect(await screen.findByTestId('test-case-view-metrics')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-content')).toBeInTheDocument();
   });
 
-  it('shows the activity section', async () => {
-    renderWithTestingProviders(<CaseViewPage {...caseProps} />);
+  it('renders metrics by default', async () => {
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} />);
 
-    expect(await screen.findByTestId('test-case-view-activity')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-metrics')).toBeInTheDocument();
   });
 
-  it('should set the breadcrumbs correctly', async () => {
-    const onComponentInitialized = jest.fn();
+  it('sets the refreshRef', async () => {
+    const refreshRef = { current: null } as React.MutableRefObject<{
+      refreshCase: () => Promise<void>;
+    } | null>;
 
-    renderWithTestingProviders(
-      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-    );
+    renderWithTestingProviders(<CaseViewPage {...defaultProps} refreshRef={refreshRef} />);
 
     await waitFor(() => {
-      expect(useCasesTitleBreadcrumbsMock).toHaveBeenCalledWith(caseProps.caseData.title);
+      expect(refreshRef.current).toEqual({ refreshCase: expect.any(Function) });
     });
   });
 });

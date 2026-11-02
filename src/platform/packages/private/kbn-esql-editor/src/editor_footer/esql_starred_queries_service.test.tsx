@@ -161,9 +161,10 @@ describe('EsqlStarredQueriesService', () => {
 
     await service.addStarredQuery(query);
     const buttonWithTooltip = service.renderStarredButton(query);
-    const button = buttonWithTooltip.props.children.props.children;
-    expect(button.props.title).toEqual('Remove ES|QL query from Starred');
-    expect(button.props.iconType).toEqual('starFilled');
+    const tooltip = buttonWithTooltip.props.children.props.children;
+    const button = tooltip.props.children;
+    expect(tooltip.props.content).toEqual('Remove ES|QL query from Starred');
+    expect(button.props.iconType).toEqual('starFill');
   });
 
   it('should display the modal when the Remove button is clicked', async () => {
@@ -176,8 +177,9 @@ describe('EsqlStarredQueriesService', () => {
 
     await service.addStarredQuery(query);
     const buttonWithTooltip = service.renderStarredButton(query);
-    const button = buttonWithTooltip.props.children.props.children;
-    expect(button.props.title).toEqual('Remove ES|QL query from Starred');
+    const tooltip = buttonWithTooltip.props.children.props.children;
+    const button = tooltip.props.children;
+    expect(tooltip.props.content).toEqual('Remove ES|QL query from Starred');
     button.props.onClick();
 
     expect(service.discardModalVisibility$.value).toEqual(true);
@@ -194,7 +196,7 @@ describe('EsqlStarredQueriesService', () => {
 
     await service.addStarredQuery(query);
     const buttonWithTooltip = service.renderStarredButton(query);
-    const button = buttonWithTooltip.props.children.props.children;
+    const button = buttonWithTooltip.props.children.props.children.props.children;
     button.props.onClick();
 
     expect(service.discardModalVisibility$.value).toEqual(false);

@@ -94,6 +94,22 @@ const sortByDateFieldsFirst = (
   return dateFieldsFirst;
 };
 
+/**
+ * The config builder will create predictable ad hoc index pattern IDs that do not
+ * necessarily match the data view IDs in the current Kibana instance.
+ * This function tries to find a data view matching the given index pattern ID
+ * either by ID or by title.
+ */
+export function findDataViewByIndexPatternId(
+  indexPatternId: string,
+  indexPatterns: IndexPatternMap
+) {
+  return (
+    indexPatterns[indexPatternId] ??
+    Object.values(indexPatterns).find((dv) => dv.title === indexPatternId)
+  );
+}
+
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
@@ -144,10 +160,22 @@ export function getLayerMetaInfo(
         isVisible,
       };
     }
+    // The datasource may hold only non-data layers (e.g. a form-based reference
+    // line layer next to ES|QL data layers); there is no underlying data to show.
+    if (dataLayerIds.length === 0) {
+      return {
+        meta: undefined,
+        error: i18n.translate('xpack.lens.app.showUnderlyingDataNoDataLayers', {
+          defaultMessage: 'Visualization has no data layers to show underlying data for',
+        }),
+        isVisible,
+      };
+    }
     datasourceAPI = currentDatasource.getPublicAPI({
       layerId: dataLayerIds[0],
       state: datasourceState,
       indexPatterns,
+      activeDataTable: activeData?.[dataLayerIds[0]],
     });
   } catch (error) {
     showMemoizedErrorNotification(error);

@@ -16,6 +16,7 @@ import type {
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { isEmpty, mapValues } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import type { APMConfig } from '.';
 import { APM_SERVER_FEATURE_ID } from '.';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
@@ -51,8 +52,9 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
-import { registerTools } from './agent_builder/tools';
 import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
+import { registerServiceMapAgentBuilder } from './agent_builder/register_service_map';
+import { registerServiceMapEmbeddableTransforms } from './lib/embeddables/register_service_map_embeddable_transforms';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -135,9 +137,8 @@ export class APMPlugin
     const managedOtlpServiceFeaturePromise = (async () => {
       const coreStart = await getCoreStart();
 
-      return await coreStart.featureFlags.getBooleanValue(
-        'observability.managedOtlpServiceEnabled',
-        false
+      return await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$('observability.managedOtlpServiceEnabled', false)
       );
     })();
 
@@ -247,29 +248,21 @@ export class APMPlugin
     );
 
     plugins.observability.alertDetailsContextualInsightsService.registerHandler(
-      getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
+      getAlertDetailsContextHandler({ setup: core, start: getCoreStart }, resourcePlugins, logger)
     );
-
-    if (plugins.onechat) {
-      registerTools({
-        core,
-        plugins,
-        logger: this.logger!.get('observabilityAgentBuilder'),
-      }).catch((e) => {
-        this.logger?.error(
-          `Failed to register observability agent builder APM tools: ${e.message}`
-        );
-        this.logger?.debug(e);
-      });
-
-      this.logger?.debug('Successfully registered agent builder APM tools');
-    }
 
     registerDataProviders({
       core,
       plugins,
+      config: currentConfig,
       logger: this.logger!.get('observabilityAgentBuilder'),
     });
+
+    registerServiceMapEmbeddableTransforms(plugins.embeddable);
+
+    if (plugins.agentBuilder) {
+      registerServiceMapAgentBuilder({ agentBuilder: plugins.agentBuilder });
+    }
 
     registerDeprecations({
       core,

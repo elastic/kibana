@@ -16,6 +16,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
   const PageObjects = getPageObjects(['monitoring']);
   const retry = getService('retry');
   const find = getService('find');
+  const browser = getService('browser');
 
   const SUBJ_LISTING_PAGE = 'elasticsearchNodesListingPage';
 
@@ -52,10 +53,8 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
 
     async clickRowByResolver(nodeResolver) {
-      await retry.waitForWithTimeout('redirection to node detail', 30000, async () => {
-        await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
-        return testSubjects.exists('elasticsearchNodeDetailStatus', { timeout: 5000 });
-      });
+      await testSubjects.click(SUBJ_NODE_LINK_PREFIX + nodeResolver, 5000);
+      await testSubjects.existOrFail('elasticsearchNodeDetailStatus', { timeout: 30000 });
     }
 
     async waitForTableToFinishLoading() {
@@ -158,19 +157,38 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
         diskFreeSpace: [],
       };
 
-      const table = await testSubjects.find(SUBJ_TABLE_BODY);
+      const onlineNodeCount = statuses.filter((status) => status === 'Status: Online').length;
+
       for (const key of Object.keys(areasWithText)) {
         const text = areasWithText[key];
-        const icons = await testSubjects.findAllDescendant(
-          `${SUBJ_NODES_ICON_PREFIX}-${key}`,
-          table
-        );
+        // Trend sparklines render asynchronously, so wait until every online node has an
+        // icon before reading — otherwise a read that races ahead of rendering finds fewer
+        // icons than rows and maps trend text to the wrong (or no) row.
+        const icons = await retry.try(async () => {
+          const table = await testSubjects.find(SUBJ_TABLE_BODY);
+          const found = await testSubjects.findAllDescendant(
+            `${SUBJ_NODES_ICON_PREFIX}-${key}`,
+            table
+          );
+          if (found.length !== onlineNodeCount) {
+            throw new Error(
+              `Expected ${onlineNodeCount} "${key}" trend icons to render, but found ${found.length}`
+            );
+          }
+          return found;
+        });
         for (const icon of icons) {
           await icon.moveMouseTo();
           await icon.click();
-          const _text = await testSubjects.getVisibleTextAll(`${SUBJ_NODES_POPOVER_PREFIX}-${key}`);
-          text.push(_text[0]);
-          await icon.click();
+          const popoverSubj = `${SUBJ_NODES_POPOVER_PREFIX}-${key}`;
+          let popoverText = '';
+          await retry.waitForWithTimeout('popover content to render', 10000, async () => {
+            const popover = await testSubjects.find(popoverSubj, 2000);
+            popoverText = await popover.getVisibleText();
+            return popoverText.length > 0;
+          });
+          text.push(popoverText);
+          await browser.pressKeys(browser.keys.ESCAPE);
         }
       }
 

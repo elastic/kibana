@@ -7,7 +7,7 @@
 
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { fetchUpsertMonitorAction } from '../state/monitor_list/actions';
 import { ConfigKey } from '../components/monitors_page/overview/types';
 import { selectMonitorUpsertStatuses } from '../state';
@@ -32,6 +32,10 @@ export function useMonitorEnableHandler({
   const upsertStatuses = useSelector(selectMonitorUpsertStatuses);
   const status: FETCH_STATUS | undefined = upsertStatuses[configId]?.status;
   const [nextEnabled, setNextEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setNextEnabled(null);
+  }, [configId]);
 
   useEffect(() => {
     if (status === FETCH_STATUS.FAILURE) {

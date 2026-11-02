@@ -8,7 +8,7 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart, QuerySuggestion } from '@kbn/kql/public';
 
 import { useEuiTheme } from '@elastic/eui';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
@@ -30,6 +30,7 @@ export interface RuleFlyoutKueryBarProps {
   placeholder?: string;
   curryLoadSuggestions?: CurryLoadSuggestionsType;
   compressed?: boolean;
+  kql: KqlPluginStart;
 }
 
 function validateQuery(query: string) {
@@ -49,6 +50,7 @@ export function RuleFlyoutKueryBar({
   placeholder,
   curryLoadSuggestions = defaultCurryLoadSuggestions,
   compressed,
+  kql,
 }: RuleFlyoutKueryBarProps) {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
@@ -76,7 +78,7 @@ export function RuleFlyoutKueryBar({
   };
 
   return (
-    <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
+    <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern} kql={kql}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           compressed={compressed}

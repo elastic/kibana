@@ -7,13 +7,44 @@
 
 import {
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
+  INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
 } from '@kbn/alerting-plugin/common';
 import type { GapAutoFillSchedulerResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
-import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX } from '@kbn/security-solution-plugin/public/detection_engine/rule_gaps/constants';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_GAP_FILL_RANGE,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_INTERVAL,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_MAX_BACKFILLS,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_NUM_RETRIES,
+  DEFAULT_GAP_AUTO_FILL_SCHEDULER_SCOPE,
+} from '@kbn/security-solution-plugin/public/detection_engine/rule_gaps/constants';
 import { rootRequest } from './common';
 import { getSpaceUrl } from '../space';
+
+export const interceptGetRulesWithGaps = () => {
+  cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH}*`, {
+    statusCode: 200,
+    body: {
+      rule_ids: ['rule-1'],
+      total: 1,
+      summary: {
+        total_unfilled_duration_ms: 86400000,
+        total_in_progress_duration_ms: 43200000,
+        total_filled_duration_ms: 43200000,
+        total_duration_ms: 172800000,
+        rules_by_gap_fill_status: {
+          unfilled: 1,
+          in_progress: 1,
+          filled: 1,
+        },
+      },
+    },
+  }).as('getRulesWithGaps');
+};
 
 export const interceptGetRuleGapsNoData = () => {
   cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}*`, {
@@ -212,6 +243,32 @@ export const deleteGapAutoFillScheduler = () =>
     })
   );
 
+/**
+ * Creates the Security Solution gap auto fill scheduler in the enabled state,
+ * mirroring the payload the Rule Settings modal sends when a user enables it.
+ */
+export const enableGapAutoFillScheduler = () =>
+  cy.currentSpace().then((spaceId) =>
+    rootRequest<GapAutoFillSchedulerResponseBodyV1>({
+      method: 'POST',
+      url: getSpaceUrl(spaceId, INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH),
+      body: {
+        id: getSchedulerId(spaceId),
+        name: '',
+        enabled: true,
+        gap_fill_range: DEFAULT_GAP_AUTO_FILL_SCHEDULER_GAP_FILL_RANGE,
+        rule_types: SECURITY_SOLUTION_RULE_TYPE_IDS.map((type) => ({
+          type,
+          consumer: SERVER_APP_ID,
+        })),
+        schedule: { interval: DEFAULT_GAP_AUTO_FILL_SCHEDULER_INTERVAL },
+        max_backfills: DEFAULT_GAP_AUTO_FILL_SCHEDULER_MAX_BACKFILLS,
+        num_retries: DEFAULT_GAP_AUTO_FILL_SCHEDULER_NUM_RETRIES,
+        scope: DEFAULT_GAP_AUTO_FILL_SCHEDULER_SCOPE,
+      },
+    })
+  );
+
 export const getGapAutoFillSchedulerApi = () =>
   cy.currentSpace().then((spaceId) =>
     rootRequest<GapAutoFillSchedulerResponseBodyV1>({
@@ -220,3 +277,52 @@ export const getGapAutoFillSchedulerApi = () =>
       failOnStatusCode: false,
     })
   );
+
+export const interceptGapAutoFillSchedulerLogsWithErrors = ({
+  timestamp = new Date().toISOString(),
+}: {
+  timestamp?: string;
+} = {}) => {
+  cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/*/logs`, (req) => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        page: 1,
+        per_page: 1,
+        total: 2,
+        data: [
+          {
+            id: 'error-log-1',
+            timestamp,
+            status: 'error',
+            message: 'Failed to schedule gap fill',
+            results: [],
+          },
+        ],
+      },
+    });
+  }).as('getGapAutoFillSchedulerLogsWithErrors');
+};
+
+export const interceptGapAutoFillScheduler = ({ enabled }: { enabled: boolean }) => {
+  cy.intercept('GET', `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/*`, {
+    statusCode: 200,
+    body: {
+      id: 'gap-auto-fill-scheduler-default',
+      name: 'Gap Auto Fill Scheduler',
+      enabled,
+      gap_fill_range: '24h',
+      max_backfills: 10,
+      num_retries: 3,
+      schedule: {
+        interval: '1h',
+      },
+      scope: 'all',
+      rule_types: [],
+      created_by: 'elastic',
+      updated_by: 'elastic',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  }).as('getGapAutoFillScheduler');
+};

@@ -11,7 +11,7 @@ import { securityLink } from '../links';
 
 export const createDashboardsNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.dashboards,
-  icon: 'dashboardApp',
+  icon: 'productDashboard',
   link: securityLink(SecurityPageName.dashboards),
   children: [
     {
@@ -29,10 +29,6 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
     {
       id: SecurityPageName.cloudSecurityPostureVulnerabilityDashboard,
       link: securityLink(SecurityPageName.cloudSecurityPostureVulnerabilityDashboard),
-    },
-    {
-      id: SecurityPageName.entityAnalytics,
-      link: securityLink(SecurityPageName.entityAnalytics),
     },
     {
       id: SecurityPageName.dataQuality,

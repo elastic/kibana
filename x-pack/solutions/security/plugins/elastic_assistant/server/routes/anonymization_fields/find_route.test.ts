@@ -101,7 +101,7 @@ describe('Find user anonymization fields route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `sort_field: Invalid enum value. Expected 'created_at' | 'anonymized' | 'allowed' | 'field' | 'updated_at', received 'name'`
+        'sort_field: Invalid option: expected one of "created_at"|"anonymized"|"allowed"|"field"|"updated_at"'
       );
     });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 
 import { contextMiddleware } from '.';
@@ -25,27 +24,42 @@ const createMiddleware = (data: DataPublicPluginStart, state?: Partial<LensAppSt
   });
   const store = {
     getState: jest.fn(() => ({
-      lens: state || {
+      lens: {
         ...initialState,
-        activeDatasourceId: 'testDatasource',
-        datasourceStates: { testDatasource: { state: {} } },
+        activeDatasourceId: 'formBased',
+        datasourceStates: { formBased: { state: {}, isLoading: false } },
+        ...state,
       },
     })),
     dispatch: jest.fn(),
   };
   const next = jest.fn();
 
-  const invoke = (action: PayloadAction<Partial<LensAppState> | void>) =>
-    middleware(store)(next)(action);
+  const invoke = (action: unknown) => middleware(store)(next)(action);
 
   return { store, next, invoke };
 };
 
 describe('contextMiddleware', () => {
+  it.each([
+    { type: 'unrelated' },
+    { type: 'unrelated', payload: null },
+    { type: 'unrelated', payload: 42 },
+    { type: 'unrelated', payload: 'value' },
+  ])('forwards actions without an object payload: %j', (action) => {
+    const data = mockDataPlugin();
+    storeDeps.datasourceMap.formBased.isTimeBased = () => false;
+    const { next, invoke } = createMiddleware(data);
+
+    invoke(action);
+
+    expect(next).toHaveBeenCalledWith(action);
+  });
+
   describe('time update', () => {
     it('does update the searchSessionId when the state changes and too much time passed', () => {
       const data = mockDataPlugin();
-      storeDeps.datasourceMap.testDatasource.isTimeBased = () => true;
+      storeDeps.datasourceMap.formBased.isTimeBased = () => true;
       (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
       (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
         from: 'now-2m',
@@ -81,7 +95,7 @@ describe('contextMiddleware', () => {
     });
     it('does not update the searchSessionId when current state is not time based', () => {
       const data = mockDataPlugin();
-      storeDeps.datasourceMap.testDatasource.isTimeBased = () => false;
+      storeDeps.datasourceMap.formBased.isTimeBased = () => false;
       (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
       (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
         from: 'now-2m',
@@ -119,7 +133,7 @@ describe('contextMiddleware', () => {
       it('only updates searchSessionId when user applies changes', () => {
         // setup
         const data = mockDataPlugin();
-        storeDeps.datasourceMap.testDatasource.isTimeBased = () => true;
+        storeDeps.datasourceMap.formBased.isTimeBased = () => true;
         (data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
         (data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
           from: 'now-2m',
@@ -131,8 +145,8 @@ describe('contextMiddleware', () => {
         });
         const { invoke, store } = createMiddleware(data, {
           ...initialState,
-          activeDatasourceId: 'testDatasource',
-          datasourceStates: { testDatasource: { state: {}, isLoading: false } },
+          activeDatasourceId: 'formBased',
+          datasourceStates: { formBased: { state: {}, isLoading: false } },
           autoApplyDisabled: true,
         });
 

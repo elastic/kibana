@@ -17,13 +17,27 @@ const _allowedExperimentalValues = {
   enableAutoInstallContentPackages: true,
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
-  enableAgentPrivilegeLevelChange: false,
+  enableAgentPrivilegeLevelChange: true,
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
-  agentlessPoliciesAPI: true, // When enabled, agentless policies API will be enabled.
-  useAgentlessAPIInUI: true, // When enabled, Fleet UI will use agentless policies API to create agentless policies.
-  disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
+  enableFleetOrphanedPolicySweep: true, // When enabled, the policy-revisions cleanup task also sweeps .fleet-policies docs for deleted agent policies.
+  enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
+  disableAgentlessLegacyAPI: true, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
+  enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
+  enableSloTemplates: true,
+  newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
+  enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions
+  enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
+  enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
+  enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
+  enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
+  enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
+  enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
+  enableIncludeTagsInEvents: true, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
+  enableIntegrationCollectionTiles: true, // When enabled, packages sharing a `group` id are collapsed into a single collection tile in the integrations marketplace.
+  enableIntegrationTileClickToAdd: true, // When enabled, clicking an integration tile navigates directly to the add-integration page instead of the overview page.
+  // NOTE: Prefer Kibana feature flags over adding new entries here. See x-pack/platform/plugins/shared/fleet/common/constants/feature_flags.ts
 };
 
 /**

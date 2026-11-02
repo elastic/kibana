@@ -10,19 +10,18 @@ import { GenericFtrService } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FilterBarService } from '@kbn/test-suites-src/functional/services/filter_bar';
 import type { QueryBarProvider } from '../services/query_bar_provider';
-import type { SecurityTelemetryFtrProviderContext } from '../config';
+import type { SecurityTelemetryFtrProviderContext } from '../config.base';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID,
-  NODE_EXPAND_BUTTON_TEST_ID,
   GRAPH_INVESTIGATION_TEST_ID,
-  GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-  GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
+  GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
@@ -32,16 +31,35 @@ const {
   GRAPH_IPS_POPOVER_ID,
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
+  GRAPH_IPS_POPOVER_IP_LINK_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
+  GRAPH_NODE_ENTITY_DETAILS_ID,
+  GRAPH_NODE_ENTITY_TAG_TEXT_ID,
+  GRAPH_NODE_ENTITY_TAG_COUNT_ID,
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
+  GROUPED_ITEM_TEST_ID,
+  GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TARGET_TEST_ID,
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
+
+/**
+ * Implicit wait for toolbar lookups. Callers poll via `retry.try`, so a miss should return
+ * immediately rather than hold the session open for the default find timeout.
+ */
+const TOOLBAR_FIND_TIMEOUT = 1000;
 
 export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrProviderContext> {
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly retry = this.ctx.getService('retry');
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -52,11 +70,13 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async assertGraphNodesNumber(expected: number): Promise<void> {
-    await this.waitGraphIsLoaded();
-    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
-    await graph.scrollIntoView();
-    const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
-    expect(nodes.length).to.be(expected);
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+      await graph.scrollIntoView();
+      const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
+      expect(nodes.length).to.be(expected);
+    });
   }
 
   async assertGraphGroupNodesNumber(expected: number): Promise<void> {
@@ -88,89 +108,170 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
     );
     expect(nodes.length).to.be(1);
-    await nodes[0].moveMouseTo();
     return nodes[0];
   }
 
-  async clickOnNodeExpandButton(
+  async getNodesByIdCount(nodeId: string): Promise<number> {
+    await this.waitGraphIsLoaded();
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    await graph.scrollIntoView();
+    const nodes = await graph.findAllByCssSelector(
+      `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
+    );
+    return nodes.length;
+  }
+
+  async assertNodeExists(nodeId: string): Promise<void> {
+    const count = await this.getNodesByIdCount(nodeId);
+    expect(count).to.be(1);
+  }
+
+  async assertNodeDoesNotExist(nodeId: string): Promise<void> {
+    const count = await this.getNodesByIdCount(nodeId);
+    expect(count).to.be(0);
+  }
+
+  /**
+   * Finds toolbar buttons belonging to a specific node, matching any of the given test subjects.
+   *
+   * Label nodes render their toolbar via a ReactFlow NodeToolbar portal
+   * (`.react-flow__node-toolbar[data-id="..."]`).
+   * Entity nodes render their toolbar as an absolutely-positioned div inside the node element
+   * (`.react-flow__node[data-id="..."]`) — no portal is used.
+   *
+   * Both containers are matched in a single `findAll` rather than probing the portal first and
+   * falling back: a miss on `findByCssSelector` costs a full find-timeout plus its internal
+   * retries, which an entity node incurs on every call since it never has a portal.
+   */
+  private async findNodeToolbarButtons(
     nodeId: string,
-    popoverId: string = GRAPH_NODE_EXPAND_POPOVER_TEST_ID
-  ): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const expandButton = await node.findByTestSubject(NODE_EXPAND_BUTTON_TEST_ID);
-    await expandButton.click();
-    await this.testSubjects.existOrFail(popoverId);
+    itemTestSubjects: string[]
+  ): Promise<WebElementWrapper[]> {
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
+    const selector = itemTestSubjects
+      .flatMap((itemTestSubject) => [
+        `.react-flow__node-toolbar[data-id="${nodeId}"] [data-test-subj="${itemTestSubject}"]`,
+        `.react-flow__node[data-id="${nodeId}"] [data-test-subj="${itemTestSubject}"]`,
+      ])
+      .join(', ');
+    return graph.findAllByCssSelector(selector, TOOLBAR_FIND_TIMEOUT);
+  }
+
+  /**
+   * Clicks a toolbar button with a raw DOM click.
+   *
+   * `browser.execute('arguments[0].click()')` bypasses:
+   * - WebDriver hit-test interception caused by `EuiToolTipAnchor` wrapping disabled buttons
+   * - `pointer-events: none` on the invisible toolbar (opacity:0 state)
+   *
+   * It also bypasses WebDriver's enabled check, and browsers silently drop clicks on disabled
+   * buttons. Toolbar items stay disabled until entity enrichment arrives, so the button has to
+   * be confirmed enabled first — otherwise the click is a no-op and whatever assertion follows
+   * waits for a state change that never comes. Throwing lets the caller's `retry.try` poll
+   * until enrichment lands, and surfaces a named failure instead of a bare mocha timeout.
+   */
+  private async clickToolbarButton(button: WebElementWrapper, description: string): Promise<void> {
+    if (!(await button.isEnabled())) {
+      throw new Error(`Toolbar item ${description} is still disabled`);
+    }
+    await this.browser.execute('arguments[0].click()', button);
+  }
+
+  /**
+   * Clicks a toolbar button for a specific node using a scoped CSS selector and a JS click.
+   */
+  async clickOnNodeToolbarItem(nodeId: string, itemTestSubject: string): Promise<void> {
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      const buttons = await this.findNodeToolbarButtons(nodeId, [itemTestSubject]);
+      expect(buttons.length).to.be(1);
+      await this.clickToolbarButton(buttons[0], `"${itemTestSubject}" on node "${nodeId}"`);
+    });
   }
 
   async showActionsByEntity(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showActionsOnEntity(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEntityDetails(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+    await this.retry.try(async () => {
+      await this.waitGraphIsLoaded();
+      // Some nodes show individual entity details; grouped nodes show a grouped-entities variant
+      const buttons = await this.findNodeToolbarButtons(nodeId, [
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+        GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
+      ]);
+      expect(buttons.length).to.be(1);
+      await this.clickToolbarButton(buttons[0], `entity details on node "${nodeId}"`);
+    });
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async showEntityRelationships(nodeId: string): Promise<void> {
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async hideActionsOnEntity(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    const btnText = await this.testSubjects.getVisibleText(
-      GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
-    );
-    expect(btnText).to.be('Hide actions done to this entity');
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async exploreRelatedEntities(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
+    await this.clickOnNodeToolbarItem(nodeId, GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
+    await this.clickOnNodeToolbarItem(
+      nodeId,
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+    );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEventOrAlertDetails(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
+    await this.clickOnNodeToolbarItem(
+      nodeId,
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+    );
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async hideEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-    const btnText = await this.testSubjects.getVisibleText(
+    await this.clickOnNodeToolbarItem(
+      nodeId,
       GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
     );
-    expect(btnText).to.be('Hide related events');
-    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async expectFilterTextEquals(filterIdx: number, expected: string): Promise<void> {
-    const filters = await this.filterBar.getFiltersLabel();
-    expect(filters.length).to.be.greaterThan(filterIdx);
-    expect(filters[filterIdx]).to.be(expected);
+    await this.retry.try(async () => {
+      const filters = await this.filterBar.getFiltersLabel();
+      expect(filters.length).to.be.greaterThan(filterIdx);
+      expect(filters[filterIdx]).to.be(expected);
+    });
   }
 
   async expectFilterPreviewEquals(filterIdx: number, expected: string): Promise<void> {
-    await this.clickEditFilter(filterIdx);
+    await this.retry.try(async () => {
+      await this.clickEditFilter(filterIdx);
 
-    const filterPreview = await this.filterBar.getFilterEditorPreview();
-    expect(filterPreview).to.be(expected);
+      const filterPreview = await this.filterBar.getFilterEditorPreview();
+      expect(filterPreview).to.be(expected);
 
-    await this.filterBar.ensureFieldEditorModalIsClosed();
+      // Close the filter editor by pressing Escape instead of using
+      // ensureFieldEditorModalIsClosed which has a bug when used inside flyouts
+      // (cancelSaveFilter exists in the DOM but is not displayed, causing a timeout)
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    });
   }
 
   async clickEditFilter(filterIdx: number): Promise<void> {
@@ -184,7 +285,9 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async addFilter(filter: Filter): Promise<void> {
+    await this.showSearchBar();
     await this.testSubjects.click(`${GRAPH_INVESTIGATION_TEST_ID} > addFilter`);
+    await this.testSubjects.existOrFail('filter-0', { timeout: 5000 });
     await this.filterBar.createFilter(filter);
     await this.testSubjects.scrollIntoView('saveFilter');
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
@@ -223,7 +326,14 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async clickOnFirstIpInPopover(): Promise<void> {
     await this.testSubjects.existOrFail(GRAPH_IPS_POPOVER_CONTENT_ID);
     const popoverContent = await this.testSubjects.find(GRAPH_IPS_POPOVER_CONTENT_ID);
-    const firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    // Prefer the clickable link element (onNetworkPreview path); fall back to the list item
+    // for the scopeId / plain-label paths where no inner link is rendered.
+    let firstIpElement: WebElementWrapper;
+    try {
+      firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_LINK_ID);
+    } catch {
+      firstIpElement = await popoverContent.findByTestSubject(GRAPH_IPS_POPOVER_IP_ID);
+    }
     await firstIpElement.click();
   }
 
@@ -239,5 +349,86 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       const ipText = await popoverContent.getVisibleText();
       expect(ipText).to.contain(expectedIp);
     }
+  }
+
+  async assertNodeEntityTag(nodeId: string, expectedTagValue: string): Promise<void> {
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const tagWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_TEXT_ID);
+      const tagText = await tagWrapper.getVisibleText();
+      expect(tagText.toLowerCase()).to.contain(expectedTagValue.toLowerCase());
+    });
+  }
+
+  async assertNodeEntityTagCount(nodeId: string, expectedCount: number): Promise<void> {
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const countWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_COUNT_ID);
+      const countText = await countWrapper.getVisibleText();
+      expect(parseInt(countText, 10)).to.be(expectedCount);
+    });
+  }
+
+  async assertNodeEntityDetails(nodeId: string, expectedDetails: string): Promise<void> {
+    await this.retry.try(async () => {
+      const node = await this.selectNode(nodeId);
+      const detailsElement = await node.findByTestSubject(GRAPH_NODE_ENTITY_DETAILS_ID);
+      const fullTextElement = await detailsElement.findByTestSubject('fullText');
+      const detailsText = await fullTextElement.getVisibleText();
+      expect(detailsText).to.be(expectedDetails);
+    });
+  }
+
+  async assertPreviewPanelGroupedItemTitleTextNumber(expected: number): Promise<void> {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const titleTextElements = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
+      expect(titleTextElements.length).to.be(expected);
+    });
+  }
+
+  async assertPreviewPanelGroupedItemTitleLinkNumber(expected: number): Promise<void> {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_LINK);
+      expect(groupedItems.length).to.be(expected);
+    });
+  }
+
+  async closePreviewSection(): Promise<void> {
+    await this.testSubjects.click(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID);
+  }
+
+  async assertGroupedItemActorAndTargetValues(
+    expectedCount: number,
+    actor: string,
+    target: string
+  ): Promise<void> {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
+      expect(groupedItems.length).to.be.greaterThan(0);
+
+      // Count how many grouped items have the specified actor and target
+      let matchingCount = 0;
+      for (const groupedItem of groupedItems) {
+        try {
+          const actorElement = await groupedItem.findByTestSubject(GROUPED_ITEM_ACTOR_TEST_ID);
+          const targetElement = await groupedItem.findByTestSubject(GROUPED_ITEM_TARGET_TEST_ID);
+
+          const actorText = await actorElement.getVisibleText();
+          const targetText = await targetElement.getVisibleText();
+
+          if (actorText.includes(actor) && targetText.includes(target)) {
+            matchingCount++;
+          }
+        } catch (e) {
+          // This grouped item might not have actor/target (could be an entity), continue checking others
+          continue;
+        }
+      }
+
+      expect(matchingCount).to.be(expectedCount);
+    });
   }
 }

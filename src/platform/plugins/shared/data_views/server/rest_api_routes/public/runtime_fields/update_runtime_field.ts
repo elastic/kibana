@@ -26,6 +26,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  UPDATE_RUNTIME_FIELD_SUMMARY,
   UPDATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
@@ -69,7 +70,7 @@ export const updateRuntimeField = async ({
 };
 
 const updateRuntimeFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, summary?: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -82,6 +83,7 @@ const updateRuntimeFieldRouteFactory =
       .post({
         path,
         access: 'public',
+        summary,
         description,
         security: {
           authz: {
@@ -98,10 +100,12 @@ const updateRuntimeFieldRouteFactory =
                 id: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: { description: 'The unique identifier of the data view.' },
                 }),
                 name: schema.string({
                   minLength: 1,
                   maxLength: 1_000,
+                  meta: { description: 'The name of the runtime field to update.' },
                 }),
               }),
               body: schema.object({
@@ -153,10 +157,13 @@ const updateRuntimeFieldRouteFactory =
 export const registerUpdateRuntimeFieldRoute = updateRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH,
   SERVICE_KEY,
+  UPDATE_RUNTIME_FIELD_SUMMARY,
   UPDATE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerUpdateRuntimeFieldRouteLegacy = updateRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
+  SERVICE_KEY_LEGACY,
+  UPDATE_RUNTIME_FIELD_SUMMARY,
+  'Deprecated in 8.0.0. Use the data_views/data_view/{id}/runtime_field/{name} endpoint instead.'
 );

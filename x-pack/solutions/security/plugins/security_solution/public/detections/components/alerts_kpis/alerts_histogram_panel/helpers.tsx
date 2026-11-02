@@ -43,7 +43,7 @@ export const createResetGroupByFieldAction: CreateResetGroupByFieldAction = ({
     return RESET_GROUP_BY_FIELDS;
   },
   getIconType(): string | undefined {
-    return 'editorRedo';
+    return 'redo';
   },
   type: 'actionButton',
   async isCompatible(): Promise<boolean> {

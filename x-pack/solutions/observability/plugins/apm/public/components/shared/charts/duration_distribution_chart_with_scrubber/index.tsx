@@ -120,8 +120,6 @@ export function DurationDistributionChartWithScrubber({
                   iconSide="left"
                   onClick={onTrackedClearSelection}
                   onClickAriaLabel={clearSelectionAriaLabel}
-                  iconOnClick={onTrackedClearSelection}
-                  iconOnClickAriaLabel={clearSelectionAriaLabel}
                   data-test-sub="apmDurationDistributionChartWithScrubberTitleClearSelectionBadge"
                 >
                   {i18n.translate('xpack.apm.durationDistributionChartWithScrubber.selectionText', {
@@ -135,7 +133,7 @@ export function DurationDistributionChartWithScrubber({
             ) : (
               <>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="info" title={emptySelectionText} size="s" />
+                  <EuiIcon type="info" size="s" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">{emptySelectionText}</EuiText>

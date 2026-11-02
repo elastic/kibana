@@ -6,13 +6,21 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
+  SO_SEARCH_LIMIT,
 } from '../../common/constants';
+import {
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
+} from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type {
@@ -22,6 +30,7 @@ import type {
 import type {
   AwsCloudConnectorVars,
   CloudConnector,
+  CloudConnectorSecretReference,
 } from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
@@ -35,6 +44,7 @@ const mockAppContextService = appContextService;
 describe('CloudConnectorService', () => {
   let service: CloudConnectorService;
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: jest.Mocked<ReturnType<typeof loggerMock.create>>;
 
   beforeEach(() => {
@@ -43,8 +53,12 @@ describe('CloudConnectorService', () => {
     // Setup mocks
     mockLogger = loggerMock.create();
     mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
+    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+      useSpaceAwareness: false,
+    });
 
     mockSoClient = createSavedObjectClientMock();
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     service = new CloudConnectorService();
   });
 
@@ -88,7 +102,6 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       },
@@ -117,7 +130,6 @@ describe('CloudConnectorService', () => {
           name: 'test-connector',
           namespace: '*',
           cloudProvider: 'aws',
-          packagePolicyCount: 1,
           created_at: expect.any(String),
           updated_at: expect.any(String),
           vars: expect.objectContaining({
@@ -140,6 +152,7 @@ describe('CloudConnectorService', () => {
         id: 'cloud-connector-123',
         name: 'test-connector',
         cloudProvider: 'aws',
+        packagePolicyCount: 0,
         namespace: '*',
         vars: {
           role_arn: {
@@ -154,7 +167,6 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       });
@@ -193,6 +205,68 @@ describe('CloudConnectorService', () => {
       );
 
       expect(result.accountType).toEqual(SINGLE_ACCOUNT);
+    });
+
+    it('persists iac_key and blueprint on confirm', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        },
+      });
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        })
+      );
+    });
+
+    it('stores no iac_key when confirm clears the digest', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          iac_key: null,
+        },
+      });
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        iac_key: null,
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          iac_key: null,
+        })
+      );
     });
 
     it('should create a cloud connector with organization accountType', async () => {
@@ -283,8 +357,8 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should throw error when AWS external_id is missing', async () => {
-      const invalidRequest: CreateCloudConnectorRequest = {
+    it('should create successfully when AWS external_id is absent (identity federation without external ID)', async () => {
+      const requestWithoutExternalId: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
         vars: {
@@ -292,12 +366,39 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        } as any, // Intentionally invalid for testing validation
+        },
       };
 
-      await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
-        /Package policy must contain valid external_id secret reference/
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+          },
+        },
+      });
+
+      const result = await service.create(mockSoClient, requestWithoutExternalId);
+
+      expect(result.name).toBe('test-connector');
+      const [soType, soAttributes] = mockSoClient.create.mock.calls[0];
+      expect(soType).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+      expect(soAttributes).toEqual(
+        expect.objectContaining({
+          cloudProvider: 'aws',
+        })
       );
+      expect((soAttributes as any).vars.external_id).toBeUndefined();
     });
 
     describe('duplicate name validation', () => {
@@ -532,7 +633,6 @@ describe('CloudConnectorService', () => {
                 type: 'password',
               },
             },
-            packagePolicyCount: 1,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
@@ -540,21 +640,60 @@ describe('CloudConnectorService', () => {
       ],
       total: 1,
       page: 1,
-      per_page: 20,
+      per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
     };
 
-    it('should get cloud connectors list successfully', async () => {
-      mockSoClient.find.mockResolvedValue(mockCloudConnectors);
+    // Mock package policy aggregation (getPackagePolicyCountsMap uses terms agg on cloud_connector_id)
+    const mockPackagePolicies = {
+      saved_objects: [],
+      total: 1,
+      page: 1,
+      per_page: 0,
+      aggregations: {
+        count_by_cloud_connector: {
+          buckets: [{ key: 'cloud-connector-1', doc_count: 1 }],
+        },
+      },
+    };
+
+    it('should get cloud connectors list successfully with computed packagePolicyCount', async () => {
+      // Mock find to return different results based on the type
+      mockSoClient.find.mockImplementation((options: any) => {
+        if (options.type === CLOUD_CONNECTOR_SAVED_OBJECT_TYPE) {
+          return Promise.resolve(mockCloudConnectors);
+        }
+        // Package policies query for computing count
+        return Promise.resolve(mockPackagePolicies);
+      });
 
       const result = await service.getList(mockSoClient);
 
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       });
+
+      expect(mockSoClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          filter: buildPackagePolicyFilterExcludingHiddenPackages(
+            `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+          ),
+          perPage: 0,
+          aggs: {
+            count_by_cloud_connector: {
+              terms: {
+                field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
+                size: SO_SEARCH_LIMIT,
+              },
+            },
+          },
+        })
+      );
 
       expect(result).toEqual([
         {
@@ -599,7 +738,12 @@ describe('CloudConnectorService', () => {
         ],
       };
 
-      mockSoClient.find.mockResolvedValue(mockCloudConnectorsWithAccountType);
+      mockSoClient.find.mockImplementation((options: any) => {
+        if (options.type === CLOUD_CONNECTOR_SAVED_OBJECT_TYPE) {
+          return Promise.resolve(mockCloudConnectorsWithAccountType);
+        }
+        return Promise.resolve(mockPackagePolicies);
+      });
 
       const result = await service.getList(mockSoClient);
 
@@ -642,7 +786,7 @@ describe('CloudConnectorService', () => {
         ],
         total: 2,
         page: 1,
-        per_page: 20,
+        per_page: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
       };
 
       mockSoClient.find.mockResolvedValue(mockConnectorsWithFields);
@@ -652,7 +796,7 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: 1,
-        perPage: 20,
+        perPage: CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
         fields: ['name'],
@@ -772,14 +916,37 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 2,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T01:00:00.000Z',
       },
     };
 
-    it('should get cloud connector by id successfully', async () => {
+    // Mock package policies for computing count
+    const mockPackagePolicies = {
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+        {
+          id: 'pp-2',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+      ],
+      total: 2,
+      page: 1,
+      per_page: 0,
+    };
+
+    it('should get cloud connector by id successfully with computed packagePolicyCount', async () => {
       mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePolicies);
 
       const result = await service.getById(mockSoClient, 'cloud-connector-123');
 
@@ -833,6 +1000,7 @@ describe('CloudConnectorService', () => {
 
     it('should log info messages correctly', async () => {
       mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePolicies);
 
       await service.getById(mockSoClient, 'cloud-connector-123');
 
@@ -842,7 +1010,7 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should handle cloud connector with minimal data', async () => {
+    it('should handle cloud connector with minimal data and zero package policies', async () => {
       const minimalSavedObject = {
         ...mockSavedObject,
         attributes: {
@@ -850,13 +1018,20 @@ describe('CloudConnectorService', () => {
           namespace: 'default',
           cloudProvider: 'aws',
           vars: {},
-          packagePolicyCount: 0,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
         },
       };
 
+      const noPackagePolicies = {
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      };
+
       mockSoClient.get.mockResolvedValue(minimalSavedObject);
+      mockSoClient.find.mockResolvedValue(noPackagePolicies);
 
       const result = await service.getById(mockSoClient, 'cloud-connector-123');
 
@@ -895,10 +1070,25 @@ describe('CloudConnectorService', () => {
             type: 'password',
           },
         },
-        packagePolicyCount: 1,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T00:00:00.000Z',
       },
+    };
+
+    // Mock package policies for computing count
+    const mockPackagePoliciesForUpdate = {
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 0,
     };
 
     it('should update cloud connector name successfully', async () => {
@@ -913,6 +1103,7 @@ describe('CloudConnectorService', () => {
 
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockUpdatedSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
 
       const result = await service.update(mockSoClient, 'cloud-connector-123', {
         name: 'updated-name',
@@ -934,9 +1125,67 @@ describe('CloudConnectorService', () => {
 
       expect(result.name).toEqual('updated-name');
       expect(result.id).toEqual('cloud-connector-123');
+
+      const awsVarsFromNameUpdate = result.vars as AwsCloudConnectorVars;
+      expect(awsVarsFromNameUpdate.role_arn?.value).toEqual(
+        'arn:aws:iam::123456789012:role/OriginalRole'
+      );
+    });
+
+    it('clears iac_key when confirm sends a null digest', async () => {
+      mockSoClient.get.mockResolvedValue({
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          iac_key: 'sha256:old',
+        },
+      });
+      mockSoClient.update.mockResolvedValue({
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          iac_key: null,
+        },
+      });
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
+
+      await service.update(mockSoClient, 'cloud-connector-123', {
+        iac_key: null,
+      });
+
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cloud-connector-123',
+        expect.objectContaining({
+          iac_key: null,
+        })
+      );
+    });
+
+    it('should keep original vars after a name-only update', async () => {
+      const mockUpdatedSavedObject = {
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          name: 'updated-name',
+          updated_at: '2023-01-01T02:00:00.000Z',
+        },
+      };
+
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockUpdatedSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
+
+      const result = await service.update(mockSoClient, 'cloud-connector-123', {
+        name: 'updated-name',
+      });
+
+      expect(result.name).toEqual('updated-name');
+      expect(result.id).toEqual('cloud-connector-123');
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-      expect(awsVars.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
+      const externalId1 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId1.id).toEqual('ORIGINALEXTERNALID12');
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -981,7 +1230,8 @@ describe('CloudConnectorService', () => {
 
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-      expect(awsVars.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
+      const externalId2 = awsVars.external_id?.value as CloudConnectorSecretReference;
+      expect(externalId2.id).toEqual('UPDATEDEXTERNALID123');
     });
 
     it('should update both name and vars successfully', async () => {
@@ -1048,22 +1298,34 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.update).not.toHaveBeenCalled();
     });
 
-    it('should require both role_arn and external_id when updating vars', async () => {
+    it('should allow updating vars with role_arn only (identity federation without external ID)', async () => {
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockExistingSavedObject);
 
-      const incompleteVars = {
+      const varsWithoutExternalId = {
         role_arn: {
           value: 'arn:aws:iam::123456789012:role/ValidRole',
           type: 'text' as const,
         },
-        // Missing external_id
-      } as any; // Intentionally invalid for testing validation
+      };
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
-          vars: incompleteVars,
+          vars: varsWithoutExternalId,
         })
-      ).rejects.toThrow('Package policy must contain valid external_id secret reference');
+      ).resolves.toBeDefined();
+
+      expect(mockSoClient.update).toHaveBeenCalled();
+    });
+
+    it('should reject updating vars with a role_arn that is not an IAM role ARN', async () => {
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+
+      await expect(
+        service.update(mockSoClient, 'cloud-connector-123', {
+          vars: { role_arn: { value: '123456', type: 'text' as const } },
+        })
+      ).rejects.toThrow('role_arn must be an IAM role ARN');
 
       expect(mockSoClient.update).not.toHaveBeenCalled();
     });
@@ -1404,7 +1666,7 @@ describe('CloudConnectorService', () => {
   });
 
   describe('delete', () => {
-    const mockSavedObjectWithZeroCount = {
+    const mockSavedObject = {
       id: 'cloud-connector-123',
       type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
       references: [],
@@ -1413,25 +1675,53 @@ describe('CloudConnectorService', () => {
         namespace: '*',
         cloudProvider: 'aws',
         vars: {},
-        packagePolicyCount: 0,
         created_at: '2023-01-01T00:00:00.000Z',
         updated_at: '2023-01-01T01:00:00.000Z',
       },
     };
 
-    const mockSavedObjectWithNonZeroCount = {
-      ...mockSavedObjectWithZeroCount,
-      attributes: {
-        ...mockSavedObjectWithZeroCount.attributes,
-        packagePolicyCount: 3,
-      },
+    const mockNoPackagePolicies = {
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
     };
 
-    it('should delete cloud connector successfully when packagePolicyCount is 0', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+    const mockPackagePoliciesWithCount = {
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+        {
+          id: 'pp-2',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+        {
+          id: 'pp-3',
+          type: 'ingest-package-policies',
+          score: 1,
+          references: [],
+          attributes: { cloud_connector_id: 'cloud-connector-123' },
+        },
+      ],
+      total: 3,
+      page: 1,
+      per_page: 0,
+    };
+
+    it('should delete cloud connector successfully when no package policies use it', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       mockSoClient.delete.mockResolvedValue({});
 
-      const result = await service.delete(mockSoClient, 'cloud-connector-123');
+      const result = await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123');
 
       expect(mockSoClient.get).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -1444,10 +1734,13 @@ describe('CloudConnectorService', () => {
       expect(result).toEqual({ id: 'cloud-connector-123' });
     });
 
-    it('should throw error when packagePolicyCount > 0 and force is false', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+    it('should throw error when package policies exist and force is false', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123', false)).rejects.toThrow(
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', false)
+      ).rejects.toThrow(
         'Cannot delete cloud connector "test-connector" as it is being used by 3 package policies'
       );
 
@@ -1457,11 +1750,12 @@ describe('CloudConnectorService', () => {
       );
     });
 
-    it('should delete successfully when packagePolicyCount > 0 and force is true', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+    it('should delete successfully when package policies exist and force is true', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
       mockSoClient.delete.mockResolvedValue({});
 
-      const result = await service.delete(mockSoClient, 'cloud-connector-123', true);
+      const result = await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', true);
 
       expect(mockSoClient.delete).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -1470,30 +1764,35 @@ describe('CloudConnectorService', () => {
       expect(result).toEqual({ id: 'cloud-connector-123' });
     });
 
-    it('should log warning when force deleting connector with packagePolicyCount > 0', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+    it('should log warning when force deleting connector with package policies', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
       mockSoClient.delete.mockResolvedValue({});
 
-      await service.delete(mockSoClient, 'cloud-connector-123', true);
+      await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', true);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Force deleting cloud connector "test-connector" which is still being used by 3 package policies'
       );
     });
 
-    it('should not log warning when force deleting connector with packagePolicyCount = 0', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+    it('should not log warning when force deleting connector with no package policies', async () => {
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       mockSoClient.delete.mockResolvedValue({});
 
-      await service.delete(mockSoClient, 'cloud-connector-123', true);
+      await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123', true);
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('should default force parameter to false when not provided', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123')).rejects.toThrow(
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123')
+      ).rejects.toThrow(
         'Cannot delete cloud connector "test-connector" as it is being used by 3 package policies'
       );
 
@@ -1506,7 +1805,7 @@ describe('CloudConnectorService', () => {
       const error = new Error('Saved object not found');
       mockSoClient.get.mockRejectedValue(error);
 
-      await expect(service.delete(mockSoClient, 'non-existent-id')).rejects.toThrow(
+      await expect(service.delete(mockSoClient, mockEsClient, 'non-existent-id')).rejects.toThrow(
         'Failed to delete cloud connector: Saved object not found'
       );
 
@@ -1517,10 +1816,11 @@ describe('CloudConnectorService', () => {
     });
 
     it('should log info messages correctly', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       mockSoClient.delete.mockResolvedValue({});
 
-      await service.delete(mockSoClient, 'cloud-connector-123');
+      await service.delete(mockSoClient, mockEsClient, 'cloud-connector-123');
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Deleting cloud connector cloud-connector-123 (force: false)'
@@ -1531,21 +1831,25 @@ describe('CloudConnectorService', () => {
     });
 
     it('should re-throw CloudConnectorDeleteError as-is', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithNonZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesWithCount);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123')).rejects.toThrow(
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123')
+      ).rejects.toThrow(
         'Cannot delete cloud connector "test-connector" as it is being used by 3 package policies'
       );
     });
 
     it('should handle saved object delete failure', async () => {
-      mockSoClient.get.mockResolvedValue(mockSavedObjectWithZeroCount);
+      mockSoClient.get.mockResolvedValue(mockSavedObject);
+      mockSoClient.find.mockResolvedValue(mockNoPackagePolicies);
       const deleteError = new Error('Database delete failed');
       mockSoClient.delete.mockRejectedValue(deleteError);
 
-      await expect(service.delete(mockSoClient, 'cloud-connector-123')).rejects.toThrow(
-        'Failed to delete cloud connector: Database delete failed'
-      );
+      await expect(
+        service.delete(mockSoClient, mockEsClient, 'cloud-connector-123')
+      ).rejects.toThrow('Failed to delete cloud connector: Database delete failed');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to delete cloud connector',
@@ -1622,8 +1926,28 @@ describe('CloudConnectorService', () => {
         );
       });
 
-      it('should throw error when external_id is missing', () => {
+      it.each([
+        ['123456', 'not an ARN'],
+        ['arn:aws:iam::123:role/TestRole', 'a short account id'],
+        ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u', 'a stack ARN'],
+        [' arn:aws:iam::123456789012:role/TestRole', 'surrounding whitespace'],
+        ['   ', 'whitespace only'],
+      ])('should throw error when role_arn is %p (%s)', (roleArn) => {
         const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'test-connector',
+          cloudProvider: 'aws',
+          vars: {
+            role_arn: { value: roleArn, type: 'text' },
+          },
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
+          'role_arn must be an IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
+        );
+      });
+
+      it('should validate successfully when external_id is absent (identity federation without external ID)', () => {
+        const validRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
           cloudProvider: 'aws',
           vars: {
@@ -1631,12 +1955,10 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          } as any, // Intentionally invalid for testing validation
+          },
         };
 
-        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Package policy must contain valid external_id secret reference'
-        );
+        expect(() => (service as any).validateCloudConnectorDetails(validRequest)).not.toThrow();
       });
 
       it('should throw error when external_id value is missing', () => {
@@ -1869,10 +2191,10 @@ describe('CloudConnectorService', () => {
         );
       });
 
-      it('should throw error for gcp cloud provider', () => {
+      it('should throw error for unknown cloud provider', () => {
         const invalidRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
-          cloudProvider: 'gcp' as any,
+          cloudProvider: 'unknown' as any,
           vars: {
             role_arn: {
               value: 'arn:aws:iam::123456789012:role/TestRole',
@@ -1889,7 +2211,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Unsupported cloud provider: gcp'
+          'Unsupported cloud provider: unknown'
         );
       });
     });
@@ -1918,11 +2240,11 @@ describe('CloudConnectorService', () => {
             namespace: '*',
             cloudProvider: 'azure',
             vars: azureRequest.vars,
-            packagePolicyCount: 1,
+            packagePolicyCount: 0,
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         // Mock the find call for duplicate name checking
         mockSoClient.find.mockResolvedValue({
@@ -1944,7 +2266,6 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
         });
         expect((createCall as any).created_at).toBeDefined();
         expect((createCall as any).updated_at).toBeDefined();
@@ -1955,7 +2276,7 @@ describe('CloudConnectorService', () => {
           namespace: '*',
           cloudProvider: 'azure',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
+          packagePolicyCount: 0,
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-01-01T00:00:00.000Z',
         });
@@ -1986,7 +2307,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         mockSoClient.create.mockResolvedValue(mockSavedObject);
 
@@ -2000,7 +2321,6 @@ describe('CloudConnectorService', () => {
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
-          packagePolicyCount: 1,
         });
         expect((createCall as any).created_at).toBeDefined();
         expect((createCall as any).updated_at).toBeDefined();
@@ -2064,7 +2384,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         const updateRequest = {
           vars: {
@@ -2122,7 +2442,7 @@ describe('CloudConnectorService', () => {
             created_at: '2023-01-01T00:00:00.000Z',
             updated_at: '2023-01-01T00:00:00.000Z',
           },
-        } as SavedObject<CloudConnector>;
+        } as unknown as SavedObject<CloudConnector>;
 
         const invalidUpdateRequest = {
           vars: {
@@ -2214,6 +2534,426 @@ describe('CloudConnectorService', () => {
           'azure_credentials_cloud_connector_id must be a valid string'
         );
       });
+    });
+  });
+
+  describe('CloudConnectorService - GCP support', () => {
+    describe('create', () => {
+      it('should create GCP cloud connector with valid vars', async () => {
+        const gcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: { isSecretRef: true, id: 'gcp-connector-id' },
+              type: 'password',
+            },
+          },
+        };
+
+        const mockSavedObject = {
+          id: 'cloud-connector-123',
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            name: 'gcp-test-connector',
+            namespace: '*',
+            cloudProvider: 'gcp',
+            vars: gcpRequest.vars,
+            packagePolicyCount: 0,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as unknown as SavedObject<CloudConnector>;
+
+        // Mock the find call for duplicate name checking
+        mockSoClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 10000,
+        });
+
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        const result = await service.create(mockSoClient, gcpRequest);
+
+        expect(mockSoClient.create).toHaveBeenCalledTimes(1);
+        const [[type, createCall]] = mockSoClient.create.mock.calls;
+        expect(type).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
+        expect(createCall).toMatchObject({
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          namespace: '*',
+          vars: gcpRequest.vars,
+        });
+        expect((createCall as any).created_at).toBeDefined();
+        expect((createCall as any).updated_at).toBeDefined();
+
+        expect(result).toEqual({
+          id: 'cloud-connector-123',
+          name: 'gcp-test-connector',
+          namespace: '*',
+          cloudProvider: 'gcp',
+          vars: gcpRequest.vars,
+          packagePolicyCount: 0,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        });
+      });
+
+      it('should throw error for GCP connector with missing service_account', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'service_account must be a valid string'
+        );
+      });
+
+      it('should throw error for GCP connector with missing audience', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'audience must be a valid string'
+        );
+      });
+
+      it('should throw error for GCP connector with missing gcp_credentials_cloud_connector_id', async () => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
+          'gcp_credentials_cloud_connector_id must be a valid string'
+        );
+      });
+    });
+
+    describe('update', () => {
+      it('should update GCP cloud connector vars', async () => {
+        const existingConnector = {
+          id: 'cloud-connector-123',
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            name: 'existing-gcp-connector',
+            namespace: '*',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'old-service-account@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: { isSecretRef: true, id: 'old-gcp-connector-id' },
+                type: 'password',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as unknown as SavedObject<CloudConnector>;
+
+        const updateRequest = {
+          vars: {
+            service_account: {
+              value: 'new-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/222222222/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: { isSecretRef: true, id: 'new-gcp-connector-id' },
+              type: 'password',
+            },
+          },
+        } as Partial<UpdateCloudConnectorRequest>;
+
+        const updatedConnector = {
+          ...existingConnector,
+          attributes: {
+            ...existingConnector.attributes,
+            vars: updateRequest.vars,
+            updated_at: '2023-01-02T00:00:00.000Z',
+          },
+        };
+
+        mockSoClient.get.mockResolvedValue(existingConnector);
+        mockSoClient.update.mockResolvedValue(updatedConnector);
+
+        const result = await service.update(mockSoClient, 'cloud-connector-123', updateRequest);
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          'cloud-connector-123',
+          expect.objectContaining({
+            vars: updateRequest.vars,
+            updated_at: expect.any(String),
+          })
+        );
+
+        expect(result.vars).toEqual(updateRequest.vars);
+      });
+
+      it('should validate GCP vars on update', async () => {
+        const existingConnector = {
+          id: 'cloud-connector-123',
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            name: 'existing-gcp-connector',
+            namespace: '*',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'old-service-account@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/111111111/locations/global/workloadIdentityPools/old-pool/providers/old-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: { isSecretRef: true, id: 'old-gcp-connector-id' },
+                type: 'password',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        } as unknown as SavedObject<CloudConnector>;
+
+        const invalidUpdateRequest = {
+          vars: {
+            service_account: { value: '', type: 'text' }, // Empty service account
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/222222222/locations/global/workloadIdentityPools/new-pool/providers/new-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'new-gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        mockSoClient.get.mockResolvedValue(existingConnector);
+
+        await expect(
+          service.update(mockSoClient, 'cloud-connector-123', invalidUpdateRequest)
+        ).rejects.toThrow('service_account must be a valid string');
+      });
+    });
+
+    describe('validateCloudConnectorDetails', () => {
+      it('should validate GCP connector requires all three fields', () => {
+        const validGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: { isSecretRef: true, id: 'gcp-connector-id' },
+              type: 'password',
+            },
+          },
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(validGcpRequest)).not.toThrow();
+      });
+
+      it('should validate GCP fields are text values', () => {
+        const invalidGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: { value: '', type: 'text' }, // Empty service account
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidGcpRequest)).toThrow(
+          'service_account must be a valid string'
+        );
+      });
+
+      it('should validate GCP connector with missing audience', () => {
+        const invalidGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidGcpRequest)).toThrow(
+          'audience must be a valid string'
+        );
+      });
+
+      it('should validate GCP connector with missing gcp_credentials_cloud_connector_id', () => {
+        const invalidGcpRequest: CreateCloudConnectorRequest = {
+          name: 'gcp-test-connector',
+          cloudProvider: 'gcp',
+          vars: {
+            service_account: {
+              value: 'test-service-account@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+          } as any,
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidGcpRequest)).toThrow(
+          'gcp_credentials_cloud_connector_id must be a valid string'
+        );
+      });
+    });
+  });
+
+  describe('iac fields', () => {
+    const baseCreate: CreateCloudConnectorRequest = {
+      name: 'iac-connector',
+      cloudProvider: 'aws',
+      vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
+    };
+
+    it('create leaves iac fields unset when not provided (static template)', async () => {
+      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 1 });
+      mockSoClient.create.mockImplementation(async (_type, attributes) => ({
+        id: 'cc-1',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      }));
+
+      await service.create(mockSoClient, baseCreate);
+
+      const [, attributes] = mockSoClient.create.mock.calls[0];
+      expect(attributes).not.toHaveProperty('iac_key');
+      expect(attributes).not.toHaveProperty('iac_deployment_id');
+    });
+
+    it('update writes iac_key and iac_deployment_id only when present in the request', async () => {
+      const existing = {
+        id: 'cc-1',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'iac-connector',
+          namespace: '*',
+          cloudProvider: 'aws',
+          vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      mockSoClient.get.mockResolvedValue(existing);
+      mockSoClient.update.mockImplementation(async (_type, _id, attributes) => ({
+        ...existing,
+        attributes: { ...existing.attributes, ...attributes },
+      }));
+      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await service.update(mockSoClient, 'cc-1', { iac_key: 'sha256:new' });
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cc-1',
+        expect.objectContaining({ iac_key: 'sha256:new' })
+      );
+      const [, , firstUpdate] = mockSoClient.update.mock.calls[0];
+      expect(firstUpdate).not.toHaveProperty('iac_deployment_id');
+
+      await service.update(mockSoClient, 'cc-1', { name: 'renamed' });
+      const [, , secondUpdate] = mockSoClient.update.mock.calls[1];
+      expect(secondUpdate).not.toHaveProperty('iac_key');
     });
   });
 });

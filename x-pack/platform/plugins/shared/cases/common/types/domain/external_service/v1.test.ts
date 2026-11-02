@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExternalServiceRt } from './v1';
+import { ExternalServiceSchema } from './v1';
 
-describe('ExternalServiceRt', () => {
+describe('ExternalServiceSchema', () => {
   const defaultRequest = {
     connector_id: 'servicenow-1',
     connector_name: 'My SN connector',
@@ -21,33 +21,25 @@ describe('ExternalServiceRt', () => {
       email: 'leslie.knope@elastic.co',
     },
   };
+
   it('has expected attributes in request', () => {
-    const query = ExternalServiceRt.decode(defaultRequest);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+    const result = ExternalServiceSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 
-  it('removes foo:bar attributes from request', () => {
-    const query = ExternalServiceRt.decode({ ...defaultRequest, foo: 'bar' });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+  it('strips unknown fields', () => {
+    const result = ExternalServiceSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 
-  it('removes foo:bar attributes from pushed_by', () => {
-    const query = ExternalServiceRt.decode({
+  it('strips unknown fields from pushed_by', () => {
+    const result = ExternalServiceSchema.safeParse({
       ...defaultRequest,
       pushed_by: { ...defaultRequest.pushed_by, foo: 'bar' },
     });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultRequest,
-    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });

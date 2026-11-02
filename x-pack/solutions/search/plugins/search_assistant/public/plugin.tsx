@@ -61,24 +61,24 @@ export class SearchAssistantPlugin
       return {};
     }
 
-    coreStart.chrome.navControls.registerRight({
-      mount: (element) => {
-        ReactDOM.render(
-          <NavControlInitiator
-            appService={appService}
-            coreStart={coreStart}
-            pluginsStart={pluginsStart}
-          />,
-          element,
-          () => {}
-        );
+    const mountSearchAssistant = (element: HTMLElement) => {
+      ReactDOM.render(
+        <NavControlInitiator
+          appService={appService}
+          coreStart={coreStart}
+          pluginsStart={pluginsStart}
+        />,
+        element,
+        () => {}
+      );
 
-        return () => {
-          ReactDOM.unmountComponentAtNode(element);
-        };
-      },
-      // right before the user profile
-      order: 1001,
+      return () => {
+        ReactDOM.unmountComponentAtNode(element);
+      };
+    };
+
+    coreStart.chrome.controls.aiButton.register({
+      content: mountSearchAssistant,
     });
 
     return {};

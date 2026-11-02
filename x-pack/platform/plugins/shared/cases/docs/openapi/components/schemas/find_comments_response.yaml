@@ -1,0 +1,24 @@
+# Response for GET /api/cases/{caseId}/comments/_find (find case comments).
+# Returns only user comments; alerts are not included.
+title: Find case comments response
+type: object
+required:
+  - comments
+  - page
+  - per_page
+  - total
+properties:
+  comments:
+    type: array
+    description: Paginated list of user comments for the case.
+    items:
+      $ref: 'user_comment_response_properties.yaml'
+  page:
+    type: integer
+    description: The current page index.
+  per_page:
+    type: integer
+    description: The number of items per page.
+  total:
+    type: integer
+    description: The total number of comments.

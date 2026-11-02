@@ -32,9 +32,14 @@ paths:
               required:
                 - id
                 - value
-            example:
-              id: ip_item
-              value: 255.255.255.255
+              example:
+                id: ip_item
+                value: 255.255.255.255
+            examples:
+              fullReplace:
+                value:
+                  id: ip_item
+                  value: 255.255.255.255
       responses:
         200:
           description: Successful response

@@ -1,15 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-agent-builder-plugin",
-  "owner": ["@elastic/obs-ai-team"],
+  "owner": ["@elastic/nightshift-context-and-research-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
     "id": "observabilityAgentBuilder",
-    "browser": false,
+    "browser": true,
     "server": true,
     "requiredPlugins": [
-      "onechat",
+      "agentBuilder",
       "apmDataAccess",
       "logsDataAccess",
       "inference",
@@ -17,10 +17,13 @@
       "ruleRegistry",
       "dataViews",
       "metricsDataAccess",
-      "inference"
+      "inference",
+      "discoverShared",
+      "licensing",
+      "searchInferenceEndpoints"
     ],
-    "optionalPlugins": ["ml"],
-    "requiredBundles": [],
+    "optionalPlugins": ["ml", "spaces", "cloud"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }
 }

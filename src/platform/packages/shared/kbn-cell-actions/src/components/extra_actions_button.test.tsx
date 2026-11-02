@@ -18,7 +18,7 @@ describe('ExtraActionsButton', () => {
     );
 
     expect(queryByTestId('showExtraActionsButton')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type="boxesHorizontal"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="boxesVertical"]')).toBeInTheDocument();
   });
 
   it('renders tooltip when showTooltip=true is received', () => {

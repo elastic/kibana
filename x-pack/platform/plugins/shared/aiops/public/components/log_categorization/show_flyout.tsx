@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -34,9 +32,10 @@ export async function showCategorizeFlyout(
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
   additionalFilter?: CategorizationAdditionalFilter,
-  focusTrapProps?: EuiFlyoutProps['focusTrapProps']
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps'],
+  projectRouting?: string
 ): Promise<void> {
-  const { overlays, application, i18n } = coreStart;
+  const { overlays, i18n } = coreStart;
 
   return new Promise((resolve, reject) => {
     try {
@@ -80,6 +79,7 @@ export async function showCategorizeFlyout(
                     selectedField={field}
                     onClose={onFlyoutClose}
                     additionalFilter={additionalFilter}
+                    projectRouting={projectRouting}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>
@@ -96,13 +96,6 @@ export async function showCategorizeFlyout(
           focusTrapProps,
         }
       );
-
-      // Close the flyout when user navigates out of the current plugin
-      application.currentAppId$
-        .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-        .subscribe(() => {
-          flyoutSession.close();
-        });
     } catch (error) {
       reject(error);
     }
