@@ -25,7 +25,6 @@ export const CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH = 160;
  * service matrix (`ingest_hub`), which a test there checks.
  */
 export const AWS_ONBOARDING_PACKAGE_NAMES: readonly string[] = [
-  'amazon_security_lake',
   'aws',
   'aws_bedrock',
   'aws_bedrock_agentcore',
@@ -34,5 +33,6 @@ export const AWS_ONBOARDING_PACKAGE_NAMES: readonly string[] = [
   'aws_logs',
   'aws_mq',
   'aws_securityhub',
+  'amazon_security_lake',
   'awsfargate',
 ];
