@@ -85,13 +85,6 @@ interface GraphNodeCallbacks {
    * Note: `GraphInvestigation` does not expose flow direction — callers always receive the source IP.
    */
   onShowNetwork: (ip: string) => void;
-  /**
-   * Scope for the graph's filter state. Defaults to a scope unique to this mounted graph so
-   * graphs open at the same time don't share filters. Consumers that only ever mount one graph
-   * and restore grouped-node previews from the URL (the legacy expandable flyout) pass a stable
-   * scope, so restored previews still reach the graph after a reload.
-   */
-  graphScopeId?: string;
 }
 
 /** Props for event/alert mode — drives the graph from an alert/event document */
@@ -99,6 +92,13 @@ interface EventGraphVisualizationProps extends GraphNodeCallbacks {
   mode: 'event';
   /** Scope ID for the flyout panel */
   scopeId: string;
+  /**
+   * Scope for the graph's filter state. Defaults to a scope unique to this mounted graph so
+   * graphs open at the same time don't share filters. Consumers that only ever mount one graph
+   * and restore grouped-node previews from the URL (the legacy expandable flyout) pass a stable
+   * scope, so restored previews still reach the graph after a reload.
+   */
+  graphScopeId?: string;
   /** Event/alert document IDs that are the origin of the graph */
   eventIds: string[];
   /** Timestamp of the source event/alert */
@@ -112,6 +112,8 @@ interface EntityGraphVisualizationProps extends GraphNodeCallbacks {
   mode: 'entity';
   /** Scope ID for the flyout panel */
   scopeId: string;
+  /** Scope for the graph's filter state. See `EventGraphVisualizationProps.graphScopeId`. */
+  graphScopeId?: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
 }
