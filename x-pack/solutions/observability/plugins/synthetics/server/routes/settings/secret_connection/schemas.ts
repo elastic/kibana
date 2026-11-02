@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { validateVaultAddress } from './address_guard';
-import { SECRET_CONNECTION_NAME_REGEX } from '../../../synthetics_service/formatters/vault_param_formatter';
+import { SECRET_CONNECTION_NAME_REGEX } from '../../../../common/lib/vault_reference';
 
 // Upper bound for any single connection string; these flow into SO docs and the
 // delivered policy blob, so keep them bounded (AGENTS.md).

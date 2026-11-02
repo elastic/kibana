@@ -10,6 +10,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import { ALERTZERO_INFERENCE_PARENT_FEATURE_ID } from '@kbn/alertzero-common';
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
@@ -107,15 +108,24 @@ const buildScopedModel = async ({
   inference,
   request,
   inferenceEndpointId,
+  telemetryPluginId,
 }: {
   inference: InferenceServerStart;
   request: KibanaRequest;
   inferenceEndpointId: string;
+  telemetryPluginId: string;
 }): Promise<ScopedModel> => {
   const chatModel = await inference.getChatModel({
     request,
     connectorId: inferenceEndpointId,
-    chatModelOptions: {},
+    chatModelOptions: {
+      // Without this the token-usage doc carries no feature_id/parent_feature_id, so the
+      // call is invisible to per-feature cost reporting.
+      telemetryMetadata: {
+        pluginId: telemetryPluginId,
+        aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+      },
+    },
   });
   const inferenceClient = inference.getClient({
     request,
@@ -137,10 +147,11 @@ const tryBuildScoped = async (
   request: KibanaRequest,
   inferenceEndpointId: string,
   label: string,
-  logger: Logger
+  logger: Logger,
+  telemetryPluginId: string
 ): Promise<ScopedModel | null> => {
   try {
-    return await buildScopedModel({ inference, request, inferenceEndpointId });
+    return await buildScopedModel({ inference, request, inferenceEndpointId, telemetryPluginId });
   } catch (err) {
     logger.warn(
       `[ti:inference] ${label} inference_endpoint='${inferenceEndpointId}' unavailable — ` +
@@ -182,6 +193,7 @@ export const resolveScopedModel = async ({
   request,
   uiSettingsClient,
   featureId,
+  telemetryPluginId,
   logger,
 }: {
   inference: InferenceServerStart | undefined;
@@ -189,6 +201,8 @@ export const resolveScopedModel = async ({
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
+  /** Token-usage `feature_id` for this model's calls, rolled up under `alertzero_parent`. */
+  telemetryPluginId: string;
   logger: Logger;
 }): Promise<ResolveScopedModelOutcome> => {
   if (!inference) {
@@ -216,7 +230,8 @@ export const resolveScopedModel = async ({
       request,
       endpointId,
       `feature='${featureId}'`,
-      logger
+      logger,
+      telemetryPluginId
     );
     if (model) return { ok: true, model };
   }
@@ -228,7 +243,14 @@ export const resolveScopedModel = async ({
   if (!searchInferenceEndpoints) {
     const fallbackId = await resolveConnectorId({ inference, request, uiSettingsClient, logger });
     if (fallbackId) {
-      const model = await tryBuildScoped(inference, request, fallbackId, 'genAi-default', logger);
+      const model = await tryBuildScoped(
+        inference,
+        request,
+        fallbackId,
+        'genAi-default',
+        logger,
+        telemetryPluginId
+      );
       if (model) return { ok: true, model };
     }
   } else {

@@ -22,6 +22,16 @@ const CATEGORY_RULES: ReadonlyArray<{
   category: FailureCategory;
   test: (lower: string) => boolean;
 }> = [
+  // Model refusals (e.g. `finish_reason: content_filter`) — checked first, because the message
+  // usually arrives wrapped in generic "Generation workflow failed" text.
+  {
+    category: 'content_filter',
+    test: (l) =>
+      includesAny(l, [
+        'the model refused to complete the response',
+        'finish_reason: content_filter',
+      ]),
+  },
   // Workflow-specific categories — checked before generic 'workflow' catch-all.
   { category: 'workflow_disabled', test: (l) => includesAny(l, ['is not enabled', 'is disabled']) },
   { category: 'workflow_deleted', test: (l) => l.includes('not found') && l.includes('workflow') },

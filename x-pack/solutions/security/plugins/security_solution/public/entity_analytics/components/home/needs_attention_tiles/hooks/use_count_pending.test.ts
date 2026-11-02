@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -156,6 +157,24 @@ describe.each([
     expect(result).not.toHaveProperty('severeAlertsCount', 7);
   });
 
+  it('has a count for a result of 0, but not when the count was skipped, failed or timed out', () => {
+    const hasCount = (props: object = {}) => render(props).hasCount;
+    // A genuine 0 is a result.
+    query({ data: { count: 0, severeAlertsCount: 0, entityIds: [] } });
+    expect(hasCount()).toBe(true);
+    // Skipped (the query never runs) or still waiting: no data.
+    query({ data: undefined });
+    expect(hasCount({ skip: true })).toBe(false);
+    // Failed, also when an earlier result is still on show.
+    query({ error: new Error('boom') });
+    expect(hasCount()).toBe(false);
+    query({ data: { count: 0, severeAlertsCount: 0, entityIds: [] }, error: new Error('boom') });
+    expect(hasCount()).toBe(false);
+    // Timed out.
+    query({ error: new TileQueryTimeoutError() });
+    expect(hasCount()).toBe(false);
+  });
+
   it('reports other errors as before, with a toast, and does not call them a timeout', () => {
     const error = new Error('boom');
     query({ error });
@@ -163,6 +182,18 @@ describe.each([
     expect(result.isTimedOut).toBe(false);
     const toastCalls = (useErrorToast as jest.Mock).mock.calls;
     expect(toastCalls[toastCalls.length - 1][1]).toBe(error);
+  });
+
+  it('runs its query in the local project only', async () => {
+    const search = jest.fn().mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
+    (useKibana as jest.Mock).mockReturnValue({ services: { data: { search: { search } } } });
+    renderHook(() => useCount({ spaceId: 'default' }));
+    const [key, queryFn] = mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1];
+    await queryFn({ signal: undefined });
+    expect(search).toHaveBeenCalledWith(
+      { params: { query: key[1] } },
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+    );
   });
 
   it('retries an error once but not a timeout', () => {
