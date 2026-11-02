@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { z } from '@kbn/zod/v4';
@@ -46,7 +50,9 @@ describe('CasesWorkflowRunService', () => {
     isActive: true,
     hasAtLeast: jest.fn(() => licenseValid),
   };
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const context = {
+    core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: esClient } } }),
     licensing: Promise.resolve({ license }),
   } as unknown as CasesRequestHandlerContext;
   const management = {
@@ -160,6 +166,7 @@ describe('CasesWorkflowRunService', () => {
       undefined as never
     );
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
+    esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
       name: 'Investigate case',
@@ -794,6 +801,44 @@ describe('CasesWorkflowRunService', () => {
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+  });
+
+  describe('when an alert is attached under the alerts alias', () => {
+    const alertsAlias = '.alerts-security.alerts-default';
+    const backingIndex = '.internal.alerts-security.alerts-default-000001';
+
+    beforeEach(() => {
+      setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: alertsAlias });
+      esClient.search.mockResolvedValue({
+        hits: { hits: [{ _id: 'alert-1', _index: backingIndex }] },
+      } as never);
+    });
+
+    it('runs on the alert selected under its backing index', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { alertIds: [{ _id: 'alert-1', _index: backingIndex }] } },
+          origin: alertOrigin('alert-1'),
+        })
+      ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: alertsAlias, query: { ids: { values: ['alert-1'] } } })
+      );
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an index the alias does not resolve the alert to', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-spoofed' }] } },
+          origin: alertOrigin('alert-1'),
+        })
+      ).rejects.toThrow('All selected alerts must belong to the case.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   it('rejects an alert origin without selected alerts with a specific validation error', async () => {
