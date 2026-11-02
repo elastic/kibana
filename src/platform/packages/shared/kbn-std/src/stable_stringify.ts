@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { configure } from 'safe-stable-stringify';
-
-// v3 defaults the circular marker to "[Circular: N]". Pin the v2 marker so
-// cache keys and hashes that run through stableStringify stay stable.
-const stringify = configure({ circularValue: '[Circular]' });
+import { stringify } from 'safe-stable-stringify';
 
 export interface StableStringifyOptions {
   /**
@@ -32,7 +28,8 @@ export interface StableStringifyOptions {
  * - Creating hashes for comparison
  * - Cryptographic operations requiring deterministic input
  *
- * Also handles circular references safely by replacing them with "[Circular]".
+ * Also handles circular references safely by replacing them with "[Circular: N]",
+ * where N is the depth of the referenced ancestor.
  *
  * @param value - The value to stringify
  * @param options - Optional configuration for formatting
