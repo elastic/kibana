@@ -38,7 +38,7 @@ import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
 import type { EntityGridView } from './entities_grid_view_context';
 import { DataViewContext } from '../../entities_table';
-import { getReadableColumns, isGridColumnId } from '../grid_columns';
+import { COLUMN_ACTIONS, getReadableColumns, isGridColumnId } from '../grid_columns';
 import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
 import { RISK_SCORE_NORM_FIELD } from '../common';
@@ -244,6 +244,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       keepFields.map((id) => ({
         id,
         displayAsText: dataView?.getFieldByName(id)?.customLabel || id,
+        actions: COLUMN_ACTIONS,
         initialWidth: 160,
         isSortable: false,
         isExpandable: false,

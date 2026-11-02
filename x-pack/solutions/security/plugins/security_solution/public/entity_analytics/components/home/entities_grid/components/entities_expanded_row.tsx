@@ -413,6 +413,7 @@ const EntityGridExpanderCell = ({ rowIndex }: EuiDataGridCellValueElementProps) 
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon
+        data-test-subj="eaGridExpandToggle"
         size="xs"
         color="text"
         aria-label={label}

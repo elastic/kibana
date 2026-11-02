@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
 import { alertCountQuerySpec, lastSeenAlertQuerySpec } from './queries/alerts';
 import { anomalyCountQuerySpec } from './queries/anomalies';
 import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
@@ -84,8 +84,22 @@ export const ENRICHED_FIELDS: ReadonlySet<string> = new Set(
   Object.values(QUERY_SPECS).flatMap((spec) => spec?.enricher?.fields ?? [])
 );
 
+/**
+ * EUI merges these into the header menu's built-in items and keeps their labels, so a click on one
+ * tells which action it was. It types each as a full `EuiListGroupItemProps`, which requires a
+ * `label` that would replace the built-in one, so only the test subjects are passed, cast.
+ */
+export const COLUMN_ACTIONS = {
+  showSortAsc: { 'data-test-subj': 'eaGridColumnSortAsc' },
+  showSortDesc: { 'data-test-subj': 'eaGridColumnSortDesc' },
+  showHide: { 'data-test-subj': 'eaGridColumnHide' },
+  showMoveLeft: { 'data-test-subj': 'eaGridColumnMoveLeft' },
+  showMoveRight: { 'data-test-subj': 'eaGridColumnMoveRight' },
+} as EuiDataGridColumnActions;
+
 const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
   ...column,
+  actions: COLUMN_ACTIONS,
   isSortable: QUERY_SPECS[column.id]?.fetchSortPage != null,
   isExpandable: false,
   isResizable: false,
