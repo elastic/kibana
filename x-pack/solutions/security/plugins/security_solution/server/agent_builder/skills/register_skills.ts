@@ -64,7 +64,10 @@ export const registerSkills = async ({
   ml,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
-  if (experimentalFeatures.automaticTroubleshootingSkill) {
+  if (
+    experimentalFeatures.automaticTroubleshootingSkill &&
+    !experimentalFeatures.automaticTroubleshootingUniversalSkill
+  ) {
     agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService, experimentalFeatures)
     );
