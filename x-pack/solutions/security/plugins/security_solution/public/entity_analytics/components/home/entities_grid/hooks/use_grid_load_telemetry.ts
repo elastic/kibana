@@ -72,6 +72,7 @@ const toEvent = (run: LoadRun, outcome: LoadOutcome, duration: number, meta: Gri
  * filter, search or range (`runKey`), once the rows, the count and the computed columns of the
  * first rows in view have settled: how long the grid took, how long its rows and its count took,
  * and whether a query failed. A failed load is reported once nothing is fetching any more.
+ * While the filters it needs resolve (`isFilterPending`), the load is timed but can't settle.
  * A load left before it settled (a new `runKey`, or the grid unmounted) is reported as
  * `abandoned` with its time so far: the slowest loads are the ones people give up on.
  * Successes are reported too: they are the baseline a slow space stands out against.
@@ -79,12 +80,14 @@ const toEvent = (run: LoadRun, outcome: LoadOutcome, duration: number, meta: Gri
 export const useGridLoadTelemetry = ({
   skip,
   runKey,
+  isFilterPending,
   loadState,
   isFetching,
   meta,
 }: {
   skip: boolean;
   runKey: string;
+  isFilterPending: boolean;
   loadState: EntityGridLoadState;
   isFetching: boolean;
   meta: GridLoadMeta;
@@ -115,7 +118,7 @@ export const useGridLoadTelemetry = ({
     }
     runMeta.current = meta;
     const current = run.current;
-    if (current.isReported) return;
+    if (current.isReported || isFilterPending) return;
 
     const { isRowsPending, isCountPending, isEnrichPending, hasError } = loadState;
     if (current.rows === undefined && !isRowsPending) {

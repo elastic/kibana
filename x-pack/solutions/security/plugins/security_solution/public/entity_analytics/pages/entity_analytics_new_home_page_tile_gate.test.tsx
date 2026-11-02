@@ -472,9 +472,38 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
 
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
     expect(gridCalls[gridCalls.length - 1][0].loadTelemetry).toEqual({
+      runKey: expect.any(String),
+      isFilterPending: false,
       hasTileFilter: false,
       hasEntityFilters: false,
     });
+  });
+
+  it('keys a grid load on the search as typed, and holds it while its overrides resolve', () => {
+    mockPrivileges();
+    const loadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'entity.name == "a"',
+      rawSearchExpression: 'entity.name == "a"',
+      isSearchOverridesPending: true,
+    });
+    const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    const { runKey, isFilterPending } = loadTelemetry();
+    expect(isFilterPending).toBe(true);
+
+    // The overrides arrive and patch the expression: the same load, now free to settle.
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: '(entity.name == "a" AND NOT entity.id IN ("x")) OR entity.id IN ("y")',
+      rawSearchExpression: 'entity.name == "a"',
+      isSearchOverridesPending: false,
+    });
+    rerender(<EntityAnalyticsNewHomePage />);
+    expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
+
+    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
   });
 });
 

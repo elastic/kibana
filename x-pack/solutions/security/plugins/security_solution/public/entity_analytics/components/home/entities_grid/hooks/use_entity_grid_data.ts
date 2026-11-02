@@ -286,7 +286,8 @@ export const useEntityGridData = (
   const loadState: EntityGridLoadState = {
     isRowsPending: isQueryPending(rowsQuery),
     isCountPending: isQueryPending(countQuery),
-    isEnrichPending: rows.length > 0 && (!enrichment.hasEnrichedRows || enrichment.isEnriching),
+    // The first chunk asked for settles it: chunks that scrolling asks for later don't count.
+    isEnrichPending: rows.length > 0 && !enrichment.hasEnrichedRows,
     hasError: error != null || enrichment.hasFailedColumns,
   };
 

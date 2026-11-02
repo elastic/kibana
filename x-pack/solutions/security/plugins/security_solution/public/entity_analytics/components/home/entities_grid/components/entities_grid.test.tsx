@@ -292,11 +292,18 @@ describe('EntitiesGrid', () => {
       renderGrid({
         sortField: 'alert_count',
         sortDirection: 'desc',
-        loadTelemetry: { hasTileFilter: true, hasEntityFilters: false },
+        loadTelemetry: {
+          runKey: 'page-run-key',
+          isFilterPending: true,
+          hasTileFilter: true,
+          hasEntityFilters: false,
+        },
       });
 
       expect(telemetryCalls().at(-1)).toMatchObject({
         skip: false,
+        runKey: 'page-run-key',
+        isFilterPending: true,
         meta: {
           rowsMode: 'resolved',
           sortField: 'alert_count',
@@ -306,31 +313,6 @@ describe('EntitiesGrid', () => {
           isAtLoadLimit: true,
         },
       });
-    });
-
-    it('keeps one run key across re-renders, and starts a new one for a new sort', () => {
-      const loadTelemetry = { hasTileFilter: false, hasEntityFilters: false };
-      const { rerender } = renderGrid({ loadTelemetry });
-      const firstKey = telemetryCalls().at(-1)?.runKey;
-      expect(new Set(telemetryCalls().map(({ runKey }) => runKey))).toEqual(new Set([firstKey]));
-
-      rerender(
-        <TestProviders>
-          <EntitiesGrid
-            columns={RESOLVED_ROWS_COLUMNS}
-            rowsMode="resolved"
-            timeRange="7d"
-            watchlistNames={new Map()}
-            sortField="entity.name"
-            sortDirection="desc"
-            onSortChange={jest.fn()}
-            readAccess={FULL_ACCESS}
-            loadTelemetry={loadTelemetry}
-          />
-        </TestProviders>
-      );
-
-      expect(telemetryCalls().at(-1)?.runKey).not.toBe(firstKey);
     });
 
     it("doesn't report for a grid inside a group, nor for its expanded groups' records", () => {

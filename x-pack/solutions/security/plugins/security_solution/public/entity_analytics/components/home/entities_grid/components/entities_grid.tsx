@@ -117,7 +117,14 @@ export interface EntitiesGridProps {
   toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
   /** Only the page's own grid reports its loads; the grids inside groups don't pass it. */
-  loadTelemetry?: { hasTileFilter: boolean; hasEntityFilters: boolean };
+  loadTelemetry?: {
+    /** What the user asked for: a new key is a new load. */
+    runKey: string;
+    /** The search overrides or the tile's entity ids are still resolving for this load. */
+    isFilterPending: boolean;
+    hasTileFilter: boolean;
+    hasEntityFilters: boolean;
+  };
 }
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
@@ -212,17 +219,10 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     { enrichRowsInView: true }
   );
 
-  // A new sort, rows mode, filter, search or range is a new load; columns and scrolling aren't.
   useGridLoadTelemetry({
     skip: !loadTelemetry,
-    runKey: JSON.stringify([
-      rowsMode,
-      readableSortField,
-      readableSortDirection,
-      searchExpression,
-      entityExpression,
-      timeRange,
-    ]),
+    runKey: loadTelemetry?.runKey ?? '',
+    isFilterPending: !!loadTelemetry?.isFilterPending,
     loadState,
     isFetching,
     meta: {

@@ -550,8 +550,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const { searchExpression, searchOverrides, isSearchOverridesPending, mainEntityOnlySearch } =
-    useSearchBarExpression(rowsMode);
+  const {
+    searchExpression,
+    searchOverrides,
+    isSearchOverridesPending,
+    mainEntityOnlySearch,
+    rawSearchExpression,
+  } = useSearchBarExpression(rowsMode);
   useEffect(() => {
     if (!mainEntityOnlySearch) return;
 
@@ -931,13 +936,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   // Strings, so a tile refetch with the same entities doesn't reset the pages below.
   const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
     useMemo(() => toEsql(activeFilters), [activeFilters]);
-  const hasTileFilter = Boolean(activeTile);
-  const hasGridEntityFilters = Object.values(entityFilters).some((values) => values.length > 0);
-  // Only the flat grid reports its loads; the grids of Group by don't.
-  const gridLoadTelemetry = useMemo(
-    () => ({ hasTileFilter, hasEntityFilters: hasGridEntityFilters }),
-    [hasTileFilter, hasGridEntityFilters]
-  );
   // Group by reads the grid's rows with DSL, so it takes the overrides the grid's filters read.
   const { data: entityFilterOverrides } = useEntityFilterOverrides({
     rowsMode,
@@ -1306,6 +1304,40 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
           }))
         : signalCards,
     [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
+  );
+
+  // Only the flat grid reports its loads; the grids of Group by don't. A load is what the user asked
+  // for: its key leaves out the search overrides and the tile's entity ids that the page resolves
+  // for it, and the load waits for them, so it is timed whole and reported once.
+  const isActiveTileLoading = Boolean(
+    activeTile && shownSignalCards.find(({ id }) => id === activeTile)?.isLoading
+  );
+  const gridLoadTelemetry = useMemo(
+    () => ({
+      runKey: JSON.stringify([
+        rowsMode,
+        sortField,
+        sortDirection,
+        rawSearchExpression,
+        entityFilters,
+        activeTile,
+        timeRange,
+      ]),
+      isFilterPending: isSearchOverridesPending || isActiveTileLoading,
+      hasTileFilter: Boolean(activeTile),
+      hasEntityFilters: Object.values(entityFilters).some((values) => values.length > 0),
+    }),
+    [
+      rowsMode,
+      sortField,
+      sortDirection,
+      rawSearchExpression,
+      entityFilters,
+      activeTile,
+      timeRange,
+      isSearchOverridesPending,
+      isActiveTileLoading,
+    ]
   );
 
   const onGroupChange = useCallback(

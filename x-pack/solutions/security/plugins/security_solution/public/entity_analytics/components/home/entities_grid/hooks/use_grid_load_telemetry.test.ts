@@ -35,6 +35,7 @@ type Props = Parameters<typeof useGridLoadTelemetry>[0];
 const props = (loadState: EntityGridLoadState, overrides: Partial<Props> = {}): Props => ({
   skip: false,
   runKey: 'resolved:risk:7d',
+  isFilterPending: false,
   loadState,
   isFetching: Object.values(loadState).some(Boolean),
   meta: {
@@ -248,5 +249,34 @@ describe('useGridLoadTelemetry, loads left before they settle', () => {
     });
     unmount();
     expect(reportEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe('useGridLoadTelemetry, while the filters of a load resolve', () => {
+  let now = 0;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    now = 0;
+    jest.spyOn(performance, 'now').mockImplementation(() => now);
+    (useKibana as jest.Mock).mockReturnValue({ services: { analytics: { reportEvent } } });
+  });
+
+  it('times the wait for the search overrides or tile ids, and reports the load once', () => {
+    const { rerender } = renderHook((p: Props) => useGridLoadTelemetry(p), {
+      initialProps: props(settled, { isFilterPending: true }),
+    });
+    now = 1200;
+    // The grid shows the rows of the filter before it resolved: not this load's result yet.
+    rerender(props(settled, { isFilterPending: true }));
+    expect(reportEvent).not.toHaveBeenCalled();
+
+    now = 2000;
+    rerender(props(settled));
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent.mock.calls[0][1]).toMatchObject({
+      duration: 2000,
+      meta: { outcome: 'ok' },
+    });
   });
 });
