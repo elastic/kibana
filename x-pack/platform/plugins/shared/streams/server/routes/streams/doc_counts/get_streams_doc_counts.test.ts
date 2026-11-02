@@ -122,15 +122,16 @@ describe('getFailedDocCountsForStreams query scope', () => {
     expect(getEsqlQuery(esClient)).toMatch(/^FROM \*::failures METADATA _index/);
   });
 
-  it('only reads the failure indices of the requested streams', async () => {
+  // Naming failure indices would fail the whole query when one is missing or unreadable.
+  it('reads every failure store for a requested stream', async () => {
     const { esClient } = makeEsClient();
 
     await getFailedDocCountsForStreams({ esClient, start: 0, end: 1, streamName: 'logs-a' });
 
-    expect(getEsqlQuery(esClient)).toMatch(/^FROM \.fs-logs-a-000001 METADATA _index/);
+    expect(getEsqlQuery(esClient)).toMatch(/^FROM \*::failures METADATA _index/);
   });
 
-  it('reads the failure indices of several requested streams', async () => {
+  it('only counts the failure indices of several requested streams', async () => {
     const { esClient, getDataStream } = makeEsClient();
     getDataStream.mockResolvedValue({
       data_streams: [
@@ -147,6 +148,7 @@ describe('getFailedDocCountsForStreams query scope', () => {
       values: [
         [5, '.fs-logs-a-000001'],
         [3, '.fs-logs-b-1'],
+        [9, '.fs-logs-unrequested-1'],
       ],
     });
 
@@ -161,7 +163,8 @@ describe('getFailedDocCountsForStreams query scope', () => {
       { name: ['logs-a', 'logs-b'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
       { querystring: { ignore_unavailable: true } }
     );
-    expect(getEsqlQuery(esClient)).toMatch(/^FROM \.fs-logs-a-000001,\.fs-logs-b-1 METADATA/);
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+    expect(getEsqlQuery(esClient)).toMatch(/^FROM \*::failures METADATA _index/);
     expect(result).toEqual([
       { stream: 'logs-a', count: 5 },
       { stream: 'logs-b', count: 3 },

@@ -384,50 +384,40 @@ export async function getFailedDocCountsForStreams(options: {
   const startIso = new Date(start).toISOString();
   const endIso = new Date(end).toISOString();
 
-  const getFailedCountRows = async (source: string): Promise<ESQLSearchResponse> =>
-    (await esClient.esql.query({
-      query: `
-FROM ${source} METADATA _index
+  const esqlQuery = `
+FROM *::failures METADATA _index
 | WHERE @timestamp >= "${startIso}" AND @timestamp <= "${endIso}"
 | STATS failed_count = COUNT(*) BY backing_index = _index
-`.trim(),
-      drop_null_columns: true,
-    })) as ESQLSearchResponse;
+`.trim();
 
-  // Scoped requests only read their own failure indices instead of every failure store.
-  const isScoped = Boolean(streamNames ?? streamName);
-  const responses = isScoped
-    ? await processAsyncInChunks({
-        items: Array.from(backingIndexToStream.keys()),
-        processChunk: (indices) => getFailedCountRows(indices.join(',')),
-      })
-    : [await getFailedCountRows('*::failures')];
+  const response = (await esClient.esql.query({
+    query: esqlQuery,
+    drop_null_columns: true,
+  })) as ESQLSearchResponse;
+
+  const backingIndexCol = response.columns.findIndex((col) => col.name === 'backing_index');
+  const failedCountCol = response.columns.findIndex((col) => col.name === 'failed_count');
+
+  if (backingIndexCol === -1 || failedCountCol === -1) {
+    return [];
+  }
 
   const countsByStream = new Map<string, number>();
 
-  for (const response of responses) {
-    const backingIndexCol = response.columns.findIndex((col) => col.name === 'backing_index');
-    const failedCountCol = response.columns.findIndex((col) => col.name === 'failed_count');
+  for (const row of response.values) {
+    const backingIndex = row[backingIndexCol] as string | undefined;
+    const failedCount = Number(row[failedCountCol] ?? 0);
 
-    if (backingIndexCol === -1 || failedCountCol === -1) {
+    if (!backingIndex || !Number.isFinite(failedCount)) {
       continue;
     }
 
-    for (const row of response.values) {
-      const backingIndex = row[backingIndexCol] as string | undefined;
-      const failedCount = Number(row[failedCountCol] ?? 0);
-
-      if (!backingIndex || !Number.isFinite(failedCount)) {
-        continue;
-      }
-
-      const stream = backingIndexToStream.get(backingIndex);
-      if (!stream) {
-        continue;
-      }
-
-      countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + failedCount);
+    const stream = backingIndexToStream.get(backingIndex);
+    if (!stream) {
+      continue;
     }
+
+    countsByStream.set(stream, (countsByStream.get(stream) ?? 0) + failedCount);
   }
 
   return Array.from(countsByStream.entries()).map(
