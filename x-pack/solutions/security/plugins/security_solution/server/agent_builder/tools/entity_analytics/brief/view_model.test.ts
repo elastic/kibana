@@ -291,7 +291,11 @@ describe('buildViewModel', () => {
 
     expect(getTitle(build())).toBe('Alerts spread across hosts');
     expect(getTitle(unverified)).toBe(NO_PRIORITIES_TITLE);
-    expect(getTitle({ ...unverified, summary: QUIET_LINE })).toBe(QUIET_TITLE);
+    const quiet = { ...unverified, summary: QUIET_LINE };
+    expect(getTitle({ ...quiet, notChecked: { unreadable: [] } })).toBe(QUIET_TITLE);
+    expect(getTitle({ ...quiet, notChecked: { unreadable: ['Risk movers'] } })).toBe(
+      NO_PRIORITIES_TITLE
+    );
   });
 
   it('lists the header facts, with coverage and what was not included only when they apply', () => {
@@ -300,7 +304,7 @@ describe('buildViewModel', () => {
     );
 
     expect(headerFacts).toEqual([
-      'Generated: 14 Oct 2026, 12:00 UTC',
+      'Captured: 14 Oct 2026, 12:00 UTC',
       'Time range: Last 7 days',
       'Risk level: High',
       'Attention tile: Risk movers',

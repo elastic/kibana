@@ -172,7 +172,7 @@ describe('renderBriefHtml', () => {
       title: 'Alerts spread across hosts',
     }).html;
     expect(withTitle).toContain('<h1>Alerts spread across hosts</h1>');
-    expect(withTitle).toContain('<strong>Generated:</strong> 20 Oct 2026, 10:53 UTC');
+    expect(withTitle).toContain('<strong>Captured:</strong> 20 Oct 2026, 10:53 UTC');
     expect(withTitle).toContain('<strong>Time range:</strong> Last 7 days');
 
     expect(renderBriefHtml(fixtureViewModel).html).toContain(

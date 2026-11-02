@@ -280,9 +280,12 @@ const describeQuietView = ({ tiles }: EntityAnalyticsScope): string => {
   return isFlagged ? NO_PRIORITIES_LINE : QUIET_LINE;
 };
 
-/** The model's title, or a fixed one for a brief without priorities. */
-export const getTitle = ({ title, summary }: BriefViewModel): string =>
-  title ?? (summary === QUIET_LINE ? QUIET_TITLE : NO_PRIORITIES_TITLE);
+/** The model's title, or a fixed one for a brief without priorities. "All clear" needs everything to have been read. */
+export const getTitle = ({ title, summary, notChecked }: BriefViewModel): string =>
+  title ??
+  (summary === QUIET_LINE && notChecked.unreadable.length === 0
+    ? QUIET_TITLE
+    : NO_PRIORITIES_TITLE);
 
 /** A key and its value, as the details under a title and under a priority print them. */
 export interface Fact {
@@ -295,7 +298,7 @@ export const getHeaderFacts = ({ scope, notChecked }: BriefViewModel): Fact[] =>
   const { unreadable, notFound } = notChecked;
   const coverage = [scope.sample, notFound].filter(Boolean).join('; ');
   return [
-    { key: 'Generated', value: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]') },
+    { key: 'Captured', value: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]') },
     { key: 'Time range', value: `Last ${scope.periodLabel}` },
     ...scope.entityFilters.map(({ label, value }) => ({ key: label, value })),
     ...(scope.focusTileTitle ? [{ key: 'Attention tile', value: scope.focusTileTitle }] : []),
