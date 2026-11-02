@@ -8,7 +8,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { convertFiltersToESQLExpression } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { GroupWrapper } from '@kbn/cloud-security-posture';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useEntityGrouping } from '../../entities_table/grouping/use_entity_grouping';
 import { processGroupFilters } from '../../entities_table/entities_table_section';
 import type { EntityURLStateResult } from '../../entities_table/hooks/use_entity_url_state';
@@ -35,6 +37,11 @@ import type { RowActions } from './cells/row_actions_cell';
 
 const GROUPED_VIEW_TABLE_ID = 'ea-new-home-grouped';
 const GROUPED_VIEW_GROUPING_ID = 'ea-new-home-grouped';
+
+const PARENT_OVERRIDES_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.parentGroupOverridesError',
+  { defaultMessage: 'Error loading entity groups' }
+);
 
 const TEST_SUBJECTS = {
   grouping: TEST_SUBJ_GROUPING,
@@ -203,7 +210,11 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
   // Other fields' buckets read DSL: a parent bucket on a group-valued field keeps the resolved
   // entities whose group's value is in it, with the overrides of that bucket alone.
   const parentGroupValueExpression = buildGroupValueBucketsExpression(groupValueBuckets);
-  const { data: parentOverrides } = useEntityFilterOverrides({
+  const {
+    data: parentOverrides,
+    error: parentOverridesError,
+    isFetching: isFetchingParentOverrides,
+  } = useEntityFilterOverrides({
     rowsMode,
     entityExpression: resolvedValueGroups.isEnabled ? undefined : parentGroupValueExpression,
   });
@@ -211,6 +222,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
     resolvedValueGroups.isEnabled ||
     !isFilteringByGroupValue({ rowsMode, entityExpression: parentGroupValueExpression }) ||
     parentOverrides != null;
+  useErrorToast(PARENT_OVERRIDES_ERROR_TITLE, parentOverridesError);
   const groupFilters: Filter[] = useMemo(
     () =>
       groupValueBuckets.length
@@ -258,7 +270,11 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
       pageSize={pageSize}
       onChangeGroupsPage={setPageIndex}
       onChangeGroupsItemsPerPage={setPageSize}
-      isFetching={resolvedValueGroups.isEnabled ? resolvedValueGroups.isFetching : isFetching}
+      isFetching={
+        resolvedValueGroups.isEnabled
+          ? resolvedValueGroups.isFetching
+          : isFetching || isFetchingParentOverrides
+      }
       selectedGroup={selectedGroup}
       groupingLevel={groupingLevel}
       testSubjects={TEST_SUBJECTS}

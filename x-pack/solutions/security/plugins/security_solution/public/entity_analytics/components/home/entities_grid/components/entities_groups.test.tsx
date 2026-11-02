@@ -13,23 +13,32 @@ import type { EntityURLStateResult } from '../../entities_table/hooks/use_entity
 import { useEntityGrouping } from '../../entities_table/grouping/use_entity_grouping';
 import { useResolvedValueGroups } from '../hooks/use_resolved_value_groups';
 import { useEntityFilterOverrides } from '../hooks/use_entity_grid_data';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { RowsMode } from '../common';
 import { EntitiesGroups } from './entities_groups';
 import { EntitiesGrid } from './entities_grid';
 
 /** The filters of the bucket each level opens. */
 let mockBucketFilters: Filter[][] = [];
+/** The `isFetching` each level passes to its group wrapper. */
+const mockWrapperFetching: Array<boolean | undefined> = [];
 
 jest.mock('@kbn/cloud-security-posture', () => ({
   GroupWrapper: ({
     renderChildComponent,
     groupingLevel = 0,
+    isFetching,
   }: {
+    isFetching?: boolean;
     renderChildComponent: (filters: Filter[]) => React.ReactNode;
     groupingLevel?: number;
     // The first level is 0, the nested ones count on from 2.
-  }) => <>{renderChildComponent(mockBucketFilters[Math.min(groupingLevel, 1)])}</>,
+  }) => {
+    mockWrapperFetching[groupingLevel] = isFetching;
+    return <>{renderChildComponent(mockBucketFilters[Math.min(groupingLevel, 1)])}</>;
+  },
 }));
+jest.mock('../../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 jest.mock('./entities_grid', () => ({ EntitiesGrid: jest.fn(() => null) }));
 jest.mock('../../entities_table/grouping/use_entity_grouping', () => ({
   useEntityGrouping: jest.fn(() => ({ groupData: {}, grouping: {}, isFetching: false })),
@@ -169,6 +178,40 @@ describe('EntitiesGroups', () => {
       expect(getLeafGridProps().searchExpression).toBe(
         'KQL("""entity.name: web*""") AND `entity.EngineMetadata.Type` : "host"'
       );
+    });
+  });
+
+  describe('a nested level whose parent overrides fail or load', () => {
+    const defaultImplementation = jest.mocked(useEntityFilterOverrides).getMockImplementation();
+
+    afterEach(() => {
+      jest.mocked(useEntityFilterOverrides).mockImplementation(defaultImplementation);
+    });
+
+    const renderNested = () => {
+      mockBucketFilters = [
+        createGroupFilter('asset.criticality', ['extreme_impact']) as Filter[],
+        createGroupFilter('entity.EngineMetadata.Type', ['host']) as Filter[],
+      ];
+      renderGroups('resolved', ['asset.criticality', 'entity.EngineMetadata.Type']);
+    };
+
+    it('shows the error of the parent overrides', () => {
+      const error = new Error('too many overrides');
+      jest.mocked(useEntityFilterOverrides).mockReturnValue({ error, isFetching: false } as never);
+      renderNested();
+
+      expect(useErrorToast).toHaveBeenCalledWith(expect.any(String), error);
+    });
+
+    it('shows the loading state while the parent overrides load', () => {
+      jest
+        .mocked(useEntityFilterOverrides)
+        .mockReturnValue({ data: undefined, isFetching: true } as never);
+      renderNested();
+
+      // The level after the first one (the first wraps the parent bucket).
+      expect(mockWrapperFetching[2]).toBe(true);
     });
   });
 });
