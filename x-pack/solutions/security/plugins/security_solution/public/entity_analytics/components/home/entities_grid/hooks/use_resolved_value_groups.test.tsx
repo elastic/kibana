@@ -18,7 +18,7 @@ import { useResolvedValueGroups } from './use_resolved_value_groups';
 import type { UseResolvedValueGroupsOptions } from './use_resolved_value_groups';
 
 const mockRunQuery = jest.fn();
-const mockFetchResolvedEntityFilterOverrides = jest.fn();
+const mockFetchResolvedEntityOverrides = jest.fn();
 
 jest.mock('../../../../../common/hooks/use_error_toast');
 jest.mock('../../../../../common/hooks/use_app_toasts');
@@ -33,8 +33,7 @@ jest.mock('../queries/esql', () => ({
 }));
 jest.mock('../queries/resolved_entities', () => ({
   ...jest.requireActual('../queries/resolved_entities'),
-  fetchResolvedEntityFilterOverrides: (...args: unknown[]) =>
-    mockFetchResolvedEntityFilterOverrides(...args),
+  fetchResolvedEntityOverrides: (...args: unknown[]) => mockFetchResolvedEntityOverrides(...args),
 }));
 
 const OPTIONS: UseResolvedValueGroupsOptions = {
@@ -71,7 +70,7 @@ describe('useResolvedValueGroups', () => {
       anomalyJobIds: [],
       isAnomalyJobsLoading: false,
     });
-    mockFetchResolvedEntityFilterOverrides.mockResolvedValue({ include: ['host:h9'], exclude: [] });
+    mockFetchResolvedEntityOverrides.mockResolvedValue({ include: ['host:h9'], exclude: [] });
     mockRunQuery.mockImplementation(async (steps: string[]) => {
       const query = steps.join('\n');
       if (query.includes('STATS total')) return [{ total: 5 }];
@@ -143,8 +142,8 @@ describe('useResolvedValueGroups', () => {
 
     await waitFor(() => expect(result.current.groupData.groupsCount).toBeDefined());
 
-    expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledWith(
-      expect.objectContaining({ entityExpression }),
+    expect(mockFetchResolvedEntityOverrides).toHaveBeenCalledWith(
+      expect.objectContaining({ own: entityExpression, group: entityExpression }),
       expect.anything()
     );
     expect(getQueries().find((query) => query.includes('BY group_value'))).toContain(

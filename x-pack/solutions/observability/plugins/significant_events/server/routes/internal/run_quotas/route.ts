@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
@@ -13,6 +13,8 @@ import {
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
+  type RunQuotaGroup,
+  type RunQuotaSettingsPatch,
   type RunQuotasResponse,
 } from '../../../../common/run_quotas';
 import { createServerRoute } from '../../create_server_route';
@@ -31,16 +33,24 @@ import {
   type RunQuotaSettingsAttributes,
 } from '../../../lib/run_quotas';
 
-const limitsUpdateSchema = z
-  .object({
-    detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-    investigation: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-    ki_extraction: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
-  })
-  .strict()
-  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
-    message: 'At least one run limit is required',
-  });
+const limitsUpdateSchema = lazySchema(() =>
+  z
+    .object({
+      detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+      investigation: z
+        .number()
+        .int()
+        .min(MIN_RUN_LIMIT + 1)
+        .max(MAX_RUN_LIMIT)
+        .nullable()
+        .optional(),
+      ki_extraction: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+    })
+    .strict()
+    .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
+      message: 'At least one run limit is required',
+    })
+);
 
 const activateLimitsSchema = z
   .object({
@@ -68,28 +78,61 @@ const activateLimitsSchema = z
     message: 'At least one run limit to activate is required',
   });
 
-const settingsUpdateSchema = z.union([
-  z
-    .object({
-      enabled: z.boolean().optional(),
-      limits: limitsUpdateSchema.optional(),
-    })
-    .strict()
-    .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
-      message: 'At least one run quota setting is required',
-    }),
-  z
-    .object({
-      activateLimits: activateLimitsSchema,
-    })
-    .strict(),
-]);
+const settingsUpdateSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        enabled: z.boolean().optional(),
+        limits: limitsUpdateSchema.optional(),
+      })
+      .strict()
+      .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
+        message: 'At least one run quota setting is required',
+      }),
+    z
+      .object({
+        activateLimits: activateLimitsSchema,
+        limits: z
+          .object({
+            investigation: z
+              .number()
+              .int()
+              .min(MIN_RUN_LIMIT + 1)
+              .max(MAX_RUN_LIMIT)
+              .nullable(),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict(),
+  ])
+);
 
 const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('detection') }).strict(),
   z.object({ group: z.literal('ki_extraction') }).strict(),
   z.object({ group: z.literal('investigation') }).strict(),
 ]);
+
+const toStoredLimits = ({
+  investigation,
+  ...limits
+}: z.infer<typeof limitsUpdateSchema>): Partial<Record<RunQuotaGroup, number>> => ({
+  ...limits,
+  ...(investigation === undefined ? {} : { investigation: investigation ?? MIN_RUN_LIMIT }),
+});
+
+const toStoredPatch = (body: z.infer<typeof settingsUpdateSchema>): RunQuotaSettingsPatch => {
+  if ('activateLimits' in body) {
+    const { limits: investigationLimit, ...activation } = body;
+    return {
+      ...activation,
+      ...(investigationLimit ? { limits: toStoredLimits(investigationLimit) } : {}),
+    };
+  }
+  const { limits, ...rest } = body;
+  return { ...rest, ...(limits ? { limits: toStoredLimits(limits) } : {}) };
+};
 
 const readRunQuotaSnapshot = async ({
   internalRepository,
@@ -173,7 +216,9 @@ const putRunQuotasRoute = createServerRoute({
     await assertCanManageRunQuotas({ request, server });
     const now = new Date();
     const internalRepository = createRunQuotaInternalRepository(server);
-    const settings = await patchRunQuotaSettings(internalRepository, params.body);
+    const { body } = params;
+    const patch = toStoredPatch(body);
+    const settings = await patchRunQuotaSettings(internalRepository, patch);
 
     return readRunQuotaSnapshot({
       internalRepository,
