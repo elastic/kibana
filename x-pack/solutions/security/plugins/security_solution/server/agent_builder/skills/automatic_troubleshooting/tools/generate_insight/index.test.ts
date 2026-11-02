@@ -15,6 +15,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextService } from '../../../../../endpoint/mocks';
+import { NotFoundError } from '../../../../../endpoint/errors';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 import { generateInsightTool } from '.';
@@ -325,7 +326,9 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
     });
 
     it('returns an error and skips graph execution when endpoint space validation fails', async () => {
-      mockEnsureInCurrentSpace.mockRejectedValueOnce(new Error('Agent endpoint-2 not found'));
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(
+        new NotFoundError('Agent endpoint-2 not found')
+      );
       const handlerContext = createHandlerContext();
 
       const result = await tool.handler(
@@ -362,8 +365,10 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
       });
     });
 
-    it('tells the model which IDs are accepted and not to retry when endpoint space validation fails', async () => {
-      mockEnsureInCurrentSpace.mockRejectedValueOnce(new Error('Agent my-host-name not found'));
+    it('tells the model which IDs are accepted and not to retry when an endpoint is not found', async () => {
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(
+        new NotFoundError('Agent my-host-name not found')
+      );
 
       const result = await tool.handler(
         {
@@ -383,6 +388,32 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
               message: expect.stringMatching(
                 /Elastic Agent IDs \(`agent\.id`\).*host names, policy IDs, and artifact IDs are not accepted.*Do not call this tool again with guessed IDs/
               ),
+            },
+          },
+        ],
+      });
+    });
+
+    it('returns the plain error when endpoint space validation fails for another reason', async () => {
+      mockEnsureInCurrentSpace.mockRejectedValueOnce(new Error('search_phase_execution_exception'));
+
+      const result = await tool.handler(
+        {
+          problemDescription: 'configuration issue detected',
+          remediation: 'fix the thing',
+          endpointIds: ['endpoint-1'],
+          data: [{ event: { type: 'process' } }],
+        },
+        createHandlerContext()
+      );
+
+      expect(mockCreateGenerateInsightGraph).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: 'Error: search_phase_execution_exception',
             },
           },
         ],

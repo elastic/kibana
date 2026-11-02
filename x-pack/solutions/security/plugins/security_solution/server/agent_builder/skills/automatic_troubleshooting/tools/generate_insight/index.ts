@@ -10,6 +10,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { NotFoundError } from '../../../../../endpoint/errors';
 import { GENERATE_INSIGHT_TOOL_ID } from '../..';
 import { createGenerateInsightGraph } from './graph';
 
@@ -77,7 +78,11 @@ This tool creates structured insights for persisting the results of the troubles
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         logger.error(`Error in ${GENERATE_INSIGHT_TOOL_ID} tool: ${errorMessage}`);
-        return errorResult(`Error: ${errorMessage}. ${INVALID_ENDPOINT_IDS_GUIDANCE}`);
+        return errorResult(
+          error instanceof NotFoundError
+            ? `Error: ${errorMessage}. ${INVALID_ENDPOINT_IDS_GUIDANCE}`
+            : `Error: ${errorMessage}`
+        );
       }
 
       try {
