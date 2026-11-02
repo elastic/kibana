@@ -2183,7 +2183,7 @@ export const UnifiedAttachmentAttachmentId = lazySchema(() =>
 export type UnifiedAttachmentAttachmentId = z.infer<typeof UnifiedAttachmentAttachmentId>;
 
 /**
-  * The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+  * The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
 
   */
 export const UnifiedAttachmentData = lazySchema(() =>
@@ -2192,7 +2192,7 @@ export const UnifiedAttachmentData = lazySchema(() =>
 export type UnifiedAttachmentData = z.infer<typeof UnifiedAttachmentData>;
 
 /**
-  * Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+  * Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
 
   */
 export const UnifiedAttachmentMetadata = lazySchema(() =>

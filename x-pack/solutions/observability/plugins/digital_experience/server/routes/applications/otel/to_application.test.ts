@@ -6,7 +6,7 @@
  */
 
 import type { LogsBucket } from './search_responses';
-import { environmentsOf, toApplication } from './to_application';
+import { toApplication } from './to_application';
 
 const terms = (...keys: string[]) => ({ buckets: keys.map((key) => ({ key })) });
 
@@ -29,23 +29,6 @@ const logsBucket = (pageLoads: number, jsErrors: number): LogsBucket => ({
   fcp: noVital,
   ttfb: noVital,
   lastSeen: { value: null },
-});
-
-describe('environmentsOf', () => {
-  it('merges both environment fields of every aggregation, without duplicates', () => {
-    expect(
-      environmentsOf(
-        { environments: terms('production'), environmentNames: terms('production', 'staging') },
-        { environments: terms('canary'), environmentNames: terms() }
-      )
-    ).toEqual(['production', 'staging', 'canary']);
-  });
-
-  it('skips missing aggregations', () => {
-    expect(
-      environmentsOf(undefined, { environments: terms('dev'), environmentNames: terms() })
-    ).toEqual(['dev']);
-  });
 });
 
 describe('toApplication', () => {
