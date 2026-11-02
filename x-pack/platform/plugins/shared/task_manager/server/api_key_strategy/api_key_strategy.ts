@@ -11,6 +11,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { queueApiKeysForInvalidation } from '@kbn/response-ops-scoped-api-keys';
 import type { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../task';
 import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
@@ -106,25 +107,12 @@ export const markApiKeysForInvalidation = async (
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  if (targets.length === 0) {
-    return;
-  }
-
-  try {
-    await savedObjectsClient.bulkCreate(
-      targets.map((target) => ({
-        attributes: {
-          apiKeyId: target.apiKeyId,
-          createdAt: new Date().toISOString(),
-          ...(target.uiamApiKey ? { uiamApiKey: target.uiamApiKey } : {}),
-          ...(target.taskId && target.taskStartedAt
-            ? { taskId: target.taskId, taskStartedAt: target.taskStartedAt }
-            : {}),
-        },
-        type: INVALIDATE_API_KEY_SO_NAME,
-      }))
-    );
-  } catch (e) {
-    logger.error(`Failed to bulk mark ${targets.length} API keys for invalidation: ${e.message}`);
-  }
+  await queueApiKeysForInvalidation(
+    { savedObjectsClient, type: INVALIDATE_API_KEY_SO_NAME, logger },
+    targets.map(({ apiKeyId, uiamApiKey, taskId, taskStartedAt }) => ({
+      apiKeyId,
+      uiamApiKey,
+      ...(taskId && taskStartedAt ? { attributes: { taskId, taskStartedAt } } : {}),
+    }))
+  );
 };

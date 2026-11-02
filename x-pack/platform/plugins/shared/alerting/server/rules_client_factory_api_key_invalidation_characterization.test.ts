@@ -222,6 +222,13 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
     );
   });
 
+  test('keeps colons in the stored UIAM secret', async () => {
+    await invalidateNow({ uiamApiKey: encode('uiam-id:essu_secret:extra') });
+
+    expect(uiamInvalidate.mock.calls[0][1]).toEqual({ id: 'uiam-id' });
+    expect(uiamInvalidate.mock.calls[0][0].headers.authorization).toBe('ApiKey essu_secret:extra');
+  });
+
   test('skips ES invalidation when the decoded ES key id is blank', async () => {
     await invalidateNow({ apiKey: encode(' :secret') });
 

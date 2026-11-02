@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -20,8 +19,9 @@ import type {
 import {
   decodeStoredApiKey,
   encodeApiKey,
-  getApiKeyFromRequest,
   getApiKeyInvalidationTargets,
+  isCloudApiKeyNotSupportedError,
+  queueApiKeysForInvalidation,
   resolveScopedApiKeys,
 } from '@kbn/response-ops-scoped-api-keys';
 import { inject, injectable } from 'inversify';
@@ -109,7 +109,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
         }
       );
     } catch (e) {
-      throw this.isCloudApiKeyRejection(e)
+      throw isCloudApiKeyNotSupportedError(e)
         ? Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
             code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
           })
@@ -139,51 +139,21 @@ export class ApiKeyService implements ApiKeyServiceContract {
       return apiKeys.map((): ApiKeyInvalidationResult => ({ success: true }));
     }
 
-    const apiKeysToInvalidate = queued.map(({ apiKeyId, uiamApiKey }) => ({
-      attributes: {
-        apiKeyId,
-        createdAt: new Date().toISOString(),
-        ...(uiamApiKey ? { uiamApiKey } : {}),
+    const results = await queueApiKeysForInvalidation(
+      {
+        savedObjectsClient: this.invalidationSavedObjectsClient,
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+        logger: this.logger,
       },
-      type: API_KEY_PENDING_INVALIDATION_TYPE,
-    }));
-
-    let response;
-    try {
-      response = await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
-    } catch (e) {
-      const message = (e as Error).message;
-      this.logger.error(
-        `Failed to bulk mark list of API keys [${queued
-          .map(({ apiKeyId }) => `"${apiKeyId}"`)
-          .join(', ')}] for invalidation: ${message}`,
-        {
-          error: { stack_trace: (e as Error).stack },
-        }
-      );
-      return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
-    }
+      queued
+    );
 
     let index = 0;
     return targets.map((target): ApiKeyInvalidationResult => {
       if (!target) {
         return { success: true };
       }
-      const created = response.saved_objects[index++];
-      if (created && !isSavedObjectErrorResult(created)) {
-        return { success: true };
-      }
-
-      const message = created
-        ? created.error.message
-        : 'Saved object was not returned by bulkCreate';
-      this.logger.error(`Failed to mark API key "${target.apiKeyId}" for invalidation: ${message}`);
-      return { success: false, message };
+      return results[index++];
     });
-  }
-
-  private isCloudApiKeyRejection(e: unknown): boolean {
-    const secret = getApiKeyFromRequest(this.request)?.api_key;
-    return Boom.isBoom(e) && e.output.statusCode === 400 && !!secret && isUiamCredential(secret);
   }
 }

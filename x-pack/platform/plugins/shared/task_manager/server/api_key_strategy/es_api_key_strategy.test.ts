@@ -200,7 +200,8 @@ describe('EsApiKeyStrategy', () => {
       await strategy.markForInvalidation([{ apiKeyId: 'key-1' }], logger, soClient);
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to bulk mark 1 API keys for invalidation')
+        'Failed to bulk mark list of API keys ["key-1"] for invalidation: SO error',
+        expect.any(Object)
       );
     });
   });

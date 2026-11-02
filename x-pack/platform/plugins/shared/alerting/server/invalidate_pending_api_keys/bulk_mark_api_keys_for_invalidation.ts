@@ -8,7 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { isUiamCredential } from '@kbn/core-security-server';
-import { decodeStoredApiKey } from '@kbn/response-ops-scoped-api-keys';
+import { decodeStoredApiKey, queueApiKeysForInvalidation } from '@kbn/response-ops-scoped-api-keys';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
@@ -35,33 +35,14 @@ export const bulkMarkApiKeysForInvalidation = async (
       return;
     }
 
-    const apiKeysToInvalidate = decodableApiKeys.map((key) => {
-      // A UIAM key is queued under its own id, so the in-use guard has to match it against the
-      // `uiamApiKeyId` attribute that pending jobs record it in, not against `apiKeyId`.
-      const { id: apiKeyId, secret } = decodeStoredApiKey(key);
-      const uiamApiKey = secret && isUiamCredential(secret) ? secret : undefined;
-
-      return {
-        attributes: {
-          apiKeyId,
-          createdAt: new Date().toISOString(),
-          ...(uiamApiKey ? { uiamApiKey } : {}),
-        },
-        type: API_KEY_PENDING_INVALIDATION_TYPE,
-      };
-    });
-
-    try {
-      await savedObjectsClient.bulkCreate(apiKeysToInvalidate);
-    } catch (e) {
-      logger.error(
-        `Failed to bulk mark list of API keys [${apiKeysToInvalidate
-          .map(({ attributes }) => `"${attributes.apiKeyId}"`)
-          .join(', ')}] for invalidation: ${e.message}`,
-        {
-          error: { stack_trace: e.stack },
-        }
-      );
-    }
+    await queueApiKeysForInvalidation(
+      { savedObjectsClient, type: API_KEY_PENDING_INVALIDATION_TYPE, logger },
+      decodableApiKeys.map((key) => {
+        // A UIAM key is queued under its own id, so the in-use guard has to match it against the
+        // `uiamApiKeyId` attribute that pending jobs record it in, not against `apiKeyId`.
+        const { id: apiKeyId, secret } = decodeStoredApiKey(key);
+        return { apiKeyId, uiamApiKey: secret && isUiamCredential(secret) ? secret : undefined };
+      })
+    );
   });
 };
