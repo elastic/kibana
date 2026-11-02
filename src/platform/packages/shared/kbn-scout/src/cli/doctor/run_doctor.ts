@@ -217,7 +217,8 @@ const printLocalCommands = (log: ToolingLog, readyArchs: DoctorArch[]) => {
   );
 };
 
-// QAF has no single create-and-run command, so chain them with the same name
+// QAF has no single create-and-run command, so chain them with the same name.
+// Without --kibana-repo-root QAF runs its own Kibana clone, not this checkout.
 const printCloudCommands = (log: ToolingLog, readyArchs: DoctorArch[]) => {
   for (const arch of readyArchs) {
     const [what, create, target] =
@@ -236,7 +237,7 @@ const printCloudCommands = (log: ToolingLog, readyArchs: DoctorArch[]) => {
     log.write(`   ${chalk.cyan(`${create} && \\`)}`);
     log.write(
       `   ${chalk.cyan(
-        `qaf kibana scout run-config ${target} --kibana-repo-root . --no-checkout ${CONFIG_PLACEHOLDER}`
+        `qaf kibana scout run-config ${target} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`
       )}`
     );
   }
