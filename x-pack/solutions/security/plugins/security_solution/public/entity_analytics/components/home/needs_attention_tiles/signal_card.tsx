@@ -371,6 +371,8 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
   const isLoading = card.isLoading ?? false;
   const isZero = card.value === 0;
   const interactive = !isZero && !isLoading;
+  // A selected tile stays clickable at 0, so the filter it applies can still be cleared.
+  const canToggle = (!isZero || selected) && !isLoading;
   const noDataMessage = isZero && !isLoading ? card.noDataMessage : undefined;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
@@ -407,7 +409,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (!interactive) {
+      if (!canToggle) {
         return;
       }
       if (event.key === 'Enter' || event.key === ' ') {
@@ -415,23 +417,23 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         onToggle();
       }
     },
-    [interactive, onToggle]
+    [canToggle, onToggle]
   );
 
   const cardNode = (
     <div
       role="button"
-      tabIndex={interactive ? 0 : -1}
-      aria-pressed={interactive ? selected : undefined}
-      aria-disabled={!interactive || undefined}
+      tabIndex={canToggle ? 0 : -1}
+      aria-pressed={canToggle ? selected : undefined}
+      aria-disabled={!canToggle || undefined}
       aria-label={ariaLabel}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
-      onClick={interactive ? onToggle : undefined}
+      onClick={canToggle ? onToggle : undefined}
       onKeyDown={onKeyDown}
       onMouseDown={(event) => {
         // Keep mouse activation from focusing the card, so deselection returns to
         // the default tile (not sticky focus-as-hover) when the pointer leaves.
-        if (interactive && event.button === 0) {
+        if (canToggle && event.button === 0) {
           event.preventDefault();
         }
       }}
@@ -448,7 +450,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         border: 1px solid ${borderColor};
         border-radius: ${euiTheme.border.radius.panel};
         background: ${tileBackground};
-        cursor: ${interactive ? 'pointer' : 'default'};
+        cursor: ${canToggle ? 'pointer' : 'default'};
         overflow: hidden;
         position: relative;
         z-index: ${selected || emphasized ? 2 : 1};
