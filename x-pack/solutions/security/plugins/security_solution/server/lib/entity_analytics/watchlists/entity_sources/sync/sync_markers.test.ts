@@ -114,6 +114,7 @@ describe('Watchlist sync markers service', () => {
         expect.objectContaining({
           index: 'logs-entityanalytics_okta.entity-default',
           query: { term: { 'event.action': 'completed' } },
+          ignore_unavailable: true,
         })
       );
     });
@@ -211,6 +212,57 @@ describe('Watchlist sync markers service', () => {
 
       expect(result).toBe(false);
       expect(mockUpdateLastFullSyncMarker).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getFullSyncWindowStart', () => {
+    it('returns the started marker when one is found', async () => {
+      const descriptorClient = createDescriptorClient();
+      const startedMarker = '2024-02-01T00:00:00Z';
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _id: '1', _source: { '@timestamp': startedMarker } }],
+        },
+      } as unknown as SearchResponse<unknown>);
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const result = await service.getFullSyncWindowStart(mockSource);
+
+      expect(result).toBe(startedMarker);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: 'logs-entityanalytics_okta.entity-default',
+          query: { term: { 'event.action': 'started' } },
+        })
+      );
+    });
+
+    it('falls back to the default lookback window when no started marker is found', async () => {
+      const descriptorClient = createDescriptorClient();
+      esClient.search.mockResolvedValueOnce({
+        hits: { hits: [] },
+      } as unknown as SearchResponse<unknown>);
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const result = await service.getFullSyncWindowStart(mockSource);
+
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    });
+
+    it('falls back to the default lookback window when syncMarkerIndex is not configured', async () => {
+      const descriptorClient = createDescriptorClient();
+      const sourceWithoutMarkerIndex: MonitoringEntitySource = {
+        ...mockSource,
+        integrations: undefined,
+      };
+
+      const service = createWatchlistSyncMarkersService(descriptorClient, esClient);
+      const result = await service.getFullSyncWindowStart(sourceWithoutMarkerIndex);
+
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      expect(esClient.search).not.toHaveBeenCalled();
     });
   });
 });

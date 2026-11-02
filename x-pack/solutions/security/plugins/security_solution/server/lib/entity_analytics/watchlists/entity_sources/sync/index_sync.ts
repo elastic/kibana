@@ -42,7 +42,6 @@ export const createIndexSyncService = ({
     esClient: internalEsClient,
     crudClient,
     logger,
-    descriptorClient,
     watchlist,
   });
   const sourcesSyncService = createSourcesSyncService({ logger });
@@ -57,7 +56,12 @@ export const createIndexSyncService = ({
         watchlistsByEuid,
         pageRange
       ) => {
-        const entities = await updateDetectionService.updateDetection(
+        // updateDetection returns hasNewFullSync alongside entities because the two are tied
+        // together: it's what decided whether `entities` was built from a full-sync window
+        // (a complete snapshot) or just the incremental cursor (a partial delta). We pass it
+        // on to deletionDetection so it knows which one it's getting — only a complete
+        // snapshot is safe to use for deciding what's missing (and should be deleted).
+        const { entities, hasNewFullSync } = await updateDetectionService.updateDetection(
           source,
           entityStoreEntityIdsByType,
           correlationMap,
@@ -68,7 +72,8 @@ export const createIndexSyncService = ({
           source,
           currentEuids,
           watchlistsByEuid,
-          pageRange
+          pageRange,
+          hasNewFullSync
         );
       },
     });

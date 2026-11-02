@@ -283,7 +283,7 @@ describe('installPrebuiltWatchlists', function () {
       expect(mockEntitySourceCreate).not.toHaveBeenCalled();
       expect(mockEntitySourceUpdate).toHaveBeenCalledWith({
         id: 'existing-okta-source-id',
-        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default', syncData: {} },
+        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
       });
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -292,7 +292,7 @@ describe('installPrebuiltWatchlists', function () {
       );
     });
 
-    it('resets syncData when backfilling syncMarkerIndex, so deletion detection does not run its first pass against a stale incremental cursor', async () => {
+    it('does not touch existing syncData when backfilling syncMarkerIndex', async () => {
       mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
       mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
       mockEntitySourceList.mockResolvedValue({
@@ -312,7 +312,7 @@ describe('installPrebuiltWatchlists', function () {
 
       expect(mockEntitySourceUpdate).toHaveBeenCalledWith({
         id: 'existing-okta-source-id',
-        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default', syncData: {} },
+        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
       });
     });
 

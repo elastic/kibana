@@ -51,6 +51,7 @@ export const createWatchlistSyncMarkersService = (
     if (!source.integrations?.syncMarkerIndex) return undefined;
     const resp = await esClient.search<EventDoc>({
       index: source.integrations.syncMarkerIndex,
+      ignore_unavailable: true,
       sort: [{ '@timestamp': { order: 'desc' } }],
       size: 1,
       query: { term: { 'event.action': action } },
@@ -71,10 +72,26 @@ export const createWatchlistSyncMarkersService = (
     return true;
   };
 
+  /**
+   * Returns how far back update detection should look when a new full sync has just been
+   * detected.
+   *
+   * A full sync re-crawls every entity from scratch, so to see everyone it found, update
+   * detection needs to look back to when that crawl started — not just use the normal
+   * incremental cursor (`lastUpdateProcessed`), which only covers recent changes and would miss
+   * entities the crawl re-confirmed further back. Falls back to the default lookback if the
+   * crawl has no `started` marker.
+   */
+  const getFullSyncWindowStart = async (source: MonitoringEntitySource): Promise<string> => {
+    const startedMarker = await findLastEventMarkerInIndex(source, 'started');
+    return startedMarker ?? parseOrThrow(FIRST_RUN_DEFAULT_RANGE);
+  };
+
   return {
     getLastProcessedMarker,
     updateLastProcessedMarker,
     findLastEventMarkerInIndex,
     detectNewFullSync,
+    getFullSyncWindowStart,
   };
 };
