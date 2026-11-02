@@ -8,11 +8,11 @@
 import React from 'react';
 import moment from 'moment-timezone';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 import { EaseDetailsContext } from '../context';
-import { mockDataFormattedForFieldBrowser } from '../../document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { mockGetFieldsData } from '../../document_details/shared/mocks/mock_get_fields_data';
-import { mockSearchHit } from '../../document_details/shared/mocks/mock_search_hit';
+import { mockDataFormattedForFieldBrowser } from '../../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
+import { mockGetFieldsData } from '../../../../../flyout/document_details/shared/mocks/mock_get_fields_data';
+import { mockSearchHit } from '../../../../../flyout/document_details/shared/mocks/mock_search_hit';
 import {
   HEADER_INTEGRATION_TITLE_TEST_ID,
   HEADER_RISK_SCORE_TITLE_TEST_ID,
@@ -21,13 +21,13 @@ import {
   HEADER_TITLE_TEST_ID,
   HeaderTitle,
 } from './header_title';
-import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
+import { useDateFormat, useTimeZone } from '../../../../../common/lib/kibana';
 import {
   RISK_SCORE_VALUE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
-} from '../../../flyout_v2/document/main/components/test_ids';
+} from '../../../../../flyout_v2/document/main/components/test_ids';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
