@@ -27,6 +27,7 @@ import {
   type ApprovalProposal,
   type DeclineParams,
 } from '@kbn/proposals-ui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
 import { useIsTextTruncated } from '../use_is_text_truncated';
@@ -51,6 +52,11 @@ export interface ProposedActionButtonProps {
   isSubmitting?: 'applying' | 'declining';
   /** Who's approving/declining, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
+  /**
+   * See `ApprovalModalProps.basePath`. Supplied by the caller: flyout slots render outside a
+   * `KibanaContextProvider`, so this package cannot read `core.http` itself.
+   */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -140,6 +146,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     onDismiss,
     isSubmitting,
     currentActorName,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -234,6 +241,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             onDismiss={onDismiss}
             isSubmitting={isSubmitting}
             currentActorName={currentActorName}
+            basePath={basePath}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}
