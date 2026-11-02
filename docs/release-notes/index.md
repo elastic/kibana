@@ -942,7 +942,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 ### Features and enhancements [kibana-9.4.9-features-enhancements]
 
 **Elastic Agent Builder**:
-* Add options to include frozen tier data in Agent Builder tools: an `include_frozen` parameter for built-in tools, an **Include frozen tier data** option for custom {{esql}} and index search tools, and the `agentBuilder:includeFrozenByDefault` advanced setting to include it by default in a space. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
+* Add options to include frozen tier data in Agent Builder tools. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
 
 **Data ingestion and {{fleet}}**:
 * Sort agent policies alphabetically in the **Assign new policy to agent** modal [#296067]({{kib-pull}}296067).
@@ -971,7 +971,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix managed integration policy upgrades redeploying the agent policy once per integration policy, which slowed upgrades and could stall them when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
 * Fix integrations that default to agentless deployment saving an agent-based policy when the integration also has a cloud connector option [#299039]({{kib-pull}}299039).
 * Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
-* Fix {{fleet}} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters [#299837]({{kib-pull}}299837).
+* Fix {{fleet}} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action [#299837]({{kib-pull}}299837).
 
 **Data management**:
 * Fix the runtime field editor ignoring **Save** when you edit a field's script while the preview is still updating [#294753]({{kib-pull}}294753).
