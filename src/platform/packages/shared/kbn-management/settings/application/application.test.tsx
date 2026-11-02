@@ -9,7 +9,11 @@
 
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
+import type {
+  IUiSettingsMetadataClient,
+  UiSettingsMetadataState,
+} from '@kbn/core-ui-settings-browser';
 import {
   SettingsApplication,
   DATA_TEST_SUBJ_SETTINGS_TITLE,
@@ -55,6 +59,59 @@ const createRootMock = () => {
   };
 };
 
+const renderWithKibanaProvider = ({
+  history = scopedHistoryMock.create({ pathname: '', search: '' }),
+  client = uiSettingsServiceMock.createStartContract(),
+  metadata = { getAll: jest.fn().mockResolvedValue({}) },
+}: {
+  history?: ReturnType<typeof scopedHistoryMock.create>;
+  client?: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
+  metadata?: IUiSettingsMetadataClient;
+} = {}) => {
+  const activeSpace: Space = {
+    id: asSpaceId('default'),
+    name: 'Default',
+    disabledFeatures: [],
+    solution: 'classic',
+  };
+  const application = applicationServiceMock.createStartContract();
+  application.capabilities = {
+    advancedSettings: { show: true, save: true },
+    globalSettings: { show: true, save: true },
+    filterSettings: { bySolutionView: false },
+  } as any;
+
+  return render(
+    <KibanaRootContextProvider {...createRootMock()}>
+      <SettingsApplicationKibanaProvider
+        docLinks={docLinksServiceMock.createStartContract()}
+        notifications={{ toasts: notificationServiceMock.createStartContract().toasts }}
+        userProfile={userProfileServiceMock.createStart()}
+        theme={themeServiceMock.createStartContract()}
+        i18n={i18nServiceMock.createStartContract()}
+        settings={{
+          client,
+          globalClient: uiSettingsServiceMock.createStartContract(),
+          metadata,
+        }}
+        history={history}
+        sectionRegistry={{
+          getSpacesSections: () => [],
+          getGlobalSections: () => [],
+        }}
+        application={application}
+        chrome={chromeServiceMock.createStartContract()}
+        spaces={{
+          getActiveSpace: () => Promise.resolve(activeSpace),
+          getActiveSpace$: () => of(activeSpace),
+        }}
+      >
+        <SettingsApplication />
+      </SettingsApplicationKibanaProvider>
+    </KibanaRootContextProvider>
+  );
+};
+
 describe('Settings application', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -86,50 +143,56 @@ describe('Settings application', () => {
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeNull();
   });
 
+  it('requests the setting definitions once per scope and shows saved values from the client', async () => {
+    const update$ = new Subject<{ key: string; newValue: unknown; oldValue: unknown }>();
+    const client = uiSettingsServiceMock.createStartContract();
+    client.getUpdate$.mockReturnValue(update$);
+    client.getAll.mockReturnValue({
+      'test:setting': {
+        name: 'Test setting',
+        type: 'string',
+        value: 'default',
+        userValue: 'saved',
+      },
+    });
+    const namespaceDefinitions: UiSettingsMetadataState = {
+      'test:setting': {
+        name: 'Test setting',
+        description: 'A setting with display metadata',
+        type: 'string',
+        value: 'default',
+        userValue: 'saved',
+      },
+    };
+    const metadata = {
+      getAll: jest.fn(async (scope: 'namespace' | 'global') =>
+        scope === 'namespace' ? namespaceDefinitions : {}
+      ),
+    };
+
+    const { findByDisplayValue, getByText } = renderWithKibanaProvider({ client, metadata });
+
+    expect(await findByDisplayValue('saved')).toBeInTheDocument();
+    expect(getByText('A setting with display metadata')).toBeInTheDocument();
+    expect(metadata.getAll).toHaveBeenCalledTimes(2);
+    expect(metadata.getAll).toHaveBeenCalledWith('namespace');
+    expect(metadata.getAll).toHaveBeenCalledWith('global');
+
+    client.getAll.mockReturnValue({
+      'test:setting': { name: 'Test setting', type: 'string', value: 'default', userValue: 'new' },
+    });
+    act(() => {
+      update$.next({ key: 'test:setting', newValue: 'new', oldValue: 'saved' });
+    });
+
+    expect(await findByDisplayValue('new')).toBeInTheDocument();
+    expect(metadata.getAll).toHaveBeenCalledTimes(2);
+  });
+
   it('replaces history while typing so browser back does not step through each character', async () => {
     const history = scopedHistoryMock.create({ pathname: '', search: '' });
-    const activeSpace: Space = {
-      id: asSpaceId('default'),
-      name: 'Default',
-      disabledFeatures: [],
-      solution: 'classic',
-    };
-    const application = applicationServiceMock.createStartContract();
-    application.capabilities = {
-      advancedSettings: { show: true, save: true },
-      globalSettings: { show: true, save: true },
-      filterSettings: { bySolutionView: false },
-    } as any;
 
-    const { getByTestId } = render(
-      <KibanaRootContextProvider {...createRootMock()}>
-        <SettingsApplicationKibanaProvider
-          docLinks={docLinksServiceMock.createStartContract()}
-          notifications={{ toasts: notificationServiceMock.createStartContract().toasts }}
-          userProfile={userProfileServiceMock.createStart()}
-          theme={themeServiceMock.createStartContract()}
-          i18n={i18nServiceMock.createStartContract()}
-          settings={{
-            client: uiSettingsServiceMock.createStartContract(),
-            globalClient: uiSettingsServiceMock.createStartContract(),
-            metadata: { getAll: jest.fn().mockResolvedValue({}) },
-          }}
-          history={history}
-          sectionRegistry={{
-            getSpacesSections: () => [],
-            getGlobalSections: () => [],
-          }}
-          application={application}
-          chrome={chromeServiceMock.createStartContract()}
-          spaces={{
-            getActiveSpace: () => Promise.resolve(activeSpace),
-            getActiveSpace$: () => of(activeSpace),
-          }}
-        >
-          <SettingsApplication />
-        </SettingsApplicationKibanaProvider>
-      </KibanaRootContextProvider>
-    );
+    const { getByTestId } = renderWithKibanaProvider({ history });
 
     const searchBar = getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
 
