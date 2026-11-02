@@ -26,7 +26,7 @@ import {
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type {
   SavedObjectAttributes,
   SavedObjectsBulkCreateObject,
@@ -41,7 +41,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk, isOk } from './lib/result_type';
 import { MsearchError } from './lib/errors';
 import { getBackpressureReason } from './lib/backpressure_reason';
-import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { grantTaskApiKeys } from './api_key_strategy/grant_task_api_keys';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
@@ -53,8 +53,8 @@ import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
 
-jest.mock('./lib/api_key_utils', () => ({
-  getApiKeyAndUserScope: jest.fn(),
+jest.mock('./api_key_strategy/grant_task_api_keys', () => ({
+  grantTaskApiKeys: jest.fn(),
 }));
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
@@ -165,7 +165,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -292,7 +292,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -362,7 +362,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey,
         userScope: mockUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
       scopedSavedObjectsClient.create.mockImplementation(
@@ -400,11 +400,13 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [task],
-        request,
-        coreStart.security,
-        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      expect(grantTaskApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskInstances: [task],
+          request,
+          security: coreStart.security,
+          opts: expect.objectContaining({ onApiKeyCreated: expect.any(Function) }),
+        })
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -479,7 +481,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       const task = {
@@ -512,9 +514,7 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
-        new Error('Something went wrong!')
-      );
+      (grantTaskApiKeys as jest.Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -522,7 +522,7 @@ describe('TaskStore', () => {
         'Something went wrong!'
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalled();
+      expect(grantTaskApiKeys).toHaveBeenCalled();
     });
 
     test('invalidates the granted API keys when the task cannot be created', async () => {
@@ -545,7 +545,7 @@ describe('TaskStore', () => {
           spaceId: 'testSpace',
         },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
       scopedSavedObjectsClient.create.mockRejectedValueOnce(
@@ -592,7 +592,7 @@ describe('TaskStore', () => {
           spaceId: 'testSpace',
         },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
       scopedSavedObjectsClient.create.mockRejectedValueOnce(
@@ -713,7 +713,7 @@ describe('TaskStore', () => {
           },
           { id: 'id', refresh: false }
         );
-        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(grantTaskApiKeys).not.toHaveBeenCalled();
         expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
       });
@@ -773,7 +773,7 @@ describe('TaskStore', () => {
           canEncryptSavedObjects: false,
           getIsSecurityEnabled: () => true,
           executionContext: mockExecutionContextStart,
-          apiKeyStrategy: new EsApiKeyStrategy(),
+          apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
         });
 
         await expect(store.schedule(task)).rejects.toThrow(
@@ -804,7 +804,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -929,7 +929,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -1181,7 +1181,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -1307,7 +1307,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -1617,7 +1617,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
       store.registerEncryptedSavedObjectsClient(esoClient);
     });
@@ -1930,7 +1930,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate(
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
@@ -1959,11 +1959,13 @@ describe('TaskStore', () => {
           type: 'api_key_to_invalidate',
         },
       ]);
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
-        mockRequest,
-        coreStart.security,
-        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      expect(grantTaskApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskInstances: [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
+          request: mockRequest,
+          security: coreStart.security,
+          opts: expect.objectContaining({ onApiKeyCreated: expect.any(Function) }),
+        })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2021,7 +2023,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('apiKeyIdUpdated:apiKey').toString('base64'),
         userScope: { ...mockUserScope, apiKeyId: 'apiKeyIdUpdated' },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate([runningTask], {
         validate: false,
@@ -2075,7 +2077,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate(
         [
@@ -2109,17 +2111,19 @@ describe('TaskStore', () => {
       });
 
       expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [
-          {
-            ...bulkUpdateTask,
-            apiKey: mockApiKey,
-            userScope: { ...mockUserScope, apiKeyCreatedByUser: true },
-          },
-        ],
-        mockRequest,
-        coreStart.security,
-        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      expect(grantTaskApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskInstances: [
+            {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              userScope: { ...mockUserScope, apiKeyCreatedByUser: true },
+            },
+          ],
+          request: mockRequest,
+          security: coreStart.security,
+          opts: expect.objectContaining({ onApiKeyCreated: expect.any(Function) }),
+        })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2183,7 +2187,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       await store.bulkUpdate(
         [
@@ -2224,17 +2228,19 @@ describe('TaskStore', () => {
           type: 'api_key_to_invalidate',
         },
       ]);
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [
-          {
-            ...bulkUpdateTask,
-            apiKey: mockApiKey,
-            userScope: mockUserScope,
-          },
-        ],
-        mockRequest,
-        coreStart.security,
-        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      expect(grantTaskApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskInstances: [
+            {
+              ...bulkUpdateTask,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+          ],
+          request: mockRequest,
+          security: coreStart.security,
+          opts: expect.objectContaining({ onApiKeyCreated: expect.any(Function) }),
+        })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2276,7 +2282,7 @@ describe('TaskStore', () => {
         apiKey: mockUpdatedApiKey,
         userScope: mockUpdatedUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       // The doc fails local validation after the key was regenerated, so it never reaches the
       // bulk update and gets no entry in the bulk response.
@@ -2352,7 +2358,7 @@ describe('TaskStore', () => {
       expect(mockGetScopedClient).not.toHaveBeenCalled();
 
       expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
-      expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+      expect(grantTaskApiKeys).not.toHaveBeenCalled();
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -2589,7 +2595,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => false,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
@@ -2792,7 +2798,7 @@ describe('TaskStore', () => {
           options: { request: mockRequest, regenerateApiKey: true },
         });
 
-        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(grantTaskApiKeys).not.toHaveBeenCalled();
         expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
       });
 
@@ -2834,7 +2840,7 @@ describe('TaskStore', () => {
         savedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [toSavedObject(credentialTask)],
         });
-        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+        (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(
           new Map([
             [
               apiKeyTask.id,
@@ -2929,7 +2935,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -3695,7 +3701,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -3840,7 +3846,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -4065,7 +4071,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -4130,7 +4136,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -4186,7 +4192,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -4254,7 +4260,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
     let store: TaskStore;
@@ -4392,7 +4398,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -4518,7 +4524,7 @@ describe('TaskStore', () => {
           canEncryptSavedObjects: true,
           getIsSecurityEnabled: () => true,
           executionContext: mockExecutionContextStart,
-          apiKeyStrategy: new EsApiKeyStrategy(),
+          apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
         });
         decryptingStore.registerEncryptedSavedObjectsClient(esoClient);
 
@@ -4693,7 +4699,7 @@ describe('TaskStore', () => {
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
             executionContext: mockExecutionContextStart,
-            apiKeyStrategy: new EsApiKeyStrategy(),
+            apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -4720,7 +4726,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -4745,7 +4751,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -4772,7 +4778,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -4932,7 +4938,7 @@ describe('TaskStore', () => {
         apiKey: mockApiKey,
         userScope: mockUserScope,
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
@@ -4987,11 +4993,13 @@ describe('TaskStore', () => {
 
       const result = await store.bulkSchedule([task1, task2], { request });
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-        [task1, task2],
-        request,
-        coreStart.security,
-        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      expect(grantTaskApiKeys).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskInstances: [task1, task2],
+          request,
+          security: coreStart.security,
+          opts: expect.objectContaining({ onApiKeyCreated: expect.any(Function) }),
+        })
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -5049,7 +5057,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -5074,12 +5082,10 @@ describe('TaskStore', () => {
     test('invalidates API keys created before a later grant fails', async () => {
       const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
       const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
-      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(
-        async (_tasks, _request, _security, options) => {
-          options.onApiKeyCreated({ apiKeyId: 'partially-granted-key-id' });
-          throw new Error('second grant failed');
-        }
-      );
+      (grantTaskApiKeys as jest.Mock).mockImplementationOnce(async ({ opts }) => {
+        opts.onApiKeyCreated({ apiKeyId: 'partially-granted-key-id' });
+        throw new Error('second grant failed');
+      });
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
 
       const request = httpServerMock.createKibanaRequest();
@@ -5109,7 +5115,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -5168,18 +5174,20 @@ describe('TaskStore', () => {
     test('invalidates the granted API key when an id-less task fails to be created', async () => {
       const task = { params: {}, state: { foo: 'bar' }, taskType: 'report' };
       let generatedTaskId: string | undefined;
-      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(async ([taskWithId]) => {
-        generatedTaskId = taskWithId.id;
-        return new Map([
-          [
-            generatedTaskId,
-            {
-              apiKey: Buffer.from('generatedApiKeyId:apiKey').toString('base64'),
-              userScope: { apiKeyId: 'generatedApiKeyId', apiKeyCreatedByUser: false },
-            },
-          ],
-        ]);
-      });
+      (grantTaskApiKeys as jest.Mock).mockImplementationOnce(
+        async ({ taskInstances: [taskWithId] }) => {
+          generatedTaskId = taskWithId.id;
+          return new Map([
+            [
+              generatedTaskId,
+              {
+                apiKey: Buffer.from('generatedApiKeyId:apiKey').toString('base64'),
+                userScope: { apiKeyId: 'generatedApiKeyId', apiKeyCreatedByUser: false },
+              },
+            ],
+          ]);
+        }
+      );
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
       scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async (objects) => {
@@ -5230,7 +5238,7 @@ describe('TaskStore', () => {
       const apiKeyAndUserScopeMap = new Map();
       apiKeyAndUserScopeMap.set('task1', sharedApiKeyFields);
       apiKeyAndUserScopeMap.set('task2', sharedApiKeyFields);
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -5261,7 +5269,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       // task2 fails local validation, so it never reaches the bulk create.
       mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => {
@@ -5330,7 +5338,7 @@ describe('TaskStore', () => {
         apiKey: Buffer.from('unregisteredApiKeyId:apiKey').toString('base64'),
         userScope: { apiKeyId: 'unregisteredApiKeyId', apiKeyCreatedByUser: false },
       });
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
 
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
       coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
@@ -5371,7 +5379,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       const task1 = {
@@ -5404,7 +5412,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -5517,9 +5525,7 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
-        new Error('Something went wrong!')
-      );
+      (grantTaskApiKeys as jest.Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -5527,7 +5533,7 @@ describe('TaskStore', () => {
         'Something went wrong!'
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalled();
+      expect(grantTaskApiKeys).toHaveBeenCalled();
     });
 
     test('errors if the task type is unknown', async () => {
@@ -5677,7 +5683,7 @@ describe('TaskStore', () => {
           taskType: 'serviceAccountTask',
           runAs,
         };
-        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+        (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(
           new Map([['task1', reportApiKeyFields]])
         );
         const request = httpServerMock.createKibanaRequest();
@@ -5685,11 +5691,13 @@ describe('TaskStore', () => {
         const result = await store.bulkSchedule([apiKeyTask, serviceAccountTask], { request });
 
         expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ type: 'task', id: 'task1' }]);
-        expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-          [apiKeyTask],
-          request,
-          coreStart.security,
-          expect.anything()
+        expect(grantTaskApiKeys).toHaveBeenCalledWith(
+          expect.objectContaining({
+            taskInstances: [apiKeyTask],
+            request,
+            security: coreStart.security,
+            opts: expect.anything(),
+          })
         );
         expect(serviceAccountSoClient.bulkCreate).toHaveBeenCalledWith(
           [
@@ -5783,7 +5791,7 @@ describe('TaskStore', () => {
               notFound('task2'),
             ],
           });
-          (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+          (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(
             new Map([['task2', reportApiKeyFields]])
           );
           const request = httpServerMock.createKibanaRequest();
@@ -5794,11 +5802,13 @@ describe('TaskStore', () => {
             message: `Task "task1" has a credential and can't be overwritten. Remove it and schedule it again.`,
           });
 
-          expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
-            [newTask],
-            request,
-            coreStart.security,
-            expect.anything()
+          expect(grantTaskApiKeys).toHaveBeenCalledWith(
+            expect.objectContaining({
+              taskInstances: [newTask],
+              request,
+              security: coreStart.security,
+              opts: expect.anything(),
+            })
           );
           expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
           expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -5824,7 +5834,7 @@ describe('TaskStore', () => {
             },
           ],
         });
-        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+        (grantTaskApiKeys as jest.Mock).mockResolvedValueOnce(
           new Map([
             ['task1', reportApiKeyFields],
             [
@@ -5871,7 +5881,7 @@ describe('TaskStore', () => {
         ).rejects.toThrow('Failure');
 
         expect(await firstErrorPromise).toEqual(new Error('Failure'));
-        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(grantTaskApiKeys).not.toHaveBeenCalled();
         expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       });
 
@@ -5891,7 +5901,7 @@ describe('TaskStore', () => {
           'Unable to schedule task(s) with runAs because service accounts are disabled.'
         );
 
-        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(grantTaskApiKeys).not.toHaveBeenCalled();
         expect(serviceAccountSoClient.bulkCreate).not.toHaveBeenCalled();
         expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       });
@@ -5926,7 +5936,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -5976,7 +5986,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -6022,7 +6032,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 
@@ -6137,7 +6147,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
+        apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       });
     });
 

@@ -35,7 +35,7 @@ import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import { TASK_MANAGER_RUN_TRANSACTION_TYPE } from './task_runner';
@@ -4574,7 +4574,7 @@ describe('TaskManagerRunner', () => {
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       getPollInterval: () => 500,
-      apiKeyStrategy: new EsApiKeyStrategy(),
+      apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
     });

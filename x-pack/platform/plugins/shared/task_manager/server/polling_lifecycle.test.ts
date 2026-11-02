@@ -31,7 +31,7 @@ import {
 } from './lib/create_managed_configuration';
 import { BulkUpdateError } from './lib/errors';
 import { FillPoolResult } from './lib/fill_pool';
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
@@ -162,7 +162,7 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
-    apiKeyStrategy: new EsApiKeyStrategy(),
+    apiKeyStrategy: new EsApiKeyStrategy(loggingSystemMock.createLogger()),
     eventLogger: eventLoggerMock,
   };
 

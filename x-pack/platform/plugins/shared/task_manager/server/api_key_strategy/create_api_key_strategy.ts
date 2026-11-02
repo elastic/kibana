@@ -20,5 +20,5 @@ export const createApiKeyStrategy = (
   if (grantUiamApiKeys && security.authc.apiKeys.uiam) {
     return new EsAndUiamApiKeyStrategy(apiKeyType, security, logger);
   }
-  return new EsApiKeyStrategy();
+  return new EsApiKeyStrategy(logger);
 };
