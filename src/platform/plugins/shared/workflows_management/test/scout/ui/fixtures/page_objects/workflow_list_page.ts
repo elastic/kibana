@@ -18,7 +18,12 @@ export class WorkflowListPage {
 
   /** Navigates to the workflows list page. */
   async navigate() {
-    await this.page.gotoApp(PLUGIN_ID);
+    // The list page and the access-denied screens are the app's two terminal render states.
+    await this.page.gotoApp(PLUGIN_ID, {
+      readyWhen: this.page.testSubj
+        .locator('workflowsPage')
+        .or(this.page.testSubj.locator('workflowsAccessDeniedEmptyState')),
+    });
   }
 
   /** Returns the table row locator for the specified workflow. */
