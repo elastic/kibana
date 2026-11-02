@@ -23,6 +23,8 @@ export type CustomContentDatasetExample = Example<
     rowOrder?: string[];
     /** `style` keeps the query and changes the template; `data` changes the query. */
     edit?: 'style' | 'data';
+    /** The measure a data edit adds, as it is written in the query, which the template must then show. */
+    addsMeasure?: string;
     /** Text the final query must contain, ignoring case and whitespace. */
     queryContains?: string[];
   },

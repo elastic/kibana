@@ -239,6 +239,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityType: EntityType.service,
             entityName: serviceName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowService,
             title: serviceName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,

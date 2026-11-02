@@ -12,7 +12,7 @@ import type { Impact } from '../../../common/impact/impact';
 import type { ImpactEntityOpener } from '../../types';
 import { registerInvestigationAttachmentRenderer } from '../../investigation_attachments';
 import { impactAttachmentRenderer } from './impact_attachment_definition';
-import { ImpactView } from './impact_view';
+import { ImpactDetailsView } from './impact_view';
 
 /**
  * Registers the Impact flyout/inline renderer with Agent Builder and the overview section.
@@ -24,11 +24,7 @@ export const registerImpactAttachmentTypes = (
   getImpactEntityOpener: () => ImpactEntityOpener | undefined
 ): void => {
   registerImpactDetailsRenderer((data) => (
-    <ImpactView
-      document={data as Impact}
-      variant="details"
-      onOpenEntity={getImpactEntityOpener()}
-    />
+    <ImpactDetailsView documents={data as Impact[]} onOpenEntity={getImpactEntityOpener()} />
   ));
   registerInvestigationAttachmentRenderer(agentBuilder, impactAttachmentRenderer);
 };

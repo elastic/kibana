@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 export const formatTimestamp = (timestamp: string, dateFormat: string): string => {
   const parsed = moment(timestamp);
@@ -43,10 +41,4 @@ export const formatTimelineTime = (timestamp: string): string => {
     });
   }
   return parsed.format(parsed.isSame(now, 'year') ? 'MMM D, HH:mm' : 'MMM D, YYYY, HH:mm');
-};
-
-export const useFormatTimestamp = (): ((timestamp: string) => string) => {
-  const dateFormat = useUiSetting<string>('dateFormat');
-
-  return useMemo(() => (timestamp: string) => formatTimestamp(timestamp, dateFormat), [dateFormat]);
 };
