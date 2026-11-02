@@ -58,6 +58,8 @@ describe('useTimelineSavePrompt', () => {
   });
 
   const getChanged = () => selectTimelineById(store.getState(), TimelineId.active).changed;
+  const getDismissed = () =>
+    selectTimelineById(store.getState(), TimelineId.active).savePromptDismissed;
 
   const renderPromptHook = () =>
     renderHook(() => useTimelineSavePrompt(TimelineId.active, onAppLeave), {
@@ -83,7 +85,7 @@ describe('useTimelineSavePrompt', () => {
   });
 
   describe('history.block path', () => {
-    it('resets `changed` and navigates when the user confirms', async () => {
+    it('keeps `changed`, marks the prompt dismissed and navigates when the user confirms', async () => {
       mockOpenConfirm.mockResolvedValue(true);
       renderPromptHook();
 
@@ -93,7 +95,8 @@ describe('useTimelineSavePrompt', () => {
       await flushPromises();
 
       expect(mockOpenConfirm).toHaveBeenCalledTimes(1);
-      expect(getChanged()).toBe(false);
+      expect(getChanged()).toBe(true);
+      expect(getDismissed()).toBe(true);
       expect(mockNavigateToUrl).toHaveBeenCalledWith('/findings', { state: undefined });
     });
 
@@ -107,6 +110,7 @@ describe('useTimelineSavePrompt', () => {
       await flushPromises();
 
       expect(getChanged()).toBe(true);
+      expect(getDismissed()).toBeFalsy();
       expect(mockNavigateToUrl).not.toHaveBeenCalled();
       expect(selectTimelineById(store.getState(), TimelineId.active).showSaveModal).toBe(true);
     });
@@ -131,6 +135,30 @@ describe('useTimelineSavePrompt', () => {
       await flushPromises();
 
       expect(mockOpenConfirm).toHaveBeenCalledTimes(1);
+      // the timeline still differs from what was saved: badge and overwrite guard read `changed`
+      expect(getChanged()).toBe(true);
+    });
+
+    it('prompts again after a user edit following the dismissal', async () => {
+      mockOpenConfirm.mockResolvedValue(true);
+      renderPromptHook();
+      act(() => {
+        history.push('/findings');
+      });
+      await flushPromises();
+      expect(mockOpenConfirm).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        store.dispatch(timelineActions.updateProviders({ id: TimelineId.active, providers: [] }));
+      });
+      expect(getDismissed()).toBe(false);
+
+      act(() => {
+        history.push('/findings');
+      });
+      await flushPromises();
+
+      expect(mockOpenConfirm).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -148,14 +176,15 @@ describe('useTimelineSavePrompt', () => {
       expect(leaveToOtherApp()).toEqual({ type: AppLeaveActionType.default });
     });
 
-    it('resets `changed` on unmount after the user confirmed leaving', () => {
+    it('marks the prompt dismissed on unmount after the user confirmed leaving', () => {
       const { unmount } = renderPromptHook();
       leaveToOtherApp();
       expect(getChanged()).toBe(true);
 
       unmount();
 
-      expect(getChanged()).toBe(false);
+      expect(getChanged()).toBe(true);
+      expect(getDismissed()).toBe(true);
     });
 
     it('keeps `changed` on unmount after the user cancelled', () => {
@@ -170,6 +199,7 @@ describe('useTimelineSavePrompt', () => {
       unmount();
 
       expect(getChanged()).toBe(true);
+      expect(getDismissed()).toBeFalsy();
     });
 
     it('keeps `changed` on unmount after a browser `beforeunload` prompt', () => {
@@ -179,6 +209,7 @@ describe('useTimelineSavePrompt', () => {
       unmount();
 
       expect(getChanged()).toBe(true);
+      expect(getDismissed()).toBeFalsy();
     });
 
     it('does not prompt again after the user confirmed leaving', () => {
@@ -191,6 +222,7 @@ describe('useTimelineSavePrompt', () => {
 
       renderPromptHook();
       expect(leaveToOtherApp()).toEqual({ type: AppLeaveActionType.default });
+      expect(getChanged()).toBe(true);
     });
   });
 });

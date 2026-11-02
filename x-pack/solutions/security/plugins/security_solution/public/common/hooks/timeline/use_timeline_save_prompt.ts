@@ -40,6 +40,7 @@ export const useTimelineSavePrompt = (
     status: timelineStatus,
     updated,
     changed,
+    savePromptDismissed,
   } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const showSaveTimelineModal = useCallback(() => {
@@ -69,7 +70,8 @@ export const useTimelineSavePrompt = (
 
         if (confirmRes) {
           // The user chose to leave anyway, so stop asking until the timeline changes again.
-          dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
+          // `changed` stays true: the timeline still has unsaved edits.
+          dispatch(timelineActions.setSavePromptDismissed({ id: timelineId, dismissed: true }));
           unblock();
           application.navigateToUrl(
             http.basePath.get() + location.pathname + location.hash + location.search,
@@ -84,7 +86,8 @@ export const useTimelineSavePrompt = (
 
       if (
         !getIsTimelineVisible(relativePath) &&
-        (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
+        ((changed && !savePromptDismissed) ||
+          (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         confirmSaveTimeline();
       } else {
@@ -108,6 +111,7 @@ export const useTimelineSavePrompt = (
     timelineStatus,
     updated,
     changed,
+    savePromptDismissed,
   ]);
 
   // Core only calls back on cancel of the app leave prompt. If the wrapper unmounts while the
@@ -117,7 +121,7 @@ export const useTimelineSavePrompt = (
   useEffect(
     () => () => {
       if (appLeavePromptPendingRef.current) {
-        dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
+        dispatch(timelineActions.setSavePromptDismissed({ id: timelineId, dismissed: true }));
       }
     },
     [dispatch, timelineId]
@@ -128,7 +132,8 @@ export const useTimelineSavePrompt = (
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&
-        (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
+        ((changed && !savePromptDismissed) ||
+          (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         // `nextAppId` is undefined for the browser `beforeunload` prompt, which never unmounts the app.
         appLeavePromptPendingRef.current = nextAppId != null;

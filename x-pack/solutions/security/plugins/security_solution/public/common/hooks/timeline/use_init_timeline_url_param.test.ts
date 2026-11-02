@@ -114,28 +114,45 @@ describe('useInitTimelineFromUrlParam', () => {
         React.createElement(Provider, { store }, children),
     });
 
-  const getChanged = (store: ReturnType<typeof createMockStore>) =>
-    selectTimelineById(store.getState(), TimelineId.active).changed;
+  const getTimeline = (store: ReturnType<typeof createMockStore>) =>
+    selectTimelineById(store.getState(), TimelineId.active);
 
-  it('does not mark a timeline rebuilt from the URL as changed', () => {
+  it('keeps an earlier prompt dismissal when it rebuilds the timeline from the URL', () => {
     // Real flow: the user confirmed leaving, then came back (browser back) to a URL that still
-    // carries the `timeline` param. Re-applying its query must not bring the prompt back.
+    // carries the `timeline` param. Re-applying its query must neither bring the prompt back
+    // nor clear `changed`, which drives the unsaved badge and the overwrite guard.
     const store = createMockStore();
-    store.dispatch(timelineActions.setChanged({ id: TimelineId.active, changed: false }));
+    store.dispatch(timelineActions.updateProviders({ id: TimelineId.active, providers: [] }));
+    store.dispatch(
+      timelineActions.setSavePromptDismissed({ id: TimelineId.active, dismissed: true })
+    );
     mockUrlState = { isOpen: false, activeTab: TimelineTabs.query };
 
     renderInit(store);
 
-    expect(getChanged(store)).toBe(false);
+    expect(getTimeline(store).changed).toBe(true);
+    expect(getTimeline(store).savePromptDismissed).toBe(true);
   });
 
-  it('does not touch `changed` when the URL has no timeline param', () => {
+  it('does not dismiss the prompt when the user had not confirmed leaving', () => {
+    const store = createMockStore();
+    store.dispatch(timelineActions.updateProviders({ id: TimelineId.active, providers: [] }));
+    mockUrlState = { isOpen: false, activeTab: TimelineTabs.query };
+
+    renderInit(store);
+
+    expect(getTimeline(store).changed).toBe(true);
+    expect(getTimeline(store).savePromptDismissed).toBeFalsy();
+  });
+
+  it('does not touch the timeline when the URL has no timeline param', () => {
     const store = createMockStore();
     store.dispatch(timelineActions.updateProviders({ id: TimelineId.active, providers: [] }));
     mockUrlState = null;
 
     renderInit(store);
 
-    expect(getChanged(store)).toBe(true);
+    expect(getTimeline(store).changed).toBe(true);
+    expect(getTimeline(store).savePromptDismissed).toBeFalsy();
   });
 });

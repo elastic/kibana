@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { safeDecode } from '@kbn/rison';
-import { useDispatch, useSelector } from 'react-redux-v7';
+import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 
 import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
@@ -20,6 +20,7 @@ import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
+  const store = useStore<State>();
   const queryTimelineById = useQueryTimelineById();
   const activeTimeline = useSelector((state: State) =>
     selectTimelineById(state, TimelineId.active)
@@ -28,6 +29,9 @@ export const useInitTimelineFromUrlParam = () => {
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
+        const savePromptDismissed = !!selectTimelineById(store.getState(), TimelineId.active)
+          ?.savePromptDismissed;
+
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,
@@ -37,16 +41,16 @@ export const useInitTimelineFromUrlParam = () => {
           query: initialState.query,
         });
 
-        if (initialState.id == null) {
-          // A timeline without a saved object is rebuilt from the URL only. Applying its query
-          // marks it as changed, but the URL is the baseline here, so the user has no unsaved work.
-          // Otherwise coming back to the app (e.g. browser back) prompts again after the user
-          // already chose to leave without saving.
-          dispatch(timelineActions.setChanged({ id: TimelineId.active, changed: false }));
+        if (initialState.id == null && savePromptDismissed) {
+          // Rebuilding the timeline from the URL dispatches change actions, which re-arm the
+          // unsaved changes prompt. That is not a user edit, so keep the earlier dismissal.
+          dispatch(
+            timelineActions.setSavePromptDismissed({ id: TimelineId.active, dismissed: true })
+          );
         }
       }
     },
-    [dispatch, queryTimelineById]
+    [dispatch, store, queryTimelineById]
   );
 
   useEffect(() => {
