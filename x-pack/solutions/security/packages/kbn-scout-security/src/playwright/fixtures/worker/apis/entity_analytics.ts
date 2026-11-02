@@ -47,6 +47,8 @@ export interface EntityAnalyticsApiService {
     entityName: string,
     options?: IndexEntityStoreEntryOptions
   ) => Promise<void>;
+  /** Removes entries from the space's latest entities index, by entity id. */
+  deleteEntityStoreEntries: (entityIds: string[]) => Promise<void>;
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
   initRiskEngine: () => Promise<void>;
@@ -187,6 +189,17 @@ export const getEntityAnalyticsApiService = ({
           });
         }
       );
+    },
+
+    deleteEntityStoreEntries: async (entityIds: string[]) => {
+      if (!esClient) {
+        throw new Error('esClient is required to delete entity store entries');
+      }
+      await esClient.deleteByQuery({
+        index: `entities-latest-${spaceId}`,
+        query: { terms: { 'entity.id': entityIds } },
+        refresh: true,
+      });
     },
 
     deleteEntityStoreEngines: async () => {
