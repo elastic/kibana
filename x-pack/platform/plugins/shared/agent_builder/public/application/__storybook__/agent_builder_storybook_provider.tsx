@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { NEVER } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
@@ -24,11 +23,7 @@ const defaultAgentBuilderServices = createStorybookAgentBuilderServices();
 const defaultQueryClient = new QueryClient({
   defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } },
 });
-const storybookStreamService = new ConversationStreamService({
-  getChatEvents$: () => NEVER,
-  getStreamEnded$: () => NEVER,
-  getStreamStarted$: () => NEVER,
-});
+const storybookStreamService = new ConversationStreamService();
 
 export interface AgentBuilderStorybookProviderProps {
   children: React.ReactNode;
