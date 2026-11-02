@@ -144,6 +144,11 @@ async function resumeWorkflowWithRequest({
     node?.type !== 'enter-parallel' &&
     node?.stepId
   ) {
+    // resume() is what loads step documents, and it also marks the run RUNNING.
+    // The deadline has to be read first, from the persisted step (resumeAt,
+    // startedAt, dynamicTimeout). Without this load the index is empty and a
+    // notification is parked on the workflow timeout instead of the step's.
+    await workflowExecutionState.load();
     const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
     const deadline = getIdleTimeoutResumeDeadlineMs(
       { workflowExecutionGraph, workflowExecutionState },

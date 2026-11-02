@@ -241,6 +241,7 @@ describe('resumeWorkflow', () => {
           workflowExecutionGraph: { getWorkflowLevelTimeout: () => timeout },
           workflowExecutionCursor: { currentStackFrames: [] },
           workflowExecutionState: {
+            load: jest.fn().mockResolvedValue(undefined),
             getWorkflowExecution: () => ({
               status: ExecutionStatus.WAITING,
               currentNodeId: 'pause',
@@ -294,6 +295,7 @@ describe('resumeWorkflow', () => {
           },
           workflowExecutionCursor: { currentStackFrames: [] },
           workflowExecutionState: {
+            load: jest.fn().mockResolvedValue(undefined),
             getWorkflowExecution: () => ({
               status: ExecutionStatus.WAITING_FOR_INPUT,
               currentNodeId: 'await_decision',

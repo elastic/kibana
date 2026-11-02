@@ -763,6 +763,7 @@ steps:
     workflowRunFixture = new WorkflowRunFixture();
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       minPayloadSize: new ByteSizeValue(1),
+      maxCacheSize: new ByteSizeValue(1),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
     await workflowRunFixture.resumeWorkflowAtScheduledTime();

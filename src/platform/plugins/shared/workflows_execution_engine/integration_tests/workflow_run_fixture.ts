@@ -37,6 +37,7 @@ export class WorkflowRunFixture {
     error: jest.fn(),
     debug: jest.fn(),
     trace: jest.fn(),
+    get: jest.fn().mockReturnThis(),
   } as unknown as Logger;
   // Create shared execute mock so tests can verify calls regardless of which client is used
   private readonly sharedExecuteMock = jest.fn();

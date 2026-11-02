@@ -49,7 +49,11 @@ import { isSerializedError } from '../utils/errors';
  *    A node with no step references needs none, so nothing is fetched for it.
  * 2. All `data.set` executions — needed by `getVariables`, only when the node may
  *    reference `variables`.
- * 3. Active scope-stack frames — needed by `enrichStepContextAccordingToStepScope`.
+ *
+ * Open scope frames (the workflow timeout zone, an in-progress foreach) are not
+ * included. They have no output until they leave the stack, and their inputs and
+ * state are already on the execution. Fetching them re-reads Elasticsearch for a
+ * document that has nothing to rehydrate.
  */
 export function resolveRehydrationTargets(
   node: GraphNodeUnion,
@@ -79,14 +83,6 @@ export function resolveRehydrationTargets(
     for (const step of state.getDataSetStepExecutions()) {
       neededIds.add(step.id);
     }
-  }
-
-  const executionId = state.getWorkflowExecutionId();
-  let currentScope = WorkflowScopeStack.fromStackFrames(state.getWorkflowExecutionScopeStack());
-  while (!currentScope.isEmpty()) {
-    const frame = currentScope.getCurrentScope();
-    currentScope = currentScope.exitScope();
-    neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
   }
 
   return neededIds;
