@@ -387,6 +387,17 @@ describe('Sml', () => {
       expect(onSelect).not.toHaveBeenCalled();
     });
 
+    it('selects the highlighted result when the text matches titles, not the start of the rows', () => {
+      setResults(['dashboard', 'Sales pipeline'], ['dashboard', 'Sales overview']);
+
+      const { onSelect, onReplaceText } = pressTab('sales');
+
+      expect(onReplaceText).not.toHaveBeenCalled();
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'dashboard:Sales overview' })
+      );
+    });
+
     it('selects the only result rather than completing its title', () => {
       setResults(['dashboard', 'Sales overview']);
 

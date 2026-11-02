@@ -793,13 +793,47 @@ describe('AgentExecutionService', () => {
         ]);
       });
 
+      // The pattern used to take about 40 seconds on this input, so the Jest timeout guards it.
       it('does not slow down on text with many brackets and no links', async () => {
-        const start = Date.now();
-
         await execute('['.repeat(200_000));
 
         expect(validated()).toBeUndefined();
-        expect(Date.now() - start).toBeLessThan(2000);
+      }, 10_000);
+
+      it('does not attach link-shaped text inside an escaped label', async () => {
+        await execute(
+          '[#dashboard/Report \\](sml://dashboard:private-id)](sml://dashboard:real-id)'
+        );
+
+        expect(validated()).toEqual([
+          {
+            type: 'dashboard-attachment',
+            origin: 'real-id',
+            description: 'dashboard/Report ](sml://dashboard:private-id)',
+          },
+        ]);
+      });
+
+      it('still attaches a link whose label ends in a backslash', async () => {
+        await execute('[#dashboard/Back\\\\](sml://dashboard:dash-9)');
+
+        expect(validated()).toEqual([
+          { type: 'dashboard-attachment', origin: 'dash-9', description: 'dashboard/Back\\' },
+        ]);
+      });
+
+      it('attaches at most 30 linked items, in the order they appear', async () => {
+        const links = Array.from(
+          { length: 40 },
+          (_, index) => `[a](sml://dashboard:dash-${index + 1})`
+        );
+
+        await execute(links.join(' '));
+
+        const origins = (validated() as Array<{ origin: string }>).map(({ origin }) => origin);
+        expect(origins).toHaveLength(30);
+        expect(origins[0]).toBe('dash-1');
+        expect(origins[29]).toBe('dash-30');
       });
 
       it('sends the message without the linked items that cannot be attached', async () => {

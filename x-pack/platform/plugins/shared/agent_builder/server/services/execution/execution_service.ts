@@ -116,16 +116,25 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
 // Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
 const SML_LINK_PATTERN = /\]\(sml:\/\/([^)?\s]+)/g;
 const MAX_LINK_LABEL_LENGTH = 300;
+// Linked items are resolved on every message, so how many are read, and at once, is bounded.
+const MAX_LINKED_ITEMS = 30;
+const LINKED_ITEMS_CONCURRENCY = 5;
+
+// A character preceded by an odd number of backslashes is escaped: the serializer escapes
+// brackets and backslashes in labels, so an escaped `]` is label text, not the end of a link.
+const isEscaped = (message: string, index: number): boolean => {
+  let backslashes = 0;
+  while (message[index - 1 - backslashes] === '\\') backslashes++;
+  return backslashes % 2 === 1;
+};
 
 // The label of the link whose text ends at `closeIndex`, read back to its unescaped `[`. Reading
 // back, and for a bounded length, keeps this linear on text with many brackets.
 const getLinkLabel = (message: string, closeIndex: number): string => {
   const earliest = Math.max(0, closeIndex - MAX_LINK_LABEL_LENGTH);
   for (let index = closeIndex - 1; index >= earliest; index--) {
-    if (message[index] === '[') {
-      let backslashes = 0;
-      while (message[index - 1 - backslashes] === '\\') backslashes++;
-      if (backslashes % 2 === 0) return message.slice(index + 1, closeIndex);
+    if (message[index] === '[' && !isEscaped(message, index)) {
+      return message.slice(index + 1, closeIndex);
     }
   }
   return '';
@@ -1157,17 +1166,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     // Linked items are best effort: one that no longer resolves, for example a deleted dashboard,
     // is left out so the message still sends.
+    const linked = this.getReferencedAttachments(params.nextInput.message);
     const referenced: AttachmentInput[] = [];
-    for (const input of this.getReferencedAttachments(params.nextInput.message)) {
-      try {
-        referenced.push(
-          ...((await attachmentsService.validateAttachmentInputs([input], request)) ?? [])
-        );
-      } catch (error) {
-        this.logger.debug(
-          `Skipping linked ${input.type} '${input.origin}': ${(error as Error).message}`
-        );
-      }
+    for (let start = 0; start < linked.length; start += LINKED_ITEMS_CONCURRENCY) {
+      const batch = linked.slice(start, start + LINKED_ITEMS_CONCURRENCY);
+      const results = await Promise.allSettled(
+        batch.map((input) => attachmentsService.validateAttachmentInputs([input], request))
+      );
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          referenced.push(...(result.value ?? []));
+          return;
+        }
+        const { type, origin } = batch[index];
+        this.logger.debug(`Skipping linked ${type} '${origin}': ${result.reason?.message}`);
+      });
     }
     const validated =
       attached || referenced.length > 0 ? [...(attached ?? []), ...referenced] : undefined;
@@ -1191,7 +1204,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private getReferencedAttachments(message: string | undefined): AttachmentInput[] {
     const inputs = new Map<string, AttachmentInput>();
     for (const match of (message ?? '').matchAll(SML_LINK_PATTERN)) {
+      if (inputs.size >= MAX_LINKED_ITEMS) break;
       const [, encodedId] = match;
+      // A `]` inside a label is escaped; text that looks like a link there was not picked.
+      if (isEscaped(message ?? '', match.index ?? 0)) continue;
       const entry = parseSmlEntryId(decodeSmlLinkId(encodedId));
       const type = entry && this.deps.getSmlTypeDefinition(entry.type)?.attachmentType;
       const key = entry && `${type}:${entry.originId}`;

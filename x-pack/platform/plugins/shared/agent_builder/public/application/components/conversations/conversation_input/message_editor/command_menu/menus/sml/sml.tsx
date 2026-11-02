@@ -178,9 +178,18 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       [onSelect]
     );
 
-    // Tab completes the typed text as far as the results agree. It only selects a result when it is the only one.
+    // Tab completes the typed text as far as the results agree. It only selects a result when it is
+    // the only one, or when the text matches titles and so is the start of none of the rows.
     const handleTab = useCallback(() => {
       if (!onReplaceText || orderedResults.length <= 1) {
+        return false;
+      }
+      const lowerTyped = typed.toLowerCase();
+      if (
+        !orderedResults.some((item) =>
+          `${item.type}/${item.title}`.toLowerCase().startsWith(lowerTyped)
+        )
+      ) {
         return false;
       }
       const completion = getCompletion(typed, orderedResults);
